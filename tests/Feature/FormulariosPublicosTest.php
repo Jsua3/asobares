@@ -187,6 +187,38 @@ class FormulariosPublicosTest extends TestCase
         }
     }
 
+    public function test_al_equipo_del_gremio_se_le_explica_por_que_no_entra_a_mi_cuenta(): void
+    {
+        // El panel y /mi-cuenta comparten sesión: llegar aquí con la sesión de
+        // la dirección abierta pasa en cada demostración. Un 403 seco deja al
+        // usuario sin saber qué hacer.
+        $this->seed(RolYPermisoSeeder::class);
+
+        $direccion = User::factory()->create(['name' => 'Natalia Gutiérrez']);
+        $direccion->syncRoles([User::ROL_SUPER_ADMIN]);
+
+        $respuesta = $this->actingAs($direccion->fresh())->get(route('mi-cuenta.index'));
+
+        $respuesta->assertForbidden();
+        $respuesta->assertSee('Natalia Gutiérrez', escape: false);
+        $respuesta->assertSee('Cerrar sesión y entrar como afiliado');
+        $respuesta->assertSee('Ir al panel del gremio');
+    }
+
+    public function test_cerrar_sesion_desde_esa_pantalla_lleva_al_login_del_afiliado(): void
+    {
+        $this->seed(RolYPermisoSeeder::class);
+
+        $direccion = User::factory()->create();
+        $direccion->syncRoles([User::ROL_SUPER_ADMIN]);
+
+        $this->actingAs($direccion->fresh())
+            ->post(route('mi-cuenta.salir'), ['destino' => 'entrar'])
+            ->assertRedirect(route('mi-cuenta.entrar'));
+
+        $this->assertGuest();
+    }
+
     public function test_el_asociado_ve_su_mora_y_el_detalle_privado_de_los_convenios(): void
     {
         $this->seed(RolYPermisoSeeder::class);

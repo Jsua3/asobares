@@ -41,7 +41,16 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            /*
+             * URL relativa a propósito.
+             *
+             * Si se ata a APP_URL, las imágenes apuntan al host y puerto que
+             * diga el .env, y se rompen en cuanto el servidor levanta en otro
+             * puerto (o detrás de un dominio distinto). Relativa funciona en
+             * cualquiera. Donde hace falta absoluta —og:image— se absolutiza
+             * en la vista con url().
+             */
+            'url' => '/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

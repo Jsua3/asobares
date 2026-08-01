@@ -17,7 +17,8 @@
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:locale" content="es_CO">
     @if (! empty($ogImagen))
-        <meta property="og:image" content="{{ $ogImagen }}">
+        {{-- Open Graph exige URL absoluta; el disco las entrega relativas. --}}
+        <meta property="og:image" content="{{ Str::startsWith($ogImagen, ['http://', 'https://']) ? $ogImagen : url($ogImagen) }}">
         <meta name="twitter:card" content="summary_large_image">
     @else
         <meta name="twitter:card" content="summary">

@@ -65,6 +65,13 @@ class SesionAsociadoController
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        // Quien sale desde la pantalla de «sesión equivocada» quiere entrar
+        // con otra cuenta, no volver al inicio.
+        if ($request->input('destino') === 'entrar') {
+            return redirect()->route('mi-cuenta.entrar')
+                ->with('exito', 'Sesión cerrada. Ahora entra con el usuario del establecimiento.');
+        }
+
         return redirect()->route('inicio')->with('exito', 'Cerraste sesión.');
     }
 }

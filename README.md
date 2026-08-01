@@ -72,6 +72,12 @@ Queda en **http://localhost:8000**. Si prefieres solo el servidor: `php artisan 
 > Para ver quién ocupa el 8000 en Windows:
 > `Get-NetTCPConnection -LocalPort 8000 -State Listen`
 
+> **Sobre `php artisan serve` y las subidas de imagen:** el servidor de desarrollo de PHP
+> atiende una petición a la vez. Al subir varias imágenes de golpe, los archivos llegan y se
+> guardan bien, pero el indicador de progreso puede quedarse girando porque la respuesta de
+> confirmación espera turno. Recarga la ficha y verás la imagen en su sitio. Detrás de un
+> servidor real (nginx, Laravel Cloud) no ocurre.
+
 ---
 
 ## Credenciales de la demostración
