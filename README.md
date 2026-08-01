@@ -64,6 +64,14 @@ composer run dev
 
 Queda en **http://localhost:8000**. Si prefieres solo el servidor: `php artisan serve`.
 
+> **Si ves la página de bienvenida de Laravel en vez del sitio**, el puerto 8000 lo tiene
+> otro proyecto. `php artisan serve` avisa en qué puerto quedó, pero es fácil pasarlo por
+> alto: fíjate en la línea `INFO Server running on [...]` y abre esa dirección exacta.
+> Para forzar otro puerto: `php artisan serve --port=8765`.
+>
+> Para ver quién ocupa el 8000 en Windows:
+> `Get-NetTCPConnection -LocalPort 8000 -State Listen`
+
 ---
 
 ## Credenciales de la demostración
