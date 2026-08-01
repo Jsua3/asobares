@@ -22,9 +22,12 @@ return new class extends Migration
             $table->string('adjunto_nombre')->nullable();
             $table->decimal('costo_aproximado', 12, 2)->nullable();
             $table->unsignedInteger('orden')->default(0);
+            // Informacion legal sensible: pasa por aprobacion de la direccion.
+            $table->string('estado')->default('borrador');
             $table->timestamps();
 
             $table->index(['municipio_id', 'orden']);
+            $table->index('estado');
         });
     }
 

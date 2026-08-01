@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\EstadoPublicacion;
 use App\Models\Municipio;
 use App\Models\RequisitoApertura;
 use Database\Seeders\Support\GeneradorPdf;
@@ -84,7 +85,11 @@ class RequisitoAperturaSeeder extends Seeder
             foreach ($requisitos as $orden => $requisito) {
                 RequisitoApertura::updateOrCreate(
                     ['municipio_id' => $municipio->id, 'entidad' => $requisito['entidad']],
-                    $requisito + ['municipio_id' => $municipio->id, 'orden' => $orden + 1]
+                    $requisito + [
+                        'municipio_id' => $municipio->id,
+                        'orden' => $orden + 1,
+                        'estado' => EstadoPublicacion::Publicado,
+                    ]
                 );
             }
         }

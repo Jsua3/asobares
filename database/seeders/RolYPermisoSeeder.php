@@ -16,12 +16,14 @@ use Spatie\Permission\PermissionRegistrar;
  */
 class RolYPermisoSeeder extends Seeder
 {
-    /** Recursos de contenido sujetos al flujo de aprobación. */
-    public const array RECURSOS = [
-        'asociado', 'evento', 'noticia', 'requisito', 'vacante',
-        'artista', 'proveedor', 'aliado', 'beneficio',
-        'municipio', 'categoria',
+    /** Contenido sujeto al flujo de aprobación: tiene permiso `publicar_`. */
+    public const array PUBLICABLES = [
+        'asociado', 'evento', 'noticia', 'requisito',
+        'vacante', 'artista', 'proveedor', 'aliado',
     ];
+
+    /** Catálogos sin flujo editorial: quedan vivos al guardarlos. */
+    public const array CATALOGOS = ['beneficio', 'municipio', 'categoria'];
 
     /** Bandejas que la secretaría sí gestiona por completo. */
     public const array BANDEJAS = ['mensaje', 'aspirante', 'inscripcion'];
@@ -32,8 +34,14 @@ class RolYPermisoSeeder extends Seeder
 
         $permisos = [];
 
-        foreach (self::RECURSOS as $recurso) {
+        foreach (self::PUBLICABLES as $recurso) {
             foreach (['ver', 'crear', 'editar', 'eliminar', 'publicar'] as $accion) {
+                $permisos[] = "{$accion}_{$recurso}";
+            }
+        }
+
+        foreach (self::CATALOGOS as $recurso) {
+            foreach (['ver', 'crear', 'editar', 'eliminar'] as $accion) {
                 $permisos[] = "{$accion}_{$recurso}";
             }
         }

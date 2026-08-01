@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\EstadoPublicacion;
 use App\Models\Aliado;
 use Database\Seeders\Support\GeneradorImagen;
 use Illuminate\Database\Seeder;
@@ -62,6 +63,7 @@ class AliadoSeeder extends Seeder
 
         foreach ($aliados as $aliado) {
             $aliado['logo'] = $imagenes->generar("aliado-{$aliado['nombre']}", 'aliados', 480, 270);
+            $aliado['estado'] = EstadoPublicacion::Publicado;
             $aliado['activo'] = true;
 
             Aliado::updateOrCreate(['nombre' => $aliado['nombre']], $aliado);

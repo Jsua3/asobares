@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\EstadoPublicacion;
+use App\Models\Concerns\EsPublicable;
 use Database\Factories\RequisitoAperturaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,14 +12,14 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
- * Producto insignia del sitio: la guÃ­a normativa, que difiere por municipio.
+ * Producto insignia del sitio: la guía normativa, que difiere por municipio.
  */
 class RequisitoApertura extends Model
 {
+    use EsPublicable, LogsActivity;
+
     /** @use HasFactory<RequisitoAperturaFactory> */
     use HasFactory;
-
-    use LogsActivity;
 
     protected $table = 'requisitos_apertura';
 
@@ -26,6 +28,7 @@ class RequisitoApertura extends Model
     protected function casts(): array
     {
         return [
+            'estado' => EstadoPublicacion::class,
             'checklist' => 'array',
             'costo_aproximado' => 'decimal:2',
         ];
@@ -50,7 +53,7 @@ class RequisitoApertura extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['entidad', 'municipio_id', 'costo_aproximado'])
+            ->logOnly(['entidad', 'estado', 'municipio_id', 'costo_aproximado'])
             ->logOnlyDirty()
             ->useLogName('requisito')
             ->setDescriptionForEvent(fn (string $evento): string => "Requisito {$this->entidad}: {$evento}");

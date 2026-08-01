@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * "La gente no paga porque no sabe cuÃ¡nto debe, entonces todo el mundo llama
+ * "La gente no paga porque no sabe cuánto debe, entonces todo el mundo llama
  * a Natalia." El asociado consulta su estado de cuenta en /mi-cuenta.
  */
 class Cartera extends Model

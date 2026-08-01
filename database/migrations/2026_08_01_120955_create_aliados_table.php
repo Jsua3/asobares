@@ -17,10 +17,13 @@ return new class extends Migration
             // Contenido privado: solo visible para asociados con sesion iniciada.
             $table->text('detalle_convenio')->nullable();
             $table->unsignedInteger('orden')->default(0);
+            // `estado` = aprobado por la direccion. `activo` = se muestra hoy
+            // en el carrusel. Para salir al sitio hacen falta los dos.
+            $table->string('estado')->default('borrador');
             $table->boolean('activo')->default(true);
             $table->timestamps();
 
-            $table->index(['activo', 'orden']);
+            $table->index(['estado', 'activo', 'orden']);
         });
     }
 

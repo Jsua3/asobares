@@ -46,14 +46,14 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         ];
     }
 
-    /** El establecimiento del que es dueÃ±o, para /mi-cuenta. */
+    /** El establecimiento del que es dueño, para /mi-cuenta. */
     public function asociado(): BelongsTo
     {
         return $this->belongsTo(Asociado::class);
     }
 
     /**
-     * El rol `asociado` no entra al panel: su sesiÃ³n sirve solo para /mi-cuenta.
+     * El rol `asociado` no entra al panel: su sesión sirve solo para /mi-cuenta.
      */
     public function canAccessPanel(Panel $panel): bool
     {
@@ -75,7 +75,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->hasRole(self::ROL_ASOCIADO);
     }
 
-    // --- MFA del nÃºcleo de Filament (RF-40) ---
+    // --- MFA del núcleo de Filament (RF-40) ---
 
     public function getAppAuthenticationSecret(): ?string
     {

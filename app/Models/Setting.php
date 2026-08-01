@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Todo el contenido institucional del sitio vive aquÃ­ (RNF-09): si un texto
+ * Todo el contenido institucional del sitio vive aquí (RNF-09): si un texto
  * aparece en el sitio, se edita desde el panel, no desde una vista.
  */
 class Setting extends Model

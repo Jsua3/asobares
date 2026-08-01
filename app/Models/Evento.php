@@ -71,7 +71,7 @@ class Evento extends Model
         return $this->fecha_inicio->isFuture();
     }
 
-    /** El registro lo maneja la Nacional: el botÃ³n lleva a su plataforma. */
+    /** El registro lo maneja la Nacional: el botón lleva a su plataforma. */
     public function delegaRegistroExterno(): bool
     {
         return filled($this->enlace_externo);

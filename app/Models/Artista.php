@@ -13,7 +13,7 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
- * CategorÃ­a aparte del empleo: "el DJ es artista, el mesero es empleo".
+ * Categoría aparte del empleo: "el DJ es artista, el mesero es empleo".
  */
 class Artista extends Model
 {

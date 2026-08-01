@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\EstadoPublicacion;
+use App\Models\Concerns\EsPublicable;
 use Database\Factories\AliadoFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,10 +13,10 @@ use Spatie\Activitylog\Support\LogOptions;
 
 class Aliado extends Model
 {
+    use EsPublicable, LogsActivity;
+
     /** @use HasFactory<AliadoFactory> */
     use HasFactory;
-
-    use LogsActivity;
 
     protected $table = 'aliados';
 
@@ -22,12 +24,16 @@ class Aliado extends Model
 
     protected function casts(): array
     {
-        return ['activo' => 'boolean'];
+        return [
+            'estado' => EstadoPublicacion::class,
+            'activo' => 'boolean',
+        ];
     }
 
-    public function scopeActivo(Builder $query): Builder
+    /** Para salir al carrusel hace falta estar aprobado Y activo. */
+    public function scopeVisible(Builder $query): Builder
     {
-        return $query->where('activo', true)->orderBy('orden');
+        return $query->publicado()->where('activo', true)->orderBy('orden');
     }
 
     /** El detalle del convenio es contenido privado de asociados. */
@@ -39,7 +45,7 @@ class Aliado extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['nombre', 'activo', 'orden'])
+            ->logOnly(['nombre', 'estado', 'activo', 'orden'])
             ->logOnlyDirty()
             ->useLogName('aliado')
             ->setDescriptionForEvent(fn (string $evento): string => "Aliado {$this->nombre}: {$evento}");

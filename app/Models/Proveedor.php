@@ -45,8 +45,8 @@ class Proveedor extends Model
     }
 
     /**
-     * Modela la monetizaciÃ³n futura: el proveedor paga por permanecer en la
-     * base y solo se lista mientras su vigencia siga al dÃ­a.
+     * Modela la monetización futura: el proveedor paga por permanecer en la
+     * base y solo se lista mientras su vigencia siga al día.
      */
     public function scopeVigente(Builder $query): Builder
     {

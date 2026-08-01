@@ -29,8 +29,8 @@ class Asociado extends Model implements HasMedia
     protected $guarded = ['id'];
 
     /**
-     * Campos internos del gremio. Nunca se exponen en el sitio pÃºblico:
-     * el propietario del establecimiento decide quÃ© informaciÃ³n suya se publica.
+     * Campos internos del gremio. Nunca se exponen en el sitio público:
+     * el propietario del establecimiento decide qué información suya se publica.
      *
      * @var list<string>
      */
@@ -119,7 +119,7 @@ class Asociado extends Model implements HasMedia
     }
 
     /**
-     * Vista pÃºblica de la ficha: excluye explÃ­citamente los campos internos.
+     * Vista pública de la ficha: excluye explícitamente los campos internos.
      *
      * @return array<string, mixed>
      */

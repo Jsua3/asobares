@@ -37,6 +37,6 @@ class Categoria extends Model
             ->logOnly(['nombre', 'slug'])
             ->logOnlyDirty()
             ->useLogName('categoria')
-            ->setDescriptionForEvent(fn (string $evento): string => "CategorÃ­a {$this->nombre}: {$evento}");
+            ->setDescriptionForEvent(fn (string $evento): string => "Categoría {$this->nombre}: {$evento}");
     }
 }

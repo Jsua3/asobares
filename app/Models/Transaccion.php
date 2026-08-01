@@ -53,7 +53,7 @@ class Transaccion extends Model
         return $this->estado === EstadoTransaccion::Aprobada;
     }
 
-    /** Referencia legible y Ãºnica: ASO-2026-A1B2C3. */
+    /** Referencia legible y única: ASO-2026-A1B2C3. */
     public static function generarReferencia(): string
     {
         do {
