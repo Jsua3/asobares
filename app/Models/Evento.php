@@ -5,12 +5,13 @@ namespace App\Models;
 use App\Enums\EstadoPublicacion;
 use App\Enums\TipoEvento;
 use App\Models\Concerns\EsPublicable;
+use Database\Factories\EventoFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * Solo eventos del gremio (ExpoBar, Congreso Nacional, capacitaciones propias).
@@ -18,10 +19,10 @@ use Spatie\Activitylog\Models\Concerns\LogsActivity;
  */
 class Evento extends Model
 {
-    /** @use HasFactory<\Database\Factories\EventoFactory> */
-    use HasFactory;
-
     use EsPublicable, LogsActivity;
+
+    /** @use HasFactory<EventoFactory> */
+    use HasFactory;
 
     protected $table = 'eventos';
 

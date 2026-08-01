@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use Database\Factories\BeneficioFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Beneficio extends Model
 {
-    /** @use HasFactory<\Database\Factories\BeneficioFactory> */
+    /** @use HasFactory<BeneficioFactory> */
     use HasFactory;
 
     use LogsActivity;

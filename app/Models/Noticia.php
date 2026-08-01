@@ -5,18 +5,19 @@ namespace App\Models;
 use App\Enums\CategoriaNoticia;
 use App\Enums\EstadoPublicacion;
 use App\Models\Concerns\EsPublicable;
+use Database\Factories\NoticiaFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Noticia extends Model
 {
-    /** @use HasFactory<\Database\Factories\NoticiaFactory> */
-    use HasFactory;
-
     use EsPublicable, LogsActivity;
+
+    /** @use HasFactory<NoticiaFactory> */
+    use HasFactory;
 
     protected $table = 'noticias';
 

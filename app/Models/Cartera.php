@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\CarteraFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Cartera extends Model
 {
-    /** @use HasFactory<\Database\Factories\CarteraFactory> */
+    /** @use HasFactory<CarteraFactory> */
     use HasFactory;
 
     protected $table = 'carteras';

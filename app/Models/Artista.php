@@ -5,21 +5,22 @@ namespace App\Models;
 use App\Enums\EstadoPublicacion;
 use App\Enums\TipoArtista;
 use App\Models\Concerns\EsPublicable;
+use Database\Factories\ArtistaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * CategorÃ­a aparte del empleo: "el DJ es artista, el mesero es empleo".
  */
 class Artista extends Model
 {
-    /** @use HasFactory<\Database\Factories\ArtistaFactory> */
-    use HasFactory;
-
     use EsPublicable, LogsActivity;
+
+    /** @use HasFactory<ArtistaFactory> */
+    use HasFactory;
 
     protected $table = 'artistas';
 

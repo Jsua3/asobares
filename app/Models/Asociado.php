@@ -4,13 +4,14 @@ namespace App\Models;
 
 use App\Enums\EstadoPublicacion;
 use App\Models\Concerns\EsPublicable;
+use Database\Factories\AsociadoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -18,10 +19,10 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Asociado extends Model implements HasMedia
 {
-    /** @use HasFactory<\Database\Factories\AsociadoFactory> */
-    use HasFactory;
-
     use EsPublicable, InteractsWithMedia, LogsActivity;
+
+    /** @use HasFactory<AsociadoFactory> */
+    use HasFactory;
 
     protected $table = 'asociados';
 

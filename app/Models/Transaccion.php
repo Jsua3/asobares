@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ConceptoTransaccion;
 use App\Enums\EstadoTransaccion;
 use App\Enums\MetodoPago;
+use Database\Factories\TransaccionFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Transaccion extends Model
 {
-    /** @use HasFactory<\Database\Factories\TransaccionFactory> */
+    /** @use HasFactory<TransaccionFactory> */
     use HasFactory;
 
     protected $table = 'transacciones';

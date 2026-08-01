@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\MunicipioFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Municipio extends Model
 {
-    /** @use HasFactory<\Database\Factories\MunicipioFactory> */
+    /** @use HasFactory<MunicipioFactory> */
     use HasFactory;
 
     use LogsActivity;

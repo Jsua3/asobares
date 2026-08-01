@@ -2,18 +2,19 @@
 
 namespace App\Models;
 
+use Database\Factories\RequisitoAperturaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * Producto insignia del sitio: la guÃ­a normativa, que difiere por municipio.
  */
 class RequisitoApertura extends Model
 {
-    /** @use HasFactory<\Database\Factories\RequisitoAperturaFactory> */
+    /** @use HasFactory<RequisitoAperturaFactory> */
     use HasFactory;
 
     use LogsActivity;
