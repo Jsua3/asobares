@@ -197,11 +197,18 @@ parte del código: el resto del sistema solo conoce la interfaz `PasarelaDePago`
 php artisan test
 ```
 
-**113 pruebas, 195 aserciones.** Cubren:
+**183 pruebas, 299 aserciones.** Cubren:
 
 - El flujo de aprobación, incluido que un subadmin no publique ni manipulando el formulario.
 - El **login real del panel** (formulario Livewire, no `actingAs`) y que el modelo `User`
   cumpla los tres contratos de MFA que el panel declara.
+- Un **barrido completo del panel**: listado, formulario de creación y formulario de edición
+  con un registro real de *cada* recurso, más el escritorio, los ajustes, la bitácora, el
+  perfil y todos los widgets. Los recursos se descubren solos, así que uno nuevo entra a la
+  prueba sin tocar nada.
+- Las **acciones invocadas de verdad**: aprobar, devolver a borrador, marcar respondido,
+  guardar ajustes, y la creación por el formulario real de Filament (donde se comprueba que
+  la secretaría termina en «pendiente» aunque escoja «Publicado»).
 - Todas las rutas públicas y del panel, con sus permisos por rol.
 - Que la ficha pública no filtre representante, correo ni notas internas del asociado.
 - Que una vacante no publicada no aparezca en `/empleo`.
@@ -316,8 +323,10 @@ siembra. Es lo correcto para el demo, pero en la suite multiplicaba el tiempo po
    construidos para soportarlo; falta la interfaz.
 6. **Recordatorios automáticos de cartera.** La directiva los pidió; hoy el afiliado ve su
    estado pero no recibe aviso. Requiere decidir el canal (correo o WhatsApp) y la cadencia.
-7. **Sin pruebas de navegador.** La cobertura es de peticiones HTTP; los flujos con
-   JavaScript (mapa, menú móvil) se verificaron a mano.
+7. **Sin pruebas de navegador.** La cobertura llega hasta los componentes Livewire; los
+   flujos que dependen de JavaScript en el navegador (mapa Leaflet, menú móvil) y la subida
+   real de archivos (portadas, galería, CSV de cartera) se verificaron a mano. El importador
+   de cartera sí tiene pruebas del servicio, pero no de la acción de Filament que lo llama.
 8. **Falta medir el rendimiento real en móvil 4G.** El objetivo de home < 2,5 s se atacó
    por diseño (webp, lazy loading, fuentes auto-alojadas, sin librerías pesadas), pero no
    se ha corrido Lighthouse.

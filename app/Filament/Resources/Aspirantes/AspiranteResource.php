@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Aspirantes;
 
-use App\Filament\Resources\Aspirantes\Pages\CreateAspirante;
 use App\Filament\Resources\Aspirantes\Pages\EditAspirante;
 use App\Filament\Resources\Aspirantes\Pages\ListAspirantes;
 use App\Filament\Resources\Aspirantes\Schemas\AspiranteForm;
@@ -50,7 +49,6 @@ class AspiranteResource extends Resource
     {
         return [
             'index' => ListAspirantes::route('/'),
-            'create' => CreateAspirante::route('/create'),
             'edit' => EditAspirante::route('/{record}/edit'),
         ];
     }

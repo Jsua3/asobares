@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Inscripcions;
 
-use App\Filament\Resources\Inscripcions\Pages\CreateInscripcion;
 use App\Filament\Resources\Inscripcions\Pages\EditInscripcion;
 use App\Filament\Resources\Inscripcions\Pages\ListInscripcions;
 use App\Filament\Resources\Inscripcions\Schemas\InscripcionForm;
@@ -50,7 +49,6 @@ class InscripcionResource extends Resource
     {
         return [
             'index' => ListInscripcions::route('/'),
-            'create' => CreateInscripcion::route('/create'),
             'edit' => EditInscripcion::route('/{record}/edit'),
         ];
     }
