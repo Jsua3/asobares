@@ -109,20 +109,20 @@ class EventoSeeder extends Seeder
 
             // --- Pasados ---
             [
-                'titulo' => 'Foro Quindío Nocturno: horarios y orden público',
+                'titulo' => 'Mercado Nocturno — segunda edición',
                 'tipo' => TipoEvento::Evento,
-                'descripcion' => 'Mesa de trabajo entre el gremio, la Secretaría de Gobierno y la Policía Metropolitana sobre la reglamentación de horarios en Armenia y su impacto en el empleo del sector.',
-                'lugar' => 'Salón de la Gobernación del Quindío',
-                'fecha_inicio' => now()->subDays(35)->setTime(14, 0),
-                'fecha_fin' => now()->subDays(35)->setTime(18, 0),
-                'cupos' => 80,
+                'descripcion' => "Mercado campesino sobre la Avenida Bolívar, dentro de la línea de Cultura del capítulo. Música en vivo, rincón cultural, exposición de bares, stand de bebidas y muestra de licoreras.\n\nUn evento semestral que apoya a empresarios del Quindío y acerca la vida nocturna a públicos que normalmente no entran a un bar.",
+                'lugar' => 'Avenida Bolívar, Armenia',
+                'fecha_inicio' => now()->subDays(35)->setTime(18, 0),
+                'fecha_fin' => now()->subDays(35)->setTime(23, 0),
+                'cupos' => null,
                 'precio' => 0,
                 'permite_inscripcion' => false,
             ],
             [
-                'titulo' => 'Taller de costos y precios para establecimientos nocturnos',
+                'titulo' => 'Socialización del Sello Púrpura',
                 'tipo' => TipoEvento::Capacitacion,
-                'descripcion' => 'Cómo costear un trago, cuánto cuesta realmente una hora de operación y por qué el margen se va sin que uno lo note. Taller práctico con la plantilla de costeo del gremio.',
+                'descripcion' => "Presentación de la estrategia del Sello Púrpura a los equipos de los establecimientos afiliados, dentro de la línea de Seguridad del capítulo.\n\nEn el baño de mujeres de cada establecimiento se instala un sticker con la ruta que se activa ante una alerta de maltrato verbal o sexual, y las líneas de atención correspondientes. Cada establecimiento socializa la estrategia con sus colaboradores.",
                 'lugar' => 'Sede ASOBARES Quindío, piso 3',
                 'fecha_inicio' => now()->subDays(70)->setTime(8, 0),
                 'fecha_fin' => now()->subDays(70)->setTime(12, 0),
