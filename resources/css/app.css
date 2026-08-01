@@ -45,6 +45,11 @@
         scroll-behavior: smooth;
     }
 
+    /* Evita el parpadeo de los bloques de Alpine antes de hidratar. */
+    [x-cloak] {
+        display: none !important;
+    }
+
     body {
         background-color: var(--color-noche-950);
         color: var(--color-noche-50);

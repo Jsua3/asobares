@@ -1,0 +1,133 @@
+<x-layouts.publico :titulo="ajuste('empleo_titulo').' — ASOBARES Quindío'"
+                   descripcion="Vacantes de bartender, chef, mesero y administrador en bares y gastrobares del Quindío. Publican solo los establecimientos asociados.">
+
+    <x-publico.hero :titulo="ajuste('empleo_titulo')" :subtitulo="ajuste('empleo_intro')" compacto>
+        <div class="mt-7 flex flex-col gap-3 sm:flex-row">
+            <a href="#perfil"
+               class="rounded-xl bg-marca-500 px-6 py-3 text-center text-sm font-semibold text-white hover:bg-marca-600">
+                Déjanos tu perfil
+            </a>
+            <a href="#vacantes"
+               class="rounded-xl border border-white/15 px-6 py-3 text-center text-sm font-semibold hover:border-marca-500/50">
+                Ver vacantes
+            </a>
+        </div>
+    </x-publico.hero>
+
+    <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+
+        @if (session('exito'))
+            <x-publico.alerta class="mb-8">{{ session('exito') }}</x-publico.alerta>
+        @endif
+
+        {{-- Muro de vacantes --}}
+        <section id="vacantes" aria-labelledby="titulo-vacantes">
+            <div class="flex flex-wrap items-end justify-between gap-4">
+                <h2 id="titulo-vacantes" class="font-display text-2xl font-bold">Vacantes abiertas</h2>
+                <p class="text-xs text-noche-400">{{ ajuste('empleo_aviso') }}</p>
+            </div>
+
+            <form method="GET" action="{{ route('empleo.index') }}" class="tarjeta mt-6 grid gap-4 p-5 sm:grid-cols-3">
+                <x-publico.campo nombre="cargo" etiqueta="Cargo" placeholder="Ej.: bartender"
+                                 :valor="$filtros['cargo'] ?? null" />
+                <x-publico.campo nombre="municipio" etiqueta="Municipio" tipo="select"
+                                 :valor="$filtros['municipio'] ?? null"
+                                 :opciones="['' => 'Todos los municipios'] + $municipios->pluck('nombre', 'slug')->all()" />
+                <div class="flex items-end gap-2">
+                    <button type="submit"
+                            class="flex-1 rounded-xl bg-marca-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-marca-600">
+                        Filtrar
+                    </button>
+                    @if (array_filter($filtros ?? []))
+                        <a href="{{ route('empleo.index') }}"
+                           class="rounded-xl border border-white/10 px-4 py-2.5 text-sm text-noche-300 hover:text-white">Limpiar</a>
+                    @endif
+                </div>
+            </form>
+
+            @if ($vacantes->isEmpty())
+                <div class="tarjeta mt-6 p-12 text-center">
+                    <p class="font-display text-lg font-semibold">No hay vacantes con ese filtro</p>
+                    <p class="mt-2 text-sm text-noche-300">
+                        Deja tu perfil abajo y te avisamos cuando aparezca una que encaje.
+                    </p>
+                </div>
+            @else
+                <ul class="mt-6 space-y-4">
+                    @foreach ($vacantes as $vacante)
+                        <li class="tarjeta tarjeta-hover p-6">
+                            <div class="flex flex-wrap items-start justify-between gap-4">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center gap-2 text-xs">
+                                        <span class="rounded-full bg-marca-500/15 px-2.5 py-1 font-medium text-marca-300">
+                                            {{ $vacante->tipo->getLabel() }}
+                                        </span>
+                                        <span class="text-noche-400">
+                                            {{ $vacante->asociado->municipio->nombre }} · publicada {{ $vacante->created_at->diffForHumans() }}
+                                        </span>
+                                    </div>
+
+                                    <h3 class="mt-3 font-display text-lg font-semibold">{{ $vacante->cargo }}</h3>
+
+                                    <p class="mt-1 text-sm text-noche-300">
+                                        en
+                                        <a href="{{ route('directorio.show', $vacante->asociado) }}"
+                                           class="text-marca-400 hover:text-marca-300">{{ $vacante->asociado->nombre }}</a>
+                                    </p>
+
+                                    @if ($vacante->descripcion)
+                                        <p class="mt-3 text-sm leading-relaxed text-noche-200">{{ $vacante->descripcion }}</p>
+                                    @endif
+
+                                    @if ($vacante->franja_horaria)
+                                        <p class="mt-3 text-xs text-noche-400">🕒 {{ $vacante->franja_horaria }}</p>
+                                    @endif
+                                </div>
+
+                                @if ($enlace = enlaceWhatsapp($vacante->whatsapp_contacto, "Hola, vi la vacante de {$vacante->cargo} en la bolsa de empleo de ASOBARES Quindío."))
+                                    <a href="{{ $enlace }}" target="_blank" rel="noopener nofollow"
+                                       class="shrink-0 rounded-xl bg-marca-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-marca-600">
+                                        Postularme
+                                    </a>
+                                @endif
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+
+                <div class="mt-10">{{ $vacantes->links() }}</div>
+            @endif
+        </section>
+
+        {{-- Formulario de aspirante --}}
+        <section id="perfil" class="tarjeta mt-16 p-7 sm:p-9" aria-labelledby="titulo-perfil">
+            <h2 id="titulo-perfil" class="font-display text-2xl font-bold">Déjanos tu perfil</h2>
+            <p class="mt-2 text-sm text-noche-300">
+                Cuando un establecimiento asociado busque tu cargo, te contactamos. No necesitas cuenta.
+            </p>
+
+            <form method="POST" action="{{ route('empleo.aspirante') }}" class="mt-7 space-y-5">
+                @csrf
+
+                <div class="grid gap-5 sm:grid-cols-2">
+                    <x-publico.campo nombre="nombre" etiqueta="Nombre completo" requerido />
+                    <x-publico.campo nombre="correo" etiqueta="Correo electrónico" tipo="email" requerido />
+                    <x-publico.campo nombre="telefono" etiqueta="Teléfono o WhatsApp" tipo="tel" />
+                    <x-publico.campo nombre="cargo_interes" etiqueta="Cargo que buscas" requerido
+                                     placeholder="Bartender, mesero, chef, administrador…" />
+                </div>
+
+                <x-publico.campo nombre="experiencia" etiqueta="Tu experiencia" tipo="textarea" filas="3"
+                                 placeholder="Cuéntanos en pocas líneas dónde has trabajado y qué sabes hacer."
+                                 ayuda="Con dos o tres frases es suficiente." />
+
+                <x-publico.habeas-data />
+
+                <button type="submit"
+                        class="w-full rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-marca-600 sm:w-auto">
+                    Registrar mi perfil
+                </button>
+            </form>
+        </section>
+    </div>
+</x-layouts.publico>

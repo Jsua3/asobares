@@ -1,0 +1,40 @@
+<?php
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pasarela activa
+    |--------------------------------------------------------------------------
+    |
+    | `fake` usa la pasarela simulada interna, que permite demostrar el flujo
+    | completo sin credenciales. `bold` activa la integración real.
+    |
+    */
+
+    'driver' => env('PAYMENT_DRIVER', 'fake'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Montos de referencia del gremio
+    |--------------------------------------------------------------------------
+    */
+
+    'mensualidad' => (int) env('VALOR_MENSUALIDAD', 50000),
+
+    'afiliacion' => (int) env('VALOR_AFILIACION', 150000),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Bold
+    |--------------------------------------------------------------------------
+    */
+
+    'bold' => [
+        'api_key' => env('BOLD_API_KEY', ''),
+        'secret' => env('BOLD_SECRET', ''),
+        'url' => env('BOLD_API_URL', 'https://integrations.api.bold.co'),
+        'sandbox' => (bool) env('BOLD_SANDBOX', true),
+    ],
+
+];

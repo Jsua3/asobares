@@ -69,6 +69,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Galerías en las semillas
+    |--------------------------------------------------------------------------
+    |
+    | Generar las galerías de los establecimientos destacados implica 36
+    | conversiones a webp. Es lo correcto para el demo, pero un lastre en la
+    | suite de pruebas, donde no se verifica nada de eso.
+    |
+    */
+
+    'seed_galeria' => (bool) env('SEED_GALERIA', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Locale Configuration
     |--------------------------------------------------------------------------
     |

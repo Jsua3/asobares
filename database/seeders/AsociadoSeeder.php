@@ -58,7 +58,8 @@ class AsociadoSeeder extends Seeder
             );
 
             // Galería solo para los destacados: mantiene la semilla ágil.
-            if (($datos['destacado'] ?? false) && $asociado->getMedia('galeria')->isEmpty()) {
+            // SEED_GALERIA=false la omite (la suite de pruebas la apaga).
+            if (config('app.seed_galeria') && ($datos['destacado'] ?? false) && $asociado->getMedia('galeria')->isEmpty()) {
                 foreach (range(1, 3) as $numero) {
                     $ruta = $imagenes->generar("galeria-{$datos['nombre']}-{$numero}", 'galeria', 1200, 900);
                     $asociado->addMedia(storage_path("app/public/{$ruta}"))

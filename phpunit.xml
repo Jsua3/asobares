@@ -32,5 +32,8 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- Las galerias reprocesan 36 conversiones webp en cada test y no
+             aportan nada a lo que se verifica: se omiten en la suite. -->
+        <env name="SEED_GALERIA" value="false"/>
     </php>
 </phpunit>
