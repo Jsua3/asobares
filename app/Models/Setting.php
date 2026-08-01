@@ -24,8 +24,17 @@ class Setting extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn () => Cache::forget(self::CLAVE_CACHE));
-        static::deleted(fn () => Cache::forget(self::CLAVE_CACHE));
+        static::saved(fn () => self::olvidarCache());
+        static::deleted(fn () => self::olvidarCache());
+    }
+
+    /**
+     * Las actualizaciones masivas no disparan eventos de modelo, así que la
+     * página de ajustes tiene que invalidar la caché explícitamente.
+     */
+    public static function olvidarCache(): void
+    {
+        Cache::forget(self::CLAVE_CACHE);
     }
 
     /**

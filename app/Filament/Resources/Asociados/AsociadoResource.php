@@ -11,14 +11,23 @@ use App\Models\Asociado;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class AsociadoResource extends Resource
 {
     protected static ?string $model = Asociado::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-storefront';
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Contenido';
+
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $slug = 'asociados';
+
+    protected static ?string $modelLabel = 'Asociado';
+
+    protected static ?string $pluralModelLabel = 'Asociados';
 
     public static function form(Schema $schema): Schema
     {

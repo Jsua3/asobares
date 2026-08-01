@@ -2,16 +2,21 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\AsociadosPorMunicipio;
+use App\Filament\Widgets\InscripcionesDelMes;
+use App\Filament\Widgets\ResumenDelGremio;
+use App\Filament\Widgets\UltimasTransacciones;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
+use Filament\Auth\MultiFactor\Email\EmailAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -28,13 +33,30 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->profile(isSimple: false)
             ->brandName('ASOBARES Quindío')
             ->favicon(asset('img/favicon.svg'))
             ->colors([
                 'primary' => Color::hex('#EE4036'),
             ])
+            // RF-40: segundo factor por app de autenticación o código al correo.
+            ->multiFactorAuthentication([
+                AppAuthentication::make()
+                    ->recoverable()
+                    ->recoveryCodeCount(8),
+                EmailAuthentication::make(),
+            ])
             ->databaseNotifications()
-            ->databaseNotificationsPolling('60s')
+            ->databaseNotificationsPolling('30s')
+            // Sin icono de grupo a propósito: Filament no admite iconos en el
+            // grupo y en sus items a la vez, y el icono por recurso orienta más.
+            ->navigationGroups([
+                NavigationGroup::make('Contenido'),
+                NavigationGroup::make('Bolsas'),
+                NavigationGroup::make('Bandejas'),
+                NavigationGroup::make('Gremio'),
+                NavigationGroup::make('Configuración')->collapsed(),
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
@@ -42,8 +64,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                ResumenDelGremio::class,
+                InscripcionesDelMes::class,
+                AsociadosPorMunicipio::class,
+                UltimasTransacciones::class,
             ])
             ->middleware([
                 EncryptCookies::class,

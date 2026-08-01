@@ -11,7 +11,10 @@ use App\Models\Proveedor;
 use App\Models\RequisitoApertura;
 use App\Models\Vacante;
 use App\Observers\FlujoDeAprobacionObserver;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 
@@ -45,6 +48,29 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $this->registrarReglaDeYoutube();
+        $this->registrarBitacoraDeSesiones();
+    }
+
+    /** RF-39: la bitácora también registra entradas y salidas al panel. */
+    private function registrarBitacoraDeSesiones(): void
+    {
+        Event::listen(Login::class, function (Login $evento): void {
+            activity('sesion')
+                ->causedBy($evento->user)
+                ->event('created')
+                ->log('inició sesión');
+        });
+
+        Event::listen(Logout::class, function (Logout $evento): void {
+            if ($evento->user === null) {
+                return;
+            }
+
+            activity('sesion')
+                ->causedBy($evento->user)
+                ->event('deleted')
+                ->log('cerró sesión');
+        });
     }
 
     /**
