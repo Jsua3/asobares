@@ -5,7 +5,7 @@
         <div class="mx-auto w-full max-w-md px-4 py-16 sm:px-6">
 
             <div class="text-center">
-                <img src="{{ asset('img/favicon.svg') }}" alt="" class="mx-auto h-12 w-12" width="48" height="48">
+                <x-publico.logo alto="h-10" class="mx-auto" />
                 <h1 class="mt-5 font-display text-2xl font-bold">Entra a tu cuenta</h1>
                 <p class="mt-2 text-sm text-noche-300">
                     Para los establecimientos afiliados al capítulo.

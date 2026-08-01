@@ -9,11 +9,11 @@ export default defineConfig({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
             fonts: [
-                bunny('Unbounded', {
-                    weights: [500, 600, 700],
-                }),
-                bunny('Hanken Grotesk', {
-                    weights: [400, 500, 600, 700],
+                // Poppins es la tipografía principal del manual de marca de
+                // Asobares Colombia. Los pesos son los cuatro que documenta:
+                // Light, Medium, Bold y Black (más Regular y SemiBold de apoyo).
+                bunny('Poppins', {
+                    weights: [300, 400, 500, 600, 700, 900],
                 }),
             ],
         }),

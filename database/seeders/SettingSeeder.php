@@ -22,14 +22,15 @@ class SettingSeeder extends Seeder
     private function ajustes(): array
     {
         return [
-            // --- Identidad ---
+            // --- Identidad (lema oficial del capítulo) ---
             $this->texto('sitio_nombre', 'ASOBARES Capítulo Quindío', 'identidad', 'Nombre del sitio'),
-            $this->texto('sitio_eslogan', 'El gremio de la vida nocturna del Quindío', 'identidad', 'Eslogan'),
+            $this->texto('sitio_eslogan', 'La noche construye territorio', 'identidad', 'Lema del capítulo'),
+            $this->texto('sitio_descripcion_corta', 'El gremio que representa, fortalece y dinamiza el sector nocturno, gastronómico y de entretenimiento del Quindío.', 'identidad', 'Descripción corta'),
             $this->largo('sitio_descripcion', 'Asociación de Bares de Colombia, Capítulo Quindío. Representamos a bares, gastrobares, cafés y discotecas del departamento ante las instituciones, y acompañamos a quien quiere abrir su establecimiento.', 'identidad', 'Descripción para buscadores'),
 
             // --- Inicio ---
-            $this->texto('hero_titulo', 'La noche del Quindío tiene quien la represente', 'inicio', 'Título del hero'),
-            $this->largo('hero_subtitulo', 'Somos el gremio que se sienta en la mesa con las instituciones y el que te explica, paso a paso, cómo abrir tu establecimiento sin que te lo cierren.', 'inicio', 'Subtítulo del hero'),
+            $this->texto('hero_titulo', 'La noche construye territorio', 'inicio', 'Título del hero'),
+            $this->largo('hero_subtitulo', 'Somos el gremio que se sienta en la mesa con las instituciones y el que te explica, paso a paso, cómo abrir tu establecimiento sin que te lo cierren. Trabajamos por la dignificación de la vida nocturna del Quindío.', 'inicio', 'Subtítulo del hero'),
             $this->texto('hero_cta_directorio', 'Explora la noche', 'inicio', 'Botón hacia el directorio'),
             $this->texto('hero_cta_afiliate', 'Afíliate', 'inicio', 'Botón hacia afiliación'),
             $this->texto('cta_final_titulo', '¿Tu establecimiento todavía no es parte del gremio?', 'inicio', 'Título del cierre'),
@@ -47,13 +48,24 @@ class SettingSeeder extends Seeder
             $this->texto('cifra_afiliados', '60', 'cifras', 'Establecimientos afiliados'),
 
             // --- Quiénes somos ---
-            $this->largo('quienes_historia', 'ASOBARES Capítulo Quindío nació el 14 de agosto de 2024 en Armenia como el capítulo regional de Asobares Colombia. Reunimos a bares, gastrobares, cafés y discotecas del departamento alrededor de una idea simple: la vida nocturna es una industria que genera empleo, paga impuestos y merece ser tratada como tal.', 'institucional', 'Historia'),
+            $this->largo('quienes_historia', 'Somos una organización gremial que nace en Bogotá y llega al Quindío con la necesidad de afianzar la relación TURISMO – NOCHE. El capítulo se fundó el 14 de agosto de 2024 en Armenia y reúne a bares, gastrobares, cafés y discotecas del departamento alrededor de una idea simple: la vida nocturna es una industria que genera empleo, paga impuestos y merece ser tratada como tal.', 'institucional', 'Historia'),
             $this->largo('quienes_mision', 'Representar al sector de la vida nocturna del Quindío ante las instituciones públicas y privadas, para proponer como gremio: participar en las decisiones sobre horarios, ruido, orden público y formalización antes de que se tomen, y no reclamar después.', 'institucional', 'Misión'),
-            $this->largo('quienes_que_hacemos', 'Gestionamos con las Secretarías de Salud, Gobierno y Planeación. Negociamos tarifas de derechos de autor. Formamos a los equipos de nuestros afiliados. Y construimos la guía normativa por municipio que hoy no tiene ningún otro gremio del país.', 'institucional', 'Qué hacemos'),
+            $this->largo('quienes_que_hacemos', 'Trabajamos por una vida nocturna más diversa y por la dignificación del sector, para consolidarnos como el corazón nocturno del Eje Cafetero. Gestionamos con las Secretarías de Salud, Gobierno y Planeación; negociamos tarifas de derechos de autor; formamos a los equipos de nuestros afiliados; y construimos la guía normativa por municipio que hoy no tiene ningún otro gremio del país.', 'institucional', 'Qué hacemos'),
+            $this->texto('quienes_vision', 'Hacia la transformación del Quindío en un paraíso nocturno seguro', 'institucional', 'Visión'),
             $this->texto('quienes_presidente', 'Jorge Iván Botero Ángel', 'institucional', 'Presidente'),
             $this->texto('quienes_directora', 'Natalia Gutiérrez', 'institucional', 'Directora ejecutiva'),
             $this->texto('quienes_fundacion', '14 de agosto de 2024', 'institucional', 'Fecha de fundación'),
-            $this->largo('quienes_programas', "Armenia 24 Horas — la propuesta para una ciudad con vida económica nocturna regulada y segura.\nForo Quindío Nocturno — el espacio donde el sector, la academia y las instituciones discuten el futuro de la industria.", 'institucional', 'Programas'),
+
+            // Las tres líneas del plan de acción del capítulo. Formato por línea:
+            // Nombre | Descripción | Programas separados por punto y coma.
+            $this->largo('quienes_lineas', implode("\n", [
+                'Seguridad | Promover esparcimiento seguro en el Quindío, articulados con las secretarías de gobierno de cada municipio. En 2024, el 73 % de los visitantes del departamento decidió hospedarse aquí: la seguridad y la convivencia son parte del atractivo turístico. | Sello Púrpura; Sello Seguro; Campañas de socialización',
+                'Cultura | Incentivar espacios donde la cultura nocturna sea la protagonista. La identidad local se refleja en la música, la gastronomía y los cócteles: eso atrae turistas, estimula a bartenders y chefs, y apoya a artistas y productores de la región. | Ruta Coctelera «Quindío en copas»; Mercado Nocturno; Karaoke bajo las estrellas; Rock al Bosque; Navidad al Aire Libre',
+                'Sostenibilidad | Reducir la huella ambiental del sector y apoyar a productores y proveedores locales, adelantándonos a la regulación en vez de reaccionar a ella. | Bares Verdes; Reciclaje Nocturno; Eventos Eco-Friendly',
+            ]), 'institucional', 'Líneas de trabajo (Nombre | Descripción | Programas)'),
+
+            $this->largo('quienes_estrategia_armenia', 'Armenia Nocturna es la propuesta del capítulo para la ciudad: articular a la Secretaría de Gobierno y a la de Desarrollo Económico alrededor de una vida económica nocturna regulada, segura y reconocida como industria.', 'institucional', 'Estrategia Armenia Nocturna'),
+            $this->largo('quienes_programas_nacionales', "Tardeo en la ciudad\nMi destino, tu noche\nLa ruta del coctel\nPregunta por Ángela", 'institucional', 'Programas de la Nacional que aterriza el capítulo'),
             $this->texto('url_nacional', 'https://asobares.org', 'institucional', 'Sitio de Asobares Nacional'),
 
             // --- Contacto ---

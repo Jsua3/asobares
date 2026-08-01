@@ -7,37 +7,48 @@
 
 /*
  * Identidad ASOBARES Capitulo Quindio.
- * Modo oscuro de vida nocturna: fondo casi negro, un solo acento rojo de marca.
+ *
+ * Valores tomados del Manual de Marca de Asobares Colombia (Quida Studio):
+ * paleta principal Pub Red / Pub Black / Ambient White, paleta secundaria
+ * Pub Grey / Wine / Ambient Purple / Ambient Rose, y Poppins como
+ * tipografia principal en Light, Medium, Bold y Black.
  */
 @theme {
-    --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
-    --font-display: 'Unbounded', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    --font-display: 'Poppins', ui-sans-serif, system-ui, sans-serif;
 
-    /* Neutros calidos sobre negro */
-    --color-noche-50: #f4efec;
-    --color-noche-100: #e7e0dd;
-    --color-noche-200: #cfc7c5;
-    --color-noche-300: #a79e9f;
-    --color-noche-400: #7c747b;
-    --color-noche-500: #575057;
-    --color-noche-600: #3b353b;
-    --color-noche-700: #2a252a;
-    --color-noche-800: #1d191d;
-    --color-noche-900: #141114;
-    --color-noche-950: #0c0a0b;
+    /* --- Paleta principal --- */
+    /* Pub Red #EE4137: dinamismo, accion y movimiento. Unico acento. */
+    --color-marca-50: #fef3f2;
+    --color-marca-100: #fde4e2;
+    --color-marca-200: #fbcac6;
+    --color-marca-300: #f7a49d;
+    --color-marca-400: #f27166;
+    --color-marca-500: #ee4137;
+    --color-marca-600: #da2b21;
+    --color-marca-700: #b71f18;
+    --color-marca-800: #971d18;
+    --color-marca-900: #7d1e1b;
+    --color-marca-950: #440b09;
 
-    /* Rojo de marca: unico acento */
-    --color-marca-50: #fef2f1;
-    --color-marca-100: #fde3e1;
-    --color-marca-200: #fbc9c5;
-    --color-marca-300: #f7a39c;
-    --color-marca-400: #f27065;
-    --color-marca-500: #ee4036;
-    --color-marca-600: #da2a20;
-    --color-marca-700: #b71f17;
-    --color-marca-800: #971d17;
-    --color-marca-900: #7d1e1a;
-    --color-marca-950: #440b08;
+    /* Pub Black #0B090A y Ambient White #F5F3F4, con la rampa intermedia
+       construida sobre Pub Grey #282628. */
+    --color-noche-50: #f5f3f4;
+    --color-noche-100: #e8e5e6;
+    --color-noche-200: #d0cccd;
+    --color-noche-300: #a8a3a5;
+    --color-noche-400: #7d7779;
+    --color-noche-500: #575254;
+    --color-noche-600: #3d393b;
+    --color-noche-700: #282628;
+    --color-noche-800: #1b191a;
+    --color-noche-900: #121011;
+    --color-noche-950: #0b090a;
+
+    /* --- Paleta secundaria: solo para acentos puntuales --- */
+    --color-vino: #a4161a;
+    --color-purpura: #c05299;
+    --color-rosa: #ea698b;
 }
 
 @layer base {
@@ -56,11 +67,13 @@
         -webkit-font-smoothing: antialiased;
     }
 
+    /* Los titulares del gremio van en Poppins Bold/Black, muy ajustados. */
     h1,
     h2,
     h3,
     h4 {
         font-family: var(--font-display);
+        font-weight: 700;
         letter-spacing: -0.02em;
     }
 
@@ -87,12 +100,29 @@
     }
 
     .tarjeta-hover:hover {
-        border-color: rgb(238 64 54 / 0.45);
+        border-color: rgb(238 65 55 / 0.45);
         transform: translateY(-2px);
     }
 
     /* Resplandor rojo discreto para heros */
     .resplandor-marca {
-        background-image: radial-gradient(60% 55% at 50% 0%, rgb(238 64 54 / 0.16) 0%, transparent 70%);
+        background-image: radial-gradient(60% 55% at 50% 0%, rgb(238 65 55 / 0.16) 0%, transparent 70%);
+    }
+
+    /*
+     * Trama de puntos: el motivo grafico que la marca usa en sus piezas
+     * (ver cronograma y TED gremial). Se aplica como textura de fondo.
+     */
+    .trama-puntos {
+        background-image: radial-gradient(rgb(238 65 55 / 0.28) 1px, transparent 1px);
+        background-size: 14px 14px;
+    }
+
+    /* Antetitulo en versalitas muy espaciadas, como en las piezas del gremio. */
+    .antetitulo {
+        font-weight: 500;
+        font-size: 0.6875rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
     }
 }

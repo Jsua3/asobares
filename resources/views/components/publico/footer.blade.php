@@ -7,13 +7,11 @@
         <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
 
             <div class="lg:col-span-1">
-                <div class="flex items-center gap-2.5">
-                    <img src="{{ asset('img/favicon.svg') }}" alt="" class="h-10 w-10" width="40" height="40">
-                    <span class="font-display text-sm font-semibold leading-tight">
-                        ASOBARES<span class="block text-[.65rem] font-medium text-marca-400">Capítulo Quindío</span>
-                    </span>
-                </div>
-                <p class="mt-4 text-sm leading-relaxed text-noche-300">{{ ajuste('sitio_eslogan') }}</p>
+                <x-publico.logo alto="h-10" />
+                <p class="mt-5 font-display text-sm font-semibold uppercase tracking-[.18em] text-marca-400">
+                    {{ ajuste('sitio_eslogan') }}
+                </p>
+                <p class="mt-3 text-sm leading-relaxed text-noche-300">{{ ajuste('sitio_descripcion_corta') }}</p>
                 <p class="mt-3 text-xs text-noche-400">Fundado el {{ ajuste('quienes_fundacion') }}</p>
             </div>
 

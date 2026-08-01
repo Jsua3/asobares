@@ -34,7 +34,7 @@
 
             const icono = L.divIcon({
                 className: '',
-                html: `<span style=&quot;display:block;width:18px;height:18px;border-radius:9999px;background:#EE4036;border:3px solid #0C0A0B;box-shadow:0 0 0 2px rgba(238,64,54,.45)&quot;></span>`,
+                html: `<span style=&quot;display:block;width:18px;height:18px;border-radius:9999px;background:#EE4137;border:3px solid #0B090A;box-shadow:0 0 0 2px rgba(238,65,55,.45)&quot;></span>`,
                 iconSize: [18, 18],
                 iconAnchor: [9, 9],
             });

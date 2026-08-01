@@ -35,8 +35,8 @@ class InscripcionesDelMes extends ChartWidget
             'datasets' => [[
                 'label' => 'Inscripciones',
                 'data' => $valores,
-                'borderColor' => '#EE4036',
-                'backgroundColor' => 'rgba(238, 64, 54, 0.15)',
+                'borderColor' => '#EE4137',
+                'backgroundColor' => 'rgba(238, 65, 55, 0.15)',
                 'fill' => true,
                 'tension' => 0.3,
             ]],

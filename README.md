@@ -218,6 +218,41 @@ vendor/bin/pint
 
 ---
 
+## Identidad de marca
+
+Todo sale del **Manual de Marca de Asobares Colombia** (re-styling de Quida Studio) y del kit
+de logo del capítulo, que están en `material/`. Nada de esto se inventó.
+
+**Paleta principal**
+
+| Nombre | HEX | Uso |
+|---|---|---|
+| Pub Red | `#EE4137` | Único acento. `marca-500` en Tailwind |
+| Pub Black | `#0B090A` | Fondo del sitio. `noche-950` |
+| Ambient White | `#F5F3F4` | Texto. `noche-50` |
+
+**Paleta secundaria** — Pub Grey `#282628` (rampa de neutros), Wine `#A4161A`,
+Ambient Purple `#C05299`, Ambient Rose `#EA698B`. Disponibles como `vino`, `purpura` y `rosa`.
+
+**Tipografía** — **Poppins** en Light (300), Medium (500), Bold (700) y Black (900), los
+cuatro pesos que documenta el manual. Se sirve auto-alojada por Vite, sin llamadas a Google.
+Rage Italic y Patrick Hand quedan fuera: el manual las reserva para activaciones puntuales.
+
+**Logo** — se usa el archivo oficial completo, sin recolorear ni reorganizar, como exige el
+manual. El componente `<x-publico.logo>` es el único punto que lo dibuja.
+
+| Archivo | Cuándo |
+|---|---|
+| `public/img/logo-asobares.svg` | Por defecto (rojo sobre fondo oscuro) |
+| `public/img/logo-asobares-blanco.png` | Fondos rojos o fotografías |
+| `public/img/monograma-asobares.png` | Símbolo «ab» suelto |
+| `public/img/favicon.png` | Monograma sobre Pub Black |
+
+**Motivos gráficos** — la clase `.trama-puntos` reproduce la trama de puntos rojos de las
+piezas del gremio, y `.antetitulo` el versalitas espaciado que usan en sus antetítulos.
+
+---
+
 ## Decisiones que conviene saber
 
 **Laravel 13, no 12.** El instalador oficial ya no entrega Laravel 12. El conflicto real no

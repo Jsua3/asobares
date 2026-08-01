@@ -16,11 +16,8 @@
     <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8"
          aria-label="Navegación principal">
 
-        <a href="{{ route('inicio') }}" class="flex shrink-0 items-center gap-2.5">
-            <img src="{{ asset('img/favicon.svg') }}" alt="" class="h-9 w-9" width="36" height="36">
-            <span class="font-display text-sm font-semibold leading-tight tracking-tight">
-                ASOBARES<span class="block text-[.65rem] font-medium text-marca-400">Capítulo Quindío</span>
-            </span>
+        <a href="{{ route('inicio') }}" class="shrink-0" aria-label="Inicio — ASOBARES Capítulo Quindío">
+            <x-publico.logo alto="h-8 sm:h-9" />
         </a>
 
         {{-- Escritorio --}}

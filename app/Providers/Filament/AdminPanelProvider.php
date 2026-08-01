@@ -35,9 +35,13 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->profile(isSimple: false)
             ->brandName('ASOBARES Quindío')
-            ->favicon(asset('img/favicon.svg'))
+            ->favicon(asset('img/favicon.png'))
+            ->brandLogo(asset('img/logo-asobares.svg'))
+            ->brandLogoHeight('2rem')
+            ->darkModeBrandLogo(asset('img/logo-asobares-blanco.png'))
+            // Pub Red, exacto según el manual de marca de Asobares Colombia.
             ->colors([
-                'primary' => Color::hex('#EE4036'),
+                'primary' => Color::hex('#EE4137'),
             ])
             // RF-40: segundo factor por app de autenticación o código al correo.
             ->multiFactorAuthentication([

@@ -23,8 +23,9 @@
         <meta name="twitter:card" content="summary">
     @endif
 
-    <link rel="icon" type="image/svg+xml" href="{{ asset('img/favicon.svg') }}">
-    <meta name="theme-color" content="#0C0A0B">
+    <link rel="icon" type="image/png" href="{{ asset('img/favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('img/favicon.png') }}">
+    <meta name="theme-color" content="#0B090A">
 
     @stack('jsonld')
 

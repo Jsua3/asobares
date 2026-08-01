@@ -21,7 +21,7 @@ class AsociadosPorMunicipio extends ChartWidget
             'datasets' => [[
                 'label' => 'Asociados',
                 'data' => $municipios->pluck('asociados_count')->all(),
-                'backgroundColor' => '#EE4036',
+                'backgroundColor' => '#EE4137',
                 'borderRadius' => 6,
             ]],
             'labels' => $municipios->pluck('nombre')->all(),

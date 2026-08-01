@@ -9,7 +9,7 @@
 
             <div class="tarjeta mt-5 overflow-hidden">
                 <div class="border-b border-white/[.09] p-7 text-center">
-                    <img src="{{ asset('img/favicon.svg') }}" alt="" class="mx-auto h-11 w-11" width="44" height="44">
+                    <x-publico.logo alto="h-9" class="mx-auto" />
                     <h1 class="mt-4 font-display text-lg font-semibold">{{ ajuste('sitio_nombre') }}</h1>
                     <p class="mt-1 text-sm text-noche-400">{{ $transaccion->concepto->getLabel() }}</p>
                 </div>

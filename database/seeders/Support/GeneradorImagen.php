@@ -15,10 +15,10 @@ use Random\Randomizer;
  */
 class GeneradorImagen
 {
-    private const int FONDO = 0x0C0A0B;
+    private const int FONDO = 0x0B090A;
 
-    /** Tonos cálidos emparentados con el rojo de marca #EE4036. */
-    private const array ACENTOS = [0xEE4036, 0xF27065, 0xB71F17, 0xDA2A20, 0x7D1E1A];
+    /** Tonos cálidos emparentados con el rojo de marca Pub Red #EE4137. */
+    private const array ACENTOS = [0xEE4137, 0xF27166, 0xB71F18, 0xDA2B21, 0x7D1E1B];
 
     /**
      * Crea un PNG determinista a partir de la semilla y devuelve su ruta
