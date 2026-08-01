@@ -197,9 +197,11 @@ parte del código: el resto del sistema solo conoce la interfaz `PasarelaDePago`
 php artisan test
 ```
 
-**107 pruebas, 170 aserciones.** Cubren:
+**113 pruebas, 195 aserciones.** Cubren:
 
 - El flujo de aprobación, incluido que un subadmin no publique ni manipulando el formulario.
+- El **login real del panel** (formulario Livewire, no `actingAs`) y que el modelo `User`
+  cumpla los tres contratos de MFA que el panel declara.
 - Todas las rutas públicas y del panel, con sus permisos por rol.
 - Que la ficha pública no filtre representante, correo ni notas internas del asociado.
 - Que una vacante no publicada no aparezca en `/empleo`.
@@ -336,7 +338,7 @@ app/
 ├── Services/         ImportadorDeCartera, RegistroDePagos
 └── Support/          Helpers de vista, Formulario, VideoDeYoutube
 database/
-├── migrations/       19 tablas, portables a PostgreSQL
+├── migrations/       20 tablas, portables a PostgreSQL
 └── seeders/          Contenido del gremio + generadores locales de PNG y PDF
 resources/views/
 ├── components/       Layout, navbar, footer, mapa, campos de formulario

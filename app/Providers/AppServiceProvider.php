@@ -12,6 +12,7 @@ use App\Models\Proveedor;
 use App\Models\RequisitoApertura;
 use App\Models\Vacante;
 use App\Observers\FlujoDeAprobacionObserver;
+use Filament\Resources\Resource;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Database\Eloquent\Model;
@@ -51,6 +52,11 @@ class AppServiceProvider extends ServiceProvider
 
         $this->registrarReglaDeYoutube();
         $this->registrarBitacoraDeSesiones();
+
+        // Filament capitaliza cada palabra de los títulos, que es convención
+        // inglesa. En español solo va mayúscula la primera: sin esto se lee
+        // «Mensajes Y PQR» o «Iniciativas Del Gremio».
+        Resource::titleCaseModelLabel(false);
     }
 
     /** RF-39: la bitácora también registra entradas y salidas al panel. */
