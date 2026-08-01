@@ -1,0 +1,93 @@
+@import 'tailwindcss';
+
+@source '../views/**/*.blade.php';
+@source '../../app/**/*.php';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+/*
+ * Identidad ASOBARES Capitulo Quindio.
+ * Modo oscuro de vida nocturna: fondo casi negro, un solo acento rojo de marca.
+ */
+@theme {
+    --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    --font-display: 'Unbounded', ui-sans-serif, system-ui, sans-serif;
+
+    /* Neutros calidos sobre negro */
+    --color-noche-50: #f4efec;
+    --color-noche-100: #e7e0dd;
+    --color-noche-200: #cfc7c5;
+    --color-noche-300: #a79e9f;
+    --color-noche-400: #7c747b;
+    --color-noche-500: #575057;
+    --color-noche-600: #3b353b;
+    --color-noche-700: #2a252a;
+    --color-noche-800: #1d191d;
+    --color-noche-900: #141114;
+    --color-noche-950: #0c0a0b;
+
+    /* Rojo de marca: unico acento */
+    --color-marca-50: #fef2f1;
+    --color-marca-100: #fde3e1;
+    --color-marca-200: #fbc9c5;
+    --color-marca-300: #f7a39c;
+    --color-marca-400: #f27065;
+    --color-marca-500: #ee4036;
+    --color-marca-600: #da2a20;
+    --color-marca-700: #b71f17;
+    --color-marca-800: #971d17;
+    --color-marca-900: #7d1e1a;
+    --color-marca-950: #440b08;
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        background-color: var(--color-noche-950);
+        color: var(--color-noche-50);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+        font-family: var(--font-display);
+        letter-spacing: -0.02em;
+    }
+
+    /* Accesibilidad: foco siempre visible sobre fondo oscuro */
+    :focus-visible {
+        outline: 2px solid var(--color-marca-500);
+        outline-offset: 3px;
+        border-radius: 4px;
+    }
+}
+
+@layer components {
+    /* Tarjeta base: borde tenue sobre superficie */
+    .tarjeta {
+        background-color: var(--color-noche-900);
+        border: 1px solid rgb(255 255 255 / 0.09);
+        border-radius: 1rem;
+    }
+
+    .tarjeta-hover {
+        transition:
+            border-color 200ms ease,
+            transform 200ms ease;
+    }
+
+    .tarjeta-hover:hover {
+        border-color: rgb(238 64 54 / 0.45);
+        transform: translateY(-2px);
+    }
+
+    /* Resplandor rojo discreto para heros */
+    .resplandor-marca {
+        background-image: radial-gradient(60% 55% at 50% 0%, rgb(238 64 54 / 0.16) 0%, transparent 70%);
+    }
+}
