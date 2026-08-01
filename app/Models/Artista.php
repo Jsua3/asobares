@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\EstadoPublicacion;
 use App\Enums\TipoArtista;
 use App\Models\Concerns\EsPublicable;
+use App\Support\VideoDeYoutube;
 use Database\Factories\ArtistaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -47,29 +48,12 @@ class Artista extends Model
     }
 
     /**
-     * Extrae el ID de YouTube de la URL guardada. Nunca se embebe la URL
-     * cruda: solo se arma el iframe con el ID validado.
+     * ID del video guardado. Nunca se embebe la URL cruda: el iframe se
+     * arma solo con este ID validado.
      */
     public function youtubeId(): ?string
     {
-        if (blank($this->video_url)) {
-            return null;
-        }
-
-        $patrones = [
-            '#^https?://(?:www\.)?youtube\.com/watch\?(?:.*&)?v=([A-Za-z0-9_-]{11})#',
-            '#^https?://(?:www\.)?youtube\.com/embed/([A-Za-z0-9_-]{11})#',
-            '#^https?://(?:www\.)?youtube\.com/shorts/([A-Za-z0-9_-]{11})#',
-            '#^https?://youtu\.be/([A-Za-z0-9_-]{11})#',
-        ];
-
-        foreach ($patrones as $patron) {
-            if (preg_match($patron, $this->video_url, $coincidencias) === 1) {
-                return $coincidencias[1];
-            }
-        }
-
-        return null;
+        return VideoDeYoutube::id($this->video_url);
     }
 
     public function tieneVideo(): bool

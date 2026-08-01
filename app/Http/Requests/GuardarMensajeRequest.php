@@ -42,7 +42,9 @@ class GuardarMensajeRequest extends FormRequest
     public function datosDelMensaje(): array
     {
         return [
-            ...$this->safe()->only(['tipo', 'nombre', 'correo', 'telefono', 'mensaje']),
+            ...$this->safe()->only(['nombre', 'correo', 'telefono', 'mensaje']),
+            // La validación acepta el valor, pero quien lo consume espera el enum.
+            'tipo' => TipoMensaje::from($this->string('tipo')->toString()),
             ...$this->selloDeConsentimiento(),
         ];
     }

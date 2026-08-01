@@ -29,7 +29,12 @@ class ArtistaForm
                 TextInput::make('tarifa_desde')
                     ->numeric(),
                 TextInput::make('video_url')
-                    ->url(),
+                    ->label('Video de YouTube')
+                    ->url()
+                    // Solo YouTube: del enlace únicamente se embebe el ID extraído.
+                    ->rule('url_youtube')
+                    ->placeholder('https://www.youtube.com/watch?v=...')
+                    ->helperText('Pega el enlace del video. Se acepta youtube.com o youtu.be.'),
                 TextInput::make('whatsapp'),
                 TextInput::make('instagram_url')
                     ->url(),
