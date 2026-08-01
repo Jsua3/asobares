@@ -35,6 +35,7 @@ class PanelAdminTest extends TestCase
             '/admin/eventos',
             '/admin/boletin',
             '/admin/requisitos',
+            '/admin/iniciativas',
             '/admin/vacantes',
             '/admin/aspirantes',
             '/admin/artistas',

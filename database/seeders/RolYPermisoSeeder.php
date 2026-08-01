@@ -18,7 +18,7 @@ class RolYPermisoSeeder extends Seeder
 {
     /** Contenido sujeto al flujo de aprobación: tiene permiso `publicar_`. */
     public const array PUBLICABLES = [
-        'asociado', 'evento', 'noticia', 'requisito',
+        'asociado', 'evento', 'noticia', 'requisito', 'iniciativa',
         'vacante', 'artista', 'proveedor', 'aliado',
     ];
 

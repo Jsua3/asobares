@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             CategoriaSeeder::class,
             BeneficioSeeder::class,
             AliadoSeeder::class,
+            IniciativaSeeder::class,
             SettingSeeder::class,
 
             // Contenido del gremio.

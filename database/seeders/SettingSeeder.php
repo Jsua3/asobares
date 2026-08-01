@@ -36,6 +36,23 @@ class SettingSeeder extends Seeder
             $this->texto('cta_final_titulo', '¿Tu establecimiento todavía no es parte del gremio?', 'inicio', 'Título del cierre'),
             $this->largo('cta_final_texto', 'Afiliarte toma una conversación. Representación ante las instituciones, descuentos en derechos de autor, formación y orientación jurídica sin costo.', 'inicio', 'Texto del cierre'),
 
+            // --- Manifiesto (discurso del TED gremial) ---
+            $this->texto('manifiesto_apertura', 'Nos conocen por la rumba. Pero hoy venimos a hablarles del territorio.', 'manifiesto', 'Frase de apertura'),
+            $this->texto('manifiesto_cierre_titulo', 'Asobares no representa bares. Representa el Quindío que se vive de noche.', 'manifiesto', 'Frase de cierre'),
+            $this->texto('manifiesto_cierre_firma', 'Construyendo un Quindío nocturno', 'manifiesto', 'Firma del cierre'),
+            $this->texto('vision_titulo', 'En 10 años, el Quindío no tendrá bares. Tendrá momentos memorables.', 'manifiesto', 'Visión a 10 años'),
+            $this->texto('vision_nota', 'No solo tragos: una experiencia.', 'manifiesto', 'Nota al margen de la visión'),
+            $this->largo('vision_detalle', "Cada municipio, un distrito de experiencia — con señalización, iluminación y seguridad como proyecto de ciudad.\nCada empresario, un anfitrión formal, de clase mundial.", 'manifiesto', 'Detalle de la visión'),
+
+            // Las dos barreras que el gremio nombra. Formato: Titular | Explicación.
+            $this->largo('barreras', implode("\n", [
+                'La informalidad nos compite en la calle | El consumo y la venta informal en el espacio público erosionan la competencia leal y deterioran la imagen del sector formal.',
+                '17 años operando bajo un POT vencido | El Plan de Ordenamiento Territorial de Armenia es del 2009–2023. Sin usos de suelo claros para el sector, no hay dónde formalizar ni crecer.',
+            ]), 'manifiesto', 'Barreras del sector (Titular | Explicación)'),
+
+            $this->texto('iniciativas_titulo', 'Las iniciativas más importantes', 'manifiesto', 'Título de iniciativas'),
+            $this->texto('iniciativas_intro', 'Lo que el gremio ya tiene en marcha para cumplir ese sueño.', 'manifiesto', 'Introducción de iniciativas'),
+
             // --- Cifras del Observatorio Económico (marzo 2026) ---
             $this->texto('cifra_empleo', '12,65 %', 'cifras', 'Participación en el empleo de Armenia'),
             $this->texto('cifra_empleo_detalle', 'del empleo de Armenia lo genera la economía nocturna', 'cifras', 'Detalle de la cifra de empleo'),

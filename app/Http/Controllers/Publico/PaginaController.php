@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Publico;
 
 use App\Models\Beneficio;
+use App\Models\Iniciativa;
 use Illuminate\Contracts\View\View;
 
 class PaginaController
@@ -11,6 +12,7 @@ class PaginaController
     {
         return view('publico.quienes-somos', [
             'beneficios' => Beneficio::orderBy('orden')->get(),
+            'iniciativas' => Iniciativa::publicado()->orderBy('orden')->get(),
         ]);
     }
 

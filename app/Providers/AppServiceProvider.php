@@ -6,6 +6,7 @@ use App\Models\Aliado;
 use App\Models\Artista;
 use App\Models\Asociado;
 use App\Models\Evento;
+use App\Models\Iniciativa;
 use App\Models\Noticia;
 use App\Models\Proveedor;
 use App\Models\RequisitoApertura;
@@ -28,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
     public const array MODELOS_PUBLICABLES = [
         Asociado::class,
         Evento::class,
+        Iniciativa::class,
         Noticia::class,
         RequisitoApertura::class,
         Vacante::class,

@@ -17,6 +17,9 @@
                 <span class="h-1.5 w-1.5 rounded-full bg-marca-500"></span>
                 {{ $totalAsociados }} establecimientos afiliados en el Quindío
             </p>
+            <p class="mb-5 max-w-2xl font-display text-base font-medium leading-snug text-noche-200 text-balance sm:text-lg">
+                {{ ajuste('manifiesto_apertura') }}
+            </p>
         </x-slot:encima>
 
         <div class="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -198,6 +201,57 @@
             </div>
         </section>
     @endif
+
+    {{-- Iniciativas en marcha --}}
+    @if ($iniciativas->isNotEmpty())
+        <section class="border-t border-white/[.09] bg-noche-900" aria-labelledby="iniciativas">
+            <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+                <div class="flex flex-wrap items-end justify-between gap-4">
+                    <div>
+                        <p class="antetitulo text-marca-400">{{ ajuste('vision_nota') }}</p>
+                        <h2 id="iniciativas" class="mt-3 font-display text-2xl font-bold sm:text-3xl">
+                            {{ ajuste('iniciativas_titulo') }}
+                        </h2>
+                        <p class="mt-2 max-w-2xl text-sm text-noche-300">{{ ajuste('iniciativas_intro') }}</p>
+                    </div>
+                    <a href="{{ route('quienes-somos') }}#iniciativas"
+                       class="text-sm font-medium text-marca-400 hover:text-marca-300">
+                        Ver el detalle →
+                    </a>
+                </div>
+
+                <ol class="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                    @foreach ($iniciativas as $indice => $iniciativa)
+                        <li class="flex flex-col rounded-2xl border border-white/[.09] bg-noche-950 p-5">
+                            <span class="font-display text-2xl font-bold text-marca-500/40">
+                                {{ str_pad((string) ($indice + 1), 2, '0', STR_PAD_LEFT) }}
+                            </span>
+                            <h3 class="mt-2 font-display text-base font-bold leading-snug">{{ $iniciativa->nombre }}</h3>
+
+                            <span @class([
+                                'mt-3 inline-block w-fit rounded-md px-2 py-1 text-[.6rem] font-semibold uppercase tracking-wider',
+                                'bg-emerald-500/15 text-emerald-300' => $iniciativa->estado_iniciativa === \App\Enums\EstadoIniciativa::EnEjecucion,
+                                'bg-amber-500/15 text-amber-300' => $iniciativa->estado_iniciativa === \App\Enums\EstadoIniciativa::Escalando,
+                                'border border-white/15 text-noche-400' => $iniciativa->estado_iniciativa === \App\Enums\EstadoIniciativa::Formulacion,
+                            ])>{{ $iniciativa->estado_iniciativa->getLabel() }}</span>
+
+                            <p class="mt-3 flex-1 text-xs leading-relaxed text-noche-300">{{ $iniciativa->resumen }}</p>
+                        </li>
+                    @endforeach
+                </ol>
+            </div>
+        </section>
+    @endif
+
+    {{-- Cierre del manifiesto --}}
+    <section class="trama-puntos border-t border-white/[.09]" aria-labelledby="manifiesto">
+        <div class="mx-auto max-w-4xl px-4 py-20 text-center sm:px-6">
+            <h2 id="manifiesto" class="font-display text-2xl font-bold leading-tight text-balance sm:text-4xl">
+                {{ ajuste('manifiesto_cierre_titulo') }}
+            </h2>
+            <p class="antetitulo mt-6 text-marca-400">{{ ajuste('manifiesto_cierre_firma') }}</p>
+        </div>
+    </section>
 
     {{-- CTA final --}}
     <section class="resplandor-marca border-t border-white/[.09]">

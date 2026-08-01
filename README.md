@@ -17,7 +17,7 @@ camino que recorrerían con Bold en producción.
 | Ruta | Qué es |
 |---|---|
 | `/` | Inicio con cifras del Observatorio, destacados, beneficios y aliados |
-| `/quienes-somos` | Historia, misión, dirección y programas |
+| `/quienes-somos` | Manifiesto del gremio, visión a 10 años, barreras del sector, líneas de trabajo y las 5 iniciativas en marcha |
 | `/directorio` · `/directorio/{slug}` | Establecimientos con filtros compartibles por URL, vista de mapa y ficha con JSON-LD |
 | `/abre-tu-negocio` | **La guía normativa por municipio**: checklist, costos y formatos descargables |
 | `/empleo` | Muro de vacantes + formulario de aspirante |
@@ -29,7 +29,7 @@ camino que recorrerían con Bold en producción.
 | `/mi-cuenta` | Estado de cartera del afiliado y detalle privado de convenios |
 | `/politica-de-datos` | Política conforme a la Ley 1581 de 2012 |
 
-**Panel `/admin`** — 17 recursos en español agrupados en Contenido, Bolsas, Bandejas,
+**Panel `/admin`** — 18 recursos en español agrupados en Contenido, Bolsas, Bandejas,
 Gremio y Configuración; flujo de aprobación con notificaciones; importador CSV de cartera;
 bitácora legible; MFA; y dashboard con 6 indicadores.
 
@@ -197,7 +197,7 @@ parte del código: el resto del sistema solo conoce la interfaz `PasarelaDePago`
 php artisan test
 ```
 
-**106 pruebas, 169 aserciones.** Cubren:
+**107 pruebas, 170 aserciones.** Cubren:
 
 - El flujo de aprobación, incluido que un subadmin no publique ni manipulando el formulario.
 - Todas las rutas públicas y del panel, con sus permisos por rol.
@@ -253,6 +253,28 @@ piezas del gremio, y `.antetitulo` el versalitas espaciado que usan en sus antet
 
 ---
 
+## De dónde sale el contenido institucional
+
+Ni un texto del sitio se inventó. Todo viene de `material/`:
+
+| Fuente | Qué aporta |
+|---|---|
+| Manual de Marca de Asobares Colombia | Paleta, tipografía y normas de uso del logo |
+| Kit de logo del capítulo | El logo oficial con «Capítulo Quindío» |
+| **TED gremial** | El manifiesto («Nos conocen por la rumba…»), la visión a 10 años, las dos barreras del sector y las **5 iniciativas con su estado** |
+| Plan Estratégico | Las tres líneas de trabajo y sus programas |
+| Cronograma del sitio web | Objetivos, fases y requisitos de rendimiento y seguridad |
+
+Las **iniciativas** son una entidad propia (`iniciativas`), no texto quemado, porque cambian
+de estado con el tiempo: **En formulación → Escalando → En ejecución**. La dirección las
+reordena y les cambia el estado desde **Contenido → Iniciativas del gremio**, y pasan por el
+mismo flujo de aprobación que el resto.
+
+El manifiesto, la visión y las barreras viven en el grupo **Manifiesto del gremio** de la
+página de Ajustes.
+
+---
+
 ## Decisiones que conviene saber
 
 **Laravel 13, no 12.** El instalador oficial ya no entrega Laravel 12. El conflicto real no
@@ -304,17 +326,17 @@ siembra. Es lo correcto para el demo, pero en la suite multiplicaba el tiempo po
 
 ```
 app/
-├── Enums/            12 enums del dominio (estados, tipos, métodos de pago)
-├── Filament/         17 recursos, 2 páginas y 4 widgets del panel
+├── Enums/            13 enums del dominio (estados, tipos, métodos de pago)
+├── Filament/         18 recursos, 2 páginas y 4 widgets del panel
 ├── Http/             Controladores públicos, form requests, middleware
-├── Models/           18 modelos + trait EsPublicable
+├── Models/           19 modelos + trait EsPublicable
 ├── Observers/        FlujoDeAprobacionObserver (RF-37)
 ├── Pagos/            PasarelaDePago, PasarelaSimulada, PasarelaBold
 ├── Policies/         Permisos por recurso, con `publicar` aparte de `editar`
 ├── Services/         ImportadorDeCartera, RegistroDePagos
 └── Support/          Helpers de vista, Formulario, VideoDeYoutube
 database/
-├── migrations/       18 tablas, portables a PostgreSQL
+├── migrations/       19 tablas, portables a PostgreSQL
 └── seeders/          Contenido del gremio + generadores locales de PNG y PDF
 resources/views/
 ├── components/       Layout, navbar, footer, mapa, campos de formulario
