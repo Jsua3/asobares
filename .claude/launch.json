@@ -1,0 +1,12 @@
+{
+    "version": "0.0.1",
+    "configurations": [
+        {
+            "name": "asobares",
+            "runtimeExecutable": "C:\\Users\\Predator\\.config\\php85\\php.exe",
+            "runtimeArgs": ["asobares-web/artisan", "serve", "--port=8123"],
+            "port": 8123,
+            "autoPort": false
+        }
+    ]
+}
