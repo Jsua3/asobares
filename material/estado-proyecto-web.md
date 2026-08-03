@@ -1,8 +1,17 @@
 # Estado del proyecto — Plataforma Web Asobares Quindío
-_Actualizado: 1 de agosto de 2026 · Mantener este doc al día; la investigación de fondo está en `investigacion-asobares-quindio.md`_
+_Actualizado: 3 de agosto de 2026 · Mantener este doc al día; la investigación de fondo está en `investigacion-asobares-quindio.md`_
 
 ## Qué es el proyecto
 Desarrollo de la **Plataforma Web Oficial de Asobares Capítulo Quindío** en el marco de una **práctica universitaria con la Universidad Alexander von Humboldt** (Armenia). El documento rector es el "Cronograma Prácticas Asobares" firmado por Natalia Gutiérrez (directora ejecutiva) — está subido a este proyecto como PDF (`CRONOGRAMA SITIO WEB 2026.pdf` + `IMAGENES CRONOGRAMA WEB SITE.pdf`). Hay un **tutor de práctica** que revisa avances y reporta bugs. **Fecha límite dura de entrega: 22 de septiembre de 2026.**
+
+## Estado actual (3 ago): prototipo terminado y tutorial visual listo
+
+- **El prototipo funcional está completo** en `asobares-web/` (repo git propio dentro del workspace; 15 commits, árbol limpio). Es el producto del `prompt-maestro-laravel-filament.md` (ahora v3): fases 0–5 ejecutadas más correcciones posteriores (identidad del manual de marca oficial, contenido real del TED gremial y el Plan Estratégico en las semillas, login MFA por correo, imágenes rotas, 403 de `/mi-cuenta`, barrido de botones sin salida en el panel).
+- **Stack real: Laravel 13.23 + Filament 4.12 + Livewire 3.8 sobre PHP 8.5.9 + SQLite, sin starter kit.** El prompt pedía Laravel 12, pero el instalador oficial ya solo entrega 13; el starter kit de Livewire trae Livewire 4, incompatible con Filament 4 (exige `livewire/livewire ^3.5`), así que el auth de `/mi-cuenta` se escribió a mano. Filament 5 (31 jul) se descartó por demasiado nuevo para la entrega del 22 sept.
+- **Qué incluye**: 14 páginas públicas (inicio, quiénes somos, directorio con mapa, guía normativa por municipio con formatos descargables, empleo, artistas, proveedores, eventos con inscripción y pago, boletín, afíliate, contacto con radicado PQR, política de datos, mi-cuenta), panel `/admin` con 18 recursos en español, flujo de aprobación RF-37 forzado en el modelo, cartera con importador CSV, MFA, bitácora, y pagos con pasarela simulada que recorre el mismo camino que Bold/PSE. Cómo correrlo y credenciales demo: README de `asobares-web`.
+- **Verificación del 3 ago**: `php artisan test --compact` → **191 pruebas: 184 pasan, 7 omitidas, 0 fallos**.
+- **El tutorial visual está terminado** (2 ago): `Tutorial Plataforma ASOBARES Quindio.html` — 32 láminas con notas de orador por lámina, conmutador claro/oscuro persistente (oscuro por defecto), Poppins y paleta oficial del manual de marca, `prefers-reduced-motion`. Es el producto del `prompt-maestro-tutorial-design.md` y **reemplaza** al borrador `tutorial-plataforma-asobares.html`.
+- Con esto, **los dos prompts maestros están ejecutados**. Lo pendiente inmediato son los objetivos documentales/administrativos de la S2 (abajo) y las decisiones aún abiertas (stack formal con la junta, dominio, hosting, insumos reales).
 
 ## Enfoque estratégico (actualizado tras Reunión 2)
 - Reunión 1 (Natalia): dos propósitos — (1) **visibilizar los establecimientos** y (2) **guiar a quien quiera abrir uno**.
@@ -39,7 +48,7 @@ Entregables finales: manual de usuario (PDF o video), documentación técnica (c
 - **F3 (S5–S6)** → S5: pasarela en sandbox; S6: panel CMS.
 - **F4 (S7–S8)** → S7: pruebas globales y corrección de bugs del tutor; S8: dominio + SSL, capacitación, entrega de documentación.
 - Nota de riesgo: con fecha límite dura conviene **invertir S5↔S6** (panel CMS antes que pasarela; la pasarela se demuestra en sandbox).
-- **Posición actual (1 ago)**: S1 = 27–31 jul (levantamiento hecho + Reuniones 1 y 2). **S2 = 3–7 ago** → objetivos en `Avances y Objetivos - Semana 3 al 7 de agosto`: (1) aprobar requisitos —ahora **v2** con lo de Reunión 2—, (2) definir stack + presupuesto con la junta, (3) wireframes móvil/escritorio, (4) repo GitHub con ramas, (5) insumos críticos, (6) académico: retroalimentación + cap. 5. **Nuevo: trabajo presencial los miércoles** en el establecimiento del directivo (horario por confirmar; se mencionó «¿de dos a ocho?»). Próximas citas: **miércoles 5 ago (presencial, confirmar hora)** y **viernes 7 ago, 9:00 a. m.** con Natalia.
+- **Posición actual (3 ago)**: S1 = 27–31 jul (levantamiento hecho + Reuniones 1 y 2). **S2 = 3–7 ago, arranca hoy lunes** → objetivos en `Avances y Objetivos - Semana 3 al 7 de agosto`: (1) aprobar requisitos —ahora **v2** con lo de Reunión 2—, (2) definir stack + presupuesto con la junta, (3) wireframes móvil/escritorio, (4) repo GitHub con ramas, (5) insumos críticos, (6) académico: retroalimentación + cap. 5. **Nuevo: trabajo presencial los miércoles** en el establecimiento del directivo (horario por confirmar; se mencionó «¿de dos a ocho?»). Próximas citas: **miércoles 5 ago (presencial, confirmar hora)** y **viernes 7 ago, 9:00 a. m.** con Natalia.
 
 ## Acuerdos y datos clave de la Reunión 1 (28 jul; `transcripcion-reunion-1.md`)
 ⚠️ Transcripción automática (Whisper small): confunde nombres y cifras — contrastar antes de usar como fuente oficial.
@@ -73,7 +82,7 @@ Entregables finales: manual de usuario (PDF o video), documentación técnica (c
 - **Documento de levantamiento de requisitos v1 producido**: 40 RF + 12 RNF priorizados, 14 preguntas abiertas, bloque de doble firma. → Varias preguntas quedaron respondidas en Reunión 2 (ver acta §3); pasar a **v2**.
 
 ## Decisiones pendientes
-- **Stack** (objetivo n.º 2 de la S2, con el docente y la junta): finalistas **WordPress** vs **Laravel + Filament**. Reuniones 1 y 2 inclinan a código propio (el equipo explicó al directivo las limitaciones de plantillas), sujeto a presupuesto. Astro+Strapi descartado salvo experiencia Node.
+- **Stack** (objetivo n.º 2 de la S2, con el docente y la junta): finalistas **WordPress** vs **Laravel + Filament**. Reuniones 1 y 2 inclinan a código propio (el equipo explicó al directivo las limitaciones de plantillas), sujeto a presupuesto. Astro+Strapi descartado salvo experiencia Node. **De facto el prototipo ya está construido en Laravel 13 + Filament 4 y verificado** (ver «Estado actual»); falta formalizar la decisión y el presupuesto con la junta.
 - **Dominio** (asobaresquindio.com / .com.co ¿o subdominio de asobares.org?) y **quién lo paga / titularidad** (debe quedar a nombre del gremio con correo institucional). Nada registrado aún.
 - **Hosting de producción** (presupuesto: ~COP 300–700 mil/año según stack; pago mensual aceptable). **Monto y aprobación de junta sin resolver** (no se tocó en Reunión 2).
 - **Fecha oficial de lanzamiento** (24 sept vs 26 nov / evento del gremio) — sin resolver.
@@ -87,7 +96,10 @@ Entregables finales: manual de usuario (PDF o video), documentación técnica (c
 - **Proyecto de práctica (GU-DO-007 v7)**: borrador con portada, tabla de contenido, caps 1–4 y bibliografía APA (11 fuentes), ajustado con la Reunión 1; entrega del 31 jul (caps 1–3 + opcional 4) cubierta. Caps 5 y 6 se redactan durante la práctica según los 6 objetivos específicos. PDF final a **proyectosing@cue.edu.co**.
 
 ## Archivos producidos
-- `prompt-maestro-laravel-filament.md` — **v2 (1 ago)**: prompt para Claude Code con el alcance ampliado de la Reunión 2 (bolsa de empleo, artistas, proveedores, cartera con importador CSV, `/mi-cuenta`, PSE en el pago simulado).
+- `asobares-web/` — **el prototipo funcional completo** (repo git propio; ver «Estado actual» y su README para correrlo y las credenciales demo).
+- `prompt-maestro-laravel-filament.md` — **v3 (3 ago), YA EJECUTADO**: prompt para Claude Code con el alcance ampliado de la Reunión 2 (bolsa de empleo, artistas, proveedores, cartera con importador CSV, `/mi-cuenta`, PSE en el pago simulado). La v3 corrige el stack al real (Laravel 13, sin starter kit) y documenta el resultado.
+- `prompt-maestro-tutorial-design.md` — **(2 ago), YA EJECUTADO**: prompt autocontenido para producir la pieza visual del tutorial de la plataforma.
+- `Tutorial Plataforma ASOBARES Quindio.html` — **tutorial visual final (2 ago)**: 32 láminas con notas de orador, tema claro/oscuro, paleta y Poppins oficiales. Reemplaza al borrador `tutorial-plataforma-asobares.html` (eliminado).
 - `investigacion-asobares-quindio.md` — investigación de fondo, **actualizada 1 ago** con la filosofía del directivo, la operativa de la guía normativa y el contexto bancario (Itaú/PSE).
 - `acta-reunion-2.md` — **síntesis oficial de la Reunión 2**: giro estratégico, alcance nuevo, respuestas, compromisos, pendientes y recomendación MoSCoW (1 ago).
 - `transcripcion-reunion-2.md` — transcripción de los 3 audios de la compañera en orden cronológico verificado + fragmentos rescatados de la grabación propia (1 ago).
