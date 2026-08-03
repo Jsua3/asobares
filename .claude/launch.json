@@ -3,9 +3,10 @@
     "configurations": [
         {
             "name": "asobares",
-            "runtimeExecutable": "php",
-            "runtimeArgs": ["artisan", "serve", "--port=8000"],
-            "port": 8000
+            "runtimeExecutable": "C:\\Users\\Predator\\.config\\php85\\php.exe",
+            "runtimeArgs": ["artisan", "serve", "--port=8123"],
+            "port": 8123,
+            "autoPort": false
         }
     ]
 }
