@@ -9,6 +9,8 @@ use App\Filament\Pages\AjustesDelSitio;
 use App\Filament\Resources\Asociados\Pages\CreateAsociado;
 use App\Filament\Resources\Asociados\Pages\ListAsociados;
 use App\Filament\Resources\Mensajes\Pages\ListMensajes;
+use App\Filament\Resources\Users\Pages\CreateUser;
+use App\Filament\Resources\Users\Pages\EditUser;
 use App\Models\Asociado;
 use App\Models\Categoria;
 use App\Models\Mensaje;
@@ -21,7 +23,9 @@ use Database\Seeders\RolYPermisoSeeder;
 use Database\Seeders\SettingSeeder;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
@@ -209,5 +213,48 @@ class AccionesDelPanelTest extends TestCase
         $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
 
         $this->assertFalse(AjustesDelSitio::canAccess());
+    }
+
+    // --- Formulario de usuarios (rol y contraseña) ---
+
+    public function test_crear_un_usuario_con_rol_desde_el_formulario_del_panel(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(CreateUser::class)
+            ->fillForm([
+                'name' => 'Persona de la Oficina',
+                'email' => 'nueva@asobaresquindio.test',
+                'password' => 'ClaveTemporal2026*',
+                'roles' => [Role::findByName(User::ROL_SUBADMIN)->id],
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $usuario = User::where('email', 'nueva@asobaresquindio.test')->firstOrFail();
+
+        $this->assertTrue($usuario->hasRole(User::ROL_SUBADMIN));
+        $this->assertTrue(Hash::check('ClaveTemporal2026*', $usuario->password));
+    }
+
+    public function test_editar_un_usuario_sin_tocar_la_contrasena_no_la_cambia(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
+
+        $usuario = User::factory()->create(['password' => 'ClaveOriginal2026*']);
+        $usuario->syncRoles([User::ROL_SUBADMIN]);
+
+        Livewire::test(EditUser::class, ['record' => $usuario->getRouteKey()])
+            ->fillForm([
+                'name' => 'Nombre Corregido',
+                'password' => '',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $usuario->refresh();
+
+        $this->assertSame('Nombre Corregido', $usuario->name);
+        $this->assertTrue(Hash::check('ClaveOriginal2026*', $usuario->password));
     }
 }

@@ -7,6 +7,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class AspiranteForm
@@ -15,21 +16,52 @@ class AspiranteForm
     {
         return $schema
             ->components([
-                Select::make('vacante_id')
-                    ->relationship('vacante', 'id'),
-                TextInput::make('nombre')
-                    ->required(),
-                TextInput::make('correo')
-                    ->required(),
-                TextInput::make('telefono')
-                    ->tel(),
-                TextInput::make('cargo_interes')
-                    ->required(),
-                Textarea::make('experiencia')
-                    ->columnSpanFull(),
-                Toggle::make('acepta_datos')
-                    ->required(),
-                DateTimePicker::make('consentimiento_at'),
+                Section::make('El aspirante')
+                    ->description('Perfil registrado desde la bolsa de empleo del sitio.')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('nombre')
+                            ->label('Nombre')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('cargo_interes')
+                            ->label('Cargo de interés')
+                            ->required()
+                            ->maxLength(255)
+                            ->placeholder('Bartender'),
+                        TextInput::make('correo')
+                            ->label('Correo')
+                            ->email()
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('telefono')
+                            ->label('Teléfono')
+                            ->tel()
+                            ->maxLength(30),
+                        Select::make('vacante_id')
+                            ->label('Vacante a la que aplicó')
+                            ->relationship('vacante', 'cargo')
+                            ->searchable()
+                            ->preload()
+                            ->helperText('Vacío si dejó su perfil sin aplicar a una vacante puntual.'),
+                        Textarea::make('experiencia')
+                            ->label('Experiencia')
+                            ->rows(4)
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Habeas Data')
+                    ->description('Consentimiento registrado al enviar el formulario. No lo edites: es la constancia legal.')
+                    ->columns(2)
+                    ->collapsed()
+                    ->schema([
+                        Toggle::make('acepta_datos')
+                            ->label('Aceptó el tratamiento de datos')
+                            ->disabled(),
+                        DateTimePicker::make('consentimiento_at')
+                            ->label('Fecha del consentimiento')
+                            ->disabled(),
+                    ]),
             ]);
     }
 }

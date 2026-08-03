@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\Inscripcions\Tables;
 
+use App\Enums\EstadoInscripcion;
+use App\Models\Inscripcion;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class InscripcionsTable
@@ -15,45 +17,55 @@ class InscripcionsTable
     {
         return $table
             ->columns([
-                TextColumn::make('evento.id')
-                    ->searchable(),
                 TextColumn::make('nombre')
-                    ->searchable(),
-                TextColumn::make('correo')
-                    ->searchable(),
-                TextColumn::make('telefono')
-                    ->searchable(),
+                    ->label('Inscrito')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->description(fn (Inscripcion $record): string => $record->correo),
+                TextColumn::make('evento.titulo')
+                    ->label('Evento')
+                    ->searchable()
+                    ->sortable()
+                    ->wrap(),
                 TextColumn::make('establecimiento')
-                    ->searchable(),
-                IconColumn::make('acepta_datos')
-                    ->boolean(),
-                TextColumn::make('consentimiento_at')
-                    ->dateTime()
-                    ->sortable(),
+                    ->label('Establecimiento')
+                    ->placeholder('—')
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('estado')
+                    ->label('Estado')
                     ->badge()
-                    ->searchable(),
-                TextColumn::make('transaccion.id')
-                    ->searchable(),
+                    ->sortable(),
+                TextColumn::make('transaccion.referencia')
+                    ->label('Pago')
+                    ->placeholder('Sin cobro')
+                    ->fontFamily('mono')
+                    ->copyable(),
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Inscrito el')
+                    ->since()
+                    ->sortable(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                SelectFilter::make('estado')
+                    ->label('Estado')
+                    ->options(EstadoInscripcion::class),
+                SelectFilter::make('evento')
+                    ->label('Evento')
+                    ->relationship('evento', 'titulo')
+                    ->preload(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->label('Ver'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->label('Eliminar'),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('Sin inscripciones todavía')
+            ->emptyStateDescription('Las inscripciones a eventos hechas desde el sitio aparecerán aquí.');
     }
 }

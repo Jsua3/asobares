@@ -8,7 +8,9 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 
 class ProveedorForm
 {
@@ -16,25 +18,67 @@ class ProveedorForm
     {
         return $schema
             ->components([
-                TextInput::make('nombre')
-                    ->required(),
-                TextInput::make('slug')
-                    ->required(),
-                Select::make('categoria_proveedor')
-                    ->options(CategoriaProveedor::class)
-                    ->default('otros')
-                    ->required(),
-                Textarea::make('descripcion')
-                    ->columnSpanFull(),
-                TextInput::make('whatsapp'),
-                TextInput::make('correo'),
-                Select::make('municipio_id')
-                    ->relationship('municipio', 'id'),
-                DatePicker::make('visible_hasta'),
-                Select::make('estado')
-                    ->options(EstadoPublicacion::class)
-                    ->default('borrador')
-                    ->required(),
+                Section::make('El proveedor')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('nombre')
+                            ->label('Nombre')
+                            ->required()
+                            ->maxLength(255)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(fn (?string $state, callable $set) => $set('slug', Str::slug((string) $state))),
+                        TextInput::make('slug')
+                            ->label('Slug (URL)')
+                            ->required()
+                            ->maxLength(255)
+                            ->unique(ignoreRecord: true),
+                        Select::make('categoria_proveedor')
+                            ->label('Categoría')
+                            ->options(CategoriaProveedor::class)
+                            ->default(CategoriaProveedor::Otros)
+                            ->required()
+                            ->native(false),
+                        Select::make('municipio_id')
+                            ->label('Municipio')
+                            ->relationship('municipio', 'nombre')
+                            ->searchable()
+                            ->preload(),
+                        Textarea::make('descripcion')
+                            ->label('Descripción')
+                            ->rows(4)
+                            ->maxLength(2000)
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Contacto')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('whatsapp')
+                            ->label('WhatsApp')
+                            ->tel()
+                            ->maxLength(30),
+                        TextInput::make('correo')
+                            ->label('Correo')
+                            ->email()
+                            ->maxLength(255),
+                    ]),
+
+                Section::make('Visibilidad')
+                    ->columns(2)
+                    ->schema([
+                        DatePicker::make('visible_hasta')
+                            ->label('Visible hasta')
+                            ->native(false)
+                            ->helperText('Fecha en que la ficha deja de mostrarse. Es la palanca del cobro por aparecer en la bolsa.'),
+                        Select::make('estado')
+                            ->label('Estado')
+                            ->options(EstadoPublicacion::class)
+                            ->default(EstadoPublicacion::Borrador)
+                            ->required()
+                            ->helperText(fn (): string => auth()->user()?->can('publicar_proveedor')
+                                ? 'Puedes publicar directamente.'
+                                : 'Al guardar, quedará pendiente de aprobación de la dirección.'),
+                    ]),
             ]);
     }
 }

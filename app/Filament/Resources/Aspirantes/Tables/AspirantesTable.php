@@ -2,12 +2,15 @@
 
 namespace App\Filament\Resources\Aspirantes\Tables;
 
+use App\Models\Aspirante;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class AspirantesTable
 {
@@ -15,40 +18,49 @@ class AspirantesTable
     {
         return $table
             ->columns([
-                TextColumn::make('vacante.id')
-                    ->searchable(),
                 TextColumn::make('nombre')
-                    ->searchable(),
-                TextColumn::make('correo')
-                    ->searchable(),
-                TextColumn::make('telefono')
-                    ->searchable(),
+                    ->label('Aspirante')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->description(fn (Aspirante $record): string => $record->correo),
                 TextColumn::make('cargo_interes')
-                    ->searchable(),
-                IconColumn::make('acepta_datos')
-                    ->boolean(),
-                TextColumn::make('consentimiento_at')
-                    ->dateTime()
+                    ->label('Cargo de interés')
+                    ->badge()
+                    ->color('gray')
+                    ->searchable()
                     ->sortable(),
+                TextColumn::make('telefono')
+                    ->label('Teléfono')
+                    ->searchable(),
+                TextColumn::make('vacante.cargo')
+                    ->label('Aplicó a')
+                    ->placeholder('Perfil general')
+                    ->sortable(),
+                IconColumn::make('acepta_datos')
+                    ->label('Datos')
+                    ->boolean()
+                    ->tooltip('Consentimiento de tratamiento de datos'),
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->label('Registrado')
+                    ->since()
+                    ->sortable(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                Filter::make('ultima_semana')
+                    ->label('Últimos 7 días')
+                    ->query(fn (Builder $query): Builder => $query->where('created_at', '>=', now()->subWeek())),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->label('Ver perfil'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->label('Eliminar'),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('Sin aspirantes todavía')
+            ->emptyStateDescription('Los perfiles que se registren en la bolsa de empleo aparecerán aquí.');
     }
 }

@@ -8,39 +8,58 @@ use App\Enums\MetodoPago;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
+/**
+ * Las transacciones las produce la pasarela: este formulario existe solo
+ * para inspección, por eso todos los campos van deshabilitados.
+ */
 class TransaccionForm
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema
             ->components([
-                TextInput::make('referencia')
-                    ->required(),
-                Select::make('concepto')
-                    ->options(ConceptoTransaccion::class)
-                    ->required(),
-                Select::make('inscripcion_id')
-                    ->relationship('inscripcion', 'id'),
-                Select::make('asociado_id')
-                    ->relationship('asociado', 'id'),
-                TextInput::make('monto')
-                    ->required()
-                    ->numeric(),
-                TextInput::make('moneda')
-                    ->required()
-                    ->default('COP'),
-                Select::make('estado')
-                    ->options(EstadoTransaccion::class)
-                    ->default('pendiente')
-                    ->required(),
-                Select::make('metodo')
-                    ->options(MetodoPago::class)
-                    ->default('pse')
-                    ->required(),
-                Textarea::make('payload')
-                    ->columnSpanFull(),
+                Section::make('La transacción')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('referencia')
+                            ->label('Referencia')
+                            ->disabled(),
+                        Select::make('concepto')
+                            ->label('Concepto')
+                            ->options(ConceptoTransaccion::class)
+                            ->disabled(),
+                        Select::make('asociado_id')
+                            ->label('Establecimiento')
+                            ->relationship('asociado', 'nombre')
+                            ->disabled(),
+                        Select::make('inscripcion_id')
+                            ->label('Inscripción')
+                            ->relationship('inscripcion', 'nombre')
+                            ->disabled(),
+                        TextInput::make('monto')
+                            ->label('Monto')
+                            ->prefix('$')
+                            ->disabled(),
+                        TextInput::make('moneda')
+                            ->label('Moneda')
+                            ->disabled(),
+                        Select::make('estado')
+                            ->label('Estado')
+                            ->options(EstadoTransaccion::class)
+                            ->disabled(),
+                        Select::make('metodo')
+                            ->label('Método')
+                            ->options(MetodoPago::class)
+                            ->disabled(),
+                        Textarea::make('payload')
+                            ->label('Detalle técnico de la pasarela')
+                            ->rows(4)
+                            ->disabled()
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 }
