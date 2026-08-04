@@ -74,5 +74,17 @@
 
             <div class="mt-10">{{ $artistas->links() }}</div>
         @endif
+
+        <section class="tarjeta mt-16 p-8 text-center">
+            <h2 class="font-display text-xl font-bold">¿Eres DJ, banda o solista?</h2>
+            <p class="mx-auto mt-2 max-w-xl text-sm text-tenue">
+                Inscríbete gratis en la bolsa de artistas del gremio y aparece cuando un establecimiento
+                busque música para su noche.
+            </p>
+            <a href="{{ route('artistas.inscripcion') }}"
+               class="mt-6 inline-block rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white hover:bg-marca-600">
+                Inscribirme en la bolsa
+            </a>
+        </section>
     </div>
 </x-layouts.publico>

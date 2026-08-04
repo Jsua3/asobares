@@ -74,8 +74,18 @@ Route::post('/empleo/{vacante}/postular', [EmpleoController::class, 'postular'])
 
 // Artistas y proveedores.
 Route::get('/artistas', [ArtistaController::class, 'index'])->name('artistas.index');
+// Antes que la ruta con slug: si no, «inscripcion» se leería como un artista.
+Route::get('/artistas/inscripcion', [ArtistaController::class, 'inscripcion'])->name('artistas.inscripcion');
+Route::post('/artistas/inscripcion', [ArtistaController::class, 'guardarInscripcion'])
+    ->middleware('throttle:6,1')
+    ->name('artistas.inscripcion.store');
 Route::get('/artistas/{artista:slug}', [ArtistaController::class, 'show'])->name('artistas.show');
+
 Route::get('/proveedores', [ProveedorController::class, 'index'])->name('proveedores.index');
+Route::get('/proveedores/inscripcion', [ProveedorController::class, 'inscripcion'])->name('proveedores.inscripcion');
+Route::post('/proveedores/inscripcion', [ProveedorController::class, 'guardarInscripcion'])
+    ->middleware('throttle:6,1')
+    ->name('proveedores.inscripcion.store');
 
 // Eventos del gremio.
 Route::get('/eventos', [EventoController::class, 'index'])->name('eventos.index');
