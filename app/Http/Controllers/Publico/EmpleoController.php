@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Publico;
 
+use App\Enums\CargoDelSector;
 use App\Http\Requests\GuardarAspiranteRequest;
 use App\Models\Aspirante;
 use App\Models\Municipio;
@@ -9,6 +10,7 @@ use App\Models\Vacante;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 /**
  * Bolsa de empleo del sector: un muro donde solo publican los asociados,
@@ -19,14 +21,16 @@ class EmpleoController
     public function index(Request $request): View
     {
         $datos = $request->validate([
-            'cargo' => ['nullable', 'string', 'max:80'],
+            'categoria' => ['nullable', Rule::enum(CargoDelSector::class)],
             'municipio' => ['nullable', 'string', 'exists:municipios,slug'],
         ]);
 
-        $consulta = Vacante::publicado()->with(['asociado.municipio', 'asociado.categoria']);
+        $consulta = Vacante::publicado()
+            ->vigente()
+            ->with(['asociado.municipio', 'asociado.categoria']);
 
-        if (filled($datos['cargo'] ?? null)) {
-            $consulta->where('cargo', 'like', '%'.$datos['cargo'].'%');
+        if (filled($datos['categoria'] ?? null)) {
+            $consulta->where('categoria_cargo', $datos['categoria']);
         }
 
         if (filled($datos['municipio'] ?? null)) {
@@ -36,8 +40,29 @@ class EmpleoController
         return view('publico.empleo.index', [
             'vacantes' => $consulta->latest()->paginate(10)->withQueryString(),
             'municipios' => Municipio::orderBy('nombre')->get(),
-            'cargos' => Vacante::publicado()->distinct()->orderBy('cargo')->pluck('cargo'),
+            'categorias' => CargoDelSector::cases(),
             'filtros' => $datos,
+        ]);
+    }
+
+    public function show(Vacante $vacante): View
+    {
+        // Una vacante cerrada, vencida o sin aprobar no existe para el
+        // público: 404, no una página que diga «ya no está disponible».
+        abort_unless($vacante->aceptaPostulaciones(), 404);
+
+        $vacante->load(['asociado.municipio', 'asociado.categoria']);
+
+        return view('publico.empleo.show', [
+            'vacante' => $vacante,
+            'similares' => Vacante::publicado()
+                ->vigente()
+                ->where('categoria_cargo', $vacante->categoria_cargo)
+                ->whereKeyNot($vacante->id)
+                ->with('asociado.municipio')
+                ->latest()
+                ->take(3)
+                ->get(),
         ]);
     }
 

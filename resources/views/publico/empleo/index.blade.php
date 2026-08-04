@@ -28,8 +28,9 @@
             </div>
 
             <form method="GET" action="{{ route('empleo.index') }}" class="tarjeta mt-6 grid gap-4 p-5 sm:grid-cols-3">
-                <x-publico.campo nombre="cargo" etiqueta="Cargo" placeholder="Ej.: bartender"
-                                 :valor="$filtros['cargo'] ?? null" />
+                <x-publico.campo nombre="categoria" etiqueta="Área" tipo="select"
+                                 :valor="$filtros['categoria'] ?? null"
+                                 :opciones="['' => 'Todas las áreas'] + collect($categorias)->mapWithKeys(fn ($c) => [$c->value => $c->getLabel()])->all()" />
                 <x-publico.campo nombre="municipio" etiqueta="Municipio" tipo="select"
                                  :valor="$filtros['municipio'] ?? null"
                                  :opciones="['' => 'Todos los municipios'] + $municipios->pluck('nombre', 'slug')->all()" />
@@ -67,7 +68,11 @@
                                         </span>
                                     </div>
 
-                                    <h3 class="mt-3 font-display text-lg font-semibold">{{ $vacante->cargo }}</h3>
+                                    <h3 class="mt-3 font-display text-lg font-semibold">
+                                        <a href="{{ route('empleo.show', $vacante) }}" class="hover:text-acento">
+                                            {{ $vacante->cargo }}
+                                        </a>
+                                    </h3>
 
                                     <p class="mt-1 text-sm text-tenue">
                                         en
@@ -82,14 +87,18 @@
                                     @if ($vacante->franja_horaria)
                                         <p class="mt-3 text-xs text-apagado">🕒 {{ $vacante->franja_horaria }}</p>
                                     @endif
+
+                                    @if ($vacante->fecha_limite)
+                                        <p class="mt-1 text-xs text-apagado">
+                                            📅 Se cierra el {{ $vacante->fecha_limite->translatedFormat('d \d\e F') }}
+                                        </p>
+                                    @endif
                                 </div>
 
-                                @if ($enlace = enlaceWhatsapp($vacante->whatsapp_contacto, "Hola, vi la vacante de {$vacante->cargo} en la bolsa de empleo de ASOBARES Quindío."))
-                                    <a href="{{ $enlace }}" target="_blank" rel="noopener nofollow"
-                                       class="shrink-0 rounded-xl bg-marca-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-marca-600">
-                                        Postularme
-                                    </a>
-                                @endif
+                                <a href="{{ route('empleo.show', $vacante) }}"
+                                   class="shrink-0 rounded-xl bg-marca-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-marca-600">
+                                    Ver y postularme
+                                </a>
                             </div>
                         </li>
                     @endforeach

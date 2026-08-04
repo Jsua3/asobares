@@ -67,6 +67,10 @@ Route::get('/empleo', [EmpleoController::class, 'index'])->name('empleo.index');
 Route::post('/empleo/perfil', [EmpleoController::class, 'registrarAspirante'])
     ->middleware('throttle:6,1')
     ->name('empleo.aspirante');
+Route::get('/empleo/{vacante}', [EmpleoController::class, 'show'])->name('empleo.show');
+Route::post('/empleo/{vacante}/postular', [EmpleoController::class, 'postular'])
+    ->middleware('throttle:6,1')
+    ->name('empleo.postular');
 
 // Artistas y proveedores.
 Route::get('/artistas', [ArtistaController::class, 'index'])->name('artistas.index');
