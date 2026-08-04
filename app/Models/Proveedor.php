@@ -30,6 +30,8 @@ class Proveedor extends Model
             'estado' => EstadoPublicacion::class,
             'categoria_proveedor' => CategoriaProveedor::class,
             'visible_hasta' => 'date',
+            'acepta_datos' => 'boolean',
+            'consentimiento_at' => 'datetime',
         ];
     }
 
@@ -42,6 +44,17 @@ class Proveedor extends Model
     public function municipio(): BelongsTo
     {
         return $this->belongsTo(Municipio::class);
+    }
+
+    /**
+     * Dueño de la ficha. Hoy siempre nulo: las fichas las carga el gremio.
+     * Existe para el día en que artistas y proveedores tengan cuenta propia.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function duenio(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
