@@ -4,12 +4,12 @@
     <x-publico.hero titulo="Política de tratamiento de datos personales" compacto
                     :subtitulo="'Última actualización: '.ajuste('politica_actualizacion')" />
 
-    <article class="mx-auto max-w-3xl space-y-9 px-4 py-12 text-sm leading-relaxed text-noche-200 sm:px-6">
+    <article class="mx-auto max-w-3xl space-y-9 px-4 py-12 text-sm leading-relaxed text-suave sm:px-6">
 
         <section>
-            <h2 class="font-display text-lg font-semibold text-white">1. Responsable del tratamiento</h2>
+            <h2 class="font-display text-lg font-semibold text-fuerte">1. Responsable del tratamiento</h2>
             <p class="mt-3">
-                <strong class="text-white">{{ ajuste('politica_responsable') }}</strong>, con domicilio en
+                <strong class="text-fuerte">{{ ajuste('politica_responsable') }}</strong>, con domicilio en
                 {{ ajuste('contacto_direccion') }}, {{ ajuste('contacto_ciudad') }}, es responsable del
                 tratamiento de los datos personales recolectados a través de este sitio.
             </p>
@@ -19,7 +19,7 @@
         </section>
 
         <section>
-            <h2 class="font-display text-lg font-semibold text-white">2. Marco legal</h2>
+            <h2 class="font-display text-lg font-semibold text-fuerte">2. Marco legal</h2>
             <p class="mt-3">
                 Esta política se adopta en cumplimiento de la Ley 1581 de 2012, el Decreto 1074 de 2015 y demás
                 normas que las modifiquen o reglamenten, así como del artículo 15 de la Constitución Política.
@@ -27,7 +27,7 @@
         </section>
 
         <section>
-            <h2 class="font-display text-lg font-semibold text-white">3. Datos que recolectamos</h2>
+            <h2 class="font-display text-lg font-semibold text-fuerte">3. Datos que recolectamos</h2>
             <p class="mt-3">Según el formulario que diligencies, podemos recolectar:</p>
             <ul class="mt-3 space-y-2">
                 @foreach ([
@@ -50,7 +50,7 @@
         </section>
 
         <section>
-            <h2 class="font-display text-lg font-semibold text-white">4. Finalidades</h2>
+            <h2 class="font-display text-lg font-semibold text-fuerte">4. Finalidades</h2>
             <ul class="mt-3 space-y-2">
                 @foreach ([
                     'Atender solicitudes de afiliación, contacto, peticiones, quejas y reclamos.',
@@ -69,7 +69,7 @@
         </section>
 
         <section>
-            <h2 class="font-display text-lg font-semibold text-white">5. Autorización</h2>
+            <h2 class="font-display text-lg font-semibold text-fuerte">5. Autorización</h2>
             <p class="mt-3">
                 La autorización se obtiene de forma previa, expresa e informada mediante la casilla de aceptación
                 que aparece en cada formulario, con enlace a esta política. El sistema registra la fecha y la hora
@@ -78,7 +78,7 @@
         </section>
 
         <section>
-            <h2 class="font-display text-lg font-semibold text-white">6. Derechos del titular</h2>
+            <h2 class="font-display text-lg font-semibold text-fuerte">6. Derechos del titular</h2>
             <p class="mt-3">Como titular de tus datos personales tienes derecho a:</p>
             <ul class="mt-3 space-y-2">
                 @foreach ([
@@ -98,11 +98,11 @@
         </section>
 
         <section>
-            <h2 class="font-display text-lg font-semibold text-white">7. Cómo ejercer tus derechos</h2>
+            <h2 class="font-display text-lg font-semibold text-fuerte">7. Cómo ejercer tus derechos</h2>
             <p class="mt-3">
-                Escribe a <a href="mailto:{{ ajuste('contacto_correo') }}" class="text-marca-400 underline underline-offset-2">{{ ajuste('contacto_correo') }}</a>
+                Escribe a <a href="mailto:{{ ajuste('contacto_correo') }}" class="text-acento underline underline-offset-2">{{ ajuste('contacto_correo') }}</a>
                 o radica tu solicitud como PQR en la
-                <a href="{{ route('contacto') }}" class="text-marca-400 underline underline-offset-2">página de contacto</a>,
+                <a href="{{ route('contacto') }}" class="text-acento underline underline-offset-2">página de contacto</a>,
                 donde recibirás un número de radicado.
             </p>
             <p class="mt-3">
@@ -112,7 +112,7 @@
         </section>
 
         <section>
-            <h2 class="font-display text-lg font-semibold text-white">8. Seguridad y vigencia</h2>
+            <h2 class="font-display text-lg font-semibold text-fuerte">8. Seguridad y vigencia</h2>
             <p class="mt-3">
                 Adoptamos medidas técnicas y administrativas para proteger tus datos contra acceso no autorizado,
                 pérdida o alteración: cifrado de contraseñas, control de acceso por roles, segundo factor de

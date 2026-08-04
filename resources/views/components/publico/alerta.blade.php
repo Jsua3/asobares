@@ -2,9 +2,9 @@
 
 @php
     $estilos = match ($tipo) {
-        'error' => 'border-marca-500/40 bg-marca-950/40 text-marca-100',
-        'aviso' => 'border-amber-500/30 bg-amber-950/30 text-amber-100',
-        default => 'border-emerald-500/30 bg-emerald-950/30 text-emerald-100',
+        'error' => 'border-marca-500/40 bg-marca-panel text-acento-fuerte',
+        'aviso' => 'border-aviso-linea bg-aviso-fondo text-aviso-suave',
+        default => 'border-exito-linea bg-exito-fondo text-exito-suave',
     };
     $icono = match ($tipo) {
         'error' => 'M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z',

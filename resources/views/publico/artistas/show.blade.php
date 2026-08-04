@@ -3,30 +3,30 @@
                    :ogImagen="$artista->foto ? Storage::disk('public')->url($artista->foto) : null">
 
     <article class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-        <a href="{{ route('artistas.index') }}" class="text-sm text-noche-400 hover:text-marca-400">← Todos los artistas</a>
+        <a href="{{ route('artistas.index') }}" class="text-sm text-apagado hover:text-acento">← Todos los artistas</a>
 
         <div class="mt-6 grid gap-10 lg:grid-cols-3">
             <div class="lg:col-span-2">
                 <div class="flex flex-wrap items-center gap-2 text-xs">
-                    <span class="rounded-full bg-marca-500/15 px-3 py-1 font-medium text-marca-300">
+                    <span class="rounded-full bg-marca-500/15 px-3 py-1 font-medium text-acento-fuerte">
                         {{ $artista->tipo->getLabel() }}
                     </span>
                     @if ($artista->municipio)
-                        <span class="rounded-full border border-white/10 px-3 py-1 text-noche-300">{{ $artista->municipio->nombre }}</span>
+                        <span class="rounded-full border border-linea px-3 py-1 text-tenue">{{ $artista->municipio->nombre }}</span>
                     @endif
                 </div>
 
                 <h1 class="mt-4 font-display text-3xl font-bold tracking-tight sm:text-4xl">{{ $artista->nombre }}</h1>
-                <p class="mt-2 text-lg text-marca-400">{{ $artista->genero_musical }}</p>
+                <p class="mt-2 text-lg text-acento">{{ $artista->genero_musical }}</p>
 
                 @if ($artista->descripcion)
-                    <p class="mt-5 text-base leading-relaxed text-noche-200 text-pretty">{{ $artista->descripcion }}</p>
+                    <p class="mt-5 text-base leading-relaxed text-suave text-pretty">{{ $artista->descripcion }}</p>
                 @endif
 
                 {{-- Video: se embebe solo el ID extraído, nunca la URL cruda --}}
                 @if ($id = $artista->youtubeId())
                     <h2 class="mt-10 font-display text-lg font-semibold">Escúchalo</h2>
-                    <div class="mt-4 aspect-video overflow-hidden rounded-2xl border border-white/[.09]">
+                    <div class="mt-4 aspect-video overflow-hidden rounded-2xl border border-linea">
                         <iframe class="h-full w-full"
                                 src="https://www.youtube-nocookie.com/embed/{{ $id }}"
                                 title="Video de {{ $artista->nombre }}"
@@ -42,15 +42,15 @@
                 @if ($artista->foto)
                     <img src="{{ Storage::disk('public')->url($artista->foto) }}" alt="{{ $artista->nombre }}"
                          width="400" height="400" decoding="async"
-                         class="aspect-square w-full rounded-2xl border border-white/[.09] object-cover">
+                         class="aspect-square w-full rounded-2xl border border-linea object-cover">
                 @endif
 
                 <div class="tarjeta p-6">
-                    <p class="text-xs uppercase tracking-wide text-noche-400">Tarifa desde</p>
-                    <p class="mt-1 font-display text-2xl font-bold text-marca-400">
+                    <p class="text-xs uppercase tracking-wide text-apagado">Tarifa desde</p>
+                    <p class="mt-1 font-display text-2xl font-bold text-acento">
                         {{ $artista->tarifa_desde ? pesos($artista->tarifa_desde) : 'A convenir' }}
                     </p>
-                    <p class="mt-2 text-xs text-noche-400">
+                    <p class="mt-2 text-xs text-apagado">
                         El valor final depende de la duración, el montaje y el desplazamiento.
                     </p>
 
@@ -63,7 +63,7 @@
                         @endif
                         @if ($artista->instagram_url)
                             <a href="{{ $artista->instagram_url }}" target="_blank" rel="noopener nofollow"
-                               class="block rounded-xl border border-white/10 px-4 py-2.5 text-center text-sm hover:border-marca-500/50">
+                               class="block rounded-xl border border-linea px-4 py-2.5 text-center text-sm hover:border-marca-500/50">
                                 Instagram ↗
                             </a>
                         @endif
@@ -80,7 +80,7 @@
                         <li>
                             <a href="{{ route('artistas.show', $similar) }}" class="tarjeta tarjeta-hover block p-5">
                                 <span class="block font-display text-sm font-semibold">{{ $similar->nombre }}</span>
-                                <span class="mt-1 block text-xs text-marca-400">{{ $similar->genero_musical }}</span>
+                                <span class="mt-1 block text-xs text-acento">{{ $similar->genero_musical }}</span>
                             </a>
                         </li>
                     @endforeach

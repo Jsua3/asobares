@@ -7,7 +7,7 @@
             <div class="text-center">
                 <x-publico.logo alto="h-10" class="mx-auto" />
                 <h1 class="mt-5 font-display text-2xl font-bold">Entra a tu cuenta</h1>
-                <p class="mt-2 text-sm text-noche-300">
+                <p class="mt-2 text-sm text-tenue">
                     Para los establecimientos afiliados al capítulo.
                 </p>
             </div>
@@ -22,9 +22,9 @@
                 <x-publico.campo nombre="email" etiqueta="Correo electrónico" tipo="email" requerido />
                 <x-publico.campo nombre="password" etiqueta="Contraseña" tipo="password" requerido />
 
-                <label class="flex items-center gap-2.5 text-sm text-noche-300">
+                <label class="flex items-center gap-2.5 text-sm text-tenue">
                     <input type="checkbox" name="recordarme" value="1"
-                           class="h-4 w-4 rounded border-white/20 bg-noche-950 text-marca-500 focus:ring-2 focus:ring-marca-500/60">
+                           class="h-4 w-4 rounded border-linea-fuerte bg-fondo text-marca-500 focus:ring-2 focus:ring-marca-500/60">
                     Mantener la sesión iniciada
                 </label>
 
@@ -34,11 +34,12 @@
                 </button>
             </form>
 
-            <p class="mt-6 text-center text-xs leading-relaxed text-noche-400">
+            <p class="mt-6 text-center text-xs leading-relaxed text-apagado">
                 ¿Todavía no eres afiliado?
-                <a href="{{ route('afiliate') }}" class="text-marca-400 hover:text-marca-300">Conoce la afiliación</a>.
+                <a href="{{ route('afiliate') }}" class="text-acento hover:text-acento-fuerte">Conoce la afiliación</a>.
                 <br>
-                El equipo del gremio ingresa por <a href="/admin" class="text-marca-400 hover:text-marca-300">/admin</a>.
+                El equipo del gremio ingresa por
+                <a href="{{ route('filament.admin.pages.dashboard') }}" class="text-acento hover:text-acento-fuerte">/admin</a>.
             </p>
         </div>
     </div>

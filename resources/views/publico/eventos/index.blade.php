@@ -6,13 +6,13 @@
 
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
-        <div class="inline-flex rounded-xl border border-white/10 p-1" role="group" aria-label="Filtrar por fecha">
+        <div class="inline-flex rounded-xl border border-linea p-1" role="group" aria-label="Filtrar por fecha">
             @foreach (['proximos' => "Próximos ({$totalProximos})", 'pasados' => "Pasados ({$totalPasados})"] as $clave => $texto)
                 <a href="{{ route('eventos.index', ['cuando' => $clave]) }}"
                    @class([
                        'rounded-lg px-5 py-2 text-sm transition-colors',
                        'bg-marca-500 font-medium text-white' => $cuando === $clave,
-                       'text-noche-300 hover:text-white' => $cuando !== $clave,
+                       'text-tenue hover:text-fuerte' => $cuando !== $clave,
                    ])
                    @if ($cuando === $clave) aria-current="true" @endif>
                     {{ $texto }}
@@ -25,7 +25,7 @@
                 <p class="font-display text-lg font-semibold">
                     {{ $cuando === 'proximos' ? 'No hay eventos programados por ahora' : 'Todavía no hay eventos pasados' }}
                 </p>
-                <p class="mt-2 text-sm text-noche-300">Publicamos aquí la agenda del gremio.</p>
+                <p class="mt-2 text-sm text-tenue">Publicamos aquí la agenda del gremio.</p>
             </div>
         @else
             <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -40,30 +40,30 @@
 
                             <div class="flex flex-1 flex-col p-5">
                                 <div class="flex flex-wrap items-center gap-2 text-xs">
-                                    <span class="rounded-full bg-marca-500/15 px-2.5 py-1 font-medium text-marca-300">
+                                    <span class="rounded-full bg-marca-500/15 px-2.5 py-1 font-medium text-acento-fuerte">
                                         {{ $evento->tipo->getLabel() }}
                                     </span>
                                     @if ($evento->esGratuito())
-                                        <span class="rounded-full border border-white/10 px-2.5 py-1 text-noche-300">Gratuito</span>
+                                        <span class="rounded-full border border-linea px-2.5 py-1 text-tenue">Gratuito</span>
                                     @else
-                                        <span class="rounded-full border border-white/10 px-2.5 py-1 text-noche-300">{{ pesos($evento->precio) }}</span>
+                                        <span class="rounded-full border border-linea px-2.5 py-1 text-tenue">{{ pesos($evento->precio) }}</span>
                                     @endif
                                 </div>
 
                                 <h2 class="mt-3 font-display text-base font-semibold leading-snug">{{ $evento->titulo }}</h2>
 
-                                <p class="mt-2 text-xs text-noche-400">
+                                <p class="mt-2 text-xs text-apagado">
                                     {{ $evento->fecha_inicio->translatedFormat('l d \d\e F, Y') }}
                                     @if ($evento->lugar)
                                         <span class="block">{{ $evento->lugar }}</span>
                                     @endif
                                 </p>
 
-                                <p class="mt-3 line-clamp-3 flex-1 text-sm leading-relaxed text-noche-300">
+                                <p class="mt-3 line-clamp-3 flex-1 text-sm leading-relaxed text-tenue">
                                     {{ Str::limit(strip_tags($evento->descripcion), 130) }}
                                 </p>
 
-                                <span class="mt-4 text-sm font-medium text-marca-400">Ver detalle →</span>
+                                <span class="mt-4 text-sm font-medium text-acento">Ver detalle →</span>
                             </div>
                         </a>
                     </article>

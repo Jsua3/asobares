@@ -15,9 +15,10 @@
             <div class="mt-7 grid gap-5 sm:grid-cols-2">
                 @foreach ($beneficios as $indice => $beneficio)
                     <div class="tarjeta p-6">
-                        <span class="font-display text-3xl font-bold text-marca-500/30">0{{ $indice + 1 }}</span>
+                        {{-- Marca de agua: numera visualmente, no aporta nada al lector de pantalla. --}}
+                        <span aria-hidden="true" class="font-display text-3xl font-bold text-marca-500/30">0{{ $indice + 1 }}</span>
                         <h3 class="mt-2 font-display text-lg font-semibold">{{ $beneficio->titulo }}</h3>
-                        <p class="mt-2 text-sm leading-relaxed text-noche-300">{{ $beneficio->descripcion }}</p>
+                        <p class="mt-2 text-sm leading-relaxed text-tenue">{{ $beneficio->descripcion }}</p>
                     </div>
                 @endforeach
             </div>
@@ -29,10 +30,10 @@
             <ol class="mt-7 space-y-4">
                 @foreach (array_filter(explode("\n", (string) ajuste('afiliate_como_funciona'))) as $indice => $paso)
                     <li class="tarjeta flex items-start gap-4 p-5">
-                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-marca-500/15 font-display text-sm font-bold text-marca-400">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-marca-500/15 font-display text-sm font-bold text-acento">
                             {{ $indice + 1 }}
                         </span>
-                        <span class="pt-1 text-sm leading-relaxed text-noche-200">{{ trim($paso) }}</span>
+                        <span class="pt-1 text-sm leading-relaxed text-suave">{{ trim($paso) }}</span>
                     </li>
                 @endforeach
             </ol>
@@ -41,7 +42,7 @@
         {{-- Formulario --}}
         <section id="formulario" class="tarjeta mt-14 p-7 sm:p-9" aria-labelledby="titulo-formulario">
             <h2 id="titulo-formulario" class="font-display text-2xl font-bold">Déjanos tus datos</h2>
-            <p class="mt-2 text-sm text-noche-300">Te contactamos para agendar la visita a tu establecimiento.</p>
+            <p class="mt-2 text-sm text-tenue">Te contactamos para agendar la visita a tu establecimiento.</p>
 
             @if (session('exito'))
                 <x-publico.alerta class="mt-6">
@@ -77,9 +78,9 @@
             </form>
 
             @if ($whatsapp)
-                <p class="mt-6 border-t border-white/[.09] pt-6 text-sm text-noche-300">
+                <p class="mt-6 border-t border-linea pt-6 text-sm text-tenue">
                     ¿Prefieres hablar directo?
-                    <a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="text-marca-400 hover:text-marca-300">
+                    <a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="text-acento hover:text-acento-fuerte">
                         Escríbenos por WhatsApp al {{ ajuste('contacto_whatsapp_visible') }}
                     </a>
                 </p>

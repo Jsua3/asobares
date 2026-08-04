@@ -34,12 +34,12 @@
     @endpush
 
     <nav aria-label="Ruta de navegación" class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
-        <ol class="flex flex-wrap items-center gap-2 text-xs text-noche-400">
-            <li><a href="{{ route('inicio') }}" class="hover:text-marca-400">Inicio</a></li>
+        <ol class="flex flex-wrap items-center gap-2 text-xs text-apagado">
+            <li><a href="{{ route('inicio') }}" class="hover:text-acento">Inicio</a></li>
             <li aria-hidden="true">/</li>
-            <li><a href="{{ route('directorio.index') }}" class="hover:text-marca-400">Directorio</a></li>
+            <li><a href="{{ route('directorio.index') }}" class="hover:text-acento">Directorio</a></li>
             <li aria-hidden="true">/</li>
-            <li class="text-noche-200" aria-current="page">{{ $asociado->nombre }}</li>
+            <li class="text-suave" aria-current="page">{{ $asociado->nombre }}</li>
         </ol>
     </nav>
 
@@ -52,14 +52,14 @@
                     <img src="{{ Storage::disk('public')->url($asociado->foto_portada) }}"
                          alt="Portada de {{ $asociado->nombre }}"
                          width="800" height="600" decoding="async"
-                         class="aspect-[4/3] w-full rounded-2xl border border-white/[.09] object-cover">
+                         class="aspect-[4/3] w-full rounded-2xl border border-linea object-cover">
                 @endif
 
                 <div class="mt-7 flex flex-wrap items-center gap-2">
-                    <span class="rounded-full bg-marca-500/15 px-3 py-1 text-xs font-medium text-marca-300">
+                    <span class="rounded-full bg-marca-500/15 px-3 py-1 text-xs font-medium text-acento-fuerte">
                         {{ $asociado->categoria->nombre }}
                     </span>
-                    <span class="rounded-full border border-white/10 px-3 py-1 text-xs text-noche-300">
+                    <span class="rounded-full border border-linea px-3 py-1 text-xs text-tenue">
                         {{ $asociado->municipio->nombre }}
                     </span>
                     @if ($asociado->destacado)
@@ -70,7 +70,7 @@
                 <h1 class="mt-4 font-display text-3xl font-bold tracking-tight sm:text-4xl">{{ $asociado->nombre }}</h1>
 
                 @if ($asociado->descripcion)
-                    <p class="mt-5 text-base leading-relaxed text-noche-200 text-pretty">{{ $asociado->descripcion }}</p>
+                    <p class="mt-5 text-base leading-relaxed text-suave text-pretty">{{ $asociado->descripcion }}</p>
                 @endif
 
                 {{-- Galería --}}
@@ -80,7 +80,7 @@
                         @foreach ($asociado->getMedia('galeria') as $imagen)
                             <img src="{{ $imagen->getUrl('thumb') }}" alt="{{ $asociado->nombre }}"
                                  loading="lazy" decoding="async" width="400" height="300"
-                                 class="aspect-[4/3] w-full rounded-xl border border-white/[.09] object-cover">
+                                 class="aspect-[4/3] w-full rounded-xl border border-linea object-cover">
                         @endforeach
                     </div>
                 @endif
@@ -93,12 +93,12 @@
                             <li class="tarjeta flex flex-wrap items-center justify-between gap-3 p-4">
                                 <div>
                                     <p class="font-medium">{{ $vacante->cargo }}</p>
-                                    <p class="mt-0.5 text-xs text-noche-400">
+                                    <p class="mt-0.5 text-xs text-apagado">
                                         {{ $vacante->tipo->getLabel() }}
                                         @if ($vacante->franja_horaria) · {{ $vacante->franja_horaria }} @endif
                                     </p>
                                 </div>
-                                <a href="{{ route('empleo.index') }}" class="text-sm text-marca-400 hover:text-marca-300">
+                                <a href="{{ route('empleo.index') }}" class="text-sm text-acento hover:text-acento-fuerte">
                                     Ver en la bolsa →
                                 </a>
                             </li>
@@ -115,14 +115,14 @@
                     <dl class="mt-4 space-y-3.5 text-sm">
                         @if ($asociado->direccion)
                             <div>
-                                <dt class="text-xs uppercase tracking-wide text-noche-400">Dirección</dt>
-                                <dd class="mt-0.5 text-noche-100">{{ $asociado->direccion }}</dd>
+                                <dt class="text-xs uppercase tracking-wide text-apagado">Dirección</dt>
+                                <dd class="mt-0.5 text-tinta">{{ $asociado->direccion }}</dd>
                             </div>
                         @endif
                         @if ($asociado->horario)
                             <div>
-                                <dt class="text-xs uppercase tracking-wide text-noche-400">Horario</dt>
-                                <dd class="mt-0.5 text-noche-100">{{ $asociado->horario }}</dd>
+                                <dt class="text-xs uppercase tracking-wide text-apagado">Horario</dt>
+                                <dd class="mt-0.5 text-tinta">{{ $asociado->horario }}</dd>
                             </div>
                         @endif
                     </dl>
@@ -143,7 +143,7 @@
                         ] as $campo => $texto)
                             @if ($asociado->{$campo})
                                 <a href="{{ $asociado->{$campo} }}" target="_blank" rel="noopener nofollow"
-                                   class="block rounded-xl border border-white/10 px-4 py-2.5 text-center text-sm text-noche-100 transition-colors hover:border-marca-500/50">
+                                   class="block rounded-xl border border-linea px-4 py-2.5 text-center text-sm text-tinta transition-colors hover:border-marca-500/50">
                                     {{ $texto }} ↗
                                 </a>
                             @endif

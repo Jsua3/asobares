@@ -15,15 +15,15 @@
                 'bg-marca-500/15' => ! $aprobada && ! $pendiente,
             ])>
                 @if ($aprobada)
-                    <svg class="h-8 w-8 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg class="h-8 w-8 text-exito" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
                     </svg>
                 @elseif ($pendiente)
-                    <svg class="h-8 w-8 text-amber-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg class="h-8 w-8 text-aviso" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                     </svg>
                 @else
-                    <svg class="h-8 w-8 text-marca-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg class="h-8 w-8 text-acento" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
                     </svg>
                 @endif
@@ -39,7 +39,7 @@
                 @endif
             </h1>
 
-            <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-noche-300 text-pretty">
+            <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-tenue text-pretty">
                 @if ($aprobada)
                     @if ($transaccion->concepto === \App\Enums\ConceptoTransaccion::Evento)
                         Tu inscripción a «{{ $transaccion->inscripcion?->evento?->titulo }}» quedó confirmada.
@@ -59,28 +59,28 @@
             <div class="tarjeta mt-8 p-6 text-left">
                 <dl class="space-y-3 text-sm">
                     <div class="flex justify-between gap-4">
-                        <dt class="text-noche-400">Referencia</dt>
-                        <dd class="font-mono text-noche-100">{{ $transaccion->referencia }}</dd>
+                        <dt class="text-apagado">Referencia</dt>
+                        <dd class="font-mono text-tinta">{{ $transaccion->referencia }}</dd>
                     </div>
                     <div class="flex justify-between gap-4">
-                        <dt class="text-noche-400">Concepto</dt>
-                        <dd class="text-noche-100">{{ $transaccion->concepto->getLabel() }}</dd>
+                        <dt class="text-apagado">Concepto</dt>
+                        <dd class="text-tinta">{{ $transaccion->concepto->getLabel() }}</dd>
                     </div>
                     <div class="flex justify-between gap-4">
-                        <dt class="text-noche-400">Monto</dt>
-                        <dd class="font-semibold text-noche-100">{{ pesos($transaccion->monto) }}</dd>
+                        <dt class="text-apagado">Monto</dt>
+                        <dd class="font-semibold text-tinta">{{ pesos($transaccion->monto) }}</dd>
                     </div>
                     <div class="flex justify-between gap-4">
-                        <dt class="text-noche-400">Método</dt>
-                        <dd class="text-noche-100">{{ $transaccion->metodo->getLabel() }}</dd>
+                        <dt class="text-apagado">Método</dt>
+                        <dd class="text-tinta">{{ $transaccion->metodo->getLabel() }}</dd>
                     </div>
                     <div class="flex justify-between gap-4">
-                        <dt class="text-noche-400">Estado</dt>
+                        <dt class="text-apagado">Estado</dt>
                         <dd @class([
                             'font-semibold',
-                            'text-emerald-400' => $aprobada,
-                            'text-amber-400' => $pendiente,
-                            'text-marca-400' => ! $aprobada && ! $pendiente,
+                            'text-exito' => $aprobada,
+                            'text-aviso' => $pendiente,
+                            'text-acento' => ! $aprobada && ! $pendiente,
                         ])>{{ $transaccion->estado->getLabel() }}</dd>
                     </div>
                 </dl>

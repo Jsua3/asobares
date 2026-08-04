@@ -17,17 +17,17 @@
     <div class="flex items-start gap-3">
         <input type="checkbox" id="{{ $id }}" name="acepta_datos" value="1" required
                @checked(old('acepta_datos'))
-               class="mt-0.5 h-4 w-4 shrink-0 rounded border-white/20 bg-noche-950 text-marca-500 focus:ring-2 focus:ring-marca-500/60">
-        <label for="{{ $id }}" class="text-xs leading-relaxed text-noche-300">
+               class="mt-0.5 h-4 w-4 shrink-0 rounded border-linea-fuerte bg-fondo text-marca-500 focus:ring-2 focus:ring-marca-500/60">
+        <label for="{{ $id }}" class="text-xs leading-relaxed text-tenue">
             Autorizo a ASOBARES Capítulo Quindío a tratar mis datos personales para atender esta solicitud,
             conforme a la
             <a href="{{ route('politica-de-datos') }}" target="_blank" rel="noopener"
-               class="text-marca-400 underline underline-offset-2 hover:text-marca-300">política de tratamiento de datos</a>.
-            <span class="text-marca-400" aria-hidden="true">*</span>
+               class="text-acento underline underline-offset-2 hover:text-acento-fuerte">política de tratamiento de datos</a>.
+            <span class="text-acento" aria-hidden="true">*</span>
         </label>
     </div>
 
     @error('acepta_datos')
-        <p class="mt-1.5 text-xs text-marca-400">{{ $message }}</p>
+        <p class="mt-1.5 text-xs text-acento">{{ $message }}</p>
     @enderror
 </div>

@@ -14,7 +14,7 @@
         <div class="mx-auto w-full max-w-lg px-4 py-16 text-center sm:px-6">
 
             <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-marca-500/15">
-                <svg class="h-7 w-7 text-marca-400" fill="none" stroke="currentColor" stroke-width="1.7"
+                <svg class="h-7 w-7 text-acento" fill="none" stroke="currentColor" stroke-width="1.7"
                      viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round"
                           d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
@@ -26,15 +26,15 @@
             </h1>
 
             @auth
-                <p class="mx-auto mt-4 max-w-md text-sm leading-relaxed text-noche-300 text-pretty">
-                    Tienes la sesión abierta como <strong class="text-noche-100">{{ $usuario->name }}</strong>,
+                <p class="mx-auto mt-4 max-w-md text-sm leading-relaxed text-tenue text-pretty">
+                    Tienes la sesión abierta como <strong class="text-tinta">{{ $usuario->name }}</strong>,
                     que es {{ $rol }}. Mi cuenta muestra el estado de cartera de un establecimiento, así que
                     hay que entrar con el usuario del dueño.
                 </p>
 
                 <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
                     @if ($esDelEquipo)
-                        <a href="/admin"
+                        <a href="{{ route('filament.admin.pages.dashboard') }}"
                            class="rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-marca-600">
                             Ir al panel del gremio
                         </a>
@@ -44,13 +44,13 @@
                         @csrf
                         <input type="hidden" name="destino" value="entrar">
                         <button type="submit"
-                                class="w-full rounded-xl border border-white/15 px-6 py-3 text-sm font-semibold transition-colors hover:border-marca-500/50 sm:w-auto">
+                                class="w-full rounded-xl border border-linea-fuerte px-6 py-3 text-sm font-semibold transition-colors hover:border-marca-500/50 sm:w-auto">
                             Cerrar sesión y entrar como afiliado
                         </button>
                     </form>
                 </div>
             @else
-                <p class="mx-auto mt-4 max-w-md text-sm leading-relaxed text-noche-300 text-pretty">
+                <p class="mx-auto mt-4 max-w-md text-sm leading-relaxed text-tenue text-pretty">
                     Tu usuario todavía no está vinculado a ningún establecimiento. Escríbenos y lo revisamos.
                 </p>
 
@@ -60,15 +60,15 @@
                         Entrar con otra cuenta
                     </a>
                     <a href="{{ route('contacto') }}"
-                       class="rounded-xl border border-white/15 px-6 py-3 text-sm font-semibold transition-colors hover:border-marca-500/50">
+                       class="rounded-xl border border-linea-fuerte px-6 py-3 text-sm font-semibold transition-colors hover:border-marca-500/50">
                         Escribirnos
                     </a>
                 </div>
             @endauth
 
-            <p class="mt-8 text-xs text-noche-400">
+            <p class="mt-8 text-xs text-apagado">
                 ¿Todavía no eres afiliado?
-                <a href="{{ route('afiliate') }}" class="text-marca-400 hover:text-marca-300">Conoce la afiliación</a>.
+                <a href="{{ route('afiliate') }}" class="text-acento hover:text-acento-fuerte">Conoce la afiliación</a>.
             </p>
         </div>
     </div>

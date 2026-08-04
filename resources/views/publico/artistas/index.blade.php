@@ -19,7 +19,7 @@
                 </button>
                 @if (array_filter($filtros ?? []))
                     <a href="{{ route('artistas.index') }}"
-                       class="rounded-xl border border-white/10 px-4 py-2.5 text-sm text-noche-300 hover:text-white">Limpiar</a>
+                       class="rounded-xl border border-linea px-4 py-2.5 text-sm text-tenue hover:text-fuerte">Limpiar</a>
                 @endif
             </div>
         </form>
@@ -27,7 +27,7 @@
         @if ($artistas->isEmpty())
             <div class="tarjeta mt-8 p-12 text-center">
                 <p class="font-display text-lg font-semibold">No hay artistas con ese filtro</p>
-                <p class="mt-2 text-sm text-noche-300">Prueba con otro género o tipo.</p>
+                <p class="mt-2 text-sm text-tenue">Prueba con otro género o tipo.</p>
             </div>
         @else
             <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -42,29 +42,29 @@
 
                             <div class="flex flex-1 flex-col p-5">
                                 <div class="flex flex-wrap items-center gap-2 text-xs">
-                                    <span class="rounded-full bg-marca-500/15 px-2.5 py-1 font-medium text-marca-300">
+                                    <span class="rounded-full bg-marca-500/15 px-2.5 py-1 font-medium text-acento-fuerte">
                                         {{ $artista->tipo->getLabel() }}
                                     </span>
                                     @if ($artista->tieneVideo())
-                                        <span class="rounded-full border border-white/10 px-2.5 py-1 text-noche-300">▶ Con video</span>
+                                        <span class="rounded-full border border-linea px-2.5 py-1 text-tenue">▶ Con video</span>
                                     @endif
                                 </div>
 
                                 <h2 class="mt-3 font-display text-lg font-semibold">{{ $artista->nombre }}</h2>
-                                <p class="mt-1 text-sm text-marca-400">{{ $artista->genero_musical }}</p>
+                                <p class="mt-1 text-sm text-acento">{{ $artista->genero_musical }}</p>
 
-                                <p class="mt-3 line-clamp-2 flex-1 text-sm leading-relaxed text-noche-300">
+                                <p class="mt-3 line-clamp-2 flex-1 text-sm leading-relaxed text-tenue">
                                     {{ $artista->descripcion }}
                                 </p>
 
                                 <div class="mt-4 flex items-end justify-between gap-3">
                                     <div>
-                                        <p class="text-[.65rem] uppercase tracking-wide text-noche-400">Tarifa desde</p>
+                                        <p class="text-[.65rem] uppercase tracking-wide text-apagado">Tarifa desde</p>
                                         <p class="font-display text-base font-semibold">
                                             {{ $artista->tarifa_desde ? pesos($artista->tarifa_desde) : 'A convenir' }}
                                         </p>
                                     </div>
-                                    <span class="text-sm font-medium text-marca-400">Ver ficha →</span>
+                                    <span class="text-sm font-medium text-acento">Ver ficha →</span>
                                 </div>
                             </div>
                         </a>

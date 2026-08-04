@@ -21,7 +21,7 @@
     @endpush
 @endonce
 
-<div {{ $attributes->merge(['class' => "overflow-hidden rounded-2xl border border-white/[.09] {$alto}"]) }}
+<div {{ $attributes->merge(['class' => "overflow-hidden rounded-2xl border border-linea {$alto}"]) }}
      x-data
      x-init="
         const dibujar = () => {
@@ -34,6 +34,10 @@
 
             const icono = L.divIcon({
                 className: '',
+                {{-- El aro va en negro fijo y NO sigue el tema: el pin no se
+                     dibuja sobre la página sino sobre las teselas de OSM, que
+                     son claras en los dos modos. Atarlo a --asb-fondo lo volvía
+                     casi blanco sobre mapa claro y el pin se perdía. --}}
                 html: `<span style=&quot;display:block;width:18px;height:18px;border-radius:9999px;background:#EE4137;border:3px solid #0B090A;box-shadow:0 0 0 2px rgba(238,65,55,.45)&quot;></span>`,
                 iconSize: [18, 18],
                 iconAnchor: [9, 9],

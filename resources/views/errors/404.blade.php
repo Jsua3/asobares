@@ -9,7 +9,7 @@
                 Esta página cerró más temprano de lo previsto
             </h1>
 
-            <p class="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-noche-300 text-pretty">
+            <p class="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-tenue text-pretty">
                 La dirección que buscas no existe o cambió. Prueba desde el directorio de establecimientos
                 o vuelve al inicio.
             </p>
@@ -20,7 +20,7 @@
                     Volver al inicio
                 </a>
                 <a href="{{ route('directorio.index') }}"
-                   class="rounded-xl border border-white/15 px-6 py-3 text-sm font-semibold transition-colors hover:border-marca-500/50">
+                   class="rounded-xl border border-linea-fuerte px-6 py-3 text-sm font-semibold transition-colors hover:border-marca-500/50">
                     Ver el directorio
                 </a>
             </div>

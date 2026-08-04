@@ -7,7 +7,7 @@
 
         {{-- Selector de municipio --}}
         <section aria-labelledby="selector">
-            <h2 id="selector" class="font-display text-xs font-semibold uppercase tracking-wider text-noche-400">
+            <h2 id="selector" class="font-display text-xs font-semibold uppercase tracking-wider text-apagado">
                 Escoge tu municipio
             </h2>
             <div class="mt-4 flex flex-wrap gap-2">
@@ -15,18 +15,18 @@
                     <a href="{{ route('guia.index', ['municipio' => $municipio->slug]) }}"
                        @class([
                            'rounded-xl border px-4 py-2 text-sm transition-colors',
-                           'border-marca-500 bg-marca-500/10 font-medium text-marca-300' => $seleccionado?->is($municipio),
-                           'border-white/10 text-noche-200 hover:border-marca-500/40 hover:text-white' => ! $seleccionado?->is($municipio),
+                           'border-marca-500 bg-marca-500/10 font-medium text-acento-fuerte' => $seleccionado?->is($municipio),
+                           'border-linea text-suave hover:border-marca-500/40 hover:text-fuerte' => ! $seleccionado?->is($municipio),
                        ])
                        @if ($seleccionado?->is($municipio)) aria-current="true" @endif>
                         {{ $municipio->nombre }}
                     </a>
                 @endforeach
             </div>
-            <p class="mt-3 text-xs text-noche-400">
+            <p class="mt-3 text-xs text-apagado">
                 Estamos levantando la guía municipio por municipio con la información que cada entidad
                 entrega al gremio. Si falta el tuyo,
-                <a href="{{ route('contacto') }}" class="text-marca-400 hover:text-marca-300">escríbenos</a>.
+                <a href="{{ route('contacto') }}" class="text-acento hover:text-acento-fuerte">escríbenos</a>.
             </p>
         </section>
 
@@ -34,16 +34,16 @@
             {{-- Resumen --}}
             <div class="tarjeta mt-10 grid gap-6 p-6 sm:grid-cols-3">
                 <div>
-                    <p class="text-xs uppercase tracking-wide text-noche-400">Municipio</p>
+                    <p class="text-xs uppercase tracking-wide text-apagado">Municipio</p>
                     <p class="mt-1 font-display text-lg font-semibold">{{ $seleccionado->nombre }}</p>
                 </div>
                 <div>
-                    <p class="text-xs uppercase tracking-wide text-noche-400">Entidades a visitar</p>
+                    <p class="text-xs uppercase tracking-wide text-apagado">Entidades a visitar</p>
                     <p class="mt-1 font-display text-lg font-semibold">{{ $requisitos->count() }}</p>
                 </div>
                 <div>
-                    <p class="text-xs uppercase tracking-wide text-noche-400">Costo aproximado</p>
-                    <p class="mt-1 font-display text-lg font-semibold text-marca-400">
+                    <p class="text-xs uppercase tracking-wide text-apagado">Costo aproximado</p>
+                    <p class="mt-1 font-display text-lg font-semibold text-acento">
                         {{ $costoTotal > 0 ? pesos($costoTotal) : 'Por confirmar' }}
                     </p>
                 </div>
@@ -54,7 +54,7 @@
                 @foreach ($requisitos as $indice => $requisito)
                     <details class="tarjeta group overflow-hidden" @if ($indice === 0) open @endif>
                         <summary class="flex cursor-pointer list-none items-start gap-4 p-6">
-                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-marca-500/15 font-display text-sm font-bold text-marca-400">
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-marca-500/15 font-display text-sm font-bold text-acento">
                                 {{ $indice + 1 }}
                             </span>
 
@@ -62,41 +62,41 @@
                                 <span class="block font-display text-base font-semibold leading-snug">{{ $requisito->entidad }}</span>
                                 <span class="mt-1.5 flex flex-wrap items-center gap-2 text-xs">
                                     @if ($requisito->tieneCosto())
-                                        <span class="rounded-full bg-marca-500/15 px-2.5 py-0.5 font-medium text-marca-300">
+                                        <span class="rounded-full bg-marca-500/15 px-2.5 py-0.5 font-medium text-acento-fuerte">
                                             {{ pesos($requisito->costo_aproximado) }}
                                         </span>
                                     @else
-                                        <span class="rounded-full border border-white/10 px-2.5 py-0.5 text-noche-400">Sin costo directo</span>
+                                        <span class="rounded-full border border-linea px-2.5 py-0.5 text-apagado">Sin costo directo</span>
                                     @endif
 
                                     @if ($requisito->checklist)
-                                        <span class="text-noche-400">{{ count($requisito->checklist) }} requisitos</span>
+                                        <span class="text-apagado">{{ count($requisito->checklist) }} requisitos</span>
                                     @endif
 
                                     @if ($requisito->tieneAdjunto())
-                                        <span class="text-marca-400">· Formato descargable</span>
+                                        <span class="text-acento">· Formato descargable</span>
                                     @endif
                                 </span>
                             </span>
 
-                            <svg class="mt-1 h-5 w-5 shrink-0 text-noche-400 transition-transform group-open:rotate-180"
+                            <svg class="mt-1 h-5 w-5 shrink-0 text-apagado transition-transform group-open:rotate-180"
                                  fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
                             </svg>
                         </summary>
 
-                        <div class="border-t border-white/[.09] px-6 py-6 sm:pl-19">
+                        <div class="border-t border-linea px-6 py-6 sm:pl-19">
                             @if ($requisito->descripcion)
-                                <p class="text-sm leading-relaxed text-noche-200">{{ $requisito->descripcion }}</p>
+                                <p class="text-sm leading-relaxed text-suave">{{ $requisito->descripcion }}</p>
                             @endif
 
                             @if ($requisito->checklist)
-                                <h3 class="mt-6 text-xs font-semibold uppercase tracking-wider text-noche-400">
+                                <h3 class="mt-6 text-xs font-semibold uppercase tracking-wider text-apagado">
                                     Lo que te van a pedir
                                 </h3>
                                 <ul class="mt-3 space-y-2.5">
                                     @foreach ($requisito->checklist as $item)
-                                        <li class="flex items-start gap-3 text-sm text-noche-100">
+                                        <li class="flex items-start gap-3 text-sm text-tinta">
                                             <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-marca-500"></span>
                                             <span class="leading-relaxed">{{ $item }}</span>
                                         </li>
@@ -117,7 +117,7 @@
 
                                 @if ($requisito->enlace_externo)
                                     <a href="{{ $requisito->enlace_externo }}" target="_blank" rel="noopener"
-                                       class="inline-flex items-center rounded-xl border border-white/10 px-4 py-2.5 text-sm text-noche-100 transition-colors hover:border-marca-500/50">
+                                       class="inline-flex items-center rounded-xl border border-linea px-4 py-2.5 text-sm text-tinta transition-colors hover:border-marca-500/50">
                                         Sitio de la entidad ↗
                                     </a>
                                 @endif
@@ -135,7 +135,7 @@
             {{-- CTA --}}
             <div class="tarjeta mt-8 p-8 text-center">
                 <h2 class="font-display text-xl font-semibold">¿Dudas con algún trámite?</h2>
-                <p class="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-noche-300">
+                <p class="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-tenue">
                     La orientación jurídica es gratuita para los afiliados, pero si estás empezando y todavía no
                     haces parte del gremio, escríbenos igual: para eso existe esta guía.
                 </p>
@@ -145,7 +145,7 @@
                         Escríbenos
                     </a>
                     <a href="{{ route('afiliate') }}"
-                       class="rounded-xl border border-white/15 px-6 py-2.5 text-sm font-semibold hover:border-marca-500/50">
+                       class="rounded-xl border border-linea-fuerte px-6 py-2.5 text-sm font-semibold hover:border-marca-500/50">
                         Conoce la afiliación
                     </a>
                 </div>
@@ -153,7 +153,7 @@
         @else
             <div class="tarjeta mt-10 p-12 text-center">
                 <p class="font-display text-lg font-semibold">Todavía no hay guía publicada</p>
-                <p class="mt-2 text-sm text-noche-300">Estamos recopilando la información con las entidades.</p>
+                <p class="mt-2 text-sm text-tenue">Estamos recopilando la información con las entidades.</p>
             </div>
         @endif
     </div>

@@ -2,7 +2,7 @@
 
 <article class="tarjeta tarjeta-hover group overflow-hidden">
     <a href="{{ route('directorio.show', $asociado) }}" class="block">
-        <div class="relative aspect-[4/3] overflow-hidden bg-noche-800">
+        <div class="relative aspect-[4/3] overflow-hidden bg-superficie-alta">
             @if ($asociado->foto_portada)
                 <img src="{{ Storage::disk('public')->url($asociado->foto_portada) }}"
                      alt="Portada de {{ $asociado->nombre }}"
@@ -16,9 +16,9 @@
                 </span>
             @endif
 
-            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-noche-950 via-noche-950/80 to-transparent p-4 pt-10">
-                <h3 class="font-display text-base font-semibold leading-tight text-white">{{ $asociado->nombre }}</h3>
-                <p class="mt-1 text-xs text-noche-300">
+            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-fondo via-fondo/80 to-transparent p-4 pt-10">
+                <h3 class="font-display text-base font-semibold leading-tight text-fuerte">{{ $asociado->nombre }}</h3>
+                <p class="mt-1 text-xs text-tenue">
                     {{ $asociado->categoria->nombre }} · {{ $asociado->municipio->nombre }}
                 </p>
             </div>
@@ -26,19 +26,19 @@
     </a>
 
     <div class="p-4">
-        <p class="line-clamp-2 text-sm leading-relaxed text-noche-300">
+        <p class="line-clamp-2 text-sm leading-relaxed text-tenue">
             {{ Str::limit($asociado->descripcion, 120) }}
         </p>
 
         <div class="mt-4 flex items-center justify-between gap-3">
             <a href="{{ route('directorio.show', $asociado) }}"
-               class="text-sm font-medium text-marca-400 transition-colors hover:text-marca-300">
+               class="text-sm font-medium text-acento transition-colors hover:text-acento-fuerte">
                 Ver ficha
             </a>
 
             @if ($enlace = enlaceWhatsapp($asociado->whatsapp, "Hola {$asociado->nombre}, los vi en la página de ASOBARES Quindío."))
                 <a href="{{ $enlace }}" target="_blank" rel="noopener nofollow"
-                   class="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-noche-200 transition-colors hover:border-marca-500/50 hover:text-white">
+                   class="rounded-lg border border-linea px-3 py-1.5 text-xs text-suave transition-colors hover:border-marca-500/50 hover:text-fuerte">
                     WhatsApp
                 </a>
             @endif
