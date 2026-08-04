@@ -12,6 +12,7 @@ use App\Models\Postulacion;
 use App\Models\Vacante;
 use App\Support\DestinatariosDelAsociado;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -91,9 +92,24 @@ class EmpleoController
         if ($postulacion instanceof Postulacion) {
             $postulacion->update($datos);
         } else {
-            $postulacion = $vacante->postulaciones()->create($datos);
+            try {
+                $postulacion = $vacante->postulaciones()->create($datos);
 
-            $this->avisarAlEstablecimiento($postulacion);
+                $this->avisarAlEstablecimiento($postulacion);
+            } catch (UniqueConstraintViolationException) {
+                // El «buscar → si no existe, crear» de arriba no es atómico:
+                // un doble clic o un reintento por red lenta puede mandar dos
+                // peticiones que pasen ambas el `first()` como null antes de
+                // que la primera termine de insertar. Aquí perdimos la
+                // carrera contra el índice único (vacante_id, correo); quien
+                // la ganó ya avisó al establecimiento, así que solo
+                // actualizamos sin repetir el correo.
+                $postulacion = Postulacion::where('vacante_id', $vacante->id)
+                    ->where('correo', $datos['correo'])
+                    ->firstOrFail();
+
+                $postulacion->update($datos);
+            }
         }
 
         return redirect()

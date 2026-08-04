@@ -10,6 +10,7 @@ use App\Models\Postulacion;
 use App\Models\Vacante;
 use App\Support\Formulario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -175,6 +176,63 @@ class BolsaDeEmpleoTest extends TestCase
         }
 
         $this->assertSame(0, Postulacion::count());
+    }
+
+    public function test_una_condicion_de_carrera_al_postular_no_revienta_ni_duplica_el_correo(): void
+    {
+        Mail::fake();
+
+        $asociado = Asociado::factory()->publicado()->create(['correo_interno' => 'oficina@bar.test']);
+        $vacante = Vacante::factory()->for($asociado)->publicado()->create();
+
+        // Simula la carrera: justo antes de que el controlador inserte su
+        // fila, "otra petición" (un doble clic, un reintento por una red
+        // lenta) ya insertó una postulación para el mismo (vacante_id,
+        // correo) y avisó al establecimiento. El `create()` del controlador
+        // choca entonces contra el índice único, tal como pasaría con dos
+        // peticiones casi simultáneas.
+        Postulacion::creating(function () use ($vacante): void {
+            $id = DB::table('postulaciones')->insertGetId([
+                'vacante_id' => $vacante->id,
+                'nombre' => 'Ganó la carrera',
+                'correo' => 'duvan@ejemplo.test',
+                'acepta_datos' => true,
+                'consentimiento_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            Mail::to('oficina@bar.test')->send(new NuevaPostulacion(Postulacion::findOrFail($id)));
+        });
+
+        $respuesta = $this->post(route('empleo.postular', $vacante), [
+            'nombre' => 'Duván Marín',
+            'correo' => 'duvan@ejemplo.test',
+            'acepta_datos' => '1',
+        ]);
+
+        Postulacion::flushEventListeners();
+
+        $respuesta->assertSessionHas('exito');
+        $this->assertSame(1, Postulacion::count());
+        Mail::assertSent(NuevaPostulacion::class, 1);
+    }
+
+    public function test_postularse_a_un_asociado_sin_correo_registrado_no_revienta(): void
+    {
+        Mail::fake();
+
+        $asociado = Asociado::factory()->publicado()->create(['correo_interno' => null]);
+        $vacante = Vacante::factory()->for($asociado)->publicado()->create();
+
+        $this->post(route('empleo.postular', $vacante), [
+            'nombre' => 'Duván Marín',
+            'correo' => 'duvan@ejemplo.test',
+            'acepta_datos' => '1',
+        ])->assertSessionHas('exito');
+
+        $this->assertSame(1, Postulacion::count());
+        Mail::assertNothingSent();
     }
 
     public function test_dejar_el_perfil_dos_veces_actualiza_en_vez_de_duplicar(): void
