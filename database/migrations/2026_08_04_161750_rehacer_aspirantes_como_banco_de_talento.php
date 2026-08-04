@@ -19,7 +19,7 @@ return new class extends Migration
         Schema::create('aspirantes_nuevo', function (Blueprint $table): void {
             $table->id();
             $table->string('nombre');
-            $table->string('correo')->unique();
+            $table->string('correo')->unique('aspirantes_correo_unique');
             $table->string('telefono', 30)->nullable();
             $table->string('cargo_interes');
             $table->string('categoria_cargo')->default('otros');
@@ -31,7 +31,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->index('categoria_cargo');
+            $table->index('categoria_cargo', 'aspirantes_categoria_cargo_index');
         });
 
         // De cada correo repetido sobrevive el registro más reciente.
