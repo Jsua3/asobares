@@ -30,7 +30,7 @@
                 <p class="mt-2 text-sm text-tenue">Estamos ampliando la base.</p>
             </div>
         @else
-            @foreach ($proveedores as $clave => $grupo)
+            @foreach ($grupos as $clave => $grupo)
                 @php $categoria = \App\Enums\CategoriaProveedor::from($clave); @endphp
 
                 <section class="mt-12" aria-labelledby="cat-{{ $clave }}">
@@ -70,6 +70,8 @@
                     </div>
                 </section>
             @endforeach
+
+            <div class="mt-10">{{ $proveedores->links() }}</div>
         @endif
 
         {{-- CTA para entrar a la base --}}
@@ -79,9 +81,9 @@
                 Si le vendes al sector nocturno del Quindío, escríbenos y te contamos cómo entrar a la
                 bolsa de proveedores del gremio.
             </p>
-            <a href="{{ route('contacto') }}"
+            <a href="{{ route('proveedores.inscripcion') }}"
                class="mt-6 inline-block rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white hover:bg-marca-600">
-                Quiero ser proveedor
+                Inscribirme en la bolsa
             </a>
         </section>
     </div>
