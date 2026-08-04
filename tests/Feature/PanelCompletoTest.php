@@ -53,6 +53,20 @@ class PanelCompletoTest extends TestCase
     }
 
     /**
+     * Recursos que se pueden crear/editar desde el panel como dirección.
+     * Vacante se excluye: solo los asociados la crean, el gremio solo modera.
+     *
+     * @return list<array{0: class-string<resource>}>
+     */
+    public static function recursosCreablesYEditables(): array
+    {
+        return array_filter(
+            self::recursosDelPanel(),
+            fn (array $recurso) => $recurso[0] !== 'App\\Filament\\Resources\\Vacantes\\VacanteResource'
+        );
+    }
+
+    /**
      * Se anclan las rutas al propio archivo de prueba, no al directorio de
      * trabajo, y la clase se arma con los dos últimos segmentos: así funciona
      * igual en Windows que en Linux.
@@ -85,7 +99,7 @@ class PanelCompletoTest extends TestCase
             ->assertSuccessful();
     }
 
-    #[DataProvider('recursosDelPanel')]
+    #[DataProvider('recursosCreablesYEditables')]
     public function test_el_formulario_de_creacion_de_cada_recurso_carga(string $recurso): void
     {
         if (! $recurso::hasPage('create')) {
@@ -97,7 +111,7 @@ class PanelCompletoTest extends TestCase
             ->assertSuccessful();
     }
 
-    #[DataProvider('recursosDelPanel')]
+    #[DataProvider('recursosCreablesYEditables')]
     public function test_el_formulario_de_edicion_de_cada_recurso_carga_con_un_registro_real(string $recurso): void
     {
         if (! $recurso::hasPage('edit')) {
