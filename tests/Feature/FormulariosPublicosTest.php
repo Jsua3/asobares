@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\CargoDelSector;
 use App\Enums\EstadoPublicacion;
 use App\Enums\TipoMensaje;
-use App\Enums\TipoVacante;
 use App\Mail\AcuseDeRadicado;
 use App\Models\Aliado;
 use App\Models\Asociado;
@@ -54,6 +54,7 @@ class FormulariosPublicosTest extends TestCase
             'nombre' => 'Sin Autorización',
             'correo' => 'sin@ejemplo.test',
             'cargo_interes' => 'Bartender',
+            'categoria_cargo' => CargoDelSector::Barra->value,
         ])->assertSessionHasErrors('acepta_datos');
 
         $this->assertSame(0, Aspirante::count());
@@ -65,6 +66,7 @@ class FormulariosPublicosTest extends TestCase
             'nombre' => 'Duván Marín',
             'correo' => 'duvan@ejemplo.test',
             'cargo_interes' => 'Bartender',
+            'categoria_cargo' => CargoDelSector::Barra->value,
             'acepta_datos' => '1',
         ]);
 
@@ -152,19 +154,8 @@ class FormulariosPublicosTest extends TestCase
     {
         $asociado = Asociado::factory()->publicado()->create();
 
-        $publicada = Vacante::create([
-            'asociado_id' => $asociado->id,
-            'cargo' => 'Bartender de fin de semana',
-            'tipo' => TipoVacante::PorTurnos,
-            'estado' => EstadoPublicacion::Publicado,
-        ]);
-
-        $pendiente = Vacante::create([
-            'asociado_id' => $asociado->id,
-            'cargo' => 'Auxiliar de cocina sin aprobar',
-            'tipo' => TipoVacante::TiempoCompleto,
-            'estado' => EstadoPublicacion::PendienteAprobacion,
-        ]);
+        $publicada = Vacante::factory()->for($asociado)->publicado()->create(['cargo' => 'Bartender de fin de semana']);
+        $pendiente = Vacante::factory()->for($asociado)->pendiente()->create(['cargo' => 'Auxiliar de cocina sin aprobar']);
 
         $respuesta = $this->get(route('empleo.index'));
 

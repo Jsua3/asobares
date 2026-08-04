@@ -124,6 +124,8 @@
                     <x-publico.campo nombre="telefono" etiqueta="Teléfono o WhatsApp" tipo="tel" />
                     <x-publico.campo nombre="cargo_interes" etiqueta="Cargo que buscas" requerido
                                      placeholder="Bartender, mesero, chef, administrador…" />
+                    <x-publico.campo nombre="categoria_cargo" etiqueta="Área del establecimiento" tipo="select" requerido
+                                     :opciones="collect($categorias)->mapWithKeys(fn ($c) => [$c->value => $c->getLabel()])->all()" />
                 </div>
 
                 <x-publico.campo nombre="experiencia" etiqueta="Tu experiencia" tipo="textarea" filas="3"

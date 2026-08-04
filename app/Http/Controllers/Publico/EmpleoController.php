@@ -4,12 +4,17 @@ namespace App\Http\Controllers\Publico;
 
 use App\Enums\CargoDelSector;
 use App\Http\Requests\GuardarAspiranteRequest;
+use App\Http\Requests\GuardarPostulacionRequest;
+use App\Mail\NuevaPostulacion;
 use App\Models\Aspirante;
 use App\Models\Municipio;
+use App\Models\Postulacion;
 use App\Models\Vacante;
+use App\Support\DestinatariosDelAsociado;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 /**
@@ -66,9 +71,57 @@ class EmpleoController
         ]);
     }
 
+    /**
+     * Antes «postularse» era un enlace de WhatsApp: no quedaba rastro, el
+     * establecimiento no tenía dónde mirar y sin número no había forma de
+     * aplicar. Ahora la postulación se guarda y se avisa por correo.
+     */
+    public function postular(GuardarPostulacionRequest $request, Vacante $vacante): RedirectResponse
+    {
+        abort_unless($vacante->aceptaPostulaciones(), 404);
+
+        $datos = $request->datosDeLaPostulacion();
+
+        $postulacion = Postulacion::where('vacante_id', $vacante->id)
+            ->where('correo', $datos['correo'])
+            ->first();
+
+        // Reenviar el formulario actualiza los datos, no crea un duplicado ni
+        // vuelve a molestar al establecimiento con un correo repetido.
+        if ($postulacion instanceof Postulacion) {
+            $postulacion->update($datos);
+        } else {
+            $postulacion = $vacante->postulaciones()->create($datos);
+
+            $this->avisarAlEstablecimiento($postulacion);
+        }
+
+        return redirect()
+            ->route('empleo.show', $vacante)
+            ->with('exito', 'Enviamos tu postulación al establecimiento. Si les encaja tu perfil, te contactan directamente.')
+            ->withFragment('postularme');
+    }
+
+    private function avisarAlEstablecimiento(Postulacion $postulacion): void
+    {
+        $correos = DestinatariosDelAsociado::correos($postulacion->vacante->asociado);
+
+        if ($correos === []) {
+            // Sin correo no hay a quién avisar, pero la postulación ya quedó
+            // guardada: el establecimiento la verá al entrar a su cuenta.
+            return;
+        }
+
+        Mail::to($correos)->send(new NuevaPostulacion($postulacion));
+    }
+
     public function registrarAspirante(GuardarAspiranteRequest $request): RedirectResponse
     {
-        Aspirante::create($request->datosDelAspirante());
+        $datos = $request->datosDelAspirante();
+
+        // Volver a dejar el perfil actualiza el que ya existe: una persona,
+        // un registro. Antes cada reenvío creaba una fila nueva.
+        Aspirante::updateOrCreate(['correo' => $datos['correo']], $datos);
 
         return redirect()
             ->route('empleo.index')

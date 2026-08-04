@@ -2,12 +2,10 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\CargoDelSector;
 use App\Http\Requests\Concerns\ProtegeFormularioPublico;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class GuardarAspiranteRequest extends FormRequest
+class GuardarPostulacionRequest extends FormRequest
 {
     use ProtegeFormularioPublico;
 
@@ -23,8 +21,6 @@ class GuardarAspiranteRequest extends FormRequest
             'nombre' => ['required', 'string', 'max:120'],
             'correo' => ['required', 'email:rfc', 'max:180'],
             'telefono' => ['nullable', 'string', 'max:30'],
-            'cargo_interes' => ['required', 'string', 'max:80'],
-            'categoria_cargo' => ['required', Rule::enum(CargoDelSector::class)],
             'experiencia' => ['nullable', 'string', 'max:600'],
             ...$this->reglasHabeasData(),
             ...$this->reglasAntispam(),
@@ -35,15 +31,15 @@ class GuardarAspiranteRequest extends FormRequest
     public function messages(): array
     {
         return $this->mensajesComunes() + [
-            'cargo_interes.required' => 'Cuéntanos qué cargo estás buscando.',
+            'nombre.required' => 'Escribe tu nombre para que el establecimiento sepa quién eres.',
         ];
     }
 
     /** @return array<string, mixed> */
-    public function datosDelAspirante(): array
+    public function datosDeLaPostulacion(): array
     {
         return [
-            ...$this->safe()->only(['nombre', 'correo', 'telefono', 'cargo_interes', 'categoria_cargo', 'experiencia']),
+            ...$this->safe()->only(['nombre', 'correo', 'telefono', 'experiencia']),
             ...$this->selloDeConsentimiento(),
         ];
     }

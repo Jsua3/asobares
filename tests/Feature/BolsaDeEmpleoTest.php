@@ -3,9 +3,14 @@
 namespace Tests\Feature;
 
 use App\Enums\CargoDelSector;
+use App\Mail\NuevaPostulacion;
 use App\Models\Asociado;
+use App\Models\Aspirante;
+use App\Models\Postulacion;
 use App\Models\Vacante;
+use App\Support\Formulario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class BolsaDeEmpleoTest extends TestCase
@@ -85,5 +90,106 @@ class BolsaDeEmpleoTest extends TestCase
         ] as $vacante) {
             $this->get(route('empleo.show', $vacante))->assertNotFound();
         }
+    }
+
+    public function test_la_postulacion_queda_guardada_y_avisa_al_establecimiento(): void
+    {
+        Mail::fake();
+
+        $asociado = Asociado::factory()->publicado()->create(['correo_interno' => 'oficina@bar.test']);
+        $vacante = Vacante::factory()->for($asociado)->publicado()->create();
+
+        $this->post(route('empleo.postular', $vacante), [
+            'nombre' => 'Duván Marín',
+            'correo' => 'duvan@ejemplo.test',
+            'telefono' => '3145598821',
+            'experiencia' => 'Tres años en barra de discoteca.',
+            'acepta_datos' => '1',
+        ])->assertSessionHas('exito');
+
+        $postulacion = Postulacion::firstOrFail();
+
+        $this->assertSame($vacante->id, $postulacion->vacante_id);
+        $this->assertTrue($postulacion->acepta_datos);
+        $this->assertNotNull($postulacion->consentimiento_at);
+
+        Mail::assertSent(NuevaPostulacion::class, 1);
+    }
+
+    public function test_postularse_dos_veces_a_la_misma_vacante_no_duplica(): void
+    {
+        Mail::fake();
+
+        $vacante = Vacante::factory()->publicado()->create();
+        $datos = [
+            'nombre' => 'Duván Marín',
+            'correo' => 'duvan@ejemplo.test',
+            'acepta_datos' => '1',
+        ];
+
+        $this->post(route('empleo.postular', $vacante), $datos);
+        $this->post(route('empleo.postular', $vacante), $datos)->assertSessionHas('exito');
+
+        $this->assertSame(1, Postulacion::count());
+        Mail::assertSent(NuevaPostulacion::class, 1);
+    }
+
+    public function test_la_postulacion_exige_la_autorizacion_de_datos(): void
+    {
+        $vacante = Vacante::factory()->publicado()->create();
+
+        $this->post(route('empleo.postular', $vacante), [
+            'nombre' => 'Sin Autorización',
+            'correo' => 'sin@ejemplo.test',
+        ])->assertSessionHasErrors('acepta_datos');
+
+        $this->assertSame(0, Postulacion::count());
+    }
+
+    public function test_el_honeypot_descarta_la_postulacion_sin_dar_pistas(): void
+    {
+        $vacante = Vacante::factory()->publicado()->create();
+
+        $this->post(route('empleo.postular', $vacante), [
+            'nombre' => 'Bot',
+            'correo' => 'bot@ejemplo.test',
+            'acepta_datos' => '1',
+            Formulario::CAMPO_TRAMPA => 'soy-un-bot',
+        ])->assertStatus(422);
+
+        $this->assertSame(0, Postulacion::count());
+    }
+
+    public function test_no_se_puede_postular_a_una_vacante_cerrada_o_vencida(): void
+    {
+        foreach ([
+            Vacante::factory()->publicado()->cerrada()->create(),
+            Vacante::factory()->publicado()->vencida()->create(),
+            Vacante::factory()->pendiente()->create(),
+        ] as $vacante) {
+            $this->post(route('empleo.postular', $vacante), [
+                'nombre' => 'Tarde',
+                'correo' => 'tarde@ejemplo.test',
+                'acepta_datos' => '1',
+            ])->assertNotFound();
+        }
+
+        $this->assertSame(0, Postulacion::count());
+    }
+
+    public function test_dejar_el_perfil_dos_veces_actualiza_en_vez_de_duplicar(): void
+    {
+        $base = [
+            'correo' => 'duvan@ejemplo.test',
+            'cargo_interes' => 'Bartender',
+            'categoria_cargo' => CargoDelSector::Barra->value,
+            'acepta_datos' => '1',
+        ];
+
+        $this->post(route('empleo.aspirante'), $base + ['nombre' => 'Duvan Marin']);
+        $this->post(route('empleo.aspirante'), $base + ['nombre' => 'Duván Alexis Marín']);
+
+        $this->assertSame(1, Aspirante::count());
+        $this->assertSame('Duván Alexis Marín', Aspirante::firstOrFail()->nombre);
     }
 }
