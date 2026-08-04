@@ -30,6 +30,18 @@ class Vacante extends Model
 
     protected $guarded = ['id'];
 
+    /**
+     * Bandera transitoria, nunca persistida: la fijan `cerrar()` y
+     * `reabrir()` en `MisVacantesController` para que el guardado no se
+     * confunda con una edición de contenido.
+     *
+     * `FlujoDeAprobacionObserver` degrada a `pendiente_aprobacion` cualquier
+     * guardado de un registro publicado hecho por quien no puede publicar,
+     * sin distinguir qué cambió. Cerrar y reabrir no son eso: son un cambio
+     * de ciclo de vida que no pasa por aprobación (ver `VacantePolicy::cerrar()`).
+     */
+    public bool $saltaFlujoDeAprobacion = false;
+
     protected function casts(): array
     {
         return [

@@ -1,0 +1,265 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Enums\CargoDelSector;
+use App\Enums\EstadoDeGestion;
+use App\Enums\EstadoPublicacion;
+use App\Enums\TipoVacante;
+use App\Models\Asociado;
+use App\Models\Postulacion;
+use App\Models\User;
+use App\Models\Vacante;
+use Database\Seeders\RolYPermisoSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class MisVacantesTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(RolYPermisoSeeder::class);
+    }
+
+    private function duenioDe(Asociado $asociado): User
+    {
+        $usuario = User::factory()->create(['asociado_id' => $asociado->id]);
+        $usuario->syncRoles([User::ROL_ASOCIADO]);
+
+        return $usuario->fresh();
+    }
+
+    public function test_el_asociado_ve_solo_sus_vacantes(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create();
+        $mia = Vacante::factory()->for($asociado)->publicado()->create(['cargo' => 'Bartender de mi bar']);
+        $ajena = Vacante::factory()->publicado()->create(['cargo' => 'Mesero del bar vecino']);
+
+        $respuesta = $this->actingAs($this->duenioDe($asociado))->get(route('mi-cuenta.vacantes.index'));
+
+        $respuesta->assertSuccessful();
+        $respuesta->assertSee($mia->cargo);
+        $respuesta->assertDontSee($ajena->cargo);
+    }
+
+    public function test_el_equipo_del_gremio_no_entra_al_portal_del_asociado(): void
+    {
+        $usuario = User::factory()->create();
+        $usuario->syncRoles([User::ROL_SUBADMIN]);
+
+        $this->actingAs($usuario->fresh())->get(route('mi-cuenta.vacantes.index'))->assertForbidden();
+    }
+
+    public function test_la_vacante_recien_creada_queda_pendiente_de_aprobacion(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create();
+
+        $this->actingAs($this->duenioDe($asociado))
+            ->post(route('mi-cuenta.vacantes.store'), [
+                'cargo' => 'Bartender de fin de semana',
+                'categoria_cargo' => CargoDelSector::Barra->value,
+                'tipo' => TipoVacante::PorTurnos->value,
+                'descripcion' => 'Barra de alto volumen, viernes y sábados.',
+                'franja_horaria' => 'Vie y sáb, 8:00 p. m. – 4:00 a. m.',
+                'whatsapp_contacto' => '3151189203',
+            ])
+            ->assertRedirect(route('mi-cuenta.vacantes.index'));
+
+        $vacante = Vacante::firstOrFail();
+
+        $this->assertSame(EstadoPublicacion::PendienteAprobacion, $vacante->estado);
+        $this->assertSame($asociado->id, $vacante->asociado_id, 'El dueño sale de la sesión, nunca del formulario.');
+    }
+
+    public function test_el_asociado_no_puede_publicar_su_vacante_mandando_el_estado(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create();
+
+        $this->actingAs($this->duenioDe($asociado))
+            ->post(route('mi-cuenta.vacantes.store'), [
+                'cargo' => 'Mesero',
+                'categoria_cargo' => CargoDelSector::Servicio->value,
+                'tipo' => TipoVacante::PorTurnos->value,
+                'estado' => EstadoPublicacion::Publicado->value,
+                'asociado_id' => Asociado::factory()->publicado()->create()->id,
+            ]);
+
+        $vacante = Vacante::firstOrFail();
+
+        $this->assertSame(EstadoPublicacion::PendienteAprobacion, $vacante->estado);
+        $this->assertSame($asociado->id, $vacante->asociado_id);
+    }
+
+    public function test_el_empleo_momentaneo_exige_fecha_limite(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create();
+
+        $this->actingAs($this->duenioDe($asociado))
+            ->post(route('mi-cuenta.vacantes.store'), [
+                'cargo' => 'Bartender para una noche',
+                'categoria_cargo' => CargoDelSector::Barra->value,
+                'tipo' => TipoVacante::Momentaneo->value,
+            ])
+            ->assertSessionHasErrors('fecha_limite');
+
+        $this->assertSame(0, Vacante::count());
+    }
+
+    public function test_la_fecha_limite_no_puede_estar_en_el_pasado(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create();
+
+        $this->actingAs($this->duenioDe($asociado))
+            ->post(route('mi-cuenta.vacantes.store'), [
+                'cargo' => 'Bartender para una noche',
+                'categoria_cargo' => CargoDelSector::Barra->value,
+                'tipo' => TipoVacante::Momentaneo->value,
+                'fecha_limite' => now()->subWeek()->toDateString(),
+            ])
+            ->assertSessionHasErrors('fecha_limite');
+    }
+
+    public function test_un_asociado_sin_establecimiento_no_llega_al_formulario(): void
+    {
+        $huerfano = User::factory()->create(['asociado_id' => null]);
+        $huerfano->syncRoles([User::ROL_ASOCIADO]);
+
+        $this->actingAs($huerfano->fresh())->get(route('mi-cuenta.vacantes.crear'))->assertForbidden();
+    }
+
+    public function test_editar_una_vacante_publicada_la_devuelve_a_revision(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create();
+        $vacante = Vacante::factory()->for($asociado)->publicado()->create([
+            'cargo' => 'Bartender',
+            'motivo_devolucion' => 'Un motivo viejo que hay que limpiar.',
+        ]);
+
+        $this->actingAs($this->duenioDe($asociado))
+            ->put(route('mi-cuenta.vacantes.update', $vacante), [
+                'cargo' => 'Bartender con experiencia en coctelería',
+                'categoria_cargo' => CargoDelSector::Barra->value,
+                'tipo' => TipoVacante::PorTurnos->value,
+            ])
+            ->assertRedirect(route('mi-cuenta.vacantes.index'));
+
+        $actualizada = $vacante->fresh();
+
+        $this->assertSame('Bartender con experiencia en coctelería', $actualizada->cargo);
+        $this->assertSame(EstadoPublicacion::PendienteAprobacion, $actualizada->estado);
+        $this->assertNull($actualizada->motivo_devolucion, 'Al reenviar se borra el motivo anterior.');
+    }
+
+    public function test_un_asociado_no_edita_la_vacante_de_otro(): void
+    {
+        $ajena = Vacante::factory()->publicado()->create();
+        $intruso = $this->duenioDe(Asociado::factory()->publicado()->create());
+
+        $this->actingAs($intruso)
+            ->put(route('mi-cuenta.vacantes.update', $ajena), [
+                'cargo' => 'Cargo secuestrado',
+                'categoria_cargo' => CargoDelSector::Barra->value,
+                'tipo' => TipoVacante::PorTurnos->value,
+            ])
+            ->assertForbidden();
+
+        $this->assertNotSame('Cargo secuestrado', $ajena->fresh()->cargo);
+    }
+
+    public function test_cerrar_una_vacante_no_pasa_por_aprobacion(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create();
+        $vacante = Vacante::factory()->for($asociado)->publicado()->create();
+
+        $this->actingAs($this->duenioDe($asociado))
+            ->post(route('mi-cuenta.vacantes.cerrar', $vacante))
+            ->assertRedirect(route('mi-cuenta.vacantes.index'));
+
+        $cerrada = $vacante->fresh();
+
+        $this->assertTrue($cerrada->estaCerrada());
+        $this->assertSame(EstadoPublicacion::Publicado, $cerrada->estado, 'Cerrar no despublica: solo saca del muro.');
+    }
+
+    public function test_reabrir_una_vacante_vigente_la_devuelve_al_muro(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create();
+        $vacante = Vacante::factory()->for($asociado)->publicado()->cerrada()->create();
+
+        $this->actingAs($this->duenioDe($asociado))->post(route('mi-cuenta.vacantes.reabrir', $vacante));
+
+        $this->assertTrue($vacante->fresh()->estaVigente());
+    }
+
+    public function test_reabrir_una_vacante_vencida_avisa_que_hay_que_cambiar_la_fecha(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create();
+        $vacante = Vacante::factory()->for($asociado)->publicado()->cerrada()->vencida()->create();
+
+        $this->actingAs($this->duenioDe($asociado))
+            ->post(route('mi-cuenta.vacantes.reabrir', $vacante))
+            ->assertSessionHas('error');
+
+        $this->assertTrue($vacante->fresh()->estaCerrada(), 'Sigue cerrada: reabrirla no la haría visible igual.');
+    }
+
+    public function test_el_dueno_ve_los_datos_de_quienes_se_postularon(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create();
+        $vacante = Vacante::factory()->for($asociado)->publicado()->create();
+        $postulacion = Postulacion::factory()->for($vacante)->create([
+            'nombre' => 'Duván Marín',
+            'correo' => 'duvan@ejemplo.test',
+        ]);
+
+        $respuesta = $this->actingAs($this->duenioDe($asociado))
+            ->get(route('mi-cuenta.vacantes.show', $vacante));
+
+        $respuesta->assertSuccessful();
+        $respuesta->assertSee('Duván Marín');
+        $respuesta->assertSee('duvan@ejemplo.test');
+        $this->assertSame($vacante->id, $postulacion->vacante_id);
+    }
+
+    public function test_un_asociado_no_ve_las_postulaciones_de_otro(): void
+    {
+        $ajena = Vacante::factory()->publicado()->create();
+        Postulacion::factory()->for($ajena)->create(['nombre' => 'Candidato Ajeno']);
+
+        $intruso = $this->duenioDe(Asociado::factory()->publicado()->create());
+
+        $this->actingAs($intruso)->get(route('mi-cuenta.vacantes.show', $ajena))->assertForbidden();
+    }
+
+    public function test_el_dueno_marca_una_postulacion_como_contactada(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create();
+        $postulacion = Postulacion::factory()
+            ->for(Vacante::factory()->for($asociado)->publicado())
+            ->create();
+
+        $this->actingAs($this->duenioDe($asociado))
+            ->patch(route('mi-cuenta.postulaciones.gestionar', $postulacion), [
+                'estado' => EstadoDeGestion::Contactado->value,
+            ]);
+
+        $this->assertSame(EstadoDeGestion::Contactado, $postulacion->fresh()->estado);
+    }
+
+    public function test_un_asociado_no_gestiona_postulaciones_ajenas(): void
+    {
+        $postulacion = Postulacion::factory()->for(Vacante::factory()->publicado())->create();
+        $intruso = $this->duenioDe(Asociado::factory()->publicado()->create());
+
+        $this->actingAs($intruso)
+            ->patch(route('mi-cuenta.postulaciones.gestionar', $postulacion), [
+                'estado' => EstadoDeGestion::Descartado->value,
+            ])
+            ->assertForbidden();
+
+        $this->assertSame(EstadoDeGestion::Nuevo, $postulacion->fresh()->estado);
+    }
+}

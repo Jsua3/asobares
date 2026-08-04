@@ -21,6 +21,12 @@ class FlujoDeAprobacionObserver
 {
     public function saving(Model $modelo): void
     {
+        // Escape puntual para cambios de ciclo de vida que no son edición de
+        // contenido (cerrar/reabrir una vacante): ver `Vacante::$saltaFlujoDeAprobacion`.
+        if ($modelo->saltaFlujoDeAprobacion ?? false) {
+            return;
+        }
+
         $usuario = Auth::user();
 
         // Semillas, comandos de consola y jobs no pasan por el flujo.

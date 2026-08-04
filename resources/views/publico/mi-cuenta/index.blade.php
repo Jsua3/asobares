@@ -16,6 +16,13 @@
             </p>
         </header>
 
+        <nav class="mt-6 flex flex-wrap gap-3">
+            <a href="{{ route('mi-cuenta.vacantes.index') }}"
+               class="rounded-xl border border-linea-fuerte px-5 py-2.5 text-sm font-semibold hover:border-marca-500/50">
+                Mis vacantes
+            </a>
+        </nav>
+
         @if (session('exito'))
             <x-publico.alerta class="mt-8">{{ session('exito') }}</x-publico.alerta>
         @endif

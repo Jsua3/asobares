@@ -10,6 +10,7 @@ use App\Http\Controllers\Publico\EventoController;
 use App\Http\Controllers\Publico\GuiaController;
 use App\Http\Controllers\Publico\InicioController;
 use App\Http\Controllers\Publico\MiCuentaController;
+use App\Http\Controllers\Publico\MisVacantesController;
 use App\Http\Controllers\Publico\NoticiaController;
 use App\Http\Controllers\Publico\PaginaController;
 use App\Http\Controllers\Publico\ProveedorController;
@@ -108,6 +109,23 @@ Route::middleware(['auth', 'rol.asociado'])->group(function (): void {
     Route::post('/mi-cuenta/pagar', [MiCuentaController::class, 'pagarMensualidad'])
         ->middleware('throttle:5,1')
         ->name('mi-cuenta.pagar');
+
+    // Bolsa de empleo: el establecimiento publica y corrige lo suyo.
+    Route::get('/mi-cuenta/vacantes', [MisVacantesController::class, 'index'])->name('mi-cuenta.vacantes.index');
+    Route::get('/mi-cuenta/vacantes/crear', [MisVacantesController::class, 'crear'])->name('mi-cuenta.vacantes.crear');
+    Route::post('/mi-cuenta/vacantes', [MisVacantesController::class, 'store'])
+        ->middleware('throttle:20,1')
+        ->name('mi-cuenta.vacantes.store');
+    Route::get('/mi-cuenta/vacantes/{vacante}/editar', [MisVacantesController::class, 'editar'])->name('mi-cuenta.vacantes.editar');
+    Route::put('/mi-cuenta/vacantes/{vacante}', [MisVacantesController::class, 'update'])
+        ->middleware('throttle:20,1')
+        ->name('mi-cuenta.vacantes.update');
+    Route::post('/mi-cuenta/vacantes/{vacante}/cerrar', [MisVacantesController::class, 'cerrar'])->name('mi-cuenta.vacantes.cerrar');
+    Route::post('/mi-cuenta/vacantes/{vacante}/reabrir', [MisVacantesController::class, 'reabrir'])->name('mi-cuenta.vacantes.reabrir');
+    Route::get('/mi-cuenta/vacantes/{vacante}', [MisVacantesController::class, 'show'])->name('mi-cuenta.vacantes.show');
+    Route::patch('/mi-cuenta/postulaciones/{postulacion}', [MisVacantesController::class, 'gestionarPostulacion'])
+        ->middleware('throttle:60,1')
+        ->name('mi-cuenta.postulaciones.gestionar');
 });
 
 /*
