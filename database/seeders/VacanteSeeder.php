@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\CargoDelSector;
 use App\Enums\EstadoPublicacion;
 use App\Enums\TipoVacante;
 use App\Models\Asociado;
@@ -93,22 +94,23 @@ class VacanteSeeder extends Seeder
     private function registrarAspirantes(): void
     {
         $aspirantes = [
-            ['Duván Alexis Marín', 'duvan.marin@ejemplo.test', '3145598821', 'Bartender', 'Tres años en barra de discoteca en Pereira. Manejo coctelería clásica y flair básico.'],
-            ['Yuliana Andrea Correa', 'yuliana.correa@ejemplo.test', '3106612077', 'Mesera', 'Un año en restaurante de hotel. Manejo de bandeja y atención en inglés básico.'],
-            ['Cristian Camilo Peña', 'cristian.pena@ejemplo.test', '3122234509', 'Chef', 'Técnico en cocina del SENA, dos años como segundo de cocina en gastrobar.'],
-            ['Marisol Henao Ospina', 'marisol.henao@ejemplo.test', '3178840162', 'Administradora', 'Cinco años administrando un bar en Armenia. Manejo de nómina y de visitas de control.'],
-            ['Brayan Stiven Loaiza', 'brayan.loaiza@ejemplo.test', '3160091144', 'Auxiliar de cocina', 'Primer empleo. Certificado de manipulación de alimentos vigente.'],
-            ['Leidy Johana Ramírez', 'leidy.ramirez@ejemplo.test', '3134461730', 'Bartender', 'Dos años en coctelería de autor. Busco turnos de fin de semana.'],
-            ['Andrés Mauricio Toro', 'andres.toro@ejemplo.test', '3197712285', 'Portero', 'Curso de vigilancia vigente y cuatro años en control de acceso.'],
+            ['Duván Alexis Marín', 'duvan.marin@ejemplo.test', '3145598821', 'Bartender', CargoDelSector::Barra, 'Tres años en barra de discoteca en Pereira. Manejo coctelería clásica y flair básico.'],
+            ['Yuliana Andrea Correa', 'yuliana.correa@ejemplo.test', '3106612077', 'Mesera', CargoDelSector::Servicio, 'Un año en restaurante de hotel. Manejo de bandeja y atención en inglés básico.'],
+            ['Cristian Camilo Peña', 'cristian.pena@ejemplo.test', '3122234509', 'Chef', CargoDelSector::Cocina, 'Técnico en cocina del SENA, dos años como segundo de cocina en gastrobar.'],
+            ['Marisol Henao Ospina', 'marisol.henao@ejemplo.test', '3178840162', 'Administradora', CargoDelSector::Administracion, 'Cinco años administrando un bar en Armenia. Manejo de nómina y de visitas de control.'],
+            ['Brayan Stiven Loaiza', 'brayan.loaiza@ejemplo.test', '3160091144', 'Auxiliar de cocina', CargoDelSector::Cocina, 'Primer empleo. Certificado de manipulación de alimentos vigente.'],
+            ['Leidy Johana Ramírez', 'leidy.ramirez@ejemplo.test', '3134461730', 'Bartender', CargoDelSector::Barra, 'Dos años en coctelería de autor. Busco turnos de fin de semana.'],
+            ['Andrés Mauricio Toro', 'andres.toro@ejemplo.test', '3197712285', 'Portero', CargoDelSector::Seguridad, 'Curso de vigilancia vigente y cuatro años en control de acceso.'],
         ];
 
-        foreach ($aspirantes as [$nombre, $correo, $telefono, $cargo, $experiencia]) {
+        foreach ($aspirantes as [$nombre, $correo, $telefono, $cargo, $categoria, $experiencia]) {
             Aspirante::updateOrCreate(
                 ['correo' => $correo],
                 [
                     'nombre' => $nombre,
                     'telefono' => $telefono,
                     'cargo_interes' => $cargo,
+                    'categoria_cargo' => $categoria,
                     'experiencia' => $experiencia,
                     'acepta_datos' => true,
                     'consentimiento_at' => now()->subDays(random_int(1, 14)),

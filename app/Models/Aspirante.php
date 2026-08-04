@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use App\Enums\CargoDelSector;
+use App\Enums\EstadoDeGestion;
 use Database\Factories\AspiranteFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Quien busca empleo en el sector: bartender, chef, mesero, administrador...
+ * Banco de talento del gremio: bartender, chef, mesero, administrador...
+ *
+ * Es distinto de una postulación. Aquí la persona deja su perfil sin apuntar
+ * a ninguna vacante, para los cargos escasos que el gremio conecta a mano.
  */
 class Aspirante extends Model
 {
@@ -22,14 +26,10 @@ class Aspirante extends Model
     protected function casts(): array
     {
         return [
+            'categoria_cargo' => CargoDelSector::class,
+            'estado' => EstadoDeGestion::class,
             'acepta_datos' => 'boolean',
             'consentimiento_at' => 'datetime',
         ];
-    }
-
-    /** @return BelongsTo<Vacante, $this> */
-    public function vacante(): BelongsTo
-    {
-        return $this->belongsTo(Vacante::class);
     }
 }
