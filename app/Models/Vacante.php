@@ -6,6 +6,7 @@ use App\Enums\CargoDelSector;
 use App\Enums\EstadoPublicacion;
 use App\Enums\TipoVacante;
 use App\Models\Concerns\EsPublicable;
+use Closure;
 use Database\Factories\VacanteFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,14 +32,18 @@ class Vacante extends Model
     protected $guarded = ['id'];
 
     /**
-     * Bandera transitoria, nunca persistida: la fijan `cerrar()` y
-     * `reabrir()` en `MisVacantesController` para que el guardado no se
-     * confunda con una edición de contenido.
+     * Bandera transitoria, nunca persistida: la lee `FlujoDeAprobacionObserver`
+     * (con un `instanceof Vacante` explícito) para no confundir un cambio de
+     * ciclo de vida con una edición de contenido.
      *
      * `FlujoDeAprobacionObserver` degrada a `pendiente_aprobacion` cualquier
      * guardado de un registro publicado hecho por quien no puede publicar,
-     * sin distinguir qué cambió. Cerrar y reabrir no son eso: son un cambio
-     * de ciclo de vida que no pasa por aprobación (ver `VacantePolicy::cerrar()`).
+     * sin distinguir qué cambió. Cerrar y reabrir no son eso (ver
+     * `VacantePolicy::cerrar()`), así que `cerrar()` y `reabrir()` la
+     * encienden solo mientras dura su propio guardado, a través de
+     * `sinFlujoDeAprobacion()`, que la apaga siempre —incluso si el
+     * guardado lanza una excepción— para que nunca quede encendida entre
+     * llamadas.
      */
     public bool $saltaFlujoDeAprobacion = false;
 
@@ -100,6 +105,36 @@ class Vacante extends Model
     public function aceptaPostulaciones(): bool
     {
         return $this->estaPublicado() && $this->estaVigente();
+    }
+
+    /** «Ya contraté»: sale del muro sin pasar por la secretaría. */
+    public function cerrar(): void
+    {
+        $this->sinFlujoDeAprobacion(fn (): bool => $this->update(['cerrada_at' => now()]));
+    }
+
+    /** No pasa por aprobación: ver `VacantePolicy::cerrar()`. */
+    public function reabrir(): void
+    {
+        $this->sinFlujoDeAprobacion(fn (): bool => $this->update(['cerrada_at' => null]));
+    }
+
+    /**
+     * Ejecuta un guardado que no debe pasar por el flujo de aprobación. La
+     * bandera se apaga siempre, incluso si `$cambio` lanza una excepción,
+     * para que nunca quede encendida entre llamadas.
+     *
+     * @param  Closure(): mixed  $cambio
+     */
+    private function sinFlujoDeAprobacion(Closure $cambio): void
+    {
+        $this->saltaFlujoDeAprobacion = true;
+
+        try {
+            $cambio();
+        } finally {
+            $this->saltaFlujoDeAprobacion = false;
+        }
     }
 
     public function getActivitylogOptions(): LogOptions

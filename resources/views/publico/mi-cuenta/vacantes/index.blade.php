@@ -80,7 +80,7 @@
                                 <a href="{{ route('mi-cuenta.vacantes.show', $vacante) }}"
                                    class="rounded-xl border border-linea-fuerte px-4 py-2 text-sm font-semibold hover:border-marca-500/50">
                                     {{ $vacante->postulaciones_count }}
-                                    {{ Str::plural('postulación', $vacante->postulaciones_count) }}
+                                    {{ $vacante->postulaciones_count === 1 ? 'postulación' : 'postulaciones' }}
                                 </a>
                                 <a href="{{ route('mi-cuenta.vacantes.editar', $vacante) }}"
                                    class="text-sm text-acento hover:text-acento-fuerte">Editar</a>

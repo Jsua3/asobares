@@ -10,7 +10,7 @@
             <h1 class="mt-3 font-display text-3xl font-bold tracking-tight">{{ $vacante->cargo }}</h1>
             <p class="mt-1.5 text-sm text-tenue">
                 {{ $vacante->tipo->getLabel() }} · {{ $postulaciones->total() }}
-                {{ Str::plural('postulación', $postulaciones->total()) }}
+                {{ $postulaciones->total() === 1 ? 'postulación' : 'postulaciones' }}
             </p>
         </header>
 

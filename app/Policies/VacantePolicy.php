@@ -24,6 +24,18 @@ class VacantePolicy
         return $usuario->can('ver_vacante') || $this->esDelEstablecimiento($usuario, $vacante);
     }
 
+    /**
+     * El detalle en `/mi-cuenta` expone datos personales de quien se
+     * postuló (nombre, correo, teléfono). Ahí no basta con `ver_vacante`:
+     * un directivo que además tenga rol `asociado` (dueño de otro
+     * establecimiento) pasaría por permiso y no por propiedad si esta
+     * ruta usara `view`. Solo el dueño entra.
+     */
+    public function verEnPortal(User $usuario, Vacante $vacante): bool
+    {
+        return $this->esDelEstablecimiento($usuario, $vacante);
+    }
+
     /** Publicar vacantes es de los asociados: el gremio no publica por ellos. */
     public function create(User $usuario): bool
     {

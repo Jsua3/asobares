@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Enums\EstadoPublicacion;
 use App\Models\User;
+use App\Models\Vacante;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
@@ -23,7 +24,12 @@ class FlujoDeAprobacionObserver
     {
         // Escape puntual para cambios de ciclo de vida que no son edición de
         // contenido (cerrar/reabrir una vacante): ver `Vacante::$saltaFlujoDeAprobacion`.
-        if ($modelo->saltaFlujoDeAprobacion ?? false) {
+        // El `instanceof` es obligatorio: sin él, `$modelo->saltaFlujoDeAprobacion`
+        // en cualquiera de los otros ocho modelos publicables pasaría por el
+        // `__get` de Eloquent (atributos, relaciones, accessors) en vez de leer
+        // una propiedad de PHP, dejando la puerta abierta a que una futura
+        // columna o accessor con ese nombre apague RF-37 en silencio.
+        if ($modelo instanceof Vacante && $modelo->saltaFlujoDeAprobacion) {
             return;
         }
 

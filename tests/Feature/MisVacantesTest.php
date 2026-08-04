@@ -262,4 +262,96 @@ class MisVacantesTest extends TestCase
 
         $this->assertSame(EstadoDeGestion::Nuevo, $postulacion->fresh()->estado);
     }
+
+    public function test_un_intruso_no_puede_cerrar_una_vacante_ajena(): void
+    {
+        $ajena = Vacante::factory()->publicado()->create();
+        $intruso = $this->duenioDe(Asociado::factory()->publicado()->create());
+
+        $this->actingAs($intruso)
+            ->post(route('mi-cuenta.vacantes.cerrar', $ajena))
+            ->assertForbidden();
+
+        $this->assertFalse($ajena->fresh()->estaCerrada());
+    }
+
+    public function test_un_intruso_no_puede_reabrir_una_vacante_ajena(): void
+    {
+        $ajena = Vacante::factory()->publicado()->cerrada()->create();
+        $intruso = $this->duenioDe(Asociado::factory()->publicado()->create());
+
+        $this->actingAs($intruso)
+            ->post(route('mi-cuenta.vacantes.reabrir', $ajena))
+            ->assertForbidden();
+
+        $this->assertTrue($ajena->fresh()->estaCerrada());
+    }
+
+    /**
+     * Un directivo del gremio que también es dueño de un establecimiento
+     * entra a /mi-cuenta con la sesión de asociado (RolYPermisoSeeder le da
+     * `ver_vacante` como subadmin). `VacantePolicy::view()` concede por ese
+     * permiso, no solo por propiedad: sin una habilidad específica para el
+     * portal, vería las postulaciones de un establecimiento ajeno.
+     */
+    public function test_un_directivo_que_tambien_es_asociado_no_ve_las_postulaciones_de_otro_establecimiento(): void
+    {
+        $ajena = Vacante::factory()->publicado()->create();
+
+        $directivo = $this->duenioDe(Asociado::factory()->publicado()->create());
+        $directivo->syncRoles([User::ROL_ASOCIADO, User::ROL_SUBADMIN]);
+
+        $this->actingAs($directivo->fresh())
+            ->get(route('mi-cuenta.vacantes.show', $ajena))
+            ->assertForbidden();
+    }
+
+    /**
+     * `GuardarVacanteRequest::datosDeLaVacante()` solo deja pasar los campos
+     * del formulario: mandar `saltaFlujoDeAprobacion` en el payload no
+     * activa el escape de `Vacante` (que además es una propiedad de PHP, no
+     * un atributo del modelo, así que un `fill()` jamás la toca).
+     */
+    public function test_mandar_salta_flujo_de_aprobacion_en_el_payload_no_activa_el_escape(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create();
+
+        $this->actingAs($this->duenioDe($asociado))
+            ->post(route('mi-cuenta.vacantes.store'), [
+                'cargo' => 'Bartender',
+                'categoria_cargo' => CargoDelSector::Barra->value,
+                'tipo' => TipoVacante::PorTurnos->value,
+                'saltaFlujoDeAprobacion' => '1',
+            ]);
+
+        $this->assertSame(EstadoPublicacion::PendienteAprobacion, Vacante::firstOrFail()->estado);
+
+        $publicada = Vacante::factory()->for($asociado)->publicado()->create();
+
+        $this->actingAs($this->duenioDe($asociado))
+            ->put(route('mi-cuenta.vacantes.update', $publicada), [
+                'cargo' => 'Bartender con experiencia',
+                'categoria_cargo' => CargoDelSector::Barra->value,
+                'tipo' => TipoVacante::PorTurnos->value,
+                'saltaFlujoDeAprobacion' => '1',
+            ]);
+
+        $this->assertSame(EstadoPublicacion::PendienteAprobacion, $publicada->fresh()->estado);
+    }
+
+    /**
+     * El escape del observer es exclusivo de `Vacante::cerrar()` y
+     * `Vacante::reabrir()`: un `update()` normal sobre una vacante publicada,
+     * hecho por quien no puede publicar, se sigue degradando a pendiente.
+     */
+    public function test_actualizar_una_vacante_publicada_sin_pasar_por_cerrar_la_sigue_degradando(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create();
+        $vacante = Vacante::factory()->for($asociado)->publicado()->create();
+
+        $this->actingAs($this->duenioDe($asociado));
+        $vacante->update(['franja_horaria' => 'Turno nuevo']);
+
+        $this->assertSame(EstadoPublicacion::PendienteAprobacion, $vacante->fresh()->estado);
+    }
 }

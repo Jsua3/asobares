@@ -101,8 +101,7 @@ class MisVacantesController
     {
         Gate::authorize('cerrar', $vacante);
 
-        $vacante->saltaFlujoDeAprobacion = true;
-        $vacante->update(['cerrada_at' => now()]);
+        $vacante->cerrar();
 
         return redirect()
             ->route('mi-cuenta.vacantes.index')
@@ -120,8 +119,7 @@ class MisVacantesController
                 ->with('error', 'Esa vacante ya pasó su fecha límite. Edítala con una fecha nueva para volver a publicarla.');
         }
 
-        $vacante->saltaFlujoDeAprobacion = true;
-        $vacante->update(['cerrada_at' => null]);
+        $vacante->reabrir();
 
         return redirect()
             ->route('mi-cuenta.vacantes.index')
@@ -130,7 +128,7 @@ class MisVacantesController
 
     public function show(Vacante $vacante): View
     {
-        Gate::authorize('view', $vacante);
+        Gate::authorize('verEnPortal', $vacante);
 
         return view('publico.mi-cuenta.vacantes.show', [
             'vacante' => $vacante,
