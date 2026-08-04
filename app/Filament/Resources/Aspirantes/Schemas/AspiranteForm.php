@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Aspirantes\Schemas;
 
+use App\Enums\CargoDelSector;
+use App\Enums\EstadoDeGestion;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -38,12 +40,16 @@ class AspiranteForm
                             ->label('Teléfono')
                             ->tel()
                             ->maxLength(30),
-                        Select::make('vacante_id')
-                            ->label('Vacante a la que aplicó')
-                            ->relationship('vacante', 'cargo')
-                            ->searchable()
-                            ->preload()
-                            ->helperText('Vacío si dejó su perfil sin aplicar a una vacante puntual.'),
+                        Select::make('categoria_cargo')
+                            ->label('Área del establecimiento')
+                            ->options(CargoDelSector::class)
+                            ->required()
+                            ->native(false),
+                        Select::make('estado')
+                            ->label('Estado de gestión')
+                            ->options(EstadoDeGestion::class)
+                            ->required()
+                            ->native(false),
                         Textarea::make('experiencia')
                             ->label('Experiencia')
                             ->rows(4)

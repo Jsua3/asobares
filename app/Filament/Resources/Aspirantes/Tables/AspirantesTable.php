@@ -33,9 +33,13 @@ class AspirantesTable
                 TextColumn::make('telefono')
                     ->label('Teléfono')
                     ->searchable(),
-                TextColumn::make('vacante.cargo')
-                    ->label('Aplicó a')
-                    ->placeholder('Perfil general')
+                TextColumn::make('categoria_cargo')
+                    ->label('Área')
+                    ->badge()
+                    ->sortable(),
+                TextColumn::make('estado')
+                    ->label('Gestión')
+                    ->badge()
                     ->sortable(),
                 IconColumn::make('acepta_datos')
                     ->label('Datos')
