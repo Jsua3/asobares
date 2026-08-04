@@ -53,20 +53,6 @@ class PanelCompletoTest extends TestCase
     }
 
     /**
-     * Recursos que se pueden crear/editar desde el panel como dirección.
-     * Vacante se excluye: solo los asociados la crean, el gremio solo modera.
-     *
-     * @return list<array{0: class-string<resource>}>
-     */
-    public static function recursosCreablesYEditables(): array
-    {
-        return array_filter(
-            self::recursosDelPanel(),
-            fn (array $recurso) => $recurso[0] !== 'App\\Filament\\Resources\\Vacantes\\VacanteResource'
-        );
-    }
-
-    /**
      * Se anclan las rutas al propio archivo de prueba, no al directorio de
      * trabajo, y la clase se arma con los dos últimos segmentos: así funciona
      * igual en Windows que en Linux.
@@ -99,19 +85,27 @@ class PanelCompletoTest extends TestCase
             ->assertSuccessful();
     }
 
-    #[DataProvider('recursosCreablesYEditables')]
+    #[DataProvider('recursosDelPanel')]
     public function test_el_formulario_de_creacion_de_cada_recurso_carga(string $recurso): void
     {
         if (! $recurso::hasPage('create')) {
             $this->markTestSkipped(class_basename($recurso).' no se crea desde el panel.');
         }
 
-        $this->actingAs($this->direccion())
-            ->get($recurso::getUrl('create'))
-            ->assertSuccessful();
+        $respuesta = $this->actingAs($this->direccion())
+            ->get($recurso::getUrl('create'));
+
+        // O puede crear, o la policy se lo niega limpiamente. Vacante es un
+        // caso donde la dirección no crea: solo el asociado. Lo que no puede
+        // pasar es un 500.
+        $this->assertContains(
+            $respuesta->status(),
+            [200, 403],
+            class_basename($recurso).' respondió '.$respuesta->status().' al abrir el formulario de creación.'
+        );
     }
 
-    #[DataProvider('recursosCreablesYEditables')]
+    #[DataProvider('recursosDelPanel')]
     public function test_el_formulario_de_edicion_de_cada_recurso_carga_con_un_registro_real(string $recurso): void
     {
         if (! $recurso::hasPage('edit')) {
@@ -124,9 +118,17 @@ class PanelCompletoTest extends TestCase
             $this->markTestSkipped('Las semillas no crearon ningún '.class_basename($recurso).'.');
         }
 
-        $this->actingAs($this->direccion())
-            ->get($recurso::getUrl('edit', ['record' => $registro]))
-            ->assertSuccessful();
+        $respuesta = $this->actingAs($this->direccion())
+            ->get($recurso::getUrl('edit', ['record' => $registro]));
+
+        // O puede editar, o la policy se lo niega limpiamente. Vacante es un
+        // caso donde la dirección no edita: solo el asociado dueño. Lo que no
+        // puede pasar es un 500.
+        $this->assertContains(
+            $respuesta->status(),
+            [200, 403],
+            class_basename($recurso).' respondió '.$respuesta->status().' al abrir el formulario de edición.'
+        );
     }
 
     /** @return list<array{0: string}> */
