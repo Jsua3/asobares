@@ -26,7 +26,14 @@ class RolYPermisoSeeder extends Seeder
     public const array CATALOGOS = ['beneficio', 'municipio', 'categoria'];
 
     /** Bandejas que la secretaría sí gestiona por completo. */
-    public const array BANDEJAS = ['mensaje', 'aspirante', 'inscripcion'];
+    public const array BANDEJAS = ['mensaje', 'aspirante', 'inscripcion', 'postulacion'];
+
+    /**
+     * Las bolsas las publican terceros —el asociado su vacante, el artista y
+     * el proveedor su ficha—, así que aprobarlas es trabajo de secretaría.
+     * El contenido que ella misma redacta lo sigue aprobando la dirección.
+     */
+    public const array PUBLICAR_BOLSAS = ['publicar_vacante', 'publicar_artista', 'publicar_proveedor'];
 
     public function run(): void
     {
@@ -69,7 +76,8 @@ class RolYPermisoSeeder extends Seeder
         $superAdmin->syncPermissions(Permission::all());
 
         // La secretaría hace todo menos publicar, y no toca usuarios,
-        // ajustes, cartera, transacciones ni bitácora.
+        // ajustes, cartera, transacciones ni bitácora. La excepción son las
+        // bolsas: ahí sí aprueba, porque el contenido lo escribe un tercero.
         $permisosSubadmin = collect($permisos)
             ->reject(fn (string $permiso): bool => str_starts_with($permiso, 'publicar_')
                 || str_ends_with($permiso, '_usuario')
@@ -78,6 +86,8 @@ class RolYPermisoSeeder extends Seeder
                 || str_ends_with($permiso, '_transaccion')
                 || str_ends_with($permiso, '_bitacora')
                 || str_starts_with($permiso, 'eliminar_'))
+            ->merge(self::PUBLICAR_BOLSAS)
+            ->unique()
             ->values()
             ->all();
 
