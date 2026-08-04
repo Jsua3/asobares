@@ -20,7 +20,11 @@ class GuardarMensajeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tipo' => ['required', Rule::enum(TipoMensaje::class)],
+            // `sometimes`: el formulario de contacto trae un selector de tipo,
+            // pero el de afiliación no manda nada —su tipo lo fija el
+            // controlador—. Exigirlo aquí hacía fallar toda solicitud de
+            // afiliación del sitio.
+            'tipo' => ['sometimes', 'required', Rule::enum(TipoMensaje::class)],
             'nombre' => ['required', 'string', 'max:120'],
             'correo' => ['required', 'email:rfc', 'max:180'],
             'telefono' => ['nullable', 'string', 'max:30'],
@@ -43,8 +47,9 @@ class GuardarMensajeRequest extends FormRequest
     {
         return [
             ...$this->safe()->only(['nombre', 'correo', 'telefono', 'mensaje']),
-            // La validación acepta el valor, pero quien lo consume espera el enum.
-            'tipo' => TipoMensaje::from($this->string('tipo')->toString()),
+            // La validación acepta el valor, pero quien lo consume espera el
+            // enum. Sin `tipo` en la petición manda quien llama al controlador.
+            'tipo' => TipoMensaje::tryFrom($this->string('tipo')->toString()) ?? TipoMensaje::Contacto,
             ...$this->selloDeConsentimiento(),
         ];
     }

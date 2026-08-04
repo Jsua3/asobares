@@ -12,13 +12,16 @@ use App\Models\Proveedor;
 use App\Models\RequisitoApertura;
 use App\Models\Vacante;
 use App\Observers\FlujoDeAprobacionObserver;
+use App\Observers\LimpiezaDeArchivosObserver;
 use Filament\Resources\Resource;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
+use RuntimeException;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,8 +49,14 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->asegurarConfiguracionDeProduccion();
+
         foreach (self::MODELOS_PUBLICABLES as $modelo) {
             $modelo::observe(FlujoDeAprobacionObserver::class);
+        }
+
+        foreach (array_keys(LimpiezaDeArchivosObserver::CAMPOS_POR_MODELO) as $modelo) {
+            $modelo::observe(LimpiezaDeArchivosObserver::class);
         }
 
         $this->registrarReglaDeYoutube();
@@ -57,6 +66,36 @@ class AppServiceProvider extends ServiceProvider
         // inglesa. En español solo va mayúscula la primera: sin esto se lee
         // «Mensajes Y PQR» o «Iniciativas Del Gremio».
         Resource::titleCaseModelLabel(false);
+    }
+
+    /**
+     * Producción no arranca con la configuración del demo.
+     *
+     * Vale más un despliegue que se cae en el primer minuto que uno que sirve
+     * la página de error de Laravel con las llaves de Bold dentro, o que
+     * escribe cada PQR con los datos del ciudadano en storage/logs.
+     */
+    private function asegurarConfiguracionDeProduccion(): void
+    {
+        if (! $this->app->isProduction()) {
+            return;
+        }
+
+        URL::forceScheme('https');
+
+        if (config('app.debug')) {
+            throw new RuntimeException(
+                'APP_DEBUG tiene que estar en false en producción: la página de error publica '
+                .'el cuerpo de la petición, las cabeceras y las variables de entorno.'
+            );
+        }
+
+        if (config('mail.default') === 'log') {
+            throw new RuntimeException(
+                'MAIL_MAILER=log en producción escribe el contenido de cada PQR, con los datos '
+                .'personales del ciudadano, en storage/logs. Configura un mailer real.'
+            );
+        }
     }
 
     /** RF-39: la bitácora también registra entradas y salidas al panel. */

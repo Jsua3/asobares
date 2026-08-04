@@ -43,7 +43,7 @@
                 @if ($aprobada)
                     @if ($transaccion->concepto === \App\Enums\ConceptoTransaccion::Evento)
                         Tu inscripción a «{{ $transaccion->inscripcion?->evento?->titulo }}» quedó confirmada.
-                        Te enviamos los detalles a {{ $transaccion->inscripcion?->correo }}.
+                        Te enviamos los detalles al correo que registraste.
                     @elseif ($transaccion->concepto === \App\Enums\ConceptoTransaccion::Mensualidad)
                         Tu estado de cuenta quedó al día. Gracias por mantener el gremio funcionando.
                     @else

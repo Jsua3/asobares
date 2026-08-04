@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\Asociados\Schemas;
 
 use App\Enums\EstadoPublicacion;
+use App\Filament\Forms\Components\SubidaSegura;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
@@ -80,14 +80,10 @@ class AsociadoForm
 
                 Section::make('Imágenes')
                     ->schema([
-                        FileUpload::make('foto_portada')
+                        SubidaSegura::make('foto_portada')
                             ->label('Foto de portada')
-                            ->image()
-                            ->disk('public')
-                            ->directory('asociados')
-                            ->maxSize(5120)
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->helperText('JPG, PNG o WebP, máximo 5 MB.'),
+                            ->imagen()
+                            ->directory('asociados'),
                         SpatieMediaLibraryFileUpload::make('galeria')
                             ->label('Galería')
                             ->collection('galeria')

@@ -49,7 +49,7 @@ class PasarelaBold implements PasarelaDePago
                 ],
                 'description' => $transaccion->concepto->getLabel(),
                 'reference' => $transaccion->referencia,
-                'callback_url' => route('pago.estado', ['transaccion' => $transaccion->referencia]),
+                'callback_url' => route('pago.retorno', ['transaccion' => $transaccion->referencia]),
                 'payment_methods' => ['PSE', 'CREDIT_CARD'],
                 'expiration_date' => now()->addDay()->getTimestampMs() * 1_000_000,
             ]);
@@ -70,20 +70,31 @@ class PasarelaBold implements PasarelaDePago
     }
 
     /**
-     * Bold firma cada notificación con HMAC-SHA256 sobre el cuerpo crudo,
-     * usando la llave secreta, y la envía en el encabezado `x-bold-signature`.
+     * Bold firma cada notificación y la envía en el encabezado `x-bold-signature`.
+     *
+     * El orden importa y no es el habitual: primero se codifica el cuerpo CRUDO
+     * en Base64, y sobre ese texto se aplica HMAC-SHA256 con la llave de
+     * identidad. El resultado se compara en HEXADECIMAL, no en Base64.
+     * Ver https://developers.bold.co/webhook.
      */
     public function firmaValida(Request $request): bool
     {
         $firmaRecibida = $request->header('x-bold-signature');
 
-        if (! is_string($firmaRecibida) || $firmaRecibida === '' || $this->secret === '') {
+        if (! is_string($firmaRecibida) || $firmaRecibida === '') {
             return false;
         }
 
-        $firmaEsperada = base64_encode(hash_hmac('sha256', $request->getContent(), $this->secret, true));
+        // En pruebas Bold firma con llave vacía a propósito. En producción una
+        // llave vacía es configuración incompleta, y aceptarla sería dar por
+        // buena cualquier notificación: ahí se rechaza siempre.
+        if ($this->secret === '' && ! $this->sandbox) {
+            return false;
+        }
 
-        return hash_equals($firmaEsperada, $firmaRecibida);
+        $firmaEsperada = hash_hmac('sha256', base64_encode($request->getContent()), $this->secret);
+
+        return hash_equals($firmaEsperada, strtolower(trim($firmaRecibida)));
     }
 
     public function interpretarConfirmacion(Request $request): ?ResultadoDePago
@@ -107,11 +118,20 @@ class PasarelaBold implements PasarelaDePago
             default => MetodoPago::Otro,
         };
 
+        // Bold no documenta un único nombre para el total, así que se prueban
+        // las formas conocidas. Si no aparece ninguna, se devuelve null y
+        // RegistroDePagos lo registra en el log en vez de bloquear el pago.
+        $montoNotificado = data_get($datos, 'data.amount.total')
+            ?? data_get($datos, 'data.amount.total_amount')
+            ?? data_get($datos, 'data.total_amount');
+
         return new ResultadoDePago(
             referencia: $referencia,
             estado: $estado,
             metodo: $metodo,
             payload: ['pasarela' => 'bold', 'sandbox' => $this->sandbox, 'evento' => $datos],
+            monto: is_numeric($montoNotificado) ? (float) $montoNotificado : null,
+            moneda: is_string($moneda = data_get($datos, 'data.amount.currency')) ? $moneda : null,
         );
     }
 

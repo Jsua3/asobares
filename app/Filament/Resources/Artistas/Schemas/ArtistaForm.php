@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Artistas\Schemas;
 
 use App\Enums\EstadoPublicacion;
 use App\Enums\TipoArtista;
-use Filament\Forms\Components\FileUpload;
+use App\Filament\Forms\Components\SubidaSegura;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -83,13 +83,10 @@ class ArtistaForm
 
                 Section::make('Foto')
                     ->schema([
-                        FileUpload::make('foto')
+                        SubidaSegura::make('foto')
                             ->label('Foto del artista')
-                            ->image()
-                            ->disk('public')
+                            ->imagen()
                             ->directory('artistas')
-                            ->maxSize(5120)
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->helperText('JPG, PNG o WebP, máximo 5 MB.'),
                     ]),
 

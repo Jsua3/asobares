@@ -103,7 +103,11 @@ Route::post('/mi-cuenta/salir', [SesionAsociadoController::class, 'salir'])->nam
 
 Route::middleware(['auth', 'rol.asociado'])->group(function (): void {
     Route::get('/mi-cuenta', [MiCuentaController::class, 'index'])->name('mi-cuenta.index');
-    Route::post('/mi-cuenta/pagar', [MiCuentaController::class, 'pagarMensualidad'])->name('mi-cuenta.pagar');
+
+    // Cada llamada crea una transacción y, con Bold, un enlace de pago real.
+    Route::post('/mi-cuenta/pagar', [MiCuentaController::class, 'pagarMensualidad'])
+        ->middleware('throttle:5,1')
+        ->name('mi-cuenta.pagar');
 });
 
 /*
@@ -112,11 +116,30 @@ Route::middleware(['auth', 'rol.asociado'])->group(function (): void {
 |--------------------------------------------------------------------------
 */
 
-Route::get('/pago-simulado/{transaccion:referencia}', [PagoController::class, 'simulado'])->name('pago.simulado');
-Route::post('/pago-simulado/{transaccion:referencia}', [PagoController::class, 'resolverSimulado'])->name('pago.simulado.resolver');
-Route::get('/pago/{transaccion:referencia}/estado', [PagoController::class, 'estado'])->name('pago.estado');
+// La pasarela simulada aprueba pagos con solo pedírselo. Sus rutas no deben
+// existir fuera de la máquina de desarrollo: no basta con que respondan 404
+// desde el controlador, es que no tienen por qué estar registradas.
+if (app()->environment('local', 'testing')) {
+    Route::get('/pago-simulado/{transaccion:referencia}', [PagoController::class, 'simulado'])->name('pago.simulado');
+    Route::post('/pago-simulado/{transaccion:referencia}', [PagoController::class, 'resolverSimulado'])
+        ->middleware('throttle:10,1')
+        ->name('pago.simulado.resolver');
+}
+
+// Punto de vuelta desde la pasarela. Existe aparte porque Bold puede añadir
+// sus propios parámetros a la URL de retorno, y eso rompería una firma: aquí
+// se ignoran y se manda a la página firmada.
+Route::get('/pago/{transaccion:referencia}/retorno', [PagoController::class, 'retorno'])
+    ->middleware('throttle:30,1')
+    ->name('pago.retorno');
+
+// Muestra el detalle de un cobro, así que va firmada y caduca.
+Route::get('/pago/{transaccion:referencia}/estado', [PagoController::class, 'estado'])
+    ->middleware(['signed', 'throttle:30,1'])
+    ->name('pago.estado');
 
 // La firma del webhook reemplaza al token CSRF: la petición viene de Bold.
 Route::post('/webhooks/bold', WebhookBoldController::class)
     ->withoutMiddleware([PreventRequestForgery::class])
+    ->middleware('throttle:120,1')
     ->name('webhooks.bold');

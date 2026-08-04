@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\URL;
 
 class Transaccion extends Model
 {
@@ -53,13 +54,35 @@ class Transaccion extends Model
         return $this->estado === EstadoTransaccion::Aprobada;
     }
 
-    /** Referencia legible y única: ASO-2026-A1B2C3. */
+    /**
+     * Referencia legible y única: ASO-2026-A1B2C3D4E5F60718.
+     *
+     * Con 3 bytes eran 16,7 millones de combinaciones, adivinables por fuerza
+     * bruta en horas. La referencia viaja por correo y por la pasarela, así
+     * que no es un secreto, pero tampoco puede ser enumerable.
+     */
     public static function generarReferencia(): string
     {
         do {
-            $referencia = sprintf('ASO-%s-%s', now()->year, strtoupper(bin2hex(random_bytes(3))));
+            $referencia = sprintf('ASO-%s-%s', now()->year, strtoupper(bin2hex(random_bytes(8))));
         } while (static::where('referencia', $referencia)->exists());
 
         return $referencia;
+    }
+
+    /**
+     * URL de retorno tras el pago: firmada y con caducidad.
+     *
+     * Es la dirección que se le entrega a Bold como `callback_url` y a la que
+     * vuelve quien paga. Muestra el detalle del cobro, así que la referencia
+     * por sí sola no puede abrirla.
+     */
+    public function urlDeEstado(): string
+    {
+        return URL::temporarySignedRoute(
+            'pago.estado',
+            now()->addHours(2),
+            ['transaccion' => $this->referencia],
+        );
     }
 }

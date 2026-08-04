@@ -30,7 +30,7 @@
                    :ogImagen="$asociado->foto_portada ? Storage::disk('public')->url($asociado->foto_portada) : null">
 
     @push('jsonld')
-        <script type="application/ld+json">{!! json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+        <x-publico.json-ld :datos="$jsonLd" />
     @endpush
 
     <nav aria-label="Ruta de navegación" class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">

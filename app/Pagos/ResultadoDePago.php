@@ -10,12 +10,20 @@ use App\Enums\MetodoPago;
  */
 final readonly class ResultadoDePago
 {
-    /** @param  array<string, mixed>  $payload */
+    /**
+     * `monto` y `moneda` son lo que la pasarela dice haber cobrado de verdad.
+     * Van como opcionales porque no toda pasarela los informa; cuando llegan,
+     * tienen que cuadrar con la transacción antes de aplicar ningún efecto.
+     *
+     * @param  array<string, mixed>  $payload
+     */
     public function __construct(
         public string $referencia,
         public EstadoTransaccion $estado,
         public MetodoPago $metodo,
         public array $payload = [],
+        public ?float $monto = null,
+        public ?string $moneda = null,
     ) {}
 
     public function fueAprobado(): bool

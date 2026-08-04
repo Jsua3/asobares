@@ -15,6 +15,23 @@ class PagosServiceProvider extends ServiceProvider
         $this->app->singleton(PasarelaDePago::class, function (): PasarelaDePago {
             $driver = config('pagos.driver');
 
+            if (! is_string($driver) || $driver === '') {
+                throw new InvalidArgumentException(
+                    'Falta PAYMENT_DRIVER en el entorno. Sin esa variable no se sabe si los pagos '
+                    .'son reales o simulados, y adivinarlo es justo lo que no se puede hacer.'
+                );
+            }
+
+            // La pasarela simulada aprueba cualquier pago con solo pedírselo.
+            // Que exista fuera de la máquina de desarrollo no es aceptable ni
+            // «por un rato mientras llegan las llaves de Bold».
+            if ($driver === 'fake' && ! $this->app->environment('local', 'testing')) {
+                throw new InvalidArgumentException(
+                    "La pasarela simulada no puede usarse en el entorno «{$this->app->environment()}». "
+                    .'Configura PAYMENT_DRIVER=bold con sus credenciales.'
+                );
+            }
+
             return match ($driver) {
                 'fake' => new PasarelaSimulada,
                 'bold' => new PasarelaBold(

@@ -129,10 +129,14 @@ class FormulariosPublicosTest extends TestCase
         $this->assertNull(Mensaje::firstOrFail()->radicado);
     }
 
+    /**
+     * El formulario real de /afiliate NO manda `tipo` —lo fija el controlador—.
+     * Este test lo envía como lo envía el navegador: sin ese campo. Antes se
+     * inyectaba a mano, y eso enmascaraba que toda afiliación fallaba.
+     */
     public function test_la_afiliacion_se_guarda_como_mensaje_del_tipo_correcto(): void
     {
         $this->post(route('afiliate.store'), [
-            'tipo' => TipoMensaje::Contacto->value, // el controlador lo fuerza a Afiliacion
             'nombre' => 'Sandra Ríos',
             'correo' => 'sandra@ejemplo.test',
             'mensaje' => 'Tengo un gastrobar en Armenia y quiero afiliarme al gremio.',

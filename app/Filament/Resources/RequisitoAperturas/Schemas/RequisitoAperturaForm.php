@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\RequisitoAperturas\Schemas;
 
 use App\Enums\EstadoPublicacion;
-use Filament\Forms\Components\FileUpload;
+use App\Filament\Forms\Components\SubidaSegura;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -68,13 +68,10 @@ class RequisitoAperturaForm
                 Section::make('Formato descargable y enlaces')
                     ->columns(2)
                     ->schema([
-                        FileUpload::make('adjunto')
+                        SubidaSegura::make('adjunto')
                             ->label('Formato oficial (PDF)')
-                            ->disk('public')
-                            ->directory('formatos')
-                            ->acceptedFileTypes(['application/pdf'])
-                            ->maxSize(5120)
-                            ->helperText('El documento que el usuario descarga desde la guía.'),
+                            ->documentoPdf()
+                            ->directory('formatos'),
                         TextInput::make('adjunto_nombre')
                             ->label('Nombre del formato')
                             ->maxLength(255)

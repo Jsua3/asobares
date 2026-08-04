@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Pagos\PasarelaBold;
 use App\Pagos\PasarelaDePago;
 use App\Services\RegistroDePagos;
 use Illuminate\Http\JsonResponse;
@@ -18,6 +19,10 @@ class WebhookBoldController
 {
     public function __invoke(Request $request, PasarelaDePago $pasarela, RegistroDePagos $pagos): JsonResponse
     {
+        // Esta ruta existe siempre y tiene el CSRF desactivado. Si la pasarela
+        // activa no es Bold, aquí no hay nada legítimo que atender.
+        abort_unless($pasarela instanceof PasarelaBold, 404);
+
         if (! $pasarela->firmaValida($request)) {
             Log::warning('Webhook de Bold rechazado por firma inválida.', [
                 'ip' => $request->ip(),

@@ -12,6 +12,7 @@ use App\Models\Transaccion;
 use App\Pagos\PasarelaDePago;
 use App\Pagos\ResultadoDePago;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Punto único donde un pago cambia el estado del mundo.
@@ -79,6 +80,22 @@ class RegistroDePagos
                 return $transaccion;
             }
 
+            // Una aprobación que no cuadra con lo cobrado no se aplica: la
+            // transacción sigue pendiente y queda constancia para revisarla a
+            // mano. Es preferible un cobro sin resolver a una deuda saldada
+            // con menos dinero del que se debía.
+            if ($resultado->fueAprobado() && ! $this->montoConcuerda($transaccion, $resultado)) {
+                Log::error('Confirmación de pago descartada: el monto notificado no cuadra.', [
+                    'referencia' => $transaccion->referencia,
+                    'esperado' => (float) $transaccion->monto,
+                    'moneda_esperada' => $transaccion->moneda,
+                    'notificado' => $resultado->monto,
+                    'moneda_notificada' => $resultado->moneda,
+                ]);
+
+                return $transaccion;
+            }
+
             $transaccion->update([
                 'estado' => $resultado->estado,
                 'metodo' => $resultado->metodo,
@@ -93,6 +110,31 @@ class RegistroDePagos
         });
     }
 
+    /**
+     * ¿Lo que la pasarela dice haber cobrado es lo que se cobró?
+     *
+     * Si la pasarela no informa monto no se puede comparar, y bloquear ahí
+     * dejaría sin aplicar pagos legítimos: se deja pasar, pero con aviso en
+     * el log para que se note en la primera prueba contra la pasarela real.
+     */
+    private function montoConcuerda(Transaccion $transaccion, ResultadoDePago $resultado): bool
+    {
+        if ($resultado->monto === null) {
+            Log::warning('La pasarela confirmó un pago sin informar el monto: no se pudo conciliar.', [
+                'referencia' => $transaccion->referencia,
+            ]);
+
+            return true;
+        }
+
+        if (round((float) $transaccion->monto, 2) !== round($resultado->monto, 2)) {
+            return false;
+        }
+
+        return $resultado->moneda === null
+            || strtoupper($resultado->moneda) === strtoupper((string) $transaccion->moneda);
+    }
+
     /** Lo que un pago aprobado desencadena, según su concepto. */
     private function aplicarEfectos(Transaccion $transaccion): void
     {
@@ -100,7 +142,7 @@ class RegistroDePagos
             ConceptoTransaccion::Evento => $transaccion->inscripcion?->update([
                 'estado' => EstadoInscripcion::Confirmada,
             ]),
-            ConceptoTransaccion::Mensualidad => $transaccion->asociado?->cartera?->marcarAlDia(),
+            ConceptoTransaccion::Mensualidad => $transaccion->asociado?->cartera?->abonar((float) $transaccion->monto),
             ConceptoTransaccion::Afiliacion => null,
         };
     }

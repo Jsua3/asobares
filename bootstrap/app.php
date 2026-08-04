@@ -17,6 +17,17 @@ return Application::configure(basePath: dirname(__DIR__))
             'rol.asociado' => AsegurarRolAsociado::class,
         ]);
 
+        // El hosting de producción todavía no está decidido. Cuando se elija,
+        // TRUSTED_PROXIES debe listar las IPs del balanceador (o `*` si el
+        // proveedor no las publica): sin esto todas las peticiones parecen
+        // venir de la misma IP —los límites por IP colapsan en un solo cubo—
+        // y las URLs se generan en http, incluida la que recibe Bold.
+        $proxies = env('TRUSTED_PROXIES');
+
+        if (filled($proxies)) {
+            $middleware->trustProxies(at: $proxies === '*' ? '*' : explode(',', (string) $proxies));
+        }
+
         // La sesión del panel y la de /mi-cuenta comparten guard: al expirar,
         // el visitante público vuelve al login de asociados, no al de Filament.
         $middleware->redirectGuestsTo(fn (Request $request): string => $request->is('admin*')

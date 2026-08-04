@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Database\Seeders\RolYPermisoSeeder;
+use Database\Seeders\UsuarioSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -16,6 +17,23 @@ class PanelAdminTest extends TestCase
     {
         parent::setUp();
         $this->seed(RolYPermisoSeeder::class);
+    }
+
+    /**
+     * Las tres cuentas del demo comparten una contraseña publicada en el
+     * README. Un `db:seed` disparado por costumbre sobre el servidor real no
+     * puede crear un super_admin con esa clave.
+     */
+    public function test_el_seeder_de_usuarios_no_crea_cuentas_en_produccion(): void
+    {
+        $this->app->detectEnvironment(fn (): string => 'production');
+
+        // Se invoca el seeder directamente y no por `db:seed`, que en producción
+        // pide confirmación por consola: lo que se comprueba aquí es la guarda
+        // del propio seeder, no la del comando.
+        (new UsuarioSeeder)->setContainer($this->app)->run();
+
+        $this->assertSame(0, User::count());
     }
 
     private function crearUsuario(string $rol): User

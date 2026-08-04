@@ -19,10 +19,15 @@ class PasarelaSimulada implements PasarelaDePago
         return route('pago.simulado', ['transaccion' => $transaccion->referencia]);
     }
 
-    /** No hay firma que validar: nadie externo llama a esta pasarela. */
+    /**
+     * Nadie externo debe poder confirmar un pago por esta pasarela: la
+     * resuelve a mano el propio sitio en /pago-simulado. Devolver `true`
+     * convertiría el webhook público en un aprobador universal de pagos,
+     * así que aquí la respuesta correcta es siempre `false`.
+     */
     public function firmaValida(Request $request): bool
     {
-        return true;
+        return false;
     }
 
     public function interpretarConfirmacion(Request $request): ?ResultadoDePago

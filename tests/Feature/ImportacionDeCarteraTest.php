@@ -6,6 +6,7 @@ use App\Models\Asociado;
 use App\Models\Cartera;
 use App\Services\ImportadorDeCartera;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class ImportacionDeCarteraTest extends TestCase
@@ -37,6 +38,66 @@ class ImportacionDeCarteraTest extends TestCase
         $this->assertSame('150000.00', Cartera::where('asociado_id', $bar->id)->value('saldo_pendiente'));
         $this->assertSame(3, Cartera::where('asociado_id', $bar->id)->value('meses_mora'));
         $this->assertSame(0, Cartera::where('asociado_id', $cafe->id)->value('meses_mora'));
+    }
+
+    /**
+     * El archivo llega del computador de la contadora y puede venir en formato
+     * colombiano o inglés. Antes se borraban todos los puntos, así que
+     * «1250.75» se importaba como 125.075: cada saldo multiplicado por cien.
+     *
+     * @param  array{0: string, 1: string}  $caso
+     */
+    #[DataProvider('cifrasDeDinero')]
+    public function test_el_punto_decimal_no_se_confunde_con_separador_de_miles(string $enElArchivo, string $enLaBase): void
+    {
+        $bar = Asociado::factory()->create(['nombre' => 'Bar La Cava', 'slug' => 'bar-la-cava']);
+
+        $resultado = app(ImportadorDeCartera::class)->importar($this->csv(
+            "establecimiento,saldo_pendiente,meses_mora\n".
+            "Bar La Cava,\"{$enElArchivo}\",1\n"
+        ));
+
+        $this->assertFalse($resultado->tieneErrores(), implode(' | ', $resultado->errores()));
+        $this->assertSame($enLaBase, Cartera::where('asociado_id', $bar->id)->value('saldo_pendiente'));
+    }
+
+    /** @return list<array{0: string, 1: string}> */
+    public static function cifrasDeDinero(): array
+    {
+        return [
+            'formato inglés con decimales' => ['1250.75', '1250.75'],
+            'formato colombiano de miles' => ['1.250.000', '1250000.00'],
+            'formato colombiano completo' => ['1.250.000,50', '1250000.50'],
+            'formato inglés completo' => ['1,250,000.75', '1250000.75'],
+            'entero pelado' => ['150000', '150000.00'],
+            'con símbolo de peso' => ['$ 150.000', '150000.00'],
+        ];
+    }
+
+    public function test_una_celda_de_saldo_vacia_es_un_error_y_no_borra_la_deuda(): void
+    {
+        $bar = Asociado::factory()->create(['nombre' => 'Bar La Cava', 'slug' => 'bar-la-cava']);
+        Cartera::create([
+            'asociado_id' => $bar->id,
+            'saldo_pendiente' => 300000,
+            'meses_mora' => 6,
+            'actualizado_at' => now(),
+        ]);
+
+        $resultado = app(ImportadorDeCartera::class)->importar($this->csv(
+            "establecimiento,saldo_pendiente,meses_mora\n".
+            "Bar La Cava,,\n"
+        ));
+
+        $this->assertTrue($resultado->tieneErrores());
+        $this->assertSame(0, $resultado->actualizados());
+        $this->assertStringContainsString('viene vacío', $resultado->errores()[0]);
+
+        $this->assertSame(
+            '300000.00',
+            Cartera::where('asociado_id', $bar->id)->value('saldo_pendiente'),
+            'Una casilla en blanco no puede perdonar una deuda.'
+        );
     }
 
     public function test_una_fila_mala_no_aborta_el_resto(): void

@@ -24,7 +24,7 @@
     @endphp
 
     @push('jsonld')
-        <script type="application/ld+json">{!! json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+        <x-publico.json-ld :datos="$jsonLd" />
     @endpush
 
     <article class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">

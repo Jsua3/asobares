@@ -13,7 +13,16 @@ class UsuarioSeeder extends Seeder
 
     public function run(): void
     {
-        $direccion = User::updateOrCreate(
+        // Son cuentas de demostración con una contraseña conocida y publicada
+        // en el README. `firstOrCreate` en vez de `updateOrCreate` para no
+        // reimponerla si alguien ya la cambió, y ni siquiera eso en producción.
+        if (app()->isProduction()) {
+            $this->command?->warn('UsuarioSeeder omitido: no se crean cuentas de demostración en producción.');
+
+            return;
+        }
+
+        $direccion = User::firstOrCreate(
             ['email' => 'direccion@asobaresquindio.test'],
             [
                 'name' => 'Natalia Gutiérrez',

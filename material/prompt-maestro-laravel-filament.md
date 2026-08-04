@@ -1,10 +1,22 @@
-# PROMPT MAESTRO v3 — Plataforma Web ASOBARES Capítulo Quindío (Laravel 13 + Filament 4)
+# PROMPT MAESTRO v4 — Plataforma Web ASOBARES Capítulo Quindío (Laravel 13 + Filament 4)
 
 > Copia TODO el contenido desde "## 1. Tu misión" hasta el final y pégalo en Claude Code, dentro de una carpeta vacía. Requisitos previos en tu máquina: PHP ≥ 8.3 con Composer, Node ≥ 20 y Git. Si algo falta, Claude Code puede instalarlo primero.
 >
 > **v2 (1 ago 2026):** incorpora el alcance ampliado de la Reunión 2 con la directiva — bolsa de empleo, directorio de artistas, bolsa de proveedores, estado de cartera del asociado, preferencia PSE y guía normativa reforzada. Los módulos nuevos se construyen en versión mínima demostrable; el alcance definitivo lo fija el documento de requisitos v2 firmado.
 >
 > **v3 (3 ago 2026) — PROMPT YA EJECUTADO:** el prototipo existe en `asobares-web/` (repo git propio) y está completo — fases 0–5 terminadas, suite de pruebas en verde (191 pruebas: 184 pasan, 7 omitidas, 0 fallos) y correcciones posteriores aplicadas (identidad del manual de marca, contenido del TED gremial, login MFA por correo, imágenes y 403 de `/mi-cuenta`). **Stack real: Laravel 13.23 + Filament 4.12 + Livewire 3.8 sobre PHP 8.5.9** — el prompt pedía Laravel 12, pero el instalador oficial ya solo entrega Laravel 13; el starter kit de Livewire se descartó porque trae Livewire 4 y Filament 4 exige `livewire/livewire ^3.5`, así que el proyecto se creó con `laravel new --no-authentication` y el login de `/mi-cuenta` se escribió a mano. Filament 5 (publicado el 31 jul 2026) se descartó por demasiado nuevo para la entrega del 22 sept. Las menciones de versión de abajo ya están corregidas; este documento queda como registro del encargo y receta de relanzamiento.
+>
+> **v5 (4 ago 2026) — TEMA CLARO/OSCURO EN TODO EL SITIO:** el frontal dejó de ser oscuro por obligación. Ahora usa **tokens semánticos** (`fondo`, `superficie`, `superficie-alta`, `fuerte`, `tinta`, `suave`, `tenue`, `apagado`, `linea`, `linea-fuerte`, `acento`, `acento-fuerte`, `marca-panel`, `exito*`, `aviso*`) definidos una sola vez en `resources/css/app.css`: `:root` es el tema claro y `.dark` el oscuro, con `@custom-variant dark` y `@theme inline` de Tailwind v4. Se migraron **446 clases cableadas en 29 vistas** y los valores del modo oscuro se conservan exactos, así que el refactor es un no-op visual para la identidad nocturna original. El control vive en un **desplegable de configuración en la navbar** —Claro / Oscuro / Sistema, por defecto **Sistema**— visible para cualquier visitante; para el asociado, la secretaría y la dirección añade además nombre, rol y sus acciones de sesión. Comparte la clave `localStorage.theme` con Filament a propósito: quien usa el panel y el sitio elige una sola vez. Se añadieron **9 pruebas** (191 → 200; el total actual de 233 incluye también el endurecimiento de seguridad de la v4), una de ellas una guardia que recorre las vistas y falla si reaparece una clase de tema cableada. **Las secciones 4, 7 y 11 están corregidas: si se relanza este prompt, el sitio se construye bicromático desde el principio, no oscuro y adaptado después.**
+>
+> **v5 · defectos cerrados de paso:** una auditoría multiagente (43 hallazgos en bruto, 12 confirmados tras refutación adversarial) destapó que el aro del pin de Leaflet **no** debe seguir el tema —se dibuja sobre teselas de OSM, claras en ambos modos—, que el foco no volvía al disparador al cerrar el desplegable con Escape y que la opción activa del selector se distinguía solo por color (1,22:1, incumple WCAG 1.4.11). Aparte: el **paginador de Laravel** se reescribió con tokens y en español, porque venía cableado en grises (2,63:1 en oscuro) y, al no existir carpeta `lang/`, mostraba las claves crudas `pagination.previous` y un «Showing … results» en un sitio en español; y las **portadas de relleno** se rediseñaron con fondo transparente, diagonales en gris neutro y el monograma de marca, para que una sola imagen sirva en los dos temas.
+>
+> **v5 · trampas que costaron tiempo y conviene no repetir:**
+> - Chromium **no reinicia una `transition` cuando lo que cambia es la custom property** que hay detrás del valor: la propiedad se queda congelada en el color del tema anterior. Con `transition-colors` repartido por todo el sitio hay que apagar las transiciones durante el cambio y devolverlas después (con respaldo de `setTimeout`: en pestaña de segundo plano no corre `requestAnimationFrame`).
+> - `app.css` escanea `storage/framework/views/*.php`, así que **el tamaño del bundle depende de qué vistas estén compiladas en caché**. Hay que `php artisan view:clear` antes de compilar para desplegar: se vio pasar de 90 kB a 69 kB solo con eso.
+> - `Paginator::$defaultView` es **estático y vive en todo el proceso**; Livewire lo reapunta a su propia vista al renderizar una tabla del panel y no siempre lo restaura, así que en la suite una prueba de `/admin` puede romper otra del sitio público.
+> - Tras unificar el repositorio, el enlace `public/storage` se quedó apuntando a la antigua `asobares-web/`: hay que rehacerlo con `php artisan storage:link` o no carga ninguna imagen.
+>
+> **v4 (4 ago 2026) — ENDURECIMIENTO DE SEGURIDAD:** antes de conectar Bold con dinero real se auditó la seguridad del prototipo (49 hallazgos en bruto, 43 confirmados tras refutación adversarial). Se cerraron los bloqueantes de pago, el XSS almacenado del JSON-LD, el importador de cartera y las subidas de archivos; la suite pasó de 200 a 233 pruebas. **Las secciones 8 y 9 están corregidas con lo aprendido: si se relanza este prompt, hay que construirlas así desde el principio.** El acta completa —método, hallazgos, qué se cerró y qué queda— está en la nueva sección 15.
 
 ---
 
@@ -49,6 +61,7 @@ Trabaja por fases (sección 12), verifica cada fase antes de seguir, y no marque
 - Tipografías (Google Fonts): **Unbounded** para titulares, **Hanken Grotesk** para texto. Pesos con jerarquía clara.
 - Mobile-first real: diseña primero la vista de 390 px; más del 80 % de los usuarios entrará por celular.
 - Detalles que elevan: bordes redondeados suaves, tarjetas con borde `rgba(255,255,255,.09)`, hover sutiles, un resplandor rojo discreto en heros. Nada de gradientes morados ni estética genérica.
+- **⚠️ v5 — el sitio es bicromático, no solo oscuro.** El modo oscuro de arriba sigue siendo la identidad nocturna y el que se diseña primero, pero convive con un modo claro levantado sobre el **Ambient White `#F5F3F4`** de la paleta principal del manual. **No escribas colores en las vistas:** usa los tokens semánticos de `resources/css/app.css` (`bg-fondo`, `bg-superficie`, `bg-superficie-alta`, `text-fuerte`, `text-tinta`, `text-suave`, `text-tenue`, `text-apagado`, `border-linea`, `text-acento`, `bg-exito-fondo`…), que `:root` resuelve en claro y `.dark` en oscuro. Los valores reales, ya corregidos contra el manual de marca, son Pub Black `#0B090A`, Pub Red `#EE4137` y Ambient White `#F5F3F4` — no los `#0C0A0B` / `#EE4036` / `#F4EFEC` del encargo original. Ojo con el acento: el Pub Red puro no alcanza AA como texto sobre fondo claro, por eso el token `acento` vale `#F27166` en oscuro y `#B71F18` en claro. Las rampas de estado (verde de «al día», ámbar de aviso) también estaban pensadas sobre negro y hay que invertirlas, o los recuadros quedan ilegibles en claro.
 - El panel Filament puede usar su tema por defecto con el rojo `#EE4036` como color primario y logo/nombre "ASOBARES Quindío".
 
 ## 5. Modelo de datos (crea exactamente estas entidades)
@@ -115,15 +128,28 @@ Rutas y páginas (todas leen de la BD/settings, **cero texto quemado**):
 12. **`/contacto`** — formulario con tipo (contacto/PQR/quiero ser aliado/quiero ser proveedor); si es PQR genera y muestra **radicado** en pantalla y (mailer `log` en demo) por correo; datos de la oficina con mapa; redes.
 13. **`/politica-de-datos`** — política de tratamiento de datos personales (plantilla seria conforme Ley 1581 de 2012, con los datos del gremio como responsable).
 14. **Extras técnicos:** layout con navbar sticky + footer completo; página 404 con la marca; `sitemap.xml` (spatie), `robots.txt`, metas y Open Graph por página, favicon con el monograma.
+15. **Selector de tema (v5):** desplegable de configuración en la navbar con Claro / Oscuro / Sistema. Lo ve cualquier visitante; con sesión abierta muestra además nombre, rol y las acciones que correspondan —*Mi cuenta* al asociado, *Ir al panel* a la secretaría y a la dirección, y *Cerrar sesión*—. En móvil el mismo bloque va desplegado dentro del menú hamburguesa. La preferencia se guarda en `localStorage.theme`, **la misma clave que usa Filament**, así que el panel y el sitio quedan siempre en el mismo tema. La clase `.dark` se pone en `<html>` desde un **script síncrono en el `<head>`, antes de las hojas de estilo**: si se deja para Alpine, quien tenga el sitio en claro ve un fogonazo negro en cada navegación. Ese mismo script mantiene el `<meta name="theme-color">` y escucha `matchMedia`, `storage` (otras pestañas) y `pageshow` (bfcache). Cerrar sesión no puede depender de Alpine: hace falta un respaldo en `<noscript>`.
+16. **Portadas de relleno (v5):** las imágenes de ejemplo del sembrador se generan con **fondo transparente** —lo que se ve por detrás es la superficie de la tarjeta, así que la misma imagen vale en los dos temas—, diagonales en un gris neutro equidistante de ambas superficies y el monograma de marca centrado. Nada de fondos sólidos ni viñetas oscuras quemadas en el PNG: el degradado que hace legible el nombre del establecimiento ya lo pone la tarjeta en HTML y sí es consciente del tema.
 
 **Rendimiento (RNF-02):** imágenes servidas en webp con thumbnails, `loading="lazy"`, sin librerías JS pesadas, CSS de Vite build. Objetivo: home < 2,5 s en móvil 4G.
 
 ## 8. Pagos (Bold, demostrable sin credenciales)
 
 - Crea una interfaz `PaymentGateway` con dos implementaciones:
-  - `BoldGateway`: estructura real — crea un **link de pago por API** (endpoint y llaves desde `.env`: `BOLD_API_KEY`, `BOLD_SECRET`, `BOLD_SANDBOX=true`) y recibe confirmación en `POST /webhooks/bold` **verificando la firma**. Déjalo implementado según la documentación pública de developers.bold.co, pero sin credenciales.
+  - `BoldGateway`: estructura real — crea un **link de pago por API** (endpoint y llaves desde `.env`: `BOLD_API_KEY`, `BOLD_SECRET`, `BOLD_SANDBOX`) y recibe confirmación en `POST /webhooks/bold` **verificando la firma**. Déjalo implementado según la documentación pública de developers.bold.co, pero sin credenciales.
   - `FakeGateway` (por defecto en el demo, `PAYMENT_DRIVER=fake`): genera una página interna `/pago-simulado/{transaccion}` con la marca, selector decorativo de método (**PSE / Tarjeta** — el gremio prefiere PSE; la cuenta real es Itaú) y botones "Pagar" y "Rechazar" que disparan el mismo flujo del webhook. Así los flujos completos **inscripción → pago → confirmación** y **mi-cuenta → pagar mensualidad → cartera al día** se pueden demostrar en vivo.
 - Toda transacción queda registrada (referencia, concepto, monto, método, estado, payload) y visible en el panel (RF-34). Nunca marques una inscripción como confirmada ni una cartera como saldada sin transacción aprobada.
+
+**Reglas duras de la pasarela (v4 — cada una nació de un fallo real, no las deduzcas de nuevo):**
+
+1. **La firma de Bold no es el HMAC habitual.** El orden es: codificar el cuerpo **crudo en Base64**, aplicarle **HMAC-SHA256** con la llave de identidad, y comparar el resultado en **hexadecimal** (64 caracteres). No es `base64(hmac(cuerpo))`. Equivocarse rechaza con 401 *todas* las notificaciones legítimas: el asociado paga, Bold cobra, y ni la inscripción se confirma ni la cartera se salda.
+2. **La prueba de la firma se congela a mano.** Si el test recalcula la firma esperada con la misma fórmula que la implementación, valida el error contra sí mismo. Usa un cuerpo y una firma literales, más una aserción sobre el **formato** (64 caracteres hexadecimales).
+3. **En el sandbox de Bold la firma se calcula con llave vacía.** Es el único caso en que se acepta una llave vacía, así que `BOLD_SANDBOX` debe valer `false` por omisión: si valiera `true`, a un despliegue le bastaría con olvidar la variable para firmar en blanco.
+4. **`PAYMENT_DRIVER` no lleva valor por defecto** y el contenedor se niega a devolver la pasarela simulada fuera de `local`/`testing`. Un despliegue sin la variable tiene que romper en el arranque, no degradarse a la pasarela que aprueba cualquier pago.
+5. **Las rutas `/pago-simulado/*` solo se registran en `local`/`testing`**, y el webhook responde 404 si la pasarela activa no es Bold. `FakeGateway::firmaValida()` devuelve `false` siempre: nadie externo debe confirmar por ahí.
+6. **La referencia no es una credencial ni un identificador adivinable**: 8 bytes aleatorios, no 3. La página de estado del pago va **firmada y con caducidad**, y no muestra datos personales de nadie.
+7. **La URL de retorno que se le entrega a la pasarela es un salto aparte** (`/pago/{ref}/retorno`), porque la pasarela puede añadir sus propios parámetros y eso invalidaría una firma justo después de pagar.
+8. **Concilia el dinero antes de aplicar efectos.** Compara monto y moneda notificados contra la transacción local; si no cuadran, deja la transacción pendiente y regístralo. Y un pago **abona** sobre el saldo, no lo salda entero: si no, un abono de $50.000 borra una deuda de $500.000.
 
 ## 9. Seguridad y Habeas Data (no negociable)
 
@@ -133,6 +159,18 @@ Rutas y páginas (todas leen de la BD/settings, **cero texto quemado**):
 - Archivos subidos: validar tipo/tamaño; imágenes reprocesadas (nunca servir el binario original de un upload). Los adjuntos de requisitos (formatos oficiales) se sirven con nombre limpio.
 - La importación CSV de cartera valida columnas, tipos y asociado existente; muestra errores por fila sin abortar todo.
 - `.env.example` completo y documentado; ningún secreto en el código ni en el repo.
+
+**Lo anterior es la intención; esto es lo que hace falta para cumplirla de verdad (v4):**
+
+- **JSON-LD dentro de `<script>`: nunca `JSON_UNESCAPED_SLASHES`.** Esa bandera desactiva el escape de la barra, que es justo lo que impide que un valor de la base cierre la etiqueta con `</script>`. Cualquier campo editable desde el panel —el nombre de un asociado, el título de una noticia— se convierte en XSS almacenado. Usa `JSON_HEX_TAG` y **un solo componente Blade** para los tres bloques: repetir la decisión de codificación en cada vista garantiza que la cuarta la copie mal.
+- **La extensión de un archivo subido la decide el servidor, no quien sube.** Filament aleatoriza el nombre pero conserva la extensión: un JPEG legítimo llamado `payload.html` pasa la validación de tipo —su MIME es `image/jpeg`— y queda servido como HTML desde `/storage`. Deriva la extensión del MIME validado con `getUploadedFileNameForStorageUsing`.
+- **Lo que se sirve tras un control de acceso no puede vivir en el disco público.** Los formatos de la guía van al disco privado; si están en `/storage`, comprobar el estado de publicación en el controlador es decorativo. Sírvelos con `Content-Type` explícito y `X-Content-Type-Options: nosniff`, y acota la ruta a su carpeta.
+- **Los archivos se borran cuando dejan de estar referenciados** (al reemplazar, al vaciar el campo y al eliminar el registro). Con fotos que un propietario pidió retirar, no borrarlas es un problema de datos personales, no solo de disco. Ojo: las semillas comparten archivo entre registros, así que comprueba que nadie más lo use antes de borrar.
+- **Los temporales de Livewire van al disco privado.** Con `FILESYSTEM_DISK=public`, el CSV de cartera de la contadora queda bajo `/storage` mientras dura la subida.
+- **Parseo de dinero en el CSV: el separador decimal es el que está más a la derecha**, y solo cuenta como decimal si le siguen una o dos cifras. Borrar todos los puntos multiplica por cien cualquier archivo exportado en formato inglés. Una celda vacía es **un error de fila**, nunca un cero: dejar una deuda en cero tiene que ser una decisión escrita.
+- **Todo CSV que se genere se escribe con `League\Csv`**, con un formateador que antepone apóstrofo a las celdas que empiezan por `=`, `+`, `-` o `@`. Excel las ejecuta como fórmula, y esos nombres los escribe un tercero.
+- **Producción no arranca con la configuración del demo**: la aplicación falla si corre en producción con `APP_DEBUG=true` o con el mailer en `log`, fuerza HTTPS, y los seeders de cuentas de demostración se niegan a ejecutarse. La contraseña del demo está publicada en el README.
+- **Los formularios se prueban con los campos que manda el navegador.** Un test que inyecta a mano un campo que el formulario real no envía enmascara el fallo: así estuvo roto todo el envío de `/afiliate`, que exigía un `tipo` que su formulario nunca mandaba.
 
 ## 10. Datos semilla (para que el demo se vea vivo)
 
@@ -151,7 +189,9 @@ Rutas y páginas (todas leen de la BD/settings, **cero texto quemado**):
 - [ ] Todo el contenido editable desde el panel (RNF-09): si un texto aparece en el sitio, vive en la BD o en settings.
 - [ ] SEO: title/description únicos por página, OG, slugs limpios, sitemap, JSON-LD en fichas.
 - [ ] Imágenes webp + lazy; sin fuentes ni librerías innecesarias.
-- [ ] Accesibilidad base: contraste AA sobre fondo oscuro, alt en imágenes, labels en formularios, foco visible.
+- [ ] Accesibilidad base: contraste AA **en los dos temas** (no solo sobre el fondo oscuro), alt en imágenes, labels en formularios, foco visible.
+- [ ] Tema claro/oscuro: cero clases de color cableadas en las vistas; el modo oscuro conserva exactamente los valores con los que se diseñó; sin parpadeo al navegar; el estado activo del selector se distingue por algo más que el color (WCAG 1.4.1 y 1.4.11).
+- [ ] Prueba de guardia que recorra las vistas y falle si reaparece una clase de tema cableada — incluidas las vistas de paquetes publicadas en `resources/views/vendor/`, que es por donde se coló el paginador.
 - [ ] Código en inglés, UI en español; PSR-12 (`laravel/pint`).
 - [ ] Git: repositorio inicializado, commits pequeños y descriptivos por fase.
 
@@ -160,7 +200,7 @@ Rutas y páginas (todas leen de la BD/settings, **cero texto quemado**):
 1. **Fase 0 — Setup:** **fetch y sigue https://laravel.com/for/agents** (verificar `php`/`composer`/`laravel`; instalar con php.new lo que falte — ⚠️ en Windows el build de php.new no trae `intl` ni `gd`, que Filament exige: usar el build oficial de windows.php.net); crear el proyecto con SQLite + npm + **Boost**, **sin starter kit**, y cargar sus guías; instalar Filament y paquetes; configurar Tailwind, fuentes, colores; commit.
 2. **Fase 1 — Datos:** migraciones + modelos + factories + seeders completos (incluidas las entidades nuevas); `php artisan migrate:fresh --seed` sin errores; commit.
 3. **Fase 2 — Panel:** recursos Filament (incluidos Vacantes, Aspirantes, Artistas, Proveedores y Cartera con importador CSV), roles y policies, flujo de aprobación con notificaciones, bitácora, MFA, dashboard; commit.
-4. **Fase 3 — Sitio público núcleo:** layout + páginas 1–4 y 8–14 (inicio, quiénes somos, directorio, abre-tu-negocio, eventos, boletín, afíliate, contacto, política, extras), filtros del directorio, mapa, formularios con habeas data y radicados; commit.
+4. **Fase 3 — Sitio público núcleo:** layout + páginas 1–4 y 8–16 (inicio, quiénes somos, directorio, abre-tu-negocio, eventos, boletín, afíliate, contacto, política, extras, **selector de tema y portadas de relleno bicromáticas**), filtros del directorio, mapa, formularios con habeas data y radicados; commit. Monta la capa de tokens semánticos que describe la sección 4 **antes** de escribir la primera vista: migrar 446 clases cableadas después cuesta mucho más que nacer con ellas.
 5. **Fase 3b — Módulos Reunión 2:** `/empleo`, `/artistas`, `/proveedores` y `/mi-cuenta` con login de asociado y vista de cartera; commit.
 6. **Fase 4 — Pagos:** interfaz + FakeGateway (con concepto `mensualidad`) + esqueleto Bold + transacciones en panel; commit.
 7. **Fase 5 — Calidad:** pruebas Pest (mínimo: subadmin no puede publicar; PQR genera radicado consecutivo; inscripción exige habeas data; webhook actualiza transacción e inscripción; **importar CSV de cartera actualiza saldos**; **/mi-cuenta exige rol asociado**; **una vacante no publicada no aparece en /empleo**; rutas públicas responden 200), pint, revisión de RNF, README.
@@ -179,3 +219,50 @@ Termina con un **README.md** que incluya: qué es el proyecto, requisitos, pasos
 - No publicar eventos de bares individuales en las semillas: solo eventos del gremio.
 - No saltarte el flujo de aprobación "porque es un demo": es EL requisito que estamos evaluando.
 - No terminar con migraciones, seeders o pruebas rotas.
+
+---
+
+## 15. Auditoría de seguridad (3–4 ago 2026)
+
+Se auditó el prototipo antes de conectar Bold con dinero real, porque la pasarela es lo siguiente en el cronograma y un fallo ahí cuesta dinero del gremio, no tiempo del equipo.
+
+**Método:** seis auditorías en paralelo sobre el código real —pagos, autorización, entrada/XSS, archivos, configuración y datos personales— y una pasada de **refutación adversarial** sobre cada hallazgo, con la instrucción de intentar tumbarlo releyendo el código. **49 hallazgos en bruto → 43 confirmados, 6 refutados.** Ninguno quedó como crítico: los tres marcados así dependían de una variable de entorno mal puesta y no sobreviven a un despliegue correcto.
+
+La suite pasó de **200 pruebas (193 pasan, 7 omitidas)** a **233 (226 pasan, 7 omitidas)**, todas verdes.
+
+### 15.1 Lo que se cerró
+
+| Grupo | Qué era | Dónde |
+|---|---|---|
+| **Firma de Bold** | El algoritmo estaba equivocado en dos pasos: ninguna notificación real habría pasado la validación | `app/Pagos/PasarelaBold.php` |
+| **G1 — Cerrojo del driver** | Sin `PAYMENT_DRIVER` se activaba la pasarela simulada, y el webhook público aprobaba cualquier pago sin firma, sin CSRF y sin sesión | `config/pagos.php`, `PagosServiceProvider`, `PasarelaSimulada`, `WebhookBoldController`, `routes/web.php` |
+| **G2 — Referencia y retorno** | Referencia de 24 bits enumerable; la página de estado era pública y mostraba el correo del inscrito | `Transaccion`, `PagoController`, `routes/web.php`, vista de estado |
+| **G3 — Conciliación** | Un pago aprobado saldaba la cartera entera sin mirar el monto; el webhook no conciliaba nada | `RegistroDePagos`, `ResultadoDePago`, `Cartera::abonar()` |
+| **G5 — Importador** | `1250.75` entraba como `125075`; una celda vacía ponía la deuda en cero en silencio; la plantilla CSV permitía inyección de fórmulas | `ImportadorDeCartera`, `ListCarteras` |
+| **G6 — Archivos** | La extensión la elegía quien sube; los archivos nunca se borraban; los formatos "privados" estaban en `/storage` | `SubidaSegura`, `LimpiezaDeArchivosObserver`, `GuiaController`, `config/livewire.php` |
+| **G7 (parcial) — XSS** | `JSON_UNESCAPED_SLASHES` permitía cerrar el `<script>` desde cualquier campo editable | componente `publico.json-ld` |
+| **B6/B7 — Despliegue** | Producción podía arrancar con `APP_DEBUG=true`; el seeder reimponía un `super_admin` con contraseña publicada | `AppServiceProvider`, `bootstrap/app.php`, `UsuarioSeeder` |
+| **Bug funcional** | `/afiliate` exigía un campo `tipo` que su formulario nunca enviaba: **toda solicitud de afiliación fallaba** | `GuardarMensajeRequest` |
+
+### 15.2 Lo que queda
+
+Ninguno es de severidad alta y ninguno bloquea conectar Bold.
+
+- **G4 — Cupos de eventos**: se consumen con inscripciones sin pagar y el conteo no está protegido contra concurrencia.
+- **G8 — Autenticación**: la MFA del panel es opcional, no obligatoria; los dos logins limitan por IP pero nunca bloquean la cuenta atacada; el login de `/mi-cuenta` confirma con un mensaje distinto que una contraseña de administrador era correcta.
+- **G9 — Flujo de aprobación**: el observer solo vigila la *entrada* a «publicado», así que **un subadmin sí puede despublicar**; y puede confirmar a mano una inscripción de pago, saltándose la regla de que solo la confirma una transacción aprobada.
+- **G12 — Datos personales (Ley 1581)**: no hay política de retención ni supresión, el consentimiento se guarda sin evidencia (IP, agente, versión de la política aceptada), y la política publicada no nombra a los encargados que intervienen —incluida la pasarela—.
+
+### 15.3 Dos incógnitas que solo resuelve el sandbox de Bold
+
+Antes de tocar credenciales reales hay que confirmarlas, porque la documentación pública no basta:
+
+1. **Unidad de `expiration_date`**: el texto dice nanosegundos y el ejemplo de la propia documentación muestra milisegundos. El código envía nanosegundos.
+2. **Nombre del campo del monto en la notificación**: se prueban tres formas conocidas. Si no aparece ninguna, la conciliación del punto 8 de la sección 8 **queda inerte** y solo lo delata un aviso en `storage/logs`. Hay que mirar el log en la primera prueba real.
+
+### 15.4 Huecos que la auditoría declaró sin cubrir
+
+- Exportaciones CSV/Excel de Filament en recursos con datos personales (Aspirantes, Inscripciones, Mensajes).
+- Los ocho recursos de Filament no auditados a fondo más allá del patrón replicado de Asociados.
+- La configuración real del servidor de producción, que aún no está elegido: decide si una extensión de archivo mal escogida es XSS almacenado o ejecución de código.
+- El comportamiento de la caché de permisos de spatie tras un cambio de rol en producción, con `config:cache` activo.

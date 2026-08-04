@@ -8,10 +8,12 @@ use App\Enums\TipoMensaje;
 use App\Filament\Pages\AjustesDelSitio;
 use App\Filament\Resources\Asociados\Pages\CreateAsociado;
 use App\Filament\Resources\Asociados\Pages\ListAsociados;
+use App\Filament\Resources\Carteras\Pages\ListCarteras;
 use App\Filament\Resources\Mensajes\Pages\ListMensajes;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Models\Asociado;
+use App\Models\Cartera;
 use App\Models\Categoria;
 use App\Models\Mensaje;
 use App\Models\Municipio;
@@ -48,6 +50,37 @@ class AccionesDelPanelTest extends TestCase
         $usuario->syncRoles([$rol]);
 
         return $usuario->fresh();
+    }
+
+    /**
+     * El archivo lo abre la contadora en Excel, y Excel ejecuta como fórmula
+     * toda celda que empiece por `=`. El nombre del establecimiento lo escribe
+     * un tercero desde el panel, así que sale neutralizado.
+     */
+    public function test_la_plantilla_de_cartera_neutraliza_las_formulas_de_excel(): void
+    {
+        $formula = Asociado::factory()->create(['nombre' => '=WEBSERVICE(A1)', 'slug' => 'bar-formula']);
+        $comillas = Asociado::factory()->create(['nombre' => 'Bar "El Roble", Armenia', 'slug' => 'bar-el-roble']);
+
+        foreach ([$formula, $comillas] as $asociado) {
+            Cartera::create([
+                'asociado_id' => $asociado->id,
+                'saldo_pendiente' => 50000,
+                'meses_mora' => 1,
+                'actualizado_at' => now(),
+            ]);
+        }
+
+        $csv = Livewire::actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN))
+            ->test(ListCarteras::class)
+            ->instance()
+            ->plantillaDeCartera();
+
+        $this->assertStringContainsString("'=WEBSERVICE(A1)", $csv, 'La fórmula sale como texto.');
+        $this->assertStringNotContainsString('"=WEBSERVICE', $csv, 'Ninguna celda puede empezar por = sin neutralizar.');
+
+        // Y el nombre con comillas y coma no puede romper el formato.
+        $this->assertStringContainsString('Bar ""El Roble"", Armenia', $csv);
     }
 
     // --- Acciones de aprobación (el guion 1 del README) ---

@@ -6,6 +6,7 @@ use App\Models\Asociado;
 use App\Models\Cartera;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use League\Csv\Reader;
 use Throwable;
@@ -53,10 +54,15 @@ class ImportadorDeCartera
         // Índice por slug para no consultar la base en cada fila.
         $asociados = Asociado::pluck('id', 'slug');
 
-        foreach ($lector->getRecords() as $numero => $fila) {
-            // getRecords numera desde la fila siguiente al encabezado.
-            $this->procesarFila($this->normalizarFila($fila), (int) $numero, $asociados, $resultado);
-        }
+        // Las filas malas se reportan sin abortar el resto, pero el archivo se
+        // aplica como un bloque: si el proceso se cae a mitad de camino, no
+        // pueden quedar la mitad de las carteras actualizadas y la otra no.
+        DB::transaction(function () use ($lector, $asociados, $resultado): void {
+            foreach ($lector->getRecords() as $numero => $fila) {
+                // getRecords numera desde la fila siguiente al encabezado.
+                $this->procesarFila($this->normalizarFila($fila), (int) $numero, $asociados, $resultado);
+            }
+        });
 
         return $resultado;
     }
@@ -84,10 +90,22 @@ class ImportadorDeCartera
             return;
         }
 
+        if (trim($fila['saldo_pendiente'] ?? '') === '') {
+            $resultado->agregarErrorDeFila($numero, "«{$nombre}»: el saldo pendiente viene vacío. Si no debe nada, escribe 0.");
+
+            return;
+        }
+
         $saldo = $this->aNumero($fila['saldo_pendiente'] ?? '');
 
         if ($saldo === null || $saldo < 0) {
             $resultado->agregarErrorDeFila($numero, "«{$nombre}»: el saldo pendiente no es un número válido.");
+
+            return;
+        }
+
+        if (trim($fila['meses_mora'] ?? '') === '') {
+            $resultado->agregarErrorDeFila($numero, "«{$nombre}»: los meses de mora vienen vacíos. Si está al día, escribe 0.");
 
             return;
         }
@@ -139,14 +157,43 @@ class ImportadorDeCartera
         return Str::of($texto)->trim()->lower()->ascii()->replace([' ', '-'], '_')->toString();
     }
 
+    /**
+     * Interpreta una cifra de dinero venga como venga del computador de la
+     * contadora: «1.250.000», «1.250.000,50», «1250.75» o «1,250,000.75».
+     *
+     * La regla es una sola: el separador decimal es el que está más a la
+     * derecha, y solo cuenta como decimal si le siguen una o dos cifras. Todo
+     * lo demás son separadores de miles y se descarta. Así «1.250.000» son un
+     * millón doscientos cincuenta mil pesos y «1250.75» son mil doscientos
+     * cincuenta con setenta y cinco.
+     *
+     * Antes se borraban TODOS los puntos, de modo que un archivo exportado en
+     * formato inglés multiplicaba cada saldo por cien.
+     *
+     * Devuelve null cuando no hay número, incluida la celda vacía: dejar la
+     * deuda de alguien en cero tiene que ser una decisión escrita, no el
+     * efecto de una casilla en blanco.
+     */
     private function aNumero(string $valor): ?float
     {
-        // El archivo puede venir con separadores de miles colombianos: 1.250.000
-        $limpio = str_replace(['$', ' ', '.'], '', trim($valor));
-        $limpio = str_replace(',', '.', $limpio);
+        $limpio = preg_replace('/[^\d,.\-]/u', '', trim($valor)) ?? '';
 
         if ($limpio === '') {
-            return 0.0;
+            return null;
+        }
+
+        $posicionDecimal = max(
+            ($coma = strrpos($limpio, ',')) === false ? -1 : $coma,
+            ($punto = strrpos($limpio, '.')) === false ? -1 : $punto,
+        );
+
+        $cifrasDecimales = $posicionDecimal >= 0 ? strlen($limpio) - $posicionDecimal - 1 : 0;
+
+        if ($posicionDecimal >= 0 && $cifrasDecimales >= 1 && $cifrasDecimales <= 2) {
+            $limpio = str_replace([',', '.'], '', substr($limpio, 0, $posicionDecimal))
+                .'.'.substr($limpio, $posicionDecimal + 1);
+        } else {
+            $limpio = str_replace([',', '.'], '', $limpio);
         }
 
         return is_numeric($limpio) ? (float) $limpio : null;

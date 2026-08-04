@@ -18,17 +18,21 @@ class GeneradorPdf
 
     /**
      * @param  list<string>  $lineas
-     * @return string Ruta relativa dentro del disco `public`.
+     * @return string Ruta relativa dentro del disco `local`.
+     *
+     * Van al disco privado porque los sirve GuiaController, que comprueba que
+     * el requisito esté publicado. En el disco público esa comprobación no
+     * servía de nada: el mismo PDF era alcanzable por /storage.
      */
     public function generar(string $titulo, string $subtitulo, array $lineas, string $carpeta, string $archivo): string
     {
         $ruta = "{$carpeta}/{$archivo}";
 
-        if (Storage::disk('public')->exists($ruta)) {
+        if (Storage::disk('local')->exists($ruta)) {
             return $ruta;
         }
 
-        Storage::disk('public')->put($ruta, $this->construir($titulo, $subtitulo, $lineas));
+        Storage::disk('local')->put($ruta, $this->construir($titulo, $subtitulo, $lineas));
 
         return $ruta;
     }

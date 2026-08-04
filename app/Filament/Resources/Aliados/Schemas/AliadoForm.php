@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\Aliados\Schemas;
 
 use App\Enums\EstadoPublicacion;
-use Filament\Forms\Components\FileUpload;
+use App\Filament\Forms\Components\SubidaSegura;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -59,13 +59,10 @@ class AliadoForm
 
                 Section::make('Logo')
                     ->schema([
-                        FileUpload::make('logo')
+                        SubidaSegura::make('logo')
                             ->label('Logo del aliado')
-                            ->image()
-                            ->disk('public')
+                            ->imagen()
                             ->directory('aliados')
-                            ->maxSize(5120)
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->helperText('JPG, PNG o WebP, máximo 5 MB.'),
                     ]),
 

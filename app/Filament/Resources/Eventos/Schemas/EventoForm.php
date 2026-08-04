@@ -4,8 +4,8 @@ namespace App\Filament\Resources\Eventos\Schemas;
 
 use App\Enums\EstadoPublicacion;
 use App\Enums\TipoEvento;
+use App\Filament\Forms\Components\SubidaSegura;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -89,13 +89,10 @@ class EventoForm
 
                 Section::make('Imagen')
                     ->schema([
-                        FileUpload::make('imagen')
+                        SubidaSegura::make('imagen')
                             ->label('Imagen del evento')
-                            ->image()
-                            ->disk('public')
+                            ->imagen()
                             ->directory('eventos')
-                            ->maxSize(5120)
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->helperText('JPG, PNG o WebP, máximo 5 MB.'),
                     ]),
 

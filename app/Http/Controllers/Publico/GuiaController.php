@@ -43,14 +43,28 @@ class GuiaController
         ]);
     }
 
-    /** Sirve el formato oficial con un nombre limpio, nunca la ruta interna. */
+    /**
+     * Sirve el formato oficial con un nombre limpio, nunca la ruta interna.
+     *
+     * Los adjuntos viven en el disco privado justamente para que esta puerta
+     * sea la única: mientras estuvieron en el disco público, comprobar aquí el
+     * estado de publicación era decorativo, porque el mismo PDF se descargaba
+     * por /storage sin pasar por ningún control.
+     */
     public function descargarFormato(RequisitoApertura $requisito): StreamedResponse
     {
         abort_unless($requisito->estaPublicado() && $requisito->tieneAdjunto(), 404);
-        abort_unless(Storage::disk('public')->exists($requisito->adjunto), 404);
+
+        // La ruta viene de la base y la escribe el panel: se acota a su
+        // carpeta para que no pueda apuntar a ningún otro sitio del disco.
+        abort_unless(str_starts_with($requisito->adjunto, 'formatos/'), 404);
+        abort_unless(Storage::disk('local')->exists($requisito->adjunto), 404);
 
         $nombre = Str::slug($requisito->adjunto_nombre ?? $requisito->entidad).'.pdf';
 
-        return Storage::disk('public')->download($requisito->adjunto, $nombre);
+        return Storage::disk('local')->download($requisito->adjunto, $nombre, [
+            'Content-Type' => 'application/pdf',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 }

@@ -90,6 +90,108 @@ class SubidaDeImagenesTest extends TestCase
         );
     }
 
+    /**
+     * La extensión no puede elegirla quien sube. Un JPEG legítimo llamado
+     * «payload.html» pasa la validación de tipo —su MIME es image/jpeg— pero
+     * si se guarda con ese nombre, el servidor lo entrega como HTML desde
+     * /storage y se ejecuta en el navegador de cualquier visitante.
+     */
+    public function test_la_extension_guardada_se_deriva_del_tipo_real_y_no_del_nombre(): void
+    {
+        Storage::fake('public');
+
+        Livewire::test(CreateAsociado::class)
+            ->fillForm([
+                'nombre' => 'Bar Polyglot',
+                'slug' => 'bar-polyglot',
+                'categoria_id' => Categoria::first()->id,
+                'municipio_id' => Municipio::first()->id,
+                'foto_portada' => UploadedFile::fake()->create('payload.html', 40, 'image/jpeg'),
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $portada = Asociado::where('slug', 'bar-polyglot')->value('foto_portada');
+
+        $this->assertNotNull($portada);
+        $this->assertStringEndsWith('.jpg', $portada, "Se guardó como «{$portada}».");
+        $this->assertStringNotContainsString('.html', $portada);
+    }
+
+    /**
+     * Se prueba sobre el modelo y no sobre el formulario porque la limpieza
+     * vive en un observer: cualquier cambio del campo la dispara, venga del
+     * panel, de un comando o de una importación.
+     */
+    public function test_cambiar_la_portada_borra_la_anterior_del_disco(): void
+    {
+        Storage::fake('public');
+
+        Storage::disk('public')->put('asociados/vieja.png', 'contenido');
+        Storage::disk('public')->put('asociados/nueva.png', 'contenido');
+
+        $asociado = Asociado::factory()->publicado()->create(['foto_portada' => 'asociados/vieja.png']);
+
+        $asociado->update(['foto_portada' => 'asociados/nueva.png']);
+
+        Storage::disk('public')->assertMissing('asociados/vieja.png');
+        Storage::disk('public')->assertExists('asociados/nueva.png');
+    }
+
+    public function test_quitar_la_portada_tambien_borra_el_archivo(): void
+    {
+        Storage::fake('public');
+
+        Storage::disk('public')->put('asociados/sola.png', 'contenido');
+        $asociado = Asociado::factory()->publicado()->create(['foto_portada' => 'asociados/sola.png']);
+
+        $asociado->update(['foto_portada' => null]);
+
+        Storage::disk('public')->assertMissing('asociados/sola.png');
+    }
+
+    public function test_eliminar_un_asociado_borra_su_portada_del_disco(): void
+    {
+        Storage::fake('public');
+
+        $asociado = Asociado::factory()->publicado()->create();
+
+        Livewire::test(EditAsociado::class, ['record' => $asociado->getRouteKey()])
+            ->fillForm(['foto_portada' => UploadedFile::fake()->image('portada.png', 400, 300)])
+            ->call('save');
+
+        $ruta = $asociado->fresh()->foto_portada;
+        Storage::disk('public')->assertExists($ruta);
+
+        $asociado->fresh()->delete();
+
+        Storage::disk('public')->assertMissing($ruta);
+    }
+
+    /**
+     * Las semillas comparten el mismo formato entre varios municipios. Borrar
+     * uno no puede dejar sin adjunto a los demás.
+     */
+    public function test_no_se_borra_un_archivo_que_otro_registro_sigue_usando(): void
+    {
+        Storage::fake('public');
+
+        $compartida = 'asociados/compartida.png';
+        Storage::disk('public')->put($compartida, 'contenido');
+
+        $uno = Asociado::factory()->publicado()->create(['foto_portada' => $compartida]);
+        Asociado::factory()->publicado()->create(['foto_portada' => $compartida]);
+
+        $uno->delete();
+
+        Storage::disk('public')->assertExists($compartida);
+    }
+
+    public function test_los_temporales_de_livewire_no_van_al_disco_publico(): void
+    {
+        $this->assertSame('local', config('livewire.temporary_file_upload.disk'));
+    }
+
     public function test_se_rechaza_un_archivo_que_no_es_imagen(): void
     {
         Storage::fake('public');

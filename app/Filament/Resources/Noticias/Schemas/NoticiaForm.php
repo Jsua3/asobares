@@ -4,8 +4,8 @@ namespace App\Filament\Resources\Noticias\Schemas;
 
 use App\Enums\CategoriaNoticia;
 use App\Enums\EstadoPublicacion;
+use App\Filament\Forms\Components\SubidaSegura;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -59,13 +59,10 @@ class NoticiaForm
 
                 Section::make('Imagen')
                     ->schema([
-                        FileUpload::make('imagen')
+                        SubidaSegura::make('imagen')
                             ->label('Imagen de la entrada')
-                            ->image()
-                            ->disk('public')
+                            ->imagen()
                             ->directory('boletin')
-                            ->maxSize(5120)
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->helperText('JPG, PNG o WebP, máximo 5 MB.'),
                     ]),
 

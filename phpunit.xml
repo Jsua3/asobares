@@ -32,6 +32,9 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- La suite no puede depender del .env de cada máquina para decidir
+             si los pagos son simulados: PAYMENT_DRIVER ya no tiene defecto. -->
+        <env name="PAYMENT_DRIVER" value="fake"/>
         <!-- Las galerias reprocesan 36 conversiones webp en cada test y no
              aportan nada a lo que se verifica: se omiten en la suite. -->
         <env name="SEED_GALERIA" value="false"/>

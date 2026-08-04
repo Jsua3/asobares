@@ -22,7 +22,7 @@ class PagoController
         abort_unless($pasarela instanceof PasarelaSimulada, 404);
 
         if ($transaccion->estado !== EstadoTransaccion::Pendiente) {
-            return redirect()->route('pago.estado', $transaccion);
+            return redirect()->to($transaccion->urlDeEstado());
         }
 
         return view('publico.pago.simulado', ['transaccion' => $transaccion->load(['inscripcion.evento', 'asociado'])]);
@@ -51,7 +51,16 @@ class PagoController
             $pagos->aplicarConfirmacion($resultado);
         }
 
-        return redirect()->route('pago.estado', $transaccion);
+        return redirect()->to($transaccion->urlDeEstado());
+    }
+
+    /**
+     * Vuelta desde la pasarela. La referencia es lo único que se necesita —es
+     * lo que la pasarela conoce—, y desde aquí se entra a la página firmada.
+     */
+    public function retorno(Transaccion $transaccion): RedirectResponse
+    {
+        return redirect()->to($transaccion->urlDeEstado());
     }
 
     public function estado(Transaccion $transaccion): View
