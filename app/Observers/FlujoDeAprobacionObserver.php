@@ -55,22 +55,34 @@ class FlujoDeAprobacionObserver
             return;
         }
 
-        $this->avisarALaDireccion($modelo);
+        $this->avisarAQuienAprueba($modelo);
     }
 
-    /** Notificación de base de datos: el súper admin la ve con badge en el panel. */
-    private function avisarALaDireccion(Model $modelo): void
+    /**
+     * Notificación de base de datos para quien pueda aprobar ESTE modelo.
+     *
+     * Se pregunta por la policy y no por un rol fijo: así las bolsas avisan a
+     * la secretaría —que sí las aprueba— y el resto del contenido sigue
+     * avisando solo a la dirección, sin ninguna lógica especial por recurso.
+     */
+    private function avisarAQuienAprueba(Model $modelo): void
     {
-        $autor = Auth::user()?->name ?? 'El sistema';
+        $autor = Auth::user();
+        $nombreDelAutor = $autor?->name ?? 'El sistema';
         $etiqueta = $modelo->nombre ?? $modelo->titulo ?? $modelo->cargo ?? $modelo->entidad ?? "#{$modelo->getKey()}";
         $tipo = class_basename($modelo);
 
-        $direccion = User::role(User::ROL_SUPER_ADMIN)->get();
+        $revisores = User::query()
+            ->whereHas('roles')
+            ->get()
+            ->filter(fn (User $revisor): bool => $revisor->can('publicar', $modelo))
+            // Quien lo envió no se avisa a sí mismo.
+            ->reject(fn (User $revisor): bool => $revisor->is($autor));
 
-        foreach ($direccion as $superAdmin) {
+        foreach ($revisores as $revisor) {
             Notification::make()
                 ->title('Contenido pendiente de aprobación')
-                ->body("{$autor} envió «{$etiqueta}» ({$tipo}) para revisión.")
+                ->body("{$nombreDelAutor} envió «{$etiqueta}» ({$tipo}) para revisión.")
                 ->icon('heroicon-o-clock')
                 ->iconColor('warning')
                 ->actions([
@@ -79,7 +91,7 @@ class FlujoDeAprobacionObserver
                         ->url($this->urlDeRevision($modelo))
                         ->markAsRead(),
                 ])
-                ->sendToDatabase($superAdmin);
+                ->sendToDatabase($revisor);
         }
     }
 
@@ -87,8 +99,14 @@ class FlujoDeAprobacionObserver
     {
         $recurso = Filament::getModelResource($modelo::class);
 
-        return $recurso
+        if ($recurso === null) {
+            return url('/admin');
+        }
+
+        // Las vacantes ya no se editan desde el panel: se moderan desde el
+        // listado, así que ahí es donde tiene que aterrizar el revisor.
+        return $recurso::hasPage('edit')
             ? $recurso::getUrl('edit', ['record' => $modelo])
-            : url('/admin');
+            : $recurso::getUrl('index');
     }
 }

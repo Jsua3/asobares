@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Enums\EstadoPublicacion;
 use App\Models\Asociado;
+use App\Models\Noticia;
 use App\Models\User;
+use App\Models\Vacante;
 use Database\Seeders\RolYPermisoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
@@ -88,5 +90,38 @@ class FlujoDeAprobacionTest extends TestCase
         $asociado = Asociado::factory()->create(['estado' => EstadoPublicacion::Publicado]);
 
         $this->assertSame(EstadoPublicacion::Publicado, $asociado->fresh()->estado);
+    }
+
+    public function test_una_vacante_pendiente_avisa_a_la_secretaria_y_a_la_direccion(): void
+    {
+        $direccion = $this->crearUsuario(User::ROL_SUPER_ADMIN);
+        $secretaria = $this->crearUsuario(User::ROL_SUBADMIN);
+
+        $asociado = Asociado::factory()->publicado()->create();
+        $duenio = User::factory()->create(['asociado_id' => $asociado->id]);
+        $duenio->syncRoles([User::ROL_ASOCIADO]);
+
+        Auth::login($duenio->fresh());
+        Vacante::factory()->for($asociado)->pendiente()->create();
+
+        $this->assertSame(1, $secretaria->notifications()->count(), 'La secretaría modera las bolsas: tiene que enterarse.');
+        $this->assertSame(1, $direccion->notifications()->count());
+    }
+
+    public function test_una_noticia_pendiente_solo_avisa_a_la_direccion(): void
+    {
+        $direccion = $this->crearUsuario(User::ROL_SUPER_ADMIN);
+        $secretaria = $this->crearUsuario(User::ROL_SUBADMIN);
+
+        Auth::login($secretaria);
+        Noticia::create([
+            'titulo' => 'Nota de prueba del gremio',
+            'slug' => 'nota-de-prueba-del-gremio',
+            'contenido' => 'Cuerpo suficiente para la nota.',
+            'estado' => EstadoPublicacion::Publicado,
+        ]);
+
+        $this->assertSame(1, $direccion->notifications()->count());
+        $this->assertSame(0, $secretaria->notifications()->count(), 'Nadie se avisa a sí mismo de lo que acaba de redactar.');
     }
 }
