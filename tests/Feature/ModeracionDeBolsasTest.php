@@ -4,13 +4,16 @@ namespace Tests\Feature;
 
 use App\Enums\EstadoDeGestion;
 use App\Enums\EstadoPublicacion;
+use App\Filament\Resources\Artistas\Pages\ListArtistas;
 use App\Filament\Resources\Postulaciones\Pages\ListPostulaciones;
 use App\Filament\Resources\Vacantes\Pages\ListVacantes;
 use App\Filament\Support\AccionesDeAprobacion;
 use App\Mail\FichaDeBolsaPublicada;
 use App\Mail\VacanteAprobada;
 use App\Mail\VacanteDevuelta;
+use App\Models\Artista;
 use App\Models\Asociado;
+use App\Models\Aspirante;
 use App\Models\Postulacion;
 use App\Models\Proveedor;
 use App\Models\User;
@@ -176,5 +179,43 @@ class ModeracionDeBolsasTest extends TestCase
         foreach ([User::ROL_SUPER_ADMIN, User::ROL_SUBADMIN] as $rol) {
             $this->actingAs($this->crearUsuario($rol))->get('/admin/vacantes')->assertSuccessful();
         }
+    }
+
+    public function test_aprobar_una_ficha_de_artista_avisa_al_solicitante(): void
+    {
+        Mail::fake();
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $artista = Artista::factory()->pendiente()->create(['correo' => 'dj@ejemplo.test']);
+
+        Livewire::test(ListArtistas::class)
+            ->callAction(TestAction::make('aprobar')->table($artista))
+            ->assertHasNoErrors();
+
+        $this->assertSame(EstadoPublicacion::Publicado, $artista->fresh()->estado);
+        Mail::assertSent(FichaDeBolsaPublicada::class, 1);
+    }
+
+    public function test_aprobar_una_ficha_sin_correo_no_intenta_escribir(): void
+    {
+        Mail::fake();
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $artista = Artista::factory()->pendiente()->create(['correo' => null]);
+
+        Livewire::test(ListArtistas::class)
+            ->callAction(TestAction::make('aprobar')->table($artista));
+
+        $this->assertSame(EstadoPublicacion::Publicado, $artista->fresh()->estado);
+        Mail::assertNothingSent();
+    }
+
+    public function test_la_bandeja_de_aspirantes_sigue_en_pie(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        Aspirante::factory()->create(['nombre' => 'Duván Marín']);
+
+        $this->get('/admin/aspirantes')->assertSuccessful()->assertSee('Duván Marín');
     }
 }

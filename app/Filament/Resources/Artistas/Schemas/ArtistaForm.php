@@ -5,9 +5,11 @@ namespace App\Filament\Resources\Artistas\Schemas;
 use App\Enums\EstadoPublicacion;
 use App\Enums\TipoArtista;
 use App\Filament\Forms\Components\SubidaSegura;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
@@ -79,6 +81,11 @@ class ArtistaForm
                             ->rule('url_youtube')
                             ->placeholder('https://www.youtube.com/watch?v=...')
                             ->helperText('Pega el enlace del video. Se acepta youtube.com o youtu.be.'),
+                        TextInput::make('correo')
+                            ->label('Correo')
+                            ->email()
+                            ->maxLength(180)
+                            ->helperText('Ahí se le avisa cuando su ficha quede publicada.'),
                     ]),
 
                 Section::make('Foto')
@@ -100,6 +107,19 @@ class ArtistaForm
                             ->helperText(fn (): string => auth()->user()?->can('publicar_artista')
                                 ? 'Puedes publicar directamente.'
                                 : 'Al guardar, quedará pendiente de aprobación de la dirección.'),
+                    ]),
+
+                Section::make('Habeas Data')
+                    ->description('Consentimiento registrado si la ficha entró por el formulario público. No lo edites: es la constancia legal.')
+                    ->columns(2)
+                    ->collapsed()
+                    ->schema([
+                        Toggle::make('acepta_datos')
+                            ->label('Aceptó el tratamiento de datos')
+                            ->disabled(),
+                        DateTimePicker::make('consentimiento_at')
+                            ->label('Fecha del consentimiento')
+                            ->disabled(),
                     ]),
             ]);
     }

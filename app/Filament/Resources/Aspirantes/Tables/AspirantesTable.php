@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Aspirantes\Tables;
 
+use App\Enums\EstadoDeGestion;
 use App\Models\Aspirante;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -9,6 +10,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -55,6 +57,9 @@ class AspirantesTable
                 Filter::make('ultima_semana')
                     ->label('Últimos 7 días')
                     ->query(fn (Builder $query): Builder => $query->where('created_at', '>=', now()->subWeek())),
+                SelectFilter::make('estado')
+                    ->label('Gestión')
+                    ->options(EstadoDeGestion::class),
             ])
             ->recordActions([
                 EditAction::make()->label('Ver perfil'),

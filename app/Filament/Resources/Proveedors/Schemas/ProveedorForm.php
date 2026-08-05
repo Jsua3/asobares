@@ -5,9 +5,11 @@ namespace App\Filament\Resources\Proveedors\Schemas;
 use App\Enums\CategoriaProveedor;
 use App\Enums\EstadoPublicacion;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
@@ -78,6 +80,19 @@ class ProveedorForm
                             ->helperText(fn (): string => auth()->user()?->can('publicar_proveedor')
                                 ? 'Puedes publicar directamente.'
                                 : 'Al guardar, quedará pendiente de aprobación de la dirección.'),
+                    ]),
+
+                Section::make('Habeas Data')
+                    ->description('Consentimiento registrado si la ficha entró por el formulario público. No lo edites: es la constancia legal.')
+                    ->columns(2)
+                    ->collapsed()
+                    ->schema([
+                        Toggle::make('acepta_datos')
+                            ->label('Aceptó el tratamiento de datos')
+                            ->disabled(),
+                        DateTimePicker::make('consentimiento_at')
+                            ->label('Fecha del consentimiento')
+                            ->disabled(),
                     ]),
             ]);
     }

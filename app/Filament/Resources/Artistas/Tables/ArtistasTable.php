@@ -10,6 +10,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class ArtistasTable
 {
@@ -37,7 +38,8 @@ class ArtistasTable
                     ->searchable(),
                 TextColumn::make('foto')
                     ->searchable(),
-                TextColumn::make('municipio.id')
+                TextColumn::make('municipio.nombre')
+                    ->label('Municipio')
                     ->searchable(),
                 TextColumn::make('estado')
                     ->badge()
@@ -57,11 +59,13 @@ class ArtistasTable
                     ->options(EstadoPublicacion::class),
             ])
             ->recordActions([
-                ...AccionesDeAprobacion::paraFila(),
+                AccionesDeAprobacion::aprobarFichaDeBolsa(fn (Model $registro): string => route('artistas.show', $registro)),
+                AccionesDeAprobacion::devolver(),
                 EditAction::make()->label('Editar'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    AccionesDeAprobacion::aprobarEnLote('publicar_artista'),
                     DeleteBulkAction::make(),
                 ]),
             ]);

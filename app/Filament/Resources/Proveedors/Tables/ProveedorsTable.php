@@ -28,7 +28,8 @@ class ProveedorsTable
                     ->searchable(),
                 TextColumn::make('correo')
                     ->searchable(),
-                TextColumn::make('municipio.id')
+                TextColumn::make('municipio.nombre')
+                    ->label('Municipio')
                     ->searchable(),
                 TextColumn::make('visible_hasta')
                     ->date()
@@ -51,11 +52,13 @@ class ProveedorsTable
                     ->options(EstadoPublicacion::class),
             ])
             ->recordActions([
-                ...AccionesDeAprobacion::paraFila(),
+                AccionesDeAprobacion::aprobarFichaDeBolsa(fn (): string => route('proveedores.index')),
+                AccionesDeAprobacion::devolver(),
                 EditAction::make()->label('Editar'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    AccionesDeAprobacion::aprobarEnLote('publicar_proveedor'),
                     DeleteBulkAction::make(),
                 ]),
             ]);
