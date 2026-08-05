@@ -266,3 +266,29 @@ Antes de tocar credenciales reales hay que confirmarlas, porque la documentació
 - Los ocho recursos de Filament no auditados a fondo más allá del patrón replicado de Asociados.
 - La configuración real del servidor de producción, que aún no está elegido: decide si una extensión de archivo mal escogida es XSS almacenado o ejecución de código.
 - El comportamiento de la caché de permisos de spatie tras un cambio de rol en producción, con `config:cache` activo.
+
+---
+
+## 16. PENDIENTE ANTES DE PRODUCCIÓN — Normatividad real y formatos oficiales
+
+**Nada del contenido normativo que hoy trae la plataforma sirve para orientar a un empresario de verdad.** Es material de demostración: existe para que la página insignia se vea viva en una presentación, no para que alguien abra un bar siguiéndolo.
+
+### Qué hay hoy y por qué no basta
+
+- `RequisitoAperturaSeeder` siembra los trámites por municipio (Cámara de Comercio, Alcaldía, Bomberos, Sayco-Acinpro, Secretaría de Salud, Policía) con descripciones, checklists y costos **aproximados y escritos a mano**. No están verificados contra la fuente oficial ni fechados.
+- Los **formatos descargables son PDF generados por `Database\Seeders\Support\GeneradorPdf`**: archivos de relleno con la forma de un formato oficial, no los documentos reales de cada entidad.
+- Los enlaces externos apuntan a los sitios institucionales correctos, pero a la portada, no al trámite concreto.
+
+Publicar esto tal cual es peor que no tener la guía: alguien puede pagar por un trámite equivocado, presentar un formato que la entidad no reconoce, o creer que cumplió y recibir una visita de control. El descargo de responsabilidad («verifica siempre con la entidad») no cubre servir un formato inventado con el sello del gremio encima.
+
+### Qué hay que hacer antes de que la guía salga a producción
+
+1. **Recoger la normatividad real, municipio por municipio.** El alcance firmado es el Quindío: Armenia, Calarcá, Circasia, Filandia, Salento, La Tebaida, Montenegro, Quimbaya, Córdoba, Buenavista, Pijao y Génova. Los requisitos **difieren entre municipios** —el certificado de bomberos no cuesta lo mismo en Armenia que en Salento— y esa diferencia es justamente el valor del módulo.
+2. **Conseguir los formatos oficiales de cada entidad**, en el archivo que la entidad publica o entrega. Sustituirlos por los PDF de relleno del seeder.
+3. **Verificar costos y vigencias contra la fuente**, y dejar constancia de cuándo se verificó cada ítem. La tarifa de Sayco-Acinpro y el impuesto de industria y comercio cambian cada año: un dato sin fecha envejece sin avisar.
+4. **Definir quién mantiene esto.** La normatividad se mueve; si nadie del gremio queda responsable de revisarla, la guía se vuelve desinformación con el tiempo. Conviene un campo de fecha de última revisión visible al público.
+5. **Cargar el contenido real desde el panel**, no desde un seeder. Los seeders son para el demo; lo definitivo lo administra la secretaría en `/admin/requisitos`.
+
+### Nota de origen legal
+
+Los requisitos de apertura y funcionamiento de establecimientos de comercio en Colombia se apoyan, entre otros, en el Código Nacional de Seguridad y Convivencia Ciudadana (Ley 1801 de 2016), el Código de Comercio en lo relativo a matrícula mercantil, la normativa sanitaria del Invima y las secretarías de salud, la reglamentación de derechos de autor de Sayco-Acinpro, y los acuerdos y decretos **de cada municipio**, que son los que introducen las diferencias locales. **Esta lista es un punto de partida para la investigación, no una fuente citable**: hay que confirmar la norma vigente con cada entidad antes de publicarla.
