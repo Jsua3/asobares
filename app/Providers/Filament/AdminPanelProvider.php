@@ -38,6 +38,7 @@ class AdminPanelProvider extends PanelProvider
             ->favicon(asset('img/favicon.png'))
             ->brandLogo(asset('img/logo-asobares.svg'))
             ->brandLogoHeight('2rem')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->darkModeBrandLogo(asset('img/logo-asobares-blanco.png'))
             // Pub Red, exacto según el manual de marca de Asobares Colombia.
             ->colors([

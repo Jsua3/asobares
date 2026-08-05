@@ -1,0 +1,20 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@import '../../tokens.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+@source '../../../../resources/views/components/panel/**/*';
+
+@layer base {
+    /* Poppins es la tipografía del manual de marca; Filament trae Inter. */
+    :root {
+        --font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+    }
+
+    h1, h2, h3, h4 {
+        font-family: var(--font-display);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+}
