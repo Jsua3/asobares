@@ -75,7 +75,7 @@ class VacantesTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    AccionesDeAprobacion::aprobarEnLote('publicar_vacante'),
+                    AccionesDeAprobacion::aprobarVacantesEnLote(),
                     DeleteBulkAction::make()->label('Eliminar'),
                 ]),
             ])

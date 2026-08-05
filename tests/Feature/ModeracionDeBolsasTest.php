@@ -6,6 +6,7 @@ use App\Enums\EstadoDeGestion;
 use App\Enums\EstadoPublicacion;
 use App\Filament\Resources\Artistas\Pages\ListArtistas;
 use App\Filament\Resources\Postulaciones\Pages\ListPostulaciones;
+use App\Filament\Resources\Proveedors\Pages\ListProveedors;
 use App\Filament\Resources\Vacantes\Pages\ListVacantes;
 use App\Filament\Support\AccionesDeAprobacion;
 use App\Mail\FichaDeBolsaPublicada;
@@ -207,6 +208,108 @@ class ModeracionDeBolsasTest extends TestCase
             ->callAction(TestAction::make('aprobar')->table($artista));
 
         $this->assertSame(EstadoPublicacion::Publicado, $artista->fresh()->estado);
+        Mail::assertNothingSent();
+    }
+
+    // --- Aprobación en lote (B1: el lote produce el mismo efecto que la fila) ---
+
+    public function test_aprobar_en_lote_de_vacantes_publica_limpia_el_motivo_y_avisa(): void
+    {
+        Mail::fake();
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $asociado = Asociado::factory()->publicado()->create(['correo_interno' => 'oficina@bar.test']);
+        $vacante = Vacante::factory()->for($asociado)->pendiente()->create(['motivo_devolucion' => 'Un motivo viejo.']);
+
+        Livewire::test(ListVacantes::class)
+            ->selectTableRecords([$vacante->getKey()])
+            ->callAction(TestAction::make('aprobar_lote')->table()->bulk())
+            ->assertHasNoErrors();
+
+        $publicada = $vacante->fresh();
+        $this->assertSame(EstadoPublicacion::Publicado, $publicada->estado);
+        $this->assertNull($publicada->motivo_devolucion, 'El lote no puede dejar la tarjeta contradictoria: publicada y devuelta a la vez.');
+        Mail::assertSent(VacanteAprobada::class, 1);
+    }
+
+    public function test_aprobar_en_lote_de_vacantes_no_revienta_si_el_asociado_no_tiene_correo(): void
+    {
+        Mail::fake();
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $asociado = Asociado::factory()->publicado()->create(['correo_interno' => null]);
+        $vacante = Vacante::factory()->for($asociado)->pendiente()->create();
+
+        Livewire::test(ListVacantes::class)
+            ->selectTableRecords([$vacante->getKey()])
+            ->callAction(TestAction::make('aprobar_lote')->table()->bulk())
+            ->assertHasNoErrors();
+
+        $this->assertSame(EstadoPublicacion::Publicado, $vacante->fresh()->estado);
+        Mail::assertNothingSent();
+    }
+
+    public function test_aprobar_en_lote_de_artistas_publica_y_avisa_por_correo(): void
+    {
+        Mail::fake();
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $artista = Artista::factory()->pendiente()->create(['correo' => 'dj@ejemplo.test']);
+
+        Livewire::test(ListArtistas::class)
+            ->selectTableRecords([$artista->getKey()])
+            ->callAction(TestAction::make('aprobar_lote')->table()->bulk())
+            ->assertHasNoErrors();
+
+        $this->assertSame(EstadoPublicacion::Publicado, $artista->fresh()->estado);
+        Mail::assertSent(FichaDeBolsaPublicada::class, 1);
+    }
+
+    public function test_aprobar_en_lote_de_artistas_no_revienta_si_no_tiene_correo(): void
+    {
+        Mail::fake();
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $artista = Artista::factory()->pendiente()->create(['correo' => null]);
+
+        Livewire::test(ListArtistas::class)
+            ->selectTableRecords([$artista->getKey()])
+            ->callAction(TestAction::make('aprobar_lote')->table()->bulk())
+            ->assertHasNoErrors();
+
+        $this->assertSame(EstadoPublicacion::Publicado, $artista->fresh()->estado);
+        Mail::assertNothingSent();
+    }
+
+    public function test_aprobar_en_lote_de_proveedores_publica_y_avisa_por_correo(): void
+    {
+        Mail::fake();
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $proveedor = Proveedor::factory()->pendiente()->create(['correo' => 'contacto@proveedor.test']);
+
+        Livewire::test(ListProveedors::class)
+            ->selectTableRecords([$proveedor->getKey()])
+            ->callAction(TestAction::make('aprobar_lote')->table()->bulk())
+            ->assertHasNoErrors();
+
+        $this->assertSame(EstadoPublicacion::Publicado, $proveedor->fresh()->estado);
+        Mail::assertSent(FichaDeBolsaPublicada::class, 1);
+    }
+
+    public function test_aprobar_en_lote_de_proveedores_no_revienta_si_no_tiene_correo(): void
+    {
+        Mail::fake();
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $proveedor = Proveedor::factory()->pendiente()->create(['correo' => null]);
+
+        Livewire::test(ListProveedors::class)
+            ->selectTableRecords([$proveedor->getKey()])
+            ->callAction(TestAction::make('aprobar_lote')->table()->bulk())
+            ->assertHasNoErrors();
+
+        $this->assertSame(EstadoPublicacion::Publicado, $proveedor->fresh()->estado);
         Mail::assertNothingSent();
     }
 

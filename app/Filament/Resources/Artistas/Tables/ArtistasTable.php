@@ -65,7 +65,10 @@ class ArtistasTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    AccionesDeAprobacion::aprobarEnLote('publicar_artista'),
+                    AccionesDeAprobacion::aprobarFichasEnLote(
+                        'publicar_artista',
+                        fn (Model $registro): string => route('artistas.show', $registro)
+                    ),
                     DeleteBulkAction::make(),
                 ]),
             ]);

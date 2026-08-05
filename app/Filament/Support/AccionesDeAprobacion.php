@@ -44,13 +44,30 @@ class AccionesDeAprobacion
             ->visible(fn (Model $registro): bool => $registro->estado !== EstadoPublicacion::Publicado
                 && auth()->user()?->can('publicar', $registro) === true)
             ->action(function (Model $registro): void {
-                $registro->update(['estado' => EstadoPublicacion::Publicado]);
+                self::publicar($registro);
 
                 Notification::make()
                     ->title('Contenido publicado')
                     ->success()
                     ->send();
             });
+    }
+
+    private static function publicar(Model $registro): void
+    {
+        $registro->update(['estado' => EstadoPublicacion::Publicado]);
+    }
+
+    /**
+     * Aprobación en lote genérica, para el contenido que solo necesita
+     * cambiar de estado (asociados, eventos, iniciativas): mismo efecto que
+     * `aprobar()` fila por fila.
+     *
+     * @param  string  $permiso  p. ej. `publicar_asociado`
+     */
+    public static function aprobarEnLote(string $permiso): BulkAction
+    {
+        return self::enLote($permiso, fn (Model $registro): mixed => self::publicar($registro));
     }
 
     public static function devolver(): Action
@@ -92,19 +109,30 @@ class AccionesDeAprobacion
             ->visible(fn (Vacante $registro): bool => $registro->estado !== EstadoPublicacion::Publicado
                 && auth()->user()?->can('publicar', $registro) === true)
             ->action(function (Vacante $registro): void {
-                $registro->update([
-                    'estado' => EstadoPublicacion::Publicado,
-                    'motivo_devolucion' => null,
-                ]);
-
-                $correos = DestinatariosDelAsociado::correos($registro->asociado);
-
-                if ($correos !== []) {
-                    Mail::to($correos)->send(new VacanteAprobada($registro));
-                }
+                self::publicarVacante($registro);
 
                 Notification::make()->title('Vacante publicada')->success()->send();
             });
+    }
+
+    /**
+     * El efecto real de aprobar una vacante, compartido por la fila y por el
+     * lote: publicarla, borrar el motivo de una devolución anterior —si se
+     * queda, la tarjeta del asociado dice «Publicada» y «pidieron un
+     * ajuste» al mismo tiempo— y avisar al establecimiento.
+     */
+    private static function publicarVacante(Vacante $registro): void
+    {
+        $registro->update([
+            'estado' => EstadoPublicacion::Publicado,
+            'motivo_devolucion' => null,
+        ]);
+
+        $correos = DestinatariosDelAsociado::correos($registro->asociado);
+
+        if ($correos !== []) {
+            Mail::to($correos)->send(new VacanteAprobada($registro));
+        }
     }
 
     /**
@@ -173,24 +201,60 @@ class AccionesDeAprobacion
             ->visible(fn (Model $registro): bool => $registro->estado !== EstadoPublicacion::Publicado
                 && auth()->user()?->can('publicar', $registro) === true)
             ->action(function (Model $registro) use ($urlPublica): void {
-                $registro->update(['estado' => EstadoPublicacion::Publicado]);
-
-                if (filled($registro->correo)) {
-                    Mail::to($registro->correo)->send(
-                        new FichaDeBolsaPublicada($registro->nombre, $urlPublica($registro))
-                    );
-                }
+                self::publicarFicha($registro, $urlPublica);
 
                 Notification::make()->title('Ficha publicada')->success()->send();
             });
     }
 
     /**
-     * Aprobación en lote para vaciar la bandeja de pendientes de una vez.
+     * El efecto real de aprobar una ficha de artista o proveedor, compartido
+     * por la fila y por el lote.
+     *
+     * @param  Closure(Model): string  $urlPublica
+     */
+    private static function publicarFicha(Model $registro, Closure $urlPublica): void
+    {
+        $registro->update(['estado' => EstadoPublicacion::Publicado]);
+
+        if (filled($registro->correo)) {
+            Mail::to($registro->correo)->send(
+                new FichaDeBolsaPublicada($registro->nombre, $urlPublica($registro))
+            );
+        }
+    }
+
+    /**
+     * Aprobación en lote de vacantes para vaciar la bandeja de pendientes de
+     * una vez: mismo efecto que `aprobarVacante()` fila por fila, así el
+     * lote nunca deja un motivo de devolución colgado ni calla el correo.
+     */
+    public static function aprobarVacantesEnLote(): BulkAction
+    {
+        return self::enLote('publicar_vacante', fn (Vacante $registro): mixed => self::publicarVacante($registro));
+    }
+
+    /**
+     * Aprobación en lote de fichas de artista o proveedor: mismo efecto que
+     * `aprobarFichaDeBolsa()` fila por fila.
+     *
+     * @param  string  $permiso  p. ej. `publicar_artista`
+     * @param  Closure(Model): string  $urlPublica
+     */
+    public static function aprobarFichasEnLote(string $permiso, Closure $urlPublica): BulkAction
+    {
+        return self::enLote($permiso, fn (Model $registro): mixed => self::publicarFicha($registro, $urlPublica));
+    }
+
+    /**
+     * Esqueleto común a toda aprobación en lote: comprueba la policy registro
+     * por registro —la visibilidad del botón nunca es la autorización— y le
+     * aplica a cada uno el mismo efecto que su acción unitaria.
      *
      * @param  string  $permiso  p. ej. `publicar_asociado`
+     * @param  Closure(Model): mixed  $efecto
      */
-    public static function aprobarEnLote(string $permiso): BulkAction
+    private static function enLote(string $permiso, Closure $efecto): BulkAction
     {
         return BulkAction::make('aprobar_lote')
             ->label('Aprobar y publicar')
@@ -199,14 +263,12 @@ class AccionesDeAprobacion
             ->requiresConfirmation()
             ->deselectRecordsAfterCompletion()
             ->visible(fn (): bool => auth()->user()?->can($permiso) === true)
-            ->action(function (Collection $registros): void {
-                // Se vuelve a comprobar registro por registro: la visibilidad
-                // del botón nunca es la autorización.
+            ->action(function (Collection $registros) use ($efecto): void {
                 $publicados = $registros->filter(
                     fn (Model $registro): bool => auth()->user()?->can('publicar', $registro) === true
                 );
 
-                $publicados->each->update(['estado' => EstadoPublicacion::Publicado]);
+                $publicados->each($efecto);
 
                 Notification::make()
                     ->title("{$publicados->count()} registros publicados")

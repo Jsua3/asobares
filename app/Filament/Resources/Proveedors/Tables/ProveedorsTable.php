@@ -58,7 +58,10 @@ class ProveedorsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    AccionesDeAprobacion::aprobarEnLote('publicar_proveedor'),
+                    AccionesDeAprobacion::aprobarFichasEnLote(
+                        'publicar_proveedor',
+                        fn (): string => route('proveedores.index')
+                    ),
                     DeleteBulkAction::make(),
                 ]),
             ]);
