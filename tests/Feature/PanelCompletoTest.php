@@ -95,9 +95,9 @@ class PanelCompletoTest extends TestCase
         $respuesta = $this->actingAs($this->direccion())
             ->get($recurso::getUrl('create'));
 
-        // O puede crear, o la policy se lo niega limpiamente. Vacante es un
-        // caso donde la dirección no crea: solo el asociado. Lo que no puede
-        // pasar es un 500.
+        // O puede crear, o la policy se lo niega limpiamente. Los recursos sin
+        // creación desde el panel (como las bolsas) ya se saltaron arriba por
+        // no tener página `create`; lo que no puede pasar aquí es un 500.
         $this->assertContains(
             $respuesta->status(),
             [200, 403],
@@ -121,9 +121,9 @@ class PanelCompletoTest extends TestCase
         $respuesta = $this->actingAs($this->direccion())
             ->get($recurso::getUrl('edit', ['record' => $registro]));
 
-        // O puede editar, o la policy se lo niega limpiamente. Vacante es un
-        // caso donde la dirección no edita: solo el asociado dueño. Lo que no
-        // puede pasar es un 500.
+        // O puede editar, o la policy se lo niega limpiamente. Los recursos
+        // sin edición desde el panel (como las bolsas) ya se saltaron arriba
+        // por no tener página `edit`; lo que no puede pasar aquí es un 500.
         $this->assertContains(
             $respuesta->status(),
             [200, 403],

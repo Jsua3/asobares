@@ -8,6 +8,7 @@ use App\Mail\VacanteAprobada;
 use App\Mail\VacanteDevuelta;
 use App\Models\Vacante;
 use App\Support\DestinatariosDelAsociado;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Textarea;
@@ -148,9 +149,18 @@ class AccionesDeAprobacion
      * Aprobación de una ficha de artista o proveedor llegada por el formulario
      * público. Se avisa al solicitante si dejó correo.
      *
-     * @param  string  $rutaPublica  nombre de ruta para armar el enlace, p. ej. `artistas.show`
+     * Recibe una función en vez de un nombre de ruta porque `route()` no es
+     * seguro con un modelo de sobra: cuando la ruta no declara parámetros
+     * (como `proveedores.index`), Laravel no lo descarta, lo cuelga como
+     * query string (`/proveedores?el-slug-del-proveedor`). Cada recurso sabe
+     * si su ruta pública necesita el registro o no, así que es quien decide
+     * cómo construir el enlace: `fn (Model $r): string => route('artistas.show', $r)`
+     * para artistas, `fn (): string => route('proveedores.index')` para
+     * proveedores.
+     *
+     * @param  Closure(Model): string  $urlPublica
      */
-    public static function aprobarFichaDeBolsa(string $rutaPublica): Action
+    public static function aprobarFichaDeBolsa(Closure $urlPublica): Action
     {
         return Action::make('aprobar')
             ->label('Aprobar y publicar')
@@ -162,12 +172,12 @@ class AccionesDeAprobacion
             ->modalSubmitActionLabel('Sí, publicar')
             ->visible(fn (Model $registro): bool => $registro->estado !== EstadoPublicacion::Publicado
                 && auth()->user()?->can('publicar', $registro) === true)
-            ->action(function (Model $registro) use ($rutaPublica): void {
+            ->action(function (Model $registro) use ($urlPublica): void {
                 $registro->update(['estado' => EstadoPublicacion::Publicado]);
 
                 if (filled($registro->correo)) {
                     Mail::to($registro->correo)->send(
-                        new FichaDeBolsaPublicada($registro->nombre, route($rutaPublica, $registro))
+                        new FichaDeBolsaPublicada($registro->nombre, $urlPublica($registro))
                     );
                 }
 

@@ -6,10 +6,13 @@ use App\Enums\EstadoDeGestion;
 use App\Enums\EstadoPublicacion;
 use App\Filament\Resources\Postulaciones\Pages\ListPostulaciones;
 use App\Filament\Resources\Vacantes\Pages\ListVacantes;
+use App\Filament\Support\AccionesDeAprobacion;
+use App\Mail\FichaDeBolsaPublicada;
 use App\Mail\VacanteAprobada;
 use App\Mail\VacanteDevuelta;
 use App\Models\Asociado;
 use App\Models\Postulacion;
+use App\Models\Proveedor;
 use App\Models\User;
 use App\Models\Vacante;
 use Database\Seeders\RolYPermisoSeeder;
@@ -82,7 +85,7 @@ class ModeracionDeBolsasTest extends TestCase
         Mail::assertSent(VacanteAprobada::class, 1);
     }
 
-    public function test_devolver_exige_motivo_y_lo_guarda(): void
+    public function test_devolver_con_motivo_lo_guarda_y_avisa_al_establecimiento(): void
     {
         Mail::fake();
         $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
@@ -103,6 +106,27 @@ class ModeracionDeBolsasTest extends TestCase
         Mail::assertSent(VacanteDevuelta::class, 1);
     }
 
+    public function test_devolver_sin_motivo_no_cambia_nada(): void
+    {
+        Mail::fake();
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $asociado = Asociado::factory()->publicado()->create(['correo_interno' => 'oficina@bar.test']);
+        $vacante = Vacante::factory()->for($asociado)->pendiente()->create();
+
+        Livewire::test(ListVacantes::class)
+            ->callAction(TestAction::make('devolver')->table($vacante), data: [
+                'motivo_devolucion' => '',
+            ])
+            ->assertHasFormErrors(['motivo_devolucion' => 'required']);
+
+        $sinCambios = $vacante->fresh();
+
+        $this->assertSame(EstadoPublicacion::PendienteAprobacion, $sinCambios->estado);
+        $this->assertNull($sinCambios->motivo_devolucion);
+        Mail::assertNotSent(VacanteDevuelta::class);
+    }
+
     public function test_aprobar_limpia_el_motivo_de_la_devolucion_anterior(): void
     {
         Mail::fake();
@@ -113,6 +137,30 @@ class ModeracionDeBolsasTest extends TestCase
         Livewire::test(ListVacantes::class)->callAction(TestAction::make('aprobar')->table($vacante));
 
         $this->assertNull($vacante->fresh()->motivo_devolucion);
+    }
+
+    /**
+     * `route()` no descarta un modelo de sobra cuando la ruta pública no
+     * declara parámetros: lo cuelga como query string. Este contrato exige
+     * que la función que arma la URL de `proveedores.index` —que no toma
+     * parámetros— nunca reciba el registro, así el enlace del correo queda
+     * limpio.
+     */
+    public function test_aprobar_ficha_de_bolsa_arma_la_url_publica_sin_parametros_colgantes(): void
+    {
+        Mail::fake();
+
+        $proveedor = Proveedor::factory()->create(['correo' => 'contacto@proveedor.test']);
+
+        $accion = AccionesDeAprobacion::aprobarFichaDeBolsa(fn (): string => route('proveedores.index'));
+        ($accion->getActionFunction())($proveedor);
+
+        Mail::assertSent(
+            FichaDeBolsaPublicada::class,
+            fn (FichaDeBolsaPublicada $correo): bool => $correo->urlPublica === route('proveedores.index')
+                && ! str_contains($correo->urlPublica, '?')
+                && $correo->nombreDeLaFicha === $proveedor->nombre
+        );
     }
 
     public function test_el_panel_ya_no_crea_ni_edita_vacantes(): void
