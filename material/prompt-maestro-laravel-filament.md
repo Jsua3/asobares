@@ -17,6 +17,13 @@
 > - Tras unificar el repositorio, el enlace `public/storage` se quedó apuntando a la antigua `asobares-web/`: hay que rehacerlo con `php artisan storage:link` o no carga ninguna imagen.
 >
 > **v4 (4 ago 2026) — ENDURECIMIENTO DE SEGURIDAD:** antes de conectar Bold con dinero real se auditó la seguridad del prototipo (49 hallazgos en bruto, 43 confirmados tras refutación adversarial). Se cerraron los bloqueantes de pago, el XSS almacenado del JSON-LD, el importador de cartera y las subidas de archivos; la suite pasó de 200 a 233 pruebas. **Las secciones 8 y 9 están corregidas con lo aprendido: si se relanza este prompt, hay que construirlas así desde el principio.** El acta completa —método, hallazgos, qué se cerró y qué queda— está en la nueva sección 15.
+>
+> **v6 (4 ago 2026) — REDISEÑO DE LAS TRES BOLSAS:** el encargo original modeló las bolsas como contenido que carga la oficina, y así no se mueven: quien tiene la necesidad —el establecimiento que busca bartender— no tenía cómo publicarla, y «postularse» era un enlace de WhatsApp que no dejaba rastro. **Se invirtió la propiedad del contenido.** Ahora el asociado publica y corrige sus propias vacantes desde `/mi-cuenta/vacantes`, la secretaría aprueba o devuelve **con motivo obligatorio**, y ni ella ni la dirección editan una vacante ajena. Las postulaciones tienen tabla propia y avisan por correo al establecimiento. Artistas y proveedores entran por formulario público moderado en vez de un mensaje de texto libre que había que transcribir a mano. Y los datos personales de la bolsa **se purgan solos** al vencer su plazo (`bolsas:depurar`, diario). La suite pasó de **233 a 374 pruebas** (363 pasan, 11 omitidas). **Las secciones 5, 6, 7, 9, 10, 11 y 12 están corregidas: si se relanza este prompt, las bolsas se construyen así desde el principio, no como un CRUD del panel.**
+>
+> **v6 · las tres trampas que costaron rondas de revisión:**
+> - **El observer de aprobación degrada *cualquier* guardado de un registro publicado hecho por quien no puede publicar**, mire el campo que mire. Cerrar una vacante solo toca `cerrada_at`, pero la despublicaba. Hace falta un escape explícito y acotado (propiedad de instancia en `Vacante`, leída con `instanceof` y encendida solo dentro de un `try/finally`), **no** relajar la condición general: hacerlo reabriría el agujero para los otros ocho modelos publicables.
+> - **Autorizar la vista del portal con la habilidad `view` es una fuga de datos.** `view` concede por permiso *o* por propiedad, así que un directivo que además sea dueño de un bar leía los candidatos de cualquier otro establecimiento. Las rutas de `/mi-cuenta` se autorizan **solo por propiedad** (habilidad aparte, `verEnPortal`); `view` queda para el panel.
+> - **Un plazo de retención en cero convierte la purga en «borra todo»**: `now()->subMonths(0)` es *ahora*. Y a cero se llega solo —variable de entorno vacía, `config:cache` viejo que no incluya el archivo nuevo—. El comando **aborta con error** si el plazo no es un entero ≥ 1; vaciar la variable no desactiva nada.
 
 ---
 
@@ -76,13 +83,14 @@ Trabaja por fases (sección 12), verifica cada fase antes de seguir, y no marque
 | `eventos` | titulo, slug, tipo (`evento`\|`capacitacion`), descripcion, lugar, fecha_inicio, fecha_fin, imagen, cupos, precio (0 = gratis), permite_inscripcion, enlace_externo (nullable, para registro de la Nacional), estado | Solo eventos del gremio. Mismo flujo de estados que asociados |
 | `inscripciones` | evento_id, nombre, correo, telefono, establecimiento, acepta_datos (bool), consentimiento_at, estado (`registrada`\|`confirmada`), transaccion_id | Habeas data obligatorio |
 | `requisitos_apertura` | municipio_id, entidad, descripcion, **checklist (json de ítems)**, enlace_externo, **adjunto descargable (formato oficial)**, **costo_aproximado (nullable)**, orden | La normatividad **difiere por municipio** (ej.: certificado de bomberos ~$100.000 en un municipio). Seed por municipio: Cámara de Comercio (matrícula), Alcaldía (uso de suelos), Bomberos (carta de solicitud de visita + certificado), Sayco-Acinpro, Secretaría de Salud, Policía (horarios) |
-| `vacantes` | asociado_id, cargo, tipo (`tiempo_completo`\|`por_turnos`), descripcion, franja_horaria, whatsapp_contacto, estado | **Bolsa de empleo del sector** ("muro"). **Solo asociados publican** (en el demo se crean desde el panel a nombre del asociado). Mismo flujo de estados |
-| `aspirantes` | vacante_id (nullable), nombre, correo, telefono, cargo_interes, experiencia (texto corto), acepta_datos, consentimiento_at | Registro público de quien busca empleo (bartender, chef, mesero, administrador…) |
-| `artistas` | nombre, slug, tipo (`dj`\|`banda`\|`solista`\|`otro`), genero_musical, descripcion, tarifa_desde (nullable), video_url (nullable, YouTube), whatsapp, instagram_url, foto, municipio_id, estado | Categoría separada del empleo («el DJ es artista, el mesero es empleo»). Ficha con género, tarifa y video embebido |
-| `proveedores` | nombre, slug, categoria_proveedor (`hielo`\|`licores`\|`alimentos`\|`aseo`\|`seguridad`\|`mantenimiento`\|`otros`), descripcion, whatsapp, correo, municipio_id, visible_hasta (date, nullable), estado | Bolsa de proveedores. La **monetización futura** (cobrar por estar en la base) se modela con `visible_hasta`: solo se listan los vigentes. En el demo, todos vigentes |
+| `vacantes` | asociado_id, cargo, **categoria_cargo** (enum `CargoDelSector`), tipo (`tiempo_completo`\|`por_turnos`\|**`momentaneo`**), descripcion, franja_horaria, **fecha_limite** (date, nullable), **cerrada_at** (timestamp, nullable), **motivo_devolucion** (text, nullable), whatsapp_contacto, estado | **Bolsa de empleo del sector** ("muro"). **La publica y la corrige el propio asociado** desde `/mi-cuenta/vacantes`; el panel solo modera. `categoria_cargo` (administración, cocina, barra, servicio, seguridad, aseo, otros) es lo que permite filtrar: `cargo` es texto libre y no se puede agrupar. `fecha_limite` es **obligatoria para `momentaneo`** (turno de una o dos noches) y opcional para el resto; al pasar, la vacante sale sola del muro. `cerrada_at` es el «ya contraté» y **no pasa por aprobación**. `motivo_devolucion` lo escribe la secretaría al devolver y lo lee el asociado en su cuenta |
+| `postulaciones` | vacante_id, nombre, correo, telefono, experiencia, **estado** (enum `EstadoDeGestion`), acepta_datos, consentimiento_at | **Quien se postula a una vacante concreta**, sin necesidad de cuenta. Índice **único por `(vacante_id, correo)`**: reenviar el formulario actualiza, no duplica ni vuelve a molestar al establecimiento. `estado`: nuevo → contactado → descartado, lo gestiona el asociado dueño |
+| `aspirantes` | nombre, **correo (único)**, telefono, cargo_interes, **categoria_cargo**, experiencia (texto corto), **estado** (`EstadoDeGestion`), acepta_datos, consentimiento_at | **Banco de talento del gremio**, distinto de una postulación: aquí la persona deja su perfil sin apuntar a ninguna vacante, para los cargos escasos que el gremio conecta a mano. **Sin `vacante_id`** — esa relación vive en `postulaciones`. Una persona, un registro |
+| `artistas` | nombre, slug, **user_id (nullable)**, tipo (`dj`\|`banda`\|`solista`\|`otro`), genero_musical, descripcion, tarifa_desde (nullable), video_url (nullable, YouTube), whatsapp, **correo**, instagram_url, foto, municipio_id, estado, **acepta_datos, consentimiento_at** | Categoría separada del empleo («el DJ es artista, el mesero es empleo»). **Se inscribe desde el sitio** y la secretaría aprueba; el `correo` es donde se le avisa que su ficha quedó publicada. `user_id` queda preparado —y sin usar— para cuando esta bolsa tenga cuenta propia |
+| `proveedores` | nombre, slug, **user_id (nullable)**, categoria_proveedor (`hielo`\|`licores`\|`alimentos`\|`aseo`\|`seguridad`\|`mantenimiento`\|`otros`), descripcion, whatsapp, correo, municipio_id, visible_hasta (date, nullable), estado, **acepta_datos, consentimiento_at** | Bolsa de proveedores, también por inscripción pública moderada. La **monetización futura** (cobrar por estar en la base) se modela con `visible_hasta`: solo se listan los vigentes. En el demo, todos vigentes |
 | `carteras` | asociado_id (único), saldo_pendiente, meses_mora, ultimo_pago_at, actualizado_at | **Estado de cuenta del afiliado**. Se **importa por CSV** desde el panel (archivo de la contadora); el asociado lo ve en `/mi-cuenta`, solo lectura |
 | `noticias` | titulo, slug, extracto, contenido (rich text), imagen, categoria (`noticia`\|`observatorio`\|`proyecto`), publicado_at, estado | Boletín de **baja frecuencia** (~mensual); categoría observatorio para cifras de la Nacional |
-| `mensajes` | tipo (`contacto`\|`afiliacion`\|`pqr`\|`aliado`\|`proveedor`), nombre, correo, telefono, mensaje, acepta_datos, consentimiento_at, radicado, estado (`nuevo`\|`en_tramite`\|`respondido`) | `radicado` consecutivo tipo `PQR-2026-0001` solo para PQR. Tipo `proveedor` = "quiero aparecer en la bolsa" |
+| `mensajes` | tipo (`contacto`\|`afiliacion`\|`pqr`\|`aliado`\|`proveedor`), nombre, correo, telefono, mensaje, acepta_datos, consentimiento_at, radicado, estado (`nuevo`\|`en_tramite`\|`respondido`) | `radicado` consecutivo tipo `PQR-2026-0001` solo para PQR. ⚠️ **v6:** el tipo `proveedor` quedó redundante — la bolsa tiene formulario propio desde `/proveedores/inscripcion`, pero el formulario de contacto **sigue ofreciendo** «Quiero aparecer en la bolsa de proveedores». Son dos caminos para lo mismo; hay que decidir si se retira esa opción del contacto o se deja como puerta alterna |
 | `transacciones` | referencia única, concepto (`afiliacion`\|`evento`\|`mensualidad`), inscripcion_id (nullable), asociado_id (nullable), monto, moneda (COP), estado (`pendiente`\|`aprobada`\|`rechazada`), metodo (`pse`\|`tarjeta`\|`otro`), payload (json) | Consultable en el panel, solo lectura |
 | `settings` | par clave/valor tipado o tabla dedicada | Textos institucionales, misión, contactos, redes, WhatsApp, correo destino, cifras del home. **Nada de contenido quemado en las vistas** |
 | `users` | + rol (spatie), + MFA de Filament, + `asociado_id` (nullable) | Roles abajo; el rol `asociado` enlaza a su establecimiento para `/mi-cuenta` |
@@ -91,16 +99,26 @@ Relaciones obvias con claves foráneas e índices (slug únicos, filtros por mun
 
 ## 6. Panel Filament `/admin` (el corazón del proyecto)
 
-**Recursos:** Asociados, Eventos, Noticias, Requisitos de apertura, **Vacantes**, **Aspirantes** (bandeja), **Artistas**, **Proveedores**, Aliados, Beneficios, Municipios, Categorías, Mensajes (bandeja), Inscripciones, Transacciones (solo lectura), **Cartera** (listado + **importador CSV** con validación y resumen de filas), Usuarios, Ajustes del sitio (página de settings), Bitácora (página que lista activitylog con filtros por usuario/modelo/fecha).
+**Recursos:** Asociados, Eventos, Noticias, Requisitos de apertura, **Vacantes (solo moderación: sin crear ni editar)**, **Postulaciones** (bandeja), **Aspirantes** (bandeja), **Artistas**, **Proveedores**, Aliados, Beneficios, Municipios, Categorías, Mensajes (bandeja), Inscripciones, Transacciones (solo lectura), **Cartera** (listado + **importador CSV** con validación y resumen de filas), Usuarios, Ajustes del sitio (página de settings), Bitácora (página que lista activitylog con filtros por usuario/modelo/fecha).
+
+**⚠️ El recurso de Vacantes no tiene formulario.** Registra solo la página de listado: nadie crea ni edita una vacante desde el panel, porque es contenido de un tercero. Las acciones de fila son aprobar, devolver con motivo y saltar a las postulaciones de esa vacante (filtradas en su propia bandeja, que es donde viven los datos personales de los candidatos).
 
 **Todo el panel en español**, con el vocabulario del gremio (nunca "posts" ni "records": "Asociados", "Eventos y capacitaciones", "Bolsa de empleo", "Boletín"...).
 
 **Roles (spatie/laravel-permission):**
-- `super_admin` (la directora): acceso total; único que **publica** contenido, gestiona usuarios, ajustes, cartera y ve transacciones.
-- `subadmin` (secretaria/pasantes): crea y edita Asociados, Eventos, Noticias, Requisitos, Vacantes, Artistas, Proveedores y Aliados, y gestiona las bandejas de Mensajes, Aspirantes e Inscripciones, **pero no puede publicar**: al guardar, su contenido queda en `pendiente_aprobacion`.
-- `asociado` (dueño de establecimiento): **no entra al panel**; su sesión sirve para `/mi-cuenta` (cartera + beneficios con detalle). Preparado para que en fase 2 pueda editar su propia ficha.
+- `super_admin` (la directora): acceso total; publica todo el contenido, gestiona usuarios, ajustes, cartera y ve transacciones. Es el único que **elimina**.
+- `subadmin` (secretaria/pasantes): crea y edita Asociados, Eventos, Noticias, Requisitos y Aliados, y gestiona las bandejas de Mensajes, Postulaciones, Aspirantes e Inscripciones. **No puede publicar lo que ella misma redacta** —al guardar queda en `pendiente_aprobacion`—, **pero sí aprueba las tres bolsas** (`publicar_vacante`, `publicar_artista`, `publicar_proveedor`) y ningún otro `publicar_*`.
+- `asociado` (dueño de establecimiento): **no entra al panel**; su sesión sirve para `/mi-cuenta` — cartera, beneficios con detalle y **sus vacantes**. Es el único que crea, edita y cierra vacantes de su establecimiento.
 
-**Flujo de aprobación (requisito crítico RF-37):** cuando un subadmin guarda contenido, el estado pasa a `pendiente_aprobacion` y el súper admin recibe una **notificación de base de datos** en el panel; el súper admin ve un badge con el número de pendientes, revisa y usa una acción "Aprobar y publicar" o "Devolver a borrador". Impleméntalo con policies + acciones de Filament, y pruébalo: un subadmin **no debe poder** publicar ni con manipulación del formulario.
+**El principio que ordena los permisos:** *nadie aprueba lo que él mismo redactó*. Las bolsas las escriben terceros —el asociado su vacante, el artista y el proveedor su ficha—, así que aprobarlas es trabajo de secretaría. El contenido que redacta la propia secretaría lo sigue aprobando la dirección.
+
+**El otro principio, el que más código toca:** *quien publica es dueño de su contenido y es el único que lo edita*. `VacantePolicy` **no hereda** del mapeo por permisos que usan los demás recursos: gobierna por propiedad. Crear exige rol asociado con establecimiento vinculado; editar y cerrar exigen ser del establecimiento dueño; el gremio modera y lee, pero no reescribe lo ajeno. (Artistas y proveedores son la excepción documentada: mientras no tengan cuenta propia, la secretaría sí edita sus fichas.)
+
+**Flujo de aprobación (requisito crítico RF-37):** cuando alguien guarda contenido que no puede publicar, el estado pasa a `pendiente_aprobacion` y llega una **notificación de base de datos** en el panel. **El aviso va a quien pueda publicar ESE modelo**, no a un rol fijo: se pregunta por la policy, no por el rol. Así las bolsas avisan a secretaría y dirección, el resto del contenido sigue avisando solo a dirección, y quien lo envió no se avisa a sí mismo — todo sin una sola línea de lógica por recurso. Impleméntalo con policies + acciones de Filament, y pruébalo: **la regla vive en el modelo (un observer), no en el formulario**, así que no se puede burlar mandando el estado a mano.
+
+**Devolver exige motivo.** La acción de devolver una vacante abre un modal con un campo obligatorio; el motivo se guarda en la vacante, se le manda por correo al asociado y lo ve en su cuenta. Devolver sin decir por qué obliga al asociado a llamar a la oficina, que es justo lo que la plataforma viene a evitar.
+
+**⚠️ La aprobación en lote tiene que producir exactamente los mismos efectos que la de fila** —limpiar el motivo, mandar el correo, saltarse los ya publicados—, y hay que probarla aparte. Es el camino que usa la secretaría cuando hay volumen, o sea cuando más importa que el aviso salga; y si reimplementa el `update` por su cuenta, se desincroniza en silencio.
 
 **Bitácora (RF-39):** `spatie/laravel-activitylog` en todos los modelos de contenido y en login/logout; página "Bitácora" legible: "Natalia aprobó el asociado X — hace 2 horas".
 
@@ -108,7 +126,7 @@ Relaciones obvias con claves foráneas e índices (slug únicos, filtros por mun
 
 **Dashboard:** widgets de resumen — asociados publicados (y por municipio), **asociados en mora y saldo total de cartera**, mensajes nuevos, aspirantes de la semana, inscripciones de la semana, total recaudado del mes (transacciones aprobadas), últimas 5 transacciones, gráfico de inscripciones últimos 30 días.
 
-**Bandejas:** Mensajes con filtros por tipo y estado (al abrir un PQR se ve el radicado; acción "Marcar respondido" con nota). Aspirantes filtrables por cargo. Las inscripciones muestran su evento y estado de pago.
+**Bandejas:** Mensajes con filtros por tipo y estado (al abrir un PQR se ve el radicado; acción "Marcar respondido" con nota). **Postulaciones** filtrables por vacante y por estado de gestión — el gremio **no recibe aviso por cada postulación** (sería ruido), pero conserva la vista para medir si la bolsa está sirviendo y para responder por los datos que custodia. Aspirantes filtrables por área y estado. Las inscripciones muestran su evento y estado de pago. Ninguna bandeja permite crear registros a mano: todas entran por formularios públicos.
 
 ## 7. Sitio público (Blade + Tailwind, server-rendered)
 
@@ -118,11 +136,14 @@ Rutas y páginas (todas leen de la BD/settings, **cero texto quemado**):
 2. **`/quienes-somos`** — historia (fundación 2024), misión con énfasis en **representatividad gremial ante instituciones**, qué hace el gremio, junta/dirección, programas (Armenia 24 Horas, Foro Quindío Nocturno), enlace a Asobares Nacional.
 3. **`/directorio`** — buscador por nombre + filtros por municipio y categoría (GET server-side, URLs compartibles tipo `/directorio?municipio=salento&categoria=cafe`); grid de tarjetas; **vista mapa** (Leaflet) con pins de los publicados. **`/directorio/{slug}`** — ficha del asociado: galería, "reseñita" (descripción), horario, dirección con mini-mapa, botones WhatsApp e Instagram y **enlaces a Google Maps/Business y TripAdvisor si existen**; **solo campos públicos** (el propietario decide qué se muestra); `schema.org` de negocio local en JSON-LD.
 4. **`/abre-tu-negocio`** — la **página insignia**. Selector de municipio → requisitos por entidad con **checklist visible**, descripción, **costo aproximado si aplica**, enlaces y **formatos oficiales descargables** (botón "Descargar formato"); acabado formal e institucional (nada que parezca un Google Docs enlazado); texto de descargo ("verifica siempre con la entidad"); CTA "¿Dudas? Escríbenos".
-5. **`/empleo`** — **bolsa de empleo del sector**: muro de vacantes publicadas (filtro por cargo y municipio; aviso visible: "solo los establecimientos asociados publican vacantes") + formulario público "Déjanos tu perfil" (aspirante: nombre, contacto, cargo de interés, experiencia breve, habeas data).
-6. **`/artistas`** — directorio de artistas (DJs, bandas, solistas) con filtro por tipo y **género musical**; tarjeta/ficha con foto, género, tarifa desde, WhatsApp y **video de YouTube embebido** (`iframe` con `loading="lazy"`) cuando exista.
-7. **`/proveedores`** — bolsa de proveedores por categoría (hielo, licores, alimentos, aseo, seguridad, mantenimiento); tarjetas con contacto directo; CTA "¿Quieres aparecer aquí? Escríbenos" → formulario tipo `proveedor`. (La vigencia pagada `visible_hasta` filtra el listado.)
+5. **`/empleo`** — **bolsa de empleo del sector**: muro de vacantes **publicadas y vigentes** (ni cerradas ni pasadas de fecha), con filtro por **área del establecimiento** y municipio, y aviso visible «solo los establecimientos asociados publican vacantes»; más el formulario público «Déjanos tu perfil» para el banco de talento (nombre, contacto, cargo e **área** de interés, experiencia breve, habeas data), que **actualiza el perfil si el correo ya existe** en vez de duplicarlo. **`/empleo/{vacante}`** — página de detalle con el formulario de postulación, `JobPosting` en JSON-LD y otras vacantes del área. El WhatsApp del establecimiento queda como canal secundario, no como única vía.
+6. **`/artistas`** — directorio de artistas (DJs, bandas, solistas) con filtro por tipo y **género musical**; tarjeta/ficha con foto, género, tarifa desde, WhatsApp y **video de YouTube embebido** (`iframe` con `loading="lazy"`) cuando exista. **`/artistas/inscripcion`** — formulario público para inscribirse en la bolsa (incluida foto), que crea la ficha en `pendiente_aprobacion`. ⚠️ **Regístrala antes que `/artistas/{artista:slug}`** o el slug se come la palabra «inscripcion».
+7. **`/proveedores`** — bolsa de proveedores por categoría (hielo, licores, alimentos, aseo, seguridad, mantenimiento), **paginada**; tarjetas con contacto directo; CTA "¿Quieres aparecer aquí?" → **`/proveedores/inscripcion`**, formulario propio que crea la ficha en `pendiente_aprobacion`. Se acabó el «quiero ser proveedor» como mensaje de texto libre que la secretaría tenía que transcribir a mano. (La vigencia pagada `visible_hasta` sigue filtrando el listado.)
 8. **`/eventos`** — próximos y pasados (tabs), tipo evento/capacitación, **solo eventos del gremio**; si el evento tiene `enlace_externo` (registro de la Nacional) el botón lleva allá. **`/eventos/{slug}`** — ficha con fecha, lugar, cupos y **formulario de inscripción** (nombre, correo, teléfono, establecimiento opcional, checkbox habeas data obligatorio). Si el evento tiene precio > 0, tras inscribirse redirige al **flujo de pago** (sección 8) y muestra el estado.
 9. **`/mi-cuenta`** — login del rol `asociado`: saludo con su establecimiento, **estado de cartera** ("Estás al día" ✅ o "Debes N meses · $X" con botón **"Pagar ahora"** → flujo de pago concepto `mensualidad`), y los **beneficios con el detalle de convenios** (contenido privado). Al aprobarse el pago simulado, la cartera del demo queda al día.
+    - **`/mi-cuenta/vacantes` — «Mis vacantes», el portal donde el asociado gestiona su bolsa.** Listado de las suyas con estado, motivo de devolución si lo hay y conteo de postulaciones; crear, editar, cerrar («ya contraté») y reabrir; y **`/mi-cuenta/vacantes/{vacante}`** con las postulaciones recibidas y su estado de gestión. Se construye en **Blade propio con la estética del sitio**, no como un segundo panel de Filament: el asociado nunca entra a `/admin` y esa frontera se mantiene dura.
+    - **Editar una vacante publicada la devuelve a revisión** y la saca del muro hasta que la secretaría apruebe el cambio: lo que está publicado es siempre algo que alguien aprobó. **Cerrar y reabrir no pasan por aprobación** — no cambian el contenido.
+    - El establecimiento se toma **de la sesión, nunca del formulario**, y el estado lo fija el servidor: mandar `estado` o `asociado_id` a mano no sirve de nada.
 10. **`/boletin`** — listado con categorías (noticias, observatorio, próximos proyectos); **`/boletin/{slug}`** — detalle; las de observatorio con tarjetas de cifras destacadas. Sección deliberadamente sobria: frecuencia ~mensual.
 11. **`/afiliate`** — los beneficios en grande, cómo funciona, formulario de afiliación (habeas data) que al enviarse: guarda el mensaje, muestra confirmación y ofrece botón directo a WhatsApp del gremio con mensaje precargado.
 12. **`/contacto`** — formulario con tipo (contacto/PQR/quiero ser aliado/quiero ser proveedor); si es PQR genera y muestra **radicado** en pantalla y (mailer `log` en demo) por correo; datos de la oficina con mapa; redes.
@@ -154,7 +175,9 @@ Rutas y páginas (todas leen de la BD/settings, **cero texto quemado**):
 ## 9. Seguridad y Habeas Data (no negociable)
 
 - Validación estricta del lado servidor en TODOS los formularios públicos + rate limiting por IP + honeypot antispam simple (sin captcha de terceros en el demo).
-- Checkbox de **autorización de tratamiento de datos obligatorio** en cada formulario que capture datos (inscripciones, aspirantes, afiliación, contacto, proveedor), con enlace a `/politica-de-datos` y `consentimiento_at` guardado con timestamp (Ley 1581 de 2012).
+- Checkbox de **autorización de tratamiento de datos obligatorio** en cada formulario que capture datos (inscripciones, postulaciones, banco de talento, inscripción de artistas y de proveedores, afiliación, contacto), con enlace a `/politica-de-datos` y `consentimiento_at` guardado con timestamp (Ley 1581 de 2012).
+- **Retención (v6): los datos personales de la bolsa se borran solos.** Un comando `bolsas:depurar` programado a diario elimina las postulaciones cuya vacante cerró o venció hace más del plazo, y los perfiles del banco de talento cuyo consentimiento tiene más del plazo. Los plazos viven en `config/bolsas.php` (6 y 12 meses por defecto), nunca cableados. **El reloj cuelga de `consentimiento_at`, no de `updated_at`**: si colgara de la última edición, un simple cambio de estado de gestión desde el panel regalaría doce meses más sin que la persona haya renovado nada. Los registros sin sello caducan por `created_at`, o serían inmortales.
+- **La política publicada tiene que describir lo que el sistema hace de verdad.** Si al postularse los datos del candidato se entregan al establecimiento —otro responsable de tratamiento—, eso es una **transferencia a un tercero** y va escrita en la política y en la casilla; un consentimiento «para atender esta solicitud» no la cubre. La lista de datos recolectados incluye la foto del artista y los contactos de artistas y proveedores. Y los plazos que anuncia la política se leen de la configuración, para que no se separen del comportamiento real.
 - Contraseñas hasheadas (por defecto de Laravel), MFA en el panel, sesiones seguras, CSRF en todo, escape de salida (nada de `{!! !!}` sobre input de usuarios; el rich text de noticias se sanea). El `video_url` de artistas se valida como URL de YouTube y se embebe solo con el ID extraído.
 - Archivos subidos: validar tipo/tamaño; imágenes reprocesadas (nunca servir el binario original de un upload). Los adjuntos de requisitos (formatos oficiales) se sirven con nombre limpio.
 - La importación CSV de cartera valida columnas, tipos y asociado existente; muestra errores por fila sin abortar todo.
@@ -172,11 +195,19 @@ Rutas y páginas (todas leen de la BD/settings, **cero texto quemado**):
 - **Producción no arranca con la configuración del demo**: la aplicación falla si corre en producción con `APP_DEBUG=true` o con el mailer en `log`, fuerza HTTPS, y los seeders de cuentas de demostración se niegan a ejecutarse. La contraseña del demo está publicada en el README.
 - **Los formularios se prueban con los campos que manda el navegador.** Un test que inyecta a mano un campo que el formulario real no envía enmascara el fallo: así estuvo roto todo el envío de `/afiliate`, que exigía un `tipo` que su formulario nunca mandaba.
 
+**Y esto es lo que enseñó el rediseño de las bolsas (v6):**
+
+- **Autorizar por permiso y autorizar por propiedad no son intercambiables.** La habilidad `view` de un recurso concede a quien tenga el permiso *o* a quien sea dueño; usarla para una ruta del portal del asociado deja entrar a cualquiera con permiso de panel. Un directivo que además sea dueño de un bar —caso perfectamente real en un gremio— podía leer los datos de los candidatos de todos los establecimientos. Las rutas del portal usan una habilidad **solo de propiedad**.
+- **Un endpoint público que hace «buscar y si no existe crear» revienta con un doble clic.** Dos peticiones pasan el `first()` a la vez y la segunda choca contra el índice único: 500 en la cara del usuario, en un formulario que se envía desde el móvil con conexión lenta. Captura la violación de unicidad, vuelve a buscar y actualiza.
+- **Un `<select>` obligatorio sin opción vacía llega preseleccionado con el primer valor.** Quien no toca el desplegable manda «Administración» y el primer municipio alfabético — y envenena justo los filtros que el módulo existe para ofrecer.
+- **Los plurales del framework son ingleses.** `Str::plural('postulación')` devuelve «postulacións» en la pantalla que más mira el asociado.
+- **Al reconstruir una tabla en una migración, nombra los índices explícitamente.** `Schema::rename()` no renombra los índices, así que quedan con el nombre de la tabla temporal y el `down()` los busca por convención, no los encuentra y revienta: el rollback queda inservible. (Y en SQLite hay que reconstruir, no alterar: no deja soltar una columna atada a una clave foránea.)
+
 ## 10. Datos semilla (para que el demo se vea vivo)
 
 - 8 municipios, 6 categorías, **24 asociados ficticios** repartidos en municipios y categorías (nombres creíbles de bares/cafés quindianos inventados; 6 destacados; coordenadas reales aproximadas de cada municipio con jitter; 8 con `google_maps_url`/`tripadvisor_url` de ejemplo), con imágenes placeholder generadas localmente (SVG/PNG de color de marca con las iniciales del negocio — no dependas de URLs externas).
 - 6 aliados (2 con `detalle_convenio` privado), los 5 beneficios reales, 6 eventos del gremio (3 futuros: 1 capacitación gratuita con inscripción, 1 evento con precio $30.000 para probar pagos, 1 con `enlace_externo` a la Nacional; 3 pasados), 8 inscripciones de ejemplo.
-- **6 vacantes** (bartender, chef, mesero, administrador, DJ residente no — ese va en artistas —, portero, auxiliar de cocina) en 5 asociados distintos + **7 aspirantes** de ejemplo.
+- **7 vacantes** (bartender, chef, mesero, administrador, portero, auxiliar de cocina — el DJ residente no: ese va en artistas —, más **una momentánea con fecha límite** para demostrar el turno de una noche) en 5 asociados distintos, cada una con su **área**; 1 queda a propósito en `pendiente_aprobacion` para demostrar que lo no aprobado no sale en `/empleo`. Además **4 postulaciones** repartidas sobre las publicadas y **7 perfiles** del banco de talento.
 - **8 artistas** (4 DJs con géneros distintos, 2 bandas, 2 solistas; 3 con `video_url` de YouTube válida; tarifas variadas) y **10 proveedores** repartidos en las categorías (todos con `visible_hasta` vigente).
 - **Cartera para los 24 asociados**: 16 al día y 8 en mora (1–6 meses, saldos realistas de mensualidad ~$50.000).
 - 6 noticias (2 de observatorio con las cifras reales del punto 2, 1 de "próximos proyectos"), **requisitos de apertura completos para Armenia, Salento y Filandia** (6 entidades c/u, con checklist json, costo aproximado donde aplique y 1–2 adjuntos de ejemplo generados localmente como PDF simple), 10 mensajes variados (3 PQR con radicados consecutivos, 2 tipo proveedor), 6 transacciones en distintos estados (incluida 1 `mensualidad` aprobada).
@@ -192,6 +223,7 @@ Rutas y páginas (todas leen de la BD/settings, **cero texto quemado**):
 - [ ] Accesibilidad base: contraste AA **en los dos temas** (no solo sobre el fondo oscuro), alt en imágenes, labels en formularios, foco visible.
 - [ ] Tema claro/oscuro: cero clases de color cableadas en las vistas; el modo oscuro conserva exactamente los valores con los que se diseñó; sin parpadeo al navegar; el estado activo del selector se distingue por algo más que el color (WCAG 1.4.1 y 1.4.11).
 - [ ] Prueba de guardia que recorra las vistas y falle si reaparece una clase de tema cableada — incluidas las vistas de paquetes publicadas en `resources/views/vendor/`, que es por donde se coló el paginador.
+- [ ] Retención de datos personales de la bolsa configurable y automática; la política publicada dice lo que el sistema hace, incluida la transferencia al establecimiento.
 - [ ] Código en inglés, UI en español; PSR-12 (`laravel/pint`).
 - [ ] Git: repositorio inicializado, commits pequeños y descriptivos por fase.
 
@@ -201,14 +233,28 @@ Rutas y páginas (todas leen de la BD/settings, **cero texto quemado**):
 2. **Fase 1 — Datos:** migraciones + modelos + factories + seeders completos (incluidas las entidades nuevas); `php artisan migrate:fresh --seed` sin errores; commit.
 3. **Fase 2 — Panel:** recursos Filament (incluidos Vacantes, Aspirantes, Artistas, Proveedores y Cartera con importador CSV), roles y policies, flujo de aprobación con notificaciones, bitácora, MFA, dashboard; commit.
 4. **Fase 3 — Sitio público núcleo:** layout + páginas 1–4 y 8–16 (inicio, quiénes somos, directorio, abre-tu-negocio, eventos, boletín, afíliate, contacto, política, extras, **selector de tema y portadas de relleno bicromáticas**), filtros del directorio, mapa, formularios con habeas data y radicados; commit. Monta la capa de tokens semánticos que describe la sección 4 **antes** de escribir la primera vista: migrar 446 clases cableadas después cuesta mucho más que nacer con ellas.
-5. **Fase 3b — Módulos Reunión 2:** `/empleo`, `/artistas`, `/proveedores` y `/mi-cuenta` con login de asociado y vista de cartera; commit.
+5. **Fase 3b — Módulos Reunión 2:** `/empleo` (muro filtrado + detalle con formulario de postulación), `/artistas` y `/proveedores` (directorio + inscripción pública moderada), y `/mi-cuenta` con login de asociado, vista de cartera y **el portal «Mis vacantes»**; los cuatro correos del gremio (postulación recibida, vacante aprobada, vacante devuelta con motivo, ficha publicada); y el comando de depuración con su tarea programada. Commit.
+   - **Orden importante dentro de la fase:** primero el modelo de datos y los permisos, después el portal del asociado, después la cara pública, y **los correos justo antes de la moderación del panel** — las vistas de correo enlazan a rutas que crean el portal y el detalle público, así que escribirlas antes deja tests rojos por rutas inexistentes.
 6. **Fase 4 — Pagos:** interfaz + FakeGateway (con concepto `mensualidad`) + esqueleto Bold + transacciones en panel; commit.
-7. **Fase 5 — Calidad:** pruebas Pest (mínimo: subadmin no puede publicar; PQR genera radicado consecutivo; inscripción exige habeas data; webhook actualiza transacción e inscripción; **importar CSV de cartera actualiza saldos**; **/mi-cuenta exige rol asociado**; **una vacante no publicada no aparece en /empleo**; rutas públicas responden 200), pint, revisión de RNF, README.
+7. **Fase 5 — Calidad:** pruebas (mínimo: subadmin no puede publicar lo que redacta pero sí aprueba las bolsas; PQR genera radicado consecutivo; inscripción exige habeas data; webhook actualiza transacción e inscripción; **importar CSV de cartera actualiza saldos**; **/mi-cuenta exige rol asociado**; **una vacante no publicada, cerrada o vencida no aparece en /empleo ni tiene detalle**; **un asociado no ve ni edita nada de otro establecimiento**; **editar una publicada la devuelve a revisión y cerrar no**; **postularse guarda y avisa, y reenviar no duplica ni reenvía**; **devolver exige motivo**; **aprobar en lote produce los mismos efectos que aprobar de a uno**; **la depuración borra lo vencido, respeta lo vigente y aborta con un plazo inválido**; rutas públicas responden 200), pint, revisión de RNF, README.
+   - **Prueba la frontera negativa, no solo el camino feliz.** Un test que comprueba que el dueño puede editar no prueba nada si no hay otro que compruebe que el vecino no. Y cuando un cambio deje sin sentido un test viejo, **cámbialo para que afirme la regla nueva** —un 403 esperado— en vez de excluir el caso del barrido: excluirlo borra la cobertura justo donde acaba de cambiar el comportamiento.
 8. **Verificación final:** `php artisan migrate:fresh --seed && php artisan test && npm run build`, levantar el server y recorrer con curl las rutas públicas y el login del panel. Arregla todo lo que falle antes de reportar.
 
 ## 13. Entregable final de tu sesión
 
-Termina con un **README.md** que incluya: qué es el proyecto, requisitos, pasos exactos para correrlo (5 comandos máximo), credenciales demo (los 3 usuarios), cómo probar el flujo de aprobación (guion de 6 pasos), cómo probar el pago simulado de un evento, **cómo probar el flujo de cartera** (login asociado → ver mora → pagar → al día) y **cómo importar el CSV de la contadora**, cómo activar Bold real con `.env`, y la lista de pendientes conocidos. Y un resumen en consola: qué se construyó, qué pruebas pasan, y las 3 cosas que priorizarías después.
+Termina con un **README.md** que incluya: qué es el proyecto, requisitos, pasos exactos para correrlo (5 comandos máximo), credenciales demo (los 3 usuarios), cómo probar el flujo de aprobación (guion de 6 pasos), cómo probar el pago simulado de un evento, **cómo probar el flujo de cartera** (login asociado → ver mora → pagar → al día), **cómo importar el CSV de la contadora**, cómo activar Bold real con `.env`, y la lista de pendientes conocidos. Y un resumen en consola: qué se construyó, qué pruebas pasan, y las 3 cosas que priorizarías después.
+
+**Guion de la bolsa de empleo, de punta a punta** (el que demuestra el rediseño de la v6, y el que conviene recorrer a mano antes de entregar):
+
+1. Entrar a `/mi-cuenta` con la cuenta de asociado y abrir **Mis vacantes**.
+2. Publicar una vacante momentánea con fecha límite → queda pendiente y **no** aparece en `/empleo`.
+3. Entrar al panel como secretaría: hay notificación de pendiente. Devolverla con motivo.
+4. Volver a `/mi-cuenta/vacantes`: se ve el motivo. Corregir y reenviar.
+5. Aprobarla desde el panel → aparece en `/empleo` y en su página de detalle.
+6. Postularse desde el detalle **sin iniciar sesión** → aparece en «Mis vacantes» del asociado y en `/admin/postulaciones`.
+7. Marcar «Ya contraté» → la vacante desaparece del muro y su detalle da 404.
+8. Inscribirse como artista desde `/artistas/inscripcion` → la ficha entra pendiente y no es visible; aprobarla desde el panel la publica.
+9. `php artisan bolsas:depurar --pretend` informa sin borrar.
 
 ## 14. Lo que NO debes hacer
 
@@ -218,6 +264,9 @@ Termina con un **README.md** que incluya: qué es el proyecto, requisitos, pasos
 - No usar datos personales reales de establecimientos, artistas, proveedores o personas (salvo los institucionales del punto 2).
 - No publicar eventos de bares individuales en las semillas: solo eventos del gremio.
 - No saltarte el flujo de aprobación "porque es un demo": es EL requisito que estamos evaluando.
+- **No volver a modelar las bolsas como un CRUD del panel.** La vacante la escribe el establecimiento; el gremio modera. Si la oficina tiene que teclear las vacantes, la bolsa no se mueve — ya se probó.
+- **No dejar que el gremio edite contenido de un tercero.** Aprobar, devolver con motivo y, en último caso, eliminar. Reescribir lo ajeno, no.
+- **No guardar datos de personas que buscan empleo sin plazo de borrado**, ni prometer en la política un plazo que el código no cumpla.
 - No terminar con migraciones, seeders o pruebas rotas.
 
 ---
@@ -251,7 +300,7 @@ Ninguno es de severidad alta y ninguno bloquea conectar Bold.
 - **G4 — Cupos de eventos**: se consumen con inscripciones sin pagar y el conteo no está protegido contra concurrencia.
 - **G8 — Autenticación**: la MFA del panel es opcional, no obligatoria; los dos logins limitan por IP pero nunca bloquean la cuenta atacada; el login de `/mi-cuenta` confirma con un mensaje distinto que una contraseña de administrador era correcta.
 - **G9 — Flujo de aprobación**: el observer solo vigila la *entrada* a «publicado», así que **un subadmin sí puede despublicar**; y puede confirmar a mano una inscripción de pago, saltándose la regla de que solo la confirma una transacción aprobada.
-- **G12 — Datos personales (Ley 1581)**: no hay política de retención ni supresión, el consentimiento se guarda sin evidencia (IP, agente, versión de la política aceptada), y la política publicada no nombra a los encargados que intervienen —incluida la pasarela—.
+- **G12 — Datos personales (Ley 1581)**: ~~no hay política de retención ni supresión~~ **cerrado en parte por la v6** para la bolsa —`bolsas:depurar` borra postulaciones y perfiles al vencer su plazo, y la política publica esos plazos y declara la transferencia al establecimiento—. **Queda abierto**: el consentimiento se sigue guardando sin evidencia (IP, agente, versión de la política aceptada); la política no nombra a los demás encargados que intervienen —incluida la pasarela—; inscripciones y mensajes no tienen plazo de retención; y no hay canal de supresión a petición del titular. **Queda además un hueco de la propia v6**: una vacante de tiempo completo sin fecha límite que nadie cierre nunca conserva sus postulaciones para siempre, porque el reloj de los seis meses arranca al cerrar o vencer. Se cierra purgando también por antigüedad absoluta de la postulación, o cerrando solas las vacantes sin movimiento.
 
 ### 15.3 Dos incógnitas que solo resuelve el sandbox de Bold
 
@@ -269,7 +318,50 @@ Antes de tocar credenciales reales hay que confirmarlas, porque la documentació
 
 ---
 
-## 16. PENDIENTE ANTES DE PRODUCCIÓN — Normatividad real y formatos oficiales
+## 16. Rediseño de las tres bolsas (4 ago 2026)
+
+**Por qué se rehizo.** El encargo original modeló las bolsas como contenido que carga la oficina: la secretaría creaba las vacantes «a nombre de» un asociado, y postularse era un enlace de WhatsApp. Con eso la bolsa no se mueve —quien tiene la necesidad no tiene cómo publicarla—, no queda rastro de nadie, y una vacante de una noche vive publicada para siempre. La directiva la había puesto como prioridad número uno.
+
+**Método.** Diseño conversado y aprobado antes de tocar código (`docs/superpowers/specs/`), plan de 22 tareas con código y pruebas escritas de antemano (`docs/superpowers/plans/`), y ejecución tarea por tarea con un agente implementador y un revisor independiente por tarea, más una revisión final de toda la rama. **30 commits. La suite pasó de 233 a 374 pruebas** (363 pasan, 11 omitidas, 0 fallos).
+
+### 16.1 Lo que cambió
+
+| Antes | Ahora |
+|---|---|
+| La oficina creaba las vacantes desde el panel | El asociado las publica y corrige desde `/mi-cuenta/vacantes`; el panel solo modera |
+| Solo la dirección publicaba | La secretaría aprueba **las tres bolsas**; la dirección sigue aprobando lo que la secretaría redacta |
+| Devolver no decía por qué | Devolver **exige motivo**, que se guarda, se manda por correo y el asociado lo ve en su cuenta |
+| Postularse era un enlace de WhatsApp | La postulación queda en base ligada a su vacante y **avisa por correo** al establecimiento |
+| `aspirantes` servía para dos cosas y hacía mal las dos | `postulaciones` (a una vacante) y `aspirantes` (banco de talento, una persona un registro) |
+| Una vacante publicada vivía para siempre | Cierre manual («ya contraté») + fecha límite que la retira sola |
+| El filtro era por texto libre | Filtro por **área del establecimiento**, que sí se puede agrupar |
+| «Quiero ser proveedor» era un mensaje de texto libre | Formulario propio que crea la ficha en pendiente |
+| Los datos de empleo se guardaban indefinidamente | `bolsas:depurar` los borra al vencer su plazo, configurable |
+
+### 16.2 Lo que la revisión atrapó y conviene no repetir
+
+Cinco de las siete rondas de arreglo salieron de revisiones independientes, no de pruebas que fallaran:
+
+- Una **fuga de datos**: la vista de postulaciones del portal autorizaba con `view`, que concede por permiso o por propiedad; un directivo que además fuera dueño de un bar leía los candidatos de cualquier establecimiento.
+- Un **plazo de retención en cero** convertía la purga en «borra todo», y a cero se llega solo con una variable de entorno vacía.
+- El **consentimiento no cubría** la transferencia al establecimiento que la propia rama acababa de introducir.
+- Un `down()` de migración que dejaba el rollback inservible, una **carrera de doble clic** que daba 500, un enlace roto a fichas sin aprobar, y cobertura de pruebas que se estaba **borrando en vez de afirmarse** cuando el comportamiento cambiaba.
+
+### 16.3 Cabos sueltos conocidos
+
+- El formulario de contacto **sigue ofreciendo** «Quiero aparecer en la bolsa de proveedores» (tipo `proveedor` de `mensajes`) pese a que la bolsa ya tiene formulario propio: dos caminos para lo mismo. Decidir si se retira del contacto.
+- La cláusula de entrega a terceros aparece en **todos** los formularios públicos, incluidos afiliación y contacto, donde no hay ningún tercero. Para Ley 1581 la autorización debería ser específica por finalidad.
+- El aviso de retención en el portal del asociado dice «seis meses» a mano, mientras la política lee el plazo de la configuración: divergen si se cambia la variable.
+- La política no menciona que el WhatsApp e Instagram del artista y el contacto del proveedor **se publican en la web abierta**.
+- Falta el texto real de la política revisado por quien responda legalmente por el gremio: lo redactó un agente describiendo el comportamiento del código.
+
+### 16.4 Lo que quedó explícitamente fuera
+
+Cuentas propias para artistas y proveedores (la columna `user_id` existe y nadie la usa), monetización de proveedores, versionado de ediciones, CV adjunto en PDF, cruce automático entre banco de talento y vacantes (la categoría de cargo lo deja facilitado), y consulta del estado de la postulación por parte del candidato —no tiene cuenta—.
+
+---
+
+## 17. PENDIENTE ANTES DE PRODUCCIÓN — Normatividad real y formatos oficiales
 
 **Nada del contenido normativo que hoy trae la plataforma sirve para orientar a un empresario de verdad.** Es material de demostración: existe para que la página insignia se vea viva en una presentación, no para que alguien abra un bar siguiéndolo.
 
