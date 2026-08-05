@@ -6,7 +6,6 @@ use App\Models\Aspirante;
 use App\Models\Postulacion;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
 
 /**
  * Borra los datos personales de las bolsas cuando ya cumplieron su fin.
@@ -22,22 +21,29 @@ class DepurarBolsas extends Command
 
     public function handle(): int
     {
+        $plazoPostulaciones = $this->plazoEnMeses('bolsas.retencion_postulaciones_meses', 'RETENCION_POSTULACIONES_MESES');
+        $plazoAspirantes = $this->plazoEnMeses('bolsas.retencion_aspirantes_meses', 'RETENCION_ASPIRANTES_MESES');
+
+        if ($plazoPostulaciones === null || $plazoAspirantes === null) {
+            return self::FAILURE;
+        }
+
         $simulacro = (bool) $this->option('pretend');
 
-        $postulaciones = $this->postulacionesCaducadas();
-        $aspirantes = $this->aspirantesCaducados();
-
-        $cuantasPostulaciones = $postulaciones->count();
-        $cuantosAspirantes = $aspirantes->count();
+        $postulaciones = $this->postulacionesCaducadas($plazoPostulaciones);
+        $aspirantes = $this->aspirantesCaducados($plazoAspirantes);
 
         if ($simulacro) {
+            $cuantasPostulaciones = $postulaciones->count();
+            $cuantosAspirantes = $aspirantes->count();
+
             $this->info("Se borrarían {$cuantasPostulaciones} postulaciones y {$cuantosAspirantes} perfiles del banco de talento.");
 
             return self::SUCCESS;
         }
 
-        $postulaciones->delete();
-        $aspirantes->delete();
+        $cuantasPostulaciones = $postulaciones->delete();
+        $cuantosAspirantes = $aspirantes->delete();
 
         if ($cuantasPostulaciones > 0 || $cuantosAspirantes > 0) {
             activity('bolsas')
@@ -50,10 +56,14 @@ class DepurarBolsas extends Command
         return self::SUCCESS;
     }
 
-    /** Postulaciones cuya vacante cerró o venció hace más del plazo. */
-    private function postulacionesCaducadas(): Builder
+    /**
+     * Postulaciones cuya vacante cerró o venció hace más del plazo.
+     *
+     * @return Builder<Postulacion>
+     */
+    private function postulacionesCaducadas(int $meses): Builder
     {
-        $limite = $this->limite('bolsas.retencion_postulaciones_meses');
+        $limite = now()->subMonths($meses);
 
         return Postulacion::query()->whereHas('vacante', function (Builder $vacante) use ($limite): void {
             $vacante
@@ -62,14 +72,37 @@ class DepurarBolsas extends Command
         });
     }
 
-    /** Perfiles del banco de talento sin movimiento en más del plazo. */
-    private function aspirantesCaducados(): Builder
+    /**
+     * Perfiles del banco de talento sin movimiento en más del plazo.
+     *
+     * @return Builder<Aspirante>
+     */
+    private function aspirantesCaducados(int $meses): Builder
     {
-        return Aspirante::query()->where('updated_at', '<=', $this->limite('bolsas.retencion_aspirantes_meses'));
+        return Aspirante::query()->where('updated_at', '<=', now()->subMonths($meses));
     }
 
-    private function limite(string $clave): Carbon
+    /**
+     * Valida el plazo de retención leído de configuración.
+     *
+     * Un plazo menor que 1 —o ausente, como con un `config:cache` viejo que
+     * no incluya `config/bolsas.php`— haría que `now()->subMonths($plazo)`
+     * fuera *ahora mismo*: la purga borraría todo en vez de nada. Eso no es
+     * una orden de borrado sino un error de configuración, así que el
+     * comando aborta en vez de ejecutar.
+     */
+    private function plazoEnMeses(string $clave, string $variable): ?int
     {
-        return now()->subMonths((int) config($clave));
+        $valor = config($clave);
+
+        if (is_numeric($valor) && (int) $valor >= 1) {
+            return (int) $valor;
+        }
+
+        $valorMostrado = is_scalar($valor) ? (string) $valor : 'null';
+
+        $this->error("El plazo de retención de «{$clave}» (variable de entorno {$variable}) debe ser un entero mayor o igual a 1. Valor actual: {$valorMostrado}.");
+
+        return null;
     }
 }

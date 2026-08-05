@@ -14,6 +14,12 @@ return [
     | Las postulaciones cuentan desde que su vacante cerró o venció; los
     | perfiles del banco de talento, desde su última actualización.
     |
+    | Un plazo de 0 (o negativo) NO desactiva la purga: `bolsas:depurar`
+    | aborta con un error en vez de ejecutar, porque `now()->subMonths(0)`
+    | es *ahora mismo* y eso convertiría el borrado en «borra todo», no en
+    | «no borres nada». Para desactivar la purga hay que quitar la tarea
+    | `bolsas:depurar` de `routes/console.php`, no vaciar estas variables.
+    |
     */
 
     'retencion_postulaciones_meses' => (int) env('RETENCION_POSTULACIONES_MESES', 6),
