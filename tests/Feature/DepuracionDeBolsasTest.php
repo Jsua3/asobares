@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\EstadoDeGestion;
 use App\Models\Aspirante;
 use App\Models\Postulacion;
 use App\Models\Vacante;
@@ -73,7 +74,7 @@ class DepuracionDeBolsasTest extends TestCase
         $this->assertNotNull($sobreviviente->fresh());
     }
 
-    public function test_borra_los_perfiles_del_banco_que_llevan_mas_de_un_ano_quietos(): void
+    public function test_borra_los_perfiles_del_banco_cuyo_consentimiento_vencio(): void
     {
         Aspirante::factory()->abandonado()->create(['correo' => 'viejo@ejemplo.test']);
         Aspirante::factory()->create(['correo' => 'activo@ejemplo.test']);
@@ -82,6 +83,27 @@ class DepuracionDeBolsasTest extends TestCase
 
         $this->assertSame(1, Aspirante::count());
         $this->assertSame('activo@ejemplo.test', Aspirante::firstOrFail()->correo);
+    }
+
+    /**
+     * Antes la purga se anclaba a `updated_at`: cualquier edición desde el
+     * panel —incluido que la secretaría cambie el estado de gestión— regalaba
+     * doce meses más sin que la persona hubiera renovado nada. Ahora cuelga
+     * de `consentimiento_at`, que una edición cualquiera no toca.
+     */
+    public function test_una_edicion_desde_el_panel_no_salva_a_un_aspirante_con_el_consentimiento_vencido(): void
+    {
+        $aspirante = Aspirante::factory()->abandonado()->create();
+        $consentimientoOriginal = $aspirante->consentimiento_at;
+
+        // La secretaría gestiona el perfil: esto toca `updated_at`, no `consentimiento_at`.
+        $aspirante->update(['estado' => EstadoDeGestion::Contactado]);
+
+        $this->assertTrue($aspirante->fresh()->consentimiento_at->equalTo($consentimientoOriginal));
+
+        $this->artisan('bolsas:depurar');
+
+        $this->assertSame(0, Aspirante::count(), 'El consentimiento sigue vencido: la edición no lo renovó.');
     }
 
     public function test_con_pretend_no_borra_nada(): void
@@ -116,7 +138,7 @@ class DepuracionDeBolsasTest extends TestCase
 
         $this->artisan('bolsas:depurar');
 
-        $this->assertSame(1, Aspirante::count(), 'Con 24 meses de plazo, un perfil actualizado hace 18 aún no vence.');
+        $this->assertSame(1, Aspirante::count(), 'Con 24 meses de plazo, un consentimiento de hace 18 aún no vence.');
     }
 
     public function test_registra_en_la_bitacora_cuando_borra_datos(): void

@@ -12,7 +12,9 @@ return [
     | puede depender de que alguien se acuerde de limpiar la bandeja.
     |
     | Las postulaciones cuentan desde que su vacante cerró o venció; los
-    | perfiles del banco de talento, desde su última actualización.
+    | perfiles del banco de talento, desde que la persona dio su
+    | consentimiento (y se resella solo si vuelve a enviar el formulario:
+    | una edición cualquiera desde el panel no cuenta).
     |
     | Un plazo de 0 (o negativo) NO desactiva la purga: `bolsas:depurar`
     | aborta con un error en vez de ejecutar, porque `now()->subMonths(0)`

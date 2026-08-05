@@ -34,9 +34,9 @@ class AspiranteFactory extends Factory
         return $this->state(['estado' => EstadoDeGestion::Contactado]);
     }
 
-    /** Perfil viejo que la depuración de datos debe barrer. */
+    /** Perfil cuyo consentimiento venció hace tiempo: la depuración debe barrerlo. */
     public function abandonado(): static
     {
-        return $this->state(['updated_at' => now()->subMonths(18)]);
+        return $this->state(['consentimiento_at' => now()->subMonths(18)]);
     }
 }

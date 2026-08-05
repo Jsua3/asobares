@@ -73,13 +73,19 @@ class DepurarBolsas extends Command
     }
 
     /**
-     * Perfiles del banco de talento sin movimiento en más del plazo.
+     * Perfiles del banco de talento cuyo consentimiento venció.
+     *
+     * Se ancla a `consentimiento_at`, no a `updated_at`: editar el registro
+     * desde el panel —incluido que la secretaría cambie el estado de
+     * gestión— no debe regalar más plazo sin que la persona haya vuelto a
+     * autorizar el tratamiento. `consentimiento_at` solo se resella cuando
+     * ella reenvía el formulario.
      *
      * @return Builder<Aspirante>
      */
     private function aspirantesCaducados(int $meses): Builder
     {
-        return Aspirante::query()->where('updated_at', '<=', now()->subMonths($meses));
+        return Aspirante::query()->where('consentimiento_at', '<=', now()->subMonths($meses));
     }
 
     /**
