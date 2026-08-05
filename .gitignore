@@ -25,3 +25,6 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Artefactos de trabajo de subagent-driven-development (scratch, no versionar)
+/.superpowers
