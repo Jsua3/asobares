@@ -1,0 +1,171 @@
+/*
+ * Única fuente de color de ASOBARES Quindío: la importan el sitio público
+ * (`app.css`) y el panel (`filament/admin/theme.css`), de modo que un cambio
+ * de paleta se hace en un solo sitio y los dos viajan juntos.
+ *
+ * Valores tomados del Manual de Marca de Asobares Colombia (Quida Studio):
+ * paleta principal Pub Red #EE4137 / Pub Black #0B090A / Ambient White #F5F3F4,
+ * paleta secundaria Pub Grey / Wine / Ambient Purple / Ambient Rose, y Poppins
+ * como tipografía principal.
+ */
+
+/*
+ * El tema lo manda la clase `.dark` en <html>, no `prefers-color-scheme`:
+ * así el visitante puede forzar claro u oscuro por encima de su sistema
+ * operativo. Es la misma convención que usa el panel Filament, de modo que
+ * ambos comparten la clave `localStorage.theme` y viajan siempre juntos.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    --font-display: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+
+    /* --- Paleta principal --- */
+    /* Pub Red #EE4137: dinamismo, accion y movimiento. Unico acento. */
+    --color-marca-50: #fef3f2;
+    --color-marca-100: #fde4e2;
+    --color-marca-200: #fbcac6;
+    --color-marca-300: #f7a49d;
+    --color-marca-400: #f27166;
+    --color-marca-500: #ee4137;
+    --color-marca-600: #da2b21;
+    --color-marca-700: #b71f18;
+    --color-marca-800: #971d18;
+    --color-marca-900: #7d1e1b;
+    --color-marca-950: #440b09;
+
+    /* Pub Black #0B090A y Ambient White #F5F3F4, con la rampa intermedia
+       construida sobre Pub Grey #282628. */
+    --color-noche-50: #f5f3f4;
+    --color-noche-100: #e8e5e6;
+    --color-noche-200: #d0cccd;
+    --color-noche-300: #a8a3a5;
+    --color-noche-400: #7d7779;
+    --color-noche-500: #575254;
+    --color-noche-600: #3d393b;
+    --color-noche-700: #282628;
+    --color-noche-800: #1b191a;
+    --color-noche-900: #121011;
+    --color-noche-950: #0b090a;
+
+    /* --- Paleta secundaria: solo para acentos puntuales --- */
+    --color-vino: #a4161a;
+    --color-purpura: #c05299;
+    --color-rosa: #ea698b;
+}
+
+/*
+ * Tokens semanticos: las vistas no dicen "negro" ni "blanco", dicen que papel
+ * juega cada color. Los dos temas son la misma rampa `noche` leida en sentidos
+ * opuestos, asi que el modo oscuro conserva exactamente los valores con los que
+ * se diseno el sitio y el claro nace con el Ambient White del manual de marca.
+ */
+:root {
+    color-scheme: light;
+
+    --asb-fondo: #f5f3f4; /* Ambient White */
+    --asb-superficie: #ffffff;
+    --asb-superficie-alta: #e8e5e6;
+
+    --asb-fuerte: #0b090a;
+    --asb-tinta: #1b191a;
+    --asb-suave: #282628;
+    --asb-tenue: #3d393b;
+    --asb-apagado: #575254;
+
+    --asb-linea: rgb(11 9 10 / 0.12);
+    --asb-linea-fuerte: rgb(11 9 10 / 0.22);
+
+    /* Sobre fondo claro el Pub Red puro no alcanza AA en texto: se usa la
+       variante 700, que da 5.86:1 y sigue leyendose como rojo de marca. */
+    --asb-acento: #b71f18;
+    --asb-acento-fuerte: #971d18;
+    --asb-marca-panel: rgb(238 65 55 / 0.07);
+
+    /* Estados. Los recuadros de exito y aviso estaban pensados sobre negro
+       (verde 950 al 30 %); en claro hay que invertirlos o quedan ilegibles. */
+    /* Emerald 800 y no 700: sobre `exito-fondo` el 700 se quedaba en 4.35:1 y
+       la insignia «En ejecución» del inicio no llegaba a AA. */
+    --asb-exito: #065f46;
+    --asb-exito-suave: #064e3b;
+    --asb-exito-fondo: rgb(16 185 129 / 0.12);
+    --asb-exito-linea: rgb(5 150 105 / 0.35);
+
+    --asb-aviso: #92400e;
+    --asb-aviso-suave: #78350f;
+    --asb-aviso-fondo: rgb(245 158 11 / 0.14);
+    --asb-aviso-linea: rgb(217 119 6 / 0.4);
+
+    --asb-resplandor: 0.09;
+    --asb-trama: 0.16;
+    --asb-sombra-tarjeta:
+        0 1px 2px rgb(11 9 10 / 0.05),
+        0 2px 6px rgb(11 9 10 / 0.04);
+}
+
+.dark {
+    color-scheme: dark;
+
+    --asb-fondo: #0b090a; /* Pub Black */
+    --asb-superficie: #121011;
+    --asb-superficie-alta: #1b191a;
+
+    --asb-fuerte: #ffffff;
+    --asb-tinta: #f5f3f4;
+    --asb-suave: #d0cccd;
+    --asb-tenue: #a8a3a5;
+    --asb-apagado: #7d7779;
+
+    --asb-linea: rgb(255 255 255 / 0.1);
+    --asb-linea-fuerte: rgb(255 255 255 / 0.16);
+
+    --asb-acento: #f27166;
+    --asb-acento-fuerte: #f7a49d;
+    --asb-marca-panel: rgb(68 11 9 / 0.4);
+
+    --asb-exito: #6ee7b7;
+    --asb-exito-suave: #a7f3d0;
+    --asb-exito-fondo: rgb(6 78 59 / 0.3);
+    --asb-exito-linea: rgb(16 185 129 / 0.3);
+
+    --asb-aviso: #fcd34d;
+    --asb-aviso-suave: #fde68a;
+    --asb-aviso-fondo: rgb(120 53 15 / 0.3);
+    --asb-aviso-linea: rgb(245 158 11 / 0.3);
+
+    --asb-resplandor: 0.16;
+    --asb-trama: 0.28;
+    --asb-sombra-tarjeta: none;
+}
+
+/* `inline` es obligatorio aqui: hace que las utilidades emitan la variable
+   cruda, de modo que cambiar `.dark` repinte sin recompilar nada. */
+@theme inline {
+    --color-fondo: var(--asb-fondo);
+    --color-superficie: var(--asb-superficie);
+    --color-superficie-alta: var(--asb-superficie-alta);
+
+    --color-fuerte: var(--asb-fuerte);
+    --color-tinta: var(--asb-tinta);
+    --color-suave: var(--asb-suave);
+    --color-tenue: var(--asb-tenue);
+    --color-apagado: var(--asb-apagado);
+
+    --color-linea: var(--asb-linea);
+    --color-linea-fuerte: var(--asb-linea-fuerte);
+
+    --color-acento: var(--asb-acento);
+    --color-acento-fuerte: var(--asb-acento-fuerte);
+    --color-marca-panel: var(--asb-marca-panel);
+
+    --color-exito: var(--asb-exito);
+    --color-exito-suave: var(--asb-exito-suave);
+    --color-exito-fondo: var(--asb-exito-fondo);
+    --color-exito-linea: var(--asb-exito-linea);
+
+    --color-aviso: var(--asb-aviso);
+    --color-aviso-suave: var(--asb-aviso-suave);
+    --color-aviso-fondo: var(--asb-aviso-fondo);
+    --color-aviso-linea: var(--asb-aviso-linea);
+}
