@@ -19,8 +19,8 @@
                @checked(old('acepta_datos'))
                class="mt-0.5 h-4 w-4 shrink-0 rounded border-linea-fuerte bg-fondo text-marca-500 focus:ring-2 focus:ring-marca-500/60">
         <label for="{{ $id }}" class="text-xs leading-relaxed text-tenue">
-            Autorizo a ASOBARES Capítulo Quindío a tratar mis datos personales para atender esta solicitud,
-            conforme a la
+            Autorizo a ASOBARES Capítulo Quindío a tratar mis datos personales para atender esta solicitud
+            —incluida su entrega a terceros cuando el trámite lo requiera—, conforme a la
             <a href="{{ route('politica-de-datos') }}" target="_blank" rel="noopener"
                class="text-acento underline underline-offset-2 hover:text-acento-fuerte">política de tratamiento de datos</a>.
             <span class="text-acento" aria-hidden="true">*</span>

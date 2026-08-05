@@ -34,6 +34,7 @@
                     'Datos de identificación y contacto: nombre, correo electrónico y teléfono.',
                     'Datos del establecimiento: nombre comercial, dirección, municipio y actividad.',
                     'Datos laborales, cuando registras tu perfil en la bolsa de empleo: cargo de interés y experiencia.',
+                    'Datos de contacto —y, si te inscribes como artista, una foto— cuando registras tu ficha en la bolsa de artistas o en la bolsa de proveedores.',
                     'Datos de las inscripciones a eventos y capacitaciones del gremio.',
                     'Datos de facturación y estado de cuenta, cuando eres un establecimiento afiliado.',
                 ] as $dato)
@@ -69,7 +70,18 @@
         </section>
 
         <section>
-            <h2 class="font-display text-lg font-semibold text-fuerte">5. Autorización</h2>
+            <h2 class="font-display text-lg font-semibold text-fuerte">5. Transferencia a terceros</h2>
+            <p class="mt-3">
+                Cuando te postulas a una vacante de la bolsa de empleo, tu nombre, correo, teléfono y lo que cuentes
+                de tu experiencia se entregan directamente al establecimiento que la publicó, para que adelante su
+                propio proceso de selección. Ese establecimiento es un responsable de tratamiento distinto de
+                ASOBARES: esta política cubre lo que hace el gremio con tus datos, no lo que haga el establecimiento
+                con ellos después de recibirlos.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="font-display text-lg font-semibold text-fuerte">6. Autorización</h2>
             <p class="mt-3">
                 La autorización se obtiene de forma previa, expresa e informada mediante la casilla de aceptación
                 que aparece en cada formulario, con enlace a esta política. El sistema registra la fecha y la hora
@@ -78,7 +90,7 @@
         </section>
 
         <section>
-            <h2 class="font-display text-lg font-semibold text-fuerte">6. Derechos del titular</h2>
+            <h2 class="font-display text-lg font-semibold text-fuerte">7. Derechos del titular</h2>
             <p class="mt-3">Como titular de tus datos personales tienes derecho a:</p>
             <ul class="mt-3 space-y-2">
                 @foreach ([
@@ -98,7 +110,7 @@
         </section>
 
         <section>
-            <h2 class="font-display text-lg font-semibold text-fuerte">7. Cómo ejercer tus derechos</h2>
+            <h2 class="font-display text-lg font-semibold text-fuerte">8. Cómo ejercer tus derechos</h2>
             <p class="mt-3">
                 Escribe a <a href="mailto:{{ ajuste('contacto_correo') }}" class="text-acento underline underline-offset-2">{{ ajuste('contacto_correo') }}</a>
                 o radica tu solicitud como PQR en la
@@ -112,15 +124,18 @@
         </section>
 
         <section>
-            <h2 class="font-display text-lg font-semibold text-fuerte">8. Seguridad y vigencia</h2>
+            <h2 class="font-display text-lg font-semibold text-fuerte">9. Seguridad y vigencia</h2>
             <p class="mt-3">
                 Adoptamos medidas técnicas y administrativas para proteger tus datos contra acceso no autorizado,
                 pérdida o alteración: cifrado de contraseñas, control de acceso por roles, segundo factor de
                 autenticación para el equipo administrativo y registro de auditoría de cada cambio.
             </p>
             <p class="mt-3">
-                Los datos se conservan mientras exista la relación con el gremio y durante los términos legales
-                aplicables. Esta política rige desde {{ ajuste('politica_actualizacion') }}.
+                En la bolsa de empleo, las postulaciones se conservan hasta {{ config('bolsas.retencion_postulaciones_meses') }} meses
+                después de que la vacante cierre o venza, y los perfiles del banco de talento hasta {{ config('bolsas.retencion_aspirantes_meses') }} meses
+                después de que diste tu autorización, sin que la hayas renovado. Pasado ese plazo se borran
+                automáticamente. Los demás datos se conservan mientras exista la relación con el gremio y durante
+                los términos legales aplicables. Esta política rige desde {{ ajuste('politica_actualizacion') }}.
             </p>
         </section>
     </article>

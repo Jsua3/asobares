@@ -1,29 +1,34 @@
 <x-layouts.publico :titulo="$vacante->cargo.' en '.$vacante->asociado->nombre.' — ASOBARES Quindío'"
                    :descripcion="Str::limit($vacante->descripcion ?? 'Vacante publicada por un establecimiento asociado a ASOBARES Capítulo Quindío.', 155)">
 
-    {{-- Datos estructurados: que la vacante aparezca en la búsqueda de empleo. --}}
-    <x-publico.json-ld :datos="[
-        '@context' => 'https://schema.org',
-        '@type' => 'JobPosting',
-        'title' => $vacante->cargo,
-        'description' => $vacante->descripcion ?? $vacante->cargo,
-        'datePosted' => $vacante->created_at->toDateString(),
-        'validThrough' => $vacante->fecha_limite?->toDateString(),
-        'employmentType' => $vacante->tipo === \App\Enums\TipoVacante::TiempoCompleto ? 'FULL_TIME' : 'PART_TIME',
-        'hiringOrganization' => [
-            '@type' => 'Organization',
-            'name' => $vacante->asociado->nombre,
-        ],
-        'jobLocation' => [
-            '@type' => 'Place',
-            'address' => [
-                '@type' => 'PostalAddress',
-                'addressLocality' => $vacante->asociado->municipio->nombre,
-                'addressRegion' => 'Quindío',
-                'addressCountry' => 'CO',
+    @php
+        $jsonLd = [
+            '@context' => 'https://schema.org',
+            '@type' => 'JobPosting',
+            'title' => $vacante->cargo,
+            'description' => $vacante->descripcion ?? $vacante->cargo,
+            'datePosted' => $vacante->created_at->toDateString(),
+            'validThrough' => $vacante->fecha_limite?->toDateString(),
+            'employmentType' => $vacante->tipo === \App\Enums\TipoVacante::TiempoCompleto ? 'FULL_TIME' : 'PART_TIME',
+            'hiringOrganization' => [
+                '@type' => 'Organization',
+                'name' => $vacante->asociado->nombre,
             ],
-        ],
-    ]" />
+            'jobLocation' => [
+                '@type' => 'Place',
+                'address' => [
+                    '@type' => 'PostalAddress',
+                    'addressLocality' => $vacante->asociado->municipio->nombre,
+                    'addressRegion' => 'Quindío',
+                    'addressCountry' => 'CO',
+                ],
+            ],
+        ];
+    @endphp
+
+    @push('jsonld')
+        <x-publico.json-ld :datos="$jsonLd" />
+    @endpush
 
     <div class="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
 
@@ -46,8 +51,12 @@
 
             <p class="mt-2 text-sm text-tenue">
                 en
-                <a href="{{ route('directorio.show', $vacante->asociado) }}"
-                   class="text-acento hover:text-acento-fuerte">{{ $vacante->asociado->nombre }}</a>
+                @if ($vacante->asociado->estaPublicado())
+                    <a href="{{ route('directorio.show', $vacante->asociado) }}"
+                       class="text-acento hover:text-acento-fuerte">{{ $vacante->asociado->nombre }}</a>
+                @else
+                    {{ $vacante->asociado->nombre }}
+                @endif
             </p>
         </header>
 

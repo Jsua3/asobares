@@ -76,8 +76,12 @@
 
                                     <p class="mt-1 text-sm text-tenue">
                                         en
-                                        <a href="{{ route('directorio.show', $vacante->asociado) }}"
-                                           class="text-acento hover:text-acento-fuerte">{{ $vacante->asociado->nombre }}</a>
+                                        @if ($vacante->asociado->estaPublicado())
+                                            <a href="{{ route('directorio.show', $vacante->asociado) }}"
+                                               class="text-acento hover:text-acento-fuerte">{{ $vacante->asociado->nombre }}</a>
+                                        @else
+                                            {{ $vacante->asociado->nombre }}
+                                        @endif
                                     </p>
 
                                     @if ($vacante->descripcion)

@@ -7,6 +7,7 @@ use App\Models\Artista;
 use App\Models\Asociado;
 use App\Models\Evento;
 use App\Models\Noticia;
+use App\Models\Vacante;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -88,6 +89,25 @@ class SitioPublicoTest extends TestCase
         $respuesta->assertDontSee('<script>alert(1)', escape: false);
         $respuesta->assertDontSee('javascript:alert(2)', escape: false);
         $respuesta->assertDontSee('onerror', escape: false);
+    }
+
+    /**
+     * N6: las otras tres páginas de detalle (boletín, eventos, directorio)
+     * empujan su JSON-LD con `@push('jsonld')` para que aterrice en el
+     * `<head>`. El detalle de vacante debe seguir el mismo patrón.
+     */
+    public function test_el_json_ld_del_detalle_de_vacante_aterriza_en_el_head(): void
+    {
+        $vacante = Vacante::factory()->publicado()->create();
+
+        $contenido = $this->get(route('empleo.show', $vacante))->assertSuccessful()->getContent();
+
+        $posicionScript = strpos($contenido, 'application/ld+json');
+        $posicionCierreHead = strpos($contenido, '</head>');
+
+        $this->assertNotFalse($posicionScript, 'El bloque JSON-LD debe estar presente.');
+        $this->assertNotFalse($posicionCierreHead);
+        $this->assertLessThan($posicionCierreHead, $posicionScript);
     }
 
     /** @return list<array{0: string}> */
