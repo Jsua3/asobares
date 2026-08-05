@@ -7,6 +7,7 @@ use App\Enums\EstadoPublicacion;
 use App\Enums\TipoVacante;
 use App\Models\Asociado;
 use App\Models\Aspirante;
+use App\Models\Postulacion;
 use App\Models\Vacante;
 use Illuminate\Database\Seeder;
 
@@ -23,6 +24,7 @@ class VacanteSeeder extends Seeder
             [
                 'asociado' => 'nocturno-33',
                 'cargo' => 'Bartender',
+                'categoria_cargo' => CargoDelSector::Barra,
                 'tipo' => TipoVacante::PorTurnos,
                 'descripcion' => 'Buscamos bartender con mínimo un año de experiencia en barra de alto volumen. Debe manejar coctelería clásica, control de inventario de barra y trabajo bajo presión en noches de lleno total. Se paga por turno más propinas repartidas.',
                 'franja_horaria' => 'Viernes y sábados, 8:00 p. m. – 4:00 a. m.',
@@ -32,6 +34,7 @@ class VacanteSeeder extends Seeder
             [
                 'asociado' => 'bruma-gastrobar',
                 'cargo' => 'Chef de cocina',
+                'categoria_cargo' => CargoDelSector::Cocina,
                 'tipo' => TipoVacante::TiempoCompleto,
                 'descripcion' => 'Chef para liderar la cocina: diseño de carta de temporada con producto quindiano, manejo de costos, escandallos y equipo de cuatro personas. Indispensable certificado de manipulación de alimentos vigente.',
                 'franja_horaria' => 'Martes a domingo, 10:00 a. m. – 8:00 p. m.',
@@ -41,6 +44,7 @@ class VacanteSeeder extends Seeder
             [
                 'asociado' => 'terraza-bolivar',
                 'cargo' => 'Mesero',
+                'categoria_cargo' => CargoDelSector::Servicio,
                 'tipo' => TipoVacante::PorTurnos,
                 'descripcion' => 'Mesero para servicio de terraza. Buena presentación, manejo de bandeja y toma de pedido en tableta. No se requiere experiencia previa: capacitamos. Ideal para estudiantes.',
                 'franja_horaria' => 'Miércoles a sábado, 5:00 p. m. – 1:00 a. m.',
@@ -50,6 +54,7 @@ class VacanteSeeder extends Seeder
             [
                 'asociado' => 'la-cava-del-yipao',
                 'cargo' => 'Administrador de establecimiento',
+                'categoria_cargo' => CargoDelSector::Administracion,
                 'tipo' => TipoVacante::TiempoCompleto,
                 'descripcion' => 'Administrador con experiencia en el sector nocturno: manejo de personal, cuadre de caja, relación con proveedores y cumplimiento de la normatividad (bomberos, salud, Sayco). Se valora conocimiento de software de punto de venta.',
                 'franja_horaria' => 'Lunes a sábado, horario administrativo con noches de cierre',
@@ -59,6 +64,7 @@ class VacanteSeeder extends Seeder
             [
                 'asociado' => 'sonora-club',
                 'cargo' => 'Portero / control de acceso',
+                'categoria_cargo' => CargoDelSector::Seguridad,
                 'tipo' => TipoVacante::PorTurnos,
                 'descripcion' => 'Personal para control de acceso y requisa en puerta. Debe tener curso de vigilancia vigente y manejo de situaciones de conflicto sin escalarlas. Trabajo en dupla.',
                 'franja_horaria' => 'Viernes y sábados, 9:00 p. m. – 3:00 a. m.',
@@ -68,6 +74,7 @@ class VacanteSeeder extends Seeder
             [
                 'asociado' => 'bruma-gastrobar',
                 'cargo' => 'Auxiliar de cocina',
+                'categoria_cargo' => CargoDelSector::Cocina,
                 'tipo' => TipoVacante::TiempoCompleto,
                 'descripcion' => 'Apoyo en preparación de mise en place, montaje de platos y aseo de cocina. Se requiere certificado de manipulación de alimentos. Vacante todavía en revisión de la dirección.',
                 'franja_horaria' => 'Martes a domingo, 11:00 a. m. – 7:00 p. m.',
@@ -75,6 +82,17 @@ class VacanteSeeder extends Seeder
                 // Queda pendiente a propósito: sirve para demostrar que una
                 // vacante no publicada NO aparece en /empleo.
                 'estado' => EstadoPublicacion::PendienteAprobacion,
+            ],
+            [
+                'asociado' => 'sonora-club',
+                'cargo' => 'Bartender para noche de aniversario',
+                'categoria_cargo' => CargoDelSector::Barra,
+                'tipo' => TipoVacante::Momentaneo,
+                'descripcion' => 'Refuerzo de barra para una sola noche: aniversario del club con aforo lleno. Se paga el turno completo esa misma noche.',
+                'franja_horaria' => 'Sábado, 8:00 p. m. – 4:00 a. m.',
+                'fecha_limite' => now()->addWeeks(2)->toDateString(),
+                'whatsapp_contacto' => '3160074455',
+                'estado' => EstadoPublicacion::Publicado,
             ],
         ];
 
@@ -89,6 +107,7 @@ class VacanteSeeder extends Seeder
         }
 
         $this->registrarAspirantes();
+        $this->registrarPostulaciones();
     }
 
     private function registrarAspirantes(): void
@@ -114,6 +133,36 @@ class VacanteSeeder extends Seeder
                     'experiencia' => $experiencia,
                     'acepta_datos' => true,
                     'consentimiento_at' => now()->subDays(random_int(1, 14)),
+                ]
+            );
+        }
+    }
+
+    /** Postulaciones de muestra sobre las vacantes publicadas. */
+    private function registrarPostulaciones(): void
+    {
+        $candidatos = [
+            ['Bartender', 'Duván Alexis Marín', 'duvan.marin@ejemplo.test', '3145598821', 'Tres años en barra de discoteca en Pereira.'],
+            ['Bartender', 'Leidy Johana Ramírez', 'leidy.ramirez@ejemplo.test', '3134461730', 'Dos años en coctelería de autor. Busco turnos de fin de semana.'],
+            ['Mesero', 'Yuliana Andrea Correa', 'yuliana.correa@ejemplo.test', '3106612077', 'Un año en restaurante de hotel.'],
+            ['Chef de cocina', 'Cristian Camilo Peña', 'cristian.pena@ejemplo.test', '3122234509', 'Técnico en cocina del SENA, dos años como segundo de cocina.'],
+        ];
+
+        foreach ($candidatos as [$cargo, $nombre, $correo, $telefono, $experiencia]) {
+            $vacante = Vacante::where('cargo', $cargo)->publicado()->first();
+
+            if ($vacante === null) {
+                continue;
+            }
+
+            Postulacion::updateOrCreate(
+                ['vacante_id' => $vacante->id, 'correo' => $correo],
+                [
+                    'nombre' => $nombre,
+                    'telefono' => $telefono,
+                    'experiencia' => $experiencia,
+                    'acepta_datos' => true,
+                    'consentimiento_at' => now()->subDays(random_int(1, 10)),
                 ]
             );
         }
