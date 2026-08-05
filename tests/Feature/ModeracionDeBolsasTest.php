@@ -249,6 +249,31 @@ class ModeracionDeBolsasTest extends TestCase
         Mail::assertNothingSent();
     }
 
+    /**
+     * El lote filtraba solo por policy, no por estado: un «seleccionar
+     * todo → Aprobar y publicar» le reescribía el estado y reenviaba el
+     * correo a una vacante que ya estaba publicada. Debe comportarse como
+     * aplicar la acción de fila a cada registro, que se oculta para lo ya
+     * publicado.
+     */
+    public function test_aprobar_en_lote_de_vacantes_no_reenvia_el_correo_a_las_ya_publicadas(): void
+    {
+        Mail::fake();
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $asociado = Asociado::factory()->publicado()->create(['correo_interno' => 'oficina@bar.test']);
+        $pendiente = Vacante::factory()->for($asociado)->pendiente()->create();
+        $yaPublicada = Vacante::factory()->for($asociado)->publicado()->create();
+
+        Livewire::test(ListVacantes::class)
+            ->selectTableRecords([$pendiente->getKey(), $yaPublicada->getKey()])
+            ->callAction(TestAction::make('aprobar_lote')->table()->bulk())
+            ->assertHasNoErrors()
+            ->assertNotified('1 registros publicados');
+
+        Mail::assertSent(VacanteAprobada::class, 1);
+    }
+
     public function test_aprobar_en_lote_de_artistas_publica_y_avisa_por_correo(): void
     {
         Mail::fake();
@@ -279,6 +304,27 @@ class ModeracionDeBolsasTest extends TestCase
 
         $this->assertSame(EstadoPublicacion::Publicado, $artista->fresh()->estado);
         Mail::assertNothingSent();
+    }
+
+    /**
+     * Mismo defecto que en vacantes, pero para fichas de artista: el lote
+     * no puede reescribir ni reavisar a una ficha que ya estaba publicada.
+     */
+    public function test_aprobar_en_lote_de_artistas_no_reenvia_el_correo_a_las_ya_publicadas(): void
+    {
+        Mail::fake();
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $pendiente = Artista::factory()->pendiente()->create(['correo' => 'dj@ejemplo.test']);
+        $yaPublicado = Artista::factory()->publicado()->create(['correo' => 'otro@ejemplo.test']);
+
+        Livewire::test(ListArtistas::class)
+            ->selectTableRecords([$pendiente->getKey(), $yaPublicado->getKey()])
+            ->callAction(TestAction::make('aprobar_lote')->table()->bulk())
+            ->assertHasNoErrors()
+            ->assertNotified('1 registros publicados');
+
+        Mail::assertSent(FichaDeBolsaPublicada::class, 1);
     }
 
     public function test_aprobar_en_lote_de_proveedores_publica_y_avisa_por_correo(): void

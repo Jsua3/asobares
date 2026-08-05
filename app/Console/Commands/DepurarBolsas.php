@@ -81,11 +81,28 @@ class DepurarBolsas extends Command
      * autorizar el tratamiento. `consentimiento_at` solo se resella cuando
      * ella reenvía el formulario.
      *
+     * `consentimiento_at` es nullable: una fila que llegó sin ese sello
+     * (por ejemplo, arrastrada tal cual por la migración que reconstruyó la
+     * tabla) nunca casaría con `<=` y quedaría inmortal, contradiciendo la
+     * política de datos que promete el borrado automático. Para esas filas
+     * se usa `created_at` como respaldo. El `orWhere` va en su propio grupo
+     * para no ampliar sin querer el conjunto que se borra.
+     *
      * @return Builder<Aspirante>
      */
     private function aspirantesCaducados(int $meses): Builder
     {
-        return Aspirante::query()->where('consentimiento_at', '<=', now()->subMonths($meses));
+        $limite = now()->subMonths($meses);
+
+        return Aspirante::query()->where(function (Builder $aspirante) use ($limite): void {
+            $aspirante
+                ->where('consentimiento_at', '<=', $limite)
+                ->orWhere(function (Builder $aspirante) use ($limite): void {
+                    $aspirante
+                        ->whereNull('consentimiento_at')
+                        ->where('created_at', '<=', $limite);
+                });
+        });
     }
 
     /**

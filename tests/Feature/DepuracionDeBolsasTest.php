@@ -106,6 +106,37 @@ class DepuracionDeBolsasTest extends TestCase
         $this->assertSame(0, Aspirante::count(), 'El consentimiento sigue vencido: la edición no lo renovó.');
     }
 
+    /**
+     * `consentimiento_at` es nullable: la migración que reconstruyó la
+     * tabla copió filas viejas tal cual, sin resellar. Sin respaldo en
+     * `created_at`, un `WHERE consentimiento_at <= ?` nunca casa con NULL y
+     * ese aspirante queda inmortal, contradiciendo la política de datos que
+     * promete el borrado automático.
+     */
+    public function test_un_aspirante_sin_sello_de_consentimiento_y_antiguo_se_borra(): void
+    {
+        Aspirante::factory()->create([
+            'consentimiento_at' => null,
+            'created_at' => now()->subMonths(18),
+        ]);
+
+        $this->artisan('bolsas:depurar');
+
+        $this->assertSame(0, Aspirante::count());
+    }
+
+    public function test_un_aspirante_sin_sello_de_consentimiento_pero_reciente_se_conserva(): void
+    {
+        Aspirante::factory()->create([
+            'consentimiento_at' => null,
+            'created_at' => now(),
+        ]);
+
+        $this->artisan('bolsas:depurar');
+
+        $this->assertSame(1, Aspirante::count());
+    }
+
     public function test_con_pretend_no_borra_nada(): void
     {
         $vieja = Vacante::factory()->publicado()->create(['cerrada_at' => now()->subMonths(8)]);

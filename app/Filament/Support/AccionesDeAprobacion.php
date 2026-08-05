@@ -247,9 +247,13 @@ class AccionesDeAprobacion
     }
 
     /**
-     * Esqueleto común a toda aprobación en lote: comprueba la policy registro
-     * por registro —la visibilidad del botón nunca es la autorización— y le
-     * aplica a cada uno el mismo efecto que su acción unitaria.
+     * Esqueleto común a toda aprobación en lote: para que el lote sea de
+     * verdad equivalente a aplicar la acción unitaria a cada registro,
+     * filtra registro por registro con la misma condición que oculta la
+     * acción de fila —estado distinto de publicado, y la policy, que la
+     * visibilidad del botón nunca es la autorización—. Así un «seleccionar
+     * todo» no le reescribe el estado ni reenvía el correo a lo que ya
+     * estaba publicado.
      *
      * @param  string  $permiso  p. ej. `publicar_asociado`
      * @param  Closure(Model): mixed  $efecto
@@ -265,7 +269,8 @@ class AccionesDeAprobacion
             ->visible(fn (): bool => auth()->user()?->can($permiso) === true)
             ->action(function (Collection $registros) use ($efecto): void {
                 $publicados = $registros->filter(
-                    fn (Model $registro): bool => auth()->user()?->can('publicar', $registro) === true
+                    fn (Model $registro): bool => $registro->estado !== EstadoPublicacion::Publicado
+                        && auth()->user()?->can('publicar', $registro) === true
                 );
 
                 $publicados->each($efecto);
