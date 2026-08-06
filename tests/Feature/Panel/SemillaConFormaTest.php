@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Panel;
 
+use App\Enums\EstadoTransaccion;
 use App\Models\ConsultaGuia;
+use App\Models\Transaccion;
 use Database\Seeders\ConsultaGuiaSeeder;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -95,6 +97,38 @@ class SemillaConFormaTest extends TestCase
             $primerSemestre,
             $ultimoSemestre,
             'La serie debe crecer tambien en los municipios pequenos: una linea plana es el artefacto que esta semilla existe para evitar.'
+        );
+    }
+
+    public function test_hay_recaudo_en_al_menos_doce_meses_distintos(): void
+    {
+        $meses = Transaccion::query()
+            ->where('estado', EstadoTransaccion::Aprobada)
+            ->get()
+            ->map(fn ($t): string => $t->created_at->format('Y-m'))
+            ->unique();
+
+        $this->assertGreaterThanOrEqual(
+            12,
+            $meses->count(),
+            'Sin serie mensual el gráfico de recaudo es una línea plana.'
+        );
+    }
+
+    public function test_diciembre_recauda_mas_que_enero(): void
+    {
+        $porMes = Transaccion::query()
+            ->where('estado', EstadoTransaccion::Aprobada)
+            ->get()
+            ->groupBy(fn ($t): string => $t->created_at->format('m'))
+            ->map(fn ($grupo): float => (float) $grupo->sum('monto'));
+
+        $this->assertArrayHasKey('12', $porMes->all());
+        $this->assertArrayHasKey('01', $porMes->all());
+        $this->assertGreaterThan(
+            $porMes['01'],
+            $porMes['12'],
+            'La vida nocturna factura en diciembre; la semilla debe parecerlo.'
         );
     }
 }
