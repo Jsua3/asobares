@@ -289,4 +289,31 @@ class TableroTest extends TestCase
 
         $this->get('/admin')->assertOk()->assertSee('Tablero del gremio');
     }
+
+    /**
+     * El tablero ya no declara `getColumns()`: los cinco widgets son
+     * `columnSpan = 'full'`, así que ninguno depende de cuántas columnas
+     * tenga la rejilla de la página. Sin esto, cualquier widget que se
+     * registre sin declarar ancho hereda el `1` de `Widget` y, bajo
+     * cualquier rejilla de más de una columna, queda apretado en una
+     * fracción de la fila — es justo lo que le pasó a
+     * `AsociadosPorMunicipio` (una gráfica de doce municipios en un cuarto
+     * de ancho, con el resto de la fila vacío) cuando la página tenía una
+     * rejilla de 4 columnas y este widget no declaraba `columnSpan`.
+     */
+    public function test_ningun_widget_del_tablero_queda_en_una_fraccion_de_la_fila(): void
+    {
+        $panel = (new AdminPanelProvider($this->app))->panel(Panel::make());
+
+        foreach ($panel->getWidgets() as $claseWidget) {
+            $widget = new $claseWidget;
+            $columnSpan = (fn () => $this->columnSpan)->call($widget);
+
+            $this->assertSame(
+                'full',
+                $columnSpan,
+                "{$claseWidget} no declara columnSpan = 'full', asi que hereda el 1 de Widget y puede quedar apretado en una fraccion de la fila."
+            );
+        }
+    }
 }

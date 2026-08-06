@@ -11,6 +11,16 @@ class AsociadosPorMunicipio extends ChartWidget
 
     protected static ?int $sort = 3;
 
+    /**
+     * Sin esto hereda el `1` de `Widget` y, en una rejilla de varias
+     * columnas, una gráfica de doce municipios queda apretada en una
+     * fracción del ancho con el resto de la fila vacío. Los otros cuatro
+     * widgets del tablero ya son `'full'` (los tres explícitos y
+     * `ResumenDelGremio` porque `StatsOverviewWidget` lo trae de fábrica);
+     * a este solo le faltaba declararlo.
+     */
+    protected int|string|array $columnSpan = 'full';
+
     protected function getData(): array
     {
         $municipios = Municipio::withCount(['asociados' => fn ($query) => $query->publicado()])
