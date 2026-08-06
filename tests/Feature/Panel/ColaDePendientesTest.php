@@ -9,6 +9,7 @@ use App\Models\Vacante;
 use App\Panel\ColaDePendientes;
 use Database\Seeders\RolYPermisoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
@@ -118,5 +119,55 @@ class ColaDePendientesTest extends TestCase
         $total = app(ColaDePendientes::class)->total($this->usuarioCon(User::ROL_SUPER_ADMIN));
 
         $this->assertSame(3, $total);
+    }
+
+    /**
+     * El tablero pide esta cola varias veces por render (widget, canView(),
+     * tarjeta de KPIs): la segunda llamada con el mismo usuario debe salir
+     * de la caché de instancia, no repetir las consultas.
+     */
+    public function test_la_segunda_llamada_con_el_mismo_usuario_no_repite_consultas(): void
+    {
+        Asociado::factory()->create(['estado' => EstadoPublicacion::PendienteAprobacion]);
+
+        $servicio = app(ColaDePendientes::class);
+        $usuario = $this->usuarioCon(User::ROL_SUPER_ADMIN);
+
+        $servicio->para($usuario);
+
+        $consultas = 0;
+        DB::listen(function () use (&$consultas): void {
+            $consultas++;
+        });
+
+        $servicio->para($usuario);
+
+        $this->assertSame(0, $consultas, 'La segunda llamada con el mismo usuario debe usar la cache de instancia.');
+    }
+
+    /**
+     * La cache se indexa por usuario: dos usuarios distintos en la misma
+     * peticion no pueden terminar compartiendo el resultado del otro.
+     */
+    public function test_dos_usuarios_distintos_no_comparten_la_cache(): void
+    {
+        Asociado::factory()->create(['estado' => EstadoPublicacion::PendienteAprobacion]);
+
+        $servicio = app(ColaDePendientes::class);
+
+        $colaDireccion = $servicio->para($this->usuarioCon(User::ROL_SUPER_ADMIN));
+        $colaSecretaria = $servicio->para($this->usuarioCon(User::ROL_SUBADMIN));
+
+        $etiquetasDireccion = array_column($colaDireccion, 'etiqueta');
+        $etiquetasSecretaria = array_column($colaSecretaria, 'etiqueta');
+
+        $this->assertNotEmpty(
+            array_filter($etiquetasDireccion, fn (string $e): bool => str_contains($e, 'asociado')),
+            'La dirección debe ver el asociado pendiente en su propia cola.'
+        );
+        $this->assertEmpty(
+            array_filter($etiquetasSecretaria, fn (string $e): bool => str_contains($e, 'asociado')),
+            'La secretaría no debe heredar el asociado de la cola de la dirección.'
+        );
     }
 }

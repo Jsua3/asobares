@@ -45,6 +45,25 @@ class ColaDePendientes
     private const int DIAS_PARA_URGENTE = 5;
 
     /**
+     * Caché de instancia, indexada por id de usuario.
+     *
+     * El tablero pide esta cola hasta tres veces por render: las filas del
+     * widget, su `canView()`, y la tarjeta de KPIs de secretaría. Sin esto
+     * cada una repite las consultas a los nueve modelos. Se indexa por
+     * usuario porque dos usuarios en la misma petición no pueden compartir
+     * resultado.
+     *
+     * @var array<int, array<int, array{
+     *     etiqueta: string,
+     *     conteo: int,
+     *     url: string,
+     *     antiguedad: ?string,
+     *     urgente: bool
+     * }>>
+     */
+    private array $porUsuario = [];
+
+    /**
      * @return array<int, array{
      *     etiqueta: string,
      *     conteo: int,
@@ -54,6 +73,20 @@ class ColaDePendientes
      * }>
      */
     public function para(User $usuario): array
+    {
+        return $this->porUsuario[$usuario->getKey()] ??= $this->calcularPara($usuario);
+    }
+
+    /**
+     * @return array<int, array{
+     *     etiqueta: string,
+     *     conteo: int,
+     *     url: string,
+     *     antiguedad: ?string,
+     *     urgente: bool
+     * }>
+     */
+    private function calcularPara(User $usuario): array
     {
         $filas = [];
 
@@ -74,8 +107,14 @@ class ColaDePendientes
                 continue;
             }
 
-            $masAntigua = $clase::query()->pendiente()->min('updated_at');
-            $espera = $masAntigua === null ? null : Carbon::parse($masAntigua);
+            // Se mide desde `updated_at` y no desde una columna propia porque
+            // editar un pendiente equivale a reenviarlo: el revisor tiene
+            // contenido nuevo delante y el reloj vuelve a empezar. Si algún
+            // día hiciera falta la espera absoluta, la solución es una
+            // columna `enviado_a_revision_at` que ponga el observer, no un
+            // cambio aquí.
+            $esperandoDesde = $clase::query()->pendiente()->min('updated_at');
+            $espera = $esperandoDesde === null ? null : Carbon::parse($esperandoDesde);
 
             $filas[] = [
                 'etiqueta' => $conteo === 1
@@ -85,7 +124,7 @@ class ColaDePendientes
                 'url' => $this->urlDelListado($clase),
                 'antiguedad' => $espera === null
                     ? null
-                    : 'la más antigua, '.$espera->diffForHumans(),
+                    : 'sin tocar desde '.$espera->diffForHumans(),
                 'urgente' => $espera !== null
                     && $espera->lt(now()->subDays(self::DIAS_PARA_URGENTE)),
             ];
