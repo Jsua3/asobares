@@ -145,6 +145,22 @@ class GraficasDelPanelTest extends TestCase
     }
 
     /**
+     * Tarea 15, Paso 7: el enlace «Revisar» de la banda «Te está esperando»
+     * (`<x-panel.cola>`, clase `text-tinta transition-colors`) se quedaba con
+     * el color del tema anterior al cambiar de tema desde el selector real
+     * de Filament. Es el mismo bug de Chromium que ya se cerró en el sitio
+     * público: una transición sobre una propiedad cuyo valor viene de una
+     * custom property no se reinicia cuando esa custom property cambia.
+     */
+    public function test_el_plugin_apaga_las_transiciones_para_no_congelar_colores(): void
+    {
+        $js = File::get(resource_path('js/panel-graficas.js'));
+
+        $this->assertStringContainsString('transition:none !important', $js);
+        $this->assertStringContainsString('requestAnimationFrame', $js);
+    }
+
+    /**
      * Los widgets no deben escribir colores de texto a mano. El relleno de
      * marca sí se admite: como relleno funciona en los dos temas.
      */
