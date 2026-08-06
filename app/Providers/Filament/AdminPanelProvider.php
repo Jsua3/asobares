@@ -21,6 +21,7 @@ use Filament\Support\Colors\Color;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Foundation\ViteException;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Vite;
@@ -94,30 +95,29 @@ class AdminPanelProvider extends PanelProvider
     }
 
     /**
-     * El plugin de graficas solo se registra si Vite ya produjo algo.
+     * El plugin de graficas solo se registra si Vite ya lo compilo.
      *
-     * `Vite::asset()` lanza cuando no encuentra manifiesto ni servidor de
-     * desarrollo, y `panel()` se evalua en CADA arranque de consola. Sin esta
-     * guarda, un clon recien hecho no puede ejecutar ni `key:generate`, y el
-     * procedimiento de compilacion del proyecto —`view:clear` antes de
-     * `npm run build`— se vuelve un punto muerto circular.
+     * `panel()` se evalua en CADA arranque de consola, asi que una excepcion
+     * aqui deja muerto a artisan entero. Y hay dos formas de llegar a ella:
+     * sin manifiesto (clon recien hecho) y con un manifiesto viejo que aun
+     * no conoce esta entrada (alguien que compilo en otra rama y vuelve a
+     * esta). `ViteManifestNotFoundException` hereda de `ViteException`, asi
+     * que un solo catch cubre las dos.
      *
-     * Degradar a lista vacia es seguro: sin nada compilado no hay panel que
-     * pintar, asi que no se pierde nada que existiera.
+     * Sin esto el procedimiento de compilacion del proyecto se vuelve un
+     * punto muerto circular: `view:clear` es el primer paso y necesitaria
+     * el manifiesto que solo produce el paso siguiente.
      *
      * @return array<int, Js>
      */
     private function assetsDelPanel(): array
     {
-        $servidorDeDesarrollo = file_exists(public_path('hot'));
-        $manifiesto = file_exists(public_path('build/manifest.json'));
-
-        if (! $servidorDeDesarrollo && ! $manifiesto) {
+        try {
+            return [
+                Js::make('panel-graficas', Vite::asset('resources/js/panel-graficas.js'))->module(),
+            ];
+        } catch (ViteException) {
             return [];
         }
-
-        return [
-            Js::make('panel-graficas', Vite::asset('resources/js/panel-graficas.js'))->module(),
-        ];
     }
 }

@@ -78,6 +78,63 @@ class GraficasDelPanelTest extends TestCase
     }
 
     /**
+     * Un manifiesto que existe pero no conoce esta entrada es el otro
+     * camino hacia el mismo punto muerto: alguien que compilo en otra rama
+     * (main, por ejemplo) hace checkout de esta y corre cualquier `artisan`
+     * antes de `npm run build`. Esta prueba es la razon de que la guarda
+     * real sea un `catch (ViteException)` y no un `file_exists()`: el
+     * archivo existe, así que `file_exists()` por si solo no distingue
+     * este caso de uno sano.
+     *
+     * Se esconde tambien `public/hot`: si existiera, `Vite::asset()`
+     * usaria el servidor de desarrollo y ni siquiera leeria el
+     * manifiesto, y la prueba no estaria ejercitando el camino real.
+     */
+    public function test_definir_el_panel_no_estalla_con_manifiesto_desactualizado(): void
+    {
+        $manifiesto = public_path('build/manifest.json');
+        $copiaManifiesto = $manifiesto.'.prueba';
+        $existiaManifiesto = file_exists($manifiesto);
+
+        $servidorDeDesarrollo = public_path('hot');
+        $copiaServidor = $servidorDeDesarrollo.'.prueba';
+        $existiaServidor = file_exists($servidorDeDesarrollo);
+
+        if ($existiaManifiesto) {
+            rename($manifiesto, $copiaManifiesto);
+        }
+
+        if ($existiaServidor) {
+            rename($servidorDeDesarrollo, $copiaServidor);
+        }
+
+        File::ensureDirectoryExists(dirname($manifiesto));
+
+        // Manifiesto valido, pero de una rama que no conoce panel-graficas.js.
+        File::put($manifiesto, json_encode([
+            'resources/css/app.css' => [
+                'file' => 'assets/app.css',
+                'src' => 'resources/css/app.css',
+            ],
+        ]));
+
+        try {
+            $panel = (new AdminPanelProvider($this->app))->panel(Panel::make());
+            $this->assertInstanceOf(Panel::class, $panel);
+        } finally {
+            File::delete($manifiesto);
+
+            if ($existiaManifiesto) {
+                rename($copiaManifiesto, $manifiesto);
+            }
+
+            if ($existiaServidor) {
+                rename($copiaServidor, $servidorDeDesarrollo);
+            }
+        }
+    }
+
+    /**
      * Se afirma sobre el texto del archivo porque el proyecto no tiene banco
      * de pruebas de JavaScript (no hay vitest ni jest en `package.json`), y
      * montarlo para un plugin de 40 líneas no se paga. La verificación real
