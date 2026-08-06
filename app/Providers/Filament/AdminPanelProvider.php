@@ -76,9 +76,7 @@ class AdminPanelProvider extends PanelProvider
                 AsociadosPorMunicipio::class,
                 UltimasTransacciones::class,
             ])
-            ->assets([
-                Js::make('panel-graficas', Vite::asset('resources/js/panel-graficas.js'))->module(),
-            ])
+            ->assets($this->assetsDelPanel())
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -93,5 +91,33 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+    }
+
+    /**
+     * El plugin de graficas solo se registra si Vite ya produjo algo.
+     *
+     * `Vite::asset()` lanza cuando no encuentra manifiesto ni servidor de
+     * desarrollo, y `panel()` se evalua en CADA arranque de consola. Sin esta
+     * guarda, un clon recien hecho no puede ejecutar ni `key:generate`, y el
+     * procedimiento de compilacion del proyecto —`view:clear` antes de
+     * `npm run build`— se vuelve un punto muerto circular.
+     *
+     * Degradar a lista vacia es seguro: sin nada compilado no hay panel que
+     * pintar, asi que no se pierde nada que existiera.
+     *
+     * @return array<int, Js>
+     */
+    private function assetsDelPanel(): array
+    {
+        $servidorDeDesarrollo = file_exists(public_path('hot'));
+        $manifiesto = file_exists(public_path('build/manifest.json'));
+
+        if (! $servidorDeDesarrollo && ! $manifiesto) {
+            return [];
+        }
+
+        return [
+            Js::make('panel-graficas', Vite::asset('resources/js/panel-graficas.js'))->module(),
+        ];
     }
 }

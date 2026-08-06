@@ -35,6 +35,49 @@ class GraficasDelPanelTest extends TestCase
     }
 
     /**
+     * Un clon recien hecho, sin `npm run build`, tiene que poder ejecutar
+     * artisan. Antes de la guarda, `php artisan view:clear` lanzaba
+     * ViteManifestNotFoundException, que es justo el comando que hay que
+     * correr ANTES de compilar.
+     *
+     * Se esconden manifiesto y `public/hot` a la vez: si el entorno de la
+     * prueba tuviera `npm run dev` corriendo, `public/hot` por si solo
+     * bastaria para que `Vite::asset()` no lance nada, y la prueba no
+     * estaria comprobando el punto muerto real (clon sin nada compilado).
+     */
+    public function test_definir_el_panel_no_estalla_sin_nada_compilado(): void
+    {
+        $manifiesto = public_path('build/manifest.json');
+        $copiaManifiesto = $manifiesto.'.prueba';
+        $existiaManifiesto = file_exists($manifiesto);
+
+        $servidorDeDesarrollo = public_path('hot');
+        $copiaServidor = $servidorDeDesarrollo.'.prueba';
+        $existiaServidor = file_exists($servidorDeDesarrollo);
+
+        if ($existiaManifiesto) {
+            rename($manifiesto, $copiaManifiesto);
+        }
+
+        if ($existiaServidor) {
+            rename($servidorDeDesarrollo, $copiaServidor);
+        }
+
+        try {
+            $panel = (new AdminPanelProvider($this->app))->panel(Panel::make());
+            $this->assertInstanceOf(Panel::class, $panel);
+        } finally {
+            if ($existiaManifiesto) {
+                rename($copiaManifiesto, $manifiesto);
+            }
+
+            if ($existiaServidor) {
+                rename($copiaServidor, $servidorDeDesarrollo);
+            }
+        }
+    }
+
+    /**
      * Se afirma sobre el texto del archivo porque el proyecto no tiene banco
      * de pruebas de JavaScript (no hay vitest ni jest en `package.json`), y
      * montarlo para un plugin de 40 líneas no se paga. La verificación real
