@@ -4,6 +4,7 @@ namespace Tests\Feature\Panel;
 
 use App\Models\ConsultaGuia;
 use App\Models\Municipio;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -63,5 +64,31 @@ class ConsultasDeGuiaTest extends TestCase
 
         $this->assertSame(5, (int) $porMunicipio[$armenia->id]);
         $this->assertSame(2, (int) $porMunicipio[$salento->id]);
+    }
+
+    public function test_visitar_la_guia_registra_la_consulta_del_municipio(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $municipio = Municipio::whereHas(
+            'requisitos',
+            fn ($q) => $q->publicado()
+        )->firstOrFail();
+
+        $this->get('/abre-tu-negocio?municipio='.$municipio->slug)->assertOk();
+
+        $this->assertDatabaseHas('consultas_guia', [
+            'municipio_id' => $municipio->id,
+            'requisito_apertura_id' => null,
+        ]);
+    }
+
+    /** Sin municipio resuelto no hay nada que contar. */
+    public function test_no_registra_nada_si_ningun_municipio_tiene_guia(): void
+    {
+        // Base limpia: no hay requisitos publicados, así que no hay selección.
+        $this->get('/abre-tu-negocio')->assertOk();
+
+        $this->assertDatabaseCount('consultas_guia', 0);
     }
 }

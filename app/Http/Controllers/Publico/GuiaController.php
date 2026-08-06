@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Publico;
 
+use App\Models\ConsultaGuia;
 use App\Models\Municipio;
 use App\Models\RequisitoApertura;
 use Illuminate\Contracts\View\View;
@@ -35,6 +36,12 @@ class GuiaController
                 ->get()
             : collect();
 
+        // Conteo anónimo para el observatorio: en qué municipios la gente
+        // quiere abrir un negocio. Sin municipio resuelto no hay qué contar.
+        if ($seleccionado !== null) {
+            ConsultaGuia::registrar($seleccionado->id);
+        }
+
         return view('publico.guia.index', [
             'municipios' => $municipiosConGuia,
             'seleccionado' => $seleccionado,
@@ -59,6 +66,9 @@ class GuiaController
         // carpeta para que no pueda apuntar a ningún otro sitio del disco.
         abort_unless(str_starts_with($requisito->adjunto, 'formatos/'), 404);
         abort_unless(Storage::disk('local')->exists($requisito->adjunto), 404);
+
+        // Descargar el formato es la señal más fuerte de intención real.
+        ConsultaGuia::registrar($requisito->municipio_id, $requisito->id);
 
         $nombre = Str::slug($requisito->adjunto_nombre ?? $requisito->entidad).'.pdf';
 
