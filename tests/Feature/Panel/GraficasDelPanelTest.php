@@ -5,6 +5,10 @@ namespace Tests\Feature\Panel;
 use App\Providers\Filament\AdminPanelProvider;
 use Filament\Panel;
 use Filament\Support\Facades\FilamentAsset;
+use Illuminate\Foundation\Vite;
+use Illuminate\Foundation\ViteException;
+use Illuminate\Foundation\ViteManifestNotFoundException;
+use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
@@ -40,41 +44,27 @@ class GraficasDelPanelTest extends TestCase
      * ViteManifestNotFoundException, que es justo el comando que hay que
      * correr ANTES de compilar.
      *
-     * Se esconden manifiesto y `public/hot` a la vez: si el entorno de la
-     * prueba tuviera `npm run dev` corriendo, `public/hot` por si solo
-     * bastaria para que `Vite::asset()` no lance nada, y la prueba no
-     * estaria comprobando el punto muerto real (clon sin nada compilado).
+     * No se toca el manifiesto en disco: `Illuminate\Foundation\Vite`
+     * cachea el manifiesto ya leido en una propiedad estatica de clase
+     * (`Vite::$manifests`), y esa cache sobrevive dentro de la misma
+     * peticion de prueba. El panel admin real ya evaluo `Vite::asset()`
+     * durante el arranque de consola de esta misma prueba (`Panel::register()`
+     * llama a `registerAssets()` porque `php artisan test` corre en
+     * consola), así que para cuando el cuerpo de la prueba se ejecuta el
+     * manifiesto real ya esta en esa cache estatica: sobrescribir el
+     * archivo en disco no la invalida, y la prueba no ejercitaria nada.
+     * En su lugar se sustituye la instancia de Vite en el contenedor por
+     * una que lanza sin tocar el sistema de archivos.
      */
     public function test_definir_el_panel_no_estalla_sin_nada_compilado(): void
     {
-        $manifiesto = public_path('build/manifest.json');
-        $copiaManifiesto = $manifiesto.'.prueba';
-        $existiaManifiesto = file_exists($manifiesto);
+        $this->fingirQueViteLanzaAlPedirAsset(
+            fn () => throw new ViteManifestNotFoundException('manifiesto de prueba: ausente')
+        );
 
-        $servidorDeDesarrollo = public_path('hot');
-        $copiaServidor = $servidorDeDesarrollo.'.prueba';
-        $existiaServidor = file_exists($servidorDeDesarrollo);
+        $panel = (new AdminPanelProvider($this->app))->panel(Panel::make());
 
-        if ($existiaManifiesto) {
-            rename($manifiesto, $copiaManifiesto);
-        }
-
-        if ($existiaServidor) {
-            rename($servidorDeDesarrollo, $copiaServidor);
-        }
-
-        try {
-            $panel = (new AdminPanelProvider($this->app))->panel(Panel::make());
-            $this->assertInstanceOf(Panel::class, $panel);
-        } finally {
-            if ($existiaManifiesto) {
-                rename($copiaManifiesto, $manifiesto);
-            }
-
-            if ($existiaServidor) {
-                rename($copiaServidor, $servidorDeDesarrollo);
-            }
-        }
+        $this->assertInstanceOf(Panel::class, $panel);
     }
 
     /**
@@ -86,52 +76,48 @@ class GraficasDelPanelTest extends TestCase
      * archivo existe, así que `file_exists()` por si solo no distingue
      * este caso de uno sano.
      *
-     * Se esconde tambien `public/hot`: si existiera, `Vite::asset()`
-     * usaria el servidor de desarrollo y ni siquiera leeria el
-     * manifiesto, y la prueba no estaria ejercitando el camino real.
+     * Mismo motivo que la prueba anterior para no tocar el disco: la
+     * cache estatica de `Vite::$manifests` haria inutil sobrescribir el
+     * manifiesto real.
      */
     public function test_definir_el_panel_no_estalla_con_manifiesto_desactualizado(): void
     {
-        $manifiesto = public_path('build/manifest.json');
-        $copiaManifiesto = $manifiesto.'.prueba';
-        $existiaManifiesto = file_exists($manifiesto);
+        $this->fingirQueViteLanzaAlPedirAsset(
+            fn () => throw new ViteException('Unable to locate file in Vite manifest: resources/js/panel-graficas.js.')
+        );
 
-        $servidorDeDesarrollo = public_path('hot');
-        $copiaServidor = $servidorDeDesarrollo.'.prueba';
-        $existiaServidor = file_exists($servidorDeDesarrollo);
+        $panel = (new AdminPanelProvider($this->app))->panel(Panel::make());
 
-        if ($existiaManifiesto) {
-            rename($manifiesto, $copiaManifiesto);
-        }
+        $this->assertInstanceOf(Panel::class, $panel);
+    }
 
-        if ($existiaServidor) {
-            rename($servidorDeDesarrollo, $copiaServidor);
-        }
+    /**
+     * Sustituye la instancia real de `Vite` en el contenedor por una que
+     * lanza en cuanto se le pide un asset, sin tocar el sistema de
+     * archivos ni el manifiesto real.
+     *
+     * `Illuminate\Foundation\Vite::class` es el accessor real de la
+     * fachada (`vendor/laravel/framework/src/Illuminate/Support/Facades/Vite.php`,
+     * `getFacadeAccessor()`), así que esa es la clave que hay que
+     * sustituir en el contenedor. Y como la fachada cachea la instancia ya
+     * resuelta en una propiedad estatica propia (`Facade::$resolvedInstance`),
+     * hace falta limpiar tambien ese cache: si no, la fachada sigue
+     * devolviendo el Vite real que el arranque de consola de esta misma
+     * prueba ya resolvio antes de que el cuerpo de la prueba se ejecute.
+     */
+    private function fingirQueViteLanzaAlPedirAsset(\Closure $lanzar): void
+    {
+        Facade::clearResolvedInstance(Vite::class);
 
-        File::ensureDirectoryExists(dirname($manifiesto));
+        $this->app->instance(Vite::class, new class($lanzar) extends Vite
+        {
+            public function __construct(private \Closure $lanzar) {}
 
-        // Manifiesto valido, pero de una rama que no conoce panel-graficas.js.
-        File::put($manifiesto, json_encode([
-            'resources/css/app.css' => [
-                'file' => 'assets/app.css',
-                'src' => 'resources/css/app.css',
-            ],
-        ]));
-
-        try {
-            $panel = (new AdminPanelProvider($this->app))->panel(Panel::make());
-            $this->assertInstanceOf(Panel::class, $panel);
-        } finally {
-            File::delete($manifiesto);
-
-            if ($existiaManifiesto) {
-                rename($copiaManifiesto, $manifiesto);
+            public function asset($asset, $buildDirectory = null)
+            {
+                ($this->lanzar)();
             }
-
-            if ($existiaServidor) {
-                rename($copiaServidor, $servidorDeDesarrollo);
-            }
-        }
+        });
     }
 
     /**
