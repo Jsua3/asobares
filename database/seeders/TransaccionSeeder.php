@@ -7,6 +7,7 @@ use App\Enums\EstadoInscripcion;
 use App\Enums\EstadoTransaccion;
 use App\Enums\MetodoPago;
 use App\Models\Asociado;
+use App\Models\Cartera;
 use App\Models\Evento;
 use App\Models\Transaccion;
 use Illuminate\Database\Seeder;
@@ -91,14 +92,18 @@ class TransaccionSeeder extends Seeder
     }
 
     /**
-     * Dieciocho meses de mensualidades con estacionalidad.
+     * Dieciocho meses de mensualidades con estacionalidad, más el mes en curso.
      *
      * El tablero grafica recaudo mensual; con las transacciones apretadas en
      * los últimos 25 días la gráfica era una línea plana, y una gráfica vacía
      * enseña que el tablero no sirve.
      *
      * La forma es la del sector: diciembre factura, enero y febrero son el
-     * valle, y la base de afiliados va creciendo mes a mes.
+     * valle, y la base de afiliados va creciendo mes a mes. El mes en curso
+     * (mesesAtras = 0) se prorratea por los días ya transcurridos: dejarlo
+     * vacío hasta el cierre de mes hacía que el KPI «recaudado este mes» del
+     * tablero mostrara una caída falsa contra el mes anterior cualquier día
+     * que no fuera fin de mes.
      */
     private function sembrarHistorialDeMensualidades(): void
     {
@@ -114,27 +119,74 @@ class TransaccionSeeder extends Seeder
             return;
         }
 
-        foreach (range(1, 18) as $mesesAtras) {
+        $totalAsociados = count($asociados);
+
+        // Se carga una sola vez, fuera del bucle: quien debe N meses no pagó
+        // ni el mes en curso ni los N-1 meses anteriores. Sin esto la cartera
+        // y el historial cuentan historias distintas y /mi-cuenta muestra
+        // «debes 3 meses» junto a un pago del mes pasado.
+        $morasPorAsociado = Cartera::whereIn('asociado_id', $asociados)->pluck('meses_mora', 'asociado_id')->all();
+
+        $cursor = 0;
+
+        // De 18 (el mes más antiguo) a 0 (el mes en curso, todavía abierto).
+        foreach (range(18, 0) as $mesesAtras) {
             $mes = now()->subMonths($mesesAtras)->startOfMonth();
+            $esMesEnCurso = $mesesAtras === 0;
 
             // La base crece: hace 18 meses pagaban ~el 40 % de los de hoy.
             $crecimiento = 0.4 + (0.6 * (18 - $mesesAtras) / 18);
             $factor = $estacionalidad[(int) $mes->format('n')] / 100;
-            $cuantos = (int) round(count($asociados) * 0.55 * $crecimiento * $factor);
-            $cuantos = max(min($cuantos, count($asociados)), 1);
+            $cuantos = (int) round($totalAsociados * 0.55 * $crecimiento * $factor);
 
-            $pagadores = array_slice($asociados, 0, $cuantos);
+            if ($esMesEnCurso) {
+                // El mes en curso no ha cerrado: se prorratea por la fracción
+                // de días que ya transcurrieron, ni vacío ni completo.
+                $cuantos = (int) round($cuantos * now()->day / now()->daysInMonth);
+            }
+
+            $cuantos = max(min($cuantos, $totalAsociados), 1);
+
+            // Rota el punto de partida en vez de tomar siempre el mismo
+            // prefijo: en 18 meses todo asociado con cartera debe aparecer
+            // al menos una vez, no siempre los mismos primeros del arreglo.
+            $inicio = $cursor % $totalAsociados;
+            $rotados = array_merge(array_slice($asociados, $inicio), array_slice($asociados, 0, $inicio));
+
+            // Quien está en mora no pagó ni el mes en curso ni los meses de
+            // su ventana de mora (coherencia con CarteraSeeder).
+            $candidatos = array_values(array_filter(
+                $rotados,
+                function (int $asociadoId) use ($morasPorAsociado, $mesesAtras): bool {
+                    $moras = $morasPorAsociado[$asociadoId] ?? 0;
+
+                    return ! ($moras > 0 && $mesesAtras <= $moras);
+                }
+            ));
+
+            $pagadores = array_slice($candidatos, 0, min($cuantos, count($candidatos)));
 
             foreach ($pagadores as $asociadoId) {
+                $fecha = $esMesEnCurso
+                    // Nunca en el futuro: acotado a los días ya transcurridos
+                    // del mes y recortado contra «ahora» como red de seguridad.
+                    ? $mes->copy()
+                        ->addDays(random_int(0, max(0, now()->day - 1)))
+                        ->addHours(random_int(0, 23))
+                        ->min(now())
+                    : $mes->copy()->addDays(random_int(0, 26))->addHours(random_int(8, 20));
+
                 $this->crear(
                     ConceptoTransaccion::Mensualidad,
                     CarteraSeeder::MENSUALIDAD,
                     EstadoTransaccion::Aprobada,
                     MetodoPago::Pse,
                     ['asociado_id' => $asociadoId],
-                    $mes->copy()->addDays(random_int(0, 26))->addHours(random_int(8, 20)),
+                    $fecha,
                 );
             }
+
+            $cursor += $cuantos;
         }
     }
 }

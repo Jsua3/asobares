@@ -3,6 +3,8 @@
 namespace Tests\Feature\Panel;
 
 use App\Enums\EstadoTransaccion;
+use App\Models\Asociado;
+use App\Models\Cartera;
 use App\Models\ConsultaGuia;
 use App\Models\Transaccion;
 use Database\Seeders\ConsultaGuiaSeeder;
@@ -130,5 +132,68 @@ class SemillaConFormaTest extends TestCase
             $porMes['12'],
             'La vida nocturna factura en diciembre; la semilla debe parecerlo.'
         );
+    }
+
+    public function test_el_mes_en_curso_tiene_recaudo_mayor_que_cero(): void
+    {
+        $recaudoDelMes = Transaccion::query()
+            ->where('estado', EstadoTransaccion::Aprobada)
+            ->whereBetween('created_at', [now()->startOfMonth(), now()])
+            ->sum('monto');
+
+        $this->assertGreaterThan(
+            0,
+            (float) $recaudoDelMes,
+            'El mes en curso no puede quedar vacío hasta el cierre: el KPI de recaudo mostraría una caída falsa.'
+        );
+    }
+
+    public function test_ninguna_transaccion_tiene_fecha_futura(): void
+    {
+        $masReciente = Transaccion::max('created_at');
+
+        $this->assertLessThanOrEqual(
+            now(),
+            Carbon::parse($masReciente),
+            'La semilla no puede fechar transacciones en el futuro.'
+        );
+    }
+
+    public function test_todo_asociado_con_cartera_aparece_como_pagador(): void
+    {
+        $conCartera = Asociado::query()->has('cartera')->pluck('id');
+
+        $pagaron = Transaccion::query()
+            ->where('estado', EstadoTransaccion::Aprobada)
+            ->whereNotNull('asociado_id')
+            ->distinct()
+            ->pluck('asociado_id');
+
+        $nuncaPagaron = $conCartera->diff($pagaron);
+
+        $this->assertCount(
+            0,
+            $nuncaPagaron,
+            'Todo asociado con cartera debe aparecer al menos una vez en el historial de dieciocho meses.'
+        );
+    }
+
+    public function test_ningun_asociado_en_mora_tiene_pagos_en_su_ventana_de_mora(): void
+    {
+        $enMora = Cartera::where('meses_mora', '>', 0)->get(['asociado_id', 'meses_mora']);
+
+        foreach ($enMora as $cartera) {
+            $pagosEnVentana = Transaccion::query()
+                ->where('estado', EstadoTransaccion::Aprobada)
+                ->where('asociado_id', $cartera->asociado_id)
+                ->where('created_at', '>=', now()->subMonths($cartera->meses_mora)->startOfMonth())
+                ->count();
+
+            $this->assertSame(
+                0,
+                $pagosEnVentana,
+                "El asociado {$cartera->asociado_id} debe {$cartera->meses_mora} meses de mora y no puede tener pagos dentro de esa ventana."
+            );
+        }
     }
 }
