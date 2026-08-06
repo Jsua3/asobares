@@ -16,12 +16,14 @@ use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Support\Assets\Js;
 use Filament\Support\Colors\Color;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -73,6 +75,9 @@ class AdminPanelProvider extends PanelProvider
                 InscripcionesDelMes::class,
                 AsociadosPorMunicipio::class,
                 UltimasTransacciones::class,
+            ])
+            ->assets([
+                Js::make('panel-graficas', Vite::asset('resources/js/panel-graficas.js'))->module(),
             ])
             ->middleware([
                 EncryptCookies::class,
