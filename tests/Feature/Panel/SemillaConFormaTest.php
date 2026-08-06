@@ -196,4 +196,18 @@ class SemillaConFormaTest extends TestCase
             );
         }
     }
+
+    /**
+     * El gremio crece mes a mes (prompt maestro): si ningún asociado se
+     * afilió en los últimos treinta días, la tarjeta «altas este mes» del
+     * tablero muestra siempre cero, un artefacto tan falso como el que
+     * corrige `ResumenDelGremio` al dejar de leer `created_at`.
+     */
+    public function test_hay_al_menos_una_afiliacion_en_los_ultimos_treinta_dias(): void
+    {
+        $this->assertTrue(
+            Asociado::where('fecha_afiliacion', '>=', now()->subDays(30)->toDateString())->exists(),
+            'La semilla debe dejar al menos un asociado afiliado en el último mes.'
+        );
+    }
 }

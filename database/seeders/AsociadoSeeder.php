@@ -52,7 +52,7 @@ class AsociadoSeeder extends Seeder
                     'representante' => $datos['representante'],
                     'correo_interno' => Str::slug($datos['nombre']).'@ejemplo.test',
                     'telefono_interno' => $datos['whatsapp'],
-                    'fecha_afiliacion' => now()->subMonths(random_int(2, 22))->toDateString(),
+                    'fecha_afiliacion' => $this->fechaDeAfiliacion($indice),
                     'notas_internas' => $datos['nota_interna'] ?? 'Sin novedades.',
                 ]
             );
@@ -68,6 +68,23 @@ class AsociadoSeeder extends Seeder
                 }
             }
         }
+    }
+
+    /**
+     * Fecha de negocio de la afiliación, no la de inserción de la fila.
+     *
+     * Los tres primeros establecimientos se afiliaron dentro de los últimos
+     * treinta días: el prompt maestro dice que el gremio «crece mes a mes»,
+     * y una semilla donde nadie se afilió nunca en el último mes hace que la
+     * tarjeta «altas este mes» del tablero muestre siempre cero, un
+     * artefacto tan falso como el que corrige (ver `ResumenDelGremio`). El
+     * resto queda repartido entre dos y veintidós meses atrás, como antes.
+     */
+    private function fechaDeAfiliacion(int $indice): string
+    {
+        return $indice < 3
+            ? now()->subDays(random_int(1, 25))->toDateString()
+            : now()->subMonths(random_int(2, 22))->toDateString();
     }
 
     /**

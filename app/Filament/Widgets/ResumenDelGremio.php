@@ -75,7 +75,20 @@ class ResumenDelGremio extends StatsOverviewWidget
         $saldo = (float) Cartera::enMora()->sum('saldo_pendiente');
 
         $publicados = Asociado::publicado()->count();
-        $altasDelMes = Asociado::publicado()->where('created_at', '>=', $inicioDeMes)->count();
+
+        // `created_at` es cuándo se insertó la fila, no cuándo se afilió el
+        // establecimiento. Con un sembrado todas las filas comparten el
+        // mismo instante, así que la cifra saldría igual al total de
+        // asociados. `fecha_afiliacion` es la fecha de negocio: la misma que
+        // el recurso muestra como «Afiliado desde».
+        //
+        // `->toDateString()` en vez de pasar el Carbon completo: la columna
+        // es `date` pura («2026-08-01»), y compararla contra un datetime
+        // («2026-08-01 00:00:00») rompe la comparación lexicográfica en el
+        // borde exacto del día 1 del mes.
+        $altasDelMes = Asociado::publicado()
+            ->where('fecha_afiliacion', '>=', $inicioDeMes->toDateString())
+            ->count();
 
         $conPresencia = Municipio::whereHas('asociados', fn ($q) => $q->publicado())->count();
 

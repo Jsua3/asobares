@@ -226,6 +226,27 @@ class TableroTest extends TestCase
             ->assertDontSee('1.000.000');
     }
 
+    /**
+     * `created_at` es cuándo Eloquent insertó la fila, no cuándo el
+     * establecimiento se afilió al gremio. Este asociado se inserta HOY pero
+     * se afilió hace seis meses: con la implementación vieja, que leía
+     * `created_at`, esta prueba habría fallado, porque hoy es exactamente
+     * cuando se creó la fila.
+     */
+    public function test_las_altas_del_mes_cuentan_por_fecha_de_afiliacion_no_por_insercion(): void
+    {
+        Asociado::factory()->publicado()->create([
+            'fecha_afiliacion' => now()->subMonths(6)->toDateString(),
+            'created_at' => now(),
+        ]);
+
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(ResumenDelGremio::class)
+            ->assertSee('0 altas este mes')
+            ->assertDontSee('1 altas este mes');
+    }
+
     private function sembrarTransaccionAprobada(Carbon $fecha, float $monto): void
     {
         Transaccion::create([
