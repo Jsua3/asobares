@@ -2,12 +2,21 @@
 
 namespace Tests\Feature\Panel;
 
+use App\Enums\ConceptoTransaccion;
 use App\Enums\EstadoPublicacion;
+use App\Enums\EstadoTransaccion;
+use App\Enums\MetodoPago;
+use App\Filament\Widgets\InscripcionesDelMes;
 use App\Filament\Widgets\PendientesDeAprobacion;
+use App\Filament\Widgets\RecaudoMensual;
+use App\Filament\Widgets\ResumenDelGremio;
 use App\Models\Asociado;
+use App\Models\Municipio;
+use App\Models\Transaccion;
 use App\Models\User;
 use Database\Seeders\RolYPermisoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -93,5 +102,141 @@ class TableroTest extends TestCase
             $consultasAAsociados,
             'canView() y el render deben compartir la misma instancia memoizada: un solo calculo, dos consultas (COUNT y MIN) contra asociados.'
         );
+    }
+
+    public function test_la_direccion_ve_cuatro_tarjetas_con_la_plata(): void
+    {
+        Municipio::factory()->count(3)->create();
+
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(ResumenDelGremio::class)
+            ->assertSee('Recaudado este mes')
+            ->assertSee('Cartera en mora')
+            ->assertSee('Cobertura territorial');
+    }
+
+    /** La secretaría no ve plata: no tiene `ver_transaccion` ni `ver_cartera`. */
+    public function test_la_secretaria_ve_su_propio_juego_de_tarjetas(): void
+    {
+        $this->actingAs($this->usuarioCon(User::ROL_SUBADMIN));
+
+        Livewire::test(ResumenDelGremio::class)
+            ->assertSee('Pendientes de moderación')
+            ->assertSee('Bandeja sin responder')
+            ->assertDontSee('Recaudado este mes')
+            ->assertDontSee('Cartera en mora');
+    }
+
+    public function test_el_resumen_muestra_exactamente_cuatro_tarjetas(): void
+    {
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        $widget = new ResumenDelGremio;
+        $stats = (fn (): array => $this->getStats())->call($widget);
+
+        $this->assertCount(4, $stats, 'Cuatro tarjetas, no seis: seis es un marcador, no un tablero.');
+    }
+
+    public function test_el_recaudo_mensual_reemplazo_a_las_inscripciones_de_30_dias(): void
+    {
+        $this->assertFalse(
+            class_exists(InscripcionesDelMes::class),
+            'La gráfica de 30 días era una línea plana en cero con eventos mensuales.'
+        );
+        $this->assertTrue(class_exists(RecaudoMensual::class));
+    }
+
+    /**
+     * El widget anterior traía todos los modelos a memoria para agruparlos con
+     * `groupBy` de Collection. Se mide el comportamiento —cuántas consultas
+     * salen— y no cómo está escrito el archivo: una aserción sobre el texto
+     * fuente se rompe con cualquier `->get()` legítimo en otro método.
+     *
+     * ⚠️ No hay `TransaccionFactory` en el proyecto: las transacciones se
+     * crean a mano con la misma forma que usa `TransaccionSeeder`.
+     */
+    public function test_el_recaudo_mensual_agrega_en_una_sola_consulta(): void
+    {
+        foreach (range(1, (int) now()->format('n')) as $mes) {
+            Transaccion::create([
+                'referencia' => Transaccion::generarReferencia(),
+                'concepto' => ConceptoTransaccion::Mensualidad,
+                'monto' => 50000,
+                'moneda' => 'COP',
+                'estado' => EstadoTransaccion::Aprobada,
+                'metodo' => MetodoPago::Pse,
+                'payload' => ['origen' => 'prueba'],
+                'created_at' => now()->startOfYear()->addMonths($mes - 1)->addDay(),
+            ]);
+        }
+
+        $consultas = [];
+        DB::listen(function ($evento) use (&$consultas): void {
+            $consultas[] = $evento->sql;
+        });
+
+        $widget = new RecaudoMensual;
+        $datos = (fn (): array => $this->getData())->call($widget);
+
+        $this->assertCount(
+            1,
+            $consultas,
+            'La serie se agrega en SQL: una consulta, no una por mes ni una por fila.'
+        );
+        $this->assertStringContainsStringIgnoringCase('sum(monto)', $consultas[0]);
+        $this->assertCount((int) now()->format('n'), $datos['labels']);
+    }
+
+    /**
+     * El delta de «Recaudado este mes» comparaba el mes en curso incompleto
+     * contra el mes anterior COMPLETO: al principio de mes eso siempre pinta
+     * mal (el día 6, $150.000 contra $930.000 del mes pasado entero sería un
+     * −84 % que no dice nada). Se siembra marzo cortado al día 15 y febrero
+     * con la mitad del dinero antes del día 15 y la otra mitad después, de
+     * forma que la ventana equivalente y el mes completo den signos
+     * contrarios: si el widget usara el mes anterior entero, o si arrastrara
+     * un pago futuro dentro del mes en curso, el resultado sería negativo.
+     */
+    public function test_el_delta_de_recaudo_compara_el_mismo_tramo_de_dias_no_el_mes_completo(): void
+    {
+        $this->travelTo(Carbon::create(2026, 3, 15, 12, 0, 0));
+
+        // Marzo, dentro de la ventana comparable (1 al 15): sí cuenta.
+        $this->sembrarTransaccionAprobada(Carbon::create(2026, 3, 10), 200_000);
+        // Marzo, después de «hoy»: un pago que aún no ha ocurrido no puede
+        // contar en el recaudo del mes en curso.
+        $this->sembrarTransaccionAprobada(Carbon::create(2026, 3, 20), 500_000);
+
+        // Febrero, dentro de la ventana equivalente (1 al 15): sí cuenta.
+        $this->sembrarTransaccionAprobada(Carbon::create(2026, 2, 10), 100_000);
+        // Febrero, después del día 15: solo entraría si el cálculo comparara
+        // contra el mes anterior completo en vez de la ventana equivalente.
+        $this->sembrarTransaccionAprobada(Carbon::create(2026, 2, 20), 900_000);
+
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        // $200.000 (marzo 1-15) vs. $100.000 (febrero 1-15) = +100,0 %. Con
+        // el mes anterior completo ($1.000.000) o el pago futuro de marzo
+        // sumado ($700.000) el delta habría salido negativo.
+        Livewire::test(ResumenDelGremio::class)
+            ->assertSee('$200.000')
+            ->assertSee('+100,0 % vs. mismo tramo del mes anterior')
+            ->assertDontSee('700.000')
+            ->assertDontSee('1.000.000');
+    }
+
+    private function sembrarTransaccionAprobada(Carbon $fecha, float $monto): void
+    {
+        Transaccion::create([
+            'referencia' => Transaccion::generarReferencia(),
+            'concepto' => ConceptoTransaccion::Mensualidad,
+            'monto' => $monto,
+            'moneda' => 'COP',
+            'estado' => EstadoTransaccion::Aprobada,
+            'metodo' => MetodoPago::Pse,
+            'payload' => ['origen' => 'prueba'],
+            'created_at' => $fecha,
+        ]);
     }
 }

@@ -3,7 +3,8 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Widgets\AsociadosPorMunicipio;
-use App\Filament\Widgets\InscripcionesDelMes;
+use App\Filament\Widgets\PendientesDeAprobacion;
+use App\Filament\Widgets\RecaudoMensual;
 use App\Filament\Widgets\ResumenDelGremio;
 use App\Filament\Widgets\UltimasTransacciones;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
@@ -72,8 +73,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
+                PendientesDeAprobacion::class,
                 ResumenDelGremio::class,
-                InscripcionesDelMes::class,
+                RecaudoMensual::class,
                 AsociadosPorMunicipio::class,
                 UltimasTransacciones::class,
             ])
