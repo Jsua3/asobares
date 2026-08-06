@@ -126,4 +126,46 @@ class ComponentesDelPanelTest extends TestCase
             );
         }
     }
+
+    public function test_la_cola_muestra_etiqueta_antiguedad_y_accion(): void
+    {
+        $html = Blade::render(
+            '<x-panel.cola etiqueta="3 vacantes por aprobar" url="/admin/vacantes" antiguedad="la más antigua, hace 4 días" />'
+        );
+
+        $this->assertStringContainsString('3 vacantes por aprobar', $html);
+        $this->assertStringContainsString('la más antigua, hace 4 días', $html);
+        $this->assertStringContainsString('href="/admin/vacantes"', $html);
+        $this->assertStringContainsString('Revisar', $html);
+    }
+
+    public function test_la_cola_permite_renombrar_la_accion(): void
+    {
+        $html = Blade::render(
+            '<x-panel.cola etiqueta="7 mensajes" url="/admin/mensajes" accion="Abrir bandeja" />'
+        );
+
+        $this->assertStringContainsString('Abrir bandeja', $html);
+        $this->assertStringNotContainsString('Revisar', $html);
+    }
+
+    /** Lo urgente no se distingue solo por color (WCAG 1.4.1). */
+    public function test_la_cola_marca_lo_urgente_con_algo_mas_que_color(): void
+    {
+        $html = Blade::render(
+            '<x-panel.cola etiqueta="2 PQR vencidos" url="/admin/mensajes" urgente />'
+        );
+
+        $this->assertStringContainsString('text-aviso', $html);
+        $this->assertStringContainsString('Urgente', $html);
+    }
+
+    public function test_la_cola_no_usa_colores_cableados(): void
+    {
+        $fuente = File::get(resource_path('views/components/panel/cola.blade.php'));
+
+        foreach (TemaClaroOscuroTest::clasesProhibidas() as $patron => $motivo) {
+            $this->assertSame(0, preg_match($patron, $fuente), "La cola tiene una clase cableada: {$motivo}");
+        }
+    }
 }
