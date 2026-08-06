@@ -18,3 +18,69 @@
         letter-spacing: -0.02em;
     }
 }
+
+/*
+ * Vidrio: dos recetas, no una opacidad compartida.
+ *
+ * En oscuro el efecto lo hace la LUZ (velo blanco translúcido sobre un fondo
+ * casi negro). En claro no hay luz que velar, así que el mismo velo se ve
+ * lavado y sin borde: allí el efecto lo hacen la SOMBRA y el borde definido.
+ *
+ * Regla dura del diseño: el vidrio va en el cromo (tarjetas KPI, cabeceras,
+ * modales), nunca sobre una tabla de datos. Este proyecto ya arregló dos
+ * fallos de contraste (1,22:1 y 2,63:1) y no se reabren.
+ */
+:root {
+    --asb-vidrio-fondo: rgb(255 255 255 / 0.7);
+    --asb-vidrio-borde: rgb(11 9 10 / 0.08);
+    --asb-vidrio-desenfoque: blur(12px);
+    --asb-vidrio-sombra:
+        0 1px 2px rgb(11 9 10 / 0.05),
+        0 8px 24px rgb(11 9 10 / 0.06);
+}
+
+.dark {
+    --asb-vidrio-fondo: rgb(255 255 255 / 0.05);
+    --asb-vidrio-borde: rgb(255 255 255 / 0.09);
+    --asb-vidrio-desenfoque: blur(12px);
+    --asb-vidrio-sombra: none;
+}
+
+@layer components {
+    .vidrio {
+        background-color: var(--asb-vidrio-fondo);
+        border: 1px solid var(--asb-vidrio-borde);
+        border-radius: 1rem;
+        box-shadow: var(--asb-vidrio-sombra);
+        backdrop-filter: var(--asb-vidrio-desenfoque);
+    }
+
+    /* Resplandor rojo discreto, el mismo recurso que usan los heros del sitio. */
+    .resplandor-panel {
+        background-image: radial-gradient(
+            70% 60% at 50% 0%,
+            rgb(238 65 55 / var(--asb-resplandor)) 0%,
+            transparent 70%
+        );
+    }
+
+    .vidrio-hover {
+        transition:
+            border-color 200ms ease,
+            transform 200ms ease;
+    }
+
+    .vidrio-hover:hover {
+        border-color: rgb(238 65 55 / 0.45);
+        transform: translateY(-2px);
+    }
+}
+
+/* Sin esto el movimiento es una barrera de accesibilidad, no un detalle. */
+@media (prefers-reduced-motion: reduce) {
+    .vidrio-hover,
+    .vidrio-hover:hover {
+        transition: none;
+        transform: none;
+    }
+}
