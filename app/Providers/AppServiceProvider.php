@@ -13,6 +13,7 @@ use App\Models\RequisitoApertura;
 use App\Models\Vacante;
 use App\Observers\FlujoDeAprobacionObserver;
 use App\Observers\LimpiezaDeArchivosObserver;
+use App\Panel\ColaDePendientes;
 use Filament\Resources\Resource;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
@@ -44,7 +45,18 @@ class AppServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        // El tablero resuelve este servicio varias veces por render —
+        // `canView()` del widget, sus filas, y la tarjeta de KPIs de
+        // secretaría—. Sin el singleton cada resolución trae una instancia
+        // nueva y su memoización interna no sirve de nada: cada una repite
+        // las consultas a los nueve modelos publicables.
         //
+        // El singleton de Laravel vive lo que vive el contenedor, o sea la
+        // petición, así que no arrastra datos entre peticiones. Si algún día
+        // el proyecto corriera sobre un servidor de aplicación persistente
+        // tipo Octane, el contenedor sobrevive a la petición y este
+        // singleton habría que revisarlo.
+        $this->app->singleton(ColaDePendientes::class);
     }
 
     public function boot(): void
