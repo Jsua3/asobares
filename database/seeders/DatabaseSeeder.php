@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             AsociadoSeeder::class,
             CarteraSeeder::class,
             RequisitoAperturaSeeder::class,
+            ConsultaGuiaSeeder::class,
             EventoSeeder::class,
             VacanteSeeder::class,
             ArtistaSeeder::class,
