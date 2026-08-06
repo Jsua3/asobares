@@ -4,6 +4,7 @@ namespace Tests\Feature\Panel;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
+use Tests\Feature\TemaClaroOscuroTest;
 use Tests\TestCase;
 
 /**
@@ -55,5 +56,74 @@ class ComponentesDelPanelTest extends TestCase
         $tema = File::get(resource_path('css/filament/admin/theme.css'));
 
         $this->assertStringContainsString('prefers-reduced-motion: reduce', $tema);
+    }
+
+    public function test_el_kpi_muestra_etiqueta_valor_y_detalle(): void
+    {
+        $html = Blade::render(
+            '<x-panel.kpi etiqueta="Recaudado este mes" valor="$1.250.000" detalle="14 transacciones" />'
+        );
+
+        $this->assertStringContainsString('Recaudado este mes', $html);
+        $this->assertStringContainsString('$1.250.000', $html);
+        $this->assertStringContainsString('14 transacciones', $html);
+    }
+
+    /** Un KPI que no lleva a ningún lado es un número muerto. */
+    public function test_el_kpi_con_url_es_un_enlace_y_sin_url_no(): void
+    {
+        $conEnlace = Blade::render(
+            '<x-panel.kpi etiqueta="Mensajes" valor="7" url="/admin/mensajes" />'
+        );
+        $this->assertStringContainsString('href="/admin/mensajes"', $conEnlace);
+        $this->assertStringContainsString('Ver detalle', $conEnlace);
+
+        $sinEnlace = Blade::render('<x-panel.kpi etiqueta="Mensajes" valor="7" />');
+        $this->assertStringNotContainsString('<a ', $sinEnlace);
+    }
+
+    /**
+     * ⚠️ No se puede afirmar sobre el nombre del icono: `x-filament::icon`
+     * renderiza un SVG crudo (`<svg class="fi-icon fi-size-md …">`) donde el
+     * nombre `heroicon-o-arrow-trending-up` no aparece por ningún lado.
+     *
+     * Se afirma sobre lo que el usuario percibe de verdad: el signo en el
+     * texto —que es lo que hace legible la dirección sin distinguir colores,
+     * WCAG 1.4.1— y el token de color que la refuerza.
+     */
+    public function test_el_kpi_marca_la_direccion_del_delta(): void
+    {
+        $sube = Blade::render('<x-panel.kpi etiqueta="Recaudo" valor="10" :delta="12.5" />');
+        $this->assertStringContainsString('+12,5', $sube);
+        $this->assertStringContainsString('text-exito', $sube);
+
+        $baja = Blade::render('<x-panel.kpi etiqueta="Recaudo" valor="10" :delta="-8.0" />');
+        $this->assertStringContainsString('−8,0', $baja);
+        $this->assertStringContainsString('text-acento', $baja);
+    }
+
+    /**
+     * Ninguna cifra se presenta sin su n. Un gremio que lleva porcentajes sin
+     * tamaño de muestra a una alcaldía pierde credibilidad una sola vez.
+     */
+    public function test_el_kpi_rotula_el_tamano_de_muestra_cuando_se_le_da(): void
+    {
+        $html = Blade::render('<x-panel.kpi etiqueta="Mora" valor="18 %" :n="11" />');
+
+        $this->assertStringContainsString('n = 11', $html);
+        $this->assertStringContainsString('muestra pequeña', $html);
+    }
+
+    public function test_el_kpi_no_usa_colores_cableados(): void
+    {
+        $fuente = File::get(resource_path('views/components/panel/kpi.blade.php'));
+
+        foreach (TemaClaroOscuroTest::clasesProhibidas() as $patron => $motivo) {
+            $this->assertSame(
+                0,
+                preg_match($patron, $fuente),
+                "El KPI tiene una clase de tema cableada: {$motivo}"
+            );
+        }
     }
 }
