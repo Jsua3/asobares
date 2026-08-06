@@ -14,7 +14,10 @@ use App\Models\Asociado;
 use App\Models\Municipio;
 use App\Models\Transaccion;
 use App\Models\User;
+use App\Providers\Filament\AdminPanelProvider;
 use Database\Seeders\RolYPermisoSeeder;
+use Filament\Pages\Dashboard;
+use Filament\Panel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -259,5 +262,31 @@ class TableroTest extends TestCase
             'payload' => ['origen' => 'prueba'],
             'created_at' => $fecha,
         ]);
+    }
+
+    public function test_el_tablero_es_una_pagina_propia_con_titulo_del_gremio(): void
+    {
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        $this->get('/admin')
+            ->assertOk()
+            ->assertSee('Tablero del gremio');
+    }
+
+    public function test_el_tablero_de_fabrica_ya_no_esta_registrado(): void
+    {
+        $panel = (new AdminPanelProvider($this->app))
+            ->panel(Panel::make());
+
+        $paginas = $panel->getPages();
+
+        $this->assertNotContains(Dashboard::class, $paginas);
+    }
+
+    public function test_la_secretaria_tambien_entra_al_tablero(): void
+    {
+        $this->actingAs($this->usuarioCon(User::ROL_SUBADMIN));
+
+        $this->get('/admin')->assertOk()->assertSee('Tablero del gremio');
     }
 }
