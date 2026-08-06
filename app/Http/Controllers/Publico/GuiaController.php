@@ -37,8 +37,9 @@ class GuiaController
             : collect();
 
         // Conteo anónimo para el observatorio: en qué municipios la gente
-        // quiere abrir un negocio. Sin municipio resuelto no hay qué contar.
-        if ($seleccionado !== null) {
+        // quiere abrir un negocio. Solo se registra cuando se elige explícitamente
+        // para evitar inflar al municipio por defecto con clics accidentales en el menú.
+        if ($seleccionado !== null && $request->filled('municipio')) {
             ConsultaGuia::registrar($seleccionado->id);
         }
 

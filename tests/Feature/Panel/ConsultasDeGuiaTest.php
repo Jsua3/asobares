@@ -4,9 +4,11 @@ namespace Tests\Feature\Panel;
 
 use App\Models\ConsultaGuia;
 use App\Models\Municipio;
+use App\Models\RequisitoApertura;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -88,6 +90,80 @@ class ConsultasDeGuiaTest extends TestCase
     {
         // Base limpia: no hay requisitos publicados, así que no hay selección.
         $this->get('/abre-tu-negocio')->assertOk();
+
+        $this->assertDatabaseCount('consultas_guia', 0);
+    }
+
+    /** Sin parámetro municipio, aunque se cargue el por defecto, no registra. */
+    public function test_no_registra_nada_si_se_visita_sin_parametro_municipio(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        // Hay municipios con guía, pero no pasamos ?municipio=
+        $this->get('/abre-tu-negocio')->assertOk();
+
+        // No debe registrar: la visita a /abre-tu-negocio sin parámetro
+        // no es una elección deliberada del usuario.
+        $this->assertDatabaseCount('consultas_guia', 0);
+    }
+
+    /** Descargar un formato válido registra con requisito_apertura_id. */
+    public function test_descargar_formato_valido_registra_la_consulta(): void
+    {
+        Storage::fake('local');
+
+        $municipio = Municipio::factory()->create();
+        $requisito = RequisitoApertura::factory()
+            ->for($municipio)
+            ->publicado()
+            ->create([
+                'adjunto' => 'formatos/mi-formato.pdf',
+                'adjunto_nombre' => 'Formato Oficial',
+            ]);
+
+        // Crea el archivo en el disco falso.
+        Storage::disk('local')->put('formatos/mi-formato.pdf', 'PDF content');
+
+        $this->get('/abre-tu-negocio/formato/'.$requisito->id)->assertOk();
+
+        $this->assertDatabaseHas('consultas_guia', [
+            'municipio_id' => $municipio->id,
+            'requisito_apertura_id' => $requisito->id,
+        ]);
+    }
+
+    /** Si el requisito no tiene adjunto, no registra nada: es un 404 limpio. */
+    public function test_intentar_descargar_sin_adjunto_no_registra(): void
+    {
+        $municipio = Municipio::factory()->create();
+        $requisito = RequisitoApertura::factory()
+            ->for($municipio)
+            ->publicado()
+            ->create(['adjunto' => null]);
+
+        $this->get('/abre-tu-negocio/formato/'.$requisito->id)
+            ->assertNotFound();
+
+        $this->assertDatabaseCount('consultas_guia', 0);
+    }
+
+    /** Si el requisito no está publicado, no registra nada: es un 404 limpio. */
+    public function test_intentar_descargar_no_publicado_no_registra(): void
+    {
+        Storage::fake('local');
+
+        $municipio = Municipio::factory()->create();
+        $requisito = RequisitoApertura::factory()
+            ->for($municipio)
+            ->create([
+                'adjunto' => 'formatos/privado.pdf',
+                'estado' => 'borrador', // No publicado
+            ]);
+
+        Storage::disk('local')->put('formatos/privado.pdf', 'PDF content');
+
+        $this->get('/abre-tu-negocio/formato/'.$requisito->id)
+            ->assertNotFound();
 
         $this->assertDatabaseCount('consultas_guia', 0);
     }
