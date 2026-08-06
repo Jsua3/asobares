@@ -76,14 +76,26 @@ new MutationObserver(() => {
     document.head.appendChild(mordaza)
     void document.documentElement.offsetHeight
 
-    graficas.forEach((grafica) => grafica.update('none'))
-
-    // Doble respaldo, igual que en el sitio público: sin el temporizador la
-    // mordaza se quedaría puesta si el cambio llega con la pestaña en
-    // segundo plano (el caso real es el evento `storage` entre /admin y el
-    // sitio) y el navegador no ejecuta requestAnimationFrame.
+    /*
+     * La retirada se programa ANTES de tocar las gráficas, y no depende de
+     * que `update()` salga bien: a diferencia del sitio público —donde entre
+     * el `appendChild` y la programación del retiro solo hay un toggle de
+     * clase, que no puede lanzar—, aquí en medio hay que repintar cada
+     * gráfica, y una ya destruida por un remontaje de Livewire que nunca
+     * pasó por `stop()` puede lanzar. Si la programación fuera después del
+     * `forEach`, esa excepción la cortaría antes de llegar, y la mordaza se
+     * quedaría pegada con `transition:none !important` en todo el panel
+     * hasta el siguiente cambio de tema que sí saliera bien.
+     *
+     * Doble respaldo, igual que en el sitio público: sin el temporizador la
+     * mordaza se quedaría puesta si el cambio llega con la pestaña en
+     * segundo plano (el caso real es el evento `storage` entre /admin y el
+     * sitio) y el navegador no ejecuta requestAnimationFrame.
+     */
     requestAnimationFrame(() => requestAnimationFrame(quitarMordaza))
     setTimeout(quitarMordaza, 250)
+
+    graficas.forEach((grafica) => grafica.update('none'))
 }).observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['class'],

@@ -161,6 +161,34 @@ class GraficasDelPanelTest extends TestCase
     }
 
     /**
+     * La retirada de la mordaza no puede depender de que `grafica.update()`
+     * salga bien: si una gráfica ya destruida por un remontaje de Livewire
+     * que nunca pasó por `stop()` lanza al repintarse, una excepción a mitad
+     * del `forEach` cortaría la ejecución antes de programar el
+     * `requestAnimationFrame`/`setTimeout` que la quita, y el
+     * `transition:none !important` se quedaría pegado en todo el panel
+     * hasta el siguiente cambio de tema que sí saliera bien. Se afirma sobre
+     * la POSICIÓN de las dos líneas en el archivo, no solo su presencia:
+     * las dos ya existían en la versión con el bug, lo que cambió fue el
+     * orden.
+     */
+    public function test_la_retirada_de_la_mordaza_no_depende_de_que_las_graficas_se_repinten(): void
+    {
+        $js = File::get(resource_path('js/panel-graficas.js'));
+
+        $posicionRetirada = strpos($js, 'requestAnimationFrame(() => requestAnimationFrame(quitarMordaza))');
+        $posicionRepintado = strpos($js, "graficas.forEach((grafica) => grafica.update('none'))");
+
+        $this->assertNotFalse($posicionRetirada, 'No se encontro la programacion de la retirada de la mordaza.');
+        $this->assertNotFalse($posicionRepintado, 'No se encontro el repintado de las graficas.');
+        $this->assertLessThan(
+            $posicionRepintado,
+            $posicionRetirada,
+            'La retirada de la mordaza debe programarse ANTES de repintar las graficas, no despues: si el repintado lanza, la retirada no puede quedar sin programar.'
+        );
+    }
+
+    /**
      * Los widgets no deben escribir colores de texto a mano. El relleno de
      * marca sí se admite: como relleno funciona en los dos temas.
      */
