@@ -45,13 +45,16 @@ class ConsultaGuiaSeeder extends Seeder
             }
 
             foreach (range(0, 17) as $mesesAtras) {
-                // Interés creciente: el mes más reciente pesa ~el doble que el
-                // más antiguo, que es como se comporta un sitio que va ganando
-                // tráfico en vez de nacer con su máximo.
+                // El divisor y el suelo van juntos a proposito: con `/10` y sin suelo, un
+                // peso de 6 daba round(0,64)=1 y round(1,2)=1, o sea dieciocho meses
+                // planos. El suelo de 2 garantiza que hasta el municipio mas pequeno
+                // duplique a lo largo de la serie, que es lo que la grafica tiene que
+                // poder mostrar.
                 $crecimiento = 1 + ((17 - $mesesAtras) / 17);
-                $cuantas = (int) round($peso * $crecimiento / 10);
+                $base = max($peso / 4, 2);
+                $cuantas = (int) round($base * $crecimiento);
 
-                foreach (range(1, max($cuantas, 1)) as $i) {
+                foreach (range(1, $cuantas) as $i) {
                     $fecha = now()
                         ->subMonths($mesesAtras)
                         ->startOfMonth()

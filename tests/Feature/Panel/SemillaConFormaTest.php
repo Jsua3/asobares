@@ -62,4 +62,39 @@ class SemillaConFormaTest extends TestCase
 
         $this->assertSame($antes, ConsultaGuia::count());
     }
+
+    public function test_hasta_el_municipio_mas_pequeno_muestra_crecimiento(): void
+    {
+        $masPequeno = ConsultaGuia::query()
+            ->selectRaw('municipio_id, count(*) as total')
+            ->groupBy('municipio_id')
+            ->orderBy('total')
+            ->first();
+
+        // Contar filas por mes exacto: meses 0-8 (ultimos 9) vs meses 9-17 (primeros 9).
+        $primerSemestre = 0;
+        $ultimoSemestre = 0;
+
+        foreach (range(0, 8) as $mes) {
+            $inicio = now()->subMonths($mes)->startOfMonth();
+            $fin = now()->subMonths($mes)->endOfMonth();
+            $ultimoSemestre += ConsultaGuia::where('municipio_id', $masPequeno->municipio_id)
+                ->whereBetween('created_at', [$inicio, $fin])
+                ->count();
+        }
+
+        foreach (range(9, 17) as $mes) {
+            $inicio = now()->subMonths($mes)->startOfMonth();
+            $fin = now()->subMonths($mes)->endOfMonth();
+            $primerSemestre += ConsultaGuia::where('municipio_id', $masPequeno->municipio_id)
+                ->whereBetween('created_at', [$inicio, $fin])
+                ->count();
+        }
+
+        $this->assertGreaterThan(
+            $primerSemestre,
+            $ultimoSemestre,
+            'La serie debe crecer tambien en los municipios pequenos: una linea plana es el artefacto que esta semilla existe para evitar.'
+        );
+    }
 }
