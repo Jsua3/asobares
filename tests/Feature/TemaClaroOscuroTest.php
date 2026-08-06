@@ -229,4 +229,40 @@ class TemaClaroOscuroTest extends TestCase
 
         $this->assertSame([], $hallazgos, "Quedan clases de tema cableadas:\n".implode("\n", $hallazgos));
     }
+
+    /**
+     * El panel se sumó al refactor bicromático, así que la guardia tiene que
+     * cubrirlo: sus vistas se rompen en silencio igual que las del sitio.
+     */
+    public function test_ninguna_vista_del_panel_conserva_clases_de_tema_cableadas(): void
+    {
+        $directorios = array_filter([
+            resource_path('views/components/panel'),
+            resource_path('views/filament'),
+        ], File::isDirectory(...));
+
+        $this->assertNotEmpty($directorios, 'No hay vistas de panel que vigilar.');
+
+        $hallazgos = [];
+
+        foreach ($directorios as $directorio) {
+            foreach (File::allFiles($directorio) as $archivo) {
+                $contenido = $archivo->getContents();
+                $ruta = str_replace(base_path().DIRECTORY_SEPARATOR, '', $archivo->getPathname());
+
+                foreach (self::clasesProhibidas() as $patron => $motivo) {
+                    if (preg_match_all($patron, $contenido, $coincidencias) > 0) {
+                        $hallazgos[] = sprintf(
+                            '%s → %s (%s)',
+                            $ruta,
+                            implode(', ', array_unique($coincidencias[0])),
+                            $motivo
+                        );
+                    }
+                }
+            }
+        }
+
+        $this->assertSame([], $hallazgos, "Quedan clases de tema cableadas en el panel:\n".implode("\n", $hallazgos));
+    }
 }
