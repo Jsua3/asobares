@@ -77,12 +77,15 @@ class ConsultasDeGuiaTest extends TestCase
             fn ($q) => $q->publicado()
         )->firstOrFail();
 
+        $antes = ConsultaGuia::where('municipio_id', $municipio->id)->count();
+
         $this->get('/abre-tu-negocio?municipio='.$municipio->slug)->assertOk();
 
-        $this->assertDatabaseHas('consultas_guia', [
-            'municipio_id' => $municipio->id,
-            'requisito_apertura_id' => null,
-        ]);
+        $this->assertSame(
+            $antes + 1,
+            ConsultaGuia::where('municipio_id', $municipio->id)->count(),
+            'Elegir municipio debe registrar exactamente una consulta.'
+        );
     }
 
     /** Sin municipio resuelto no hay nada que contar. */
@@ -99,12 +102,18 @@ class ConsultasDeGuiaTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
+        $antes = ConsultaGuia::count();
+
         // Hay municipios con guía, pero no pasamos ?municipio=
         $this->get('/abre-tu-negocio')->assertOk();
 
         // No debe registrar: la visita a /abre-tu-negocio sin parámetro
         // no es una elección deliberada del usuario.
-        $this->assertDatabaseCount('consultas_guia', 0);
+        $this->assertSame(
+            $antes,
+            ConsultaGuia::count(),
+            'Visitar sin elegir municipio no debe registrar nada.'
+        );
     }
 
     /** Descargar un formato válido registra con requisito_apertura_id. */
