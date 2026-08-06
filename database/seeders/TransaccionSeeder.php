@@ -74,6 +74,20 @@ class TransaccionSeeder extends Seeder
     ): Transaccion {
         $cuando = $fecha ?? now()->subDays(random_int(1, 25));
 
+        // Mismo principio que en sembrarHistorialDeMensualidades(): un
+        // establecimiento no paga antes de afiliarse. Hace falta el mismo
+        // resguardo aquí porque las dos mensualidades sueltas de run() («al
+        // día» y la «pendiente» de mora) no pasan `$fecha` explícita: sin
+        // esto, la fecha aleatoria por defecto puede caer, por azar, antes
+        // de la afiliación del asociado al que le tocó.
+        if ($fecha === null && isset($extra['asociado_id'])) {
+            $afiliacion = Asociado::find($extra['asociado_id'])?->fecha_afiliacion;
+
+            if ($afiliacion !== null) {
+                $cuando = $cuando->max($afiliacion);
+            }
+        }
+
         return Transaccion::create([
             'referencia' => Transaccion::generarReferencia(),
             'concepto' => $concepto,
@@ -127,6 +141,11 @@ class TransaccionSeeder extends Seeder
         // «debes 3 meses» junto a un pago del mes pasado.
         $morasPorAsociado = Cartera::whereIn('asociado_id', $asociados)->pluck('meses_mora', 'asociado_id')->all();
 
+        // Igual de una sola vez: un establecimiento no paga mensualidades
+        // antes de afiliarse. Sin este filtro la semilla le pone pagos de
+        // hace catorce meses a alguien que se afilió la semana pasada.
+        $afiliacionPorAsociado = Asociado::whereIn('id', $asociados)->pluck('fecha_afiliacion', 'id');
+
         $cursor = 0;
 
         // De 18 (el mes más antiguo) a 0 (el mes en curso, todavía abierto).
@@ -154,27 +173,55 @@ class TransaccionSeeder extends Seeder
             $rotados = array_merge(array_slice($asociados, $inicio), array_slice($asociados, 0, $inicio));
 
             // Quien está en mora no pagó ni el mes en curso ni los meses de
-            // su ventana de mora (coherencia con CarteraSeeder).
+            // su ventana de mora (coherencia con CarteraSeeder), y quien
+            // todavía no estaba afiliado en este mes tampoco pudo pagarlo.
             $candidatos = array_values(array_filter(
                 $rotados,
-                function (int $asociadoId) use ($morasPorAsociado, $mesesAtras): bool {
+                function (int $asociadoId) use ($morasPorAsociado, $mesesAtras, $afiliacionPorAsociado, $mes): bool {
                     $moras = $morasPorAsociado[$asociadoId] ?? 0;
 
-                    return ! ($moras > 0 && $mesesAtras <= $moras);
+                    if ($moras > 0 && $mesesAtras <= $moras) {
+                        return false;
+                    }
+
+                    $afiliacion = $afiliacionPorAsociado[$asociadoId] ?? null;
+
+                    return $afiliacion === null || $afiliacion->copy()->startOfMonth()->lte($mes);
                 }
             ));
 
             $pagadores = array_slice($candidatos, 0, min($cuantos, count($candidatos)));
 
+            // Quien se afilió justo este mes paga sin excepción: es su
+            // primera mensualidad. Sin esta garantía, el recorte por
+            // `$cuantos` puede dejarlo fuera de las pocas ventanas donde era
+            // candidato válido y no aparecer pagando en los dieciocho meses.
+            $debutantes = array_filter(
+                $candidatos,
+                fn (int $asociadoId): bool => ($afiliacionPorAsociado[$asociadoId] ?? null)
+                    ?->copy()->startOfMonth()->eq($mes) === true
+            );
+
+            $pagadores = array_values(array_unique(array_merge($pagadores, $debutantes)));
+
             foreach ($pagadores as $asociadoId) {
+                $afiliacion = $afiliacionPorAsociado[$asociadoId] ?? null;
+
+                // No basta con acertar el mes: si este ES el mes en que el
+                // establecimiento se afilió, el pago tampoco puede caer
+                // antes del día exacto de la afiliación.
+                $diaMinimo = ($afiliacion !== null && $afiliacion->copy()->startOfMonth()->eq($mes))
+                    ? $afiliacion->day - 1
+                    : 0;
+
                 $fecha = $esMesEnCurso
                     // Nunca en el futuro: acotado a los días ya transcurridos
                     // del mes y recortado contra «ahora» como red de seguridad.
                     ? $mes->copy()
-                        ->addDays(random_int(0, max(0, now()->day - 1)))
+                        ->addDays(random_int($diaMinimo, max($diaMinimo, now()->day - 1)))
                         ->addHours(random_int(0, 23))
                         ->min(now())
-                    : $mes->copy()->addDays(random_int(0, 26))->addHours(random_int(8, 20));
+                    : $mes->copy()->addDays(random_int($diaMinimo, max($diaMinimo, 26)))->addHours(random_int(8, 20));
 
                 $this->crear(
                     ConceptoTransaccion::Mensualidad,

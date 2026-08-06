@@ -210,4 +210,52 @@ class SemillaConFormaTest extends TestCase
             'La semilla debe dejar al menos un asociado afiliado en el último mes.'
         );
     }
+
+    /**
+     * Un establecimiento no paga mensualidades antes de afiliarse. Es la
+     * prueba que habría atrapado el caso real: `la-cava-del-yipao` afiliado
+     * el 2026-07-30 con pagos desde 2025-05-18, catorce meses antes de
+     * existir como afiliado.
+     */
+    public function test_ningun_asociado_tiene_pagos_aprobados_antes_de_su_afiliacion(): void
+    {
+        $asociados = Asociado::whereNotNull('fecha_afiliacion')->get(['id', 'fecha_afiliacion']);
+
+        foreach ($asociados as $asociado) {
+            $pagoMasAntiguo = Transaccion::query()
+                ->where('estado', EstadoTransaccion::Aprobada)
+                ->where('asociado_id', $asociado->id)
+                ->min('created_at');
+
+            if ($pagoMasAntiguo === null) {
+                continue;
+            }
+
+            $this->assertGreaterThanOrEqual(
+                $asociado->fecha_afiliacion->startOfDay(),
+                Carbon::parse($pagoMasAntiguo),
+                "El asociado {$asociado->id} tiene un pago aprobado anterior a su fecha de afiliación."
+            );
+        }
+    }
+
+    /**
+     * `bruma-gastrobar` es `CarteraSeeder::ASOCIADO_DEMO`, el establecimiento
+     * de `/mi-cuenta` en el guion de la demo. Que alguien afiliado hace nueve
+     * días deba tres meses de mora es la primera pantalla que cualquiera
+     * cuestionaría al abrir la demo.
+     */
+    public function test_ningun_asociado_en_mora_se_afilio_en_los_ultimos_treinta_dias(): void
+    {
+        $enMoraYReciente = Cartera::query()
+            ->where('meses_mora', '>', 0)
+            ->whereHas('asociado', fn ($q) => $q->where('fecha_afiliacion', '>=', now()->subDays(30)->toDateString()))
+            ->count();
+
+        $this->assertSame(
+            0,
+            $enMoraYReciente,
+            'Quien acaba de afiliarse no puede deber meses de mensualidad.'
+        );
+    }
 }

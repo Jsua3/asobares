@@ -30,10 +30,16 @@ class CarteraSeeder extends Seeder
         'bar-luces-de-quimbaya' => 1,
     ];
 
+    /** Meses de mora fijos de este slug, o 0 si está al día. */
+    public static function mesesDeMora(string $slug): int
+    {
+        return self::EN_MORA[$slug] ?? 0;
+    }
+
     public function run(): void
     {
         foreach (Asociado::all() as $asociado) {
-            $mesesMora = self::EN_MORA[$asociado->slug] ?? 0;
+            $mesesMora = self::mesesDeMora($asociado->slug);
 
             Cartera::updateOrCreate(
                 ['asociado_id' => $asociado->id],

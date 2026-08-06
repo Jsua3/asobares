@@ -23,9 +23,10 @@ class AsociadoSeeder extends Seeder
 
         foreach ($this->establecimientos() as $indice => $datos) {
             $coordenadas = $this->coordenadasConJitter($datos['municipio'], $indice);
+            $slug = Str::slug($datos['nombre']);
 
             $asociado = Asociado::updateOrCreate(
-                ['slug' => Str::slug($datos['nombre'])],
+                ['slug' => $slug],
                 [
                     'nombre' => $datos['nombre'],
                     'categoria_id' => $categorias[$datos['categoria']],
@@ -39,7 +40,7 @@ class AsociadoSeeder extends Seeder
                         ? 'https://maps.google.com/?q='.urlencode($datos['nombre'].' '.$datos['municipio'])
                         : null,
                     'tripadvisor_url' => $datos['perfiles'] ?? false
-                        ? 'https://www.tripadvisor.co/Restaurant_Review-'.Str::slug($datos['nombre'])
+                        ? 'https://www.tripadvisor.co/Restaurant_Review-'.$slug
                         : null,
                     'horario' => $datos['horario'],
                     'lat' => $coordenadas['lat'],
@@ -50,9 +51,9 @@ class AsociadoSeeder extends Seeder
 
                     // Campos internos: existen en el panel, nunca en el sitio.
                     'representante' => $datos['representante'],
-                    'correo_interno' => Str::slug($datos['nombre']).'@ejemplo.test',
+                    'correo_interno' => $slug.'@ejemplo.test',
                     'telefono_interno' => $datos['whatsapp'],
-                    'fecha_afiliacion' => $this->fechaDeAfiliacion($indice),
+                    'fecha_afiliacion' => $this->fechaDeAfiliacion($slug),
                     'notas_internas' => $datos['nota_interna'] ?? 'Sin novedades.',
                 ]
             );
@@ -71,20 +72,47 @@ class AsociadoSeeder extends Seeder
     }
 
     /**
+     * Tres establecimientos con afiliación reciente (últimos treinta días).
+     *
+     * Se eligen por slug, no por posición en `establecimientos()`: un índice
+     * se desalinea en silencio si alguien reordena esa lista, un slug no.
+     *
+     * Quien acaba de afiliarse no puede deber meses de mensualidad, así que
+     * las altas recientes se eligen fuera del asociado demo
+     * (`CarteraSeeder::ASOCIADO_DEMO`) y de los morosos
+     * (`CarteraSeeder::EN_MORA`): un establecimiento afiliado hace nueve días
+     * al que se le reclaman tres meses de mora es la primera pantalla que
+     * cualquiera cuestionaría en la demo.
+     *
+     * @var list<string>
+     */
+    private const array RECIEN_AFILIADOS = ['la-cava-del-yipao', 'cafe-cordillera', 'terraza-bolivar'];
+
+    /**
      * Fecha de negocio de la afiliación, no la de inserción de la fila.
      *
-     * Los tres primeros establecimientos se afiliaron dentro de los últimos
-     * treinta días: el prompt maestro dice que el gremio «crece mes a mes»,
-     * y una semilla donde nadie se afilió nunca en el último mes hace que la
+     * Los de `RECIEN_AFILIADOS` se afiliaron dentro de los últimos treinta
+     * días: el prompt maestro dice que el gremio «crece mes a mes», y una
+     * semilla donde nadie se afilió nunca en el último mes hace que la
      * tarjeta «altas este mes» del tablero muestre siempre cero, un
      * artefacto tan falso como el que corrige (ver `ResumenDelGremio`). El
      * resto queda repartido entre dos y veintidós meses atrás, como antes.
+     *
+     * Para los morosos (`CarteraSeeder::EN_MORA`) el sorteo nunca puede caer
+     * por debajo de su propia mora fija: nadie puede deber más meses de
+     * mensualidad de los que lleva afiliado. Sin este piso, `bruma-gastrobar`
+     * —el asociado del guion del demo, con sus «3 meses de mora» impresos en
+     * la consola de `db:seed`— podría salir afiliado hace 2 meses debiendo 3.
      */
-    private function fechaDeAfiliacion(int $indice): string
+    private function fechaDeAfiliacion(string $slug): string
     {
-        return $indice < 3
-            ? now()->subDays(random_int(1, 25))->toDateString()
-            : now()->subMonths(random_int(2, 22))->toDateString();
+        if (in_array($slug, self::RECIEN_AFILIADOS, true)) {
+            return now()->subDays(random_int(1, 25))->toDateString();
+        }
+
+        $minimoMeses = max(2, CarteraSeeder::mesesDeMora($slug) + 1);
+
+        return now()->subMonths(random_int($minimoMeses, 22))->toDateString();
     }
 
     /**
