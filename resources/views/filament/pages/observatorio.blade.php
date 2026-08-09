@@ -43,13 +43,4 @@
             :url="route('filament.admin.resources.cartera.index')"
         />
     </div>
-
-    {{--
-        Rejilla de widgets del observatorio: hoy vacía porque las seis
-        gráficas (OBS T5 y OBS T6) todavía no existen. `getFooterWidgets()`
-        ya la deja lista — se oculta sola mientras no haya widgets que
-        registrar, y basta con sobrescribirla para que las próximas tareas
-        aparezcan aquí sin tocar esta vista.
-    --}}
-    {{ $this->footerWidgets }}
 </x-filament-panels::page>

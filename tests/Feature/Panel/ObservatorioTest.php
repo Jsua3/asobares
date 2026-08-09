@@ -94,4 +94,69 @@ class ObservatorioTest extends TestCase
             $this->assertStringContainsString("'grid'", $contenido, $archivo->getFilename().' debe declarar grid.');
         }
     }
+
+    /**
+     * La prueba de arriba solo mira si las cadenas `'ticks'` y `'grid'`
+     * aparecen en algún lugar del archivo, no que cada eje declarado las
+     * tenga las dos. Un eje al que le falte una de las dos sigue en el gris
+     * de fábrica y esta prueba pasaba igual. Se inspecciona la estructura
+     * real que devuelve `getOptions()`, eje por eje.
+     */
+    public function test_cada_eje_de_los_widgets_del_observatorio_declara_ticks_y_grid(): void
+    {
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        foreach ([
+            PresenciaPorMunicipio::class,
+            ComposicionDelSector::class,
+            SaludFinanciera::class,
+        ] as $widget) {
+            $instancia = Livewire::test($widget)->instance();
+
+            $metodo = new \ReflectionMethod($widget, 'getOptions');
+            $opciones = $metodo->invoke($instancia);
+
+            $ejes = $opciones['scales'] ?? [];
+            $this->assertNotEmpty($ejes, "{$widget} no declara ninguna escala en getOptions().");
+
+            foreach ($ejes as $nombreEje => $eje) {
+                $this->assertArrayHasKey(
+                    'ticks',
+                    $eje,
+                    "{$widget}: el eje \"{$nombreEje}\" no declara ticks, así que el plugin de tema no tiene dónde escribir."
+                );
+                $this->assertArrayHasKey(
+                    'grid',
+                    $eje,
+                    "{$widget}: el eje \"{$nombreEje}\" no declara grid, así que el plugin de tema no tiene dónde escribir."
+                );
+            }
+        }
+    }
+
+    /**
+     * `<x-filament-panels::page>` ya invoca `{{ $this->footerWidgets }}` por
+     * dentro (vendor/filament/filament/resources/views/components/page/index.blade.php).
+     * Si la vista de la página lo vuelve a invocar a mano, cada widget monta
+     * dos instancias Livewire: el doble de consultas, y un directivo vería
+     * cada gráfica repetida.
+     */
+    public function test_cada_widget_del_observatorio_se_monta_una_sola_vez(): void
+    {
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        $html = $this->get(Observatorio::getUrl())->getContent();
+
+        foreach ([
+            'app.filament.widgets.observatorio.presencia-por-municipio',
+            'app.filament.widgets.observatorio.composicion-del-sector',
+            'app.filament.widgets.observatorio.salud-financiera',
+        ] as $nombreLivewire) {
+            $this->assertSame(
+                1,
+                substr_count($html, $nombreLivewire),
+                "{$nombreLivewire} aparece ".substr_count($html, $nombreLivewire).' veces en el HTML: se está montando más de una instancia.'
+            );
+        }
+    }
 }
