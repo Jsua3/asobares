@@ -33,6 +33,23 @@ class TemaClaroOscuroTest extends TestCase
         return $usuario->fresh();
     }
 
+    /**
+     * `app.css` declara `--font-sans: 'Poppins', ...` pero nada enlazaba el
+     *
+     * @font-face compilado por `bunny('Poppins', ...)` en vite.config.js:
+     * medido en navegador, Poppins resolvía por fallback y no se
+     * renderizaba (el mismo defecto que tenía el panel, ver
+     * TemaDelPanelTest). El layout público debe traer `Vite::fonts()`.
+     */
+    public function test_el_sitio_publico_enlaza_la_hoja_de_fuentes_real(): void
+    {
+        $respuesta = $this->get('/contacto');
+
+        $respuesta->assertOk()
+            ->assertSee('@font-face', false)
+            ->assertSee('font-family: "Poppins"', false);
+    }
+
     // --- El tema se aplica antes del primer pintado ---
 
     public function test_el_layout_resuelve_el_tema_en_el_head_antes_de_pintar(): void

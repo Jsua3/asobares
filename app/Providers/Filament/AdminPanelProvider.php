@@ -9,6 +9,7 @@ use App\Filament\Widgets\ResumenDelGremio;
 use App\Filament\Widgets\UltimasTransacciones;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Auth\MultiFactor\Email\EmailAuthentication;
+use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -18,6 +19,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Assets\Js;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -25,6 +27,7 @@ use Illuminate\Foundation\ViteException;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Vite;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -42,6 +45,23 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(asset('img/logo-asobares.svg'))
             ->brandLogoHeight('2rem')
             ->viteTheme('resources/css/filament/admin/theme.css')
+            // Sin esto Filament ignora el `--font-family: 'Poppins'` de
+            // theme.css: su propio layout base siempre pinta un `<style>`
+            // con `--font-family` DESPUÉS del tema, y sin `font()` esa
+            // variable vale 'Inter Variable' a secas. `LocalFontProvider`
+            // sin URL no agrega ningún <link>: el @font-face de verdad lo
+            // sirve `Vite::fonts()` desde el render hook de abajo, así que
+            // aquí solo hace falta corregir el nombre de la familia.
+            ->font('Poppins', provider: LocalFontProvider::class)
+            // `laravel-vite-plugin` con `fonts: [bunny('Poppins', ...)]`
+            // compila un `fonts-manifest.json` con los doce @font-face, pero
+            // nada lo enlazaba: por eso Poppins nunca llegaba a resolver, con
+            // o sin este `font()`. `Vite::fonts()` (Illuminate\Foundation\Vite)
+            // lee ese manifiesto y devuelve los preload + el <style> real.
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn (): HtmlString => Vite::fonts(),
+            )
             ->darkModeBrandLogo(asset('img/logo-asobares-blanco.png'))
             // Pub Red, exacto según el manual de marca de Asobares Colombia.
             ->colors([

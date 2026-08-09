@@ -147,6 +147,14 @@
     @stack('jsonld')
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{--
+        `app.css` declara `--font-sans: 'Poppins', ...` pero nadie enlazaba el
+        @font-face compilado por `bunny('Poppins', ...)` en vite.config.js:
+        sin esto Poppins resuelve por fallback y nunca se renderiza de
+        verdad. `Vite::fonts()` lee `fonts-manifest.json` y devuelve los
+        preload y el <style> con los doce @font-face reales.
+    --}}
+    {{ Vite::fonts() }}
     @stack('cabeza')
 </head>
 <body class="min-h-screen bg-fondo text-tinta antialiased">
