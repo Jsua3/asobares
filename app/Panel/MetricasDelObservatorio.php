@@ -19,7 +19,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Las seis cifras del Observatorio del gremio.
+ * Las cifras del Observatorio del gremio: seis gráficas más un indicador.
  *
  * Cada método agrega en SQL y devuelve una {@see SerieDelObservatorio}: los
  * datos y el tamaño de muestra que los sostiene. Nada de traer modelos a
@@ -31,6 +31,10 @@ use Illuminate\Support\Facades\DB;
  * gremio. `Aspirante` y `Postulacion` no tienen ese estado editorial —son
  * banco de talento y candidaturas, no contenido del sitio— así que se
  * cuentan completos.
+ *
+ * `tasaDeMoraActual()` no es una de las seis gráficas: es un indicador aparte
+ * que alimenta una tarjeta KPI, no una serie temporal. Ver su docblock para
+ * el porqué no vive dentro de `saludFinanciera()`.
  */
 class MetricasDelObservatorio
 {
@@ -63,6 +67,11 @@ class MetricasDelObservatorio
     public function saludFinanciera(): SerieDelObservatorio
     {
         return $this->cache[__FUNCTION__] ??= $this->calcularSaludFinanciera();
+    }
+
+    public function tasaDeMoraActual(): SerieDelObservatorio
+    {
+        return $this->cache[__FUNCTION__] ??= $this->calcularTasaDeMoraActual();
     }
 
     public function coberturaDeProveedores(): SerieDelObservatorio
@@ -174,17 +183,12 @@ class MetricasDelObservatorio
     }
 
     /**
-     * Recaudo mensual y tasa de mora, dieciocho meses.
+     * Recaudo mensual, dieciocho meses.
      *
-     * `carteras` guarda el estado actual del asociado, no su historia: no
-     * existe (todavía) una serie real de mora mes a mes, solo esta cifra de
-     * hoy. En vez de inventar una tendencia que nunca se midió, la tasa de
-     * hoy se repite como línea plana en los dieciocho puntos: sirve para
-     * compararla visualmente contra el recaudo del mismo periodo, y una
-     * línea sin pendiente es, en sí misma, la manera honesta de decir «esto
-     * es una fotografía, no una evolución». El día que se guarde un historial
-     * de mora (por ejemplo snapshots mensuales de `carteras`), este método
-     * cambia para leer de ahí.
+     * Solo el recaudo: la tasa de mora no vive aquí (ver
+     * {@see calcularTasaDeMoraActual()} para el porqué), así que esta serie
+     * es una sola cosa medida de una sola forma, con su `n` real de
+     * transacciones aprobadas del periodo.
      */
     private function calcularSaludFinanciera(): SerieDelObservatorio
     {
@@ -199,16 +203,6 @@ class MetricasDelObservatorio
             ->get();
 
         $recaudoPorMes = $filasRecaudo->pluck('total', 'mes');
-
-        $mora = Cartera::query()
-            ->selectRaw('count(*) as total, sum(case when meses_mora > 0 then 1 else 0 end) as en_mora')
-            ->first();
-
-        $totalCarteras = (int) ($mora->total ?? 0);
-        $tasaDeMora = $totalCarteras > 0
-            ? round(((int) $mora->en_mora / $totalCarteras) * 100, 1)
-            : 0.0;
-
         $meses = $this->rangoDeMeses($desde, 18);
 
         return new SerieDelObservatorio(
@@ -218,10 +212,54 @@ class MetricasDelObservatorio
                     fn (array $mes): float => (float) ($recaudoPorMes[$mes['clave']] ?? 0),
                     $meses
                 ),
-                'Tasa de mora actual (%)' => array_fill(0, count($meses), $tasaDeMora),
             ],
             n: (int) $filasRecaudo->sum(fn ($fila): int => (int) $fila->cantidad),
             unidad: 'transacciones',
+        );
+    }
+
+    /**
+     * Tasa de mora de hoy, con su propio tamaño de muestra.
+     *
+     * No es una serie temporal: `carteras` guarda el estado actual del
+     * asociado, no su historia, así que no hay dieciocho mediciones reales
+     * que graficar. Se separó de `saludFinanciera()` por dos motivos, y el
+     * segundo es el que decide:
+     *
+     * 1. Lectura visual: una recta sin pendiente junto a una curva con
+     *    pendiente, en un gráfico que un directivo mira diez segundos, no se
+     *    lee como «esto es una foto de hoy» — se lee como «la mora lleva
+     *    dieciocho meses igual». Nadie relee la leyenda de cada serie; se lee
+     *    la forma. Simular mediciones que nunca ocurrieron es dibujar una
+     *    tendencia inventada, aunque el valor sea honesto.
+     * 2. El `n` no se puede prestar: las carteras son una muestra propia y
+     *    más chica que las transacciones de `saludFinanciera()`. Si esta
+     *    cifra heredara el `n` de recaudo, una tasa de mora con muestra
+     *    insuficiente (menos de `SerieDelObservatorio::MUESTRA_MINIMA`
+     *    carteras) se rotularía «muestra suficiente» solo por viajar en la
+     *    misma serie que otra cosa que sí la tiene — justo lo que este
+     *    módulo existe para impedir.
+     *
+     * El día que exista un historial real de mora (por ejemplo, instantáneas
+     * mensuales de `carteras`), este método puede volver a ser una serie
+     * temporal de verdad, con dieciocho puntos medidos y no repetidos.
+     */
+    private function calcularTasaDeMoraActual(): SerieDelObservatorio
+    {
+        $mora = Cartera::query()
+            ->selectRaw('count(*) as total, sum(case when meses_mora > 0 then 1 else 0 end) as en_mora')
+            ->first();
+
+        $totalCarteras = (int) ($mora->total ?? 0);
+        $tasaDeMora = $totalCarteras > 0
+            ? round(((int) $mora->en_mora / $totalCarteras) * 100, 1)
+            : 0.0;
+
+        return new SerieDelObservatorio(
+            etiquetas: ['Hoy'],
+            series: ['Tasa de mora (%)' => [$tasaDeMora]],
+            n: $totalCarteras,
+            unidad: 'carteras',
         );
     }
 

@@ -4,6 +4,7 @@ namespace Tests\Feature\Panel;
 
 use App\Enums\EstadoPublicacion;
 use App\Models\Asociado;
+use App\Models\Cartera;
 use App\Models\ConsultaGuia;
 use App\Models\Municipio;
 use App\Panel\MetricasDelObservatorio;
@@ -216,5 +217,26 @@ class MetricasDelObservatorioTest extends TestCase
             $metricas->ofertaContraDemanda()->n < SerieDelObservatorio::MUESTRA_MINIMA,
             ! $metricas->ofertaContraDemanda()->hayMuestraSuficiente()
         );
+    }
+
+    /**
+     * Esto es lo que casi nos muerde: si la tasa de mora heredara el `n` de
+     * `saludFinanciera()` (cientos de transacciones), se rotularía «muestra
+     * suficiente» aunque las carteras —su propia muestra— no alcancen el
+     * umbral. `carteras` no guarda historia, así que la mora no puede vivir
+     * dentro de la serie temporal de recaudo ni prestarle su `n`.
+     */
+    public function test_la_tasa_de_mora_no_hereda_el_n_de_recaudo(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $metricas = app(MetricasDelObservatorio::class);
+
+        $salud = $metricas->saludFinanciera();
+        $mora = $metricas->tasaDeMoraActual();
+
+        $this->assertSame(Cartera::count(), $mora->n);
+        $this->assertNotSame($salud->n, $mora->n);
+        $this->assertArrayNotHasKey('Tasa de mora (%)', $salud->series);
     }
 }
