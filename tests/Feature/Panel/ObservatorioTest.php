@@ -12,8 +12,11 @@ use App\Filament\Widgets\Observatorio\OfertaContraDemanda;
 use App\Filament\Widgets\Observatorio\PresenciaPorMunicipio;
 use App\Filament\Widgets\Observatorio\SaludFinanciera;
 use App\Models\Asociado;
+use App\Models\Aspirante;
 use App\Models\User;
 use App\Models\Vacante;
+use App\Panel\MetricasDelObservatorio;
+use App\Panel\SerieDelObservatorio;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
@@ -230,6 +233,79 @@ class ObservatorioTest extends TestCase
         $tema = File::get(resource_path('css/filament/admin/theme.css'));
 
         $this->assertStringContainsString('@media print', $tema);
+    }
+
+    /**
+     * `test_el_informe_lleva_marca_fecha_y_el_n_de_cada_serie` solo mira si
+     * la palabra «muestra» aparece en algún lugar de la página, y esa
+     * palabra vive también en el título fijo «Descargo sobre el tamaño de
+     * muestra», que sale siempre, tenga los datos que tenga el informe. Si
+     * alguien borra el aviso por serie (el párrafo junto a cada tabla) esa
+     * prueba sigue en verde, y es justo ese aviso el que impide que un
+     * funcionario confunda `n = 10` con una cifra sólida.
+     *
+     * Esta prueba afirma la estructura, no la presencia de una palabra: la
+     * serie sin muestra suficiente lleva el aviso pegado a su propia
+     * sección, y la serie con muestra suficiente no lo lleva en la suya.
+     * Para eso hace falta un caso de cada tipo en el mismo render:
+     * `coberturaDeProveedores()` ya no alcanza con la semilla por defecto
+     * (ver el docblock de `CoberturaDeProveedores`, n = 10), y se empuja
+     * `ofertaContraDemanda()` por encima del umbral con aspirantes reales de
+     * una sola categoría — mismo mecanismo que
+     * `test_la_misma_visualizacion_dibuja_en_cuanto_hay_muestra`.
+     */
+    public function test_el_aviso_de_muestra_insuficiente_va_pegado_a_su_serie_y_no_a_la_que_si_alcanza(): void
+    {
+        $metricas = app(MetricasDelObservatorio::class);
+
+        // Precondición explícita: si el seeder cambia y la cobertura de
+        // proveedores llega a 30, esta prueba tiene que avisarlo en vez de
+        // volverse un falso positivo silencioso.
+        $this->assertLessThan(
+            SerieDelObservatorio::MUESTRA_MINIMA,
+            $metricas->coberturaDeProveedores()->n,
+            'Esta prueba necesita que la cobertura de proveedores no alcance muestra con la semilla por defecto.'
+        );
+
+        Aspirante::factory()->count(35)->create(['categoria_cargo' => CargoDelSector::Barra]);
+
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        $html = $this->get(InformeDelObservatorio::getUrl())
+            ->assertOk()
+            ->getContent();
+
+        $avisoPorSerie = 'todavía no alcanza muestra suficiente';
+
+        // «Cobertura de proveedores» es la serie justo antes de «Demanda
+        // laboral por área»: ese tramo es su sección completa.
+        $seccionSinMuestra = $this->extraerSeccion($html, 'Cobertura de proveedores', 'Demanda laboral por área');
+        $this->assertStringContainsString(
+            $avisoPorSerie,
+            $seccionSinMuestra,
+            'La sección de "Cobertura de proveedores" (sin muestra suficiente) debería llevar el aviso pegado a su tabla.'
+        );
+
+        // «Oferta contra demanda» es la última serie antes del descargo: su
+        // sección va desde su título hasta ese bloque.
+        $seccionConMuestra = $this->extraerSeccion($html, 'Oferta contra demanda', 'Descargo sobre el tamaño de muestra');
+        $this->assertStringNotContainsString(
+            $avisoPorSerie,
+            $seccionConMuestra,
+            'La sección de "Oferta contra demanda" ya alcanza muestra suficiente y no debería llevar el aviso.'
+        );
+    }
+
+    /** Recorta el HTML entre dos marcadores de texto, ambos obligatorios. */
+    private function extraerSeccion(string $html, string $desde, string $hasta): string
+    {
+        $inicio = strpos($html, $desde);
+        $this->assertNotFalse($inicio, "No se encontró \"{$desde}\" en el HTML.");
+
+        $fin = strpos($html, $hasta, $inicio);
+        $this->assertNotFalse($fin, "No se encontró \"{$hasta}\" después de \"{$desde}\".");
+
+        return substr($html, $inicio, $fin - $inicio);
     }
 
     /**
