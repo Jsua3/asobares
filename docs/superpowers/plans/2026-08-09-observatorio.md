@@ -675,7 +675,9 @@ La página expone un método `metricas()` memoizado y controla el acceso con **e
     }
 ```
 
-**Las dos partes son necesarias.** `canAccess()` por sí solo gobierna la navegación; el `abort_unless` del `mount()` es lo que produce el 403 que afirma la prueba. Sin él, la frontera negativa no pasaría.
+**⚠️ Corrección del 9 ago 2026, verificada por mutación.** El plan afirmaba antes que sin el `abort_unless` la frontera negativa no pasaría. **Es falso.** `Filament\Pages\Page` usa el trait `Concerns\CanAuthorizeAccess`, que define los hooks `mountCanAuthorizeAccess()` y `hydrateCanAuthorizeAccess()` —cada uno con su propio `abort_unless(static::canAccess(), 403)`— y Livewire los invoca automáticamente además del `mount()` de la clase. Comentar el `abort_unless` explícito deja las 15 pruebas en verde.
+
+Así que el guardián real es el mecanismo de Filament, y el `abort_unless` de la clase es **defensa en profundidad invisible a mutación**: no lo cubre ninguna prueba y no puede cubrirlo ninguna mientras el trait exista. **Se conserva a propósito** —sobrevive a un cambio de internals de Filament— pero el comentario tiene que decir eso, no fingir que es el que cierra la puerta.
 
 La vista `resources/views/filament/pages/observatorio.blade.php` rinde una banda de cuatro `<x-panel.kpi>` con las cifras cabecera del gremio —elígelas de entre lo que el servicio ya calcula, y **pásales su `n`**— y debajo la rejilla de widgets.
 
