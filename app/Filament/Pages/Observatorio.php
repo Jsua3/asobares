@@ -2,9 +2,13 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\Observatorio\ComposicionDelSector;
+use App\Filament\Widgets\Observatorio\PresenciaPorMunicipio;
+use App\Filament\Widgets\Observatorio\SaludFinanciera;
 use App\Panel\MetricasDelObservatorio;
 use BackedEnum;
 use Filament\Pages\Page;
+use Filament\Widgets\Widget;
 use UnitEnum;
 
 /**
@@ -57,6 +61,24 @@ class Observatorio extends Page
     public function mount(): void
     {
         abort_unless(self::canAccess(), 403);
+    }
+
+    /**
+     * Las tres gráficas que sí tienen datos que sostienen lo que dibujan
+     * (OBS T5). Las tres flacas con su estado vacío llegan en OBS T6, a esta
+     * misma lista. El mecanismo es `getFooterWidgets()` y no
+     * `<x-filament-widgets::widgets>`: ese componente está `@deprecated` en
+     * `vendor/filament/`, y la vista ya invoca `{{ $this->footerWidgets }}`.
+     *
+     * @return array<class-string<Widget>>
+     */
+    protected function getFooterWidgets(): array
+    {
+        return [
+            PresenciaPorMunicipio::class,
+            ComposicionDelSector::class,
+            SaludFinanciera::class,
+        ];
     }
 
     /**
