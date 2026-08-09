@@ -176,4 +176,20 @@ class SitioPublicoTest extends TestCase
             ->assertNotFound()
             ->assertSee('ASOBARES');
     }
+
+    /**
+     * `/abre-tu-negocio` inserta una fila en `consultas_guia` por cada visita
+     * con `?municipio=`: sin límite, un bucle sobre esa cadena envenena la
+     * cifra que el observatorio le enseña a una alcaldía. El límite es 30 por
+     * minuto (ver el porqué en `routes/web.php`), así que la petición 31
+     * dentro del mismo minuto debe rebotar con 429.
+     */
+    public function test_la_guia_normativa_tiene_limite_de_peticiones(): void
+    {
+        for ($i = 0; $i < 30; $i++) {
+            $this->get('/abre-tu-negocio')->assertSuccessful();
+        }
+
+        $this->get('/abre-tu-negocio')->assertStatus(429);
+    }
 }

@@ -59,7 +59,15 @@ Route::get('/directorio', [DirectorioController::class, 'index'])->name('directo
 Route::get('/directorio/{asociado:slug}', [DirectorioController::class, 'show'])->name('directorio.show');
 
 // Guía normativa: el producto insignia.
-Route::get('/abre-tu-negocio', [GuiaController::class, 'index'])->name('guia.index');
+// Es lectura, no un formulario, y cada visita con ?municipio= inserta una fila
+// para el observatorio: sin límite, un bucle sobre los 12 municipios del
+// Quindío envenena esa cifra. 6,1 —el límite de los formularios de escritura—
+// cortaría a la mitad a alguien comparando municipios de verdad; 30,1 iguala
+// el límite que ya usan las otras rutas de lectura del sitio (retorno y
+// estado de pago) y sigue muy lejos de permitir un bucle serio.
+Route::get('/abre-tu-negocio', [GuiaController::class, 'index'])
+    ->middleware('throttle:30,1')
+    ->name('guia.index');
 Route::get('/abre-tu-negocio/formato/{requisito}', [GuiaController::class, 'descargarFormato'])->name('guia.formato');
 
 // Bolsa de empleo.
