@@ -9,11 +9,12 @@
 ])
 
 @php
-    // Treinta es la regla de oro convencional: por debajo de esa muestra una
-    // cifra no sostiene una afirmación. Se rotula para no presentar ruido
-    // como tendencia — con 60 asociados, casi todas las series del gremio
-    // caen aquí en 2026, y la interfaz tiene que decirlo.
-    $muestraChica = $n !== null && $n < 30;
+    // El umbral se comparte con el observatorio: si divergieran, la misma
+    // cifra sería «muestra pequeña» en una tarjeta y suficiente en la
+    // gráfica de al lado. Se rotula para no presentar ruido como tendencia
+    // — con 60 asociados, casi todas las series del gremio caen aquí en
+    // 2026, y la interfaz tiene que decirlo.
+    $muestraChica = $n !== null && $n < \App\Panel\SerieDelObservatorio::MUESTRA_MINIMA;
     $sube = $delta !== null && $delta >= 0;
     $deltaTexto = $delta === null
         ? null
