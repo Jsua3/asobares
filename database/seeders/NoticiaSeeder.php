@@ -20,7 +20,7 @@ class NoticiaSeeder extends Seeder
         foreach ($this->noticias() as $noticia) {
             $noticia['slug'] = Str::slug($noticia['titulo']);
             $noticia['imagen'] = $imagenes->generar("noticia-{$noticia['titulo']}", 'noticias', 1200, 675);
-            $noticia['estado'] = EstadoPublicacion::Publicado;
+            $noticia['estado'] ??= EstadoPublicacion::Publicado;
 
             Noticia::updateOrCreate(['slug' => $noticia['slug']], $noticia);
         }
@@ -71,6 +71,18 @@ class NoticiaSeeder extends Seeder
                 'extracto' => 'Capacitación gratuita con la Secretaría de Salud, pensada para las cocinas pequeñas de bares y gastrobares.',
                 'contenido' => '<p>El capítulo abrió inscripciones para la certificación en manipulación de alimentos, dictada junto con la Secretaría de Salud y pensada específicamente para las cocinas de bares y gastrobares, no para restaurantes grandes.</p><p>El contenido cubre almacenamiento en frío, cadena de temperatura, control de plagas y —lo que más preocupa a los dueños— <strong>el papeleo exacto que revisa el inspector cuando llega sin avisar</strong>.</p><p>La capacitación es gratuita y entrega certificado individual. Los cupos son limitados y se asignan por orden de inscripción.</p>',
                 'publicado_at' => now()->subDays(8),
+            ],
+            [
+                'titulo' => 'Borrador: balance del primer trimestre del observatorio',
+                'categoria' => CategoriaNoticia::Observatorio,
+                'extracto' => 'Todavía en redacción por la secretaría. Queda pendiente de aprobación de la dirección.',
+                'contenido' => '<p>Borrador en revisión. Falta contrastar las cifras del primer trimestre con la Cámara de Comercio antes de publicar.</p>',
+                // Sin publicado_at: no se ha publicado. Pendiente y con
+                // antigüedad propia para que la cola de pendientes de la
+                // dirección también muestre variedad, no solo la de secretaría.
+                'estado' => EstadoPublicacion::PendienteAprobacion,
+                'created_at' => now()->subDays(4),
+                'updated_at' => now()->subDays(4),
             ],
         ];
     }

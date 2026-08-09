@@ -93,6 +93,21 @@ class ArtistaSeeder extends Seeder
                 'video_url' => null,
                 'whatsapp' => '3183356674', 'municipio' => 'salento',
             ],
+            [
+                'nombre' => 'DJ Amanecer',
+                'tipo' => TipoArtista::Dj,
+                'genero_musical' => 'Afrobeat / World',
+                'descripcion' => 'Sets de cierre para el after: afrobeat, world music y downtempo. Ficha recién inscrita, todavía sin revisar.',
+                'tarifa_desde' => 300000,
+                'video_url' => null,
+                'whatsapp' => '3145511221', 'municipio' => 'armenia',
+                // Pendiente a propósito, con antigüedad corta: junto con el
+                // proveedor y la vacante pendientes, la banda de pendientes
+                // del tablero muestra más de un renglón con edades distintas.
+                'estado' => EstadoPublicacion::PendienteAprobacion,
+                'created_at' => now()->subDay(),
+                'updated_at' => now()->subDay(),
+            ],
         ];
 
         foreach ($artistas as $artista) {
@@ -103,7 +118,7 @@ class ArtistaSeeder extends Seeder
             $artista['municipio_id'] = $municipios[$slug];
             $artista['instagram_url'] = 'https://instagram.com/'.Str::slug($artista['nombre'], '');
             $artista['foto'] = $imagenes->generar("artista-{$artista['nombre']}", 'artistas', 800, 800);
-            $artista['estado'] = EstadoPublicacion::Publicado;
+            $artista['estado'] ??= EstadoPublicacion::Publicado;
 
             Artista::updateOrCreate(['slug' => $artista['slug']], $artista);
         }

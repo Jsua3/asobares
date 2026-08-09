@@ -233,6 +233,31 @@ class TableroTest extends TestCase
     }
 
     /**
+     * «+300,0 %» sobre cuatro pagos contra uno es ruido de muestra chica,
+     * no una tendencia: el titular no aguanta la pregunta «¿de qué a qué?».
+     * `Stat` no tiene un hueco propio para la n, así que va en la misma
+     * description() que el porcentaje.
+     */
+    public function test_el_recaudo_muestra_la_n_de_cada_tramo_junto_al_porcentaje(): void
+    {
+        $this->travelTo(Carbon::create(2026, 3, 15, 12, 0, 0));
+
+        // Cuatro pagos en el tramo actual (marzo 1-15) contra uno en el
+        // mismo tramo del mes anterior (febrero 1-15): +300,0 %.
+        $this->sembrarTransaccionAprobada(Carbon::create(2026, 3, 5), 50_000);
+        $this->sembrarTransaccionAprobada(Carbon::create(2026, 3, 8), 50_000);
+        $this->sembrarTransaccionAprobada(Carbon::create(2026, 3, 10), 50_000);
+        $this->sembrarTransaccionAprobada(Carbon::create(2026, 3, 12), 50_000);
+        $this->sembrarTransaccionAprobada(Carbon::create(2026, 2, 10), 50_000);
+
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(ResumenDelGremio::class)
+            ->assertSee('+300,0 % vs. mismo tramo del mes anterior')
+            ->assertSee('n = 4 vs. n = 1');
+    }
+
+    /**
      * `created_at` es cuándo Eloquent insertó la fila, no cuándo el
      * establecimiento se afilió al gremio. Este asociado se inserta HOY pero
      * se afilió hace seis meses: con la implementación vieja, que leía

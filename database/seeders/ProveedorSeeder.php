@@ -80,6 +80,18 @@ class ProveedorSeeder extends Seeder
                 'descripcion' => 'Alquiler, instalación y mantenimiento de equipos de sonido e iluminación para establecimientos y eventos.',
                 'whatsapp' => '3151102277', 'correo' => 'alquiler@nocturnapro.test', 'municipio' => 'montenegro',
             ],
+            [
+                'nombre' => 'Insumos Bar Express',
+                'categoria_proveedor' => CategoriaProveedor::Alimentos,
+                'descripcion' => 'Frutas, jarabes y garnish para barra. Ficha inscrita hace más de una semana y todavía sin revisar.',
+                'whatsapp' => '3178801122', 'correo' => 'ventas@insumosbarexpress.test', 'municipio' => 'armenia',
+                // Pendiente y con más de cinco días de antigüedad a propósito:
+                // es el renglón que hace visible el estado "urgente" de la
+                // banda de pendientes del tablero (ColaDePendientes::DIAS_PARA_URGENTE).
+                'estado' => EstadoPublicacion::PendienteAprobacion,
+                'created_at' => now()->subDays(7),
+                'updated_at' => now()->subDays(7),
+            ],
         ];
 
         foreach ($proveedores as $proveedor) {
@@ -89,7 +101,7 @@ class ProveedorSeeder extends Seeder
             $proveedor['slug'] = Str::slug($proveedor['nombre']);
             $proveedor['municipio_id'] = $municipios[$slug];
             $proveedor['visible_hasta'] = now()->addMonths(random_int(4, 14))->toDateString();
-            $proveedor['estado'] = EstadoPublicacion::Publicado;
+            $proveedor['estado'] ??= EstadoPublicacion::Publicado;
 
             Proveedor::updateOrCreate(['slug' => $proveedor['slug']], $proveedor);
         }

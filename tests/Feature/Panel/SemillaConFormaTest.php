@@ -7,6 +7,8 @@ use App\Models\Asociado;
 use App\Models\Cartera;
 use App\Models\ConsultaGuia;
 use App\Models\Transaccion;
+use App\Models\User;
+use App\Panel\ColaDePendientes;
 use Database\Seeders\ConsultaGuiaSeeder;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -256,6 +258,32 @@ class SemillaConFormaTest extends TestCase
             0,
             $enMoraYReciente,
             'Quien acaba de afiliarse no puede deber meses de mensualidad.'
+        );
+    }
+
+    /**
+     * Antes la semilla dejaba un único pendiente en todo el sistema, con
+     * `updated_at = now()`: la banda de pendientes del tablero se enseñaba
+     * en la demo con un solo renglón y el estado "urgente" nunca aparecía.
+     * Ahora hay pendientes repartidos entre modelos distintos (vacante,
+     * artista, proveedor, noticia) con antigüedades escalonadas.
+     */
+    public function test_la_semilla_reparte_pendientes_entre_modelos_con_al_menos_uno_urgente(): void
+    {
+        $usuario = User::factory()->create();
+        $usuario->syncRoles([User::ROL_SUPER_ADMIN]);
+
+        $cola = app(ColaDePendientes::class)->para($usuario->fresh());
+
+        $this->assertGreaterThan(
+            1,
+            count($cola),
+            'La banda de pendientes no puede depender de un único renglón: hace falta variedad para que la demo la enseñe bien.'
+        );
+
+        $this->assertTrue(
+            collect($cola)->contains(fn (array $fila): bool => $fila['urgente'] === true),
+            'Al menos uno de los pendientes sembrados debe superar el umbral de "urgente" (más de cinco días).'
         );
     }
 }

@@ -80,8 +80,13 @@ class VacanteSeeder extends Seeder
                 'franja_horaria' => 'Martes a domingo, 11:00 a. m. – 7:00 p. m.',
                 'whatsapp_contacto' => '3106648820',
                 // Queda pendiente a propósito: sirve para demostrar que una
-                // vacante no publicada NO aparece en /empleo.
+                // vacante no publicada NO aparece en /empleo. La fecha
+                // escalonada es para que la banda de pendientes del tablero
+                // no muestre un solo renglón con "hace instantes": ver el
+                // porqué en ColaDePendientesTest y SemillaConFormaTest.
                 'estado' => EstadoPublicacion::PendienteAprobacion,
+                'created_at' => now()->subDays(2),
+                'updated_at' => now()->subDays(2),
             ],
             [
                 'asociado' => 'sonora-club',

@@ -72,6 +72,14 @@ class ResumenDelGremio extends StatsOverviewWidget
         $recaudado = $this->recaudadoEntre($inicioDeMes, $hoy);
         $recaudadoAntes = $this->recaudadoEntre($mesAnterior, $finVentanaAnterior);
 
+        // El titular no aguanta la pregunta «¿de qué a qué?»: un +300,0 %
+        // sobre cuatro pagos contra uno es ruido de muestra pequeña, no una
+        // tendencia. Ninguna cifra se presenta sin su n (ver `x-panel.kpi`);
+        // `Stat` no tiene un hueco propio para eso, así que va en la misma
+        // description() que el porcentaje.
+        $transaccionesRecaudado = $this->contarTransaccionesEntre($inicioDeMes, $hoy);
+        $transaccionesAntes = $this->contarTransaccionesEntre($mesAnterior, $finVentanaAnterior);
+
         $enMora = Cartera::enMora()->count();
         $saldo = (float) Cartera::enMora()->sum('saldo_pendiente');
 
@@ -95,7 +103,7 @@ class ResumenDelGremio extends StatsOverviewWidget
 
         return [
             Stat::make('Recaudado este mes', $this->pesos($recaudado))
-                ->description($this->variacion($recaudado, $recaudadoAntes))
+                ->description($this->variacion($recaudado, $recaudadoAntes, $transaccionesRecaudado, $transaccionesAntes))
                 ->descriptionIcon($recaudado >= $recaudadoAntes
                     ? 'heroicon-o-arrow-trending-up'
                     : 'heroicon-o-arrow-trending-down')
@@ -176,12 +184,22 @@ class ResumenDelGremio extends StatsOverviewWidget
             ->sum('monto');
     }
 
+    private function contarTransaccionesEntre(Carbon $desde, Carbon $hasta): int
+    {
+        return Transaccion::aprobada()
+            ->whereBetween('created_at', [$desde, $hasta])
+            ->count();
+    }
+
     /**
      * El texto deja explícito contra qué ventana compara: "mes anterior" a
      * secas sugiere el mes completo, y la comparación real es contra el
      * mismo tramo de días. Ver el porqué en `tarjetasDeDireccion()`.
+     *
+     * También lleva la n de cada tramo: un +300,0 % puede ser cuatro pagos
+     * contra uno, y ese porcentaje no dice nada sin saber de dónde sale.
      */
-    private function variacion(float $ahora, float $antes): string
+    private function variacion(float $ahora, float $antes, int $transaccionesAhora, int $transaccionesAntes): string
     {
         if ($antes <= 0.0) {
             return $ahora > 0.0
@@ -192,7 +210,8 @@ class ResumenDelGremio extends StatsOverviewWidget
         $porcentaje = (($ahora - $antes) / $antes) * 100;
         $signo = $porcentaje >= 0 ? '+' : '−';
 
-        return $signo.number_format(abs($porcentaje), 1, ',', '.').' % vs. mismo tramo del mes anterior';
+        return $signo.number_format(abs($porcentaje), 1, ',', '.')
+            ." % vs. mismo tramo del mes anterior (n = {$transaccionesAhora} vs. n = {$transaccionesAntes})";
     }
 
     private function pesos(float $monto): string
