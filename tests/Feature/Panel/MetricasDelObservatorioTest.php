@@ -42,6 +42,42 @@ class MetricasDelObservatorioTest extends TestCase
     }
 
     /**
+     * La relacion entre etiquetas y n es un OR: si cualquiera de los dos falta,
+     * la serie esta vacia. Sin esta prueba, un cambio futuro de `||` a `&&`
+     * pasaria desapercibido: el observatorio dibujaria un grafico de nada.
+     * Este caso asinmetrico fija que etiquetas presentes pero n=0 sigue siendo vacia.
+     */
+    public function test_con_etiquetas_pero_sin_muestra_esta_vacia(): void
+    {
+        $sinMuestra = new SerieDelObservatorio(
+            etiquetas: ['Armenia', 'Calarca'],
+            series: ['Asociados' => [0, 0]],
+            n: 0,
+            unidad: 'asociados',
+        );
+
+        $this->assertTrue($sinMuestra->estaVacia());
+    }
+
+    /**
+     * La relacion entre etiquetas y n es un OR: si cualquiera de los dos falta,
+     * la serie esta vacia. Sin esta prueba, un cambio futuro de `||` a `&&`
+     * pasaria desapercibido: el observatorio dibujaria un grafico de nada.
+     * Este caso asinmetrico fija que sin etiquetas pero n>0 sigue siendo vacia.
+     */
+    public function test_sin_etiquetas_pero_con_muestra_esta_vacia(): void
+    {
+        $sinEtiquetas = new SerieDelObservatorio(
+            etiquetas: [],
+            series: ['Asociados' => []],
+            n: 42,
+            unidad: 'asociados',
+        );
+
+        $this->assertTrue($sinEtiquetas->estaVacia());
+    }
+
+    /**
      * El umbral vive en un solo sitio: si el componente KPI y el observatorio
      * usaran números distintos, la misma cifra sería «muestra pequeña» en una
      * tarjeta y suficiente en la gráfica de al lado.
