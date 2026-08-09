@@ -7,6 +7,12 @@
     'accion' => 'Revisar',
 ])
 
+@php
+    // Urgente cambia el icono de verdad, no solo su color: es el segundo
+    // canal no cromático que el comentario de abajo promete.
+    $iconoMostrado = $urgente ? 'heroicon-o-exclamation-triangle' : $icono;
+@endphp
+
 {{--
     Fila de la cola de pendientes. Lo urgente se distingue por icono y por
     rótulo, no solo por color: el estado activo del selector de tema del sitio
@@ -18,7 +24,7 @@
         'bg-aviso-fondo text-aviso' => $urgente,
         'bg-marca-panel text-acento' => ! $urgente,
     ])>
-        <x-filament::icon :icon="$icono" class="h-5 w-5" />
+        <x-filament::icon :icon="$iconoMostrado" class="h-5 w-5" />
     </span>
 
     <div class="min-w-0 flex-1">

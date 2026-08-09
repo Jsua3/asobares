@@ -160,6 +160,31 @@ class ComponentesDelPanelTest extends TestCase
         $this->assertStringContainsString('Urgente', $html);
     }
 
+    /**
+     * El comentario del componente dice que lo urgente se distingue por
+     * "icono y rótulo", pero el glifo era el mismo en los dos estados:
+     * `icono` siempre caía en su valor por defecto. `x-filament::icon`
+     * pinta SVG crudo sin el nombre del icono en ningún lado del HTML, así
+     * que no se puede afirmar sobre el texto "heroicon-o-...": se renderiza
+     * cada icono por separado y se compara el SVG real que produce cada uno.
+     */
+    public function test_la_cola_cambia_el_icono_cuando_es_urgente(): void
+    {
+        $svgReloj = Blade::render('<x-filament::icon icon="heroicon-o-clock" class="h-5 w-5" />');
+        $svgTriangulo = Blade::render('<x-filament::icon icon="heroicon-o-exclamation-triangle" class="h-5 w-5" />');
+
+        $this->assertNotSame($svgReloj, $svgTriangulo, 'La comparación no dice nada si los dos SVG salieran iguales.');
+
+        $noUrgente = Blade::render('<x-panel.cola etiqueta="3 vacantes" url="/admin/vacantes" />');
+        $urgente = Blade::render('<x-panel.cola etiqueta="2 PQR vencidos" url="/admin/mensajes" urgente />');
+
+        $this->assertStringContainsString($svgReloj, $noUrgente, 'Sin urgencia sigue siendo el reloj.');
+        $this->assertStringNotContainsString($svgTriangulo, $noUrgente);
+
+        $this->assertStringContainsString($svgTriangulo, $urgente, 'Urgente debe cambiar el icono, no solo el color y el rótulo.');
+        $this->assertStringNotContainsString($svgReloj, $urgente);
+    }
+
     public function test_la_cola_no_usa_colores_cableados(): void
     {
         $fuente = File::get(resource_path('views/components/panel/cola.blade.php'));

@@ -135,10 +135,11 @@ class TransaccionSeeder extends Seeder
 
         $totalAsociados = count($asociados);
 
-        // Se carga una sola vez, fuera del bucle: quien debe N meses no pagó
-        // ni el mes en curso ni los N-1 meses anteriores. Sin esto la cartera
-        // y el historial cuentan historias distintas y /mi-cuenta muestra
-        // «debes 3 meses» junto a un pago del mes pasado.
+        // Se carga una sola vez, fuera del bucle: el filtro de más abajo
+        // (`$mesesAtras <= $moras`) excluye el mes en curso y los N meses
+        // anteriores, N+1 cubos en total para quien debe N meses. Sin esto
+        // la cartera y el historial cuentan historias distintas y
+        // /mi-cuenta muestra «debes 3 meses» junto a un pago del mes pasado.
         $morasPorAsociado = Cartera::whereIn('asociado_id', $asociados)->pluck('meses_mora', 'asociado_id')->all();
 
         // Igual de una sola vez: un establecimiento no paga mensualidades
