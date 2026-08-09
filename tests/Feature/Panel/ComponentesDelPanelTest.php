@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Panel;
 
+use App\Panel\SerieDelObservatorio;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
 use Tests\Feature\TemaClaroOscuroTest;
@@ -191,6 +192,35 @@ class ComponentesDelPanelTest extends TestCase
 
         foreach (TemaClaroOscuroTest::clasesProhibidas() as $patron => $motivo) {
             $this->assertSame(0, preg_match($patron, $fuente), "La cola tiene una clase cableada: {$motivo}");
+        }
+    }
+
+    public function test_el_estado_sin_muestra_dice_cuantos_datos_hay_y_por_que_no_dibuja(): void
+    {
+        $serie = new SerieDelObservatorio(
+            etiquetas: ['Barra', 'Cocina'],
+            series: ['Demanda' => [2, 1]],
+            n: 3,
+            unidad: 'vacantes',
+        );
+
+        $html = Blade::render(
+            '<x-panel.sin-muestra :serie="$serie" que="la demanda laboral por área" />',
+            ['serie' => $serie]
+        );
+
+        $this->assertStringContainsString('n = 3 vacantes', $html);
+        $this->assertStringContainsString('la demanda laboral por área', $html);
+        // La honestidad es el punto: se nombra el umbral que falta por alcanzar.
+        $this->assertStringContainsString((string) SerieDelObservatorio::MUESTRA_MINIMA, $html);
+    }
+
+    public function test_el_estado_sin_muestra_no_usa_colores_cableados(): void
+    {
+        $fuente = File::get(resource_path('views/components/panel/sin-muestra.blade.php'));
+
+        foreach (TemaClaroOscuroTest::clasesProhibidas() as $patron => $motivo) {
+            $this->assertSame(0, preg_match($patron, $fuente), "Clase cableada: {$motivo}");
         }
     }
 }
