@@ -66,6 +66,7 @@ class RolYPermisoSeeder extends Seeder
             'ver_cartera', 'importar_cartera',
             'ver_transaccion',
             'ver_bitacora',
+            'ver_observatorio',
         ]);
 
         foreach ($permisos as $permiso) {
@@ -76,8 +77,9 @@ class RolYPermisoSeeder extends Seeder
         $superAdmin->syncPermissions(Permission::all());
 
         // La secretaría hace todo menos publicar, y no toca usuarios,
-        // ajustes, cartera, transacciones ni bitácora. La excepción son las
-        // bolsas: ahí sí aprueba, porque el contenido lo escribe un tercero.
+        // ajustes, cartera, transacciones, bitácora ni el observatorio. La
+        // excepción son las bolsas: ahí sí aprueba, porque el contenido lo
+        // escribe un tercero.
         $permisosSubadmin = collect($permisos)
             ->reject(fn (string $permiso): bool => str_starts_with($permiso, 'publicar_')
                 || str_ends_with($permiso, '_usuario')
@@ -85,6 +87,7 @@ class RolYPermisoSeeder extends Seeder
                 || str_ends_with($permiso, '_cartera')
                 || str_ends_with($permiso, '_transaccion')
                 || str_ends_with($permiso, '_bitacora')
+                || str_ends_with($permiso, '_observatorio')
                 || str_starts_with($permiso, 'eliminar_'))
             ->merge(self::PUBLICAR_BOLSAS)
             ->unique()
