@@ -38,6 +38,22 @@ class Observatorio extends Page
         return auth()->user()?->can('ver_observatorio') === true;
     }
 
+    /**
+     * El guardián real no es este método: es `canAccess()`. El trait
+     * `Filament\Pages\Concerns\CanAuthorizeAccess` (que `Page` ya trae)
+     * define `mountCanAuthorizeAccess()` e `hydrateCanAuthorizeAccess()`,
+     * y cada uno hace su propio `abort_unless(static::canAccess(), 403)`.
+     * Livewire invoca esos hooks solo, en cada mount y cada hidratación,
+     * y como `canAccess()` está sobrescrito aquí, el enlace tardío hace
+     * que el hook del trait ya cierre la puerta antes de que este método
+     * se ejecute.
+     *
+     * El `abort_unless` de abajo es defensa en profundidad, no el cierre
+     * principal: sobrevive si algún día el trait cambia de internals.
+     * Ninguna prueba lo cubre —ni puede cubrirlo mientras el trait
+     * exista, porque comentarlo no rompe nada—, así que no lo tomes como
+     * "verificado" ni lo borres por parecer código muerto.
+     */
     public function mount(): void
     {
         abort_unless(self::canAccess(), 403);
