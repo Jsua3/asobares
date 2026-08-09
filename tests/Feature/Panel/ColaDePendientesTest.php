@@ -4,12 +4,17 @@ namespace Tests\Feature\Panel;
 
 use App\Enums\EstadoPublicacion;
 use App\Models\Asociado;
+use App\Models\Concerns\EsPublicable;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Panel\ColaDePendientes;
+use App\Providers\AppServiceProvider;
 use Database\Seeders\RolYPermisoSeeder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use ReflectionClass;
 use Tests\TestCase;
 
 /**
@@ -168,6 +173,60 @@ class ColaDePendientesTest extends TestCase
         $this->assertEmpty(
             array_filter($etiquetasSecretaria, fn (string $e): bool => str_contains($e, 'asociado')),
             'La secretaría no debe heredar el asociado de la cola de la dirección.'
+        );
+    }
+
+    /**
+     * Los nueve modelos con flujo editorial están escritos cuatro veces:
+     * `ColaDePendientes::PUBLICABLES`, `AppServiceProvider::MODELOS_PUBLICABLES`,
+     * `RolYPermisoSeeder::PUBLICABLES` y el trait `EsPublicable` en cada
+     * modelo. Ninguna prueba las cruzaba: si alguien añade el décimo
+     * publicable y olvida una de las cuatro listas, esta banda lo omite en
+     * silencio, que es justo el fallo que existe para evitar.
+     *
+     * La lista de referencia no es una quinta lista escrita a mano: se
+     * obtiene recorriendo los modelos reales de `app/Models` y comprobando
+     * cuáles usan el trait de verdad, para que un futuro publicable que
+     * olvide alguna de las otras tres listas haga fallar esta prueba en vez
+     * de pasar desapercibido.
+     */
+    public function test_las_cuatro_listas_de_publicables_coinciden_con_el_trait_real(): void
+    {
+        $modelosConTrait = collect(File::files(app_path('Models')))
+            ->map(fn ($archivo): string => 'App\\Models\\'.$archivo->getFilenameWithoutExtension())
+            ->filter(fn (string $clase): bool => class_exists($clase) && is_subclass_of($clase, Model::class))
+            ->filter(fn (string $clase): bool => in_array(EsPublicable::class, class_uses_recursive($clase), true))
+            ->sort()
+            ->values();
+
+        $this->assertNotEmpty($modelosConTrait, 'La búsqueda en app/Models no debe salir vacía: si sale vacía, la prueba compara contra nada.');
+
+        $publicablesDeLaCola = (new ReflectionClass(ColaDePendientes::class))->getConstant('PUBLICABLES');
+
+        $this->assertEquals(
+            $modelosConTrait->all(),
+            collect(array_keys($publicablesDeLaCola))->sort()->values()->all(),
+            'ColaDePendientes::PUBLICABLES debe listar exactamente los modelos que usan EsPublicable, ni uno más ni uno menos.'
+        );
+
+        $this->assertEquals(
+            $modelosConTrait->all(),
+            collect(AppServiceProvider::MODELOS_PUBLICABLES)->sort()->values()->all(),
+            'AppServiceProvider::MODELOS_PUBLICABLES debe listar exactamente los modelos que usan EsPublicable, ni uno más ni uno menos.'
+        );
+
+        // RolYPermisoSeeder no guarda nombres de clase sino el slug en
+        // singular («asociado», no `Asociado::class»); se compara contra el
+        // mismo slug que ColaDePendientes ya le asigna a cada modelo.
+        $slugsDeLaCola = collect($publicablesDeLaCola)
+            ->map(fn (array $etiquetas): string => $etiquetas[0])
+            ->sort()
+            ->values();
+
+        $this->assertEquals(
+            $slugsDeLaCola->all(),
+            collect(RolYPermisoSeeder::PUBLICABLES)->sort()->values()->all(),
+            'RolYPermisoSeeder::PUBLICABLES debe listar el mismo slug singular para cada modelo que usa EsPublicable.'
         );
     }
 }

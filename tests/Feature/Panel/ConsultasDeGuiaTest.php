@@ -5,10 +5,12 @@ namespace Tests\Feature\Panel;
 use App\Models\ConsultaGuia;
 use App\Models\Municipio;
 use App\Models\RequisitoApertura;
+use Database\Seeders\ConsultaGuiaSeeder;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 use Tests\TestCase;
 
 /**
@@ -175,5 +177,26 @@ class ConsultasDeGuiaTest extends TestCase
             ->assertNotFound();
 
         $this->assertDatabaseCount('consultas_guia', 0);
+    }
+
+    /**
+     * `ConsultaGuiaSeeder` esperaba un nombre exacto por cada municipio de su
+     * lista de pesos y, si `MunicipioSeeder` divergía, lo saltaba con un
+     * `continue` mudo: la serie salía corta y nada lo avisaba. Ahora debe
+     * lanzar en vez de callar el hueco.
+     */
+    public function test_el_seeder_lanza_si_un_municipio_de_pesos_no_existe(): void
+    {
+        // Todos los nombres que pide ConsultaGuiaSeeder menos uno: sin
+        // "Filandia" en la tabla, el seed debe avisar en vez de dejarlo
+        // fuera del mapa de calor en silencio.
+        foreach (['Armenia', 'Calarcá', 'Salento', 'Montenegro', 'La Tebaida', 'Quimbaya', 'Circasia'] as $nombre) {
+            Municipio::factory()->create(['nombre' => $nombre]);
+        }
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Filandia');
+
+        $this->seed(ConsultaGuiaSeeder::class);
     }
 }

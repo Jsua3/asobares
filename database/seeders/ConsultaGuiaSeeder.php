@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\ConsultaGuia;
 use App\Models\Municipio;
 use Illuminate\Database\Seeder;
+use RuntimeException;
 
 /**
  * Consultas a la guía repartidas en 18 meses.
@@ -38,11 +39,14 @@ class ConsultaGuiaSeeder extends Seeder
         $filas = [];
 
         foreach (self::PESOS as $nombre => $peso) {
-            $municipioId = $municipios[$nombre] ?? null;
-
-            if ($municipioId === null) {
-                continue;
-            }
+            // `?? null` + `continue` dejaba un hueco mudo en el mapa de
+            // calor si un nombre divergía de `MunicipioSeeder`: la serie
+            // salía corta y nada lo avisaba. Mejor romper el seed que
+            // servir un observatorio con un municipio invisible.
+            $municipioId = $municipios[$nombre] ?? throw new RuntimeException(
+                "ConsultaGuiaSeeder espera el municipio «{$nombre}», que no existe en la tabla municipios. "
+                .'Revisa que el nombre coincida exactamente con el de MunicipioSeeder.'
+            );
 
             foreach (range(0, 17) as $mesesAtras) {
                 // El divisor y el suelo van juntos a proposito: con `/10` y sin suelo, un
