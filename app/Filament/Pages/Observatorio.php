@@ -10,6 +10,7 @@ use App\Filament\Widgets\Observatorio\PresenciaPorMunicipio;
 use App\Filament\Widgets\Observatorio\SaludFinanciera;
 use App\Panel\MetricasDelObservatorio;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Filament\Widgets\Widget;
 use UnitEnum;
@@ -43,6 +44,26 @@ class Observatorio extends Page
     public static function canAccess(): bool
     {
         return auth()->user()?->can('ver_observatorio') === true;
+    }
+
+    /**
+     * El botón que lleva al informe imprimible. No descarga ningún archivo:
+     * abre {@see InformeDelObservatorio} y el PDF lo produce el propio
+     * navegador (Ctrl/Cmd+P → «Guardar como PDF»). Se eligió esa vía y no
+     * una librería de PDF porque el proyecto no tiene ninguna dependencia de
+     * ese tipo — sumar una exige aprobación, y así el papel sale con la
+     * tipografía y los colores reales del gremio, no con los de una
+     * librería genérica.
+     */
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('descargarInforme')
+                ->label('Descargar informe')
+                ->icon('heroicon-o-printer')
+                ->url(fn (): string => InformeDelObservatorio::getUrl())
+                ->openUrlInNewTab(),
+        ];
     }
 
     /**

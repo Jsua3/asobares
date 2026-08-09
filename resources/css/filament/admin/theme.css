@@ -84,3 +84,37 @@
         transform: none;
     }
 }
+
+/*
+ * Informe imprimible del observatorio (ver `InformeDelObservatorio`): el
+ * navegador es el motor de PDF —Ctrl/Cmd+P, «Guardar como PDF»— y no una
+ * librería nueva, así que este bloque es el CSS de impresión completo.
+ *
+ * Sobrevive el contenido; el cromo del panel (barra lateral, barra
+ * superior, botones) desaparece, y `print-color-adjust` conserva los
+ * fondos de aviso/éxito que Chrome descarta en impresión por defecto.
+ */
+@media print {
+    @page {
+        margin: 1.5cm;
+    }
+
+    * {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .fi-sidebar,
+    .fi-topbar-ctn,
+    .fi-header-actions-ctn,
+    .fi-layout-sidebar-toggle-btn-ctn,
+    .fi-btn,
+    .fi-icon-btn {
+        display: none !important;
+    }
+
+    /* Ningún bloque del informe se parte a mitad de hoja. */
+    .informe-bloque {
+        break-inside: avoid;
+    }
+}

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Panel;
 
 use App\Enums\CargoDelSector;
+use App\Filament\Pages\InformeDelObservatorio;
 use App\Filament\Pages\Observatorio;
 use App\Filament\Widgets\Observatorio\CoberturaDeProveedores;
 use App\Filament\Widgets\Observatorio\ComposicionDelSector;
@@ -198,6 +199,37 @@ class ObservatorioTest extends TestCase
 
         Livewire::test(OfertaContraDemanda::class)
             ->assertDontSee('Aún sin muestra suficiente');
+    }
+
+    /**
+     * El informe es el objeto que la dirección deja sobre la mesa en una
+     * alcaldía: marca, fecha, y ninguna cifra sin su n.
+     */
+    public function test_el_informe_lleva_marca_fecha_y_el_n_de_cada_serie(): void
+    {
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        $this->get(InformeDelObservatorio::getUrl())
+            ->assertOk()
+            ->assertSee('ASOBARES')
+            ->assertSee(now()->format('d/m/Y'))
+            ->assertSee('n = ', false)
+            // El descargo es obligatorio: hay series que no alcanzan muestra.
+            ->assertSee('muestra');
+    }
+
+    public function test_el_informe_es_igual_de_exclusivo_que_el_observatorio(): void
+    {
+        $this->actingAs($this->usuarioCon(User::ROL_SUBADMIN));
+
+        $this->get(InformeDelObservatorio::getUrl())->assertForbidden();
+    }
+
+    public function test_el_tema_esconde_el_cromo_del_panel_al_imprimir(): void
+    {
+        $tema = File::get(resource_path('css/filament/admin/theme.css'));
+
+        $this->assertStringContainsString('@media print', $tema);
     }
 
     /**
