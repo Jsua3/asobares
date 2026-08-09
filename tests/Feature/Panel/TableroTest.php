@@ -3,14 +3,17 @@
 namespace Tests\Feature\Panel;
 
 use App\Enums\ConceptoTransaccion;
+use App\Enums\EstadoMensaje;
 use App\Enums\EstadoPublicacion;
 use App\Enums\EstadoTransaccion;
 use App\Enums\MetodoPago;
+use App\Enums\TipoMensaje;
 use App\Filament\Widgets\InscripcionesDelMes;
 use App\Filament\Widgets\PendientesDeAprobacion;
 use App\Filament\Widgets\RecaudoMensual;
 use App\Filament\Widgets\ResumenDelGremio;
 use App\Models\Asociado;
+use App\Models\Mensaje;
 use App\Models\Municipio;
 use App\Models\Transaccion;
 use App\Models\User;
@@ -248,6 +251,75 @@ class TableroTest extends TestCase
         Livewire::test(ResumenDelGremio::class)
             ->assertSee('0 altas este mes')
             ->assertDontSee('1 altas este mes');
+    }
+
+    /**
+     * «1 altas este mes» era el texto real que producía la base: la
+     * descripción concatenaba el conteo sin pasar por `Str::plural`, la misma
+     * convención que ya usan `directorio/index.blade.php`,
+     * `mi-cuenta/index.blade.php` y el paginador.
+     */
+    public function test_las_altas_del_mes_singularizan_con_una_sola_alta(): void
+    {
+        Asociado::factory()->publicado()->create([
+            'fecha_afiliacion' => now()->startOfMonth()->toDateString(),
+        ]);
+
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(ResumenDelGremio::class)
+            ->assertSee('1 alta este mes')
+            ->assertDontSee('1 altas este mes');
+    }
+
+    public function test_las_altas_del_mes_pluralizan_con_dos_altas(): void
+    {
+        Asociado::factory()->publicado()->count(2)->create([
+            'fecha_afiliacion' => now()->startOfMonth()->toDateString(),
+        ]);
+
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(ResumenDelGremio::class)->assertSee('2 altas este mes');
+    }
+
+    /**
+     * Mismo defecto de concordancia en la tarjeta de secretaría: «1 PQR
+     * abiertos» tenía el adjetivo en plural fijo, sin importar el conteo.
+     */
+    public function test_los_pqr_abiertos_singularizan_con_uno_solo(): void
+    {
+        $this->crearPqr('PQR-2026-0001');
+
+        $this->actingAs($this->usuarioCon(User::ROL_SUBADMIN));
+
+        Livewire::test(ResumenDelGremio::class)
+            ->assertSee('1 PQR abierto')
+            ->assertDontSee('1 PQR abiertos');
+    }
+
+    public function test_los_pqr_abiertos_pluralizan_con_dos(): void
+    {
+        $this->crearPqr('PQR-2026-0001');
+        $this->crearPqr('PQR-2026-0002');
+
+        $this->actingAs($this->usuarioCon(User::ROL_SUBADMIN));
+
+        Livewire::test(ResumenDelGremio::class)->assertSee('2 PQR abiertos');
+    }
+
+    private function crearPqr(string $radicado): Mensaje
+    {
+        return Mensaje::create([
+            'tipo' => TipoMensaje::Pqr,
+            'nombre' => 'Carlos Muñoz',
+            'correo' => 'carlos@ejemplo.test',
+            'mensaje' => 'No me ha llegado el carné de afiliado.',
+            'radicado' => $radicado,
+            'estado' => EstadoMensaje::Nuevo,
+            'acepta_datos' => true,
+            'consentimiento_at' => now(),
+        ]);
     }
 
     private function sembrarTransaccionAprobada(Carbon $fecha, float $monto): void

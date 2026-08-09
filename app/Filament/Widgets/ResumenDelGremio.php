@@ -17,6 +17,7 @@ use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 /**
  * Banda 2 del tablero: cuatro cifras, no seis, y distintas según el oficio.
@@ -108,7 +109,7 @@ class ResumenDelGremio extends StatsOverviewWidget
                 ->url(route('filament.admin.resources.cartera.index')),
 
             Stat::make('Asociados publicados', $publicados)
-                ->description($altasDelMes.' altas este mes')
+                ->description($altasDelMes.' '.Str::plural('alta', $altasDelMes).' este mes')
                 ->descriptionIcon('heroicon-o-building-storefront')
                 ->color('success')
                 ->url(route('filament.admin.resources.asociados.index')),
@@ -149,7 +150,7 @@ class ResumenDelGremio extends StatsOverviewWidget
                 ->url(route('filament.admin.resources.vacantes.index')),
 
             Stat::make('Bandeja sin responder', $sinResponder)
-                ->description($pqrAbiertos.' PQR abiertos')
+                ->description($pqrAbiertos.' PQR '.Str::plural('abierto', $pqrAbiertos))
                 ->descriptionIcon('heroicon-o-inbox')
                 ->color($pqrAbiertos > 0 ? 'danger' : 'warning')
                 ->url(route('filament.admin.resources.mensajes.index')),
