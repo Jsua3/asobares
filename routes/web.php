@@ -68,7 +68,15 @@ Route::get('/directorio/{asociado:slug}', [DirectorioController::class, 'show'])
 Route::get('/abre-tu-negocio', [GuiaController::class, 'index'])
     ->middleware('throttle:30,1')
     ->name('guia.index');
-Route::get('/abre-tu-negocio/formato/{requisito}', [GuiaController::class, 'descargarFormato'])->name('guia.formato');
+// Descargar un formato también escribe en consultas_guia (ver el
+// controlador), pero es una acción más deliberada y menos repetitiva que
+// elegir municipio: nadie baja 30 formatos por minuto de verdad, y cada guía
+// solo trae dos o tres. 10,1 iguala el límite que ya usan las otras
+// escrituras ocasionales del sitio (resolver el pago simulado) y sobra para
+// bajar todos los formatos de una guía real sin rebotar a nadie.
+Route::get('/abre-tu-negocio/formato/{requisito}', [GuiaController::class, 'descargarFormato'])
+    ->middleware('throttle:10,1')
+    ->name('guia.formato');
 
 // Bolsa de empleo.
 Route::get('/empleo', [EmpleoController::class, 'index'])->name('empleo.index');

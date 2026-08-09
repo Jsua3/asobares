@@ -192,4 +192,26 @@ class SitioPublicoTest extends TestCase
 
         $this->get('/abre-tu-negocio')->assertStatus(429);
     }
+
+    /**
+     * `/abre-tu-negocio/formato/{requisito}` también inserta una fila en
+     * `consultas_guia` (ver `GuiaController::descargarFormato`) y hasta ahora
+     * no tenía límite: 40 peticiones seguidas producían 40 filas. El límite es
+     * 10 por minuto (ver el porqué en `routes/web.php`).
+     *
+     * `ThrottleRequests` va antes que `SubstituteBindings` en la prioridad por
+     * defecto de Laravel, así que el límite corta antes de que la ruta
+     * intente resolver `{requisito}`: no hace falta un requisito real con
+     * adjunto para probarlo, un id inexistente basta y prueba además que el
+     * límite protege incluso antes de llegar a los `abort_unless` del
+     * controlador.
+     */
+    public function test_descargar_formato_de_la_guia_tiene_limite_de_peticiones(): void
+    {
+        for ($i = 0; $i < 10; $i++) {
+            $this->get('/abre-tu-negocio/formato/999999')->assertNotFound();
+        }
+
+        $this->get('/abre-tu-negocio/formato/999999')->assertStatus(429);
+    }
 }
