@@ -2,11 +2,17 @@
 
 namespace Tests\Feature\Panel;
 
+use App\Enums\CargoDelSector;
 use App\Filament\Pages\Observatorio;
+use App\Filament\Widgets\Observatorio\CoberturaDeProveedores;
 use App\Filament\Widgets\Observatorio\ComposicionDelSector;
+use App\Filament\Widgets\Observatorio\DemandaLaboralPorArea;
+use App\Filament\Widgets\Observatorio\OfertaContraDemanda;
 use App\Filament\Widgets\Observatorio\PresenciaPorMunicipio;
 use App\Filament\Widgets\Observatorio\SaludFinanciera;
+use App\Models\Asociado;
 use App\Models\User;
+use App\Models\Vacante;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
@@ -151,12 +157,83 @@ class ObservatorioTest extends TestCase
             'app.filament.widgets.observatorio.presencia-por-municipio',
             'app.filament.widgets.observatorio.composicion-del-sector',
             'app.filament.widgets.observatorio.salud-financiera',
+            'app.filament.widgets.observatorio.cobertura-de-proveedores',
+            'app.filament.widgets.observatorio.demanda-laboral-por-area',
+            'app.filament.widgets.observatorio.oferta-contra-demanda',
         ] as $nombreLivewire) {
             $this->assertSame(
                 1,
                 substr_count($html, $nombreLivewire),
                 "{$nombreLivewire} aparece ".substr_count($html, $nombreLivewire).' veces en el HTML: se está montando más de una instancia.'
             );
+        }
+    }
+
+    /**
+     * Con la semilla de hoy la oferta contra demanda no llega al umbral, así
+     * que la pantalla tiene que decirlo en vez de dibujar barras sobre n=17.
+     */
+    public function test_una_visualizacion_sin_muestra_no_dibuja_y_lo_explica(): void
+    {
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(OfertaContraDemanda::class)
+            ->assertSee('Aún sin muestra suficiente')
+            ->assertSee('n = ');
+    }
+
+    /**
+     * Y cuando el dato llegue, dibuja. Si esta prueba se cae, es que el
+     * estado vacío se quedó pegado y el observatorio nunca enseñará empleo.
+     */
+    public function test_la_misma_visualizacion_dibuja_en_cuanto_hay_muestra(): void
+    {
+        // `publicado()` es un estado real de ambas factories, verificado.
+        $asociado = Asociado::factory()->publicado()->create();
+        Vacante::factory()->count(35)->publicado()->for($asociado)->create([
+            'categoria_cargo' => CargoDelSector::Barra,
+        ]);
+
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(OfertaContraDemanda::class)
+            ->assertDontSee('Aún sin muestra suficiente');
+    }
+
+    /**
+     * Las tres flacas también respetan el hueco del plugin de tema: cada
+     * eje declarado en `getOptions()` trae `ticks` y `grid`, igual que las
+     * tres sólidas.
+     */
+    public function test_cada_eje_de_las_tres_visualizaciones_flacas_declara_ticks_y_grid(): void
+    {
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        foreach ([
+            CoberturaDeProveedores::class,
+            DemandaLaboralPorArea::class,
+            OfertaContraDemanda::class,
+        ] as $widget) {
+            $instancia = Livewire::test($widget)->instance();
+
+            $metodo = new \ReflectionMethod($widget, 'getOptions');
+            $opciones = $metodo->invoke($instancia);
+
+            $ejes = $opciones['scales'] ?? [];
+            $this->assertNotEmpty($ejes, "{$widget} no declara ninguna escala en getOptions().");
+
+            foreach ($ejes as $nombreEje => $eje) {
+                $this->assertArrayHasKey(
+                    'ticks',
+                    $eje,
+                    "{$widget}: el eje \"{$nombreEje}\" no declara ticks, así que el plugin de tema no tiene dónde escribir."
+                );
+                $this->assertArrayHasKey(
+                    'grid',
+                    $eje,
+                    "{$widget}: el eje \"{$nombreEje}\" no declara grid, así que el plugin de tema no tiene dónde escribir."
+                );
+            }
         }
     }
 }

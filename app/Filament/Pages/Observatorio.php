@@ -2,7 +2,10 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\Observatorio\CoberturaDeProveedores;
 use App\Filament\Widgets\Observatorio\ComposicionDelSector;
+use App\Filament\Widgets\Observatorio\DemandaLaboralPorArea;
+use App\Filament\Widgets\Observatorio\OfertaContraDemanda;
 use App\Filament\Widgets\Observatorio\PresenciaPorMunicipio;
 use App\Filament\Widgets\Observatorio\SaludFinanciera;
 use App\Panel\MetricasDelObservatorio;
@@ -64,11 +67,13 @@ class Observatorio extends Page
     }
 
     /**
-     * Las tres gráficas que sí tienen datos que sostienen lo que dibujan
-     * (OBS T5). Las tres flacas con su estado vacío llegan en OBS T6, a esta
-     * misma lista. El mecanismo es `getFooterWidgets()` y no
+     * Las seis gráficas del observatorio: las tres que sí tienen datos que
+     * sostienen lo que dibujan (OBS T5), y las tres flacas con su estado
+     * vacío honesto (OBS T6). El mecanismo es `getFooterWidgets()` y no
      * `<x-filament-widgets::widgets>`: ese componente está `@deprecated` en
-     * `vendor/filament/`, y la vista ya invoca `{{ $this->footerWidgets }}`.
+     * `vendor/filament/`, y quien de verdad rinde estos widgets es el
+     * envoltorio `<x-filament-panels::page>` (invoca `{{ $this->footerWidgets }}`
+     * por dentro) — la vista de esta página no vuelve a llamarlos.
      *
      * @return array<class-string<Widget>>
      */
@@ -78,6 +83,9 @@ class Observatorio extends Page
             PresenciaPorMunicipio::class,
             ComposicionDelSector::class,
             SaludFinanciera::class,
+            CoberturaDeProveedores::class,
+            DemandaLaboralPorArea::class,
+            OfertaContraDemanda::class,
         ];
     }
 
