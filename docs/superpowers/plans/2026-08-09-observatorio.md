@@ -140,18 +140,27 @@ class MetricasDelObservatorioTest extends TestCase
      * El umbral vive en un solo sitio: si el componente KPI y el observatorio
      * usaran números distintos, la misma cifra sería «muestra pequeña» en una
      * tarjeta y suficiente en la gráfica de al lado.
+     *
+     * Se prueba por comportamiento y no buscando el número en el archivo:
+     * después del paso 4 ese archivo ya no contiene el literal, sino la
+     * referencia a la constante. Una aserción sobre el texto fallaría justo
+     * después del arreglo que pretende verificar.
      */
-    public function test_el_umbral_es_el_mismo_que_usa_la_tarjeta_kpi(): void
+    public function test_la_tarjeta_kpi_marca_muestra_pequena_con_el_mismo_umbral(): void
     {
-        $kpi = \Illuminate\Support\Facades\File::get(
-            resource_path('views/components/panel/kpi.blade.php')
+        $limite = SerieDelObservatorio::MUESTRA_MINIMA;
+
+        $justoDebajo = \Illuminate\Support\Facades\Blade::render(
+            '<x-panel.kpi etiqueta="Mora" valor="18 %" :n="$n" />',
+            ['n' => $limite - 1]
+        );
+        $justoEncima = \Illuminate\Support\Facades\Blade::render(
+            '<x-panel.kpi etiqueta="Mora" valor="18 %" :n="$n" />',
+            ['n' => $limite]
         );
 
-        $this->assertStringContainsString(
-            (string) SerieDelObservatorio::MUESTRA_MINIMA,
-            $kpi,
-            'La tarjeta KPI debe usar la misma constante de umbral que el observatorio.'
-        );
+        $this->assertStringContainsString('muestra pequeña', $justoDebajo);
+        $this->assertStringNotContainsString('muestra pequeña', $justoEncima);
     }
 }
 ```
