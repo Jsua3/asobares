@@ -326,12 +326,21 @@ Añade a `tests/Feature/Panel/MetricasDelObservatorioTest.php`. La clase necesit
 
         $metricas = app(\App\Panel\MetricasDelObservatorio::class);
 
+        /*
+         * El listener se registra UNA vez, fuera del bucle. `DB::listen` no se
+         * retira nunca, y `foreach` no crea scope: registrar uno por iteración
+         * deja k listeners incrementando la misma variable por referencia, así
+         * que la medida sería k × consultas reales y desde la quinta vuelta el
+         * test sería insatisfacible para cualquier implementación.
+         */
+        $consultas = 0;
+        \Illuminate\Support\Facades\DB::listen(function () use (&$consultas): void {
+            $consultas++;
+        });
+
         foreach (['presenciaPorMunicipio', 'composicionDelSector', 'saludFinanciera',
             'coberturaDeProveedores', 'demandaLaboralPorArea', 'ofertaContraDemanda'] as $metodo) {
             $consultas = 0;
-            \Illuminate\Support\Facades\DB::listen(function () use (&$consultas): void {
-                $consultas++;
-            });
 
             app(\App\Panel\MetricasDelObservatorio::class)->{$metodo}();
 
