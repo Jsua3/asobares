@@ -119,6 +119,32 @@ class SubidaDeImagenesTest extends TestCase
     }
 
     /**
+     * La galería es el único campo que va por la librería de medios, así que
+     * no hereda la defensa de `SubidaSegura` por el hecho de estar en el mismo
+     * formulario: hay que dársela aparte. El riesgo es el mismo que en la
+     * portada, y peor, porque la colección vive en el disco público.
+     */
+    public function test_la_galeria_tambien_deriva_la_extension_del_tipo_real(): void
+    {
+        Storage::fake('public');
+
+        $asociado = Asociado::factory()->publicado()->create();
+
+        Livewire::test(EditAsociado::class, ['record' => $asociado->getRouteKey()])
+            ->fillForm([
+                'galeria' => [$this->imagenRealLlamada('payload.html')],
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $media = $asociado->fresh()->getMedia('galeria')->first();
+
+        $this->assertNotNull($media, 'La imagen debería quedar en la colección `galeria`.');
+        $this->assertStringEndsWith('.jpg', $media->file_name, "Se guardó como «{$media->file_name}».");
+        $this->assertStringNotContainsString('.html', $media->file_name);
+    }
+
+    /**
      * Se prueba sobre el modelo y no sobre el formulario porque la limpieza
      * vive en un observer: cualquier cambio del campo la dispara, venga del
      * panel, de un comando o de una importación.
@@ -190,6 +216,20 @@ class SubidaDeImagenesTest extends TestCase
     public function test_los_temporales_de_livewire_no_van_al_disco_publico(): void
     {
         $this->assertSame('local', config('livewire.temporary_file_upload.disk'));
+    }
+
+    /**
+     * Un archivo que es una imagen de verdad —lo dicen sus bytes— pero que
+     * llega con otro nombre. Es el caso que importa: la validación de tipo lo
+     * acepta con razón, y aun así no puede quedar guardado como «.html».
+     */
+    private function imagenRealLlamada(string $nombre): UploadedFile
+    {
+        $imagen = UploadedFile::fake()->image('real.jpg', 600, 400);
+
+        return UploadedFile::fake()
+            ->createWithContent($nombre, (string) file_get_contents($imagen->getRealPath()))
+            ->mimeType('image/jpeg');
     }
 
     public function test_se_rechaza_un_archivo_que_no_es_imagen(): void

@@ -13,6 +13,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class AsociadoForm
 {
@@ -84,13 +85,23 @@ class AsociadoForm
                             ->label('Foto de portada')
                             ->imagen()
                             ->directory('asociados'),
+                        // La librería de medios trae su propio nombrador, así
+                        // que no hereda la defensa de `SubidaSegura`: sin esto
+                        // la extensión la elegiría quien sube, y un JPEG
+                        // llamado «payload.html» quedaría servido como HTML
+                        // desde /storage.
                         SpatieMediaLibraryFileUpload::make('galeria')
                             ->label('Galería')
                             ->collection('galeria')
                             ->multiple()
                             ->reorderable()
                             ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(5120)
+                            ->getUploadedFileNameForStorageUsing(
+                                static fn (TemporaryUploadedFile $file): string => Str::ulid()
+                                    .'.'.SubidaSegura::extensionPara($file->getMimeType())
+                            )
                             ->helperText('Se convierten a WebP automáticamente.'),
                     ]),
 
