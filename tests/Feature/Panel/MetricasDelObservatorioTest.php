@@ -39,6 +39,50 @@ class MetricasDelObservatorioTest extends TestCase
         $this->assertTrue($this->serie(30)->hayMuestraSuficiente());
     }
 
+    /**
+     * `n` combinado es la puerta trasera que este par de pruebas cierra: una
+     * serie con tres conjuntos de datos (762 en total, muy por encima del
+     * umbral) no debe pasar si uno solo de esos conjuntos —aquí,
+     * «Vacantes», con 6— no llega a treinta observaciones por sí mismo. Son
+     * los números reales de `presenciaPorMunicipio()` con la semilla de hoy:
+     * 24 asociados + 6 vacantes + 732 consultas.
+     */
+    public function test_una_serie_multi_conjunto_con_un_conjunto_flojo_no_alcanza_muestra(): void
+    {
+        $presencia = new SerieDelObservatorio(
+            etiquetas: ['Armenia', 'Calarcá'],
+            series: [
+                'Asociados' => [20, 4],
+                'Vacantes' => [5, 1],
+                'Consultas de la guía' => [700, 32],
+            ],
+            n: 24 + 6 + 732,
+            unidad: 'registros',
+        );
+
+        $this->assertFalse(
+            $presencia->hayMuestraSuficiente(),
+            'El conjunto "Vacantes" (6) no llega a treinta por sí solo; que "Consultas de la guía" sí lo haga no debería prestarle su muestra.'
+        );
+    }
+
+    /** El mismo mecanismo, en verde: si los tres conjuntos alcanzan el umbral por separado, la serie sí lo alcanza. */
+    public function test_una_serie_multi_conjunto_alcanza_muestra_cuando_todos_sus_conjuntos_la_alcanzan(): void
+    {
+        $presencia = new SerieDelObservatorio(
+            etiquetas: ['Armenia', 'Calarcá'],
+            series: [
+                'Asociados' => [25, 5],
+                'Vacantes' => [28, 2],
+                'Consultas de la guía' => [700, 32],
+            ],
+            n: 30 + 30 + 732,
+            unidad: 'registros',
+        );
+
+        $this->assertTrue($presencia->hayMuestraSuficiente());
+    }
+
     public function test_el_rotulo_de_muestra_dice_cuantos_y_de_que(): void
     {
         $this->assertSame('n = 42 asociados', $this->serie(42)->rotuloDeMuestra());
@@ -199,9 +243,17 @@ class MetricasDelObservatorioTest extends TestCase
     }
 
     /**
-     * Con la semilla de hoy las dos métricas de empleo no llegan al umbral, y
-     * eso es lo que la interfaz tiene que poder decir. Si algún día la semilla
+     * Con la semilla de hoy las métricas de empleo no llegan al umbral, y eso
+     * es lo que la interfaz tiene que poder decir. Si algún día la semilla
      * crece, esta prueba cambia de sentido: afirma la regla, no el número.
+     *
+     * `presenciaPorMunicipio()` pasó de «suficiente» a «insuficiente» con el
+     * arreglo de `SerieDelObservatorio::hayMuestraSuficiente()`: antes n=762
+     * (la suma de asociados, vacantes y consultas) sellaba la serie entera,
+     * aunque el conjunto «Vacantes» descansara sobre apenas 6 observaciones
+     * — el mismo número que el módulo declara insuficiente en cualquier otra
+     * gráfica. Ahora el umbral se exige a cada conjunto por separado, y
+     * «Asociados» (24) y «Vacantes» (6) no lo alcanzan por sí solos.
      */
     public function test_las_metricas_declaran_si_tienen_muestra_suficiente(): void
     {
@@ -209,10 +261,14 @@ class MetricasDelObservatorioTest extends TestCase
 
         $metricas = app(MetricasDelObservatorio::class);
 
-        $this->assertTrue(
-            $metricas->presenciaPorMunicipio()->hayMuestraSuficiente(),
-            'Las consultas de la guia sí tienen volumen.'
+        $presencia = $metricas->presenciaPorMunicipio();
+        $this->assertFalse(
+            $presencia->hayMuestraSuficiente(),
+            'Aunque las consultas de la guía tengan volumen, "Asociados" (24) y "Vacantes" (6) no llegan a treinta por sí solos.'
         );
+        $this->assertLessThan(SerieDelObservatorio::MUESTRA_MINIMA, array_sum($presencia->series['Asociados']));
+        $this->assertLessThan(SerieDelObservatorio::MUESTRA_MINIMA, array_sum($presencia->series['Vacantes']));
+
         $this->assertSame(
             $metricas->ofertaContraDemanda()->n < SerieDelObservatorio::MUESTRA_MINIMA,
             ! $metricas->ofertaContraDemanda()->hayMuestraSuficiente()
