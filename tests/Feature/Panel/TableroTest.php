@@ -8,10 +8,12 @@ use App\Enums\EstadoPublicacion;
 use App\Enums\EstadoTransaccion;
 use App\Enums\MetodoPago;
 use App\Enums\TipoMensaje;
+use App\Filament\Widgets\AsociadosPorMunicipio;
 use App\Filament\Widgets\InscripcionesDelMes;
 use App\Filament\Widgets\PendientesDeAprobacion;
 use App\Filament\Widgets\RecaudoMensual;
 use App\Filament\Widgets\ResumenDelGremio;
+use App\Filament\Widgets\UltimasTransacciones;
 use App\Models\Asociado;
 use App\Models\Mensaje;
 use App\Models\Municipio;
@@ -378,6 +380,46 @@ class TableroTest extends TestCase
         $paginas = $panel->getPages();
 
         $this->assertNotContains(Dashboard::class, $paginas);
+    }
+
+    /**
+     * `discoverWidgets(in: app_path('Filament/Widgets'))` recorre
+     * subdirectorios: sin que las gráficas de `Observatorio/` opten por
+     * quedar fuera (`GraficaDelObservatorio::$isDiscovered = false`), las
+     * seis se colaban en el tablero con sus `$sort` (1–6) intercalados entre
+     * los del tablero (0–4) — Pendientes → Presencia → Resumen → Composición
+     * → Recaudo → …, rompiendo las tres bandas que el tablero documenta como
+     * su razón de existir y doblando su coste de consultas.
+     *
+     * Se afirma el conjunto exacto, no solo la ausencia del observatorio: un
+     * tablero al que le falte uno de los cinco widgets propios también sería
+     * un defecto, y `assertEqualsCanonicalizing` lo atrapa igual que atrapa
+     * una fuga del observatorio.
+     */
+    public function test_el_tablero_trae_exactamente_sus_widgets_y_ninguno_del_observatorio(): void
+    {
+        $panel = (new AdminPanelProvider($this->app))->panel(Panel::make());
+
+        $widgets = array_values($panel->getWidgets());
+
+        $this->assertEqualsCanonicalizing(
+            [
+                PendientesDeAprobacion::class,
+                ResumenDelGremio::class,
+                RecaudoMensual::class,
+                AsociadosPorMunicipio::class,
+                UltimasTransacciones::class,
+            ],
+            $widgets,
+            'El tablero debe traer exactamente estos cinco widgets: ni de menos, ni con ninguna gráfica del observatorio colada por discoverWidgets().'
+        );
+
+        foreach ($widgets as $widget) {
+            $this->assertFalse(
+                str_starts_with($widget, 'App\\Filament\\Widgets\\Observatorio\\'),
+                "{$widget} es una gráfica del observatorio y no debería estar registrada en el tablero."
+            );
+        }
     }
 
     public function test_la_secretaria_tambien_entra_al_tablero(): void

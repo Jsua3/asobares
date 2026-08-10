@@ -88,6 +88,15 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([])
+            // `discoverWidgets()` recorre `Filament/Widgets` RECURSIVAMENTE:
+            // cualquier subdirectorio (como `Observatorio/`) entra también,
+            // con su propio `$sort` compitiendo por posición con el tablero.
+            // Las gráficas de `Observatorio/` optan por quedar fuera con
+            // `GraficaDelObservatorio::$isDiscovered = false` en vez de vivir
+            // en otro directorio: siguen registradas a mano en
+            // `Observatorio::getFooterWidgets()`. El siguiente subdirectorio
+            // de widgets que se agregue aquí necesita el mismo mecanismo si
+            // no debe aparecer en el tablero.
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 PendientesDeAprobacion::class,

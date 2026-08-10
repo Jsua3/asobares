@@ -27,6 +27,24 @@ use Illuminate\Support\Facades\Auth;
  */
 abstract class GraficaDelObservatorio extends ChartWidget
 {
+    /**
+     * `AdminPanelProvider::panel()` descubre widgets recursivamente en
+     * `app/Filament/Widgets` (`discoverWidgets()` recorre subdirectorios), así
+     * que sin esto las seis gráficas del observatorio se colaban en el
+     * tablero: sus `$sort` (1–6) se intercalaban con los del tablero (0–4) y
+     * rompían las tres bandas que el tablero documenta como su razón de
+     * existir, además de doblar su coste de consultas en cada carga.
+     *
+     * `$isDiscovered = false` es el mecanismo nativo de Filament para esto
+     * (`Widget::isDiscovered()`, consultado por `discoverComponents()` antes
+     * de registrar cada clase encontrada): saca la familia entera del
+     * descubrimiento automático sin sacarla del directorio ni de la
+     * convención de namespace. `Observatorio::getFooterWidgets()` las sigue
+     * registrando de forma explícita — `isDiscovered` solo afecta al barrido
+     * automático, no a una referencia directa a la clase.
+     */
+    protected static bool $isDiscovered = false;
+
     protected int|string|array $columnSpan = 'full';
 
     private ?MetricasDelObservatorio $metricas = null;
