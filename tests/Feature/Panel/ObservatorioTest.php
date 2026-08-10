@@ -78,16 +78,53 @@ class ObservatorioTest extends TestCase
             ->assertSee('n = ', false);
     }
 
-    public function test_las_tres_visualizaciones_solidas_dibujan_y_rotulan_su_muestra(): void
+    /**
+     * Reemplaza a `test_las_tres_visualizaciones_solidas_dibujan_y_rotulan_su_muestra`,
+     * la prueba que dejó pasar el Crítico 1: decía «dibujan» en su nombre y
+     * solo comprobaba `assertSee('n = ')` sobre una lista de tres gráficas
+     * escrita a mano, sin mirar canvas ni estado vacío. Esa lista incluía
+     * `ComposicionDelSector` con n = 24 (bajo el umbral) y la daba por
+     * «sólida» igual.
+     *
+     * Esta versión afirma lo que promete —canvas visible cuando la muestra
+     * alcanza, estado vacío cuando no— para las SEIS gráficas, y deriva
+     * cuáles deberían dibujar del umbral en vivo: lee la serie real de cada
+     * widget por reflexión (`serie()`, protegido) y le pregunta
+     * `hayMuestraSuficiente()`, en vez de repetir una lista de nombres que
+     * alguien tendría que recordar mover el día que una muestra cruce el
+     * umbral en cualquier dirección.
+     *
+     * El wrapper del canvas de `chart-widget.blade.php` (vendor/filament)
+     * siempre imprime el `<canvas>` en el HTML, esté vacío o no: solo lo
+     * envuelve en `style="display: none"` cuando `isEmpty()` es cierto. Por
+     * eso la señal de "dibuja" no es la presencia del tag sino la AUSENCIA
+     * de ese estilo, junto con la ausencia del texto del estado vacío.
+     */
+    public function test_cada_grafica_dibuja_o_calla_segun_si_su_muestra_alcanza_el_umbral_vigente(): void
     {
         $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
 
-        foreach ([
-            PresenciaPorMunicipio::class,
-            ComposicionDelSector::class,
-            SaludFinanciera::class,
-        ] as $widget) {
-            Livewire::test($widget)->assertSee('n = ');
+        $paginaObservatorio = Livewire::test(Observatorio::class)->instance();
+        $widgets = (new \ReflectionMethod(Observatorio::class, 'getFooterWidgets'))->invoke($paginaObservatorio);
+
+        $this->assertNotEmpty($widgets, 'Observatorio::getFooterWidgets() no debería estar vacío.');
+
+        foreach ($widgets as $claseWidget) {
+            $prueba = Livewire::test($claseWidget);
+
+            $serie = (new \ReflectionMethod($claseWidget, 'serie'))->invoke($prueba->instance());
+
+            $prueba->assertSee('n = ');
+
+            if ($serie->hayMuestraSuficiente()) {
+                $prueba
+                    ->assertDontSeeHtml('style="display: none"')
+                    ->assertDontSee('Aún sin muestra suficiente');
+            } else {
+                $prueba
+                    ->assertSeeHtml('style="display: none"')
+                    ->assertSee('Aún sin muestra suficiente');
+            }
         }
     }
 
