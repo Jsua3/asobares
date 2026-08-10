@@ -94,6 +94,13 @@ class ObservatorioTest extends TestCase
     public function test_los_widgets_del_observatorio_dejan_hueco_al_plugin_de_tema(): void
     {
         foreach (File::allFiles(app_path('Filament/Widgets/Observatorio')) as $archivo) {
+            // `GraficaDelObservatorio` es la base abstracta de la que heredan
+            // las seis: no declara `getOptions()` (cada gráfica trae la suya),
+            // así que no le aplica esta regla.
+            if ($archivo->getFilenameWithoutExtension() === 'GraficaDelObservatorio') {
+                continue;
+            }
+
             $contenido = $archivo->getContents();
 
             $this->assertStringContainsString(

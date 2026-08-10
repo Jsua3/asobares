@@ -2,10 +2,7 @@
 
 namespace App\Filament\Widgets\Observatorio;
 
-use App\Panel\MetricasDelObservatorio;
 use App\Panel\SerieDelObservatorio;
-use Filament\Widgets\ChartWidget;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Recaudo mensual a dieciocho meses: horizonte analítico, no operativo.
@@ -20,18 +17,18 @@ use Illuminate\Support\Facades\Auth;
  * La tasa de mora no vive aquí: ver el docblock de
  * `MetricasDelObservatorio::calcularTasaDeMoraActual()` para el porqué.
  */
-class SaludFinanciera extends ChartWidget
+class SaludFinanciera extends GraficaDelObservatorio
 {
     protected static ?int $sort = 3;
 
-    protected int|string|array $columnSpan = 'full';
-
-    private ?MetricasDelObservatorio $metricas = null;
-
-    /** El rótulo `n = …` va junto al título, no escondido en un tooltip. */
-    public function getHeading(): string
+    public static function titulo(): string
     {
-        return "Salud financiera, últimos 18 meses ({$this->serie()->rotuloDeMuestra()})";
+        return 'Salud financiera, últimos 18 meses';
+    }
+
+    public static function que(): string
+    {
+        return 'la salud financiera del gremio';
     }
 
     protected function getData(): array
@@ -65,17 +62,7 @@ class SaludFinanciera extends ChartWidget
         ];
     }
 
-    public static function canView(): bool
-    {
-        return Auth::user()?->can('ver_observatorio') === true;
-    }
-
-    private function metricas(): MetricasDelObservatorio
-    {
-        return $this->metricas ??= app(MetricasDelObservatorio::class);
-    }
-
-    private function serie(): SerieDelObservatorio
+    protected function serie(): SerieDelObservatorio
     {
         return $this->metricas()->saludFinanciera();
     }

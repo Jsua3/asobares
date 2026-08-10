@@ -2,10 +2,7 @@
 
 namespace App\Filament\Widgets\Observatorio;
 
-use App\Panel\MetricasDelObservatorio;
 use App\Panel\SerieDelObservatorio;
-use Filament\Widgets\ChartWidget;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Presencia del gremio por municipio: asociados, vacantes y consultas de la
@@ -13,19 +10,24 @@ use Illuminate\Support\Facades\Auth;
  *
  * Barras horizontales (`indexAxis: 'y'`): doce municipios con nombre largo
  * (p. ej. «Córdoba», «Génova») no caben en un eje vertical sin solaparse.
+ *
+ * Tres conjuntos de datos con tamaños de muestra muy distintos (asociados,
+ * vacantes, consultas): ver el docblock de
+ * `SerieDelObservatorio::hayMuestraSuficiente()` para el porqué esta gráfica
+ * exige el umbral al más flaco de los tres, no a su suma.
  */
-class PresenciaPorMunicipio extends ChartWidget
+class PresenciaPorMunicipio extends GraficaDelObservatorio
 {
     protected static ?int $sort = 1;
 
-    protected int|string|array $columnSpan = 'full';
-
-    private ?MetricasDelObservatorio $metricas = null;
-
-    /** El rótulo `n = …` va junto al título, no escondido en un tooltip. */
-    public function getHeading(): string
+    public static function titulo(): string
     {
-        return "Presencia por municipio ({$this->serie()->rotuloDeMuestra()})";
+        return 'Presencia por municipio';
+    }
+
+    public static function que(): string
+    {
+        return 'la presencia del gremio por municipio';
     }
 
     protected function getData(): array
@@ -83,17 +85,7 @@ class PresenciaPorMunicipio extends ChartWidget
         ];
     }
 
-    public static function canView(): bool
-    {
-        return Auth::user()?->can('ver_observatorio') === true;
-    }
-
-    private function metricas(): MetricasDelObservatorio
-    {
-        return $this->metricas ??= app(MetricasDelObservatorio::class);
-    }
-
-    private function serie(): SerieDelObservatorio
+    protected function serie(): SerieDelObservatorio
     {
         return $this->metricas()->presenciaPorMunicipio();
     }

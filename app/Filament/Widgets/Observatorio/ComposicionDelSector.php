@@ -2,10 +2,7 @@
 
 namespace App\Filament\Widgets\Observatorio;
 
-use App\Panel\MetricasDelObservatorio;
 use App\Panel\SerieDelObservatorio;
-use Filament\Widgets\ChartWidget;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Asociados publicados por categoría, de mayor a menor.
@@ -14,19 +11,25 @@ use Illuminate\Support\Facades\Auth;
  * una sola serie), pero agrupado por categoría en vez de por municipio y
  * leyendo de `MetricasDelObservatorio::composicionDelSector()` en vez de
  * consultar por su cuenta.
+ *
+ * Con la semilla de hoy hay veinticuatro asociados publicados (n = 24, bajo
+ * el umbral de treinta): esta gráfica se clasificó como «sólida» cuando se
+ * escribió y nadie volvió a mirarla cuando su muestra bajó. Heredar de
+ * `GraficaDelObservatorio` es lo que evita que eso vuelva a pasar: la regla
+ * de la muestra ya no depende de que alguien la copie a mano aquí.
  */
-class ComposicionDelSector extends ChartWidget
+class ComposicionDelSector extends GraficaDelObservatorio
 {
     protected static ?int $sort = 2;
 
-    protected int|string|array $columnSpan = 'full';
-
-    private ?MetricasDelObservatorio $metricas = null;
-
-    /** El rótulo `n = …` va junto al título, no escondido en un tooltip. */
-    public function getHeading(): string
+    public static function titulo(): string
     {
-        return "Composición del sector ({$this->serie()->rotuloDeMuestra()})";
+        return 'Composición del sector';
+    }
+
+    public static function que(): string
+    {
+        return 'la composición del sector por categoría';
     }
 
     protected function getData(): array
@@ -63,17 +66,7 @@ class ComposicionDelSector extends ChartWidget
         ];
     }
 
-    public static function canView(): bool
-    {
-        return Auth::user()?->can('ver_observatorio') === true;
-    }
-
-    private function metricas(): MetricasDelObservatorio
-    {
-        return $this->metricas ??= app(MetricasDelObservatorio::class);
-    }
-
-    private function serie(): SerieDelObservatorio
+    protected function serie(): SerieDelObservatorio
     {
         return $this->metricas()->composicionDelSector();
     }

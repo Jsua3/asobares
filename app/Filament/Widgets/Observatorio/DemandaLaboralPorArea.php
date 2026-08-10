@@ -3,11 +3,7 @@
 namespace App\Filament\Widgets\Observatorio;
 
 use App\Enums\CargoDelSector;
-use App\Panel\MetricasDelObservatorio;
 use App\Panel\SerieDelObservatorio;
-use Filament\Widgets\ChartWidget;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Vacantes publicadas por mes y por área, doce meses, apiladas — ver el
@@ -18,43 +14,18 @@ use Illuminate\Support\Facades\Auth;
  * tendencia mensual que todavía no existe, así que la gráfica lo dice en vez
  * de dibujarlo.
  */
-class DemandaLaboralPorArea extends ChartWidget
+class DemandaLaboralPorArea extends GraficaDelObservatorio
 {
     protected static ?int $sort = 5;
 
-    protected int|string|array $columnSpan = 'full';
-
-    private ?MetricasDelObservatorio $metricas = null;
-
-    /** El rótulo `n = …` va junto al título, dibuje o no la gráfica. */
-    public function getHeading(): string
+    public static function titulo(): string
     {
-        return "Demanda laboral por área ({$this->serie()->rotuloDeMuestra()})";
+        return 'Demanda laboral por área';
     }
 
-    /**
-     * `ChartWidget::isEmpty()` de fábrica solo mira si `getData()` vino
-     * vacío. Aquí el criterio es otro: puede haber una barra solitaria sin
-     * que la muestra alcance el umbral de
-     * `SerieDelObservatorio::MUESTRA_MINIMA`.
-     */
-    public function isEmpty(): bool
+    public static function que(): string
     {
-        return ! $this->serie()->hayMuestraSuficiente();
-    }
-
-    /**
-     * `chart-widget.blade.php` (vendor/filament/widgets) ya bifurca: si
-     * `isEmpty()` es cierto, rinde esto en vez del canvas. Es el mecanismo
-     * nativo de Filament para que un `ChartWidget` decida no dibujar — no
-     * hace falta un `Widget` con vista propia.
-     */
-    public function getEmptyState(): View
-    {
-        return view('components.panel.sin-muestra', [
-            'serie' => $this->serie(),
-            'que' => 'la demanda laboral por área y por mes',
-        ]);
+        return 'la demanda laboral por área y por mes';
     }
 
     protected function getData(): array
@@ -111,17 +82,7 @@ class DemandaLaboralPorArea extends ChartWidget
         ];
     }
 
-    public static function canView(): bool
-    {
-        return Auth::user()?->can('ver_observatorio') === true;
-    }
-
-    private function metricas(): MetricasDelObservatorio
-    {
-        return $this->metricas ??= app(MetricasDelObservatorio::class);
-    }
-
-    private function serie(): SerieDelObservatorio
+    protected function serie(): SerieDelObservatorio
     {
         return $this->metricas()->demandaLaboralPorArea();
     }

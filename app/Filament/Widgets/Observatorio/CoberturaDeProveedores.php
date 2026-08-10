@@ -2,11 +2,7 @@
 
 namespace App\Filament\Widgets\Observatorio;
 
-use App\Panel\MetricasDelObservatorio;
 use App\Panel\SerieDelObservatorio;
-use Filament\Widgets\ChartWidget;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Proveedores publicados y vigentes por categoría, las siete del enum
@@ -17,43 +13,18 @@ use Illuminate\Support\Facades\Auth;
  * siete categorías (n < 30): dibujar barras ahí sugeriría una cobertura que
  * todavía no existe, así que esta gráfica decide no dibujar y lo dice.
  */
-class CoberturaDeProveedores extends ChartWidget
+class CoberturaDeProveedores extends GraficaDelObservatorio
 {
     protected static ?int $sort = 4;
 
-    protected int|string|array $columnSpan = 'full';
-
-    private ?MetricasDelObservatorio $metricas = null;
-
-    /** El rótulo `n = …` va junto al título, dibuje o no la gráfica. */
-    public function getHeading(): string
+    public static function titulo(): string
     {
-        return "Cobertura de proveedores ({$this->serie()->rotuloDeMuestra()})";
+        return 'Cobertura de proveedores';
     }
 
-    /**
-     * `ChartWidget::isEmpty()` de fábrica solo mira si `getData()` vino
-     * vacío. Aquí el criterio es otro: puede haber datos (siete categorías,
-     * varias en cero) sin que la muestra alcance el umbral de
-     * `SerieDelObservatorio::MUESTRA_MINIMA`.
-     */
-    public function isEmpty(): bool
+    public static function que(): string
     {
-        return ! $this->serie()->hayMuestraSuficiente();
-    }
-
-    /**
-     * `chart-widget.blade.php` (vendor/filament/widgets) ya bifurca: si
-     * `isEmpty()` es cierto, rinde esto en vez del canvas. Es el mecanismo
-     * nativo de Filament para que un `ChartWidget` decida no dibujar — no
-     * hace falta un `Widget` con vista propia.
-     */
-    public function getEmptyState(): View
-    {
-        return view('components.panel.sin-muestra', [
-            'serie' => $this->serie(),
-            'que' => 'la cobertura de proveedores por categoría',
-        ]);
+        return 'la cobertura de proveedores por categoría';
     }
 
     protected function getData(): array
@@ -87,17 +58,7 @@ class CoberturaDeProveedores extends ChartWidget
         ];
     }
 
-    public static function canView(): bool
-    {
-        return Auth::user()?->can('ver_observatorio') === true;
-    }
-
-    private function metricas(): MetricasDelObservatorio
-    {
-        return $this->metricas ??= app(MetricasDelObservatorio::class);
-    }
-
-    private function serie(): SerieDelObservatorio
+    protected function serie(): SerieDelObservatorio
     {
         return $this->metricas()->coberturaDeProveedores();
     }

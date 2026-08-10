@@ -2,11 +2,7 @@
 
 namespace App\Filament\Widgets\Observatorio;
 
-use App\Panel\MetricasDelObservatorio;
 use App\Panel\SerieDelObservatorio;
-use Filament\Widgets\ChartWidget;
-use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Demanda (vacantes publicadas) contra oferta (aspirantes + postulaciones)
@@ -14,48 +10,25 @@ use Illuminate\Support\Facades\Auth;
  * `MetricasDelObservatorio::calcularOfertaContraDemanda()`.
  *
  * Con la semilla de hoy hay siete vacantes, siete aspirantes y cuatro
- * postulaciones repartidos en siete áreas: n = 17. Es justo el argumento
+ * postulaciones repartidos en siete áreas. Es justo el argumento
  * institucional que el observatorio existe para sostener ante el gremio y
- * una alcaldía, así que es la primera gráfica que no puede permitirse
- * fingir una tendencia que la muestra no aguanta.
+ * una alcaldía, así que es una de las gráficas que menos puede permitirse
+ * fingir una tendencia que la muestra no aguanta — ver el docblock de
+ * `SerieDelObservatorio::hayMuestraSuficiente()`: con dos conjuntos de datos,
+ * el umbral se le exige al más flaco de los dos, no a su suma.
  */
-class OfertaContraDemanda extends ChartWidget
+class OfertaContraDemanda extends GraficaDelObservatorio
 {
     protected static ?int $sort = 6;
 
-    protected int|string|array $columnSpan = 'full';
-
-    private ?MetricasDelObservatorio $metricas = null;
-
-    /** El rótulo `n = …` va junto al título, dibuje o no la gráfica. */
-    public function getHeading(): string
+    public static function titulo(): string
     {
-        return "Oferta contra demanda ({$this->serie()->rotuloDeMuestra()})";
+        return 'Oferta contra demanda';
     }
 
-    /**
-     * `ChartWidget::isEmpty()` de fábrica solo mira si `getData()` vino
-     * vacío. Aquí el criterio es otro: hay datos (n = 17), pero no alcanzan
-     * el umbral de `SerieDelObservatorio::MUESTRA_MINIMA`, y dibujar barras
-     * sobre esa muestra sugeriría una tendencia que no existe.
-     */
-    public function isEmpty(): bool
+    public static function que(): string
     {
-        return ! $this->serie()->hayMuestraSuficiente();
-    }
-
-    /**
-     * `chart-widget.blade.php` (vendor/filament/widgets) ya bifurca: si
-     * `isEmpty()` es cierto, rinde esto en vez del canvas. Es el mecanismo
-     * nativo de Filament para que un `ChartWidget` decida no dibujar — no
-     * hace falta un `Widget` con vista propia.
-     */
-    public function getEmptyState(): View
-    {
-        return view('components.panel.sin-muestra', [
-            'serie' => $this->serie(),
-            'que' => 'la oferta contra la demanda laboral',
-        ]);
+        return 'la oferta contra la demanda laboral';
     }
 
     protected function getData(): array
@@ -100,17 +73,7 @@ class OfertaContraDemanda extends ChartWidget
         ];
     }
 
-    public static function canView(): bool
-    {
-        return Auth::user()?->can('ver_observatorio') === true;
-    }
-
-    private function metricas(): MetricasDelObservatorio
-    {
-        return $this->metricas ??= app(MetricasDelObservatorio::class);
-    }
-
-    private function serie(): SerieDelObservatorio
+    protected function serie(): SerieDelObservatorio
     {
         return $this->metricas()->ofertaContraDemanda();
     }
