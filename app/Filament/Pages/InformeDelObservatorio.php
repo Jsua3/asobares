@@ -100,7 +100,20 @@ class InformeDelObservatorio extends Page
      * (ver `resources/views/components/panel/sin-muestra.blade.php`), para
      * que el papel diga exactamente lo mismo que la pantalla.
      *
-     * @return list<array{titulo: string, que: string, serie: SerieDelObservatorio}>
+     * Única fuente de verdad para el título de cada serie: antes vivía
+     * duplicado aquí y en `todosLosIndicadores()`, y un revisor demostró que
+     * las dos copias podían divergir (una se renombraba, la otra no) sin que
+     * ninguna prueba lo notara. `todosLosIndicadores()` ahora deriva de esta
+     * lista en vez de repetir los títulos a mano, así que renombrar una
+     * serie aquí la renombra también en el descargo — no hay un segundo
+     * sitio que se pueda olvidar.
+     *
+     * `clave` es el identificador estable de cada sección en el HTML
+     * (`data-serie` en la vista): a diferencia de `titulo`, no cambia si se
+     * retoca el rótulo visible, así que sigue sirviendo para ubicar la
+     * sección aunque el texto se edite.
+     *
+     * @return list<array{clave: string, titulo: string, que: string, serie: SerieDelObservatorio}>
      */
     public function series(): array
     {
@@ -108,31 +121,37 @@ class InformeDelObservatorio extends Page
 
         return [
             [
+                'clave' => 'presencia-por-municipio',
                 'titulo' => 'Presencia por municipio',
                 'que' => 'la presencia del gremio por municipio',
                 'serie' => $metricas->presenciaPorMunicipio(),
             ],
             [
+                'clave' => 'composicion-del-sector',
                 'titulo' => 'Composición del sector',
                 'que' => 'la composición del sector por categoría',
                 'serie' => $metricas->composicionDelSector(),
             ],
             [
+                'clave' => 'salud-financiera',
                 'titulo' => 'Salud financiera, últimos 18 meses',
                 'que' => 'la salud financiera del gremio',
                 'serie' => $metricas->saludFinanciera(),
             ],
             [
+                'clave' => 'cobertura-de-proveedores',
                 'titulo' => 'Cobertura de proveedores',
                 'que' => 'la cobertura de proveedores por categoría',
                 'serie' => $metricas->coberturaDeProveedores(),
             ],
             [
+                'clave' => 'demanda-laboral-por-area',
                 'titulo' => 'Demanda laboral por área',
                 'que' => 'la demanda laboral por área y por mes',
                 'serie' => $metricas->demandaLaboralPorArea(),
             ],
             [
+                'clave' => 'oferta-contra-demanda',
                 'titulo' => 'Oferta contra demanda',
                 'que' => 'la oferta contra la demanda laboral',
                 'serie' => $metricas->ofertaContraDemanda(),
@@ -147,21 +166,22 @@ class InformeDelObservatorio extends Page
      * publicados» y «Composición del sector»)—, para que el descargo de
      * muestra no repita la misma cifra dos veces con dos nombres distintos.
      *
+     * Las seis series toman su título de {@see series()} en vez de
+     * repetirlo: solo la tasa de mora, que no tiene tabla propia, se agrega
+     * aparte.
+     *
      * @return list<array{titulo: string, serie: SerieDelObservatorio}>
      */
     private function todosLosIndicadores(): array
     {
-        $metricas = $this->metricas();
+        $seis = array_map(
+            fn (array $item): array => ['titulo' => $item['titulo'], 'serie' => $item['serie']],
+            $this->series(),
+        );
 
-        return [
-            ['titulo' => 'Presencia por municipio', 'serie' => $metricas->presenciaPorMunicipio()],
-            ['titulo' => 'Composición del sector', 'serie' => $metricas->composicionDelSector()],
-            ['titulo' => 'Salud financiera', 'serie' => $metricas->saludFinanciera()],
-            ['titulo' => 'Tasa de mora actual', 'serie' => $metricas->tasaDeMoraActual()],
-            ['titulo' => 'Cobertura de proveedores', 'serie' => $metricas->coberturaDeProveedores()],
-            ['titulo' => 'Demanda laboral por área', 'serie' => $metricas->demandaLaboralPorArea()],
-            ['titulo' => 'Oferta contra demanda', 'serie' => $metricas->ofertaContraDemanda()],
-        ];
+        $seis[] = ['titulo' => 'Tasa de mora actual', 'serie' => $this->metricas()->tasaDeMoraActual()];
+
+        return $seis;
     }
 
     /**

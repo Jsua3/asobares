@@ -253,6 +253,19 @@ class ObservatorioTest extends TestCase
      * `ofertaContraDemanda()` por encima del umbral con aspirantes reales de
      * una sola categoría — mismo mecanismo que
      * `test_la_misma_visualizacion_dibuja_en_cuanto_hay_muestra`.
+     *
+     * `extraerSeccionDeSerie()` acota cada sección por su propio
+     * `data-serie` hasta su propio `</section>` — no por el título de la
+     * SIGUIENTE serie, como hacía la primera versión de esta prueba. Con
+     * títulos como delimitador, un revisor demostró que renombrar el título
+     * de otra serie (sin tocar el aviso de nadie) podía desplazar el "hasta"
+     * varias secciones más abajo: el recorte se tragaba media página, el
+     * aviso seguía cayendo dentro por pura casualidad, y la prueba pasaba
+     * sin haber comprobado nada. `data-serie` no es texto visible que pueda
+     * reaparecer en el descargo del pie, así que no tiene ese problema; y el
+     * `assertLessThan` de abajo es la segunda red: si algún día el recorte
+     * volviera a inflarse por cualquier otra vía, el tamaño lo delata aunque
+     * el contenido, por casualidad, siguiera pasando.
      */
     public function test_el_aviso_de_muestra_insuficiente_va_pegado_a_su_serie_y_no_a_la_que_si_alcanza(): void
     {
@@ -277,33 +290,49 @@ class ObservatorioTest extends TestCase
 
         $avisoPorSerie = 'todavía no alcanza muestra suficiente';
 
-        // «Cobertura de proveedores» es la serie justo antes de «Demanda
-        // laboral por área»: ese tramo es su sección completa.
-        $seccionSinMuestra = $this->extraerSeccion($html, 'Cobertura de proveedores', 'Demanda laboral por área');
+        $seccionSinMuestra = $this->extraerSeccionDeSerie($html, 'cobertura-de-proveedores');
+        // El título pinta el título real que trae la sección: si alguna vez
+        // vuelve a divergir de `series()`, esta línea lo delata en vez de
+        // dejar que `extraerSeccionDeSerie()` encuentre la sección correcta
+        // pero con contenido de otra.
+        $this->assertStringContainsString('Cobertura de proveedores', $seccionSinMuestra);
         $this->assertStringContainsString(
             $avisoPorSerie,
             $seccionSinMuestra,
             'La sección de "Cobertura de proveedores" (sin muestra suficiente) debería llevar el aviso pegado a su tabla.'
         );
+        $this->assertLessThan(
+            8000,
+            strlen($seccionSinMuestra),
+            'La sección parece haberse tragado más página de la que le corresponde.'
+        );
 
-        // «Oferta contra demanda» es la última serie antes del descargo: su
-        // sección va desde su título hasta ese bloque.
-        $seccionConMuestra = $this->extraerSeccion($html, 'Oferta contra demanda', 'Descargo sobre el tamaño de muestra');
+        $seccionConMuestra = $this->extraerSeccionDeSerie($html, 'oferta-contra-demanda');
+        $this->assertStringContainsString('Oferta contra demanda', $seccionConMuestra);
         $this->assertStringNotContainsString(
             $avisoPorSerie,
             $seccionConMuestra,
             'La sección de "Oferta contra demanda" ya alcanza muestra suficiente y no debería llevar el aviso.'
         );
+        $this->assertLessThan(
+            8000,
+            strlen($seccionConMuestra),
+            'La sección parece haberse tragado más página de la que le corresponde.'
+        );
     }
 
-    /** Recorta el HTML entre dos marcadores de texto, ambos obligatorios. */
-    private function extraerSeccion(string $html, string $desde, string $hasta): string
+    /**
+     * Recorta el `<section data-serie="{clave}">...</section>` completo de
+     * una serie del informe. Ver el docblock de la prueba de arriba para el
+     * porqué de anclar en `data-serie` y no en el título de otra sección.
+     */
+    private function extraerSeccionDeSerie(string $html, string $clave): string
     {
-        $inicio = strpos($html, $desde);
-        $this->assertNotFalse($inicio, "No se encontró \"{$desde}\" en el HTML.");
+        $inicio = strpos($html, 'data-serie="'.$clave.'"');
+        $this->assertNotFalse($inicio, "No se encontró la sección con data-serie=\"{$clave}\" en el HTML.");
 
-        $fin = strpos($html, $hasta, $inicio);
-        $this->assertNotFalse($fin, "No se encontró \"{$hasta}\" después de \"{$desde}\".");
+        $fin = strpos($html, '</section>', $inicio);
+        $this->assertNotFalse($fin, "La sección \"{$clave}\" no cierra con </section>.");
 
         return substr($html, $inicio, $fin - $inicio);
     }

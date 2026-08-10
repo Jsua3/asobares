@@ -48,9 +48,25 @@
         @endforeach
     </div>
 
+    {{--
+        Cada serie se dibuja como tabla, no como el `ChartWidget` que ya
+        existe para ella en `Observatorio` (mismo dato, mismo `MetricasDelObservatorio`).
+        Un `ChartWidget` renderiza sobre `<canvas>` vía Chart.js, y Chart.js
+        dibuja ese canvas después de que el navegador ya calculó el layout —
+        justo el paso que un motor de impresión puede saltarse u ordenar de
+        otra forma. El riesgo real es una gráfica en blanco en el papel que
+        la dirección lleva a una alcaldía, y una tabla de HTML no depende de
+        ningún ciclo de render en JavaScript: lo que compone la página es lo
+        que sale impreso.
+
+        `data-serie` en cada `<section>` es el identificador estable de esa
+        sección (ver el docblock de `InformeDelObservatorio::series()`): no
+        cambia si se retoca el título visible, así que sigue sirviendo para
+        ubicarla en las pruebas aunque el rótulo se edite.
+    --}}
     <div class="mt-8 space-y-8">
         @foreach ($series as $item)
-            <section class="informe-bloque">
+            <section class="informe-bloque" data-serie="{{ $item['clave'] }}">
                 <h2 class="text-base text-fuerte">
                     {{ $item['titulo'] }}
                     <span @class([
