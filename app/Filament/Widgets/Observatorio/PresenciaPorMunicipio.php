@@ -35,25 +35,25 @@ class PresenciaPorMunicipio extends GraficaDelObservatorio
         $serie = $this->serie();
 
         return [
+            // Las tres primeras ranuras de la paleta categórica de la base
+            // (Pub Red, Wine, Ambient Purple). El color efectivo lo escribe
+            // `panel-graficas.js` desde `--asb-serie-N`, porque Wine no
+            // sobrevive al fondo del tema oscuro.
             'datasets' => [
                 [
                     'label' => 'Asociados',
                     'data' => $serie->series['Asociados'] ?? [],
-                    // Paleta secundaria oficial de marca (Pub Red, Wine,
-                    // Ambient Purple): tres series necesitan tres colores
-                    // distinguibles y ninguno es Tailwind cableado, así que
-                    // la guardia de tema no los vigila.
-                    'backgroundColor' => '#EE4137',
+                    ...$this->relleno(1),
                 ],
                 [
                     'label' => 'Vacantes',
                     'data' => $serie->series['Vacantes'] ?? [],
-                    'backgroundColor' => '#A4161A',
+                    ...$this->relleno(2),
                 ],
                 [
                     'label' => 'Consultas de la guía',
                     'data' => $serie->series['Consultas de la guía'] ?? [],
-                    'backgroundColor' => '#C05299',
+                    ...$this->relleno(3),
                 ],
             ],
             'labels' => $serie->etiquetas,

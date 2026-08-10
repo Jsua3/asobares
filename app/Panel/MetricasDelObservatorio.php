@@ -329,6 +329,10 @@ class MetricasDelObservatorio
             series: $series,
             n: (int) $filas->sum(fn ($fila): int => (int) $fila->total),
             unidad: 'vacantes',
+            // Las siete áreas son rebanadas de una sola población —las
+            // vacantes publicadas—, no siete medidas independientes: el
+            // umbral se le pide al total. Ver `hayMuestraSuficiente()`.
+            rebanadasDeUnaMedida: true,
         );
     }
 

@@ -81,9 +81,13 @@
                 @if ($item['serie']->estaVacia())
                     <p class="mt-2 text-sm text-tenue">Todavía no hay datos que mostrar.</p>
                 @elseif (! $item['serie']->hayMuestraSuficiente())
+                    {{-- El rótulo que decide, no el `n` combinado: en una serie que
+                         cruza medidas independientes el total puede estar muy por
+                         encima del umbral y aun así no alcanzar, y ponerlo al lado
+                         del mínimo se leía como una contradicción. --}}
                     <p class="mt-2 text-sm text-aviso">
                         Esta cifra todavía no alcanza muestra suficiente
-                        ({{ $item['serie']->rotuloDeMuestra() }}, mínimo
+                        ({{ $item['serie']->rotuloDeLaMuestraQueDecide() }}, mínimo
                         {{ \App\Panel\SerieDelObservatorio::MUESTRA_MINIMA }}) para sostener
                         {{ $item['que'] }}. La tabla queda como referencia, no como afirmación.
                     </p>

@@ -13,6 +13,7 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -81,6 +82,173 @@ class MetricasDelObservatorioTest extends TestCase
         );
 
         $this->assertTrue($presencia->hayMuestraSuficiente());
+    }
+
+    /**
+     * La frontera de la rama multi-conjunto, que es donde de verdad se
+     * demuestra el umbral. Los dos casos de arriba usan números holgados —6
+     * muy por debajo, 30 justo encima— y con eso un off-by-one en la
+     * comparación pasa desapercibido.
+     *
+     * @return array<string, array{int, bool}>
+     */
+    public static function fronteraDelConjuntoMasFlaco(): array
+    {
+        return [
+            'el conjunto flojo se queda a uno' => [29, false],
+            'el conjunto flojo llega justo' => [30, true],
+        ];
+    }
+
+    #[DataProvider('fronteraDelConjuntoMasFlaco')]
+    public function test_la_frontera_del_conjunto_mas_flaco_decide_la_muestra(int $flaco, bool $alcanza): void
+    {
+        $serie = new SerieDelObservatorio(
+            etiquetas: ['Armenia', 'Calarcá'],
+            series: [
+                'Vacantes' => [$flaco - 1, 1],
+                'Consultas de la guía' => [700, 32],
+            ],
+            n: $flaco + 732,
+            unidad: 'registros',
+        );
+
+        $this->assertSame($alcanza, $serie->hayMuestraSuficiente());
+    }
+
+    /**
+     * Hay dos formas distintas de traer varios conjuntos y el umbral no
+     * significa lo mismo en las dos.
+     *
+     * `presenciaPorMunicipio()` cruza tres medidas independientes —asociados,
+     * vacantes, consultas—, y ahí exigir el umbral a cada una es justo lo que
+     * cierra la puerta trasera: una serie robusta no le presta credibilidad a
+     * otra que no la tiene.
+     *
+     * `demandaLaboralPorArea()` es lo contrario: parte UNA población —las
+     * vacantes— en siete rebanadas por área. Exigirle treinta a cada rebanada
+     * son doscientas diez vacantes, y «Otros» es un cajón residual que por
+     * definición nunca las tendrá: la gráfica no podría dibujar nunca, y el
+     * módulo estaría anunciando un umbral de treinta mientras aplica otro.
+     */
+    public function test_las_rebanadas_de_una_misma_medida_comparan_el_umbral_contra_el_total(): void
+    {
+        $demanda = new SerieDelObservatorio(
+            etiquetas: ['Ene', 'Feb'],
+            series: [
+                'Administración' => [4, 3],
+                'Cocina' => [5, 2],
+                'Barra' => [3, 2],
+                'Servicio' => [4, 1],
+                'Seguridad' => [2, 0],
+                'Aseo' => [2, 1],
+                'Otros' => [1, 0],
+            ],
+            n: 30,
+            unidad: 'vacantes',
+            rebanadasDeUnaMedida: true,
+        );
+
+        $this->assertTrue(
+            $demanda->hayMuestraSuficiente(),
+            'Treinta vacantes repartidas en siete áreas son treinta observaciones de la misma medida: el umbral se le pide a la población, no a cada rebanada.'
+        );
+    }
+
+    /** Y la rebanada no es una excusa para saltarse el umbral: contra el total, sigue rigiendo. */
+    public function test_las_rebanadas_de_una_misma_medida_siguen_sujetas_al_umbral(): void
+    {
+        $demanda = new SerieDelObservatorio(
+            etiquetas: ['Ene', 'Feb'],
+            series: [
+                'Administración' => [10, 9],
+                'Otros' => [6, 4],
+            ],
+            n: 29,
+            unidad: 'vacantes',
+            rebanadasDeUnaMedida: true,
+        );
+
+        $this->assertFalse($demanda->hayMuestraSuficiente());
+    }
+
+    /**
+     * El estado vacío decía «hoy hay n = 762 registros y hacen falta al menos
+     * 30 para afirmar algo», que es una contradicción delante de un
+     * directivo: 762 es mayor que 30. Venía de imprimir el `n` combinado
+     * mientras la decisión ya se tomaba por conjunto. Lo que hay que nombrar
+     * es la señal que de verdad no llega.
+     */
+    public function test_el_rotulo_de_la_muestra_que_decide_nombra_el_conjunto_mas_flaco(): void
+    {
+        $presencia = new SerieDelObservatorio(
+            etiquetas: ['Armenia', 'Calarcá'],
+            series: [
+                'Asociados' => [20, 4],
+                'Vacantes' => [5, 1],
+                'Consultas de la guía' => [700, 32],
+            ],
+            n: 762,
+            unidad: 'registros',
+        );
+
+        $this->assertSame('«Vacantes» solo reúne 6 registros', $presencia->rotuloDeLaMuestraQueDecide());
+    }
+
+    /**
+     * Cuando no hay un conjunto que señalar —una sola medida, o rebanadas de
+     * una sola medida— la que decide es la muestra total y el rótulo vuelve a
+     * ser el de siempre.
+     *
+     * @return array<string, array{array<string, list<int>>, bool}>
+     */
+    public static function seriesSinConjuntoFlaco(): array
+    {
+        return [
+            'un solo conjunto' => [['Asociados' => [20, 4]], false],
+            'rebanadas de una misma medida' => [['Cocina' => [12, 6], 'Otros' => [4, 2]], true],
+        ];
+    }
+
+    /** @param  array<string, list<int>>  $series */
+    #[DataProvider('seriesSinConjuntoFlaco')]
+    public function test_el_rotulo_de_la_muestra_que_decide_cae_en_el_total(array $series, bool $rebanadas): void
+    {
+        $serie = new SerieDelObservatorio(
+            etiquetas: ['Armenia', 'Calarcá'],
+            series: $series,
+            n: 24,
+            unidad: 'asociados',
+            rebanadasDeUnaMedida: $rebanadas,
+        );
+
+        $this->assertSame($serie->rotuloDeMuestra(), $serie->rotuloDeLaMuestraQueDecide());
+    }
+
+    /**
+     * Las dos pruebas de arriba construyen la serie a mano, así que pasarían
+     * igual si la producción se olvidara de la bandera. Ésta ata la que sale
+     * de verdad de la consulta.
+     */
+    public function test_la_demanda_laboral_declara_que_sus_areas_son_rebanadas(): void
+    {
+        $this->assertTrue(
+            app(MetricasDelObservatorio::class)->demandaLaboralPorArea()->rebanadasDeUnaMedida,
+            'Sin la bandera, la gráfica exigiría treinta vacantes en CADA una de las siete áreas —doscientas diez— y «Otros» no las tendría nunca.'
+        );
+    }
+
+    /**
+     * Y el reverso, que es el que impide que la bandera se reparta por
+     * comodidad: presencia por municipio cruza tres medidas independientes y
+     * ahí el umbral tiene que seguir exigiéndose a cada una.
+     */
+    public function test_la_presencia_por_municipio_no_se_declara_rebanada(): void
+    {
+        $this->assertFalse(
+            app(MetricasDelObservatorio::class)->presenciaPorMunicipio()->rebanadasDeUnaMedida,
+            'Asociados, vacantes y consultas son tres medidas distintas: si se marcaran como rebanadas, 732 consultas volverían a prestarle muestra a 6 vacantes.'
+        );
     }
 
     public function test_el_rotulo_de_muestra_dice_cuantos_y_de_que(): void

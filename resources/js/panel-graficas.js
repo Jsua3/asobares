@@ -1,10 +1,17 @@
 /*
  * Las gráficas del panel siguen el tema.
  *
- * El relleno de las series se queda en Pub Red: como relleno funciona en los
- * dos temas (la restricción AA del token `acento` es para texto). Lo que no
- * seguía el tema eran los ticks, la rejilla y la leyenda, que Chart.js pinta
- * en un gris fijo con poco contraste sobre el fondo oscuro.
+ * Lo que no seguía el tema eran los ticks, la rejilla y la leyenda, que
+ * Chart.js pinta en un gris fijo con poco contraste sobre el fondo oscuro.
+ *
+ * El relleno de una gráfica de una sola serie se queda en Pub Red: como
+ * relleno funciona en los dos temas (la restricción AA del token `acento` es
+ * para texto). Las gráficas categóricas son otra cosa: siete rellenos que
+ * tienen que distinguirse del fondo Y entre sí, y la paleta del manual está
+ * pensada sobre Ambient White. Sobre Pub Black, Wine y Pub Grey se apagan y
+ * Pub Black ES el fondo. Por eso esos rellenos salen de `--asb-serie-N`
+ * (tokens.css, con valores propios en `.dark`) y no del hexadecimal que
+ * mandó el servidor, que queda como reserva para cuando no hay JS.
  *
  * El plugin lleva su propio registro de instancias (`start`/`stop`) en vez de
  * leer `Chart.instances`: Filament empaqueta Chart.js como módulo y no expone
@@ -42,6 +49,19 @@ const plugin = {
             if (eje.ticks) eje.ticks.color = tinta
             if (eje.grid) eje.grid.color = linea
             if (eje.border) eje.border.color = linea
+        }
+
+        /*
+         * Solo repinta lo que pidió su ranura: un conjunto sin
+         * `asobaresSerie` conserva el color que mandó el servidor. Así una
+         * gráfica de una sola serie no se ve afectada, y si el token faltara
+         * se queda el hexadecimal de reserva en vez de pintar transparente.
+         */
+        for (const conjunto of grafica.data?.datasets ?? []) {
+            if (! conjunto.asobaresSerie) continue
+
+            const relleno = leerToken(`--asb-serie-${conjunto.asobaresSerie}`)
+            if (relleno) conjunto.backgroundColor = relleno
         }
     },
 }

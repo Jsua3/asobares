@@ -47,6 +47,30 @@ abstract class GraficaDelObservatorio extends ChartWidget
 
     protected int|string|array $columnSpan = 'full';
 
+    /**
+     * Color de reserva de cada ranura de la paleta categórica, para el
+     * instante anterior a que `panel-graficas.js` pinte y para un cliente sin
+     * JS. Son los valores del tema claro tal como están en `:root`, y
+     * `ObservatorioTest` los ata a `--asb-serie-N` para que no diverjan.
+     *
+     * El color de verdad vive en tokens.css porque son DOS paletas: la del
+     * manual de marca está pensada sobre Ambient White, y sobre Pub Black
+     * tres de estos siete —Wine, Pub Grey y Pub Black mismo— no llegan a 3:1
+     * contra la superficie. Vive aquí, en la base, por lo mismo que la regla
+     * del umbral: `PresenciaPorMunicipio` y `DemandaLaboralPorArea` ya
+     * cablearon la misma paleta a mano cada una por su lado, y la segunda
+     * arrastró el error de la primera.
+     */
+    protected const array RESERVA_DE_SERIE = [
+        1 => '#ee4137', // Pub Red
+        2 => '#a4161a', // Wine
+        3 => '#c05299', // Ambient Purple
+        4 => '#ea698b', // Ambient Rose
+        5 => '#282628', // Pub Grey
+        6 => '#0b090a', // Pub Black
+        7 => '#7d7779', // Noche 400
+    ];
+
     private ?MetricasDelObservatorio $metricas = null;
 
     /** Título corto de la serie, sin el rótulo de muestra: p. ej. «Composición del sector». */
@@ -106,5 +130,23 @@ abstract class GraficaDelObservatorio extends ChartWidget
     protected function metricas(): MetricasDelObservatorio
     {
         return $this->metricas ??= app(MetricasDelObservatorio::class);
+    }
+
+    /**
+     * El relleno de un conjunto de datos, para esparcir dentro de él:
+     * `...$this->relleno(2)`. Devuelve las dos claves juntas a propósito —el
+     * color de reserva y la ranura que `panel-graficas.js` repinta— porque
+     * separarlas es justo como se declara una sin la otra.
+     *
+     * @return array{backgroundColor: string, asobaresSerie: int}
+     */
+    protected function relleno(int $ranura): array
+    {
+        return [
+            'backgroundColor' => self::RESERVA_DE_SERIE[$ranura],
+            // Chart.js conserva las claves que no conoce, así que ésta viaja
+            // con el conjunto hasta el cliente sin registrarla en ningún sitio.
+            'asobaresSerie' => $ranura,
+        ];
     }
 }

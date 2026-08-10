@@ -28,35 +28,36 @@ class DemandaLaboralPorArea extends GraficaDelObservatorio
         return 'la demanda laboral por área y por mes';
     }
 
+    /**
+     * La ranura de paleta que le toca a cada área. El color de verdad vive en
+     * `--asb-serie-N` (tokens.css) y lo escribe `panel-graficas.js` al pintar
+     * y en cada cambio de tema, porque tres de estos siete colores no
+     * sobreviven al fondo oscuro y necesitan un valor distinto ahí.
+     *
+     * Aquí solo se declara qué ranura usa cada área; el hexadecimal que se
+     * manda como reserva es el del tema claro, y `ObservatorioTest` comprueba
+     * que no se separe del token.
+     */
+    private const array RANURAS = [
+        CargoDelSector::Administracion->value => 1,
+        CargoDelSector::Cocina->value => 2,
+        CargoDelSector::Barra->value => 3,
+        CargoDelSector::Servicio->value => 4,
+        CargoDelSector::Seguridad->value => 5,
+        CargoDelSector::Aseo->value => 6,
+        CargoDelSector::Otros->value => 7,
+    ];
+
     protected function getData(): array
     {
         $serie = $this->serie();
-
-        // Un color por cada una de las siete áreas del enum, tomados de la
-        // paleta oficial de marca completa (Manual de Marca Asobares
-        // Colombia): ninguno es una clase Tailwind cableada, así que la
-        // guardia de tema no los vigila — igual que en `PresenciaPorMunicipio`.
-        $colores = [
-            CargoDelSector::Administracion->value => '#EE4137', // Pub Red
-            CargoDelSector::Cocina->value => '#A4161A', // Wine
-            CargoDelSector::Barra->value => '#C05299', // Ambient Purple
-            CargoDelSector::Servicio->value => '#EA698B', // Ambient Rose
-            CargoDelSector::Seguridad->value => '#282628', // Pub Grey
-            CargoDelSector::Aseo->value => '#0B090A', // Pub Black
-            // Ambient White (#F5F3F4) es prácticamente el mismo tono que el
-            // fondo del tema claro (`--asb-fondo` en tokens.css): la barra
-            // de "Otros" quedaba invisible ahí. Noche 400 (`--color-noche-400`
-            // en tokens.css), el gris medio de la rampa oficial construida
-            // sobre Pub Grey/Pub Black, se distingue en los dos temas.
-            CargoDelSector::Otros->value => '#7D7779', // Noche 400
-        ];
 
         $datasets = [];
         foreach (CargoDelSector::cases() as $cargo) {
             $datasets[] = [
                 'label' => $cargo->getLabel(),
                 'data' => $serie->series[$cargo->getLabel()] ?? [],
-                'backgroundColor' => $colores[$cargo->value],
+                ...$this->relleno(self::RANURAS[$cargo->value]),
             ];
         }
 

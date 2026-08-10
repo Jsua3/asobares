@@ -36,16 +36,20 @@ class OfertaContraDemanda extends GraficaDelObservatorio
         $serie = $this->serie();
 
         return [
+            // Ranuras 2 y 3 de la paleta categórica de la base (Wine y
+            // Ambient Purple). El color efectivo lo escribe
+            // `panel-graficas.js` desde `--asb-serie-N`: Wine no sobrevive al
+            // fondo del tema oscuro y necesita su propio valor allí.
             'datasets' => [
                 [
                     'label' => 'Demanda',
                     'data' => $serie->series['Demanda'] ?? [],
-                    'backgroundColor' => '#A4161A',
+                    ...$this->relleno(2),
                 ],
                 [
                     'label' => 'Oferta',
                     'data' => $serie->series['Oferta'] ?? [],
-                    'backgroundColor' => '#C05299',
+                    ...$this->relleno(3),
                 ],
             ],
             'labels' => $serie->etiquetas,

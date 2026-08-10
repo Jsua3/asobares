@@ -31,9 +31,14 @@
     @else
         <p class="text-sm font-medium text-tinta">Aún sin muestra suficiente</p>
 
+        {{-- Se nombra la muestra que DECIDE, no el `n` combinado. Con el
+             combinado, presencia por municipio decia «hoy hay n = 762
+             registros y hacen falta al menos 30»: 762 es mayor que 30 y
+             quien lo lee tiene razon en desconfiar. Lo que no llega es una
+             de las tres senales, y eso es lo que hay que decir. --}}
         <p class="max-w-sm text-xs text-tenue">
-            El observatorio ya mide {{ $que }}, pero hoy hay
-            <span class="font-medium text-aviso">{{ $serie->rotuloDeMuestra() }}</span>
+            El observatorio ya mide {{ $que }}, pero
+            <span class="font-medium text-aviso">{{ $serie->rotuloDeLaMuestraQueDecide() }}</span>
             y hacen falta al menos {{ \App\Panel\SerieDelObservatorio::MUESTRA_MINIMA }}
             para afirmar algo. La gráfica se llenará sola cuando el sector alimente el dato.
         </p>

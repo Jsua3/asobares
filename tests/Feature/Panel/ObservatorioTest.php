@@ -30,6 +30,13 @@ class ObservatorioTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * WCAG 2.1 §1.4.11 pide 3:1 para los objetos gráficos que hacen falta
+     * para entender el contenido. Una barra de una gráfica lo es: si no se
+     * distingue del fondo, el dato que carga no llega.
+     */
+    private const float CONTRASTE_MINIMO = 3.0;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -132,9 +139,15 @@ class ObservatorioTest extends TestCase
      * `InformeDelObservatorio::series()` lee el `que` de cada serie desde el
      * `que()` estático del widget correspondiente en vez de repetir la frase
      * a mano: antes vivía escrita dos veces (aquí y en el widget flaco) sin
-     * ninguna prueba que las atara. Con una sola fuente no hay cómo
-     * divergir, pero esta prueba deja el enlace explícito: si algún día
-     * alguien vuelve a hardcodear la frase en uno de los dos sitios, se cae.
+     * ninguna prueba que las atara.
+     *
+     * Lo que esta prueba demuestra es DIVERGENCIA: que las dos frases no se
+     * separen. No detecta que alguien vuelva a escribir a mano en el informe
+     * la misma cadena que ya devuelve el widget —eso pasa en verde, se
+     * comprobó— y no puede detectarlo comparando valores. La duplicación
+     * idéntica es un problema de lectura del código; la divergencia es el que
+     * llega al lector del informe con dos frases distintas para el mismo
+     * dato, y es el que se vigila aquí.
      */
     public function test_el_que_del_informe_es_el_mismo_que_el_de_su_widget(): void
     {
@@ -469,26 +482,276 @@ class ObservatorioTest extends TestCase
     }
 
     /**
-     * «Otros» pintaba con Ambient White (#F5F3F4), prácticamente el mismo
-     * tono que el fondo del tema claro: la barra quedaba invisible ahí. Fija
-     * que el color no sea ese blanco, en vez de fijar el color exacto que lo
-     * reemplaza — así un ajuste de paleta futuro no rompe esta prueba
-     * mientras siga siendo visible.
+     * Centinela del ancla de vendor.
+     *
+     * Varias pruebas deciden «dibuja / no dibuja» mirando si aparece
+     * `style="display: none"`, que lo emite `chart-widget.blade.php` de
+     * Filament, no este proyecto. Si una versión futura pasara a una clase,
+     * los `assertDontSeeHtml` se volverían pases permanentes —verdes para
+     * siempre, sin vigilar nada— y nadie se enteraría.
+     *
+     * Esto no arregla la fragilidad: la hace ruidosa. Si esta prueba se cae
+     * tras actualizar Filament, hay que cambiar el ancla en las pruebas que
+     * la usan, no borrar ésta.
      */
-    public function test_el_color_de_otros_en_demanda_laboral_no_es_el_blanco_invisible(): void
+    public function test_el_ancla_de_vendor_que_distingue_dibujar_de_no_dibujar_sigue_existiendo(): void
+    {
+        $plantilla = base_path('vendor/filament/widgets/resources/views/chart-widget.blade.php');
+
+        $this->assertFileExists($plantilla, 'Filament movió la plantilla del ChartWidget: las pruebas que miran su HTML necesitan otra ancla.');
+
+        $this->assertStringContainsString(
+            'style="display: none"',
+            File::get($plantilla),
+            'Filament dejó de emitir `style="display: none"` para ocultar el lienzo. Los `assertDontSeeHtml` que dependen de esa cadena ya no vigilan nada: hay que actualizarlos.'
+        );
+    }
+
+    /**
+     * El estado vacío se contradecía en pantalla: «hoy hay n = 762 registros
+     * y hacen falta al menos 30». Quien lo lee tiene razón en desconfiar —762
+     * es mayor que 30— y este módulo existe justo para aguantar esa pregunta.
+     * El total no era lo que fallaba; fallaba una de las tres señales.
+     */
+    public function test_el_estado_vacio_nombra_la_senal_que_no_llega_y_no_el_total(): void
     {
         $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
 
-        $instancia = Livewire::test(DemandaLaboralPorArea::class)->instance();
-        $datos = (new \ReflectionMethod(DemandaLaboralPorArea::class, 'getData'))->invoke($instancia);
+        $serie = app(MetricasDelObservatorio::class)->presenciaPorMunicipio();
 
-        $datasetOtros = collect($datos['datasets'])->firstWhere('label', CargoDelSector::Otros->getLabel());
-
-        $this->assertNotNull($datasetOtros, 'No se encontró el conjunto de datos de "Otros".');
-        $this->assertNotSame(
-            '#F5F3F4',
-            strtoupper($datasetOtros['backgroundColor']),
-            'El color de "Otros" sigue siendo Ambient White, casi invisible sobre fondo claro.'
+        // Precondición de la prueba: es la serie que cruza tres señales y hoy
+        // no alcanza. Si algún día alcanzara, esto avisa en vez de dejar la
+        // prueba afirmando sobre un estado vacío que ya no se dibuja.
+        $this->assertFalse(
+            $serie->hayMuestraSuficiente(),
+            'Presencia por municipio ya alcanza muestra: esta prueba necesita una serie que NO alcance para poder mirar su estado vacío.'
         );
+
+        Livewire::test(PresenciaPorMunicipio::class)
+            ->assertSee($serie->rotuloDeLaMuestraQueDecide())
+            ->assertSee('hacen falta al menos '.SerieDelObservatorio::MUESTRA_MINIMA);
+    }
+
+    /**
+     * Una barra tiene que verse sobre la superficie donde se dibuja, y este
+     * panel es bicromático: son DOS superficies, no una.
+     *
+     * La versión anterior de esta prueba prohibía una sola cadena —el Ambient
+     * White con el que «Otros» quedaba invisible en claro— y por eso no
+     * vigilaba nada más: repintar «Otros» de blanco puro, que es peor que el
+     * bug original, la dejaba en verde. Mientras tanto Wine, Pub Grey y Pub
+     * Black seguían por debajo de 3:1 sobre el fondo oscuro, y Pub Black era
+     * literalmente el color de ese fondo.
+     *
+     * Mide contraste WCAG de verdad, sobre las SIETE ranuras y contra la
+     * superficie de cada tema, leyendo `tokens.css` en vez de copiar la
+     * paleta aquí: si la paleta se mueve, la prueba se mueve con ella.
+     */
+    public function test_los_colores_de_las_series_se_ven_en_su_tema(): void
+    {
+        $invisibles = [];
+
+        foreach ($this->paletaDeSeriesPorTema() as $tema => $paleta) {
+            foreach ($paleta['colores'] as $ranura => $color) {
+                $contraste = $this->contraste($color, $paleta['superficie']);
+
+                if ($contraste < self::CONTRASTE_MINIMO) {
+                    $invisibles[] = sprintf(
+                        '--asb-serie-%d (%s) da %.2f:1 sobre la superficie del tema %s (%s).',
+                        $ranura,
+                        $color,
+                        $contraste,
+                        $tema,
+                        $paleta['superficie'],
+                    );
+                }
+            }
+        }
+
+        // Se acumulan todas antes de fallar: quien rompa la paleta merece ver
+        // de una vez cada serie que se pierde, no descubrirlas de una en una.
+        $this->assertSame([], $invisibles, sprintf(
+            "Hay series que no se distinguen de su fondo (mínimo %s:1):\n%s",
+            self::CONTRASTE_MINIMO,
+            implode("\n", $invisibles),
+        ));
+    }
+
+    /**
+     * Ninguna gráfica de varias series puede cablear sus colores a mano, y
+     * cada una declara ranuras distintas entre sí.
+     *
+     * Recorre TODAS las gráficas del observatorio, no una: `PresenciaPorMunicipio`
+     * y `DemandaLaboralPorArea` cablearon cada una por su lado la misma
+     * paleta pensada para fondo claro, y arreglar solo la segunda habría
+     * dejado a Wine invisible en la primera. Una gráfica de una sola serie no
+     * entra: su relleno es el acento de marca, que sí funciona en los dos
+     * temas.
+     */
+    public function test_ninguna_grafica_de_varias_series_cablea_sus_colores(): void
+    {
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        $cableadas = [];
+        $repetidas = [];
+
+        foreach ($this->conjuntosDeCadaGrafica() as $grafica => $conjuntos) {
+            if (count($conjuntos) <= 1) {
+                continue;
+            }
+
+            $ranuras = collect($conjuntos)->pluck('asobaresSerie', 'label');
+
+            foreach ($ranuras->filter(fn (mixed $ranura): bool => $ranura === null)->keys() as $sinRanura) {
+                $cableadas[] = "{$grafica} → «{$sinRanura}»";
+            }
+
+            foreach ($ranuras->duplicates() as $duplicada) {
+                $repetidas[] = "{$grafica} → ranura {$duplicada}";
+            }
+        }
+
+        $this->assertSame([], $cableadas, "Hay series sin ranura declarada: `panel-graficas.js` no las repinta y se quedan con el color del tema claro sobre fondo oscuro.\n".implode("\n", $cableadas));
+        $this->assertSame([], $repetidas, "Hay series que comparten ranura y se dibujarían del mismo color:\n".implode("\n", $repetidas));
+    }
+
+    /**
+     * El color de reserva que manda el servidor y el token del tema claro son
+     * el mismo valor escrito en dos sitios, y esa es justo la forma en la que
+     * este módulo ya se equivocó una vez con la frase de `que()`. Los ata.
+     */
+    public function test_el_color_de_reserva_no_diverge_del_token_del_tema_claro(): void
+    {
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        $claro = $this->paletaDeSeriesPorTema()['claro']['colores'];
+
+        foreach ($this->conjuntosDeCadaGrafica() as $grafica => $conjuntos) {
+            foreach ($conjuntos as $conjunto) {
+                if (! isset($conjunto['asobaresSerie'])) {
+                    continue;
+                }
+
+                $this->assertArrayHasKey(
+                    $conjunto['asobaresSerie'],
+                    $claro,
+                    "{$grafica} pide la ranura {$conjunto['asobaresSerie']}, que no existe en tokens.css."
+                );
+
+                $this->assertSame(
+                    $claro[$conjunto['asobaresSerie']],
+                    strtolower($conjunto['backgroundColor']),
+                    sprintf(
+                        'La reserva de «%s» en %s se separó de --asb-serie-%d: hasta que el plugin de tema pinte, la barra saldría de un color que ya no está en la paleta.',
+                        $conjunto['label'],
+                        $grafica,
+                        $conjunto['asobaresSerie'],
+                    )
+                );
+            }
+        }
+    }
+
+    /**
+     * Los conjuntos de datos de cada gráfica del observatorio, por nombre
+     * corto de clase. Sale de `getFooterWidgets()` y no de una lista escrita
+     * a mano: una gráfica nueva entra sola en estas pruebas.
+     *
+     * @return array<string, list<array<string, mixed>>>
+     */
+    private function conjuntosDeCadaGrafica(): array
+    {
+        $pagina = new Observatorio;
+        $widgets = (new \ReflectionMethod(Observatorio::class, 'getFooterWidgets'))->invoke($pagina);
+
+        $this->assertNotEmpty($widgets, 'Sin widgets no hay nada que vigilar y estas pruebas pasarían en vacío.');
+
+        $conjuntos = [];
+        foreach ($widgets as $widget) {
+            $instancia = Livewire::test($widget)->instance();
+            $datos = (new \ReflectionMethod($widget, 'getData'))->invoke($instancia);
+
+            $conjuntos[class_basename($widget)] = $datos['datasets'] ?? [];
+        }
+
+        return $conjuntos;
+    }
+
+    /**
+     * La paleta efectiva de cada tema con la superficie sobre la que se
+     * dibuja, leídas de `tokens.css`: `:root` para el claro, `.dark` para el
+     * oscuro. Una ranura que `.dark` no redefine hereda la de `:root`, que es
+     * exactamente lo que hace el navegador en cascada.
+     *
+     * @return array<string, array{superficie: string, colores: array<int, string>}>
+     */
+    private function paletaDeSeriesPorTema(): array
+    {
+        [$raiz, $oscuro] = explode('.dark {', File::get(resource_path('css/tokens.css')), 2);
+
+        $coloresClaros = $this->coloresDeSerieEn($raiz);
+
+        $this->assertCount(
+            count(CargoDelSector::cases()),
+            $coloresClaros,
+            'tokens.css debe declarar una ranura `--asb-serie-N` por área en `:root`; si falta alguna, esta prueba estaría midiendo menos colores de los que se dibujan.'
+        );
+
+        return [
+            'claro' => [
+                'superficie' => $this->superficieDe($raiz),
+                'colores' => $coloresClaros,
+            ],
+            'oscuro' => [
+                'superficie' => $this->superficieDe($oscuro),
+                'colores' => $this->coloresDeSerieEn($oscuro) + $coloresClaros,
+            ],
+        ];
+    }
+
+    /** @return array<int, string> */
+    private function coloresDeSerieEn(string $bloque): array
+    {
+        preg_match_all('/--asb-serie-(\d+):\s*(#[0-9a-fA-F]{6});/', $bloque, $coincidencias, PREG_SET_ORDER);
+
+        $colores = [];
+        foreach ($coincidencias as [, $ranura, $color]) {
+            $colores[(int) $ranura] = strtolower($color);
+        }
+
+        return $colores;
+    }
+
+    private function superficieDe(string $bloque): string
+    {
+        $encontrado = preg_match('/--asb-superficie:\s*(#[0-9a-fA-F]{6});/', $bloque, $coincidencias);
+
+        $this->assertSame(1, $encontrado, 'No se pudo leer `--asb-superficie` de tokens.css: la prueba se quedaría sin referencia contra la que medir.');
+
+        return strtolower($coincidencias[1]);
+    }
+
+    /** Razón de contraste WCAG 2.1 entre dos colores hexadecimales. */
+    private function contraste(string $unColor, string $otroColor): float
+    {
+        $uno = $this->luminanciaRelativa($unColor);
+        $otro = $this->luminanciaRelativa($otroColor);
+
+        return (max($uno, $otro) + 0.05) / (min($uno, $otro) + 0.05);
+    }
+
+    /** Luminancia relativa WCAG 2.1, la que entra en la razón de contraste. */
+    private function luminanciaRelativa(string $hex): float
+    {
+        $canales = array_map(
+            static function (string $par): float {
+                $canal = hexdec($par) / 255;
+
+                return $canal <= 0.03928 ? $canal / 12.92 : (($canal + 0.055) / 1.055) ** 2.4;
+            },
+            str_split(ltrim($hex, '#'), 2)
+        );
+
+        return 0.2126 * $canales[0] + 0.7152 * $canales[1] + 0.0722 * $canales[2];
     }
 }

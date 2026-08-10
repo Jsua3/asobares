@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Panel;
 
+use App\Filament\Pages\InformeDelObservatorio;
 use App\Filament\Pages\Observatorio;
 use App\Models\User;
 use Database\Seeders\RolYPermisoSeeder;
@@ -84,5 +85,25 @@ class ObservatorioBaseVaciaTest extends TestCase
                 ->assertSee('Todavía no hay datos que mostrar')
                 ->assertDontSee('Aún sin muestra suficiente');
         }
+    }
+
+    /**
+     * El informe impreso es la única superficie del módulo que no pasaba por
+     * aquí, y es justamente la que se lleva a una alcaldía. Ya distinguía
+     * base vacía de muestra insuficiente —fue el primero en hacerlo—, pero
+     * ninguna prueba lo ejercitaba con la base recién migrada: estaba sin
+     * cubrir, no roto.
+     */
+    public function test_el_informe_impreso_distingue_la_base_vacia_de_la_muestra_insuficiente(): void
+    {
+        $this->actingAs($this->direccion());
+
+        $this->get(InformeDelObservatorio::getUrl())
+            ->assertOk()
+            ->assertSee('Todavía no hay datos que mostrar.')
+            ->assertDontSee('todavía no alcanza muestra suficiente')
+            // Con la base vacía no hay ninguna cifra que sostener, así que
+            // tampoco puede aparecer el cierre que celebra lo contrario.
+            ->assertDontSee('Hoy todos los indicadores de este informe alcanzan muestra suficiente.');
     }
 }

@@ -83,6 +83,30 @@
     --asb-acento-fuerte: #971d18;
     --asb-marca-panel: rgb(238 65 55 / 0.07);
 
+    /*
+     * Paleta categorica de las graficas: un color por serie, y son DOS
+     * recetas, no una. Igual que el vidrio esmerilado se hace con sombra en
+     * claro y con luz en oscuro, estos siete colores no pueden ser los mismos
+     * en los dos temas: la paleta del manual esta pensada sobre Ambient
+     * White, y sobre Pub Black tres de ellos —Wine, Pub Grey y Pub Black
+     * mismo— caen por debajo de 3:1 contra la superficie. Pub Black sobre el
+     * tema oscuro es, literalmente, el color del fondo.
+     *
+     * Solo cambian esos tres al cruzar de tema; los otros cuatro aguantan en
+     * los dos y se quedan quietos para que la grafica se lea igual.
+     *
+     * WCAG 2.1 §1.4.11 pide 3:1 para objetos graficos portadores de
+     * informacion. Lo vigila `ObservatorioTest`, que lee estos tokens y mide
+     * el contraste de verdad contra `--asb-superficie` de cada tema.
+     */
+    --asb-serie-1: #ee4137; /* Pub Red */
+    --asb-serie-2: #a4161a; /* Wine */
+    --asb-serie-3: #c05299; /* Ambient Purple */
+    --asb-serie-4: #ea698b; /* Ambient Rose */
+    --asb-serie-5: #282628; /* Pub Grey */
+    --asb-serie-6: #0b090a; /* Pub Black */
+    --asb-serie-7: #7d7779; /* Noche 400 */
+
     /* Estados. Los recuadros de exito y aviso estaban pensados sobre negro
        (verde 950 al 30 %); en claro hay que invertirlos o quedan ilegibles. */
     /* Emerald 800 y no 700: sobre `exito-fondo` el 700 se quedaba en 4.35:1 y
@@ -123,6 +147,20 @@
     --asb-acento: #f27166;
     --asb-acento-fuerte: #f7a49d;
     --asb-marca-panel: rgb(68 11 9 / 0.4);
+
+    /*
+     * Las tres que no sobreviven al fondo oscuro, subidas por su propia
+     * rampa hasta pasar 3:1 contra `--asb-superficie` sin dejar de leerse
+     * como el color de marca del que vienen:
+     *   Wine      #a4161a (2.44:1) -> #d9313a (4.02:1)
+     *   Pub Grey  #282628 (1.26:1) -> Noche 300 (7.62:1)
+     *   Pub Black #0b090a (1.05:1) -> Noche 200 (11.91:1)
+     * Las otras cuatro no se repiten aqui a proposito: heredan de `:root` y
+     * asi no pueden divergir por descuido.
+     */
+    --asb-serie-2: #d9313a; /* Wine aclarado */
+    --asb-serie-5: #a8a3a5; /* Noche 300 */
+    --asb-serie-6: #d0cccd; /* Noche 200 */
 
     --asb-exito: #6ee7b7;
     --asb-exito-suave: #a7f3d0;
