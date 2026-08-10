@@ -416,13 +416,21 @@ Documentos: `docs/superpowers/specs/2026-08-05-panel-administrativo-design.md` y
 
 ### 18.2 Lo que está a medias — Observatorio del gremio
 
-**Rama `observatorio`, 16 commits sobre `main`, suite en 486 pruebas.** Plan en `docs/superpowers/plans/2026-08-09-observatorio.md`; el registro de ejecución, con todos los hallazgos y decisiones, en `.superpowers/sdd/2026-08-09-observatorio/progress.md` (git-ignorado, pero es el mapa de recuperación).
+**Rama `observatorio`, 25 commits sobre `main`.** Plan en `docs/superpowers/plans/2026-08-09-observatorio.md`; el registro de ejecución, con todos los hallazgos y decisiones, en `.superpowers/sdd/2026-08-09-observatorio/progress.md` (git-ignorado, pero es el mapa de recuperación).
 
-**Terminado y revisado:** T1 (objeto `SerieDelObservatorio` con su tamaño de muestra), T2 (servicio `MetricasDelObservatorio` con siete agregaciones en SQL), T3 (estado vacío honesto), T4 (página `/admin/observatorio` con permiso `ver_observatorio` exclusivo de dirección), T5 (las tres visualizaciones con datos) y T6 (las tres flacas, que no dibujan si no hay muestra).
+**Las ocho tareas del plan están cerradas y revisadas**, y encima se aplicó una **ola de arreglos** tras la revisión de toda la rama, que encontró dos Críticos. Las pruebas propias del módulo están en verde: **115/115** en `tests/Feature/Panel/`.
 
-**A medias: T7, el informe imprimible.** Está implementado y en verde, pero en **ronda de arreglo 2**: la prueba que vigila el descargo por serie puede pasar en falso porque `InformeDelObservatorio` guarda **dos copias del título de cada serie** —una en `series()` y otra en `todosLosIndicadores()`— y la extracción por `strpos` salta a la copia lejana si una diverge, tragándose media página. El arreglo pedido es una sola fuente de verdad para los títulos y una extracción acotada. Falta también un comentario que explique por qué el informe usa tablas en vez de incrustar los `ChartWidget` (evita que un `canvas` salga en blanco al imprimir).
+**Lo que falta para poder fusionar:**
+1. La **re-revisión acotada de la ola de arreglos** (siete commits, de `168ce93` a `7778ce3`). Es el último control del método y no se ha hecho.
+2. **Correr la suite completa sobre un árbol limpio.** Hoy no se puede — ver 18.8.
+3. Fusionar y recuperar el stash de 18.5.
 
-**Sin empezar: T8, la verificación de conjunto** — suite completa, recorrido en los dos roles y los dos temas, y conteo de consultas de un render de la página. Después toca la revisión de toda la rama y la fusión.
+**⚠️ El módulo cambió de aspecto tras la ola de arreglos, y hay que decidir si así se enseña.** Antes dibujaban tres de seis gráficas; **ahora dibuja una sola** (salud financiera, n=167). Las otras cinco muestran el estado vacío honesto, incluidas dos que antes dibujaban:
+
+- **Composición del sector** tenía `n = 24` y dibujaba **sin aviso**, mientras la tarjeta KPI y el informe impreso marcaban ese mismo dato como «muestra pequeña». El plan la había clasificado mal como «sólida» y nadie volvió a mirarla.
+- **Presencia por municipio** sumaba tres señales heterogéneas en un solo `n` (24 asociados + 6 vacantes + 732 consultas = 762) y con eso se sellaba «suficiente», pero el 96 % venía de una serie. Ahora el umbral se le exige **al conjunto más flaco, no a la suma**, que es lo correcto: una serie robusta no puede prestarle credibilidad a dos que no la tienen.
+
+Los dos arreglos son correctos y restauran el principio del módulo. Pero **un observatorio que enseña cinco de seis paneles diciendo «aún sin muestra suficiente» es una decisión de producto**, no solo técnica, y conviene confirmarla antes del 22 de septiembre. Las alternativas honestas son: enseñarlo así y explicar que la herramienta ya mide y falta que el sector alimente; o sembrar una bolsa de empleo con volumen realista para que las series tengan sustancia.
 
 ### 18.3 Decisiones del dueño que gobiernan este trabajo
 
@@ -468,3 +476,25 @@ Método: **diseño conversado y aprobado antes de tocar código** (`docs/superpo
 Lo que hace que funcione no es la revisión en sí, es **la mutación**: el revisor rompe el código a propósito y comprueba si la prueba se entera. Cinco de los fallos más caros de estas dos fases eran pruebas que pasaban con el bug reintroducido, y ninguna se detectó leyendo.
 
 ⚠️ **El panel del navegador de esta sesión no compone fotogramas** —las capturas fallan con «the page is not compositing frames»—, así que **nadie ha visto Chart.js pintar de verdad**. Lo verificado es estructural: el JSON de opciones que llega al cliente, los tokens computados, el DOM. Si tu sesión sí puede componer, **mira las gráficas del observatorio y del tablero en los dos temas**: es la única verificación que falta en todo este trabajo.
+
+### 18.8 ⚠️ HAY OTRA SESIÓN TRABAJANDO EN ESTE MISMO DIRECTORIO
+
+**Léelo antes de correr la suite o de creerte un fallo.** El 9 ago 2026, mientras se construía el Observatorio, apareció en el árbol de trabajo un segundo frente **sin commitear**, de otra sesión, que está cerrando los pendientes **G4–G12 de la sección 15.2**. No es basura y no hay que borrarlo.
+
+Lo que hay sin commitear, por lo que se ve en los archivos:
+
+| Frente | Archivos |
+|---|---|
+| MFA obligatoria del panel (G8) | `AdminPanelProvider` con `isRequired: true`, `LoginDelPanelTest`, `PoliticaDeContrasenasTest` |
+| Cabeceras de seguridad | `app/Http/Middleware/CabecerasDeSeguridad.php`, su prueba, `bootstrap/app.php` |
+| Cupos de eventos (G4) | `EventoController`, `ConfirmacionDeInscripcionObserver`, `CuposDeEventoTest` |
+| Retención de datos (G12) | `config/retencion.php`, `DepurarMensajes`, `DepuracionDeMensajesTest`, `routes/console.php` |
+| Flujo de aprobación (G9) | `FlujoDeAprobacionObserver`, su prueba |
+| Pagos | `PasarelaBold`, `PasarelaSimulada`, `RegistroDePagos`, `FlujoDePagoTest` |
+| Login de asociado | `SesionAsociadoController`, `LoginDeAsociadoTest`, `config/session.php` |
+
+**Consecuencia práctica, y es la que importa:** con ese trabajo en el árbol, **`php artisan test` da 52 fallos** — todos en `PanelCompletoTest`, todos `302` porque la MFA obligatoria cambia el flujo de login que esas pruebas asumen. **No son del Observatorio.** Las pruebas propias del módulo (`tests/Feature/Panel/`) están en **115/115 verde**.
+
+Si retomas y ves la suite en rojo: **primero mira `git status`**. Si esos archivos siguen sin commitear, el rojo probablemente no es tuyo. Verifica tu trabajo corriendo solo tus archivos, y no intentes «arreglar» `PanelCompletoTest` — le toca a quien esté haciendo la MFA obligatoria, que además tendrá que actualizar esas pruebas para que afirmen la regla nueva.
+
+**No stashees ese trabajo sin hablarlo.** Son 31 archivos de otra persona a medio camino.
