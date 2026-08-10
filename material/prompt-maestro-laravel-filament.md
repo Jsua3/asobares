@@ -393,9 +393,9 @@ Los requisitos de apertura y funcionamiento de establecimientos de comercio en C
 
 ---
 
-## 18. ESTADO ACTUAL Y TRABAJO EN CURSO (9 ago 2026)
+## 18. ESTADO DEL PROYECTO (9–10 ago 2026)
 
-**Léelo antes de tocar nada.** Esta sección existe para que una sesión nueva sepa en qué punto está el proyecto sin tener que reconstruirlo del historial. Se escribió con trabajo a medias en el árbol; si retomas, empieza por «Lo que está a medias».
+**Léelo antes de tocar nada.** Esta sección existe para que una sesión nueva sepa en qué punto está el proyecto sin tener que reconstruirlo del historial. La escribió la sesión del Observatorio con trabajo a medias en el árbol y la actualizó la del 10 ago al cerrarlo; **el resumen de qué quedó vivo está en la sección 19**, que es la más corta y la que conviene leer primero.
 
 ### 18.1 Qué está terminado y fusionado a `main`
 
@@ -414,16 +414,21 @@ Los requisitos de apertura y funcionamiento de establecimientos de comercio en C
 
 Documentos: `docs/superpowers/specs/2026-08-05-panel-administrativo-design.md` y `docs/superpowers/plans/2026-08-05-panel-f1-f3.md`.
 
-### 18.2 Lo que está a medias — Observatorio del gremio
+### 18.2 Observatorio del gremio — FUSIONADO a `main` el 10 ago 2026
 
-**Rama `observatorio`, 25 commits sobre `main`.** Plan en `docs/superpowers/plans/2026-08-09-observatorio.md`; el registro de ejecución, con todos los hallazgos y decisiones, en `.superpowers/sdd/2026-08-09-observatorio/progress.md` (git-ignorado, pero es el mapa de recuperación).
+Plan en `docs/superpowers/plans/2026-08-09-observatorio.md`; el registro de ejecución, con todos los hallazgos y decisiones, en `.superpowers/sdd/2026-08-09-observatorio/progress.md` (git-ignorado, pero es el mapa de recuperación).
 
-**Las ocho tareas del plan están cerradas y revisadas**, y encima se aplicó una **ola de arreglos** tras la revisión de toda la rama, que encontró dos Críticos. Las pruebas propias del módulo están en verde: **115/115** en `tests/Feature/Panel/`.
+Las ocho tareas del plan, la ola de arreglos posterior y **la re-revisión de esa ola** están cerradas. La rama `observatorio` se fusionó por avance rápido y se borró. Suite completa sobre `main`: **508 pruebas, 497 pasan, 11 omitidas, 0 fallos.**
 
-**Lo que falta para poder fusionar — está desarrollado como encargo en la sección 19, que es lo primero que hay que hacer:**
-1. La **re-revisión acotada de la ola de arreglos** (siete commits, de `168ce93` a `7778ce3`). Es el último control del método y no se ha hecho.
-2. **Correr la suite completa sobre un árbol limpio.** Hoy no se puede — ver 18.8.
-3. Fusionar y recuperar el stash de 18.5.
+**La re-revisión encontró cinco cosas, y conviene saber cuáles porque dos eran del tipo que este proyecto ya pagó caro** (commit `e072d33`):
+
+- **Un Crítico de prueba en falso verde.** El arreglo del color de «Otros» estaba custodiado por una aserción que prohibía UNA cadena. Repintar la barra de blanco puro —contraste 1.0:1, peor que el bug original— la dejaba en verde.
+- Esa prueba, rehecha para medir contraste WCAG de verdad, destapó **tres barras por debajo de 3:1 sobre el fondo oscuro**, y al generalizarla a las seis gráficas apareció que **tres widgets distintos habían cableado la misma paleta a mano**, cada uno por su lado.
+- **El umbral se le exigía a cada conjunto también cuando los conjuntos son rebanadas de una sola medida.** Demanda laboral pedía 30 vacantes en cada una de sus siete áreas —210— y «Otros», que es un cajón residual, no las tendría nunca: la gráfica no podía dibujar jamás mientras el módulo anunciaba un umbral de 30.
+- **La frontera de esa regla no estaba probada** (los casos usaban 6 y 30): un off-by-one sobrevivía con la suite verde.
+- **El estado vacío se contradecía en pantalla:** «hoy hay n = 762 registros y hacen falta al menos 30».
+
+Lección, que es la misma de siempre: **las cinco aparecieron mutando, ninguna leyendo.**
 
 **⚠️ El módulo cambió de aspecto tras la ola de arreglos, y hay que decidir si así se enseña.** Antes dibujaban tres de seis gráficas; **ahora dibuja una sola** (salud financiera, n=167). Las otras cinco muestran el estado vacío honesto, incluidas dos que antes dibujaban:
 
@@ -454,7 +459,7 @@ El 9 ago 2026 aparecieron en el árbol dos archivos modificados que **no pertene
 
 Es un **arreglo de seguridad real y correcto**: el campo de galería sube por Spatie MediaLibrary, que trae su propio nombrador y **no hereda la defensa de `SubidaSegura`**, así que la extensión la elegía quien sube y un JPEG llamado `payload.html` habría quedado servido como HTML desde `/storage`. Es el hallazgo **G6 de la sección 15** en el único campo que se le escapó entonces. Con el arreglo, `SubidaDeImagenesTest` pasa 11/11.
 
-Está en **`stash@{0}`** de la rama `observatorio`, por decisión del dueño, para no mezclar dos trabajos sin relación. **Merece commit propio.** Recupéralo con `git stash pop` cuando el observatorio esté cerrado.
+**Recuperado y commiteado el 10 ago 2026** en `a8c02ee`, con commit propio como estaba previsto. Ya no hay nada guardado en stash. Se queda escrito aquí porque explica por qué ese arreglo llegó suelto y sin plan detrás.
 
 ### 18.6 Deuda conocida que quedó anotada
 
@@ -493,71 +498,29 @@ Lo que hay sin commitear, por lo que se ve en los archivos:
 | Pagos | `PasarelaBold`, `PasarelaSimulada`, `RegistroDePagos`, `FlujoDePagoTest` |
 | Login de asociado | `SesionAsociadoController`, `LoginDeAsociadoTest`, `config/session.php` |
 
-**Consecuencia práctica, y es la que importa:** con ese trabajo en el árbol, **`php artisan test` da 52 fallos** — todos en `PanelCompletoTest`, todos `302` porque la MFA obligatoria cambia el flujo de login que esas pruebas asumen. **No son del Observatorio.** Las pruebas propias del módulo (`tests/Feature/Panel/`) están en **115/115 verde**.
+**Consecuencia práctica, y es la que importa:** con ese trabajo en el árbol, **`php artisan test` da 52 fallos** — todos en `PanelCompletoTest`, todos `302` porque la MFA obligatoria cambia el flujo de login que esas pruebas asumen. **No son del Observatorio.** Quedó demostrado el 10 ago 2026: guardando esos 33 archivos en stash, la suite completa dio **508 pruebas, 497 pasan, 0 fallos**; devolviéndolos al árbol, vuelven los 52.
 
 Si retomas y ves la suite en rojo: **primero mira `git status`**. Si esos archivos siguen sin commitear, el rojo probablemente no es tuyo. Verifica tu trabajo corriendo solo tus archivos, y no intentes «arreglar» `PanelCompletoTest` — le toca a quien esté haciendo la MFA obligatoria, que además tendrá que actualizar esas pruebas para que afirmen la regla nueva.
 
-**No stashees ese trabajo sin hablarlo.** Son 31 archivos de otra persona a medio camino.
+**No stashees ese trabajo sin hablarlo.** Son 33 archivos de otra persona a medio camino. El 10 ago 2026 hubo que hacerlo para poder correr la suite limpia, **con permiso explícito del dueño**, y se devolvieron al árbol intactos al terminar (verificado archivo por archivo y línea por línea contra un inventario tomado antes). Si te toca repetirlo: toma el inventario primero (`git status --short` y `git diff --stat` a un archivo aparte), usa `git stash push -u` con un mensaje que diga de quién es, y compara al devolverlo.
 
 ---
 
-## 19. LO PRIMERO QUE TIENES QUE HACER EN LA PRÓXIMA SESIÓN
+## 19. ESTADO AL CERRAR EL OBSERVATORIO (10 ago 2026)
 
-**Esta sección es el encargo, no el contexto.** El Observatorio está construido y sus pruebas están verdes, pero **no está cerrado**: le faltan los tres pasos de abajo, en este orden. Hazlos antes de empezar nada nuevo.
+El encargo que dejó escrito la sesión anterior —re-revisar la ola de arreglos, correr la suite limpia, fusionar y recuperar el stash— **está hecho**. `main` va por `a8c02ee`, sin ramas vivas y sin nada en stash.
 
-### Paso 1 — La re-revisión de la ola de arreglos (pendiente, es el control que falta)
+| Paso | Resultado |
+|---|---|
+| Re-revisión de `168ce93..7778ce3` | Cinco de siete arreglos aguantaron la mutación; dos se cayeron. Cinco hallazgos, cerrados en `e072d33` — ver 18.2 |
+| Suite completa sobre árbol limpio | **508 pruebas, 497 pasan, 11 omitidas, 0 fallos** |
+| Fusión y stash | Avance rápido, rama borrada, arreglo de galería en commit propio (`a8c02ee`) |
 
-Tras cerrar las ocho tareas, una revisión de toda la rama encontró dos Críticos y se aplicó una **ola de arreglos de siete commits**. Esa ola **nunca se re-revisó**, y el método dice que toda ola de arreglos termina con una re-revisión acotada. Es el último control y está sin hacer.
+### 19.1 La decisión de producto sigue pendiente, y sigue sin ser del agente
 
-El rango exacto es `168ce93..7778ce3`. Genera el paquete así:
+**De las seis gráficas del observatorio solo dibuja una** (salud financiera, n = 173). Las otras cinco muestran «Aún sin muestra suficiente», y es correcto: sus muestras no sostienen lo que dibujarían.
 
-```
-bash <ruta-a-superpowers>/skills/subagent-driven-development/scripts/review-package \
-  docs/superpowers/plans/2026-08-09-observatorio.md 168ce93 7778ce3
-```
-
-Los siete commits, y lo que cada uno debe haber cerrado:
-
-| Commit | Qué arregla | Qué debe verificar la re-revisión |
-|---|---|---|
-| `2625326` | Sube la regla del umbral a una clase base de la que heredan las seis gráficas | Que **ninguna** gráfica puede olvidarse de la regla. Añade una séptima de mentira sin declarar nada y comprueba que hereda el comportamiento |
-| `f3f09d2` | Saca las gráficas del observatorio del descubrimiento del tablero | Que el tablero **no** contiene ninguna. Revierte el arreglo y comprueba que la prueba nueva se pone roja |
-| `2731819` | El umbral se exige al conjunto más flaco, no a la suma | Que una serie con varios conjuntos y uno flojo **no** alcanza muestra, y que sí la alcanza cuando todos la tienen |
-| `999c7fc` | Reescribe la prueba de las «sólidas» para que mida lo que dice | Que ahora afirma canvas presente y estado vacío ausente, y que **deriva del umbral en vivo** en vez de una lista escrita a mano |
-| `06785cf` | Distingue base vacía de muestra insuficiente | Que con base vacía se ve texto legible y no un lienzo en blanco |
-| `f887104` | Una sola fuente para la frase `que`, y color visible para «Otros» | Que no quedan frases duplicadas entre widget e informe, y que «Otros» se ve en los dos temas |
-| `7778ce3` | Arregla dos pruebas que el arreglo del umbral dejó en rojo | Que las arregló **afirmando la regla nueva**, no excluyendo el caso |
-
-**Exígele mutación, no lectura.** En estas dos fases aparecieron **seis pruebas en falso verde**, todas escritas por el autor del plan, todas de la forma «afirmo que una cadena aparece en algún sitio». Ninguna se detectó leyendo. La instrucción al re-revisor tiene que ser: *rompe el código de cada arreglo y comprueba que la prueba se entera*.
-
-### Paso 2 — La suite completa sobre un árbol limpio
-
-Hoy **no se puede correr** y el motivo está en 18.8: otra sesión tiene 31 archivos sin commitear (MFA obligatoria, cabeceras, retención, cupos) que dejan 52 pruebas de `PanelCompletoTest` en rojo por un `302` de login. **Ese rojo no es del Observatorio.**
-
-Antes de fusionar hace falta una corrida limpia. Dos caminos, y **hay que hablarlo con el dueño**, no decidirlo solo:
-
-- **Si ese trabajo ya está commiteado** cuando retomes: corre la suite y punto.
-- **Si sigue sin commitear**: no lo stashees por tu cuenta. Pregunta. Son 31 archivos de otra persona a medio camino, y ya hubo que guardar uno antes (18.5).
-
-Mientras tanto, lo que sí puedes afirmar: `php artisan test --compact tests/Feature/Panel/` da **115/115**, y ésas son las pruebas propias del módulo.
-
-### Paso 3 — Fusionar, y recuperar el stash
-
-Con la re-revisión limpia y la suite verde:
-
-```
-git checkout main
-git merge observatorio
-php artisan test --compact          # sobre el resultado fusionado, no solo sobre la rama
-git branch -d observatorio
-git stash pop                       # el arreglo de seguridad de la galeria, ver 18.5
-```
-
-El `stash@{0}` **merece commit propio**, no ir mezclado: es el hallazgo G6 de la sección 15 en el campo de galería, que se le escapó a la auditoría de agosto. Con él, `SubidaDeImagenesTest` pasa 11/11.
-
-### Y una decisión que el dueño tiene pendiente, no técnica
-
-Tras la ola de arreglos, **de las seis gráficas del observatorio solo dibuja una** (salud financiera). Las otras cinco muestran «Aún sin muestra suficiente», y es correcto: sus muestras no sostienen lo que dibujarían.
+El arreglo del umbral por rebanadas **no cambió esto**. Demanda laboral ya no exige 210 vacantes sino 30, pero hoy hay 7: sigue sin dibujar. Lo que cambió es que ahora *puede* dibujar algún día; antes no podía nunca.
 
 Es honesto, y es exactamente lo que el módulo prometía. **También es un observatorio que enseña cinco paneles vacíos el día de la presentación ante la directiva.** Las dos salidas honestas:
 
@@ -565,3 +528,21 @@ Es honesto, y es exactamente lo que el módulo prometía. **También es un obser
 - **Sembrar una bolsa de empleo con volumen realista** —del orden de 60–80 vacantes repartidas en 18 meses y por área, más aspirantes proporcionales— para que las series tengan sustancia. Son datos ficticios sobre un mercado laboral que no existe todavía, y eso hay que tenerlo claro antes de elegirlo.
 
 **No lo decidas tú.** Pregúntaselo al dueño antes del 22 de septiembre.
+
+### 19.2 La verificación que sigue sin hacerse, y que ahora importa más
+
+**Nadie ha visto Chart.js pintar de verdad.** El panel del navegador de las sesiones que construyeron esto no compone fotogramas («the page is not compositing frames»), así que lo verificado es estructural: el JSON de opciones que llega al cliente, los tokens computados, el DOM.
+
+Eso ya estaba anotado en 18.7, pero **desde el 10 ago 2026 pesa más**: los colores de las gráficas categóricas ya no salen del servidor, los escribe `panel-graficas.js` leyendo `--asb-serie-N` en cada pintado y en cada cambio de tema. La cadena entera —token → plugin → `dataset.backgroundColor`— está probada por sus extremos (los tokens tienen prueba de contraste; los widgets tienen prueba de ranura y de reserva), pero **el eslabón de JavaScript no tiene prueba automática**: este proyecto no tiene infraestructura de pruebas de JS.
+
+Si tu sesión puede componer fotogramas, esto es lo primero que vale la pena mirar: **abre el observatorio en los dos temas y comprueba que las siete barras de demanda laboral y las tres de presencia por municipio se distinguen del fondo y entre sí.** Necesitarás sembrar vacantes para que la gráfica dibuje.
+
+### 19.3 Deuda nueva que dejó este trabajo
+
+- **La paleta de marca no da para siete categorías en los dos temas.** La banda que supera 3:1 sobre blanco Y sobre casi-negro contiene solo cinco de sus colores. Por eso son dos paletas. La consecuencia es que en el tema oscuro hay tres grises juntos (`#d0cccd`, `#a8a3a5`, `#7d7779`) y dos rojos (`#ee4137`, `#d9313a`) más próximos entre sí de lo que están sus equivalentes en claro. Se distinguen, pero si algún día el observatorio necesita una octava categoría, la paleta no la tiene: hay que ampliar el manual de marca, no inventar un hexadecimal.
+- **`--asb-serie-N` es la primera paleta del proyecto que vive a medias entre CSS y JS.** El servidor manda un color de reserva y el cliente lo pisa. `ObservatorioTest` ata la reserva al token de `:root` para que no diverjan, pero nada obliga a que un widget nuevo use `relleno()`: la prueba solo exige ranura a las gráficas de **más de una serie**. Una gráfica nueva de una sola serie puede cablear un color sin que nadie chiste, igual que hacían las tres que había.
+- **Lo que sigue sin tocarse de 18.6**: la corrida contra PostgreSQL que pide el spec §7 (las expresiones SQL de `pgsql` y `mysql` se estrenarán el día del despliegue), la duplicación entre los dos guardianes de tema, y el resto de la lista.
+
+### 19.4 Lo único que queda vivo en el árbol
+
+Los **33 archivos sin commitear de la otra sesión** (G4–G12), que siguen exactamente donde estaban. Ver 18.8 — incluida la advertencia de que dejan 52 pruebas de `PanelCompletoTest` en rojo y de que ese rojo no es tuyo.
