@@ -24,6 +24,12 @@
 > - **El observer de aprobación degrada *cualquier* guardado de un registro publicado hecho por quien no puede publicar**, mire el campo que mire. Cerrar una vacante solo toca `cerrada_at`, pero la despublicaba. Hace falta un escape explícito y acotado (propiedad de instancia en `Vacante`, leída con `instanceof` y encendida solo dentro de un `try/finally`), **no** relajar la condición general: hacerlo reabriría el agujero para los otros ocho modelos publicables.
 > - **Autorizar la vista del portal con la habilidad `view` es una fuga de datos.** `view` concede por permiso *o* por propiedad, así que un directivo que además sea dueño de un bar leía los candidatos de cualquier otro establecimiento. Las rutas de `/mi-cuenta` se autorizan **solo por propiedad** (habilidad aparte, `verEnPortal`); `view` queda para el panel.
 > - **Un plazo de retención en cero convierte la purga en «borra todo»**: `now()->subMonths(0)` es *ahora*. Y a cero se llega solo —variable de entorno vacía, `config:cache` viejo que no incluya el archivo nuevo—. El comando **aborta con error** si el plazo no es un entero ≥ 1; vaciar la variable no desactiva nada.
+>
+> **v7 (5–9 ago 2026) — EL PANEL ADMINISTRATIVO, Y TRABAJO EN CURSO:** el objetivo declarado por la dirección cambió de «prototipo completo» a **demo para la directiva del 22 de septiembre**, y eso reordenó la prioridad hacia el panel. Se rediseñó `/admin` como **sistema de diseño**, no como cuatro pantallas sueltas: los tokens de color pasaron a un `resources/css/tokens.css` compartido entre el sitio y un tema propio de Filament, se añadieron tres componentes reutilizables (vidrio, tarjeta KPI, fila de cola), las gráficas pasaron a seguir el tema, y el tablero de fábrica se sustituyó por uno de tres bandas: **lo pendiente de aprobar preguntando a las policies**, cuatro KPIs **distintos por rol** y todos enlazados, y recaudo mensual agregado en SQL. En paralelo se sembró historia con forma (18 meses de mensualidades con estacionalidad, consultas de la guía por municipio) y se añadió la tabla anónima `consultas_guia`. **Todo eso está fusionado a `main`: 39 commits, la suite pasó de 374 a 458 pruebas.** Encima se está construyendo el **Observatorio del gremio** (rama `observatorio`, 16 commits, suite en 486), que **no está terminado**. El estado exacto, lo que falta y las trampas están en la nueva **sección 18**.
+>
+> **v7 · la trampa que más costó, y que no es técnica:** de veintitantos fallos atrapados en estas dos fases, **cinco fueron pruebas en falso verde escritas por el propio autor del plan** — pruebas que pasaban con el bug reintroducido. Todas tenían la misma forma: `assertSee('alguna palabra')` o una aserción sobre el texto de un archivo, en vez de sobre el comportamiento. Ninguna se detectó leyendo; todas salieron cuando un revisor **mutó el código a propósito** y miró si la prueba se enteraba. Si se relanza cualquier parte de este trabajo: **escribir la prueba no basta, hay que romper el código y ver el rojo.**
+>
+> **v7 · tres suposiciones sobre la API de Filament que resultaron falsas.** Cuestan una ronda entera cada una, así que conviene leerlas antes de escribir: `Panel::getAssets()` **no existe** en 4.12 (los assets se leen con `registerAssets()` + `FilamentAsset::getScripts()`); una página con `$view` propio **no debe** invocar `{{ $this->footerWidgets }}` a mano, porque el envoltorio `<x-filament-panels::page>` ya lo hace y llamarlo duplica cada widget; y `ChartWidget` **sí** sabe no dibujar, con `isEmpty()` y `getEmptyState()` nativos, sin necesidad de un `Widget` con vista propia.
 
 ---
 
@@ -384,3 +390,81 @@ Publicar esto tal cual es peor que no tener la guía: alguien puede pagar por un
 ### Nota de origen legal
 
 Los requisitos de apertura y funcionamiento de establecimientos de comercio en Colombia se apoyan, entre otros, en el Código Nacional de Seguridad y Convivencia Ciudadana (Ley 1801 de 2016), el Código de Comercio en lo relativo a matrícula mercantil, la normativa sanitaria del Invima y las secretarías de salud, la reglamentación de derechos de autor de Sayco-Acinpro, y los acuerdos y decretos **de cada municipio**, que son los que introducen las diferencias locales. **Esta lista es un punto de partida para la investigación, no una fuente citable**: hay que confirmar la norma vigente con cada entidad antes de publicarla.
+
+---
+
+## 18. ESTADO ACTUAL Y TRABAJO EN CURSO (9 ago 2026)
+
+**Léelo antes de tocar nada.** Esta sección existe para que una sesión nueva sepa en qué punto está el proyecto sin tener que reconstruirlo del historial. Se escribió con trabajo a medias en el árbol; si retomas, empieza por «Lo que está a medias».
+
+### 18.1 Qué está terminado y fusionado a `main`
+
+**Panel administrativo, fases F1–F3** — 39 commits, suite de **374 → 458 pruebas** (447 pasan, 11 omitidas, 0 fallos).
+
+| Pieza | Dónde |
+|---|---|
+| Tokens de color compartidos entre sitio y panel | `resources/css/tokens.css`, importado por `app.css` y por el tema del panel |
+| Tema propio de Filament, con Poppins de verdad | `resources/css/filament/admin/theme.css` + `->font()` y `Vite::fonts()` |
+| Componentes reutilizables | `resources/views/components/panel/{vidrio,kpi,cola}.blade.php` |
+| Gráficas que siguen el tema | `resources/js/panel-graficas.js` (plugin global de Chart.js) |
+| Cola de pendientes por policy, no por rol | `app/Panel/ColaDePendientes.php` (singleton, memoizado por usuario) |
+| Tablero propio de tres bandas | `app/Filament/Pages/Dashboard.php` + widgets |
+| Conteo anónimo de consultas a la guía | tabla `consultas_guia`, sin IP ni agente ni sesión |
+| Semilla con forma temporal | 18 meses de mensualidades con estacionalidad, coherencia entre afiliación, cartera e historial |
+
+Documentos: `docs/superpowers/specs/2026-08-05-panel-administrativo-design.md` y `docs/superpowers/plans/2026-08-05-panel-f1-f3.md`.
+
+### 18.2 Lo que está a medias — Observatorio del gremio
+
+**Rama `observatorio`, 16 commits sobre `main`, suite en 486 pruebas.** Plan en `docs/superpowers/plans/2026-08-09-observatorio.md`; el registro de ejecución, con todos los hallazgos y decisiones, en `.superpowers/sdd/2026-08-09-observatorio/progress.md` (git-ignorado, pero es el mapa de recuperación).
+
+**Terminado y revisado:** T1 (objeto `SerieDelObservatorio` con su tamaño de muestra), T2 (servicio `MetricasDelObservatorio` con siete agregaciones en SQL), T3 (estado vacío honesto), T4 (página `/admin/observatorio` con permiso `ver_observatorio` exclusivo de dirección), T5 (las tres visualizaciones con datos) y T6 (las tres flacas, que no dibujan si no hay muestra).
+
+**A medias: T7, el informe imprimible.** Está implementado y en verde, pero en **ronda de arreglo 2**: la prueba que vigila el descargo por serie puede pasar en falso porque `InformeDelObservatorio` guarda **dos copias del título de cada serie** —una en `series()` y otra en `todosLosIndicadores()`— y la extracción por `strpos` salta a la copia lejana si una diverge, tragándose media página. El arreglo pedido es una sola fuente de verdad para los títulos y una extracción acotada. Falta también un comentario que explique por qué el informe usa tablas en vez de incrustar los `ChartWidget` (evita que un `canvas` salga en blanco al imprimir).
+
+**Sin empezar: T8, la verificación de conjunto** — suite completa, recorrido en los dos roles y los dos temas, y conteo de consultas de un render de la página. Después toca la revisión de toda la rama y la fusión.
+
+### 18.3 Decisiones del dueño que gobiernan este trabajo
+
+- **Objetivo: demo para la directiva del 22 de septiembre.** Prioriza impacto visual y que las gráficas se vean vivas, pero nada de lo construido debe tirarse después.
+- **Identificadores y comentarios en español.** `CLAUDE.md` se contradice a sí mismo sobre esto; el dueño resolvió el 5 ago 2026 que gobierna la convención existente del código. **No es un defecto y no debe reportarse como tal.**
+- **Bicromático con los dos temas al mismo nivel.** El vidrio esmerilado se hace con **luz** en oscuro y con **sombra y borde** en claro: son dos recetas, no una opacidad compartida.
+- **Sin dependencias nuevas.** El informe del observatorio se produce con CSS de impresión y lo convierte el navegador, en vez de añadir una librería de PDF.
+- **El «mapa de calor» son barras ordenadas, no Leaflet**: los municipios no tienen coordenadas y el componente de mapa del sitio publica sus assets en stacks que el panel no tiene.
+- **Las visualizaciones sin muestra no dibujan.** Con 7 vacantes en 7 áreas, dibujar barras sugiere una tendencia inexistente. El umbral es 30 (`SerieDelObservatorio::MUESTRA_MINIMA`), compartido con la tarjeta KPI.
+- **La tasa de mora se queda en la banda de cabecera** con su `n = 24` y su rótulo «muestra pequeña». Es la cifra más incómoda del gremio en primera fila, diciendo con cuántos datos se sostiene.
+
+### 18.4 El principio que ordena el Observatorio
+
+**Ninguna cifra se presenta sin su n.** No es un adorno: el módulo existe para que la dirección lleve datos a una alcaldía, y un porcentaje sin el número de observaciones detrás no aguanta la primera pregunta. Hoy **cinco de las siete métricas no alcanzan muestra suficiente**, y la interfaz lo dice en cada una, no en un descargo genérico al pie.
+
+Ese principio ya se violó una vez dentro del propio módulo y conviene saber cómo: la tasa de mora vivía dentro de `saludFinanciera()` como línea plana repetida en dieciocho puntos. Dos problemas — una recta junto a una curva se lee como tendencia, y **heredaba el `n` de transacciones (160) cuando el suyo es 24**, así que salía sellada como «muestra suficiente» siendo pequeña. Está separada en `tasaDeMoraActual()` por eso.
+
+### 18.5 Un cambio ajeno guardado en stash
+
+El 9 ago 2026 aparecieron en el árbol dos archivos modificados que **no pertenecen a este plan**: `app/Filament/Resources/Asociados/Schemas/AsociadoForm.php` y `tests/Feature/SubidaDeImagenesTest.php`.
+
+Es un **arreglo de seguridad real y correcto**: el campo de galería sube por Spatie MediaLibrary, que trae su propio nombrador y **no hereda la defensa de `SubidaSegura`**, así que la extensión la elegía quien sube y un JPEG llamado `payload.html` habría quedado servido como HTML desde `/storage`. Es el hallazgo **G6 de la sección 15** en el único campo que se le escapó entonces. Con el arreglo, `SubidaDeImagenesTest` pasa 11/11.
+
+Está en **`stash@{0}`** de la rama `observatorio`, por decisión del dueño, para no mezclar dos trabajos sin relación. **Merece commit propio.** Recupéralo con `git stash pop` cuando el observatorio esté cerrado.
+
+### 18.6 Deuda conocida que quedó anotada
+
+De la revisión final de F1–F3, ninguna bloqueante, todas con su sitio:
+
+- **`<x-panel.kpi>` no tenía consumidor en producción** hasta que el observatorio estrenó su banda de KPIs. Si el observatorio se descarta, el componente vuelve a quedar huérfano.
+- **La convención de `ticks`/`grid` vacíos en los `ChartWidget` es load-bearing y frágil**: el plugin de tema solo escribe donde ya hay clave. Hay pruebas que lo vigilan **por eje** en los widgets del observatorio, pero no en los del tablero.
+- **Duplicación entre los dos guardianes de tema** (`TemaClaroOscuroTest`, sitio y panel): ~28 líneas literales.
+- **`RequisitoAperturaFactory`** usa el string crudo `borrador` donde su hermana usa el caso del enum.
+- **El singleton de `ColaDePendientes` habilita staleness intra-petición** si el rol de un usuario cambiara entre `canView()` y el render. No explotable hoy; documentado en `AppServiceProvider`.
+- **`AsociadoSeeder`** lanzaría `ValueError` si algún día `CarteraSeeder::EN_MORA` ganara un slug con mora ≥ 22 meses.
+- **`Bitacora` y `AjustesDelSitio`** arrastran un `abort_unless` redundante con un comentario que dice que es el que cierra la puerta; el guardián real es el trait `CanAuthorizeAccess` de Filament.
+- **La corrida contra PostgreSQL que pide el spec §7 sigue sin hacerse.** `RecaudoMensual` y `MetricasDelObservatorio` tienen expresiones SQL por motor de las que **solo se ejecuta la de SQLite**; las de `pgsql` y `mysql` se estrenarán el día del despliegue.
+
+### 18.7 Cómo se está trabajando, por si retomas
+
+Método: **diseño conversado y aprobado antes de tocar código** (`docs/superpowers/specs/`), **plan con el código y las pruebas escritos de antemano** (`docs/superpowers/plans/`), y ejecución tarea por tarea con un implementador fresco y un **revisor independiente por tarea**, más una revisión de toda la rama al final.
+
+Lo que hace que funcione no es la revisión en sí, es **la mutación**: el revisor rompe el código a propósito y comprueba si la prueba se entera. Cinco de los fallos más caros de estas dos fases eran pruebas que pasaban con el bug reintroducido, y ninguna se detectó leyendo.
+
+⚠️ **El panel del navegador de esta sesión no compone fotogramas** —las capturas fallan con «the page is not compositing frames»—, así que **nadie ha visto Chart.js pintar de verdad**. Lo verificado es estructural: el JSON de opciones que llega al cliente, los tokens computados, el DOM. Si tu sesión sí puede componer, **mira las gráficas del observatorio y del tablero en los dos temas**: es la única verificación que falta en todo este trabajo.
