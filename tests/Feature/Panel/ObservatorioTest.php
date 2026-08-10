@@ -128,6 +128,41 @@ class ObservatorioTest extends TestCase
         }
     }
 
+    /**
+     * `InformeDelObservatorio::series()` lee el `que` de cada serie desde el
+     * `que()` estático del widget correspondiente en vez de repetir la frase
+     * a mano: antes vivía escrita dos veces (aquí y en el widget flaco) sin
+     * ninguna prueba que las atara. Con una sola fuente no hay cómo
+     * divergir, pero esta prueba deja el enlace explícito: si algún día
+     * alguien vuelve a hardcodear la frase en uno de los dos sitios, se cae.
+     */
+    public function test_el_que_del_informe_es_el_mismo_que_el_de_su_widget(): void
+    {
+        $mapa = [
+            'presencia-por-municipio' => PresenciaPorMunicipio::class,
+            'composicion-del-sector' => ComposicionDelSector::class,
+            'salud-financiera' => SaludFinanciera::class,
+            'cobertura-de-proveedores' => CoberturaDeProveedores::class,
+            'demanda-laboral-por-area' => DemandaLaboralPorArea::class,
+            'oferta-contra-demanda' => OfertaContraDemanda::class,
+        ];
+
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        $informe = Livewire::test(InformeDelObservatorio::class)->instance();
+
+        foreach ($informe->series() as $item) {
+            $claseWidget = $mapa[$item['clave']] ?? null;
+            $this->assertNotNull($claseWidget, "Clave sin mapear en la prueba: {$item['clave']}");
+
+            $this->assertSame(
+                $claseWidget::que(),
+                $item['que'],
+                "El 'que' de \"{$item['clave']}\" en el informe debería venir de {$claseWidget}::que()."
+            );
+        }
+    }
+
     public function test_los_widgets_del_observatorio_dejan_hueco_al_plugin_de_tema(): void
     {
         foreach (File::allFiles(app_path('Filament/Widgets/Observatorio')) as $archivo) {
@@ -416,5 +451,29 @@ class ObservatorioTest extends TestCase
                 );
             }
         }
+    }
+
+    /**
+     * «Otros» pintaba con Ambient White (#F5F3F4), prácticamente el mismo
+     * tono que el fondo del tema claro: la barra quedaba invisible ahí. Fija
+     * que el color no sea ese blanco, en vez de fijar el color exacto que lo
+     * reemplaza — así un ajuste de paleta futuro no rompe esta prueba
+     * mientras siga siendo visible.
+     */
+    public function test_el_color_de_otros_en_demanda_laboral_no_es_el_blanco_invisible(): void
+    {
+        $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
+
+        $instancia = Livewire::test(DemandaLaboralPorArea::class)->instance();
+        $datos = (new \ReflectionMethod(DemandaLaboralPorArea::class, 'getData'))->invoke($instancia);
+
+        $datasetOtros = collect($datos['datasets'])->firstWhere('label', CargoDelSector::Otros->getLabel());
+
+        $this->assertNotNull($datasetOtros, 'No se encontró el conjunto de datos de "Otros".');
+        $this->assertNotSame(
+            '#F5F3F4',
+            strtoupper($datasetOtros['backgroundColor']),
+            'El color de "Otros" sigue siendo Ambient White, casi invisible sobre fondo claro.'
+        );
     }
 }

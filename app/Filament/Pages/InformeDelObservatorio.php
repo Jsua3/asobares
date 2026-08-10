@@ -2,6 +2,12 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Widgets\Observatorio\CoberturaDeProveedores;
+use App\Filament\Widgets\Observatorio\ComposicionDelSector;
+use App\Filament\Widgets\Observatorio\DemandaLaboralPorArea;
+use App\Filament\Widgets\Observatorio\OfertaContraDemanda;
+use App\Filament\Widgets\Observatorio\PresenciaPorMunicipio;
+use App\Filament\Widgets\Observatorio\SaludFinanciera;
 use App\Panel\MetricasDelObservatorio;
 use App\Panel\SerieDelObservatorio;
 use Filament\Pages\Page;
@@ -95,10 +101,14 @@ class InformeDelObservatorio extends Page
 
     /**
      * Las seis series del observatorio, en el mismo orden que sus gráficas
-     * en {@see Observatorio::getFooterWidgets()}. Cada `que` repite la misma
-     * frase que ya usa el widget flaco correspondiente en su estado vacío
-     * (ver `resources/views/components/panel/sin-muestra.blade.php`), para
-     * que el papel diga exactamente lo mismo que la pantalla.
+     * en {@see Observatorio::getFooterWidgets()}. Cada `que` viene de
+     * `GraficaDelObservatorio::que()` del widget correspondiente —estático,
+     * así que se lee sin instanciar el componente— en vez de repetir la
+     * frase aquí: antes vivía escrita a mano en este archivo Y en el widget
+     * flaco correspondiente (ver `resources/views/components/panel/sin-muestra.blade.php`),
+     * sin ninguna prueba que las atara, la misma causa raíz que ya se cerró
+     * para los títulos (ver el punto de abajo). Ahora hay una sola fuente:
+     * el widget.
      *
      * Única fuente de verdad para el título de cada serie: antes vivía
      * duplicado aquí y en `todosLosIndicadores()`, y un revisor demostró que
@@ -123,37 +133,37 @@ class InformeDelObservatorio extends Page
             [
                 'clave' => 'presencia-por-municipio',
                 'titulo' => 'Presencia por municipio',
-                'que' => 'la presencia del gremio por municipio',
+                'que' => PresenciaPorMunicipio::que(),
                 'serie' => $metricas->presenciaPorMunicipio(),
             ],
             [
                 'clave' => 'composicion-del-sector',
                 'titulo' => 'Composición del sector',
-                'que' => 'la composición del sector por categoría',
+                'que' => ComposicionDelSector::que(),
                 'serie' => $metricas->composicionDelSector(),
             ],
             [
                 'clave' => 'salud-financiera',
                 'titulo' => 'Salud financiera, últimos 18 meses',
-                'que' => 'la salud financiera del gremio',
+                'que' => SaludFinanciera::que(),
                 'serie' => $metricas->saludFinanciera(),
             ],
             [
                 'clave' => 'cobertura-de-proveedores',
                 'titulo' => 'Cobertura de proveedores',
-                'que' => 'la cobertura de proveedores por categoría',
+                'que' => CoberturaDeProveedores::que(),
                 'serie' => $metricas->coberturaDeProveedores(),
             ],
             [
                 'clave' => 'demanda-laboral-por-area',
                 'titulo' => 'Demanda laboral por área',
-                'que' => 'la demanda laboral por área y por mes',
+                'que' => DemandaLaboralPorArea::que(),
                 'serie' => $metricas->demandaLaboralPorArea(),
             ],
             [
                 'clave' => 'oferta-contra-demanda',
                 'titulo' => 'Oferta contra demanda',
-                'que' => 'la oferta contra la demanda laboral',
+                'que' => OfertaContraDemanda::que(),
                 'serie' => $metricas->ofertaContraDemanda(),
             ],
         ];

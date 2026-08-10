@@ -43,7 +43,12 @@ class DemandaLaboralPorArea extends GraficaDelObservatorio
             CargoDelSector::Servicio->value => '#EA698B', // Ambient Rose
             CargoDelSector::Seguridad->value => '#282628', // Pub Grey
             CargoDelSector::Aseo->value => '#0B090A', // Pub Black
-            CargoDelSector::Otros->value => '#F5F3F4', // Ambient White
+            // Ambient White (#F5F3F4) es prácticamente el mismo tono que el
+            // fondo del tema claro (`--asb-fondo` en tokens.css): la barra
+            // de "Otros" quedaba invisible ahí. Noche 400 (`--color-noche-400`
+            // en tokens.css), el gris medio de la rampa oficial construida
+            // sobre Pub Grey/Pub Black, se distingue en los dos temas.
+            CargoDelSector::Otros->value => '#7D7779', // Noche 400
         ];
 
         $datasets = [];
