@@ -420,7 +420,7 @@ Documentos: `docs/superpowers/specs/2026-08-05-panel-administrativo-design.md` y
 
 **Las ocho tareas del plan están cerradas y revisadas**, y encima se aplicó una **ola de arreglos** tras la revisión de toda la rama, que encontró dos Críticos. Las pruebas propias del módulo están en verde: **115/115** en `tests/Feature/Panel/`.
 
-**Lo que falta para poder fusionar:**
+**Lo que falta para poder fusionar — está desarrollado como encargo en la sección 19, que es lo primero que hay que hacer:**
 1. La **re-revisión acotada de la ola de arreglos** (siete commits, de `168ce93` a `7778ce3`). Es el último control del método y no se ha hecho.
 2. **Correr la suite completa sobre un árbol limpio.** Hoy no se puede — ver 18.8.
 3. Fusionar y recuperar el stash de 18.5.
@@ -498,3 +498,70 @@ Lo que hay sin commitear, por lo que se ve en los archivos:
 Si retomas y ves la suite en rojo: **primero mira `git status`**. Si esos archivos siguen sin commitear, el rojo probablemente no es tuyo. Verifica tu trabajo corriendo solo tus archivos, y no intentes «arreglar» `PanelCompletoTest` — le toca a quien esté haciendo la MFA obligatoria, que además tendrá que actualizar esas pruebas para que afirmen la regla nueva.
 
 **No stashees ese trabajo sin hablarlo.** Son 31 archivos de otra persona a medio camino.
+
+---
+
+## 19. LO PRIMERO QUE TIENES QUE HACER EN LA PRÓXIMA SESIÓN
+
+**Esta sección es el encargo, no el contexto.** El Observatorio está construido y sus pruebas están verdes, pero **no está cerrado**: le faltan los tres pasos de abajo, en este orden. Hazlos antes de empezar nada nuevo.
+
+### Paso 1 — La re-revisión de la ola de arreglos (pendiente, es el control que falta)
+
+Tras cerrar las ocho tareas, una revisión de toda la rama encontró dos Críticos y se aplicó una **ola de arreglos de siete commits**. Esa ola **nunca se re-revisó**, y el método dice que toda ola de arreglos termina con una re-revisión acotada. Es el último control y está sin hacer.
+
+El rango exacto es `168ce93..7778ce3`. Genera el paquete así:
+
+```
+bash <ruta-a-superpowers>/skills/subagent-driven-development/scripts/review-package \
+  docs/superpowers/plans/2026-08-09-observatorio.md 168ce93 7778ce3
+```
+
+Los siete commits, y lo que cada uno debe haber cerrado:
+
+| Commit | Qué arregla | Qué debe verificar la re-revisión |
+|---|---|---|
+| `2625326` | Sube la regla del umbral a una clase base de la que heredan las seis gráficas | Que **ninguna** gráfica puede olvidarse de la regla. Añade una séptima de mentira sin declarar nada y comprueba que hereda el comportamiento |
+| `f3f09d2` | Saca las gráficas del observatorio del descubrimiento del tablero | Que el tablero **no** contiene ninguna. Revierte el arreglo y comprueba que la prueba nueva se pone roja |
+| `2731819` | El umbral se exige al conjunto más flaco, no a la suma | Que una serie con varios conjuntos y uno flojo **no** alcanza muestra, y que sí la alcanza cuando todos la tienen |
+| `999c7fc` | Reescribe la prueba de las «sólidas» para que mida lo que dice | Que ahora afirma canvas presente y estado vacío ausente, y que **deriva del umbral en vivo** en vez de una lista escrita a mano |
+| `06785cf` | Distingue base vacía de muestra insuficiente | Que con base vacía se ve texto legible y no un lienzo en blanco |
+| `f887104` | Una sola fuente para la frase `que`, y color visible para «Otros» | Que no quedan frases duplicadas entre widget e informe, y que «Otros» se ve en los dos temas |
+| `7778ce3` | Arregla dos pruebas que el arreglo del umbral dejó en rojo | Que las arregló **afirmando la regla nueva**, no excluyendo el caso |
+
+**Exígele mutación, no lectura.** En estas dos fases aparecieron **seis pruebas en falso verde**, todas escritas por el autor del plan, todas de la forma «afirmo que una cadena aparece en algún sitio». Ninguna se detectó leyendo. La instrucción al re-revisor tiene que ser: *rompe el código de cada arreglo y comprueba que la prueba se entera*.
+
+### Paso 2 — La suite completa sobre un árbol limpio
+
+Hoy **no se puede correr** y el motivo está en 18.8: otra sesión tiene 31 archivos sin commitear (MFA obligatoria, cabeceras, retención, cupos) que dejan 52 pruebas de `PanelCompletoTest` en rojo por un `302` de login. **Ese rojo no es del Observatorio.**
+
+Antes de fusionar hace falta una corrida limpia. Dos caminos, y **hay que hablarlo con el dueño**, no decidirlo solo:
+
+- **Si ese trabajo ya está commiteado** cuando retomes: corre la suite y punto.
+- **Si sigue sin commitear**: no lo stashees por tu cuenta. Pregunta. Son 31 archivos de otra persona a medio camino, y ya hubo que guardar uno antes (18.5).
+
+Mientras tanto, lo que sí puedes afirmar: `php artisan test --compact tests/Feature/Panel/` da **115/115**, y ésas son las pruebas propias del módulo.
+
+### Paso 3 — Fusionar, y recuperar el stash
+
+Con la re-revisión limpia y la suite verde:
+
+```
+git checkout main
+git merge observatorio
+php artisan test --compact          # sobre el resultado fusionado, no solo sobre la rama
+git branch -d observatorio
+git stash pop                       # el arreglo de seguridad de la galeria, ver 18.5
+```
+
+El `stash@{0}` **merece commit propio**, no ir mezclado: es el hallazgo G6 de la sección 15 en el campo de galería, que se le escapó a la auditoría de agosto. Con él, `SubidaDeImagenesTest` pasa 11/11.
+
+### Y una decisión que el dueño tiene pendiente, no técnica
+
+Tras la ola de arreglos, **de las seis gráficas del observatorio solo dibuja una** (salud financiera). Las otras cinco muestran «Aún sin muestra suficiente», y es correcto: sus muestras no sostienen lo que dibujarían.
+
+Es honesto, y es exactamente lo que el módulo prometía. **También es un observatorio que enseña cinco paneles vacíos el día de la presentación ante la directiva.** Las dos salidas honestas:
+
+- **Enseñarlo así**, explicando que la herramienta ya mide y lo que falta es que el sector alimente el dato. Es defendible y distingue esto de un tablero de vanidad.
+- **Sembrar una bolsa de empleo con volumen realista** —del orden de 60–80 vacantes repartidas en 18 meses y por área, más aspirantes proporcionales— para que las series tengan sustancia. Son datos ficticios sobre un mercado laboral que no existe todavía, y eso hay que tenerlo claro antes de elegirlo.
+
+**No lo decidas tú.** Pregúntaselo al dueño antes del 22 de septiembre.
