@@ -268,6 +268,14 @@ class ObservatorioTest extends TestCase
     /**
      * Y cuando el dato llegue, dibuja. Si esta prueba se cae, es que el
      * estado vacío se quedó pegado y el observatorio nunca enseñará empleo.
+     *
+     * Empuja los DOS lados —demanda (vacantes) y oferta (aspirantes)— por
+     * encima del umbral, no solo uno: desde el arreglo de
+     * `SerieDelObservatorio::hayMuestraSuficiente()` (ver su docblock),
+     * empujar un solo conjunto ya no basta para que la serie completa se
+     * declare con muestra suficiente. Es justo el fallo que ese arreglo
+     * cierra, así que esta prueba tiene que demostrar el caso real: los dos
+     * conjuntos con muestra propia, no uno prestándole la suya al otro.
      */
     public function test_la_misma_visualizacion_dibuja_en_cuanto_hay_muestra(): void
     {
@@ -276,6 +284,7 @@ class ObservatorioTest extends TestCase
         Vacante::factory()->count(35)->publicado()->for($asociado)->create([
             'categoria_cargo' => CargoDelSector::Barra,
         ]);
+        Aspirante::factory()->count(35)->create(['categoria_cargo' => CargoDelSector::Barra]);
 
         $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
 
@@ -329,8 +338,10 @@ class ObservatorioTest extends TestCase
      * Para eso hace falta un caso de cada tipo en el mismo render:
      * `coberturaDeProveedores()` ya no alcanza con la semilla por defecto
      * (ver el docblock de `CoberturaDeProveedores`, n = 10), y se empuja
-     * `ofertaContraDemanda()` por encima del umbral con aspirantes reales de
-     * una sola categoría — mismo mecanismo que
+     * `ofertaContraDemanda()` por encima del umbral con vacantes Y
+     * aspirantes reales de una sola categoría —los dos lados, no solo
+     * uno: desde el arreglo de `SerieDelObservatorio::hayMuestraSuficiente()`
+     * empujar un solo conjunto ya no basta— mismo mecanismo que
      * `test_la_misma_visualizacion_dibuja_en_cuanto_hay_muestra`.
      *
      * `extraerSeccionDeSerie()` acota cada sección por su propio
@@ -359,6 +370,10 @@ class ObservatorioTest extends TestCase
             'Esta prueba necesita que la cobertura de proveedores no alcance muestra con la semilla por defecto.'
         );
 
+        $asociado = Asociado::factory()->publicado()->create();
+        Vacante::factory()->count(35)->publicado()->for($asociado)->create([
+            'categoria_cargo' => CargoDelSector::Barra,
+        ]);
         Aspirante::factory()->count(35)->create(['categoria_cargo' => CargoDelSector::Barra]);
 
         $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
