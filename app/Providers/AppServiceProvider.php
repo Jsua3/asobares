@@ -7,10 +7,12 @@ use App\Models\Artista;
 use App\Models\Asociado;
 use App\Models\Evento;
 use App\Models\Iniciativa;
+use App\Models\Inscripcion;
 use App\Models\Noticia;
 use App\Models\Proveedor;
 use App\Models\RequisitoApertura;
 use App\Models\Vacante;
+use App\Observers\ConfirmacionDeInscripcionObserver;
 use App\Observers\FlujoDeAprobacionObserver;
 use App\Observers\LimpiezaDeArchivosObserver;
 use App\Panel\ColaDePendientes;
@@ -66,6 +68,8 @@ class AppServiceProvider extends ServiceProvider
         foreach (self::MODELOS_PUBLICABLES as $modelo) {
             $modelo::observe(FlujoDeAprobacionObserver::class);
         }
+
+        Inscripcion::observe(ConfirmacionDeInscripcionObserver::class);
 
         foreach (array_keys(LimpiezaDeArchivosObserver::CAMPOS_POR_MODELO) as $modelo) {
             $modelo::observe(LimpiezaDeArchivosObserver::class);

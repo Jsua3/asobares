@@ -47,12 +47,17 @@ class InscripcionForm
                 Section::make('Estado y pago')
                     ->columns(2)
                     ->schema([
+                        // Desactivado a propósito: la confirmación la dispara
+                        // el pago aprobado. La regla la hace cumplir
+                        // `ConfirmacionDeInscripcionObserver`; esto sólo evita
+                        // ofrecer en pantalla algo que el modelo va a rechazar.
                         Select::make('estado')
                             ->label('Estado')
                             ->options(EstadoInscripcion::class)
                             ->default(EstadoInscripcion::Registrada)
-                            ->required()
-                            ->helperText('En eventos de pago, la confirmación la dispara el pago aprobado: no la marques a mano.'),
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->helperText('En eventos de pago, la confirmación la dispara el pago aprobado.'),
                         Select::make('transaccion_id')
                             ->label('Transacción')
                             ->relationship('transaccion', 'referencia')
