@@ -220,10 +220,12 @@
                 {{ collect(array_filter(explode("\n", (string) ajuste('quienes_programas_nacionales'))))->map(fn ($p) => trim($p))->join(', ', ' y ') }}.
                 Lo que no es local se gestiona directamente con la Nacional.
             </p>
-            <a href="{{ ajuste('url_nacional') }}" target="_blank" rel="noopener"
-               class="mt-6 inline-block rounded-xl border border-linea-fuerte px-6 py-2.5 text-sm font-semibold transition-colors hover:border-marca-500/50">
-                Ir a Asobares Nacional ↗
-            </a>
+            @if ($enlaceNacional = enlaceSeguro(ajuste('url_nacional')))
+                <a href="{{ $enlaceNacional }}" target="_blank" rel="noopener"
+                   class="mt-6 inline-block rounded-xl border border-linea-fuerte px-6 py-2.5 text-sm font-semibold transition-colors hover:border-marca-500/50">
+                    Ir a Asobares Nacional ↗
+                </a>
+            @endif
         </section>
     </div>
 </x-layouts.publico>

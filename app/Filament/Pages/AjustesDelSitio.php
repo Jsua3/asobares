@@ -107,9 +107,35 @@ class AjustesDelSitio extends Page implements HasSchemas
                 ->columnSpanFull();
         }
 
-        return TextInput::make($ajuste->clave)
+        $campo = TextInput::make($ajuste->clave)
             ->label($etiqueta)
             ->maxLength(500);
+
+        // Todos los ajustes se trataban como texto libre, pero algunos acaban
+        // dentro de un `href` del sitio público. `{{ }}` escapa las comillas
+        // —no se puede salir del atributo— pero no filtra el esquema, así que
+        // un `javascript:` guardado aquí se ejecutaba al pulsar el enlace en
+        // cada página.
+        //
+        // La regla se aplica sólo cuando el campo trae algo: dejar un ajuste
+        // en blanco es legítimo, y si el formato se exigiera también sobre el
+        // vacío, un solo ajuste sin llenar bloquearía el guardado de toda la
+        // página.
+        $siTieneValor = static fn (?string $state): bool => filled($state);
+
+        return match (true) {
+            self::esEnlace($ajuste->clave) => $campo->rule('url', $siTieneValor),
+            str_contains($ajuste->clave, 'correo') => $campo->rule('email', $siTieneValor),
+            str_contains($ajuste->clave, '_lat'),
+            str_contains($ajuste->clave, '_lng') => $campo->rule('numeric', $siTieneValor),
+            default => $campo,
+        };
+    }
+
+    /** Los ajustes cuyo valor termina siendo el destino de un enlace. */
+    public static function esEnlace(string $clave): bool
+    {
+        return str_starts_with($clave, 'url_') || str_ends_with($clave, '_url');
     }
 
     public function guardar(): void

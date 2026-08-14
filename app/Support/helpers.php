@@ -23,6 +23,30 @@ if (! function_exists('pesos')) {
     }
 }
 
+if (! function_exists('enlaceSeguro')) {
+    /**
+     * Deja pasar sólo destinos http(s).
+     *
+     * La validación del formulario es la primera barrera, pero los ajustes
+     * también se cargan de semillas y de la base: si alguna vez entra por ahí
+     * un `javascript:` o un `data:`, el enlace del pie lo ejecutaría en el
+     * origen del sitio. Aquí se descarta y el enlace simplemente no se pinta.
+     */
+    function enlaceSeguro(?string $url): ?string
+    {
+        $limpio = trim((string) $url);
+
+        if ($limpio === '') {
+            return null;
+        }
+
+        return str_starts_with(strtolower($limpio), 'https://')
+            || str_starts_with(strtolower($limpio), 'http://')
+            ? $limpio
+            : null;
+    }
+}
+
 if (! function_exists('enlaceWhatsapp')) {
     /** Arma un enlace de WhatsApp con mensaje precargado. */
     function enlaceWhatsapp(?string $numero, string $mensaje = ''): ?string

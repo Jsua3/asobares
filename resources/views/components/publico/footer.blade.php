@@ -22,7 +22,9 @@
                     <li><a href="{{ route('afiliate') }}" class="text-suave hover:text-acento">Afíliate</a></li>
                     <li><a href="{{ route('boletin.index') }}" class="text-suave hover:text-acento">Boletín</a></li>
                     <li><a href="{{ route('eventos.index') }}" class="text-suave hover:text-acento">Eventos y capacitaciones</a></li>
-                    <li><a href="{{ ajuste('url_nacional') }}" rel="noopener" target="_blank" class="text-suave hover:text-acento">Asobares Nacional ↗</a></li>
+                    @if ($enlaceNacional = enlaceSeguro(ajuste('url_nacional')))
+                        <li><a href="{{ $enlaceNacional }}" rel="noopener" target="_blank" class="text-suave hover:text-acento">Asobares Nacional ↗</a></li>
+                    @endif
                 </ul>
             </div>
 
