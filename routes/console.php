@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Los datos personales de la bolsa se borran solos al vencer su plazo.
 Schedule::command('bolsas:depurar')->dailyAt('03:30');
+
+// Y los de los formularios públicos: contacto y PQR también caducan.
+Schedule::command('mensajes:depurar')->dailyAt('03:45');
