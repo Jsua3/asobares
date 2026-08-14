@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AsegurarRolAsociado;
+use App\Http\Middleware\CabecerasDeSeguridad;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'rol.asociado' => AsegurarRolAsociado::class,
         ]);
+
+        // Global, no sólo en `web`: también cubre las descargas y cualquier
+        // respuesta que no pase por el grupo del sitio.
+        $middleware->append(CabecerasDeSeguridad::class);
 
         // El hosting de producción todavía no está decidido. Cuando se elija,
         // TRUSTED_PROXIES debe listar las IPs del balanceador (o `*` si el
