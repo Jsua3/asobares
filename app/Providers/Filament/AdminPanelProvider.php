@@ -68,12 +68,26 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::hex('#EE4137'),
             ])
             // RF-40: segundo factor por app de autenticación o código al correo.
-            ->multiFactorAuthentication([
-                AppAuthentication::make()
-                    ->recoverable()
-                    ->recoveryCodeCount(8),
-                EmailAuthentication::make(),
-            ])
+            //
+            // `isRequired` es lo que lo vuelve una defensa y no una opción.
+            // Registrar los dos proveedores sólo los ofrecía: quien nunca
+            // entraba a su perfil a activarlos seguía entrando con la
+            // contraseña sola, y este panel gobierna los pagos, la cartera y
+            // los datos personales de los afiliados.
+            //
+            // No deja a nadie fuera: quien todavía no tiene factor no se topa
+            // con un portazo sino con `SetUpRequiredMultiFactorAuthentication`,
+            // la pantalla de alta obligatoria de Filament, y entra en cuanto
+            // lo configura.
+            ->multiFactorAuthentication(
+                [
+                    AppAuthentication::make()
+                        ->recoverable()
+                        ->recoveryCodeCount(8),
+                    EmailAuthentication::make(),
+                ],
+                isRequired: true,
+            )
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
             // Sin icono de grupo a propósito: Filament no admite iconos en el

@@ -30,6 +30,12 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            // El panel exige segundo factor, así que una cuenta sin él no
+            // llega al escritorio: se queda en la pantalla de alta. Lo normal
+            // en una cuenta en uso es tenerlo, y eso es lo que debe producir
+            // la factory; para probar la propia exigencia está
+            // `sinSegundoFactor()`.
+            'has_email_authentication' => true,
         ];
     }
 
@@ -40,6 +46,15 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /** Cuenta recién creada, todavía sin dar de alta su segundo factor. */
+    public function sinSegundoFactor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'has_email_authentication' => false,
+            'app_authentication_secret' => null,
         ]);
     }
 }

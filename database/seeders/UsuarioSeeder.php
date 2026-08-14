@@ -22,12 +22,18 @@ class UsuarioSeeder extends Seeder
             return;
         }
 
+        // El panel exige segundo factor: sin darlo de alta, estas cuentas se
+        // quedarían en la pantalla de alta y el demo no pasaría de ahí. Se
+        // deja el de correo, que no obliga a instalar nada. En producción este
+        // seeder ni siquiera corre, así que las cuentas reales sí pasan por el
+        // alta obligatoria.
         $direccion = User::firstOrCreate(
             ['email' => 'direccion@asobaresquindio.test'],
             [
                 'name' => 'Natalia Gutiérrez',
                 'password' => Hash::make(self::CLAVE_DEMO),
                 'email_verified_at' => now(),
+                'has_email_authentication' => true,
             ]
         );
         $direccion->syncRoles([User::ROL_SUPER_ADMIN]);
@@ -38,6 +44,7 @@ class UsuarioSeeder extends Seeder
                 'name' => 'Secretaría del capítulo',
                 'password' => Hash::make(self::CLAVE_DEMO),
                 'email_verified_at' => now(),
+                'has_email_authentication' => true,
             ]
         );
         $oficina->syncRoles([User::ROL_SUBADMIN]);
