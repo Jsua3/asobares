@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Publico;
 
 use App\Http\Requests\GuardarInscripcionRequest;
 use App\Models\Evento;
+use App\Models\Inscripcion;
 use App\Services\RegistroDePagos;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EventoController
 {
@@ -40,11 +42,25 @@ class EventoController
     {
         abort_unless($evento->estaPublicado(), 404);
 
-        if (! $evento->admiteInscripciones()) {
+        // Comprobar el cupo y luego insertar eran dos pasos sueltos: dos
+        // peticiones simultáneas leían el mismo conteo, las dos lo daban por
+        // bueno y las dos insertaban. Con el último asiento eso es sobreventa,
+        // y en un evento de pago se cobra por una silla que no existe. El
+        // bloqueo de la fila del evento serializa a los competidores, y la
+        // comprobación se repite ya dentro del cerrojo.
+        $inscripcion = DB::transaction(function () use ($evento, $request): ?Inscripcion {
+            $enExclusiva = Evento::whereKey($evento->getKey())->lockForUpdate()->firstOrFail();
+
+            if (! $enExclusiva->admiteInscripciones()) {
+                return null;
+            }
+
+            return $enExclusiva->inscripciones()->create($request->datosDeLaInscripcion());
+        });
+
+        if (! $inscripcion instanceof Inscripcion) {
             return back()->with('error', 'Este evento ya no recibe inscripciones.');
         }
-
-        $inscripcion = $evento->inscripciones()->create($request->datosDeLaInscripcion());
 
         // Si el evento es gratuito, la inscripción queda lista. Si tiene
         // precio, no se confirma hasta que la transacción sea aprobada.
