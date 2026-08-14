@@ -40,6 +40,12 @@ class PasarelaSimulada implements PasarelaDePago
 
         $aprobado = $request->string('decision')->toString() === 'aprobar';
 
+        // Una pasarela de verdad informa cuánto cobró, y la conciliación de
+        // `RegistroDePagos` no aplica un pago que no lo diga. El demo tiene
+        // que comportarse igual, o ejercitaría un camino que en producción no
+        // existe.
+        $cobrada = Transaccion::where('referencia', $referencia)->first();
+
         return new ResultadoDePago(
             referencia: $referencia,
             estado: $aprobado ? EstadoTransaccion::Aprobada : EstadoTransaccion::Rechazada,
@@ -49,6 +55,8 @@ class PasarelaSimulada implements PasarelaDePago
                 'decision' => $aprobado ? 'aprobada' : 'rechazada',
                 'confirmado_en' => now()->toIso8601String(),
             ],
+            monto: $cobrada !== null ? (float) $cobrada->monto : null,
+            moneda: $cobrada?->moneda,
         );
     }
 

@@ -85,10 +85,13 @@ class PasarelaBold implements PasarelaDePago
             return false;
         }
 
-        // En pruebas Bold firma con llave vacía a propósito. En producción una
-        // llave vacía es configuración incompleta, y aceptarla sería dar por
-        // buena cualquier notificación: ahí se rechaza siempre.
-        if ($this->secret === '' && ! $this->sandbox) {
+        // En pruebas Bold firma con llave vacía a propósito, y sin eso no hay
+        // forma de ejercitar la integración. Pero un HMAC con llave vacía lo
+        // reproduce cualquiera, así que la excusa vale sólo en la máquina de
+        // desarrollo: un servidor de pruebas expuesto a internet con
+        // BOLD_SANDBOX=true y la llave sin poner aceptaría notificaciones
+        // falsificadas. Fuera de local, llave vacía es rechazo.
+        if ($this->secret === '' && ! ($this->sandbox && app()->environment('local', 'testing'))) {
             return false;
         }
 

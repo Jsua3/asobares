@@ -178,6 +178,8 @@ class FlujoDePagoTest extends TestCase
             referencia: $transaccion->referencia,
             estado: EstadoTransaccion::Aprobada,
             metodo: MetodoPago::Pse,
+            monto: (float) $transaccion->monto,
+            moneda: $transaccion->moneda,
         );
 
         $registro->aplicarConfirmacion($resultado);
@@ -187,10 +189,46 @@ class FlujoDePagoTest extends TestCase
             referencia: $transaccion->referencia,
             estado: EstadoTransaccion::Rechazada,
             metodo: MetodoPago::Pse,
+            monto: (float) $transaccion->monto,
+            moneda: $transaccion->moneda,
         );
         $registro->aplicarConfirmacion($rechazoTardio);
 
         $this->assertSame(EstadoTransaccion::Aprobada, $transaccion->fresh()->estado);
+    }
+
+    /**
+     * La conciliación de monto se daba por buena cuando la pasarela no
+     * informaba cuánto había cobrado. El riesgo no era un ataque —la firma ya
+     * autentica el mensaje— sino quedarse ciego: si el nombre real del campo
+     * no fuera ninguno de los que adivina `PasarelaBold`, NINGÚN pago se
+     * conciliaría nunca y sólo lo delataría una línea en el log.
+     */
+    public function test_una_confirmacion_sin_monto_no_aprueba_la_transaccion(): void
+    {
+        $evento = $this->eventoPago();
+
+        $this->post(route('eventos.inscribir', $evento), [
+            'nombre' => 'Sin Monto',
+            'correo' => 'sin.monto@ejemplo.test',
+            'telefono' => '3134470091',
+            'acepta_datos' => '1',
+        ]);
+
+        $transaccion = Transaccion::firstOrFail();
+
+        app(RegistroDePagos::class)->aplicarConfirmacion(new ResultadoDePago(
+            referencia: $transaccion->referencia,
+            estado: EstadoTransaccion::Aprobada,
+            metodo: MetodoPago::Pse,
+        ));
+
+        $this->assertSame(
+            EstadoTransaccion::Pendiente,
+            $transaccion->fresh()->estado,
+            'Sin monto no hay conciliación, y sin conciliación no se aplica el pago.'
+        );
+        $this->assertSame(EstadoInscripcion::Registrada, Inscripcion::firstOrFail()->estado);
     }
 
     public function test_el_webhook_de_bold_rechaza_una_firma_invalida(): void
@@ -556,7 +594,11 @@ class FlujoDePagoTest extends TestCase
 
         $cuerpo = json_encode([
             'type' => 'SALE_APPROVED',
-            'data' => ['metadata' => ['reference' => $transaccion->referencia], 'payment_method' => 'PSE'],
+            'data' => [
+                'metadata' => ['reference' => $transaccion->referencia],
+                'payment_method' => 'PSE',
+                'amount' => ['total' => (float) $transaccion->monto, 'currency' => 'COP'],
+            ],
         ]);
 
         $this->call(

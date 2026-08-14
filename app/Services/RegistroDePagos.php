@@ -113,18 +113,25 @@ class RegistroDePagos
     /**
      * ¿Lo que la pasarela dice haber cobrado es lo que se cobró?
      *
-     * Si la pasarela no informa monto no se puede comparar, y bloquear ahí
-     * dejaría sin aplicar pagos legítimos: se deja pasar, pero con aviso en
-     * el log para que se note en la primera prueba contra la pasarela real.
+     * Antes, una notificación sin monto se daba por buena con un aviso en el
+     * log. El problema es lo que pasa si el nombre real del campo no es
+     * ninguno de los que adivina `PasarelaBold`: entonces NINGÚN pago se
+     * concilia nunca y el control queda inerte sin que nadie se entere, que es
+     * justo el modo de fallar que no se puede permitir en la parte del dinero.
+     *
+     * Fallando cerrado, la transacción se queda pendiente y el desajuste se
+     * ve en la primera prueba contra el sandbox, que es cuando toca
+     * descubrirlo. Ningún pago se pierde: la referencia sigue viva y se
+     * concilia a mano o con la notificación corregida.
      */
     private function montoConcuerda(Transaccion $transaccion, ResultadoDePago $resultado): bool
     {
         if ($resultado->monto === null) {
-            Log::warning('La pasarela confirmó un pago sin informar el monto: no se pudo conciliar.', [
+            Log::warning('La pasarela confirmó un pago sin informar el monto: no se concilia y queda pendiente.', [
                 'referencia' => $transaccion->referencia,
             ]);
 
-            return true;
+            return false;
         }
 
         if (round((float) $transaccion->monto, 2) !== round($resultado->monto, 2)) {
