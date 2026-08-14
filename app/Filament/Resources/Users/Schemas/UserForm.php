@@ -7,6 +7,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Password;
 use Spatie\Permission\Models\Role;
 
 class UserForm
@@ -35,15 +36,25 @@ class UserForm
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
+                        // Sin regla de fortaleza, el único límite era la
+                        // longitud máxima: se podía dejar una sola letra como
+                        // contraseña de la dirección, la cuenta que gobierna
+                        // los pagos (RF-40). La condición evita exigirla al
+                        // editar sin cambiarla, que es cuando el campo va
+                        // vacío a propósito.
                         TextInput::make('password')
                             ->label('Contraseña')
                             ->password()
                             ->revealable()
                             ->required(fn (string $operation): bool => $operation === 'create')
                             ->dehydrated(fn (?string $state): bool => filled($state))
+                            ->rule(
+                                Password::min(12)->mixedCase()->numbers()->symbols(),
+                                fn (?string $state): bool => filled($state),
+                            )
                             ->maxLength(255)
                             ->helperText(fn (string $operation): string => $operation === 'create'
-                                ? 'Entrégala como contraseña temporal y pide cambiarla al primer ingreso.'
+                                ? 'Mínimo 12 caracteres, con mayúsculas, minúsculas, números y símbolos. Entrégala como temporal y pide cambiarla al primer ingreso.'
                                 : 'Déjala en blanco para no cambiarla.')
                             ->columnSpanFull(),
                     ]),
