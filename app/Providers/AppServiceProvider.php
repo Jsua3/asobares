@@ -99,6 +99,12 @@ class AppServiceProvider extends ServiceProvider
 
         URL::forceScheme('https');
 
+        // `forceScheme` sólo cambia las URLs que genera Laravel: no marca la
+        // cookie de sesión. Sin el atributo `Secure`, el navegador la manda
+        // también por http y cualquiera en la misma red la captura y la
+        // reutiliza. En producción no se deja a criterio del .env.
+        config(['session.secure' => true]);
+
         if (config('app.debug')) {
             throw new RuntimeException(
                 'APP_DEBUG tiene que estar en false en producción: la página de error publica '

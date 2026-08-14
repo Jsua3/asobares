@@ -169,7 +169,13 @@ return [
     |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    /*
+     * Sin valor, la cookie de sesión viaja también por http, y ahí cualquiera
+     * en la misma red la lee y la reutiliza. `forceScheme('https')` del
+     * arranque sólo afecta a las URLs que genera Laravel, no a este atributo,
+     * así que el valor por defecto tiene que decidirlo el entorno.
+     */
+    'secure' => env('SESSION_SECURE_COOKIE', env('APP_ENV') === 'production'),
 
     /*
     |--------------------------------------------------------------------------
