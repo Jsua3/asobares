@@ -303,6 +303,8 @@ La suite pasó de **200 pruebas (193 pasan, 7 omitidas)** a **233 (226 pasan, 7 
 
 Ninguno es de severidad alta y ninguno bloquea conectar Bold.
 
+> **Actualización (14 ago 2026):** el frente que cerraba estos pendientes se terminó y se commiteó — ver 19.4. **G4 y G9 quedaron cerrados**; **G8 en sus tres frentes** (MFA obligatoria, política de contraseñas, login de `/mi-cuenta` con mensaje genérico y bloqueo por cuenta; el login del panel sigue sin bloquear por cuenta, pero con el segundo factor obligatorio la contraseña sola ya no abre sesión); y **de G12 se cerró además la retención de mensajes** de contacto y PQR (`mensajes:depurar`, plazos en `config/retencion.php`). De G12 sigue abierto lo demás: evidencia del consentimiento (IP, agente, versión de la política), los encargados que la política no nombra, el plazo de retención de inscripciones, el canal de supresión a petición del titular y la vacante sin fecha límite que retiene postulaciones para siempre.
+
 - **G4 — Cupos de eventos**: se consumen con inscripciones sin pagar y el conteo no está protegido contra concurrencia.
 - **G8 — Autenticación**: la MFA del panel es opcional, no obligatoria; los dos logins limitan por IP pero nunca bloquean la cuenta atacada; el login de `/mi-cuenta` confirma con un mensaje distinto que una contraseña de administrador era correcta.
 - **G9 — Flujo de aprobación**: el observer solo vigila la *entrada* a «publicado», así que **un subadmin sí puede despublicar**; y puede confirmar a mano una inscripción de pago, saltándose la regla de que solo la confirma una transacción aprobada.
@@ -484,6 +486,8 @@ Lo que hace que funcione no es la revisión en sí, es **la mutación**: el revi
 
 ### 18.8 ⚠️ HAY OTRA SESIÓN TRABAJANDO EN ESTE MISMO DIRECTORIO
 
+> **Actualización (14 ago 2026): frente cerrado y commiteado.** El trabajo descrito abajo se terminó y entró a `main` en once commits temáticos; ya no hay nada ajeno sin commitear en el árbol. La advertencia de los 52 rojos quedó obsoleta: quien cerró el frente dio de alta el segundo factor por omisión en `UserFactory` y en `UsuarioSeeder`, así que `PanelCompletoTest` pasa sin tocarlo. Suite completa con todo dentro: **558 pruebas, 547 pasan, 11 omitidas, 0 fallos.** Lo que sigue se conserva como registro.
+
 **Léelo antes de correr la suite o de creerte un fallo.** El 9 ago 2026, mientras se construía el Observatorio, apareció en el árbol de trabajo un segundo frente **sin commitear**, de otra sesión, que está cerrando los pendientes **G4–G12 de la sección 15.2**. No es basura y no hay que borrarlo.
 
 Lo que hay sin commitear, por lo que se ve en los archivos:
@@ -545,4 +549,4 @@ Si tu sesión puede componer fotogramas, esto es lo primero que vale la pena mir
 
 ### 19.4 Lo único que queda vivo en el árbol
 
-Los **33 archivos sin commitear de la otra sesión** (G4–G12), que siguen exactamente donde estaban. Ver 18.8 — incluida la advertencia de que dejan 52 pruebas de `PanelCompletoTest` en rojo y de que ese rojo no es tuyo.
+**Ya nada (14 ago 2026).** El frente G4–G12 que vivía aquí sin commitear se terminó y entró a `main` en once commits temáticos: MFA obligatoria, política de contraseñas, login de asociado, cabeceras de seguridad, cupos de eventos, confirmación de inscripción, despublicación vigilada, conciliación de pagos fallando cerrada, retención de mensajes, filtrado de enlaces de ajustes y cookie de sesión `Secure`. La suite completa con ese trabajo: **558 pruebas, 547 pasan, 11 omitidas, 0 fallos.** En el árbol solo queda `_to_delete/` (dos tarballs de empaquetado, sin trackear). Lo vivo ahora es otra cosa: **83 commits sin push** — `origin/main` se quedó en el 5 de agosto y todo lo posterior existe solo en este disco.
