@@ -59,6 +59,36 @@ class FlujoDeAprobacionTest extends TestCase
         $this->assertSame(EstadoPublicacion::PendienteAprobacion, $asociado->fresh()->estado);
     }
 
+    /**
+     * La frontera de publicación se cruza en los dos sentidos. Vigilar sólo la
+     * entrada dejaba que la secretaría bajara del sitio, en silencio y sin
+     * dejar rastro en la cola de revisión, contenido que la dirección ya
+     * había aprobado.
+     */
+    public function test_un_subadmin_no_puede_despublicar_lo_que_la_direccion_aprobo(): void
+    {
+        $asociado = Asociado::factory()->create(['estado' => EstadoPublicacion::Publicado]);
+
+        Auth::login($this->crearUsuario(User::ROL_SUBADMIN));
+        $asociado->update(['estado' => EstadoPublicacion::Borrador]);
+
+        $this->assertSame(
+            EstadoPublicacion::PendienteAprobacion,
+            $asociado->fresh()->estado,
+            'Bajarlo a borrador lo sacaría del sitio sin que la dirección se entere.'
+        );
+    }
+
+    public function test_la_direccion_si_puede_despublicar(): void
+    {
+        $asociado = Asociado::factory()->create(['estado' => EstadoPublicacion::Publicado]);
+
+        Auth::login($this->crearUsuario(User::ROL_SUPER_ADMIN));
+        $asociado->update(['estado' => EstadoPublicacion::Borrador]);
+
+        $this->assertSame(EstadoPublicacion::Borrador, $asociado->fresh()->estado);
+    }
+
     public function test_el_super_admin_si_publica(): void
     {
         $direccion = $this->crearUsuario(User::ROL_SUPER_ADMIN);

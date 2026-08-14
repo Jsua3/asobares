@@ -40,13 +40,36 @@ class FlujoDeAprobacionObserver
             return;
         }
 
-        if ($modelo->estado !== EstadoPublicacion::Publicado) {
+        // La frontera de publicación se cruza en los dos sentidos. Mirar sólo
+        // el destino dejaba libre el camino de vuelta: quien no puede publicar
+        // bajaba a borrador algo ya aprobado y lo sacaba del sitio en
+        // silencio, sin aviso ni rastro en la cola de revisión. Un cambio de
+        // estado sobre contenido publicado también es una decisión de
+        // publicación, así que pasa por la misma puerta.
+        if ($modelo->estado !== EstadoPublicacion::Publicado && ! $this->estabaPublicado($modelo)) {
             return;
         }
 
         if ($usuario->cannot('publicar', $modelo)) {
             $modelo->estado = EstadoPublicacion::PendienteAprobacion;
         }
+    }
+
+    /**
+     * El estado con el que el registro venía de la base. `getOriginal` aplica
+     * el cast, pero se compara también contra el valor crudo por si el modelo
+     * llega sin castear desde una importación o un `insert` directo.
+     */
+    private function estabaPublicado(Model $modelo): bool
+    {
+        if (! $modelo->exists) {
+            return false;
+        }
+
+        $original = $modelo->getOriginal('estado');
+
+        return $original === EstadoPublicacion::Publicado
+            || $original === EstadoPublicacion::Publicado->value;
     }
 
     public function saved(Model $modelo): void
