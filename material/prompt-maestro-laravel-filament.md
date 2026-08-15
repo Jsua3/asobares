@@ -29,6 +29,8 @@
 >
 > **v7 · la trampa que más costó, y que no es técnica:** de veintitantos fallos atrapados en estas dos fases, **cinco fueron pruebas en falso verde escritas por el propio autor del plan** — pruebas que pasaban con el bug reintroducido. Todas tenían la misma forma: `assertSee('alguna palabra')` o una aserción sobre el texto de un archivo, en vez de sobre el comportamiento. Ninguna se detectó leyendo; todas salieron cuando un revisor **mutó el código a propósito** y miró si la prueba se enteraba. Si se relanza cualquier parte de este trabajo: **escribir la prueba no basta, hay que romper el código y ver el rojo.**
 >
+> **v8 (15 ago 2026) — HOSTING DECIDIDO, DESPLIEGUE EN ESPERA DE UN TRÁMITE HUMANO:** un consejo de decisión multiagente (cinco asientos con encargos distintos, prueba de fuga del expediente y refutación cruzada) eligió **Laravel Cloud** para el hosting de pruebas y como candidato definitivo, con una condición que es la mitad del veredicto: **la cuenta nace institucional, no personal**. El despliegue quedó bloqueado únicamente por el paso que un agente no puede dar — el registro/OAuth y el medio de pago son del dueño. **Toda sesión nueva: lee la sección 20 antes de proponer o tocar hosting.** El CLI de Cloud, su skill de despliegue y los certificados ya quedaron listos en esta máquina.
+>
 > **v7 · tres suposiciones sobre la API de Filament que resultaron falsas.** Cuestan una ronda entera cada una, así que conviene leerlas antes de escribir: `Panel::getAssets()` **no existe** en 4.12 (los assets se leen con `registerAssets()` + `FilamentAsset::getScripts()`); una página con `$view` propio **no debe** invocar `{{ $this->footerWidgets }}` a mano, porque el envoltorio `<x-filament-panels::page>` ya lo hace y llamarlo duplica cada widget; y `ChartWidget` **sí** sabe no dibujar, con `isEmpty()` y `getEmptyState()` nativos, sin necesidad de un `Widget` con vista propia.
 
 ---
@@ -551,4 +553,50 @@ Si tu sesión puede componer fotogramas, esto es lo primero que vale la pena mir
 
 ### 19.4 Lo único que queda vivo en el árbol
 
-**Ya nada (14 ago 2026).** El frente G4–G12 que vivía aquí sin commitear se terminó y entró a `main` en once commits temáticos: MFA obligatoria, política de contraseñas, login de asociado, cabeceras de seguridad, cupos de eventos, confirmación de inscripción, despublicación vigilada, conciliación de pagos fallando cerrada, retención de mensajes, filtrado de enlaces de ajustes y cookie de sesión `Secure`. La suite completa con ese trabajo: **558 pruebas, 547 pasan, 11 omitidas, 0 fallos.** En el árbol solo queda `_to_delete/` (dos tarballs de empaquetado, sin trackear). Lo vivo ahora es otra cosa: **83 commits sin push** — `origin/main` se quedó en el 5 de agosto y todo lo posterior existe solo en este disco.
+**Ya nada (14 ago 2026).** El frente G4–G12 que vivía aquí sin commitear se terminó y entró a `main` en once commits temáticos: MFA obligatoria, política de contraseñas, login de asociado, cabeceras de seguridad, cupos de eventos, confirmación de inscripción, despublicación vigilada, conciliación de pagos fallando cerrada, retención de mensajes, filtrado de enlaces de ajustes y cookie de sesión `Secure`. La suite completa con ese trabajo: **558 pruebas, 547 pasan, 11 omitidas, 0 fallos.** En el árbol solo queda `_to_delete/` (dos tarballs de empaquetado, sin trackear). Lo vivo ahora es otra cosa: **83 commits sin push** — `origin/main` se quedó en el 5 de agosto y todo lo posterior existe solo en este disco. *(Actualización del mismo 14–15 ago: el push se hizo y `_to_delete/` se borró; el remoto quedó al día.)*
+
+---
+
+## 20. PENDIENTE INMEDIATO — Despliegue en Laravel Cloud (decidido el 15 ago 2026, SIN HACER)
+
+**Recordatorio para toda sesión nueva: esto está decidido y no ejecutado.** No reabras la discusión de proveedor salvo que se cumpla alguno de los falsadores de abajo; lo que falta es un trámite humano y después una tarde de trabajo.
+
+### 20.1 La decisión y su porqué
+
+Un consejo de decisión multiagente (cinco asientos con funciones objetivo distintas, expediente pasado por prueba de fuga, ronda de refutación cruzada; tres modelos distintos, asiento de evidencia con búsqueda web real del 15 ago 2026) eligió **Laravel Cloud, plan Starter**, para el hosting de pruebas y como candidato definitivo. Confianza alta: los asientos convergieron.
+
+- **El lock-in que se temía no existe:** la app es un monolito portable con migraciones verificadas en SQLite y PostgreSQL 17; salir cuesta 2–8 horas técnicas y no hay punto de no retorno contractual. Lo que sí ata para siempre es **una cuenta a nombre equivocado** — por eso la condición de abajo.
+- **El recurso escaso del gremio no es el dinero, es el operador:** las opciones difieren en menos de US$15/mes pero en un orden de magnitud en horas (VPS: 15–30 h de arranque + 24–60 h/año que nadie del gremio va a poner).
+- **Evidencia fresca (15 ago 2026):** Starter = US$5/mes con US$5 de uso incluidos y primer mes gratis; desde jun 2026 trae límites de gasto que **pausan** el cómputo en vez de facturar, e hibernación de toda la pila con el scheduler corriendo. Oracle Free quedó descartado (recortes sin aviso y terminación de instancias desde el 18 ago 2026); Railway/Render/Fly exigen Dockerfile que el repo no tiene. Ley 1581: EE. UU. tiene nivel adecuado (Circular 005/2017 SIC) — la transferencia es legal; queda pendiente de G12 quién firma como responsable del tratamiento.
+
+### 20.2 La condición que es mitad del veredicto
+
+**La cuenta de Laravel Cloud nace institucional, no personal.** La autopsia del consejo fue unánime en el modo de muerte: cuenta y tarjeta del practicante → la demo sale bien → nadie migra lo que funciona → la práctica termina y las llaves se van → al primer evento operativo el gremio reconstruye desde cero. Concreto:
+
+- Correo de la cuenta / facturación: `asobaresquindio@asobares.org` (no el personal del desarrollador).
+- Medio de pago: del gremio. Si por urgencia se usa uno personal, queda anotado aquí como deuda con fecha de traspaso.
+- Límite de gasto configurado el día uno (~US$10/mes) — ese número, no el piso de US$5, es el que se le presenta a la junta como techo.
+- El repo `Jsua3/asobares` vive en cuenta personal de GitHub: recomendado moverlo a una organización con un segundo administrador del gremio, o al menos añadir uno.
+
+### 20.3 El paso humano bloqueante (por esto no está hecho)
+
+El registro/inicio de sesión en cloud.laravel.com y el ingreso del medio de pago **los debe hacer el dueño** (un agente no debe autenticar ni tocar datos de pago). En una terminal interactiva: `& "$env:APPDATA\Composer\vendor\bin\cloud.bat" auth` — abre el navegador, se autoriza, y el token queda en `~\.config\cloud\config.json` para que el agente continúe.
+
+### 20.4 Lo que ya quedó listo en esta máquina (15 ago 2026)
+
+CLI de Laravel Cloud instalado global (`laravel/cloud-cli` ^0.5, binario en `%APPDATA%\Composer\vendor\bin`); skill `deploying-laravel-cloud` instalada en `~/.claude/skills` (usar sus combos de flags: `-n` siempre, `--json` en lecturas); certificados CA arreglados en `php.ini` (curl.cainfo/openssl.cafile → bundle de Git); `pdo_pgsql` habilitado y la suite completa validada contra PostgreSQL 17 — la base de Cloud es Serverless Postgres, justo el motor probado.
+
+### 20.5 Checklist de despliegue (para la sesión que lo retome, tras 20.3)
+
+1. `cloud ship -n` desde el repo (app + entorno de pruebas + Postgres de Cloud). Región US East.
+2. Variables: `APP_ENV=staging`, `APP_DEBUG=false`, `SESSION_SECURE_COOKIE=true`, `PAYMENT_DRIVER=bold` (la pasarela simulada se niega fuera de local/testing — los pagos NO se demuestran en este hosting, por diseño), `MAIL_MAILER` según el punto 3.
+3. **Correo saliente:** Laravel Cloud no lo incluye. Sin proveedor (Resend/Postmark/SES, cuenta del gremio), los códigos MFA del panel mueren en el log y el login no es demostrable ante la dirección; mientras no exista, los códigos se leen con `cloud environment:logs`.
+4. Límite de gasto desde el panel o CLI antes del primer despliegue público.
+5. `migrate --seed` remoto (los seeders demo corren en staging, se niegan en production — por eso staging), smoke test de rutas públicas y del login, y la URL a la dirección.
+6. Anotar aquí la URL, el entorno y a nombre de quién quedó todo.
+
+### 20.6 Falsadores (cuándo sí reabrir la decisión)
+
+- Dos facturas seguidas > ~US$15/mes con límite de gasto puesto y sin crecimiento de tráfico → reevaluar PaaS genérica con Dockerfile.
+- Otra caída total de Laravel Cloud que afecte aplicaciones (la única seria: 20 feb 2026, 3h15m).
+- El gremio no logra aportar correo/medio de pago institucional en dos semanas → el problema es de gobierno, no de proveedor: escalarlo a la junta como riesgo del proyecto, no resolverlo desplegando con cuenta personal.
