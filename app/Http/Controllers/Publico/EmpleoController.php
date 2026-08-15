@@ -15,6 +15,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
@@ -93,7 +94,18 @@ class EmpleoController
             $postulacion->update($datos);
         } else {
             try {
-                $postulacion = $vacante->postulaciones()->create($datos);
+                // El intento de inserción va en su propia transacción: si ya
+                // hay una abierta (el envoltorio de RefreshDatabase en las
+                // pruebas, o cualquier llamador transaccional), la anidada se
+                // vuelve un savepoint. Ese savepoint es lo que le permite a
+                // PostgreSQL sobrevivir la violación de unicidad: sin él, el
+                // error aborta la transacción exterior entera y el
+                // firstOrFail() del catch muere con «current transaction is
+                // aborted» (25P02). SQLite y MySQL no abortan, por eso el
+                // patrón parecía portable hasta que se corrió contra pgsql.
+                $postulacion = DB::transaction(
+                    fn (): Postulacion => $vacante->postulaciones()->create($datos)
+                );
 
                 $this->avisarAlEstablecimiento($postulacion);
             } catch (UniqueConstraintViolationException) {
@@ -102,13 +114,16 @@ class EmpleoController
                 // peticiones que pasen ambas el `first()` como null antes de
                 // que la primera termine de insertar. Aquí perdimos la
                 // carrera contra el índice único (vacante_id, correo); quien
-                // la ganó ya avisó al establecimiento, así que solo
-                // actualizamos sin repetir el correo.
-                $postulacion = Postulacion::where('vacante_id', $vacante->id)
-                    ->where('correo', $datos['correo'])
-                    ->firstOrFail();
-
-                $postulacion->update($datos);
+                // la ganó ya avisó al establecimiento, así que solo se
+                // actualizan los datos sin repetir el correo. updateOrCreate y
+                // no firstOrFail: si la fila ganadora ya no está —se borró en
+                // la ventana, o el savepoint se la llevó en una simulación de
+                // pruebas—, la postulación se guarda igual en vez de tumbar
+                // la petición con un 404.
+                $postulacion = Postulacion::updateOrCreate(
+                    ['vacante_id' => $vacante->id, 'correo' => $datos['correo']],
+                    $datos
+                );
             }
         }
 

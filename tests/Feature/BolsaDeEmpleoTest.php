@@ -191,7 +191,23 @@ class BolsaDeEmpleoTest extends TestCase
         // correo) y avisó al establecimiento. El `create()` del controlador
         // choca entonces contra el índice único, tal como pasaría con dos
         // peticiones casi simultáneas.
-        Postulacion::creating(function () use ($vacante): void {
+        // El hook es de un solo disparo. La inserción del controlador va en
+        // un savepoint (portabilidad con PostgreSQL: sin él, la violación
+        // aborta la transacción de RefreshDatabase entera), y ese savepoint
+        // se lleva al rival al hacer rollback, porque esta simulación lo
+        // planta en la MISMA conexión — en la vida real vive en otra petición
+        // y sobrevive. El updateOrCreate del catch reintenta entonces el
+        // create, y si el hook volviera a plantar al rival, la carrera no
+        // terminaría nunca.
+        $rivalYaGano = false;
+
+        Postulacion::creating(function () use ($vacante, &$rivalYaGano): void {
+            if ($rivalYaGano) {
+                return;
+            }
+
+            $rivalYaGano = true;
+
             $id = DB::table('postulaciones')->insertGetId([
                 'vacante_id' => $vacante->id,
                 'nombre' => 'Ganó la carrera',
