@@ -474,7 +474,7 @@ De la revisión final de F1–F3, ninguna bloqueante, todas con su sitio:
 - **El singleton de `ColaDePendientes` habilita staleness intra-petición** si el rol de un usuario cambiara entre `canView()` y el render. No explotable hoy; documentado en `AppServiceProvider`.
 - **`AsociadoSeeder`** lanzaría `ValueError` si algún día `CarteraSeeder::EN_MORA` ganara un slug con mora ≥ 22 meses.
 - **`Bitacora` y `AjustesDelSitio`** arrastran un `abort_unless` redundante con un comentario que dice que es el que cierra la puerta; el guardián real es el trait `CanAuthorizeAccess` de Filament.
-- **La corrida contra PostgreSQL que pide el spec §7 sigue sin hacerse.** `RecaudoMensual` y `MetricasDelObservatorio` tienen expresiones SQL por motor de las que **solo se ejecuta la de SQLite**; las de `pgsql` y `mysql` se estrenarán el día del despliegue.
+- **La corrida contra PostgreSQL que pide el spec §7** — **hecha el 14 ago 2026** contra PostgreSQL 17 en Docker: suite completa **559 pruebas, 548 pasan, 11 omitidas, 0 fallos**. Las expresiones por motor de `RecaudoMensual` y `MetricasDelObservatorio` pasaron sin cambios; lo que cayó fue otra cosa, dos veces: la columna `data` de `notifications` era `text` y Filament la consulta con `->>` (casi todos los 88 fallos de la primera pasada; ahora es `json`, que en SQLite compila a TEXT y no cambia nada), y el catch de la violación de unicidad al postular moría con `25P02` bajo el envoltorio transaccional de las pruebas — la inserción va ahora en un savepoint y el catch usa `updateOrCreate`. **La expresión de `mysql` sigue sin estrenarse.**
 
 ### 18.7 Cómo se está trabajando, por si retomas
 
@@ -547,7 +547,7 @@ Si tu sesión puede componer fotogramas, esto es lo primero que vale la pena mir
 
 - **La paleta de marca no da para siete categorías en los dos temas.** La banda que supera 3:1 sobre blanco Y sobre casi-negro contiene solo cinco de sus colores. Por eso son dos paletas. La consecuencia es que en el tema oscuro hay tres grises juntos (`#d0cccd`, `#a8a3a5`, `#7d7779`) y dos rojos (`#ee4137`, `#d9313a`) más próximos entre sí de lo que están sus equivalentes en claro. Se distinguen, pero si algún día el observatorio necesita una octava categoría, la paleta no la tiene: hay que ampliar el manual de marca, no inventar un hexadecimal.
 - **`--asb-serie-N` es la primera paleta del proyecto que vive a medias entre CSS y JS.** El servidor manda un color de reserva y el cliente lo pisa. `ObservatorioTest` ata la reserva al token de `:root` para que no diverjan, pero nada obliga a que un widget nuevo use `relleno()`: la prueba solo exige ranura a las gráficas de **más de una serie**. Una gráfica nueva de una sola serie puede cablear un color sin que nadie chiste, igual que hacían las tres que había.
-- **Lo que sigue sin tocarse de 18.6**: la corrida contra PostgreSQL que pide el spec §7 (las expresiones SQL de `pgsql` y `mysql` se estrenarán el día del despliegue), la duplicación entre los dos guardianes de tema, y el resto de la lista.
+- **Lo que sigue sin tocarse de 18.6**: la duplicación entre los dos guardianes de tema y el resto de la lista. La corrida contra PostgreSQL ya no está aquí: se hizo el 14 ago 2026 con dos hallazgos corregidos — ver la actualización en 18.6; solo la expresión de `mysql` sigue sin estrenarse.
 
 ### 19.4 Lo único que queda vivo en el árbol
 
