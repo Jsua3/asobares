@@ -31,4 +31,14 @@ return [
 
     'pqr_meses' => (int) env('RETENCION_PQR_MESES', 24),
 
+    /*
+     * Las inscripciones a eventos guardan nombre, correo y teléfono cuyo
+     * fin —participar en el evento— se agota cuando el evento pasa. El
+     * plazo corre desde que el evento termina y es más largo que el de
+     * contacto por el vínculo con pagos: la transacción sobrevive a la
+     * purga (su clave foránea es nullOnDelete), pero conviene poder
+     * responder un reclamo del inscrito mientras el cobro sea discutible.
+     */
+    'inscripciones_meses' => (int) env('RETENCION_INSCRIPCIONES_MESES', 24),
+
 ];

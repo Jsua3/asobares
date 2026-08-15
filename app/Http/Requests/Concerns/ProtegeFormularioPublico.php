@@ -4,6 +4,7 @@ namespace App\Http\Requests\Concerns;
 
 use App\Support\Formulario;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -48,12 +49,24 @@ trait ProtegeFormularioPublico
         throw new ValidationException($validator);
     }
 
-    /** Marca de tiempo del consentimiento (Ley 1581 de 2012). */
+    /**
+     * Constancia del consentimiento (Ley 1581 de 2012).
+     *
+     * No basta el booleano y la fecha: ante un reclamo del titular hay que
+     * poder decir desde dónde se autorizó, con qué navegador y qué versión
+     * de la política estaba publicada al aceptar. La versión es el mismo
+     * ajuste que la política muestra como su vigencia, capturado en el
+     * momento de aceptar — si la política cambia después, la constancia
+     * conserva la que la persona vio.
+     */
     protected function selloDeConsentimiento(): array
     {
         return [
             'acepta_datos' => true,
             'consentimiento_at' => now(),
+            'consentimiento_ip' => $this->ip(),
+            'consentimiento_agente' => Str::limit((string) $this->userAgent(), 255, ''),
+            'consentimiento_politica' => ((string) ajuste('politica_actualizacion')) ?: null,
         ];
     }
 }

@@ -22,15 +22,16 @@ class DepurarBolsas extends Command
     public function handle(): int
     {
         $plazoPostulaciones = $this->plazoEnMeses('bolsas.retencion_postulaciones_meses', 'RETENCION_POSTULACIONES_MESES');
+        $plazoMaximo = $this->plazoEnMeses('bolsas.retencion_postulaciones_maximo_meses', 'RETENCION_POSTULACIONES_MAXIMO_MESES');
         $plazoAspirantes = $this->plazoEnMeses('bolsas.retencion_aspirantes_meses', 'RETENCION_ASPIRANTES_MESES');
 
-        if ($plazoPostulaciones === null || $plazoAspirantes === null) {
+        if ($plazoPostulaciones === null || $plazoMaximo === null || $plazoAspirantes === null) {
             return self::FAILURE;
         }
 
         $simulacro = (bool) $this->option('pretend');
 
-        $postulaciones = $this->postulacionesCaducadas($plazoPostulaciones);
+        $postulaciones = $this->postulacionesCaducadas($plazoPostulaciones, $plazoMaximo);
         $aspirantes = $this->aspirantesCaducados($plazoAspirantes);
 
         if ($simulacro) {
@@ -57,18 +58,41 @@ class DepurarBolsas extends Command
     }
 
     /**
-     * Postulaciones cuya vacante cerró o venció hace más del plazo.
+     * Postulaciones cuya vacante cerró o venció hace más del plazo — o que
+     * ya superaron la antigüedad máxima absoluta aunque la vacante siga
+     * abierta.
+     *
+     * El máximo absoluto cierra el hueco que la v6 dejó anotado: una
+     * vacante de tiempo completo sin fecha límite que nadie cierra nunca
+     * conservaba sus postulaciones para siempre, porque este reloj solo
+     * arrancaba al cerrar o vencer. Se ancla al consentimiento (o a
+     * `created_at` si la fila no trae sello, igual que en aspirantes) y
+     * cada `orWhere` va en su propio grupo para no ampliar sin querer el
+     * conjunto que se borra.
      *
      * @return Builder<Postulacion>
      */
-    private function postulacionesCaducadas(int $meses): Builder
+    private function postulacionesCaducadas(int $meses, int $mesesMaximo): Builder
     {
         $limite = now()->subMonths($meses);
+        $limiteAbsoluto = now()->subMonths($mesesMaximo);
 
-        return Postulacion::query()->whereHas('vacante', function (Builder $vacante) use ($limite): void {
-            $vacante
-                ->where('cerrada_at', '<=', $limite)
-                ->orWhereDate('fecha_limite', '<=', $limite->toDateString());
+        return Postulacion::query()->where(function (Builder $postulacion) use ($limite, $limiteAbsoluto): void {
+            $postulacion
+                ->whereHas('vacante', function (Builder $vacante) use ($limite): void {
+                    $vacante
+                        ->where('cerrada_at', '<=', $limite)
+                        ->orWhereDate('fecha_limite', '<=', $limite->toDateString());
+                })
+                ->orWhere(function (Builder $postulacion) use ($limiteAbsoluto): void {
+                    $postulacion
+                        ->where('consentimiento_at', '<=', $limiteAbsoluto)
+                        ->orWhere(function (Builder $postulacion) use ($limiteAbsoluto): void {
+                            $postulacion
+                                ->whereNull('consentimiento_at')
+                                ->where('created_at', '<=', $limiteAbsoluto);
+                        });
+                });
         });
     }
 

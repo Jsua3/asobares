@@ -28,4 +28,14 @@ return [
 
     'retencion_aspirantes_meses' => (int) env('RETENCION_ASPIRANTES_MESES', 12),
 
+    /*
+     * El máximo absoluto cierra el hueco de la vacante que nadie cierra:
+     * sin él, una vacante de tiempo completo sin fecha límite conservaba
+     * sus postulaciones para siempre, porque el reloj de arriba solo
+     * arranca al cerrar o vencer. Cuenta desde el consentimiento (o desde
+     * la llegada, si la fila no trae sello), aunque la vacante siga
+     * abierta. Le aplican las mismas reglas: menor que 1 aborta la purga.
+     */
+    'retencion_postulaciones_maximo_meses' => (int) env('RETENCION_POSTULACIONES_MAXIMO_MESES', 12),
+
 ];

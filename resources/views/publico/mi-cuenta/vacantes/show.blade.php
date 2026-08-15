@@ -20,7 +20,7 @@
 
         <p class="mt-8 rounded-xl border border-linea bg-marca-panel p-4 text-xs leading-relaxed text-tenue">
             Estos datos personales te los confiaron para este proceso de selección. No los compartas ni los uses
-            para otra cosa. El gremio los borra automáticamente seis meses después de que cierre la vacante.
+            para otra cosa. El gremio los borra automáticamente {{ config('bolsas.retencion_postulaciones_meses') }} meses después de que cierre la vacante.
         </p>
 
         @if ($postulaciones->isEmpty())

@@ -258,4 +258,61 @@ class DepuracionDeBolsasTest extends TestCase
         $this->assertSame(1, Aspirante::count());
         $this->assertSame(0, Activity::where('log_name', 'bolsas')->count());
     }
+
+    /**
+     * El hueco que la v6 dejó anotado: una vacante de tiempo completo sin
+     * fecha límite que nadie cierra nunca conservaba sus postulaciones para
+     * siempre, porque el reloj de la retención solo arrancaba al cerrar o
+     * vencer. La antigüedad absoluta corre aunque la vacante siga abierta.
+     */
+    public function test_una_postulacion_antigua_se_borra_aunque_su_vacante_siga_abierta(): void
+    {
+        $abierta = Vacante::factory()->publicado()->create();
+
+        Postulacion::factory()->for($abierta)->create(['consentimiento_at' => now()->subMonths(13)]);
+        $reciente = Postulacion::factory()->for($abierta)->create(['consentimiento_at' => now()->subMonths(11)]);
+
+        $this->artisan('bolsas:depurar');
+
+        $this->assertSame(1, Postulacion::count());
+        $this->assertNotNull($reciente->fresh());
+    }
+
+    public function test_una_postulacion_antigua_sin_sello_de_consentimiento_se_borra_por_su_llegada(): void
+    {
+        $abierta = Vacante::factory()->publicado()->create();
+
+        Postulacion::factory()->for($abierta)->create([
+            'consentimiento_at' => null,
+            'created_at' => now()->subMonths(13),
+        ]);
+
+        $this->artisan('bolsas:depurar');
+
+        $this->assertSame(0, Postulacion::count());
+    }
+
+    public function test_el_maximo_absoluto_sale_de_la_configuracion(): void
+    {
+        config(['bolsas.retencion_postulaciones_maximo_meses' => 24]);
+
+        $abierta = Vacante::factory()->publicado()->create();
+        Postulacion::factory()->for($abierta)->create(['consentimiento_at' => now()->subMonths(13)]);
+
+        $this->artisan('bolsas:depurar');
+
+        $this->assertSame(1, Postulacion::count(), 'Con 24 meses de máximo, una postulación de hace 13 aún no vence.');
+    }
+
+    public function test_aborta_si_el_maximo_absoluto_es_invalido(): void
+    {
+        config(['bolsas.retencion_postulaciones_maximo_meses' => 0]);
+
+        $abierta = Vacante::factory()->publicado()->create();
+        Postulacion::factory()->for($abierta)->create(['consentimiento_at' => now()->subMonths(13)]);
+
+        $this->artisan('bolsas:depurar')->assertExitCode(1);
+
+        $this->assertSame(1, Postulacion::count());
+    }
 }

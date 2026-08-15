@@ -128,14 +128,21 @@
             <p class="mt-3">
                 Adoptamos medidas técnicas y administrativas para proteger tus datos contra acceso no autorizado,
                 pérdida o alteración: cifrado de contraseñas, control de acceso por roles, segundo factor de
-                autenticación para el equipo administrativo y registro de auditoría de cada cambio.
+                autenticación para el equipo administrativo y registro de auditoría de cada cambio. De cada
+                autorización que nos das guardamos constancia: la fecha, la dirección IP y el navegador desde los
+                que la diste, y la versión de esta política vigente en ese momento.
             </p>
             <p class="mt-3">
                 En la bolsa de empleo, las postulaciones se conservan hasta {{ config('bolsas.retencion_postulaciones_meses') }} meses
-                después de que la vacante cierre o venza, y los perfiles del banco de talento hasta {{ config('bolsas.retencion_aspirantes_meses') }} meses
-                después de que diste tu autorización, sin que la hayas renovado. Pasado ese plazo se borran
-                automáticamente. Los demás datos se conservan mientras exista la relación con el gremio y durante
-                los términos legales aplicables. Esta política rige desde {{ ajuste('politica_actualizacion') }}.
+                después de que la vacante cierre o venza —y en todo caso, como máximo {{ config('bolsas.retencion_postulaciones_maximo_meses') }} meses
+                desde que las enviaste, aunque la vacante siga abierta—, y los perfiles del banco de talento
+                hasta {{ config('bolsas.retencion_aspirantes_meses') }} meses después de que diste tu autorización, sin que la hayas renovado.
+                Los mensajes de contacto se conservan hasta {{ config('retencion.contacto_meses') }} meses y las PQR
+                hasta {{ config('retencion.pqr_meses') }} meses desde su respuesta (o desde su llegada, si no la hubo). Las inscripciones
+                a eventos se conservan hasta {{ config('retencion.inscripciones_meses') }} meses después del evento; el registro contable
+                del pago se conserva sin tus datos personales. Pasado cada plazo, el borrado es automático. Los
+                demás datos se conservan mientras exista la relación con el gremio y durante los términos legales
+                aplicables. Esta política rige desde {{ ajuste('politica_actualizacion') }}.
             </p>
         </section>
     </article>

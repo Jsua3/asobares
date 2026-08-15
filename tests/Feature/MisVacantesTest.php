@@ -53,6 +53,23 @@ class MisVacantesTest extends TestCase
         $this->actingAs($usuario->fresh())->get(route('mi-cuenta.vacantes.index'))->assertForbidden();
     }
 
+    /**
+     * El aviso decía «seis meses» a mano mientras la política lee el plazo de
+     * la configuración: divergían en cuanto alguien cambiara la variable
+     * (cabo suelto anotado en la v6). Ahora los dos leen del mismo sitio.
+     */
+    public function test_el_aviso_de_retencion_publica_el_plazo_de_la_configuracion(): void
+    {
+        config(['bolsas.retencion_postulaciones_meses' => 7]);
+
+        $asociado = Asociado::factory()->publicado()->create();
+        $vacante = Vacante::factory()->for($asociado)->publicado()->create();
+
+        $this->actingAs($this->duenioDe($asociado))
+            ->get(route('mi-cuenta.vacantes.show', $vacante))
+            ->assertSee('7 meses');
+    }
+
     public function test_la_vacante_recien_creada_queda_pendiente_de_aprobacion(): void
     {
         $asociado = Asociado::factory()->publicado()->create();
