@@ -15,7 +15,11 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('type');
             $table->morphs('notifiable');
-            $table->text('data');
+            // json, no text: Filament consulta esta columna con operadores
+            // JSON («data»->>'format') y PostgreSQL los rechaza sobre text.
+            // En SQLite json() compila a TEXT, así que allí no cambia nada —
+            // por eso la suite sobre SQLite nunca pudo ver la diferencia.
+            $table->json('data');
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
