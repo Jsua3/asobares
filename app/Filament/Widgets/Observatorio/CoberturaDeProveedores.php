@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets\Observatorio;
 
+use App\Panel\RanuraDeTema;
 use App\Panel\SerieDelObservatorio;
 
 /**
@@ -52,8 +53,8 @@ class CoberturaDeProveedores extends GraficaDelObservatorio
         return [
             'plugins' => ['legend' => ['display' => false]],
             'scales' => [
-                'y' => ['beginAtZero' => true, 'ticks' => ['precision' => 0], 'grid' => []],
-                'x' => ['ticks' => [], 'grid' => ['display' => false]],
+                'y' => ['beginAtZero' => true, 'ticks' => ['precision' => 0], 'grid' => RanuraDeTema::vacia()],
+                'x' => ['ticks' => RanuraDeTema::vacia(), 'grid' => ['display' => false]],
             ],
         ];
     }

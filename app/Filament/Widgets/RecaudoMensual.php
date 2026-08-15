@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Transaccion;
+use App\Panel\RanuraDeTema;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -78,8 +79,8 @@ class RecaudoMensual extends ChartWidget
         return [
             'plugins' => ['legend' => ['display' => false]],
             'scales' => [
-                'y' => ['beginAtZero' => true, 'ticks' => [], 'grid' => []],
-                'x' => ['ticks' => [], 'grid' => ['display' => false]],
+                'y' => ['beginAtZero' => true, 'ticks' => RanuraDeTema::vacia(), 'grid' => RanuraDeTema::vacia()],
+                'x' => ['ticks' => RanuraDeTema::vacia(), 'grid' => ['display' => false]],
             ],
         ];
     }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets\Observatorio;
 
+use App\Panel\RanuraDeTema;
 use App\Panel\SerieDelObservatorio;
 
 /**
@@ -68,11 +69,11 @@ class OfertaContraDemanda extends GraficaDelObservatorio
             // es donde `panel-graficas.js` escribe el color de texto al
             // cambiar de tema.
             'plugins' => [
-                'legend' => ['labels' => []],
+                'legend' => ['labels' => RanuraDeTema::vacia()],
             ],
             'scales' => [
-                'y' => ['beginAtZero' => true, 'ticks' => ['precision' => 0], 'grid' => []],
-                'x' => ['ticks' => [], 'grid' => ['display' => false]],
+                'y' => ['beginAtZero' => true, 'ticks' => ['precision' => 0], 'grid' => RanuraDeTema::vacia()],
+                'x' => ['ticks' => RanuraDeTema::vacia(), 'grid' => ['display' => false]],
             ],
         ];
     }

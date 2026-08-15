@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets\Observatorio;
 
 use App\Enums\CargoDelSector;
+use App\Panel\RanuraDeTema;
 use App\Panel\SerieDelObservatorio;
 
 /**
@@ -79,11 +80,11 @@ class DemandaLaboralPorArea extends GraficaDelObservatorio
             // `labels` vacío es donde `panel-graficas.js` escribe el color
             // de texto al cambiar de tema.
             'plugins' => [
-                'legend' => ['labels' => []],
+                'legend' => ['labels' => RanuraDeTema::vacia()],
             ],
             'scales' => [
-                'x' => ['stacked' => true, 'ticks' => [], 'grid' => ['display' => false]],
-                'y' => ['stacked' => true, 'beginAtZero' => true, 'ticks' => ['precision' => 0], 'grid' => []],
+                'x' => ['stacked' => true, 'ticks' => RanuraDeTema::vacia(), 'grid' => ['display' => false]],
+                'y' => ['stacked' => true, 'beginAtZero' => true, 'ticks' => ['precision' => 0], 'grid' => RanuraDeTema::vacia()],
             ],
         ];
     }

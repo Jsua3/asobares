@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets\Observatorio;
 
+use App\Panel\RanuraDeTema;
 use App\Panel\SerieDelObservatorio;
 
 /**
@@ -73,14 +74,14 @@ class PresenciaPorMunicipio extends GraficaDelObservatorio
             // declara vacío para que `panel-graficas.js` tenga dónde escribir
             // el color de texto al cambiar de tema.
             'plugins' => [
-                'legend' => ['labels' => []],
+                'legend' => ['labels' => RanuraDeTema::vacia()],
             ],
             'scales' => [
                 // Eje de valor (horizontal en barras invertidas).
-                'x' => ['beginAtZero' => true, 'ticks' => ['precision' => 0], 'grid' => []],
+                'x' => ['beginAtZero' => true, 'ticks' => ['precision' => 0], 'grid' => RanuraDeTema::vacia()],
                 // Eje de categoría (los municipios): sin rejilla, como en
                 // el resto de gráficas de barras del panel.
-                'y' => ['ticks' => [], 'grid' => ['display' => false]],
+                'y' => ['ticks' => RanuraDeTema::vacia(), 'grid' => ['display' => false]],
             ],
         ];
     }

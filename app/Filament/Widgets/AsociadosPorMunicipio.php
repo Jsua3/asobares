@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Municipio;
+use App\Panel\RanuraDeTema;
 use Filament\Widgets\ChartWidget;
 
 class AsociadosPorMunicipio extends ChartWidget
@@ -54,10 +55,10 @@ class AsociadosPorMunicipio extends ChartWidget
                 'y' => [
                     'beginAtZero' => true,
                     'ticks' => ['precision' => 0],
-                    'grid' => [],
+                    'grid' => RanuraDeTema::vacia(),
                 ],
                 'x' => [
-                    'ticks' => [],
+                    'ticks' => RanuraDeTema::vacia(),
                     'grid' => ['display' => false],
                 ],
             ],

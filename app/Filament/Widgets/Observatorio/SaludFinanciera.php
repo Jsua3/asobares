@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets\Observatorio;
 
+use App\Panel\RanuraDeTema;
 use App\Panel\SerieDelObservatorio;
 
 /**
@@ -56,8 +57,8 @@ class SaludFinanciera extends GraficaDelObservatorio
         return [
             'plugins' => ['legend' => ['display' => false]],
             'scales' => [
-                'y' => ['beginAtZero' => true, 'ticks' => [], 'grid' => []],
-                'x' => ['ticks' => [], 'grid' => ['display' => false]],
+                'y' => ['beginAtZero' => true, 'ticks' => RanuraDeTema::vacia(), 'grid' => RanuraDeTema::vacia()],
+                'x' => ['ticks' => RanuraDeTema::vacia(), 'grid' => ['display' => false]],
             ],
         ];
     }
