@@ -115,7 +115,17 @@ new MutationObserver(() => {
     requestAnimationFrame(() => requestAnimationFrame(quitarMordaza))
     setTimeout(quitarMordaza, 250)
 
-    graficas.forEach((grafica) => grafica.update('none'))
+    /*
+     * update() en modo normal, no update('none'): «none» es un modo directo
+     * en el que Chart.js NO vuelve a fusionar las opciones compartidas de
+     * los elementos, así que los rellenos que beforeUpdate acaba de escribir
+     * en el dataset no llegan a las barras y cada serie se queda con la
+     * paleta del tema anterior — Seguridad, que en claro es casi negro,
+     * quedaba invisible al pasar a oscuro. Se vio midiendo los píxeles del
+     * canvas el 14 ago 2026, no leyendo. Tampoco anima: el componente de
+     * Filament fija animation.duration en 0 para todas las gráficas.
+     */
+    graficas.forEach((grafica) => grafica.update())
 }).observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['class'],

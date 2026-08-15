@@ -177,10 +177,16 @@ class GraficasDelPanelTest extends TestCase
         $js = File::get(resource_path('js/panel-graficas.js'));
 
         $posicionRetirada = strpos($js, 'requestAnimationFrame(() => requestAnimationFrame(quitarMordaza))');
-        $posicionRepintado = strpos($js, "graficas.forEach((grafica) => grafica.update('none'))");
+        $posicionRepintado = strpos($js, 'graficas.forEach((grafica) => grafica.update())');
 
         $this->assertNotFalse($posicionRetirada, 'No se encontro la programacion de la retirada de la mordaza.');
-        $this->assertNotFalse($posicionRepintado, 'No se encontro el repintado de las graficas.');
+        $this->assertNotFalse(
+            $posicionRepintado,
+            'No se encontro el repintado de las graficas en modo normal. Tiene que ser update() y no '
+                ."update('none'): «none» es un modo directo en el que Chart.js no vuelve a fusionar las "
+                .'opciones de los elementos, así que los rellenos que beforeUpdate escribe en el dataset '
+                .'no llegan a las barras y cada serie se queda con la paleta del tema anterior.'
+        );
         $this->assertLessThan(
             $posicionRepintado,
             $posicionRetirada,
