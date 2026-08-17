@@ -27,7 +27,7 @@
         {{ $slot }}
     </a>
 @else
-    <button type="{{ $tipo }}" {{ $attributes->merge(['class' => "{$base} {$estilos}"]) }}>
+    <button {{ $attributes->merge(['type' => $tipo, 'class' => "{$base} {$estilos}"]) }}>
         {{ $slot }}
     </button>
 @endif

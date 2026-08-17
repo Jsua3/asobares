@@ -316,4 +316,30 @@ class MovimientoTest extends TestCase
         $this->assertStringContainsString('sm:w-auto', $html);
         $this->assertStringContainsString('bg-marca-500', $html);
     }
+
+    /**
+     * El prop se llama `tipo`, pero el atributo HTML nativo es `type`. Si la
+     * Task 11 traduce mecánicamente un `<button type="button">` y escribe
+     * `type="button"` en la etiqueta del componente, ese atributo llegaba por
+     * `$attributes` y convivía con el que el componente emitía a mano: el
+     * navegador se quedaba con la primera ocurrencia (`type="submit"`, el
+     * default fijo) y descartaba la del llamador sin ningún error visible.
+     */
+    public function test_el_atributo_type_del_llamador_sobrescribe_el_tipo_por_defecto(): void
+    {
+        $conProp = Blade::render(
+            '<x-publico.boton tipo="button">Cancelar</x-publico.boton>'
+        );
+
+        $this->assertStringContainsString('type="button"', $conProp);
+        $this->assertSame(1, substr_count($conProp, 'type='));
+
+        $conAtributoNativo = Blade::render(
+            '<x-publico.boton type="button">Cancelar</x-publico.boton>'
+        );
+
+        $this->assertStringContainsString('type="button"', $conAtributoNativo);
+        $this->assertStringNotContainsString('type="submit"', $conAtributoNativo);
+        $this->assertSame(1, substr_count($conAtributoNativo, 'type='));
+    }
 }
