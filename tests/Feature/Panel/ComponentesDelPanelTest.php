@@ -96,6 +96,31 @@ class ComponentesDelPanelTest extends TestCase
     }
 
     /**
+     * El conteo animado gastaba 600 ms en retrasar la lectura de las cuatro
+     * cifras que son el motivo entero del observatorio, y encima mentía: la
+     * cifra correcta se pintaba, saltaba a cero y volvía a subir. No cumplía
+     * ninguno de los cinco propósitos válidos del movimiento.
+     *
+     * Nota: era el único `x-intersect` del repositorio, y funcionaba solo
+     * porque este componente vive dentro de /admin, donde el Alpine de
+     * Livewire lo trae. `@alpinejs/intersect` nunca estuvo en package.json.
+     */
+    public function test_el_kpi_pinta_la_cifra_de_una_sin_contarla(): void
+    {
+        $fuente = File::get(resource_path('views/components/panel/kpi.blade.php'));
+
+        $this->assertStringNotContainsString('x-intersect', $fuente);
+        $this->assertStringNotContainsString('requestAnimationFrame', $fuente);
+        $this->assertStringNotContainsString('x-text="mostrado"', $fuente);
+
+        $html = Blade::render(
+            '<x-panel.kpi etiqueta="Recaudado" valor="$1.250.000" />'
+        );
+
+        $this->assertStringContainsString('$1.250.000', $html);
+    }
+
+    /**
      * ⚠️ No se puede afirmar sobre el nombre del icono: `x-filament::icon`
      * renderiza un SVG crudo (`<svg class="fi-icon fi-size-md …">`) donde el
      * nombre `heroicon-o-arrow-trending-up` no aparece por ningún lado.

@@ -31,35 +31,12 @@
     </div>
 
     {{--
-        El conteo animado sube desde cero al entrar en pantalla. `x-intersect`
-        evita animar tarjetas que nadie está mirando, y quien pidió menos
-        movimiento ve el valor final de una.
+        La cifra se pinta de una. El conteo animado que vivía aquí retrasaba
+        600 ms la lectura de lo único que la página existe para enseñar, y
+        además solo contaba en las tarjetas cuyo ajuste era parseable: en la
+        misma fila, unas contaban y otras no.
     --}}
-    <p
-        class="mt-3 font-display text-3xl font-bold tracking-tight text-fuerte"
-        x-data="{
-            mostrado: @js((string) $valor),
-            animar() {
-                const crudo = @js((string) $valor);
-                const destino = Number(crudo.replace(/[^0-9,-]/g, '').replace(',', '.'));
-
-                if (! Number.isFinite(destino) || destino === 0) return;
-                if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-                const inicio = performance.now();
-                const paso = (ahora) => {
-                    const avance = Math.min((ahora - inicio) / 600, 1);
-                    const valor = Math.round(destino * (1 - Math.pow(1 - avance, 3)));
-                    this.mostrado = crudo.replace(/[0-9.,]+/, valor.toLocaleString('es-CO'));
-                    if (avance < 1) requestAnimationFrame(paso);
-                    else this.mostrado = crudo;
-                };
-                requestAnimationFrame(paso);
-            },
-        }"
-        x-intersect.once="animar()"
-        x-text="mostrado"
-    >{{ $valor }}</p>
+    <p class="mt-3 font-display text-3xl font-bold tracking-tight text-fuerte">{{ $valor }}</p>
 
     @if ($deltaTexto)
         <p @class([
