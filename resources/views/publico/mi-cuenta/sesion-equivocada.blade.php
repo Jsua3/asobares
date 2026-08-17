@@ -34,10 +34,9 @@
 
                 <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
                     @if ($esDelEquipo)
-                        <a href="{{ route('filament.admin.pages.dashboard') }}"
-                           class="rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-marca-600">
+                        <x-publico.boton :href="route('filament.admin.pages.dashboard')">
                             Ir al panel del gremio
-                        </a>
+                        </x-publico.boton>
                     @endif
 
                     <form method="POST" action="{{ route('mi-cuenta.salir') }}">
@@ -55,10 +54,9 @@
                 </p>
 
                 <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-                    <a href="{{ route('mi-cuenta.entrar') }}"
-                       class="rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-marca-600">
+                    <x-publico.boton :href="route('mi-cuenta.entrar')">
                         Entrar con otra cuenta
-                    </a>
+                    </x-publico.boton>
                     <a href="{{ route('contacto') }}"
                        class="rounded-xl border border-linea-fuerte px-6 py-3 text-sm font-semibold transition-colors hover:border-marca-500/50">
                         Escribirnos

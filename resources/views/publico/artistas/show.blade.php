@@ -56,10 +56,9 @@
 
                     <div class="mt-5 space-y-2.5">
                         @if ($enlace = enlaceWhatsapp($artista->whatsapp, "Hola {$artista->nombre}, te vi en el directorio de artistas de ASOBARES Quindío."))
-                            <a href="{{ $enlace }}" target="_blank" rel="noopener nofollow"
-                               class="block rounded-xl bg-marca-500 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-marca-600">
+                            <x-publico.boton :href="$enlace" target="_blank" rel="noopener nofollow" class="w-full">
                                 Contactar por WhatsApp
-                            </a>
+                            </x-publico.boton>
                         @endif
                         @if ($artista->instagram_url)
                             <a href="{{ $artista->instagram_url }}" target="_blank" rel="noopener nofollow"

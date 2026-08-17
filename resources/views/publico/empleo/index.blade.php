@@ -3,10 +3,9 @@
 
     <x-publico.hero :titulo="ajuste('empleo_titulo')" :subtitulo="ajuste('empleo_intro')" compacto>
         <div class="mt-7 flex flex-col gap-3 sm:flex-row">
-            <a href="#perfil"
-               class="rounded-xl bg-marca-500 px-6 py-3 text-center text-sm font-semibold text-white hover:bg-marca-600">
+            <x-publico.boton href="#perfil">
                 Déjanos tu perfil
-            </a>
+            </x-publico.boton>
             <a href="#vacantes"
                class="rounded-xl border border-linea-fuerte px-6 py-3 text-center text-sm font-semibold hover:border-marca-500/50">
                 Ver vacantes
@@ -35,10 +34,9 @@
                                  :valor="$filtros['municipio'] ?? null"
                                  :opciones="['' => 'Todos los municipios'] + $municipios->pluck('nombre', 'slug')->all()" />
                 <div class="flex items-end gap-2">
-                    <button type="submit"
-                            class="flex-1 rounded-xl bg-marca-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-marca-600">
+                    <x-publico.boton class="flex-1">
                         Filtrar
-                    </button>
+                    </x-publico.boton>
                     @if (array_filter($filtros ?? []))
                         <a href="{{ route('empleo.index') }}"
                            class="rounded-xl border border-linea px-4 py-2.5 text-sm text-tenue hover:text-fuerte">Limpiar</a>
@@ -99,10 +97,9 @@
                                     @endif
                                 </div>
 
-                                <a href="{{ route('empleo.show', $vacante) }}"
-                                   class="shrink-0 rounded-xl bg-marca-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-marca-600">
+                                <x-publico.boton :href="route('empleo.show', $vacante)" class="shrink-0">
                                     Ver y postularme
-                                </a>
+                                </x-publico.boton>
                             </div>
                         </li>
                     @endforeach
@@ -138,10 +135,9 @@
 
                 <x-publico.habeas-data />
 
-                <button type="submit"
-                        class="w-full rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-marca-600 sm:w-auto">
+                <x-publico.boton class="w-full sm:w-auto">
                     Registrar mi perfil
-                </button>
+                </x-publico.boton>
             </form>
         </section>
     </div>

@@ -106,13 +106,12 @@
 
                             <div class="mt-6 flex flex-wrap gap-2.5">
                                 @if ($requisito->tieneAdjunto())
-                                    <a href="{{ route('guia.formato', $requisito) }}"
-                                       class="inline-flex items-center gap-2 rounded-xl bg-marca-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-marca-600">
+                                    <x-publico.boton :href="route('guia.formato', $requisito)" class="inline-flex items-center gap-2">
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>
                                         </svg>
                                         Descargar formato
-                                    </a>
+                                    </x-publico.boton>
                                 @endif
 
                                 @if ($requisito->enlace_externo)
@@ -140,10 +139,9 @@
                     haces parte del gremio, escríbenos igual: para eso existe esta guía.
                 </p>
                 <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-                    <a href="{{ route('contacto') }}"
-                       class="rounded-xl bg-marca-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-marca-600">
+                    <x-publico.boton :href="route('contacto')">
                         Escríbenos
-                    </a>
+                    </x-publico.boton>
                     <a href="{{ route('afiliate') }}"
                        class="rounded-xl border border-linea-fuerte px-6 py-2.5 text-sm font-semibold hover:border-marca-500/50">
                         Conoce la afiliación

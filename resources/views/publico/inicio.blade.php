@@ -23,10 +23,9 @@
         </x-slot:encima>
 
         <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a href="{{ route('directorio.index') }}"
-               class="rounded-xl bg-marca-500 px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-marca-600">
+            <x-publico.boton :href="route('directorio.index')">
                 {{ ajuste('hero_cta_directorio') }}
-            </a>
+            </x-publico.boton>
             <a href="{{ route('afiliate') }}"
                class="rounded-xl border border-linea-fuerte px-6 py-3 text-center text-sm font-semibold text-tinta transition-colors hover:border-marca-500/50 hover:bg-superficie-alta">
                 {{ ajuste('hero_cta_afiliate') }}
@@ -261,10 +260,9 @@
             <p class="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-suave sm:text-base text-pretty">
                 {{ ajuste('cta_final_texto') }}
             </p>
-            <a href="{{ route('afiliate') }}"
-               class="mt-8 inline-block rounded-xl bg-marca-500 px-8 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-marca-600">
+            <x-publico.boton :href="route('afiliate')" class="mt-8">
                 Quiero afiliarme
-            </a>
+            </x-publico.boton>
         </div>
     </section>
 </x-layouts.publico>

@@ -28,10 +28,9 @@
                     Mantener la sesión iniciada
                 </label>
 
-                <button type="submit"
-                        class="w-full rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-marca-600">
+                <x-publico.boton class="w-full">
                     Entrar
-                </button>
+                </x-publico.boton>
             </form>
 
             <p class="mt-6 text-center text-xs leading-relaxed text-apagado">

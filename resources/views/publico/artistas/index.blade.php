@@ -14,9 +14,9 @@
                              :opciones="['' => 'Todos los géneros'] + $generos->mapWithKeys(fn ($g) => [$g => $g])->all()" />
 
             <div class="flex items-end gap-2">
-                <button type="submit" class="flex-1 rounded-xl bg-marca-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-marca-600">
+                <x-publico.boton class="flex-1">
                     Filtrar
-                </button>
+                </x-publico.boton>
                 @if (array_filter($filtros ?? []))
                     <a href="{{ route('artistas.index') }}"
                        class="rounded-xl border border-linea px-4 py-2.5 text-sm text-tenue hover:text-fuerte">Limpiar</a>
@@ -81,10 +81,9 @@
                 Inscríbete gratis en la bolsa de artistas del gremio y aparece cuando un establecimiento
                 busque música para su noche.
             </p>
-            <a href="{{ route('artistas.inscripcion') }}"
-               class="mt-6 inline-block rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white hover:bg-marca-600">
+            <x-publico.boton :href="route('artistas.inscripcion')" class="mt-6">
                 Inscribirme en la bolsa
-            </a>
+            </x-publico.boton>
         </section>
     </div>
 </x-layouts.publico>

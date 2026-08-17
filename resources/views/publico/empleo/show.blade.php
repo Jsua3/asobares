@@ -107,10 +107,9 @@
 
                 <x-publico.habeas-data />
 
-                <button type="submit"
-                        class="w-full rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-marca-600 sm:w-auto">
+                <x-publico.boton class="w-full sm:w-auto">
                     Enviar mi postulación
-                </button>
+                </x-publico.boton>
             </form>
 
             @if ($enlace = enlaceWhatsapp($vacante->whatsapp_contacto, "Hola, vi la vacante de {$vacante->cargo} en la bolsa de empleo de ASOBARES Quindío."))

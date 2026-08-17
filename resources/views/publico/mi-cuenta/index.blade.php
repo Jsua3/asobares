@@ -74,10 +74,9 @@
 
                         <form method="POST" action="{{ route('mi-cuenta.pagar') }}" class="shrink-0">
                             @csrf
-                            <button type="submit"
-                                    class="rounded-xl bg-marca-500 px-8 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-marca-600">
+                            <x-publico.boton>
                                 Pagar ahora
-                            </button>
+                            </x-publico.boton>
                             <p class="mt-2 text-center text-[.65rem] text-apagado">PSE o tarjeta</p>
                         </form>
                     </div>

@@ -74,10 +74,9 @@
                         </p>
 
                         <div class="mt-7 space-y-3">
-                            <button type="submit" name="decision" value="aprobar"
-                                    class="w-full rounded-xl bg-marca-500 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-marca-600">
+                            <x-publico.boton name="decision" value="aprobar" class="w-full">
                                 Pagar {{ pesos($transaccion->monto) }}
-                            </button>
+                            </x-publico.boton>
                             <button type="submit" name="decision" value="rechazar"
                                     class="w-full rounded-xl border border-linea px-6 py-3 text-sm text-tenue transition-colors hover:border-marca-500/40 hover:text-fuerte">
                                 Simular pago rechazado

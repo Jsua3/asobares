@@ -48,10 +48,9 @@
                 <x-publico.alerta class="mt-6">
                     {{ session('exito') }}
                     @if ($whatsapp)
-                        <a href="{{ $whatsapp }}" target="_blank" rel="noopener"
-                           class="mt-3 inline-block rounded-lg bg-marca-500 px-4 py-2 text-xs font-semibold text-white hover:bg-marca-600">
+                        <x-publico.boton :href="$whatsapp" target="_blank" rel="noopener" class="mt-3">
                             Escribirnos ya por WhatsApp
-                        </a>
+                        </x-publico.boton>
                     @endif
                 </x-publico.alerta>
             @endif
@@ -71,10 +70,9 @@
 
                 <x-publico.habeas-data />
 
-                <button type="submit"
-                        class="w-full rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-marca-600 sm:w-auto">
+                <x-publico.boton class="w-full sm:w-auto">
                     Enviar solicitud
-                </button>
+                </x-publico.boton>
             </form>
 
             @if ($whatsapp)

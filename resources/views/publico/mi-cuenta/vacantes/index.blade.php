@@ -11,10 +11,9 @@
                     Las publicas tú y las aprueba la secretaría. Nadie del gremio edita lo que escribiste.
                 </p>
             </div>
-            <a href="{{ route('mi-cuenta.vacantes.crear') }}"
-               class="rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white hover:bg-marca-600">
+            <x-publico.boton :href="route('mi-cuenta.vacantes.crear')">
                 Publicar una vacante
-            </a>
+            </x-publico.boton>
         </header>
 
         @if (session('exito'))

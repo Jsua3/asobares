@@ -87,18 +87,16 @@
                     </dl>
 
                     @if ($evento->delegaRegistroExterno())
-                        <a href="{{ $evento->enlace_externo }}" target="_blank" rel="noopener"
-                           class="mt-6 block rounded-xl bg-marca-500 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-marca-600">
+                        <x-publico.boton :href="$evento->enlace_externo" target="_blank" rel="noopener" class="mt-6 w-full">
                             Registrarme en la Nacional ↗
-                        </a>
+                        </x-publico.boton>
                         <p class="mt-2.5 text-xs text-apagado">
                             La inscripción de este evento la gestiona directamente Asobares Colombia.
                         </p>
                     @elseif ($evento->admiteInscripciones())
-                        <a href="#inscripcion"
-                           class="mt-6 block rounded-xl bg-marca-500 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-marca-600">
+                        <x-publico.boton href="#inscripcion" class="mt-6 w-full">
                             {{ $evento->esGratuito() ? 'Inscribirme' : 'Inscribirme y pagar' }}
-                        </a>
+                        </x-publico.boton>
                     @else
                         <p class="mt-6 rounded-xl border border-linea px-4 py-3 text-center text-sm text-apagado">
                             Las inscripciones están cerradas.
@@ -140,10 +138,9 @@
 
                     <x-publico.habeas-data />
 
-                    <button type="submit"
-                            class="w-full rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-marca-600 sm:w-auto">
+                    <x-publico.boton class="w-full sm:w-auto">
                         {{ $evento->esGratuito() ? 'Confirmar inscripción' : 'Continuar al pago de '.pesos($evento->precio) }}
-                    </button>
+                    </x-publico.boton>
                 </form>
             </section>
         @endif

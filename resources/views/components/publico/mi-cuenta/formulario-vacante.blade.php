@@ -31,10 +31,9 @@
                      placeholder="Qué se necesita, qué experiencia esperas y cómo se paga." />
 
     <div class="flex flex-wrap items-center gap-4">
-        <button type="submit"
-                class="rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white hover:bg-marca-600">
+        <x-publico.boton>
             {{ $textoBoton }}
-        </button>
+        </x-publico.boton>
         <a href="{{ route('mi-cuenta.vacantes.index') }}" class="text-sm text-tenue hover:text-fuerte">Cancelar</a>
     </div>
 </form>

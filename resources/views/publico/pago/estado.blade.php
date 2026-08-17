@@ -86,10 +86,9 @@
                 </dl>
             </div>
 
-            <a href="{{ $volverA }}"
-               class="mt-8 inline-block rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-marca-600">
+            <x-publico.boton :href="$volverA" class="mt-8">
                 Volver
-            </a>
+            </x-publico.boton>
         </div>
     </div>
 </x-layouts.publico>

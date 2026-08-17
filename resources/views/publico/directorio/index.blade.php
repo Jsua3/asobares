@@ -36,10 +36,9 @@
                              :opciones="['' => 'Todas las categorías'] + $categorias->pluck('nombre', 'slug')->all()" />
 
             <div class="flex items-end gap-2">
-                <button type="submit"
-                        class="flex-1 rounded-xl bg-marca-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-marca-600">
+                <x-publico.boton class="flex-1">
                     Filtrar
-                </button>
+                </x-publico.boton>
                 @if (array_filter($filtros ?? []))
                     <a href="{{ route('directorio.index') }}"
                        class="rounded-xl border border-linea px-4 py-2.5 text-sm text-tenue hover:text-fuerte">

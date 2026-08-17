@@ -53,10 +53,9 @@
 
                                 <div class="mt-5 space-y-2">
                                     @if ($enlace = enlaceWhatsapp($proveedor->whatsapp, "Hola, los vi en la bolsa de proveedores de ASOBARES Quindío."))
-                                        <a href="{{ $enlace }}" target="_blank" rel="noopener nofollow"
-                                           class="block rounded-xl bg-marca-500 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-marca-600">
+                                        <x-publico.boton :href="$enlace" target="_blank" rel="noopener nofollow" class="w-full">
                                             WhatsApp
-                                        </a>
+                                        </x-publico.boton>
                                     @endif
                                     @if ($proveedor->correo)
                                         <a href="mailto:{{ $proveedor->correo }}"
@@ -81,10 +80,9 @@
                 Si le vendes al sector nocturno del Quindío, escríbenos y te contamos cómo entrar a la
                 bolsa de proveedores del gremio.
             </p>
-            <a href="{{ route('proveedores.inscripcion') }}"
-               class="mt-6 inline-block rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white hover:bg-marca-600">
+            <x-publico.boton :href="route('proveedores.inscripcion')" class="mt-6">
                 Inscribirme en la bolsa
-            </a>
+            </x-publico.boton>
         </section>
     </div>
 </x-layouts.publico>

@@ -129,10 +129,9 @@
 
                     <div class="mt-5 space-y-2.5">
                         @if ($enlace = enlaceWhatsapp($asociado->whatsapp, "Hola {$asociado->nombre}, los vi en la página de ASOBARES Quindío."))
-                            <a href="{{ $enlace }}" target="_blank" rel="noopener nofollow"
-                               class="block rounded-xl bg-marca-500 px-4 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-marca-600">
+                            <x-publico.boton :href="$enlace" target="_blank" rel="noopener nofollow" class="w-full">
                                 Escribir por WhatsApp
-                            </a>
+                            </x-publico.boton>
                         @endif
 
                         @foreach ([

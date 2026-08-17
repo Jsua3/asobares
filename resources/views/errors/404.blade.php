@@ -15,10 +15,9 @@
             </p>
 
             <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-                <a href="{{ route('inicio') }}"
-                   class="rounded-xl bg-marca-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-marca-600">
+                <x-publico.boton :href="route('inicio')">
                     Volver al inicio
-                </a>
+                </x-publico.boton>
                 <a href="{{ route('directorio.index') }}"
                    class="rounded-xl border border-linea-fuerte px-6 py-3 text-sm font-semibold transition-colors hover:border-marca-500/50">
                     Ver el directorio
