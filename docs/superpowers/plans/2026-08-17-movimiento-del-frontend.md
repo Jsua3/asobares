@@ -18,7 +18,8 @@ Todo lo de aquí aplica a **todas** las tareas.
 - **Cero `@keyframes` propios.** Todo movimiento es `transition` o `@starting-style`. Es lo que las mordazas de cambio de tema ya cubren.
 - **Solo se anima `transform` y `opacity`** (y `border-color`/`color` en fundidos). Nunca `height`, `width`, márgenes ni `all`.
 - **Nunca `ease-in`** en interfaz. Entradas y salidas → `ease-out`. Movimiento en pantalla → `ease-in-out`. Hover y color → `ease-color`. Menú móvil → `ease-cajon`.
-- **Ninguna vista escribe duraciones ni curvas crudas.** Solo `duration-[--duracion-*]` y las utilidades `ease-*` de los tokens.
+- **Ninguna vista escribe duraciones ni curvas crudas.** Solo `duration-(--duracion-*)` y las utilidades `ease-*` de los tokens.
+- **La sintaxis de variable en Tailwind 4 es el PARÉNTESIS, no el corchete.** Verificado empíricamente contra `tailwindcss@4.3.3`: `duration-(--duracion-boton)` compila a `transition-duration: var(--duracion-boton)`, mientras que `duration-[--duracion-boton]` compila a `transition-duration: --duracion-boton` — una declaración inválida que el navegador **descarta en silencio** y que hace caer la animación al default de 150 ms sin que nada falle a la vista. Vale igual para `translate-y-(--…)`. Si dudas, la forma larga `duration-[var(--duracion-boton)]` también es correcta.
 - **Ninguna duración de interfaz pasa de 300 ms**, y la salida siempre es más rápida que la entrada.
 - **Identificadores, nombres de archivo, comentarios y mensajes en español.** Los nombres de método de prueba van en snake_case **sin tildes ni eñes**; los comentarios y docblocks sí las llevan.
 - **Binario de PHP:** `"C:/Users/Predator/.config/php85/php.exe"`. El `php` del PATH resuelve al mismo, pero usar la ruta absoluta entre comillas es lo seguro.
@@ -131,7 +132,7 @@ En el mismo archivo, después de la declaración de `--asb-sombra-tarjeta` (que 
 
     /*
      * Duraciones. No hay namespace de Tailwind para duración, así que viven
-     * aquí y se alcanzan desde Blade con `duration-[--duracion-boton]`.
+     * aquí y se alcanzan desde Blade con `duration-(--duracion-boton)`.
      * Los nombres codifican la regla: la salida es más rápida que la entrada.
      */
     --duracion-instante: 100ms; /* :active */
@@ -685,7 +686,15 @@ Añadir a `tests/Feature/MovimientoTest.php`:
             '/\bease-in\b(?!-out)/' => 'ease-in arranca lento justo cuando más se mira; en interfaz nunca',
             '/\btransition-all\b/' => 'transition: all arrastra propiedades caras que nadie quiso animar',
             '/transition:\s*all\b/' => 'transition: all arrastra propiedades caras que nadie quiso animar',
-            '/\bduration-\d+\b/' => 'la duración se toma de los tokens: duration-[--duracion-*]',
+            '/\bduration-\d+\b/' => 'la duración se toma de los tokens: duration-(--duracion-*)',
+
+            /*
+             * En Tailwind 4 el corchete NO envuelve la variable en var(): esto
+             * compila a `transition-duration: --duracion-boton`, que el
+             * navegador descarta en silencio y deja la animación en el default
+             * de 150 ms. Nada falla a la vista, y por eso hace falta vigilarlo.
+             */
+            '/(?:duration|translate-[xy]|delay)-\[--/' => 'usa el paréntesis: duration-(--var), no el corchete, o el valor no se envuelve en var()',
         ];
     }
 
@@ -780,7 +789,7 @@ En `resources/views/components/publico/menu-usuario.blade.php`, reemplazar la l�
 por:
 
 ```blade
-         x-transition:enter="transition-[opacity,transform] ease-out duration-[--duracion-entrada]"
+         x-transition:enter="transition-[opacity,transform] ease-out duration-(--duracion-entrada)"
 ```
 
 Y la línea 83:
@@ -792,7 +801,7 @@ Y la línea 83:
 por:
 
 ```blade
-         x-transition:leave="transition-[opacity,transform] ease-out duration-[--duracion-salida]"
+         x-transition:leave="transition-[opacity,transform] ease-out duration-(--duracion-salida)"
 ```
 
 Tres arreglos en dos líneas: `ease-in` era la única curva prohibida escrita a mano del proyecto; las duraciones pasan a tokens (200 ms entrada, 160 ms salida); y `transition` a secas arrastraba la lista completa de propiedades de Tailwind —incluidas `box-shadow`, `filter` y `backdrop-filter`— sobre un panel con `shadow-xl`.
@@ -848,7 +857,7 @@ Reemplazar la línea 10 de `resources/views/components/publico/tarjeta-asociado.
 por:
 
 ```blade
-                     class="h-full w-full object-cover transition-transform duration-[--duracion-boton] ease-out group-hover:scale-105">
+                     class="h-full w-full object-cover transition-transform duration-(--duracion-boton) ease-out group-hover:scale-105">
 ```
 
 Un solo gesto de hover disparaba dos relojes: el borde y la elevación de la tarjeta a 200 ms, y la foto a 500 ms. La tarjeta terminaba de moverse en dos tiempos. `scale-105` se conserva: la propiedad ya era la correcta.
@@ -1108,7 +1117,7 @@ Añadir a `tests/Feature/MovimientoTest.php`:
         $this->assertStringContainsString('type="submit"', $primaria);
         $this->assertStringContainsString('bg-marca-500', $primaria);
         $this->assertStringContainsString('pulsable', $primaria);
-        $this->assertStringContainsString('duration-[--duracion-boton]', $primaria);
+        $this->assertStringContainsString('duration-(--duracion-boton)', $primaria);
 
         $contorno = \Illuminate\Support\Facades\Blade::render(
             '<x-publico.boton variante="contorno" href="/directorio">Ver el directorio</x-publico.boton>'
@@ -1162,7 +1171,7 @@ Crear `resources/views/components/publico/boton.blade.php`:
      * `.pulsable` llega de fábrica: es el acuse de pulsación que el proyecto
      * no tenía en ningún sitio, y en táctil es el único que existe.
      */
-    $base = 'inline-block rounded-xl px-6 py-3 text-center text-sm font-semibold pulsable transition-colors duration-[--duracion-boton] ease-color';
+    $base = 'inline-block rounded-xl px-6 py-3 text-center text-sm font-semibold pulsable transition-colors duration-(--duracion-boton) ease-color';
 
     $estilos = match ($variante) {
         'contorno' => 'border border-linea-fuerte text-tinta hover:border-marca-500/50 hover:bg-superficie-alta',
@@ -1327,7 +1336,7 @@ A cada uno **añadir** `enlace-accion` a su `class` existente. No quitar ni camb
 
 `resources/views/vendor/pagination/tailwind.blade.php:11` pone `transition-colors` en la pastilla base, que heredan las variantes `$inerte` y `$actual` — y ninguna de las dos tiene `hover:`. Es una transición que no puede dispararse nunca.
 
-Quitar `transition-colors` de la clase base y añadirla únicamente a la variante que sí tiene hover (la de los enlaces activos), junto con `duration-[--duracion-boton] ease-color`.
+Quitar `transition-colors` de la clase base y añadirla únicamente a la variante que sí tiene hover (la de los enlaces activos), junto con `duration-(--duracion-boton) ease-color`.
 
 - [ ] **Step 5: Correr la suite**
 
@@ -1753,8 +1762,8 @@ class MenuMovilTest extends TestCase
         $this->assertStringContainsString('overflow-y-auto', $navbar);
 
         // Solo opacity y transform, con la curva de cajón y salida más rápida.
-        $this->assertStringContainsString('duration-[--duracion-panel]', $navbar);
-        $this->assertStringContainsString('duration-[--duracion-salida]', $navbar);
+        $this->assertStringContainsString('duration-(--duracion-panel)', $navbar);
+        $this->assertStringContainsString('duration-(--duracion-salida)', $navbar);
         $this->assertStringContainsString('ease-cajon', $navbar);
     }
 
@@ -1813,12 +1822,12 @@ por:
     <div id="menu-movil"
          x-show="menuMovil"
          x-cloak
-         x-transition:enter="transition-[opacity,transform] ease-cajon duration-[--duracion-panel]"
-         x-transition:enter-start="opacity-0 translate-y-[--asb-desplazamiento-panel]"
+         x-transition:enter="transition-[opacity,transform] ease-cajon duration-(--duracion-panel)"
+         x-transition:enter-start="opacity-0 translate-y-(--asb-desplazamiento-panel)"
          x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition-[opacity,transform] ease-cajon duration-[--duracion-salida]"
+         x-transition:leave="transition-[opacity,transform] ease-cajon duration-(--duracion-salida)"
          x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 translate-y-[--asb-desplazamiento-panel]"
+         x-transition:leave-end="opacity-0 translate-y-(--asb-desplazamiento-panel)"
          class="absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] origin-top overflow-y-auto border-t border-linea bg-fondo shadow-lg lg:hidden">
 ```
 
@@ -1926,17 +1935,17 @@ por:
                 {{-- Los dos trazos se cruzan girando en sentidos opuestos. El
                      origen es el centro del lienzo de 24×24, no del <path>. --}}
                 <path x-show="! menuMovil"
-                      x-transition:enter="transition-[opacity,transform] ease-out duration-[--duracion-salida]"
+                      x-transition:enter="transition-[opacity,transform] ease-out duration-(--duracion-salida)"
                       x-transition:enter-start="opacity-0 -rotate-90"
-                      x-transition:leave="transition-[opacity,transform] ease-out duration-[--duracion-salida]"
+                      x-transition:leave="transition-[opacity,transform] ease-out duration-(--duracion-salida)"
                       x-transition:leave-end="opacity-0 -rotate-90"
                       style="transform-origin: 12px 12px"
                       stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>
                 <path x-show="menuMovil"
                       x-cloak
-                      x-transition:enter="transition-[opacity,transform] ease-out duration-[--duracion-salida]"
+                      x-transition:enter="transition-[opacity,transform] ease-out duration-(--duracion-salida)"
                       x-transition:enter-start="opacity-0 rotate-90"
-                      x-transition:leave="transition-[opacity,transform] ease-out duration-[--duracion-salida]"
+                      x-transition:leave="transition-[opacity,transform] ease-out duration-(--duracion-salida)"
                       x-transition:leave-end="opacity-0 rotate-90"
                       style="transform-origin: 12px 12px"
                       stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
