@@ -712,7 +712,7 @@ Esperado: `0.14s, 0.14s`.
 playwright-cli eval "getComputedStyle(document.querySelector('.tarjeta-hover')).transitionTimingFunction" --raw
 ```
 
-Esperado: `cubic-bezier(0.23, 1, 0.32, 1)` (dos veces, una por propiedad).
+Esperado: `ease, cubic-bezier(0.23, 1, 0.32, 1)` — **dos curvas distintas, una por propiedad, y así debe ser**: `border-color` funde con `--ease-color` (que vale `ease`) y `transform` se eleva con `--ease-out`. Si las dos salieran iguales, alguien habría colapsado la declaración en una sola.
 
 - [ ] **Step 8: Commit**
 
