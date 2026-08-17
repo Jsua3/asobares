@@ -1346,7 +1346,26 @@ Cada resultado que sea un `<a>` o un `<button>` de acción se convierte. Confirm
 
 Descartar de esa lista, porque **no** son botones de acción y quedan fuera por diseño: `navbar.blade.php:51` y `:96` (navbar excluido), `tarjeta-asociado.blade.php` (la insignia «Destacado» es un `<span>`), `artistas/inscripcion.blade.php:46` (pseudo-elemento `file:`), y las ramas activas de los chips y de los controles segmentados (`@class` con dos ramas).
 
-Regla de conversión: el padding, el radio y el tamaño de texto los pone el componente. Solo se conserva vía `class=` lo que sea **maquetación** (`w-full`, `sm:w-auto`, `flex-1`, `shrink-0`, `mt-*`, `block`, `inline-block`, `text-center`). Todo lo que sea color, borde, `transition` o `hover:` se descarta: ya lo pone el componente.
+Regla de conversión: el padding, el radio y el tamaño de texto los pone el componente. Solo se conserva vía `class=` lo que sea **maquetación** (`w-full`, `sm:w-auto`, `flex-1`, `shrink-0`, `mt-*`, `text-center`). Todo lo que sea color, borde, `transition` o `hover:` se descarta: ya lo pone el componente.
+
+**Dos trampas que hay que conocer antes de tocar el primer archivo.**
+
+**`block` se traduce a `w-full`, nunca se arrastra.** El componente lleva `inline-block`, y en la hoja compilada de Tailwind `.inline-block` aparece *después* de `.block`. Como tienen la misma especificidad, gana `inline-block` siempre, da igual el orden en que se escriban las clases en el atributo. Un botón migrado con `class="block"` se encoge al ancho de su texto en vez de ocupar la fila, y **nada en el HTML delata el error**. Los que dependen de esto y hay que traducir:
+
+| Archivo | Líneas |
+|---|---|
+| `publico/directorio/show.blade.php` | 132 |
+| `publico/eventos/show.blade.php` | 90, 97 |
+| `publico/proveedores/index.blade.php` | 57, 63 |
+| `publico/artistas/show.blade.php` | 60, 66 |
+
+**El prop se llama `tipo`, no `type`.** Si escribes `type="button"` por reflejo al traducir un `<button type="button">`, el atributo llega por `$attributes` y convive con el que pone el componente: el navegador se queda con el primero y el botón sigue siendo `submit`, sin ningún error visible. Usa `tipo="button"`. Antes de commitear, comprueba que no se coló ninguno:
+
+```bash
+grep -rn 'x-publico.boton[^>]*\stype=' resources/views/
+```
+
+Esperado: sin resultados.
 
 **Excepción documentada:** `afiliate.blade.php:51` usa `rounded-lg` y `text-xs` (botón chico de WhatsApp). Se convierte igual y **acepta** el radio y el tamaño del componente: unificarlo es el objetivo. Anotarlo en el mensaje de commit.
 
