@@ -38,4 +38,45 @@ class MovimientoTest extends TestCase
         $this->assertStringContainsString('--asb-desplazamiento-panel: -4%', $tokens);
         $this->assertStringContainsString('--asb-desplazamiento-alerta: -25%', $tokens);
     }
+
+    /**
+     * La regla no dice «quitar toda animación»: dice quitar el movimiento y
+     * conservar los fundidos de opacidad y color, que ayudan a comprender.
+     * Por eso se anulan los desplazamientos y NO las duraciones — si se
+     * pusieran las duraciones a cero moriría también el fundido del borde.
+     */
+    public function test_el_movimiento_reducido_anula_el_desplazamiento_y_no_el_reloj(): void
+    {
+        $tokens = File::get(resource_path('css/tokens.css'));
+
+        $this->assertStringContainsString('@media (prefers-reduced-motion: reduce)', $tokens);
+        $this->assertStringContainsString('--asb-levante: 0px', $tokens);
+        $this->assertStringContainsString('--asb-desplazamiento-panel: 0%', $tokens);
+        $this->assertStringContainsString('--asb-desplazamiento-alerta: 0%', $tokens);
+
+        // Las duraciones NO se anulan: si alguien las pone a cero aquí, está
+        // deshaciendo la precisión de arriba.
+        $this->assertStringNotContainsString('--duracion-boton: 0ms', $tokens);
+        $this->assertStringNotContainsString('--duracion-entrada: 0ms', $tokens);
+    }
+
+    /**
+     * Los tokens solo cubren lo que los usa. Filament y Leaflet traen su propio
+     * movimiento, y el scroll suave global lo dispara el enlace «Saltar al
+     * contenido», que es navegación de teclado.
+     */
+    public function test_hay_red_de_seguridad_para_lo_que_no_usa_los_tokens(): void
+    {
+        $app = File::get(resource_path('css/app.css'));
+
+        // Barrido estrecho: solo `animation` y `scroll-behavior`. NO toca
+        // `transition`, para no deshacer la precisión del interruptor.
+        $this->assertStringContainsString('animation-duration: 1ms !important', $app);
+        $this->assertStringContainsString('animation-iteration-count: 1 !important', $app);
+        $this->assertStringContainsString('scroll-behavior: auto !important', $app);
+        $this->assertStringNotContainsString('transition-duration: 0', $app);
+
+        // El scroll suave deja de ser incondicional.
+        $this->assertStringContainsString('@media (prefers-reduced-motion: no-preference)', $app);
+    }
 }

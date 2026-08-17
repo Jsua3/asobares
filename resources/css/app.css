@@ -7,8 +7,16 @@
 @source '../../storage/framework/views/*.php';
 
 @layer base {
+    /* El scroll suave lo dispara el enlace «Saltar al contenido», que es
+       navegación de teclado. Incondicional era una barrera. */
     html {
-        scroll-behavior: smooth;
+        scroll-behavior: auto;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        html {
+            scroll-behavior: smooth;
+        }
     }
 
     /* Evita el parpadeo de los bloques de Alpine antes de hidratar. */
@@ -87,5 +95,30 @@
         font-size: 0.6875rem;
         letter-spacing: 0.22em;
         text-transform: uppercase;
+    }
+}
+
+/*
+ * Red de seguridad, deliberadamente estrecha: solo `animation` y
+ * `scroll-behavior`.
+ *
+ * NO toca `transition` a propósito. El interruptor de `tokens.css` ya anula
+ * el desplazamiento con precisión, y un barrido de `transition-duration`
+ * aquí mataría los fundidos de color que la regla manda conservar.
+ *
+ * Esto cubre lo que no usa nuestros tokens: los @keyframes de Filament y
+ * cualquier cosa futura. Leaflet no se trata aquí sino en su propia API
+ * (ver `components/publico/mapa.blade.php`), que es donde el control existe.
+ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+    }
+
+    html {
+        scroll-behavior: auto !important;
     }
 }

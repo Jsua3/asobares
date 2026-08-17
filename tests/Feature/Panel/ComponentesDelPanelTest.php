@@ -52,11 +52,23 @@ class ComponentesDelPanelTest extends TestCase
         $this->assertStringContainsString('--asb-vidrio-sombra: none', $tema);
     }
 
+    /**
+     * Antes esta prueba solo miraba que la cadena `prefers-reduced-motion`
+     * apareciera en el tema del panel: pasaba igual aunque se vaciara la
+     * guarda entera. Y además vigilaba el sitio equivocado — la guarda se
+     * mudó a `tokens.css`, que importan las dos superficies.
+     */
     public function test_el_movimiento_respeta_prefers_reduced_motion(): void
     {
-        $tema = File::get(resource_path('css/filament/admin/theme.css'));
+        $tokens = File::get(resource_path('css/tokens.css'));
 
-        $this->assertStringContainsString('prefers-reduced-motion: reduce', $tema);
+        $this->assertStringContainsString('@media (prefers-reduced-motion: reduce)', $tokens);
+
+        // Los valores, no la presencia: es lo único que prueba que la guarda
+        // hace algo.
+        $this->assertStringContainsString('--asb-levante: 0px', $tokens);
+        $this->assertStringContainsString('--asb-desplazamiento-panel: 0%', $tokens);
+        $this->assertStringContainsString('--asb-desplazamiento-alerta: 0%', $tokens);
     }
 
     public function test_el_kpi_muestra_etiqueta_valor_y_detalle(): void

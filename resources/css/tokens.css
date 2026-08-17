@@ -236,3 +236,22 @@
     --color-aviso-fondo: var(--asb-aviso-fondo);
     --color-aviso-linea: var(--asb-aviso-linea);
 }
+
+/*
+ * Movimiento reducido: se anula el DESPLAZAMIENTO, no el reloj.
+ *
+ * La regla de craft pide quitar el movimiento y conservar las transiciones de
+ * opacidad y color, que ayudan a comprender. Poner las duraciones a cero
+ * mataría también los fundidos. Con esto, la tarjeta del directorio sigue
+ * fundiendo su borde a rojo en 140 ms y lo único que pierde es la elevación.
+ *
+ * Va después de `.dark` para ganar por orden de aparición: misma
+ * especificidad, gana la última.
+ */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --asb-levante: 0px;
+        --asb-desplazamiento-panel: 0%;
+        --asb-desplazamiento-alerta: 0%;
+    }
+}
