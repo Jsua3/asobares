@@ -28,7 +28,7 @@
     @endpush
 
     <article class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-        <a href="{{ route('eventos.index') }}" class="text-sm text-apagado hover:text-acento">← Todos los eventos</a>
+        <a href="{{ route('eventos.index') }}" class="enlace-accion text-sm text-apagado hover:text-acento">← Todos los eventos</a>
 
         <div class="mt-5 flex flex-wrap items-center gap-2 text-xs">
             <span class="rounded-full bg-marca-500/15 px-3 py-1 font-medium text-acento-fuerte">{{ $evento->tipo->getLabel() }}</span>

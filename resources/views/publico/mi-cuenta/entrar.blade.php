@@ -35,10 +35,10 @@
 
             <p class="mt-6 text-center text-xs leading-relaxed text-apagado">
                 ¿Todavía no eres afiliado?
-                <a href="{{ route('afiliate') }}" class="text-acento hover:text-acento-fuerte">Conoce la afiliación</a>.
+                <a href="{{ route('afiliate') }}" class="enlace-accion text-acento hover:text-acento-fuerte">Conoce la afiliación</a>.
                 <br>
                 El equipo del gremio ingresa por
-                <a href="{{ route('filament.admin.pages.dashboard') }}" class="text-acento hover:text-acento-fuerte">/admin</a>.
+                <a href="{{ route('filament.admin.pages.dashboard') }}" class="enlace-accion text-acento hover:text-acento-fuerte">/admin</a>.
             </p>
         </div>
     </div>

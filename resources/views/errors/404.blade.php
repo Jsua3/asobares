@@ -18,10 +18,9 @@
                 <x-publico.boton :href="route('inicio')">
                     Volver al inicio
                 </x-publico.boton>
-                <a href="{{ route('directorio.index') }}"
-                   class="rounded-xl border border-linea-fuerte px-6 py-3 text-sm font-semibold transition-colors hover:border-marca-500/50">
+                <x-publico.boton variante="contorno" :href="route('directorio.index')">
                     Ver el directorio
-                </a>
+                </x-publico.boton>
             </div>
         </div>
     </div>

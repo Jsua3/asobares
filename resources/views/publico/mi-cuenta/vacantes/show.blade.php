@@ -4,7 +4,7 @@
     <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
 
         <header>
-            <a href="{{ route('mi-cuenta.vacantes.index') }}" class="text-sm text-acento hover:text-acento-fuerte">
+            <a href="{{ route('mi-cuenta.vacantes.index') }}" class="enlace-accion text-sm text-acento hover:text-acento-fuerte">
                 ← Mis vacantes
             </a>
             <h1 class="mt-3 font-display text-3xl font-bold tracking-tight">{{ $vacante->cargo }}</h1>
@@ -36,7 +36,7 @@
                             <div class="min-w-0 flex-1">
                                 <h2 class="font-display text-base font-semibold">{{ $postulacion->nombre }}</h2>
                                 <p class="mt-1 text-sm text-tenue">
-                                    <a href="mailto:{{ $postulacion->correo }}" class="text-acento hover:text-acento-fuerte">
+                                    <a href="mailto:{{ $postulacion->correo }}" class="enlace-accion text-acento hover:text-acento-fuerte">
                                         {{ $postulacion->correo }}
                                     </a>
                                     @if ($postulacion->telefono)
@@ -63,10 +63,9 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <button type="submit"
-                                        class="rounded-xl border border-linea-fuerte px-4 py-2 text-sm font-semibold hover:border-marca-500/50">
+                                <x-publico.boton variante="contorno">
                                     Guardar
-                                </button>
+                                </x-publico.boton>
                             </form>
                         </div>
                     </li>

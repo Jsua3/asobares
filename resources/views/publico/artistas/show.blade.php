@@ -3,7 +3,7 @@
                    :ogImagen="$artista->foto ? Storage::disk('public')->url($artista->foto) : null">
 
     <article class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-        <a href="{{ route('artistas.index') }}" class="text-sm text-apagado hover:text-acento">← Todos los artistas</a>
+        <a href="{{ route('artistas.index') }}" class="enlace-accion text-sm text-apagado hover:text-acento">← Todos los artistas</a>
 
         <div class="mt-6 grid gap-10 lg:grid-cols-3">
             <div class="lg:col-span-2">

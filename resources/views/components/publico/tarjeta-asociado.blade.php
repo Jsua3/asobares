@@ -32,7 +32,7 @@
 
         <div class="mt-4 flex items-center justify-between gap-3">
             <a href="{{ route('directorio.show', $asociado) }}"
-               class="text-sm font-medium text-acento transition-colors hover:text-acento-fuerte">
+               class="enlace-accion text-sm font-medium text-acento transition-colors hover:text-acento-fuerte">
                 Ver ficha
             </a>
 

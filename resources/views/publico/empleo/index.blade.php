@@ -6,10 +6,9 @@
             <x-publico.boton href="#perfil">
                 Déjanos tu perfil
             </x-publico.boton>
-            <a href="#vacantes"
-               class="rounded-xl border border-linea-fuerte px-6 py-3 text-center text-sm font-semibold hover:border-marca-500/50">
+            <x-publico.boton variante="contorno" href="#vacantes">
                 Ver vacantes
-            </a>
+            </x-publico.boton>
         </div>
     </x-publico.hero>
 
@@ -76,7 +75,7 @@
                                         en
                                         @if ($vacante->asociado->estaPublicado())
                                             <a href="{{ route('directorio.show', $vacante->asociado) }}"
-                                               class="text-acento hover:text-acento-fuerte">{{ $vacante->asociado->nombre }}</a>
+                                               class="enlace-accion text-acento hover:text-acento-fuerte">{{ $vacante->asociado->nombre }}</a>
                                         @else
                                             {{ $vacante->asociado->nombre }}
                                         @endif

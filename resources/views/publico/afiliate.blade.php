@@ -78,7 +78,7 @@
             @if ($whatsapp)
                 <p class="mt-6 border-t border-linea pt-6 text-sm text-tenue">
                     ¿Prefieres hablar directo?
-                    <a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="text-acento hover:text-acento-fuerte">
+                    <a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="enlace-accion text-acento hover:text-acento-fuerte">
                         Escríbenos por WhatsApp al {{ ajuste('contacto_whatsapp_visible') }}
                     </a>
                 </p>

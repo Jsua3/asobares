@@ -76,23 +76,22 @@
                             </div>
 
                             <div class="flex shrink-0 flex-col items-end gap-2">
-                                <a href="{{ route('mi-cuenta.vacantes.show', $vacante) }}"
-                                   class="rounded-xl border border-linea-fuerte px-4 py-2 text-sm font-semibold hover:border-marca-500/50">
+                                <x-publico.boton variante="contorno" :href="route('mi-cuenta.vacantes.show', $vacante)">
                                     {{ $vacante->postulaciones_count }}
                                     {{ $vacante->postulaciones_count === 1 ? 'postulación' : 'postulaciones' }}
-                                </a>
+                                </x-publico.boton>
                                 <a href="{{ route('mi-cuenta.vacantes.editar', $vacante) }}"
-                                   class="text-sm text-acento hover:text-acento-fuerte">Editar</a>
+                                   class="enlace-accion text-sm text-acento hover:text-acento-fuerte">Editar</a>
 
                                 @if ($vacante->estaCerrada())
                                     <form method="POST" action="{{ route('mi-cuenta.vacantes.reabrir', $vacante) }}">
                                         @csrf
-                                        <button type="submit" class="text-sm text-acento hover:text-acento-fuerte">Reabrir</button>
+                                        <button type="submit" class="enlace-accion text-sm text-acento hover:text-acento-fuerte">Reabrir</button>
                                     </form>
                                 @else
                                     <form method="POST" action="{{ route('mi-cuenta.vacantes.cerrar', $vacante) }}">
                                         @csrf
-                                        <button type="submit" class="text-sm text-tenue hover:text-fuerte">Ya contraté</button>
+                                        <button type="submit" class="enlace-accion text-sm text-tenue hover:text-fuerte">Ya contraté</button>
                                     </form>
                                 @endif
                             </div>

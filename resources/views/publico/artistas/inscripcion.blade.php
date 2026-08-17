@@ -3,7 +3,7 @@
 
     <div class="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
 
-        <a href="{{ route('artistas.index') }}" class="text-sm text-acento hover:text-acento-fuerte">← Ver el directorio</a>
+        <a href="{{ route('artistas.index') }}" class="enlace-accion text-sm text-acento hover:text-acento-fuerte">← Ver el directorio</a>
 
         <h1 class="mt-4 font-display text-3xl font-bold tracking-tight">Inscríbete en la bolsa de artistas</h1>
         <p class="mt-2 text-sm text-tenue">

@@ -61,20 +61,20 @@
                     <address class="mt-4 space-y-3 text-sm not-italic text-suave">
                         <p>{{ ajuste('contacto_direccion') }}<br>{{ ajuste('contacto_ciudad') }}</p>
                         <p>
-                            <a href="mailto:{{ ajuste('contacto_correo') }}" class="text-acento hover:text-acento-fuerte">
+                            <a href="mailto:{{ ajuste('contacto_correo') }}" class="enlace-accion text-acento hover:text-acento-fuerte">
                                 {{ ajuste('contacto_correo') }}
                             </a>
                         </p>
                         @if ($whatsapp)
                             <p>
-                                <a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="text-acento hover:text-acento-fuerte">
+                                <a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="enlace-accion text-acento hover:text-acento-fuerte">
                                     WhatsApp {{ ajuste('contacto_whatsapp_visible') }}
                                 </a>
                             </p>
                         @endif
                         <p>
                             <a href="https://instagram.com/{{ ajuste('contacto_instagram') }}" target="_blank" rel="noopener"
-                               class="text-acento hover:text-acento-fuerte">
+                               class="enlace-accion text-acento hover:text-acento-fuerte">
                                 &#64;{{ ajuste('contacto_instagram') }}
                             </a>
                         </p>

@@ -26,10 +26,9 @@
             <x-publico.boton :href="route('directorio.index')">
                 {{ ajuste('hero_cta_directorio') }}
             </x-publico.boton>
-            <a href="{{ route('afiliate') }}"
-               class="rounded-xl border border-linea-fuerte px-6 py-3 text-center text-sm font-semibold text-tinta transition-colors hover:border-marca-500/50 hover:bg-superficie-alta">
+            <x-publico.boton variante="contorno" :href="route('afiliate')">
                 {{ ajuste('hero_cta_afiliate') }}
-            </a>
+            </x-publico.boton>
         </div>
     </x-publico.hero>
 
@@ -97,7 +96,7 @@
                     <h2 id="destacados" class="font-display text-2xl font-bold sm:text-3xl">La noche del Quindío</h2>
                     <p class="mt-2 text-sm text-tenue">Algunos de los establecimientos afiliados al gremio.</p>
                 </div>
-                <a href="{{ route('directorio.index') }}" class="text-sm font-medium text-acento hover:text-acento-fuerte">
+                <a href="{{ route('directorio.index') }}" class="enlace-accion text-sm font-medium text-acento hover:text-acento-fuerte">
                     Ver el directorio completo →
                 </a>
             </div>
@@ -137,7 +136,7 @@
         <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" aria-labelledby="eventos">
             <div class="flex flex-wrap items-end justify-between gap-4">
                 <h2 id="eventos" class="font-display text-2xl font-bold sm:text-3xl">Próximos eventos del gremio</h2>
-                <a href="{{ route('eventos.index') }}" class="text-sm font-medium text-acento hover:text-acento-fuerte">
+                <a href="{{ route('eventos.index') }}" class="enlace-accion text-sm font-medium text-acento hover:text-acento-fuerte">
                     Ver todos →
                 </a>
             </div>
@@ -195,7 +194,7 @@
                 </div>
                 <p class="mt-4 text-xs text-apagado">
                     El detalle de cada convenio es información privada de los afiliados.
-                    <a href="{{ route('mi-cuenta.index') }}" class="text-acento hover:text-acento-fuerte">Inicia sesión para verlo →</a>
+                    <a href="{{ route('mi-cuenta.index') }}" class="enlace-accion text-acento hover:text-acento-fuerte">Inicia sesión para verlo →</a>
                 </p>
             </div>
         </section>
@@ -214,7 +213,7 @@
                         <p class="mt-2 max-w-2xl text-sm text-tenue">{{ ajuste('iniciativas_intro') }}</p>
                     </div>
                     <a href="{{ route('quienes-somos') }}#iniciativas"
-                       class="text-sm font-medium text-acento hover:text-acento-fuerte">
+                       class="enlace-accion text-sm font-medium text-acento hover:text-acento-fuerte">
                         Ver el detalle →
                     </a>
                 </div>

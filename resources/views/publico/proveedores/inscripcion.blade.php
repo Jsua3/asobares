@@ -3,7 +3,7 @@
 
     <div class="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
 
-        <a href="{{ route('proveedores.index') }}" class="text-sm text-acento hover:text-acento-fuerte">← Ver la bolsa</a>
+        <a href="{{ route('proveedores.index') }}" class="enlace-accion text-sm text-acento hover:text-acento-fuerte">← Ver la bolsa</a>
 
         <h1 class="mt-4 font-display text-3xl font-bold tracking-tight">Inscríbete en la bolsa de proveedores</h1>
         <p class="mt-2 text-sm text-tenue">

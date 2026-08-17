@@ -22,7 +22,7 @@
             Autorizo a ASOBARES Capítulo Quindío a tratar mis datos personales para atender esta solicitud
             —incluida su entrega a terceros cuando el trámite lo requiera—, conforme a la
             <a href="{{ route('politica-de-datos') }}" target="_blank" rel="noopener"
-               class="text-acento underline underline-offset-2 hover:text-acento-fuerte">política de tratamiento de datos</a>.
+               class="enlace-accion text-acento underline underline-offset-2 hover:text-acento-fuerte">política de tratamiento de datos</a>.
             <span class="text-acento" aria-hidden="true">*</span>
         </label>
     </div>

@@ -8,8 +8,8 @@
     inglés dentro de un sitio íntegramente en español.
 --}}
 @php
-    $pastilla = 'inline-flex items-center px-4 py-2 text-sm font-medium transition-colors';
-    $enlace = "{$pastilla} bg-superficie text-tenue hover:bg-superficie-alta hover:text-fuerte";
+    $pastilla = 'inline-flex items-center px-4 py-2 text-sm font-medium';
+    $enlace = "{$pastilla} bg-superficie text-tenue transition-colors duration-(--duracion-boton) ease-color hover:bg-superficie-alta hover:text-fuerte";
     $inerte = "{$pastilla} bg-superficie text-apagado cursor-not-allowed";
     $actual = "{$pastilla} bg-marca-500 text-white";
 @endphp

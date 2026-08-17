@@ -17,10 +17,9 @@
         </header>
 
         <nav class="mt-6 flex flex-wrap gap-3">
-            <a href="{{ route('mi-cuenta.vacantes.index') }}"
-               class="rounded-xl border border-linea-fuerte px-5 py-2.5 text-sm font-semibold hover:border-marca-500/50">
+            <x-publico.boton variante="contorno" :href="route('mi-cuenta.vacantes.index')">
                 Mis vacantes
-            </a>
+            </x-publico.boton>
         </nav>
 
         @if (session('exito'))
@@ -162,7 +161,7 @@
 
                         @if ($aliado->url)
                             <a href="{{ $aliado->url }}" target="_blank" rel="noopener"
-                               class="mt-4 inline-block text-sm text-acento hover:text-acento-fuerte">
+                               class="enlace-accion mt-4 inline-block text-sm text-acento hover:text-acento-fuerte">
                                 Sitio del aliado ↗
                             </a>
                         @endif

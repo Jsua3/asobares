@@ -42,10 +42,9 @@
                     <form method="POST" action="{{ route('mi-cuenta.salir') }}">
                         @csrf
                         <input type="hidden" name="destino" value="entrar">
-                        <button type="submit"
-                                class="w-full rounded-xl border border-linea-fuerte px-6 py-3 text-sm font-semibold transition-colors hover:border-marca-500/50 sm:w-auto">
+                        <x-publico.boton variante="contorno" class="w-full sm:w-auto">
                             Cerrar sesión y entrar como afiliado
-                        </button>
+                        </x-publico.boton>
                     </form>
                 </div>
             @else
@@ -57,16 +56,15 @@
                     <x-publico.boton :href="route('mi-cuenta.entrar')">
                         Entrar con otra cuenta
                     </x-publico.boton>
-                    <a href="{{ route('contacto') }}"
-                       class="rounded-xl border border-linea-fuerte px-6 py-3 text-sm font-semibold transition-colors hover:border-marca-500/50">
+                    <x-publico.boton variante="contorno" :href="route('contacto')">
                         Escribirnos
-                    </a>
+                    </x-publico.boton>
                 </div>
             @endauth
 
             <p class="mt-8 text-xs text-apagado">
                 ¿Todavía no eres afiliado?
-                <a href="{{ route('afiliate') }}" class="text-acento hover:text-acento-fuerte">Conoce la afiliación</a>.
+                <a href="{{ route('afiliate') }}" class="enlace-accion text-acento hover:text-acento-fuerte">Conoce la afiliación</a>.
             </p>
         </div>
     </div>

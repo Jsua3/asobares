@@ -32,7 +32,7 @@
 
     <div class="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
 
-        <a href="{{ route('empleo.index') }}" class="text-sm text-acento hover:text-acento-fuerte">← Todas las vacantes</a>
+        <a href="{{ route('empleo.index') }}" class="enlace-accion text-sm text-acento hover:text-acento-fuerte">← Todas las vacantes</a>
 
         <header class="mt-4">
             <div class="flex flex-wrap items-center gap-2 text-xs">
@@ -53,7 +53,7 @@
                 en
                 @if ($vacante->asociado->estaPublicado())
                     <a href="{{ route('directorio.show', $vacante->asociado) }}"
-                       class="text-acento hover:text-acento-fuerte">{{ $vacante->asociado->nombre }}</a>
+                       class="enlace-accion text-acento hover:text-acento-fuerte">{{ $vacante->asociado->nombre }}</a>
                 @else
                     {{ $vacante->asociado->nombre }}
                 @endif
@@ -116,7 +116,7 @@
                 <p class="mt-6 text-xs text-apagado">
                     ¿Prefieres escribir?
                     <a href="{{ $enlace }}" target="_blank" rel="noopener nofollow"
-                       class="text-acento hover:text-acento-fuerte">Contactar por WhatsApp ↗</a>
+                       class="enlace-accion text-acento hover:text-acento-fuerte">Contactar por WhatsApp ↗</a>
                 </p>
             @endif
         </section>

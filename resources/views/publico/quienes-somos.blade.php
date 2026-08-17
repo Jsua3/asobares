@@ -221,10 +221,9 @@
                 Lo que no es local se gestiona directamente con la Nacional.
             </p>
             @if ($enlaceNacional = enlaceSeguro(ajuste('url_nacional')))
-                <a href="{{ $enlaceNacional }}" target="_blank" rel="noopener"
-                   class="mt-6 inline-block rounded-xl border border-linea-fuerte px-6 py-2.5 text-sm font-semibold transition-colors hover:border-marca-500/50">
+                <x-publico.boton variante="contorno" :href="$enlaceNacional" target="_blank" rel="noopener" class="mt-6">
                     Ir a Asobares Nacional ↗
-                </a>
+                </x-publico.boton>
             @endif
         </section>
     </div>

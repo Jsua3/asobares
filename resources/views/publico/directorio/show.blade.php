@@ -98,7 +98,7 @@
                                         @if ($vacante->franja_horaria) · {{ $vacante->franja_horaria }} @endif
                                     </p>
                                 </div>
-                                <a href="{{ route('empleo.index') }}" class="text-sm text-acento hover:text-acento-fuerte">
+                                <a href="{{ route('empleo.index') }}" class="enlace-accion text-sm text-acento hover:text-acento-fuerte">
                                     Ver en la bolsa →
                                 </a>
                             </li>

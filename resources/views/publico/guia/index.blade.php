@@ -26,7 +26,7 @@
             <p class="mt-3 text-xs text-apagado">
                 Estamos levantando la guía municipio por municipio con la información que cada entidad
                 entrega al gremio. Si falta el tuyo,
-                <a href="{{ route('contacto') }}" class="text-acento hover:text-acento-fuerte">escríbenos</a>.
+                <a href="{{ route('contacto') }}" class="enlace-accion text-acento hover:text-acento-fuerte">escríbenos</a>.
             </p>
         </section>
 
@@ -142,10 +142,9 @@
                     <x-publico.boton :href="route('contacto')">
                         Escríbenos
                     </x-publico.boton>
-                    <a href="{{ route('afiliate') }}"
-                       class="rounded-xl border border-linea-fuerte px-6 py-2.5 text-sm font-semibold hover:border-marca-500/50">
+                    <x-publico.boton variante="contorno" :href="route('afiliate')">
                         Conoce la afiliación
-                    </a>
+                    </x-publico.boton>
                 </div>
             </div>
         @else
