@@ -21,6 +21,15 @@
     --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
     --font-display: 'Poppins', ui-sans-serif, system-ui, sans-serif;
 
+    /* --- Movimiento ---
+       Van en @theme y no en :root porque `--ease-*` es namespace de Tailwind 4:
+       genera las utilidades `ease-*` y, al redefinir `--ease-out`, pisa la
+       nativa (cubic-bezier(0,0,0.2,1)) en todo el proyecto. */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-cajon: cubic-bezier(0.32, 0.72, 0, 1);
+    --ease-color: ease;
+
     /* --- Paleta principal --- */
     /* Pub Red #EE4137: dinamismo, accion y movimiento. Unico acento. */
     --color-marca-50: #fef3f2;
@@ -126,6 +135,26 @@
     --asb-sombra-tarjeta:
         0 1px 2px rgb(11 9 10 / 0.05),
         0 2px 6px rgb(11 9 10 / 0.04);
+
+    /*
+     * Duraciones. No hay namespace de Tailwind para duración, así que viven
+     * aquí y se alcanzan desde Blade con `duration-(--duracion-boton)`.
+     * Los nombres codifican la regla: la salida es más rápida que la entrada.
+     */
+    --duracion-instante: 100ms; /* :active */
+    --duracion-boton: 140ms; /* hover, color */
+    --duracion-salida: 160ms; /* leave de desplegables */
+    --duracion-entrada: 200ms; /* enter de desplegables, alertas */
+    --duracion-panel: 240ms; /* menú móvil */
+
+    /*
+     * Desplazamientos. Son tokens y no literales porque bajo
+     * `prefers-reduced-motion` se anulan estos y NO las duraciones: así el
+     * borde sigue fundiendo y lo único que desaparece es el movimiento.
+     */
+    --asb-levante: -2px;
+    --asb-desplazamiento-panel: -4%;
+    --asb-desplazamiento-alerta: -25%;
 }
 
 .dark {
