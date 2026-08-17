@@ -436,6 +436,52 @@ Añadir a `tests/Feature/MovimientoTest.php`:
 
 ```php
     /**
+     * Quita del CSS los bloques `@media (hover: hover) and (pointer: fine)`
+     * completos, contando llaves para respetar el anidamiento.
+     *
+     * Se hace así y no con una expresión regular porque lo que hay que probar
+     * no es que ambas cosas existan en el archivo —eso pasaría aunque
+     * estuvieran en extremos opuestos— sino que el `:hover` está DENTRO de la
+     * puerta. Lo que sobrevive a esta poda es exactamente lo que queda fuera.
+     */
+    private function sinBloquesDeHoverFino(string $css): string
+    {
+        $marca = '@media (hover: hover) and (pointer: fine)';
+
+        while (($inicio = strpos($css, $marca)) !== false) {
+            $llave = strpos($css, '{', $inicio);
+
+            if ($llave === false) {
+                break;
+            }
+
+            $nivel = 0;
+            $fin = null;
+
+            for ($i = $llave, $largo = strlen($css); $i < $largo; $i++) {
+                if ($css[$i] === '{') {
+                    $nivel++;
+                } elseif ($css[$i] === '}') {
+                    $nivel--;
+
+                    if ($nivel === 0) {
+                        $fin = $i;
+                        break;
+                    }
+                }
+            }
+
+            if ($fin === null) {
+                break;
+            }
+
+            $css = substr($css, 0, $inicio).substr($css, $fin + 1);
+        }
+
+        return $css;
+    }
+
+    /**
      * En táctil un `:hover` con `transform` se queda pegado tras el toque: la
      * tarjeta del directorio se quedaba elevada y con borde rojo, como si
      * estuviera seleccionada. La puerta va alrededor del bloque `:hover`, no
@@ -449,18 +495,14 @@ Añadir a `tests/Feature/MovimientoTest.php`:
         ];
 
         foreach ($hojas as $hoja) {
-            $contenido = File::get($hoja);
             $ruta = str_replace(base_path().DIRECTORY_SEPARATOR, '', $hoja);
+            $fuera = $this->sinBloquesDeHoverFino(File::get($hoja));
 
-            // Todo `:hover {` que declare transform debe ir precedido, en el
-            // mismo archivo, por la apertura de la media query de puntero fino.
-            if (preg_match('/:hover\s*\{[^}]*transform:/', $contenido) === 1) {
-                $this->assertStringContainsString(
-                    '@media (hover: hover) and (pointer: fine)',
-                    $contenido,
-                    "{$ruta} eleva en :hover sin puerta táctil."
-                );
-            }
+            $this->assertDoesNotMatchRegularExpression(
+                '/:hover\s*\{[^}]*transform:/',
+                $fuera,
+                "{$ruta} eleva en :hover fuera de la puerta táctil."
+            );
         }
     }
 
@@ -762,14 +804,13 @@ grep -rnE "\bease-in\b|\bduration-[0-9]+\b|transition-all|transition:\s*all" res
 
 Los resultados deben coincidir con los hallazgos del Step 2. Si aparece algún archivo que no salió en la prueba, el regex tiene un hueco: arreglarlo antes de seguir.
 
-- [ ] **Step 4: Commit de la guardia en rojo**
+- [ ] **Step 4: NO commitear todavía**
 
-La guardia se commitea aunque falle: documenta la deuda y las dos tareas siguientes la saldan.
+La guardia queda escrita y en rojo en el árbol de trabajo, **sin commitear**. Verla fallar es el valor de este paso —dice exactamente qué archivos hay que arreglar— pero un commit rojo deja el árbol en un estado que nadie que corra la suite entre esta tarea y la 7 sabría interpretar.
 
-```bash
-git add tests/Feature/MovimientoTest.php
-git commit -m "Anade la guardia que nombra el movimiento improvisado que queda"
-```
+Las Tasks 6 y 7 saldan las violaciones que acabas de listar, y **la Task 7 commitea la guardia en verde junto con su propio arreglo.**
+
+Dejar el archivo tal cual y pasar a la Task 6. No ejecutar `git add` ni `git commit` en esta tarea.
 
 ---
 
@@ -870,12 +911,22 @@ Un solo gesto de hover disparaba dos relojes: el borde y la elevación de la tar
 
 Esperado: **PASS en todas**, incluida `test_ninguna_vista_improvisa_movimiento`. Si sigue en rojo, la lista de hallazgos dice qué archivo falta: arreglarlo con el mismo criterio antes de continuar.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 3: Commit — la guardia entra aquí, en verde**
+
+Este commit lleva **tres** cosas: la guardia que la Task 5 escribió y dejó sin commitear, el arreglo de la Task 6 si tampoco se commiteó, y este. La guardia nunca entra al historial en rojo.
 
 ```bash
-git add resources/views/components/publico/tarjeta-asociado.blade.php
-git commit -m "Sincroniza el zoom de portada con la tarjeta que lo contiene"
+git add tests/Feature/MovimientoTest.php resources/views/components/publico/tarjeta-asociado.blade.php
+git commit -m "Sincroniza el zoom de portada y cierra la guardia de movimiento"
 ```
+
+Verificar que no queda nada suelto:
+
+```bash
+git status --short
+```
+
+Esperado: limpio.
 
 ---
 
