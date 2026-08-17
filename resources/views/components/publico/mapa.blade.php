@@ -25,7 +25,16 @@
      x-data
      x-init="
         const dibujar = () => {
-            const mapa = L.map($el, { scrollWheelZoom: false }).setView([{{ $lat }}, {{ $lng }}], {{ $zoom }});
+            // Leaflet anima teselas, zoom y marcadores con transiciones propias, que el
+            // barrido de CSS no alcanza. Aquí es donde el control existe de verdad.
+            const movimientoReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            const mapa = L.map($el, {
+                scrollWheelZoom: false,
+                fadeAnimation: ! movimientoReducido,
+                zoomAnimation: ! movimientoReducido,
+                markerZoomAnimation: ! movimientoReducido,
+            }).setView([{{ $lat }}, {{ $lng }}], {{ $zoom }});
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; colaboradores de OpenStreetMap',

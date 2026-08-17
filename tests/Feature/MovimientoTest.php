@@ -259,4 +259,19 @@ class MovimientoTest extends TestCase
 
         $this->assertSame([], $hallazgos, "Movimiento improvisado en vistas:\n".implode("\n", $hallazgos));
     }
+
+    /**
+     * Leaflet anima el fundido de teselas y el zoom por su cuenta, y el
+     * barrido de CSS no lo alcanza porque son transiciones, no keyframes.
+     * El control existe en su propia API: hay que consultarla allí.
+     */
+    public function test_el_mapa_consulta_la_preferencia_de_movimiento(): void
+    {
+        $mapa = File::get(resource_path('views/components/publico/mapa.blade.php'));
+
+        $this->assertStringContainsString("matchMedia('(prefers-reduced-motion: reduce)')", $mapa);
+        $this->assertStringContainsString('fadeAnimation', $mapa);
+        $this->assertStringContainsString('zoomAnimation', $mapa);
+        $this->assertStringContainsString('markerZoomAnimation', $mapa);
+    }
 }
