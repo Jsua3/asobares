@@ -220,7 +220,17 @@ Añadir a `tests/Feature/MovimientoTest.php`, dentro de la clase:
         $this->assertStringContainsString('animation-duration: 1ms !important', $app);
         $this->assertStringContainsString('animation-iteration-count: 1 !important', $app);
         $this->assertStringContainsString('scroll-behavior: auto !important', $app);
-        $this->assertStringNotContainsString('transition-duration: 0', $app);
+
+        /*
+         * Lo que se prohíbe es que el BARRIDO anule `transition`, no que nadie
+         * escriba nunca una duración de cero: `.pulsable:active` usa
+         * `transition-duration: 0ms` a propósito para que el botón baje sin
+         * retardo. Por eso se buscan las formas con `!important`, que son las
+         * que solo puede escribir un barrido.
+         */
+        $this->assertStringNotContainsString('transition-duration: .01ms', $app);
+        $this->assertStringNotContainsString('transition-duration: 0ms !important', $app);
+        $this->assertStringNotContainsString('transition: none !important', $app);
 
         // El scroll suave deja de ser incondicional.
         $this->assertStringContainsString('@media (prefers-reduced-motion: no-preference)', $app);
@@ -429,6 +439,20 @@ git commit -m "Borra la portada de fabrica que nadie renderizaba"
 **Interfaces:**
 - Consumes: `--duracion-instante`, `--duracion-boton`, `--ease-out`, `--ease-color`, `--asb-levante` de la Task 1.
 - Produces: las clases `.pulsable`, `.enlace-accion` y `.tarjeta-hover`, que consumen las Tasks 10, 11 y 12.
+
+**Arreglo obligatorio de una prueba de la Task 2, que esta tarea rompe.**
+
+`.pulsable:active` escribe `transition-duration: 0ms`, y la prueba `test_hay_red_de_seguridad_para_lo_que_no_usa_los_tokens` que la Task 2 ya commiteó afirma `assertStringNotContainsString('transition-duration: 0', $app)`. Las dos no pueden ser ciertas a la vez.
+
+La aserción de la Task 2 estaba mal escrita: su intención era prohibir que el **barrido** anule `transition`, no que nadie escriba nunca una duración de cero. Antes de escribir `.pulsable`, reemplaza esa línea en `tests/Feature/MovimientoTest.php` por:
+
+```php
+        $this->assertStringNotContainsString('transition-duration: .01ms', $app);
+        $this->assertStringNotContainsString('transition-duration: 0ms !important', $app);
+        $this->assertStringNotContainsString('transition: none !important', $app);
+```
+
+Conserva la intención original —las tres formas con `!important` son las únicas que puede escribir un barrido— y deja de colisionar con un portador legítimo. **Esta edición es parte de la Task 4 y entra en su commit.**
 
 - [ ] **Step 1: Escribir la prueba que falla**
 
