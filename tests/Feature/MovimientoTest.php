@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
@@ -273,5 +274,46 @@ class MovimientoTest extends TestCase
         $this->assertStringContainsString('fadeAnimation', $mapa);
         $this->assertStringContainsString('zoomAnimation', $mapa);
         $this->assertStringContainsString('markerZoomAnimation', $mapa);
+    }
+
+    /**
+     * La cadena de submit primario estaba repetida IDÉNTICA ocho veces, y de
+     * los 34 botones primarios 18 tenían `transition-colors` y 16 no: dos
+     * botones iguales en padding y color se comportaban distinto al pasar el
+     * ratón. Un componente es la única forma de que eso no vuelva a pasar.
+     */
+    public function test_el_boton_rinde_las_dos_variantes_con_acuse_de_pulsacion(): void
+    {
+        $primaria = Blade::render(
+            '<x-publico.boton>Enviar solicitud</x-publico.boton>'
+        );
+
+        $this->assertStringContainsString('Enviar solicitud', $primaria);
+        $this->assertStringContainsString('<button', $primaria);
+        $this->assertStringContainsString('type="submit"', $primaria);
+        $this->assertStringContainsString('bg-marca-500', $primaria);
+        $this->assertStringContainsString('pulsable', $primaria);
+        $this->assertStringContainsString('duration-(--duracion-boton)', $primaria);
+
+        $contorno = Blade::render(
+            '<x-publico.boton variante="contorno" href="/directorio">Ver el directorio</x-publico.boton>'
+        );
+
+        $this->assertStringContainsString('<a', $contorno);
+        $this->assertStringContainsString('href="/directorio"', $contorno);
+        $this->assertStringContainsString('border-linea-fuerte', $contorno);
+        $this->assertStringNotContainsString('bg-marca-500', $contorno);
+    }
+
+    /** Nueve botones de envío llevaban `w-full ... sm:w-auto`: debe pasar. */
+    public function test_el_boton_deja_pasar_las_clases_de_maquetacion(): void
+    {
+        $html = Blade::render(
+            '<x-publico.boton class="w-full sm:w-auto">Enviar</x-publico.boton>'
+        );
+
+        $this->assertStringContainsString('w-full', $html);
+        $this->assertStringContainsString('sm:w-auto', $html);
+        $this->assertStringContainsString('bg-marca-500', $html);
     }
 }
