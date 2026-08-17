@@ -891,8 +891,14 @@ npm run build
 playwright-cli goto http://localhost:8123/
 ```
 
+**No sirve forzar `style.display='block'` y leer el estilo computado.** Eso puentea el mecanismo de `x-transition` de Alpine —que aplica las clases solo durante la transición real— y devuelve `all` tanto antes como después del arreglo: verificaría nada. Hay que abrir el desplegable de verdad y leer durante la transición:
+
 ```bash
-playwright-cli eval "const d=document.getElementById('menu-configuracion'); d.style.display='block'; return getComputedStyle(d).transitionProperty" --raw
+playwright-cli click "Configuración del sitio"
+```
+
+```bash
+playwright-cli eval "await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))); return getComputedStyle(document.getElementById('menu-configuracion')).transitionProperty" --raw
 ```
 
 Esperado: `opacity, transform`. **No** debe aparecer `box-shadow` ni `backdrop-filter`.
