@@ -1405,6 +1405,15 @@ git commit -m "Pasa las 34 primarias al componente y les da el acuse que faltaba
 **Files:**
 - Modify: `errors/404.blade.php:22`, `mi-cuenta/sesion-equivocada.blade.php:46` y `:62`, `empleo/index.blade.php:10`, `quienes-somos.blade.php:224`, `guia/index.blade.php:147`, `mi-cuenta/index.blade.php:20`, `mi-cuenta/vacantes/index.blade.php:80`, `mi-cuenta/vacantes/show.blade.php:66`, `inicio.blade.php:30`
 
+**La trampa del `block` también aplica aquí.** El componente lleva `inline-block`, que en la hoja compilada gana siempre a `block` por orden de aparición. Estos dos son de variante contorno y quedaron fuera de la Task 11 precisamente por eso — al migrarlos, `block` se traduce a `w-full`, nunca se arrastra:
+
+| Archivo | Línea | Qué es |
+|---|---|---|
+| `publico/proveedores/index.blade.php` | 63 | Enlace de correo |
+| `publico/artistas/show.blade.php` | 66 | Enlace de Instagram |
+
+Y el prop se llama `tipo`, no `type`: el mismo grep de verificación de la Task 11 aplica antes de commitear.
+
 - [ ] **Step 1: Sustituir los nueve CTA secundarios**
 
 Todos comparten el núcleo `border border-linea-fuerte ... font-semibold ... hover:border-marca-500/50`. Reemplazar cada uno por:
