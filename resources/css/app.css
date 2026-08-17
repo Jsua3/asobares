@@ -62,13 +62,40 @@
 
     .tarjeta-hover {
         transition:
-            border-color 200ms ease,
-            transform 200ms ease;
+            border-color var(--duracion-boton) var(--ease-color),
+            transform var(--duracion-boton) var(--ease-out);
     }
 
-    .tarjeta-hover:hover {
-        border-color: rgb(238 65 55 / 0.45);
-        transform: translateY(-2px);
+    /* La puerta envuelve solo el `:hover`, nunca la `transition`: en táctil
+       el estado se quedaba pegado tras el toque. */
+    @media (hover: hover) and (pointer: fine) {
+        .tarjeta-hover:hover {
+            border-color: rgb(238 65 55 / 0.45);
+            transform: translateY(var(--asb-levante));
+        }
+    }
+
+    /*
+     * Acuse de pulsación. Sin puerta de puntero fino a propósito: en táctil
+     * el `:active` es el único acuse que existe, porque no hay hover.
+     * Bajar es instantáneo y subir tarda 100 ms — al revés se siente lento.
+     */
+    .pulsable {
+        transition: transform var(--duracion-instante) var(--ease-out);
+    }
+
+    .pulsable:active {
+        transform: scale(0.97);
+        transition-duration: 0ms;
+    }
+
+    /*
+     * Enlace de acción en prosa: los 26 «Ver detalle →» del sitio. No lleva
+     * padding a propósito — ninguno lo tenía, y dárselo ahora movería texto
+     * en 26 sitios. Solo unifica el fundido de color, que hoy está en 2 de 26.
+     */
+    .enlace-accion {
+        transition: color var(--duracion-boton) var(--ease-color);
     }
 
     /* Resplandor rojo discreto para heros */

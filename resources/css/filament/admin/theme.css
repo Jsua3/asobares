@@ -66,24 +66,24 @@
 
     .vidrio-hover {
         transition:
-            border-color 200ms ease,
-            transform 200ms ease;
+            border-color var(--duracion-boton) var(--ease-color),
+            transform var(--duracion-boton) var(--ease-out);
     }
 
-    .vidrio-hover:hover {
-        border-color: rgb(238 65 55 / 0.45);
-        transform: translateY(-2px);
+    @media (hover: hover) and (pointer: fine) {
+        .vidrio-hover:hover {
+            border-color: rgb(238 65 55 / 0.45);
+            transform: translateY(var(--asb-levante));
+        }
     }
 }
 
-/* Sin esto el movimiento es una barrera de accesibilidad, no un detalle. */
-@media (prefers-reduced-motion: reduce) {
-    .vidrio-hover,
-    .vidrio-hover:hover {
-        transition: none;
-        transform: none;
-    }
-}
+/*
+ * El parche por clase que vivía aquí se borró: `tokens.css` anula
+ * `--asb-levante` bajo `prefers-reduced-motion` y eso cubre esta clase, su
+ * gemela pública y todo lo que se escriba después. Aquel bloque ya había
+ * divergido de `.tarjeta-hover`, que corría sin guarda ninguna.
+ */
 
 /*
  * Informe imprimible del observatorio (ver `InformeDelObservatorio`): el

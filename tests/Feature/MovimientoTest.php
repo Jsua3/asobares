@@ -74,9 +74,114 @@ class MovimientoTest extends TestCase
         $this->assertStringContainsString('animation-duration: 1ms !important', $app);
         $this->assertStringContainsString('animation-iteration-count: 1 !important', $app);
         $this->assertStringContainsString('scroll-behavior: auto !important', $app);
-        $this->assertStringNotContainsString('transition-duration: 0', $app);
+        /*
+         * Lo que se prohíbe es que el BARRIDO anule `transition`, no que nadie
+         * escriba nunca una duración de cero: `.pulsable:active` usa
+         * `transition-duration: 0ms` a propósito para que el botón baje sin
+         * retardo. Por eso se buscan las formas con `!important`, que son las
+         * que solo puede escribir un barrido.
+         */
+        $this->assertStringNotContainsString('transition-duration: .01ms', $app);
+        $this->assertStringNotContainsString('transition-duration: 0ms !important', $app);
+        $this->assertStringNotContainsString('transition: none !important', $app);
 
         // El scroll suave deja de ser incondicional.
         $this->assertStringContainsString('@media (prefers-reduced-motion: no-preference)', $app);
+    }
+
+    /**
+     * Quita del CSS los bloques `@media (hover: hover) and (pointer: fine)`
+     * completos, contando llaves para respetar el anidamiento.
+     *
+     * Se hace así y no con una expresión regular porque lo que hay que probar
+     * no es que ambas cosas existan en el archivo —eso pasaría aunque
+     * estuvieran en extremos opuestos— sino que el `:hover` está DENTRO de la
+     * puerta. Lo que sobrevive a esta poda es exactamente lo que queda fuera.
+     */
+    private function sinBloquesDeHoverFino(string $css): string
+    {
+        $marca = '@media (hover: hover) and (pointer: fine)';
+
+        while (($inicio = strpos($css, $marca)) !== false) {
+            $llave = strpos($css, '{', $inicio);
+
+            if ($llave === false) {
+                break;
+            }
+
+            $nivel = 0;
+            $fin = null;
+
+            for ($i = $llave, $largo = strlen($css); $i < $largo; $i++) {
+                if ($css[$i] === '{') {
+                    $nivel++;
+                } elseif ($css[$i] === '}') {
+                    $nivel--;
+
+                    if ($nivel === 0) {
+                        $fin = $i;
+                        break;
+                    }
+                }
+            }
+
+            if ($fin === null) {
+                break;
+            }
+
+            $css = substr($css, 0, $inicio).substr($css, $fin + 1);
+        }
+
+        return $css;
+    }
+
+    /**
+     * En táctil un `:hover` con `transform` se queda pegado tras el toque: la
+     * tarjeta del directorio se quedaba elevada y con borde rojo, como si
+     * estuviera seleccionada. La puerta va alrededor del bloque `:hover`, no
+     * de la declaración `transition`.
+     */
+    public function test_todo_hover_con_transform_tiene_puerta_tactil(): void
+    {
+        $hojas = [
+            resource_path('css/app.css'),
+            resource_path('css/filament/admin/theme.css'),
+        ];
+
+        foreach ($hojas as $hoja) {
+            $ruta = str_replace(base_path().DIRECTORY_SEPARATOR, '', $hoja);
+            $fuera = $this->sinBloquesDeHoverFino(File::get($hoja));
+
+            $this->assertDoesNotMatchRegularExpression(
+                '/:hover\s*\{[^}]*transform:/',
+                $fuera,
+                "{$ruta} eleva en :hover fuera de la puerta táctil."
+            );
+        }
+    }
+
+    /** Cero `:active` en todo el repositorio era la mayor pérdida por línea. */
+    public function test_existe_el_portador_del_acuse_de_pulsacion(): void
+    {
+        $app = File::get(resource_path('css/app.css'));
+
+        $this->assertStringContainsString('.pulsable:active', $app);
+        $this->assertStringContainsString('transform: scale(0.97)', $app);
+
+        // Bajar instantáneo, subir en 100 ms: el retardo al presionar se nota.
+        $this->assertStringContainsString('transition-duration: 0ms', $app);
+    }
+
+    /** El `translateY(-2px)` y el `200ms ease` estaban duplicados literales. */
+    public function test_los_portadores_no_repiten_valores_de_movimiento(): void
+    {
+        $app = File::get(resource_path('css/app.css'));
+        $tema = File::get(resource_path('css/filament/admin/theme.css'));
+
+        foreach (['app.css' => $app, 'theme.css' => $tema] as $nombre => $contenido) {
+            $this->assertStringNotContainsString('translateY(-2px)', $contenido, "{$nombre} cablea el levante.");
+            $this->assertStringNotContainsString('200ms ease', $contenido, "{$nombre} cablea la duración.");
+            $this->assertStringContainsString('var(--asb-levante)', $contenido);
+        }
     }
 }
