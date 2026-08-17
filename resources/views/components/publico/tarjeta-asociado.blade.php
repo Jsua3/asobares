@@ -7,7 +7,7 @@
                 <img src="{{ Storage::disk('public')->url($asociado->foto_portada) }}"
                      alt="Portada de {{ $asociado->nombre }}"
                      loading="lazy" decoding="async" width="400" height="300"
-                     class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
+                     class="h-full w-full object-cover transition-transform duration-(--duracion-boton) ease-out group-hover:scale-105">
             @endif
 
             @if ($asociado->destacado)

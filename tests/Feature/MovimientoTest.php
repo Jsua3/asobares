@@ -184,4 +184,76 @@ class MovimientoTest extends TestCase
             $this->assertStringContainsString('var(--asb-levante)', $contenido);
         }
     }
+
+    /**
+     * Patrones que ninguna vista debe contener, con su motivo.
+     *
+     * Es `public static` y no `private` siguiendo el patrón de guardia
+     * compartida del repositorio: `TemaClaroOscuroTest::clasesProhibidas()`
+     * la reutiliza `ComponentesDelPanelTest`. Si mañana el panel quiere la
+     * misma vigilancia, la importa en vez de copiarla.
+     *
+     * @return array<string, string> patrón => por qué
+     */
+    public static function patronesProhibidos(): array
+    {
+        return [
+            '/\bease-in\b(?!-out)/' => 'ease-in arranca lento justo cuando más se mira; en interfaz nunca',
+            '/\btransition-all\b/' => 'transition: all arrastra propiedades caras que nadie quiso animar',
+            '/transition:\s*all\b/' => 'transition: all arrastra propiedades caras que nadie quiso animar',
+            '/\bduration-\d+\b/' => 'la duración se toma de los tokens: duration-(--duracion-*)',
+
+            /*
+             * En Tailwind 4 el corchete NO envuelve la variable en var(): esto
+             * compila a `transition-duration: --duracion-boton`, que el
+             * navegador descarta en silencio y deja la animación en el default
+             * de 150 ms. Nada falla a la vista, y por eso hace falta vigilarlo.
+             */
+            '/(?:duration|translate-[xy]|delay)-\[--/' => 'usa el paréntesis: duration-(--var), no el corchete, o el valor no se envuelve en var()',
+        ];
+    }
+
+    /**
+     * La dispersión no fue descuido de nadie: fue que 39 archivos decidían por
+     * su cuenta. Esta prueba es la que hace que el sistema sobreviva a la
+     * siguiente persona que edite una vista con prisa.
+     */
+    public function test_ninguna_vista_improvisa_movimiento(): void
+    {
+        $directorios = array_filter([
+            resource_path('views/publico'),
+            resource_path('views/components/publico'),
+            resource_path('views/components/panel'),
+            resource_path('views/filament'),
+            resource_path('views/errors'),
+        ], File::isDirectory(...));
+
+        $this->assertNotEmpty($directorios, 'No hay vistas que vigilar.');
+
+        $hallazgos = [];
+
+        foreach ($directorios as $directorio) {
+            foreach (File::allFiles($directorio) as $archivo) {
+                if ($archivo->getExtension() !== 'php') {
+                    continue;
+                }
+
+                $contenido = $archivo->getContents();
+                $ruta = str_replace(base_path().DIRECTORY_SEPARATOR, '', $archivo->getPathname());
+
+                foreach (self::patronesProhibidos() as $patron => $motivo) {
+                    if (preg_match_all($patron, $contenido, $coincidencias) > 0) {
+                        $hallazgos[] = sprintf(
+                            '%s → %s (%s)',
+                            $ruta,
+                            implode(', ', array_unique($coincidencias[0])),
+                            $motivo
+                        );
+                    }
+                }
+            }
+        }
+
+        $this->assertSame([], $hallazgos, "Movimiento improvisado en vistas:\n".implode("\n", $hallazgos));
+    }
 }
