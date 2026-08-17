@@ -223,9 +223,12 @@ class MovimientoTest extends TestCase
         $directorios = array_filter([
             resource_path('views/publico'),
             resource_path('views/components/publico'),
+            resource_path('views/components/layouts'),
             resource_path('views/components/panel'),
             resource_path('views/filament'),
             resource_path('views/errors'),
+            // Las vistas publicadas de paquetes también pintan en el sitio.
+            resource_path('views/vendor'),
         ], File::isDirectory(...));
 
         $this->assertNotEmpty($directorios, 'No hay vistas que vigilar.');
