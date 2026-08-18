@@ -137,6 +137,33 @@
         0 2px 6px rgb(11 9 10 / 0.04);
 
     /*
+     * Materiales. Son DOS recetas y no una opacidad compartida, igual que el
+     * vidrio esmerilado del panel: sobre Ambient White un material se percibe
+     * por la SOMBRA que proyecta, y sobre Pub Black no hay sombra que ver, asi
+     * que el canto se dibuja con un filo de LUZ. Escribir una sola receta para
+     * los dos temas es lo que dejaba la barra plana en claro y sin peso en
+     * oscuro.
+     *
+     * El velo se deriva de `--asb-fondo` con color-mix y no se cablea: clonar
+     * el hexadecimal deja dos valores que divergen en cuanto alguien retoque
+     * la paleta, que es justo lo que este archivo existe para impedir.
+     */
+    --asb-cromo-velo: color-mix(in oklab, var(--asb-fondo) 72%, transparent);
+    --asb-cromo-desenfoque: blur(20px) saturate(180%);
+    /* Solo se pinta con la pagina desplazada: separar de lo que no solapa
+       nada es una raya gratis cruzando la pantalla. */
+    --asb-cromo-apoyo:
+        0 1px 0 rgb(11 9 10 / 0.07),
+        0 8px 24px rgb(11 9 10 / 0.06);
+
+    /* Hojas flotantes: los desplegables. Superficie mas cercana al ojo que el
+       cromo, asi que sombra mas profunda. */
+    --asb-hoja-borde: rgb(11 9 10 / 0.08);
+    --asb-hoja-sombra:
+        0 1px 2px rgb(11 9 10 / 0.06),
+        0 12px 32px rgb(11 9 10 / 0.12);
+
+    /*
      * Duraciones. No hay namespace de Tailwind para duración, así que viven
      * aquí y se alcanzan desde Blade con `duration-(--duracion-boton)`.
      * Los nombres codifican la regla: la salida es más rápida que la entrada.
@@ -203,7 +230,66 @@
 
     --asb-resplandor: 0.16;
     --asb-trama: 0.28;
-    --asb-sombra-tarjeta: none;
+
+    /*
+     * En oscuro esto valia `none`, y por eso las cuarenta y pico tarjetas del
+     * sitio se leian como rectangulos dibujados con una raya finisima:
+     * superficie #121011 contra fondo #0b090a se diferencian en 1,1:1, o sea
+     * nada. La receta de luz las convierte en objetos.
+     *
+     * El `inset 0 1px 0` es el filo superior brillante: la luz que engancha el
+     * canto que mira hacia arriba. La sombra ambiental sobre negro casi puro
+     * no se lee como sombra sino como caida, que es lo que hace falta.
+     */
+    --asb-sombra-tarjeta:
+        inset 0 1px 0 rgb(255 255 255 / 0.055),
+        0 12px 28px rgb(0 0 0 / 0.45);
+
+    --asb-cromo-velo: color-mix(in oklab, var(--asb-fondo) 62%, transparent);
+    --asb-cromo-apoyo:
+        0 1px 0 rgb(255 255 255 / 0.1),
+        0 8px 28px rgb(0 0 0 / 0.55);
+
+    --asb-hoja-borde: rgb(255 255 255 / 0.1);
+    --asb-hoja-sombra:
+        inset 0 1px 0 rgb(255 255 255 / 0.07),
+        0 16px 40px rgb(0 0 0 / 0.55);
+}
+
+/*
+ * Las otras dos senales de accesibilidad que Apple trata al mismo nivel que
+ * `prefers-reduced-motion`, y que este sitio no atendia.
+ *
+ * Van despues de `.dark` y con `:root.dark` para ganar por especificidad y no
+ * solo por orden: hay que pisar los valores de LOS DOS temas.
+ */
+@media (prefers-reduced-transparency: reduce) {
+    :root,
+    :root.dark {
+        /* El material se vuelve solido: sube el velo a opaco y muere el
+           desenfoque. Lo que se pierde es la profundidad, no la jerarquia:
+           la sombra de apoyo sigue separando el cromo del contenido. */
+        --asb-cromo-velo: var(--asb-fondo);
+        --asb-cromo-desenfoque: none;
+    }
+}
+
+@media (prefers-contrast: more) {
+    :root {
+        --asb-linea: rgb(11 9 10 / 0.38);
+        --asb-linea-fuerte: rgb(11 9 10 / 0.55);
+        --asb-tenue: #1b191a;
+        --asb-apagado: #282628;
+        --asb-hoja-borde: rgb(11 9 10 / 0.42);
+    }
+
+    :root.dark {
+        --asb-linea: rgb(255 255 255 / 0.34);
+        --asb-linea-fuerte: rgb(255 255 255 / 0.5);
+        --asb-tenue: #e8e5e6;
+        --asb-apagado: #d0cccd;
+        --asb-hoja-borde: rgb(255 255 255 / 0.38);
+    }
 }
 
 /* `inline` es obligatorio aqui: hace que las utilidades emitan la variable

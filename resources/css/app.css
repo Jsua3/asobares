@@ -165,6 +165,41 @@
         }
     }
 
+    /*
+     * Cromo translúcido: la barra deja de ser una banda opaca con una raya y
+     * pasa a ser una capa por debajo de la cual corre el contenido.
+     *
+     * La separación es CONDICIONAL. Un borde de 1px encendido siempre cruza la
+     * pantalla incluso con la página sin desplazar, cuando no hay nada que
+     * separar; y cuando sí hay contenido pasando por debajo, esa misma raya es
+     * toda la separación que existe. Con `.cromo-apoyado` la sombra aparece al
+     * desplazar y se va al volver arriba, que es lo que hace que la barra se
+     * lea como algo que flota sobre el contenido y no como parte del papel.
+     */
+    .cromo {
+        background-color: var(--asb-cromo-velo);
+        -webkit-backdrop-filter: var(--asb-cromo-desenfoque);
+        backdrop-filter: var(--asb-cromo-desenfoque);
+        box-shadow: none;
+        transition: box-shadow var(--duracion-entrada) var(--ease-color);
+    }
+
+    .cromo-apoyado {
+        box-shadow: var(--asb-cromo-apoyo);
+    }
+
+    /*
+     * Hoja flotante: los paneles de los desplegables. Sombra más profunda que
+     * el cromo porque están más cerca del ojo, y con sus dos recetas — en
+     * oscuro la profundidad la da el filo de luz del `inset`, no la sombra,
+     * que sobre negro no se ve.
+     */
+    .hoja-flotante {
+        background-color: var(--asb-superficie);
+        border: 1px solid var(--asb-hoja-borde);
+        box-shadow: var(--asb-hoja-sombra);
+    }
+
     /* Resplandor rojo discreto para heros */
     .resplandor-marca {
         background-image: radial-gradient(

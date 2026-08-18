@@ -19,11 +19,18 @@
 {{-- Las tres salidas van en el <header> y no en el panel: el botón que
      alterna vive dentro del header, y si `click.outside` estuviera en el
      panel el clic del botón lo cerraría y lo abriría en el mismo gesto. --}}
-<header x-data="{ menuMovil: false }"
+{{-- `desplazado` gobierna la separación con el contenido: la barra solo se
+     apoya —sombra en claro, filo de luz en oscuro— cuando hay algo pasando por
+     debajo. El umbral de 8 px evita que el rebote elástico del scroll en iOS
+     la encienda y apague sola en el tope. --}}
+<header x-data="{ menuMovil: false, desplazado: false }"
+        x-init="desplazado = window.scrollY > 8"
+        x-on:scroll.window.passive="desplazado = window.scrollY > 8"
         x-on:keydown.escape.window="menuMovil = false"
         x-on:click.outside="menuMovil = false"
         x-on:resize.window="if (window.innerWidth >= 1024) menuMovil = false"
-        class="sticky top-0 z-40 border-b border-linea bg-fondo/85 backdrop-blur-md">
+        x-bind:class="(desplazado || menuMovil) ? 'cromo-apoyado' : ''"
+        class="cromo sticky top-0 z-40">
     <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8"
          aria-label="Navegación principal">
 

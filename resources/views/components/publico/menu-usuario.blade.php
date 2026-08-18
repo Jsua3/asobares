@@ -83,7 +83,12 @@
          x-transition:leave="transicion-desplegable ease-out duration-(--duracion-salida)"
          x-transition:leave-start="opacity-100 scale-100"
          x-transition:leave-end="opacity-0 scale-95"
-         class="absolute right-0 z-50 mt-2 w-64 origin-top-right rounded-2xl border border-linea bg-superficie p-2 shadow-xl shadow-black/20">
+         {{-- `hoja-flotante` en vez de `shadow-xl shadow-black/20`: aquella
+              sombra era negro cableado, o sea la receta CLARA aplicada a los
+              dos temas, y sobre Pub Black una sombra negra no se ve. El
+              portador trae las dos recetas — sombra en claro, filo de luz en
+              oscuro— desde los tokens. --}}
+         class="hoja-flotante absolute right-0 z-50 mt-2 w-64 origin-top-right rounded-2xl p-2">
 
         @if ($usuario)
             <div class="border-b border-linea px-3 pb-3 pt-2">
