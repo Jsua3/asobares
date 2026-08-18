@@ -66,7 +66,7 @@
                         con checklist, costos y los formatos oficiales listos para descargar.
                     </p>
                 </div>
-                <span class="mt-6 text-sm font-medium text-acento group-hover:text-acento-fuerte">Ver la guía →</span>
+                <span class="enlace-accion mt-6 text-sm font-medium text-acento group-hover:text-acento-fuerte">Ver la guía →</span>
             </a>
 
             <a href="{{ route('empleo.index') }}"
@@ -83,7 +83,7 @@
                         Publican solo los establecimientos asociados.
                     </p>
                 </div>
-                <span class="mt-6 text-sm font-medium text-acento group-hover:text-acento-fuerte">Ver vacantes →</span>
+                <span class="enlace-accion mt-6 text-sm font-medium text-acento group-hover:text-acento-fuerte">Ver vacantes →</span>
             </a>
         </div>
     </section>
