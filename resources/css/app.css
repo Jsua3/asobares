@@ -98,6 +98,28 @@
         transition: color var(--duracion-boton) var(--ease-color);
     }
 
+    /*
+     * Entrada de la alerta. `@starting-style` y no `@keyframes`: la mordaza
+     * del cambio de tema apaga `transition` y no `animation`, así que por
+     * esta vía la cobertura sale gratis.
+     *
+     * Porcentaje y no píxeles: la alerta cambia de alto según el mensaje.
+     * Y sin retardo: `role=status`/`role=alert` son regiones vivas, y el
+     * anuncio del lector de pantalla no puede esperar a una animación.
+     */
+    .alerta-animada {
+        transition:
+            opacity var(--duracion-entrada) var(--ease-out),
+            transform var(--duracion-entrada) var(--ease-out);
+    }
+
+    @starting-style {
+        .alerta-animada {
+            opacity: 0;
+            transform: translateY(var(--asb-desplazamiento-alerta));
+        }
+    }
+
     /* Resplandor rojo discreto para heros */
     .resplandor-marca {
         background-image: radial-gradient(

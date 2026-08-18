@@ -342,4 +342,36 @@ class MovimientoTest extends TestCase
         $this->assertStringNotContainsString('type="submit"', $conAtributoNativo);
         $this->assertSame(1, substr_count($conAtributoNativo, 'type='));
     }
+
+    /**
+     * La alerta es el único acuse de recibo del sitio tras enviar un
+     * formulario, y aparecía de golpe. Entra por `transition` +
+     * `@starting-style` y no por keyframes: así la cubre la mordaza del
+     * cambio de tema, que apaga `transition` pero no `animation`.
+     *
+     * Y de paso: `role="status"` es una región educada, correcta para un
+     * acuse pero no para un fallo. Un error necesita `role="alert"`.
+     */
+    public function test_la_alerta_entra_y_anuncia_el_error_como_error(): void
+    {
+        $exito = Blade::render(
+            '<x-publico.alerta>Tu solicitud llegó.</x-publico.alerta>'
+        );
+
+        $this->assertStringContainsString('role="status"', $exito);
+        $this->assertStringContainsString('alerta-animada', $exito);
+
+        $error = Blade::render(
+            '<x-publico.alerta tipo="error">No pudimos abrir la pasarela.</x-publico.alerta>'
+        );
+
+        $this->assertStringContainsString('role="alert"', $error);
+
+        // El descargo estático de la guía no es un acuse: no debe animarse.
+        $estatica = Blade::render(
+            '<x-publico.alerta tipo="aviso" :animado="false">Texto fijo.</x-publico.alerta>'
+        );
+
+        $this->assertStringNotContainsString('alerta-animada', $estatica);
+    }
 }

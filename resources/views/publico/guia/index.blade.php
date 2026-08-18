@@ -126,8 +126,8 @@
                 @endforeach
             </div>
 
-            {{-- Descargo --}}
-            <x-publico.alerta tipo="aviso" class="mt-10">
+            {{-- Descargo: texto fijo de la página, no un acuse de nada. --}}
+            <x-publico.alerta tipo="aviso" :animado="false" class="mt-10">
                 {{ ajuste('guia_descargo') }}
             </x-publico.alerta>
 
