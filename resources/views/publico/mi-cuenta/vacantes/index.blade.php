@@ -21,9 +21,7 @@
         @endif
 
         @if (session('error'))
-            <div class="mt-8 rounded-xl border border-marca-500/40 bg-marca-panel p-5 text-sm text-tinta">
-                {{ session('error') }}
-            </div>
+            <x-publico.alerta tipo="error" class="mt-8">{{ session('error') }}</x-publico.alerta>
         @endif
 
         @if ($vacantes->isEmpty())

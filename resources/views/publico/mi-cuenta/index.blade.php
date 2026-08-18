@@ -26,6 +26,10 @@
             <x-publico.alerta class="mt-8">{{ session('exito') }}</x-publico.alerta>
         @endif
 
+        @if (session('error'))
+            <x-publico.alerta tipo="error" class="mt-8">{{ session('error') }}</x-publico.alerta>
+        @endif
+
         {{-- Estado de cartera --}}
         <section class="mt-10" aria-labelledby="cartera">
             <h2 id="cartera" class="font-display text-xl font-bold">Estado de cuenta</h2>

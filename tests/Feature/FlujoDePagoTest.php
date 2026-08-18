@@ -543,6 +543,29 @@ class FlujoDePagoTest extends TestCase
         $this->assertSame(EstadoTransaccion::Pendiente, $transaccion->fresh()->estado);
     }
 
+    /**
+     * `pagarMensualidad` redirige con `->with('error', ...)` cuando la
+     * pasarela cae, pero la vista solo pintaba `session('exito')`: el único
+     * mensaje de fallo de pago del sistema se descartaba en silencio y la
+     * persona volvía a pulsar sin saber qué había pasado.
+     */
+    public function test_la_cuenta_pinta_el_error_de_pasarela_caida(): void
+    {
+        $this->seed(RolYPermisoSeeder::class);
+
+        $asociado = Asociado::factory()->publicado()->create();
+        $duenio = User::factory()->create(['asociado_id' => $asociado->id]);
+        $duenio->syncRoles([User::ROL_ASOCIADO]);
+
+        $respuesta = $this->actingAs($duenio->fresh())
+            ->withSession(['error' => 'No pudimos abrir la pasarela de pago en este momento.'])
+            ->get(route('mi-cuenta.index'));
+
+        $respuesta->assertOk();
+        $respuesta->assertSee('No pudimos abrir la pasarela de pago en este momento.');
+        $respuesta->assertSee('role="alert"', false);
+    }
+
     public function test_pagar_dos_veces_seguidas_no_abre_dos_cobros(): void
     {
         $this->seed(RolYPermisoSeeder::class);
