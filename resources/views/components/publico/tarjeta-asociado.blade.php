@@ -8,7 +8,7 @@
                      alt="Portada de {{ $asociado->nombre }}"
                      loading="lazy" decoding="async" width="400" height="300"
                      style="view-transition-name: portada-{{ $asociado->id }}"
-                     class="h-full w-full object-cover transition-transform duration-(--duracion-boton) ease-out group-hover:scale-105">
+                     class="h-full w-full object-cover transition-transform duration-(--duracion-boton) ease-out motion-safe:group-hover:scale-105">
             @endif
 
             @if ($asociado->destacado)
@@ -33,7 +33,7 @@
 
         <div class="mt-4 flex items-center justify-between gap-3">
             <a href="{{ route('directorio.show', $asociado) }}"
-               class="enlace-accion text-sm font-medium text-acento transition-colors hover:text-acento-fuerte">
+               class="enlace-accion text-sm font-medium text-acento hover:text-acento-fuerte">
                 Ver ficha
             </a>
 
