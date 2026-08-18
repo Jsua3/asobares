@@ -171,3 +171,34 @@
         scroll-behavior: auto !important;
     }
 }
+
+/*
+ * Transiciones de vista entre documentos.
+ *
+ * Este sitio recarga la página entera en cada navegación: filtrar, paginar y
+ * abrir un detalle no tienen estado de cliente que animar. Esto es la única
+ * palanca de movimiento real que queda, y degrada a nada donde no haya
+ * soporte, así que el riesgo de regresión es cero.
+ */
+@view-transition {
+    navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 180ms;
+    animation-timing-function: var(--ease-out);
+}
+
+/*
+ * Guarda propia, y no es redundante: los pseudoelementos de view transition
+ * viven en un árbol aparte que `*, *::before, *::after` NO alcanza. Sin este
+ * bloque, quien pidió menos movimiento seguiría viendo el fundido.
+ */
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation: none !important;
+    }
+}

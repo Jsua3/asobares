@@ -401,4 +401,28 @@ class MovimientoTest extends TestCase
             'La pasarela debe deshabilitar los dos botones: viven en el mismo formulario.'
         );
     }
+
+    /**
+     * En un sitio de recarga completa, filtrar, paginar y abrir un detalle son
+     * SIEMPRE navegación: no hay estado de cliente que animar. Las view
+     * transitions son la única palanca real, y degradan a nada donde no haya
+     * soporte.
+     *
+     * Viven en un árbol de pseudoelementos aparte, así que el barrido de
+     * `*, *::before, *::after` NO las alcanza: necesitan su propia regla de
+     * movimiento reducido o quedarían sin guarda.
+     */
+    public function test_las_transiciones_de_vista_tienen_su_propia_guarda(): void
+    {
+        $app = File::get(resource_path('css/app.css'));
+
+        $this->assertStringContainsString('@view-transition', $app);
+        $this->assertStringContainsString('navigation: auto', $app);
+        $this->assertStringContainsString('::view-transition-old(root)', $app);
+        $this->assertStringContainsString('animation-timing-function: var(--ease-out)', $app);
+
+        // La guarda propia: el barrido con `*` no llega a estos pseudoelementos.
+        $this->assertStringContainsString('::view-transition-group(*)', $app);
+        $this->assertStringContainsString('animation: none !important', $app);
+    }
 }

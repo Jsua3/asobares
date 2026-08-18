@@ -52,6 +52,7 @@
                     <img src="{{ Storage::disk('public')->url($asociado->foto_portada) }}"
                          alt="Portada de {{ $asociado->nombre }}"
                          width="800" height="600" decoding="async"
+                         style="view-transition-name: portada-{{ $asociado->id }}"
                          class="aspect-[4/3] w-full rounded-2xl border border-linea object-cover">
                 @endif
 
