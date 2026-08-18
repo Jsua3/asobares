@@ -75,9 +75,14 @@
                             </div>
                         </div>
 
-                        <form method="POST" action="{{ route('mi-cuenta.pagar') }}" class="shrink-0">
+                        <form method="POST" action="{{ route('mi-cuenta.pagar') }}" class="shrink-0"
+                              x-data="{ enviando: false }" x-on:submit="enviando = true">
                             @csrf
-                            <x-publico.boton>
+                            <x-publico.boton
+                                x-bind:disabled="enviando"
+                                x-bind:class="enviando && 'opacity-55'"
+                                x-text="enviando ? 'Abriendo la pasarela…' : 'Pagar ahora'"
+                            >
                                 Pagar ahora
                             </x-publico.boton>
                             <p class="mt-2 text-center text-[.65rem] text-apagado">PSE o tarjeta</p>

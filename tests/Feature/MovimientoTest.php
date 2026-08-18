@@ -374,4 +374,31 @@ class MovimientoTest extends TestCase
 
         $this->assertStringNotContainsString('alerta-animada', $estatica);
     }
+
+    /**
+     * El servidor ya se protege del doble cobro con la idempotencia de 24 h de
+     * `MiCuentaController::cobroVigente`. Lo que faltaba era que la interfaz lo
+     * contara: se pulsaba «Pagar ahora», no pasaba nada visible, y se volvía a
+     * pulsar. En la pasarela hay que deshabilitar LOS DOS botones, no solo el
+     * pulsado: viven en el mismo formulario.
+     */
+    public function test_los_botones_que_cobran_acusan_el_envio(): void
+    {
+        $cuenta = File::get(resource_path('views/publico/mi-cuenta/index.blade.php'));
+
+        $this->assertStringContainsString('x-data="{ enviando: false }"', $cuenta);
+        $this->assertStringContainsString('x-on:submit="enviando = true"', $cuenta);
+        $this->assertStringContainsString('x-bind:disabled="enviando"', $cuenta);
+
+        $pasarela = File::get(resource_path('views/publico/pago/simulado.blade.php'));
+
+        $this->assertStringContainsString('enviando', $pasarela);
+
+        // Los dos botones, no solo el pulsado.
+        $this->assertSame(
+            2,
+            substr_count($pasarela, 'x-bind:disabled="enviando"'),
+            'La pasarela debe deshabilitar los dos botones: viven en el mismo formulario.'
+        );
+    }
 }

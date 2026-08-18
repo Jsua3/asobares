@@ -48,7 +48,7 @@
                     </div>
 
                     <form method="POST" action="{{ route('pago.simulado.resolver', $transaccion) }}" class="mt-7"
-                          x-data="{ metodo: 'pse' }">
+                          x-data="{ metodo: 'pse', enviando: false }" x-on:submit="enviando = true">
                         @csrf
 
                         <fieldset>
@@ -74,10 +74,15 @@
                         </p>
 
                         <div class="mt-7 space-y-3">
-                            <x-publico.boton name="decision" value="aprobar" class="w-full">
+                            <x-publico.boton name="decision" value="aprobar" class="w-full"
+                                x-bind:disabled="enviando"
+                                x-bind:class="enviando && 'opacity-55'"
+                            >
                                 Pagar {{ pesos($transaccion->monto) }}
                             </x-publico.boton>
                             <button type="submit" name="decision" value="rechazar"
+                                    x-bind:disabled="enviando"
+                                    x-bind:class="enviando && 'opacity-55'"
                                     class="w-full rounded-xl border border-linea px-6 py-3 text-sm text-tenue transition-colors hover:border-marca-500/40 hover:text-fuerte">
                                 Simular pago rechazado
                             </button>
