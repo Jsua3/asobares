@@ -281,6 +281,12 @@ class MovimientoTest extends TestCase
      * los 34 botones primarios 18 tenían `transition-colors` y 16 no: dos
      * botones iguales en padding y color se comportaban distinto al pasar el
      * ratón. Un componente es la única forma de que eso no vuelva a pasar.
+     *
+     * Ya no se afirma `duration-(--duracion-boton)` en el HTML renderizado:
+     * la transición de color salió del portador (`$base`) y ahora vive
+     * completa dentro de `.pulsable`, en `app.css`, para que la capa de
+     * utilidades de Tailwind no vuelva a pisarla. Esa guardia la cubre
+     * `test_el_boton_no_reintroduce_la_utilidad_que_pisa_al_portador`.
      */
     public function test_el_boton_rinde_las_dos_variantes_con_acuse_de_pulsacion(): void
     {
@@ -293,7 +299,6 @@ class MovimientoTest extends TestCase
         $this->assertStringContainsString('type="submit"', $primaria);
         $this->assertStringContainsString('bg-marca-500', $primaria);
         $this->assertStringContainsString('pulsable', $primaria);
-        $this->assertStringContainsString('duration-(--duracion-boton)', $primaria);
 
         $contorno = Blade::render(
             '<x-publico.boton variante="contorno" href="/directorio">Ver el directorio</x-publico.boton>'
@@ -303,6 +308,21 @@ class MovimientoTest extends TestCase
         $this->assertStringContainsString('href="/directorio"', $contorno);
         $this->assertStringContainsString('border-linea-fuerte', $contorno);
         $this->assertStringNotContainsString('bg-marca-500', $contorno);
+    }
+
+    /**
+     * `.pulsable` vive en `@layer components`, y en Tailwind 4 una utilidad
+     * de `@layer utilities` gana siempre a `@layer components` sin importar
+     * especificidad. Si `transition-colors` volviera al portador, pisaría
+     * de nuevo la transición de color de `.pulsable` — y con ella su
+     * `transition-duration: 0ms` del `:active` — en los 43 botones del
+     * sitio, tal como pasaba antes de este arreglo.
+     */
+    public function test_el_boton_no_reintroduce_la_utilidad_que_pisa_al_portador(): void
+    {
+        $componente = File::get(resource_path('views/components/publico/boton.blade.php'));
+
+        $this->assertStringNotContainsString('transition-colors', $componente);
     }
 
     /** Nueve botones de envío llevaban `w-full ... sm:w-auto`: debe pasar. */

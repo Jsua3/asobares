@@ -79,11 +79,31 @@
      * Acuse de pulsación. Sin puerta de puntero fino a propósito: en táctil
      * el `:active` es el único acuse que existe, porque no hay hover.
      * Bajar es instantáneo y subir tarda 100 ms — al revés se siente lento.
+     *
+     * Lleva la transición COMPLETA del botón, no solo el `transform`: en
+     * `@layer utilities` Tailwind compila `transition-colors` con más
+     * especificidad de capa que `@layer components`, así que si el color
+     * vive en una utilidad del portador (`boton.blade.php`), esa utilidad
+     * pisa a `.pulsable` y la subida de 100 ms al soltar nunca llega a
+     * correr. La única forma de que las dos convivan es que las dicte la
+     * misma regla, cada una a su ritmo: `transform` al de `.pulsable`,
+     * color al de la variante.
      */
     .pulsable {
-        transition: transform var(--duracion-instante) var(--ease-out);
+        transition:
+            transform var(--duracion-instante) var(--ease-out),
+            color var(--duracion-boton) var(--ease-color),
+            background-color var(--duracion-boton) var(--ease-color),
+            border-color var(--duracion-boton) var(--ease-color);
     }
 
+    /*
+     * `transition-duration: 0ms` anula las CUATRO propiedades mientras el
+     * botón está pulsado, colores incluidos, no solo `transform`. Es
+     * deliberado: el estado activo dura milisegundos y al soltar las cuatro
+     * duraciones vuelven a la regla de arriba, así que el fundido de color
+     * no se pierde, solo se pausa el instante que dura el clic.
+     */
     .pulsable:active {
         transform: scale(0.97);
         transition-duration: 0ms;
