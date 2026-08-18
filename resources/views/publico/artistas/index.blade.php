@@ -37,7 +37,7 @@
                             @if ($artista->foto)
                                 <img src="{{ Storage::disk('public')->url($artista->foto) }}" alt=""
                                      loading="lazy" decoding="async" width="400" height="400"
-                                     style="view-transition-name: portada-{{ $artista->id }}"
+                                     style="view-transition-name: portada-artista-{{ $artista->id }}"
                                      class="aspect-square w-full object-cover">
                             @endif
 
