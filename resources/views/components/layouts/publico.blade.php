@@ -26,6 +26,26 @@
 
     <link rel="icon" type="image/png" href="{{ asset('img/favicon.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('img/favicon.png') }}">
+
+    {{--
+        El logo se pide desde el <head> y con prioridad alta, y no es un adorno
+        de rendimiento: es la corrección de un defecto medido.
+
+        Descubierto al vuelo —cuando el analizador llega al <img> de la
+        navbar— no le daba tiempo a descargar y decodificar antes del primer
+        pintado. Medido en los dos temas: en `pagereveal` y en el primer rAF el
+        <img> seguía con `naturalWidth` 0, y no terminaba hasta el evento
+        `load`, ~500 ms después.
+
+        En un sitio de recarga completa eso pasa en CADA navegación, y como
+        además hay transiciones de vista, la instantánea de la página nueva se
+        tomaba sin logo: se veía desaparecer y volver a aparecer.
+
+        Va emparejado con el cambio de `logo.blade.php`, que dejó de servir el
+        SVG que solo envolvía este PNG. Si algún día cambia el archivo allí,
+        tiene que cambiar aquí o la precarga deja de servir para nada.
+    --}}
+    <link rel="preload" as="image" href="{{ asset('img/logo-asobares.png') }}" fetchpriority="high">
     {{-- El valor claro es el que corresponde al marcado servido: sin la clase
          `.dark` el CSS pinta el tema claro. El script de abajo lo corrige al
          instante según la preferencia real. --}}
