@@ -70,17 +70,17 @@
                 {{-- Los dos trazos se cruzan girando en sentidos opuestos. El
                      origen es el centro del lienzo de 24×24, no del <path>. --}}
                 <path x-show="! menuMovil"
-                      x-transition:enter="transition-[opacity,transform] ease-out duration-(--duracion-salida)"
+                      x-transition:enter="transicion-desplegable ease-out duration-(--duracion-salida)"
                       x-transition:enter-start="opacity-0 -rotate-90"
-                      x-transition:leave="transition-[opacity,transform] ease-out duration-(--duracion-salida)"
+                      x-transition:leave="transicion-desplegable ease-out duration-(--duracion-salida)"
                       x-transition:leave-end="opacity-0 -rotate-90"
                       style="transform-origin: 12px 12px"
                       stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>
                 <path x-show="menuMovil"
                       x-cloak
-                      x-transition:enter="transition-[opacity,transform] ease-out duration-(--duracion-salida)"
+                      x-transition:enter="transicion-desplegable ease-out duration-(--duracion-salida)"
                       x-transition:enter-start="opacity-0 rotate-90"
-                      x-transition:leave="transition-[opacity,transform] ease-out duration-(--duracion-salida)"
+                      x-transition:leave="transicion-desplegable ease-out duration-(--duracion-salida)"
                       x-transition:leave-end="opacity-0 rotate-90"
                       style="transform-origin: 12px 12px"
                       stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
@@ -105,10 +105,10 @@
     <div id="menu-movil"
          x-show="menuMovil"
          x-cloak
-         x-transition:enter="transition-[opacity,transform] ease-cajon duration-(--duracion-panel)"
+         x-transition:enter="transicion-desplegable ease-cajon duration-(--duracion-panel)"
          x-transition:enter-start="opacity-0 translate-y-(--asb-desplazamiento-panel)"
          x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition-[opacity,transform] ease-cajon duration-(--duracion-salida)"
+         x-transition:leave="transicion-desplegable ease-cajon duration-(--duracion-salida)"
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 translate-y-(--asb-desplazamiento-panel)"
          class="absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] origin-top overflow-y-auto border-t border-linea bg-fondo shadow-lg lg:hidden">

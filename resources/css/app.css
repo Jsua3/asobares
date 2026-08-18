@@ -119,6 +119,31 @@
     }
 
     /*
+     * Transición de los desplegables. Existe por una trampa de Tailwind 4 que
+     * no da ningún error y deja el movimiento muerto:
+     *
+     * `transition-[opacity,transform]` declara la propiedad `transform`, pero
+     * las utilidades de movimiento de Tailwind 4 YA NO compilan a `transform`.
+     * Compilan a las propiedades independientes:
+     *     translate-y-*  ->  translate: ...
+     *     scale-*        ->  scale: ...
+     *     rotate-*       ->  rotate: ...
+     * Como `transform` y `translate` son propiedades distintas, transicionar
+     * la primera no anima la segunda: los tres desplegables del sitio fundían
+     * la opacidad mientras su geometría SALTABA de golpe. El menú móvil no
+     * deslizaba, el de usuario no escalaba y la hamburguesa no giraba.
+     *
+     * Se enumeran las cuatro, que es exactamente lo que hace la propia
+     * `transition-transform` de Tailwind, para que mañana cambiar un
+     * `translate-y` por un `scale` en una vista no vuelva a romperlo en
+     * silencio. La duración y la curva siguen viniendo por utilidad desde la
+     * vista: aquí solo se dice QUÉ se anima, nunca cuánto.
+     */
+    .transicion-desplegable {
+        transition-property: opacity, transform, translate, scale, rotate;
+    }
+
+    /*
      * Entrada de la alerta. `@starting-style` y no `@keyframes`: la mordaza
      * del cambio de tema apaga `transition` y no `animation`, así que por
      * esta vía la cobertura sale gratis.

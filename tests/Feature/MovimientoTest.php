@@ -223,7 +223,67 @@ class MovimientoTest extends TestCase
              */
             '/(?:duration|delay)-\[/' => 'duración o retardo con valor arbitrario: usa los tokens duration-(--duracion-*)',
             '/ease-\[/' => 'curva arbitraria: usa las utilidades ease-* de los tokens',
+
+            /*
+             * En Tailwind 4 las utilidades de movimiento no compilan a
+             * `transform`, sino a las propiedades independientes `translate`,
+             * `scale` y `rotate`. Una transición que solo declara `transform`
+             * no anima ninguna de las tres: la opacidad funde y la geometría
+             * salta, sin ningún error visible. Los tres desplegables del
+             * sitio estuvieron así.
+             *
+             * Se permite nombrar `transform` si además se nombra `translate`,
+             * porque entonces quien lo escribió sabía que son distintas.
+             */
+            '/transition-\[[^\]]*\btransform\b(?![^\]]*\btranslate\b)/' => 'translate/scale/rotate no son `transform` en Tailwind 4: usa el portador .transicion-desplegable',
         ];
+    }
+
+    /**
+     * El portador que arregla la trampa de arriba tiene que existir y tiene
+     * que nombrar las cuatro propiedades. Si alguien lo recorta a `transform`
+     * volvemos al punto de partida con la guardia en verde.
+     */
+    public function test_el_portador_de_los_desplegables_cubre_las_propiedades_reales(): void
+    {
+        $app = File::get(resource_path('css/app.css'));
+
+        $this->assertStringContainsString('.transicion-desplegable', $app);
+        $this->assertMatchesRegularExpression(
+            '/\.transicion-desplegable\s*\{[^}]*transition-property:[^;]*\btranslate\b[^;]*;/',
+            $app,
+            '.transicion-desplegable debe nombrar `translate`, que es la propiedad que de verdad anima el desplazamiento.'
+        );
+
+        foreach (['scale', 'rotate'] as $propiedad) {
+            $this->assertMatchesRegularExpression(
+                '/\.transicion-desplegable\s*\{[^}]*transition-property:[^;]*\b'.$propiedad.'\b[^;]*;/',
+                $app,
+                ".transicion-desplegable debe nombrar `{$propiedad}`."
+            );
+        }
+    }
+
+    /**
+     * Los tres desplegables tienen que usar el portador. Si uno se queda con
+     * su propia lista, se mueve distinto que los otros dos y nadie lo nota.
+     */
+    public function test_los_desplegables_usan_el_portador(): void
+    {
+        $vistas = [
+            'components/publico/navbar.blade.php',
+            'components/publico/menu-usuario.blade.php',
+        ];
+
+        foreach ($vistas as $vista) {
+            $contenido = File::get(resource_path('views/'.$vista));
+
+            $this->assertStringContainsString(
+                'transicion-desplegable',
+                $contenido,
+                "{$vista} declara transiciones de desplegable sin el portador."
+            );
+        }
     }
 
     /**
