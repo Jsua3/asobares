@@ -211,6 +211,18 @@ class MovimientoTest extends TestCase
              * de 150 ms. Nada falla a la vista, y por eso hace falta vigilarlo.
              */
             '/(?:duration|translate-[xy]|delay)-\[--/' => 'usa el paréntesis: duration-(--var), no el corchete, o el valor no se envuelve en var()',
+
+            /*
+             * Estos dos patrones son más anchos que el de arriba: cazan
+             * cualquier valor arbitrario entre corchetes, no solo el que
+             * intenta envolver una variable. Una duración, un retardo o una
+             * curva escritos a mano en una vista es la misma improvisación
+             * que la guardia ya prohíbe en `--duracion-\d+` y `ease-in`,
+             * solo que con sintaxis de corchete en vez de número o palabra
+             * clave.
+             */
+            '/(?:duration|delay)-\[/' => 'duración o retardo con valor arbitrario: usa los tokens duration-(--duracion-*)',
+            '/ease-\[/' => 'curva arbitraria: usa las utilidades ease-* de los tokens',
         ];
     }
 
