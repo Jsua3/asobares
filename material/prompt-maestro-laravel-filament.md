@@ -633,3 +633,56 @@ Fusionado a `main` en `301cf55` (avance rápido, 45 archivos, +1157/−479), ram
 ### 21.4 Notas de cierre
 
 La verificación visual se hizo con `playwright-cli` sobre Chromium real (el panel del navegador de esta máquina no compone fotogramas): tres vídeos entregados en la conversación del 17 ago 2026 — menú móvil, transición listado→ficha, y el recorrido completo de 8 capítulos. No están en el repo. La grabación dejó **un Mensaje de demo en la base local** (envío real de /contacto); la retención de G12 lo depura sola. El pendiente del §20 (despliegue en Laravel Cloud) sigue igual: decidido, sin ejecutar, esperando el paso humano del §20.3.
+
+---
+
+## 22. EN CURSO — Pase de interfaz iOS y el parpadeo del logo (18 ago 2026)
+
+Encargo del dueño: (1) el logo «aparece y desaparece» en cada navegación; (2) «mejorar toda la interfaz dándole ese toque de iOS que tienen los iPhone». Sobre `main`, tres commits, suite **599 pruebas (588 pasan, 11 omitidas, 0 fallos)**.
+
+### 22.1 El parpadeo del logo NO era la transición de vista
+
+Conviene leerlo porque la hipótesis obvia era falsa y costó cuatro rondas de medición descartarla. El fundido de raíz de `@view-transition` usa `mix-blend-mode: plus-lighter`, que para píxeles idénticos **es estable**: medido, la desviación de luminancia de la caja del logo durante la navegación era de 0,14/255, o sea invisible. Nombrar el cromo con `view-transition-name` no arreglaba nada porque no había nada que arreglar ahí.
+
+La causa estaba en el activo. **`logo-asobares.svg` nunca fue un vector**: eran 49.211 bytes de un `<svg><image xlink:href="data:img/png;base64,…">`, es decir un PNG de 592×108 envuelto en base64 —con el tipo MIME mal escrito, `img/png` en vez de `image/png`—. Descubierto tarde, al analizar el cuerpo, no le daba tiempo a descarga + análisis de XML + decodificación de base64 + decodificación de PNG antes del primer pintado. Instrumentando el documento nuevo desde dentro, en los dos temas, el `<img>` llegaba a `pagereveal` y al primer `rAF` con `naturalWidth` 0 y no terminaba hasta `load`, ~500 ms después. Como la instantánea de la página entrante se toma en la primera oportunidad de pintado, salía **sin logo**.
+
+Arreglo: se extrajo el PNG de dentro del SVG (mismos píxeles, sin recodificar), `<link rel=preload as=image fetchpriority=high>` en el `<head>` y `fetchpriority=high` en el `<img>`. Desviación medida: **48,1 → 0,0** en claro y **30,4 → 0,4** en oscuro.
+
+⚠️ **El SVG viejo sigue en `public/img/` y ya no lo usa el sitio público, pero `AdminPanelProvider:45` sí** (`->brandLogo()`). El panel arrastra el mismo coste; se dejó fuera de alcance a propósito.
+
+### 22.2 Los tres desplegables no animaban nada de lo que se mueve
+
+Trampa de Tailwind 4, hermana de la que ya documenta el §21.2 y con la misma firma: ningún error, nada roto a la vista. `transition-[opacity,transform]` declara `transform`, pero las utilidades de movimiento de Tailwind 4 **ya no compilan a `transform`**:
+
+```
+translate-y-(--var)  ->  translate: ...
+scale-95             ->  scale: ...
+rotate-90            ->  rotate: ...
+```
+
+Son propiedades distintas, así que transicionar `transform` no interpola ninguna. El menú móvil no deslizaba, el de usuario no escalaba y la hamburguesa no giraba: las tres solo fundían opacidad y la geometría saltaba. Que la propia `transition-transform` de Tailwind se defina como `transform, translate, scale, rotate` es la confirmación.
+
+Entra el portador `.transicion-desplegable` con las cuatro propiedades, más dos guardias: un patrón prohibido que caza cualquier `transition-[…transform…]` que no nombre también `translate`, y una prueba de que el portador no se puede recortar. Verificado muestreando con `requestAnimationFrame` la propiedad computada: 38 valores de `translate`, 26 de `scale`, 25 y 26 de `rotate`. Antes, dos.
+
+### 22.3 Material con dos recetas
+
+El sitio cumplía el bicromatismo en el panel y no aquí: el único `backdrop-filter` del frontend era una opacidad compartida por los dos temas, y la tarjeta en oscuro llevaba `box-shadow: none` (superficie contra fondo, 1,1:1). Entran `--asb-cromo-*` y `--asb-hoja-*` con sus dos recetas —sombra sobre Ambient White, filo de luz sobre Pub Black—, el velo derivado de `--asb-fondo` con `color-mix`, `blur(20px) saturate(180%)`, y separación **condicional al scroll** (`.cromo-apoyado`, umbral de 8 px para no pelear con el rebote elástico de iOS). Más `prefers-reduced-transparency` y `prefers-contrast`, que no existían.
+
+⚠️ **Trampa de verificación, y es la razón por la que esto se anota:** Playwright **acepta** la opción de contexto `reducedTransparency` pero **no la emula** en la versión instalada — la consulta sigue devolviendo `false`. Quien la dé por buena con la opción de contexto está firmando a ciegas. Hay que forzarla por CDP con `Emulation.setEmulatedMedia`. La opción `contrast: 'more'` sí funciona.
+
+### 22.4 Lo que queda, con su informe
+
+Una auditoría multiagente de ocho lentes contra los principios de Apple (16 agentes, refutación adversarial por lente) dejó **59 hallazgos vivos de 84**. Lo entregado arriba cubre los de material y movimiento. Sigue abierto, por orden de impacto:
+
+- **`campo.blade.php:16` mata el foco visible** con `focus:outline-none` y lo sustituye por un anillo de 2,21:1. Es el único indicador de foco de todos los formularios del sitio y no cumple. Arreglo: borrar esa cadena y dejar actuar al `:focus-visible` de `app.css:44` (3,49:1 en claro, 5,15:1 en oscuro).
+- **La ayuda del campo desaparece al errar y la rejilla salta.** Lo dejó anotado el §10 de la spec de movimiento y sigue abierto: hay que emitir la ranura SIEMPRE (`min-h-4`), no condicionarla.
+- **41 de 75 objetivos táctiles por debajo de 44 px**, los enlaces de la navbar en 36 px.
+- **`.pulsable` tiene un solo consumidor** (`boton.blade.php`): 43 botones responden al dedo y los otros ~106 controles del sitio no tienen acuse ninguno.
+- **Tipografía sin escala**: un `letter-spacing: -0.02em` plano para toda la horquilla de 16 a 60 px, y `leading-relaxed` único repartido entre 12 y 18 px en 48 sitios. ⚠️ La escala va en `app.css`, **nunca en `tokens.css`**: el tema del panel importa `tokens.css` y redefinir ahí `--text-*` cambia en silencio toda la tipografía de `/admin`.
+- **21 de 22 `transition-colors` corren a 150 ms con la curva nativa** en vez de los tokens; se cierra con `--default-transition-duration` en un `@theme` de `app.css` (misma advertencia de ubicación).
+- **Las 27 flechas del sitio** (`→`, `←`, `↗`) se pintan con la fuente del sistema, no con Poppins, porque el subconjunto compilado no las trae.
+- **Los enlaces «Abre tu negocio» y «Quiénes somos» parten en dos líneas** en la navbar de escritorio a 1280, 1440 y 1600 px, dejándola en 81 px de alto. **Es anterior a este trabajo** —verificado con el árbol en stash— y es decisión de producto: o se acortan las etiquetas o la navegación se reagrupa.
+
+### 22.5 Decisión pendiente del dueño
+
+El §10 de la spec de movimiento rechazó a propósito animar navbar, pie, migas, paginación y logo, y el scroll-reveal de las rejillas. **El pase de iOS no ha reabierto ninguno de esos rechazos**: todo lo entregado es material, profundidad y movimiento que ya existía pero estaba roto. Si se quiere ir más lejos —scroll-reveal, hero animado, transiciones de vista con emparejamiento de cromo— hay que reabrir el §10 **a propósito y por escrito**, no de pasada en una revisión.
