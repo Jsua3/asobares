@@ -67,8 +67,23 @@
                 x-bind:aria-expanded="menuMovil ? 'true' : 'false'" aria-controls="menu-movil">
             <span class="sr-only">Abrir menú</span>
             <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
-                <path x-show="! menuMovil" stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>
-                <path x-show="menuMovil" x-cloak stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+                {{-- Los dos trazos se cruzan girando en sentidos opuestos. El
+                     origen es el centro del lienzo de 24×24, no del <path>. --}}
+                <path x-show="! menuMovil"
+                      x-transition:enter="transition-[opacity,transform] ease-out duration-(--duracion-salida)"
+                      x-transition:enter-start="opacity-0 -rotate-90"
+                      x-transition:leave="transition-[opacity,transform] ease-out duration-(--duracion-salida)"
+                      x-transition:leave-end="opacity-0 -rotate-90"
+                      style="transform-origin: 12px 12px"
+                      stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5"/>
+                <path x-show="menuMovil"
+                      x-cloak
+                      x-transition:enter="transition-[opacity,transform] ease-out duration-(--duracion-salida)"
+                      x-transition:enter-start="opacity-0 rotate-90"
+                      x-transition:leave="transition-[opacity,transform] ease-out duration-(--duracion-salida)"
+                      x-transition:leave-end="opacity-0 rotate-90"
+                      style="transform-origin: 12px 12px"
+                      stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
             </svg>
         </button>
     </nav>
