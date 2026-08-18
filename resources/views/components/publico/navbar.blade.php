@@ -16,7 +16,13 @@
 
 {{-- `menuMovil` y no `abierto`: el desplegable de configuración anida su propio
      x-data y dos propiedades con el mismo nombre se pisarían. --}}
+{{-- Las tres salidas van en el <header> y no en el panel: el botón que
+     alterna vive dentro del header, y si `click.outside` estuviera en el
+     panel el clic del botón lo cerraría y lo abriría en el mismo gesto. --}}
 <header x-data="{ menuMovil: false }"
+        x-on:keydown.escape.window="menuMovil = false"
+        x-on:click.outside="menuMovil = false"
+        x-on:resize.window="if (window.innerWidth >= 1024) menuMovil = false"
         class="sticky top-0 z-40 border-b border-linea bg-fondo/85 backdrop-blur-md">
     <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8"
          aria-label="Navegación principal">
@@ -81,7 +87,16 @@
         </noscript>
     @endauth
 
-    <div id="menu-movil" x-show="menuMovil" x-cloak x-collapse class="border-t border-linea bg-fondo lg:hidden">
+    <div id="menu-movil"
+         x-show="menuMovil"
+         x-cloak
+         x-transition:enter="transition-[opacity,transform] ease-cajon duration-(--duracion-panel)"
+         x-transition:enter-start="opacity-0 translate-y-(--asb-desplazamiento-panel)"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition-[opacity,transform] ease-cajon duration-(--duracion-salida)"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-(--asb-desplazamiento-panel)"
+         class="absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] origin-top overflow-y-auto border-t border-linea bg-fondo shadow-lg lg:hidden">
         <div class="space-y-1 px-4 py-3">
             @foreach ($enlaces as $enlace)
                 <a href="{{ route($enlace['ruta']) }}"
