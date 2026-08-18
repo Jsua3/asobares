@@ -175,9 +175,12 @@
  * el desplazamiento con precisión, y un barrido de `transition-duration`
  * aquí mataría los fundidos de color que la regla manda conservar.
  *
- * Esto cubre lo que no usa nuestros tokens: los @keyframes de Filament y
- * cualquier cosa futura. Leaflet no se trata aquí sino en su propia API
- * (ver `components/publico/mapa.blade.php`), que es donde el control existe.
+ * Esto cubre lo que no usa nuestros tokens DENTRO DEL SITIO PÚBLICO:
+ * cualquier `@keyframes` que aparezca aquí a futuro. Leaflet no se trata en
+ * este barrido sino en su propia API (ver `components/publico/mapa.blade.php`),
+ * que es donde el control existe. El movimiento propio de Filament queda
+ * fuera de alcance por diseño y no por olvido: `app.css` no se carga en
+ * `/admin`, así que este barrido nunca llega a sus `@keyframes`.
  */
 @media (prefers-reduced-motion: reduce) {
     *,
