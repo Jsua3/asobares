@@ -9,6 +9,7 @@
 /.cursor/
 /.idea
 /.nova
+/.playwright-cli
 /.phpunit.cache
 /.vscode
 /.zed
