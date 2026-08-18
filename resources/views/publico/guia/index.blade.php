@@ -18,7 +18,7 @@
                            'border-marca-500 bg-marca-500/10 font-medium text-acento-fuerte' => $seleccionado?->is($municipio),
                            'border-linea text-suave hover:border-marca-500/40 hover:text-fuerte' => ! $seleccionado?->is($municipio),
                        ])
-                       @if ($seleccionado?->is($municipio)) aria-current="true" @endif>
+                       @if ($seleccionado?->is($municipio)) aria-current="true" style="view-transition-name: filtro-activo" @endif>
                         {{ $municipio->nombre }}
                     </a>
                 @endforeach

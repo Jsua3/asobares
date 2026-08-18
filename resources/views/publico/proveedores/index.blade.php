@@ -12,7 +12,8 @@
                    'rounded-xl border px-4 py-2 text-sm transition-colors',
                    'border-marca-500 bg-marca-500/10 font-medium text-acento-fuerte' => empty($filtros['categoria']),
                    'border-linea text-suave hover:border-marca-500/40' => ! empty($filtros['categoria']),
-               ])>Todas</a>
+               ])
+               @if (empty($filtros['categoria'])) style="view-transition-name: filtro-activo" @endif>Todas</a>
 
             @foreach ($categorias as $categoria)
                 <a href="{{ route('proveedores.index', ['categoria' => $categoria->value]) }}"
@@ -20,7 +21,8 @@
                        'rounded-xl border px-4 py-2 text-sm transition-colors',
                        'border-marca-500 bg-marca-500/10 font-medium text-acento-fuerte' => ($filtros['categoria'] ?? null) === $categoria->value,
                        'border-linea text-suave hover:border-marca-500/40' => ($filtros['categoria'] ?? null) !== $categoria->value,
-                   ])>{{ $categoria->getLabel() }}</a>
+                   ])
+                   @if (($filtros['categoria'] ?? null) === $categoria->value) style="view-transition-name: filtro-activo" @endif>{{ $categoria->getLabel() }}</a>
             @endforeach
         </div>
 

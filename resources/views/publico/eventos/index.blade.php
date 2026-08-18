@@ -35,6 +35,7 @@
                             @if ($evento->imagen)
                                 <img src="{{ Storage::disk('public')->url($evento->imagen) }}" alt=""
                                      loading="lazy" decoding="async" width="400" height="225"
+                                     style="view-transition-name: portada-{{ $evento->id }}"
                                      class="aspect-video w-full object-cover">
                             @endif
 

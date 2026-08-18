@@ -42,6 +42,7 @@
                 @if ($artista->foto)
                     <img src="{{ Storage::disk('public')->url($artista->foto) }}" alt="{{ $artista->nombre }}"
                          width="400" height="400" decoding="async"
+                         style="view-transition-name: portada-{{ $artista->id }}"
                          class="aspect-square w-full rounded-2xl border border-linea object-cover">
                 @endif
 
