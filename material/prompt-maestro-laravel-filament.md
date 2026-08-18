@@ -602,3 +602,34 @@ CLI de Laravel Cloud instalado global (`laravel/cloud-cli` ^0.5, binario en `%AP
 - Dos facturas seguidas > ~US$15/mes con límite de gasto puesto y sin crecimiento de tráfico → reevaluar PaaS genérica con Dockerfile.
 - Otra caída total de Laravel Cloud que afecte aplicaciones (la única seria: 20 feb 2026, 3h15m).
 - El gremio no logra aportar correo/medio de pago institucional en dos semanas → el problema es de gobierno, no de proveedor: escalarlo a la junta como riesgo del proyecto, no resolverlo desplegando con cuenta personal.
+
+---
+
+## 21. CERRADO — Rework de movimiento del frontend (17 ago 2026)
+
+Fusionado a `main` en `301cf55` (avance rápido, 45 archivos, +1157/−479), rama borrada. Suite: **597 pruebas, 586 pasan, 11 omitidas, 0 fallos** (creció desde 578 sin perder ninguna). La especificación vive en `docs/superpowers/specs/2026-08-17-movimiento-del-frontend-design.md` y el plan ejecutado —con sus cinco enmiendas commiteadas y explicadas— en `docs/superpowers/plans/2026-08-17-movimiento-del-frontend.md`. Léelos antes de tocar movimiento: los rechazos del §10 de la spec (scroll-reveal, hero, navegación, cambio de tema…) son deliberados y no se reabren en revisión.
+
+### 21.1 El sistema, en cinco líneas
+
+- **Fuente única en `tokens.css`**: curvas `--ease-out/-in-out/-cajon/-color` en `@theme` (pisan las utilidades nativas de Tailwind: cada `ease-out` del proyecto usa ya la curva propia) y `--duracion-instante/boton/salida/entrada/panel` + tres desplazamientos `--asb-*` en `:root`.
+- **Movimiento reducido = anular el desplazamiento, no el reloj**: el interruptor al final de `tokens.css` pone los desplazamientos a cero y deja vivir los fundidos. La red de seguridad de `app.css` solo apaga `animation` y `scroll-behavior` — jamás ampliarla a `transition`.
+- **Portadores con nombre**: `.pulsable` (lleva la transición COMPLETA del botón: transform + colores), `.tarjeta-hover`/`.vidrio-hover`, `.enlace-accion`, `.alerta-animada` (via `@starting-style`, nunca keyframes: las mordazas de tema no cubren `animation`). Componente `x-publico.boton` (variantes primaria/contorno, prop `tipo`, `.pulsable` de fábrica) en 43 sitios.
+- **Guardias**: `tests/Feature/MovimientoTest.php` (7 patrones prohibidos sobre 7 directorios de vistas, poda de llaves para el hover táctil) y `tests/Feature/MenuMovilTest.php` (las tres salidas de la superposición).
+- **Transiciones de vista** entre documentos: fundido de raíz 180 ms + emparejamientos `view-transition-name` **prefijados por sección** (`portada-asociado-{id}`, `portada-artista-{id}`, `portada-evento-{id}`, `filtro-activo`). Una sección nueva que copie el patrón debe nacer con su propio prefijo o colisiona por navbar y el navegador descarta la transición entera en silencio.
+
+### 21.2 Las dos reglas que no se ven venir (costaron cinco defectos silenciosos)
+
+1. **La sintaxis de variable es el paréntesis**: `duration-(--duracion-boton)`. El corchete `duration-[--var]` compila a una declaración inválida que el navegador descarta sin avisar y todo cae al default de 150 ms. La guardia lo vigila.
+2. **Una utilidad de Tailwind pisa siempre a un portador de `@layer components`** (utilities gana a components, da igual la especificidad). Nunca poner `transition-*`/`duration-*`/`ease-*` sueltas en un elemento que lleve `.pulsable` o `.enlace-accion`; la guardia prohíbe `transition-colors` en `boton.blade.php` por esto. Misma física por la que `class="block"` no puede vencer al `inline-block` del componente: se traduce a `w-full`.
+
+### 21.3 Deuda anotada (dictamen del revisor final: ninguna bloquea)
+
+- **`@alpinejs/collapse` quedó sin consumidores** (el menú móvil era el único); `app.js:2,4` la sigue importando y registrando. Retirarla toca `package.json` → decisión del dueño.
+- Los **7 chips de filtro** piden componente propio con prop `:activo` (la cadena `@class` está repetida idéntica 4 veces entre boletín y proveedores).
+- `--ease-in-out` aún sin consumidor; los conmutadores segmentados (Tarjetas/Mapa, Próximos/Pasados) sin unificar; `empleo/show:35` con paleta distinta a sus tres migas gemelas.
+- Huecos menores del regex de la guardia, hoy sin instancias: modificadores de Alpine (`x-transition:enter.duration.150ms`) y estilos en línea (`style="transition-duration:…"`).
+- La red de seguridad de `app.css` no está en `@layer` (riesgo teórico frente a `!important` en capa; hoy nadie lo escribe); la `variante` con typo en el botón cae en primaria sin avisar.
+
+### 21.4 Notas de cierre
+
+La verificación visual se hizo con `playwright-cli` sobre Chromium real (el panel del navegador de esta máquina no compone fotogramas): tres vídeos entregados en la conversación del 17 ago 2026 — menú móvil, transición listado→ficha, y el recorrido completo de 8 capítulos. No están en el repo. La grabación dejó **un Mensaje de demo en la base local** (envío real de /contacto); la retención de G12 lo depura sola. El pendiente del §20 (despliegue en Laravel Cloud) sigue igual: decidido, sin ejecutar, esperando el paso humano del §20.3.
