@@ -1,0 +1,83 @@
+@startuml
+title Diagrama de casos de uso UML 2.5.1 — Plataforma Web ASOBARES Quindío
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam actorBorderColor #EE4036
+skinparam usecaseBorderColor #333333
+skinparam rectangleBorderColor #EE4036
+skinparam usecaseBackgroundColor #FFFFFF
+skinparam actorBackgroundColor #FFFFFF
+skinparam titleFontSize 18
+skinparam arrowColor #333333
+
+actor "Visitante" as vis
+actor "Usuario registrado" as ureg
+actor "Asociado" as aso
+actor "Buscador de empleo" as bus
+actor "Artista" as art
+actor "Proveedor" as prov
+actor "Administrador\nASOBARES" as adm
+actor "Contadora" as cont
+actor "Pasarela Bold\n<<sistema externo>>" as bold
+
+aso --|> ureg
+bus --|> ureg
+art --|> ureg
+prov --|> ureg
+
+rectangle "Plataforma Web ASOBARES Quindío" {
+  usecase "Consultar directorio\nde asociados" as UC1
+  usecase "Consultar guía normativa\npor municipio" as UC2
+  usecase "Descargar formatos\nde trámite" as UC3
+  usecase "Consultar bolsa\nde empleo" as UC4
+  usecase "Consultar directorio\nde artistas" as UC5
+  usecase "Registrarse" as UC6
+  usecase "Iniciar sesión" as UC7
+  usecase "Publicar vacante" as UC8
+  usecase "Ver detalle\nde beneficios" as UC9
+  usecase "Consultar estado\nde cartera" as UC10
+  usecase "Pagar cuota\nde afiliación" as UC11
+  usecase "Inscribirse a evento" as UC12
+  usecase "Postularse a vacante" as UC13
+  usecase "Publicar perfil\nartístico" as UC14
+  usecase "Publicar ficha\nde proveedor" as UC15
+  usecase "Gestionar contenidos" as UC16
+  usecase "Gestionar asociados" as UC17
+  usecase "Publicar evento\ndel gremio" as UC18
+  usecase "Actualizar guía\nnormativa" as UC19
+  usecase "Cargar estado\nde cartera" as UC20
+  usecase "Procesar pago\nen pasarela" as UC21
+}
+
+vis --> UC1
+vis --> UC2
+vis --> UC3
+vis --> UC4
+vis --> UC5
+vis --> UC6
+ureg --> UC7
+aso --> UC8
+aso --> UC9
+aso --> UC10
+aso --> UC11
+aso --> UC12
+bus --> UC13
+art --> UC14
+prov --> UC15
+adm --> UC16
+adm --> UC17
+adm --> UC18
+adm --> UC19
+cont --> UC20
+
+UC11 ..> UC21 : <<include>>
+UC12 ..> UC21 : <<include>>
+UC8 ..> UC7 : <<include>>
+UC9 ..> UC7 : <<include>>
+UC10 ..> UC7 : <<include>>
+UC13 ..> UC7 : <<include>>
+
+UC21 -- bold
+@enduml

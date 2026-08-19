@@ -1,0 +1,39 @@
+@startuml
+title Diagrama de contexto (nivel 0) — Plataforma Web ASOBARES Quindío
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam rectangleBorderColor #555555
+skinparam arrowColor #333333
+skinparam titleFontSize 18
+skinparam rectangleFontSize 13
+
+rectangle "Visitante" as vis
+rectangle "Asociado" as aso
+rectangle "Administrador\nASOBARES" as adm
+rectangle "Contadora" as cont
+rectangle "Pasarela Bold" as bold
+rectangle "Asobares Nacional" as nac
+rectangle "Google Maps" as maps
+rectangle "Servicio de correo" as mail
+
+rectangle "<b>PLATAFORMA WEB\n<b>ASOBARES QUINDÍO" as sys #FFF5F4;line:EE4036;line.bold
+
+vis -right-> sys : consultas de directorio,\nguía, empleo y artistas
+sys -left-> vis : fichas de establecimientos,\nchecklists y formatos descargables,\nvacantes publicadas
+
+aso ----> sys : credenciales,\nvacantes publicadas,\ndatos del establecimiento
+sys --> aso : estado de cartera,\ncomprobantes,\ndetalle de beneficios
+
+adm -down-> sys : contenidos, eventos,\nguía normativa
+sys -up-> adm : reportes y métricas
+
+cont -down-> sys : archivo de cartera mensual
+
+bold <-left- sys : solicitudes de\ntransacción PSE
+bold -right-> sys : confirmaciones\n(webhook)
+
+nac -up-> sys : datos del observatorio y eventos\nnacionales (actualización mensual)
+maps -up-> sys : mapas para el directorio
+sys -down-> mail : notificaciones, recordatorios,\ncomprobantes
+@enduml

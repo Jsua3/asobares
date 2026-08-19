@@ -1,0 +1,36 @@
+@startuml
+title Proceso de negocio (BPMN 2.0) — Construcción y uso de la guía normativa por municipio
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam titleFontSize 17
+skinparam activityBorderColor #555555
+skinparam activityDiamondBorderColor #EE4036
+skinparam arrowColor #333333
+skinparam partitionBorderColor #EE4036
+skinparam noteBackgroundColor #FFF5F4
+skinparam noteBorderColor #EE4036
+
+|Dirección ejecutiva (Natalia)|
+start
+note right: Evento de inicio: necesidad de\nformalizar requisitos por municipio
+:Solicitar checklist oficial a cada entidad\n<<tarea de envío>>;
+|Secretarías y Bomberos|
+:Enviar checklist y formatos\n<<tarea de envío>>;
+note right: Documentos: formato de\nBomberos, formato de Policía
+|Dirección ejecutiva (Natalia)|
+:Compilar requisitos por municipio\n<<tarea de usuario>>;
+|Plataforma web|
+:Publicar guía en el CMS\n<<tarea de usuario>>;
+note right: BD + colección de\ndocumentos descargables
+|Dueño de bar (usuario final)|
+:Consultar guía de su municipio\n<<tarea de usuario>>;
+:Descargar checklist y formatos\n<<tarea de usuario>>;
+repeat
+  :Realizar trámites ante las entidades\n<<tarea manual>>;
+  note right: Ej.: enviar carta a Bomberos\npara solicitar la visita
+backward :Completar requisitos faltantes\n<<evento intermedio condicional>>;
+repeat while (¿Obtiene todos los certificados?) is (No) not (Sí)
+stop
+note right: Fin de terminación: el establecimiento\ncumple la norma y evita el cierre.\n«Ningún gremio la tiene; es el punto donde\ncaen los negocios y los cierran» (Reunión 2)
+@enduml

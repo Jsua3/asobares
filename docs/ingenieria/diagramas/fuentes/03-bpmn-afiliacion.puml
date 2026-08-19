@@ -1,0 +1,41 @@
+@startuml
+title Proceso de negocio (BPMN 2.0) — Afiliación de un establecimiento a ASOBARES Quindío
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam titleFontSize 17
+skinparam activityBorderColor #555555
+skinparam activityDiamondBorderColor #EE4036
+skinparam arrowColor #333333
+skinparam partitionBorderColor #EE4036
+skinparam noteBackgroundColor #FFF5F4
+skinparam noteBorderColor #EE4036
+
+|Establecimiento solicitante|
+start
+note right: Evento de inicio:\nsolicitud de afiliación
+:Diligenciar formulario de afiliación\n<<tarea de usuario>>;
+note right: Salida: solicitud +\nautorización habeas data\n(Ley 1581 de 2012)
+|Plataforma web|
+:Registrar solicitud\n<<tarea script>>;
+note right: BD de asociados
+|Dirección ejecutiva|
+:Revisar solicitud y documentos\n<<tarea de usuario>>;
+if (¿Cumple requisitos?) then (No)
+  :Notificar rechazo con motivos\n<<tarea de envío>>;
+  end
+  note right: Fin simple:\nsolicitud rechazada
+else (Sí)
+  |Plataforma web|
+  :Enviar enlace de pago de cuota\n<<tarea de envío>>;
+  |Establecimiento solicitante|
+  :Pagar cuota (PSE / Bold)\n<<tarea de usuario>>;
+  |Plataforma web|
+  :Esperar confirmación de la pasarela\n<<evento intermedio temporizador>>;
+  :Activar perfil en el directorio\n<<tarea script>>;
+  note right: BD de asociados
+  :Enviar bienvenida y credenciales\n<<tarea de envío>>;
+  stop
+  note right: Fin de terminación:\nestablecimiento afiliado y\nvisible en el directorio
+endif
+@enduml

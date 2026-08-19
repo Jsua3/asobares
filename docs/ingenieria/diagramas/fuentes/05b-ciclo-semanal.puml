@@ -1,0 +1,30 @@
+@startuml
+title Subproceso transversal — ciclo semanal del equipo de práctica
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam titleFontSize 16
+skinparam activityBorderColor #555555
+skinparam activityDiamondBorderColor #EE4036
+skinparam arrowColor #333333
+skinparam noteBackgroundColor #FFF5F4
+skinparam noteBorderColor #EE4036
+
+start
+note right: Se repite cada semana\ndel cronograma
+:Planear el incremento contra el backlog\n<<tarea de usuario>>;
+note right: Entra solo lo que cumple\nla Definición de Listo (DoR)
+:Construir en rama con pruebas\n<<tarea de usuario>>;
+:Revisión cruzada del otro frente\n<<tarea de usuario>>;
+if (¿Cumple la Definición de Terminado?) then (No)
+  :Corregir\n<<tarea de usuario>>;
+  detach
+else (Sí)
+endif
+:Demostrar a la PO el viernes 9:00 a. m.\n<<tarea de usuario>>;
+note right: Ley de Humphrey: los usuarios\nsaben lo que quieren cuando lo ven\nfuncionando
+:Registrar retroalimentación y refinar el backlog\n<<tarea de usuario>>;
+:Enviar el avance del documento a la universidad\n<<tarea de envío>>;
+note right: Viernes 11:59 p. m., sin excepción
+stop
+@enduml

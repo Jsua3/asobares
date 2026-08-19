@@ -1,0 +1,152 @@
+@startuml
+title Modelo de datos implementado — Plataforma Web ASOBARES Quindío
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam titleFontSize 18
+skinparam classBorderColor #555555
+skinparam classBackgroundColor #FFFFFF
+skinparam classArrowColor #333333
+skinparam packageBorderColor #EE4036
+skinparam packageBackgroundColor #FFFFFF
+skinparam classAttributeIconSize 0
+hide circle
+hide methods
+
+package "Catálogos" {
+  entity Municipio {
+    + nombre
+    + slug
+    --
+    guia publicada
+  }
+  entity Categoria {
+    + nombre
+    + slug
+  }
+}
+
+package "Directorio y afiliación" {
+  entity Asociado {
+    + nombre
+    + slug
+    + direccion, horario
+    + contacto público
+    + contacto interno
+    + estado de publicación
+    + afiliado_at
+  }
+  entity Cartera {
+    + saldo
+    + meses en mora
+    + actualizada_at
+  }
+  entity User {
+    + nombre, correo
+    + rol
+    + segundo factor por correo
+  }
+}
+
+package "Guía normativa ★" {
+  entity RequisitoApertura {
+    + trámite
+    + entidad responsable
+    + pasos
+    + costo aproximado
+    + formato descargable
+  }
+  entity ConsultaGuia {
+    + fecha
+    --
+    sin dato personal
+  }
+}
+
+package "Eventos y recaudo" {
+  entity Evento {
+    + título, fecha
+    + lugar, aforo
+    + valor
+  }
+  entity Inscripcion {
+    + asistente
+    + estado
+    + consentimiento
+  }
+  entity Transaccion {
+    + referencia
+    + monto, moneda
+    + estado
+    + pasarela
+  }
+}
+
+package "Bolsas del sector" {
+  entity Vacante {
+    + cargo, modalidad
+    + fecha límite
+    + estado de publicación
+    + motivo de devolución
+  }
+  entity Postulacion {
+    + candidato
+    + estado de gestión
+    + consentimiento
+  }
+  entity Aspirante {
+    + banco de talento
+    + cargo de interés
+    + consentimiento
+  }
+  entity Artista {
+    + nombre artístico
+    + género, tarifa
+    + video
+  }
+  entity Proveedor {
+    + categoría
+    + servicios
+    + vigencia
+  }
+}
+
+package "Contenido institucional" {
+  entity Aliado
+  entity Beneficio
+  entity Noticia
+  entity Iniciativa
+  entity Mensaje {
+    + tipo (contacto/PQR/\n  afiliación/aliado)
+    + radicado
+  }
+  entity Setting
+}
+
+Municipio "1" -- "0..*" Asociado
+Categoria "1" -- "0..*" Asociado
+Asociado "1" -- "0..1" Cartera
+Asociado "1" -- "0..*" User
+Asociado "1" -- "0..*" Vacante
+Asociado "1" -- "0..*" Transaccion
+Vacante "1" -- "0..*" Postulacion
+Evento "1" -- "0..*" Inscripcion
+Inscripcion "1" -- "0..*" Transaccion
+Municipio "1" -- "0..*" RequisitoApertura
+Municipio "1" -- "0..*" ConsultaGuia
+RequisitoApertura "1" -- "0..*" ConsultaGuia
+Municipio "1" -- "0..*" Artista
+Municipio "1" -- "0..*" Proveedor
+
+note bottom of Aspirante
+  Banco de talento independiente:
+  desde el 4 ago 2026 ya no cuelga
+  de una vacante concreta.
+end note
+
+note bottom of ConsultaGuia
+  Métrica anónima del módulo insignia:
+  demuestra el uso de la guía sin
+  registrar a quien la consulta.
+end note
+@enduml

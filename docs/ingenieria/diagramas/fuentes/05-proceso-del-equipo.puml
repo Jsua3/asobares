@@ -1,0 +1,55 @@
+@startuml
+title Proceso de desarrollo del equipo de práctica (BPMN 2.0) — Plataforma Web ASOBARES Quindío
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Sans
+skinparam titleFontSize 17
+skinparam activityBorderColor #555555
+skinparam activityDiamondBorderColor #EE4036
+skinparam arrowColor #333333
+skinparam partitionBorderColor #EE4036
+skinparam noteBackgroundColor #FFF5F4
+skinparam noteBorderColor #EE4036
+
+|Cliente ASOBARES (product owner)|
+start
+note right: Evento de inicio:\ncronograma firmado por la\ndirección ejecutiva (8 semanas)
+:Elicitar necesidades en reuniones\n<<tarea de usuario>>;
+note right: Artefactos: actas de las\nReuniones 1 y 2, matriz de interesados
+
+|Frente A — arquitectura, backend, pagos, CMS|
+repeat
+  :Fase 1 · Redactar requisitos y elegir stack\n<<tarea de usuario>>;
+  note right: Artefactos: ERS v3 (62 RF),\nproduct backlog (14 épicas, 53 HU),\ndiagramas UML y BPMN
+  |Cliente ASOBARES (product owner)|
+  :Revisar la línea base propuesta\n<<tarea de usuario>>;
+backward :Registrar los cambios solicitados\n<<tarea de usuario>>;
+note right: Control de cambios: solicitud escrita →\nevaluación de impacto en el plazo →\naceptación escrita → nueva versión
+repeat while (¿Aprueba la línea base?) is (No) not (Sí, doble firma)
+note right: La línea base congelada es\nla referencia contra la que se\nnegocia todo cambio posterior
+
+|Frente A — arquitectura, backend, pagos, CMS|
+:Fase 2 · Construir base y secciones institucionales\n<<tarea de usuario>>;
+|Frente B — maquetación móvil, directorio, eventos|
+:Fase 2 · Directorio con filtros y módulo de eventos\n<<tarea de usuario>>;
+note right: Artefactos: incrementos en rama,\ncommits descriptivos semanales (RNF-11)
+
+|Frente A — arquitectura, backend, pagos, CMS|
+:Fase 3 · Pasarela en sandbox y panel CMS\n<<tarea de usuario>>;
+note right: Bold real + pasarela simulada,\nconmutables por configuración
+
+|Frente B — maquetación móvil, directorio, eventos|
+:Fase 4 · Matriz de pruebas y manual de usuario\n<<tarea de usuario>>;
+|Frente A — arquitectura, backend, pagos, CMS|
+:Fase 4 · Despliegue, dominio y SSL\n<<tarea de usuario>>;
+
+|Universidad (docente asesor)|
+:Revisar el documento de práctica\n<<tarea de usuario>>;
+note right: Entrega semanal los viernes\n11:59 p. m. (GU-DO-007)
+
+|Cliente ASOBARES (product owner)|
+:Capacitar al equipo administrativo\n<<tarea de usuario>>;
+:Recibir la plataforma\n<<tarea de usuario>>;
+stop
+note right: Fin de terminación:\nplataforma entregada con manual,\ndocumentación técnica, código fuente\ny base de datos exportada\n(22 de septiembre de 2026)
+@enduml
