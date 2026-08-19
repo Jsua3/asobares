@@ -29,6 +29,8 @@
 >
 > **v7 · la trampa que más costó, y que no es técnica:** de veintitantos fallos atrapados en estas dos fases, **cinco fueron pruebas en falso verde escritas por el propio autor del plan** — pruebas que pasaban con el bug reintroducido. Todas tenían la misma forma: `assertSee('alguna palabra')` o una aserción sobre el texto de un archivo, en vez de sobre el comportamiento. Ninguna se detectó leyendo; todas salieron cuando un revisor **mutó el código a propósito** y miró si la prueba se enteraba. Si se relanza cualquier parte de este trabajo: **escribir la prueba no basta, hay que romper el código y ver el rojo.**
 >
+> **v9 (18 ago 2026) — EL CUELLO DE BOTELLA YA NO ES TÉCNICO:** revisión de estado con el repositorio, el cronograma firmado y los correos del docente asesor a la vista. El producto va dos o tres semanas por delante del cronograma y **las cuatro cosas que faltan no son código de producto**: hosting, manual de usuario, capacitación y documentación de entrega. El despliegue del §20 deja de ser tarea y pasa a **riesgo escalado a la junta (R-14)** — el bloqueo es la cuenta y el medio de pago institucionales, no un paso de ingeniería, y no se resuelve desplegando con cuenta personal. El pase de interfaz del §22 **queda en pausa**: ninguno de sus siete hallazgos vivos bloquea la entrega. La nueva **sección 23 manda sobre el orden de trabajo** hasta el 21 de agosto y es lo primero que debe leer una sesión nueva.
+>
 > **v8 (15 ago 2026) — HOSTING DECIDIDO, DESPLIEGUE EN ESPERA DE UN TRÁMITE HUMANO:** un consejo de decisión multiagente (cinco asientos con encargos distintos, prueba de fuga del expediente y refutación cruzada) eligió **Laravel Cloud** para el hosting de pruebas y como candidato definitivo, con una condición que es la mitad del veredicto: **la cuenta nace institucional, no personal**. El despliegue quedó bloqueado únicamente por el paso que un agente no puede dar — el registro/OAuth y el medio de pago son del dueño. **Toda sesión nueva: lee la sección 20 antes de proponer o tocar hosting.** El CLI de Cloud, su skill de despliegue y los certificados ya quedaron listos en esta máquina.
 >
 > **v7 · tres suposiciones sobre la API de Filament que resultaron falsas.** Cuestan una ronda entera cada una, así que conviene leerlas antes de escribir: `Panel::getAssets()` **no existe** en 4.12 (los assets se leen con `registerAssets()` + `FilamentAsset::getScripts()`); una página con `$view` propio **no debe** invocar `{{ $this->footerWidgets }}` a mano, porque el envoltorio `<x-filament-panels::page>` ya lo hace y llamarlo duplica cada widget; y `ChartWidget` **sí** sabe no dibujar, con `isEmpty()` y `getEmptyState()` nativos, sin necesidad de un `Widget` con vista propia.
@@ -636,7 +638,9 @@ La verificación visual se hizo con `playwright-cli` sobre Chromium real (el pan
 
 ---
 
-## 22. EN CURSO — Pase de interfaz iOS y el parpadeo del logo (18 ago 2026)
+## 22. EN PAUSA — Pase de interfaz iOS y el parpadeo del logo (18 ago 2026)
+
+> ⚠️ **En pausa desde el 18 de agosto por decisión del dueño (§23.6).** Lo entregado abajo está fusionado y verde; los siete hallazgos vivos del §22.4 siguen abiertos y siguen siendo válidos, pero ninguno bloquea la entrega del 22 de septiembre, ninguno aparece en el cronograma firmado y ninguno lo califica el docente asesor. **No los retomes sin cerrar antes la Fase 4 del §23.5.** Única excepción admitida: `campo.blade.php:16`, por ser una línea y por incumplir el foco visible.
 
 Encargo del dueño: (1) el logo «aparece y desaparece» en cada navegación; (2) «mejorar toda la interfaz dándole ese toque de iOS que tienen los iPhone». Sobre `main`, tres commits, suite **599 pruebas (588 pasan, 11 omitidas, 0 fallos)**.
 
@@ -686,3 +690,165 @@ Una auditoría multiagente de ocho lentes contra los principios de Apple (16 age
 ### 22.5 Decisión pendiente del dueño
 
 El §10 de la spec de movimiento rechazó a propósito animar navbar, pie, migas, paginación y logo, y el scroll-reveal de las rejillas. **El pase de iOS no ha reabierto ninguno de esos rechazos**: todo lo entregado es material, profundidad y movimiento que ya existía pero estaba roto. Si se quiere ir más lejos —scroll-reveal, hero animado, transiciones de vista con emparejamiento de cromo— hay que reabrir el §10 **a propósito y por escrito**, no de pasada en una revisión.
+
+
+---
+
+## 23. DÓNDE ESTÁ EL PROYECTO Y QUÉ TOCA AHORA (18 ago 2026)
+
+**Esta sección manda sobre el orden de trabajo hasta el 21 de agosto.** Las §15–22 cuentan lo que se construyó y las trampas que costaron rondas; esta cuenta lo que falta y por qué el cuello de botella ya no es técnico. Si retomas el proyecto, lee esta primero y las otras cuando toques su tema.
+
+El diagnóstico en una línea, y no cambió desde la auditoría del 14 de agosto: **el producto va dos o tres semanas por delante del cronograma; la evidencia contractual va por detrás.** Lo que falta no es código de funcionalidad — es despliegue, documentación de entrega y firmas.
+
+### 23.1 Los dos calendarios, que no son el mismo
+
+Hay dos relojes corriendo y se cruzan el viernes 21.
+
+**Carril empresa** — cronograma firmado por la dirección ejecutiva, 8 semanas:
+
+| Semana | Fechas | Lo que exige | Estado real |
+|---|---|---|---|
+| S1 | 27–31 jul | Textos, sitemap, elección de stack | ✅ |
+| S2 | 3–7 ago | Wireframes, paleta, tipografías · **hito: aprobación del diseño** | ✅ construido; el hito nunca se firmó formalmente |
+| S3 | 10–14 ago | Proyecto, **hosting de pruebas**, BD, menú, institucional | ⚠️ todo menos el hosting |
+| **S4** | **17–21 ago** | **Directorio + módulo de eventos** | ✅ hecho desde el 5 de agosto |
+| S5 | 24–28 ago | Pasarela en sandbox | ✅ hecho (Bold real + simulada, conmutable) |
+| S6 | 31 ago–4 sep | Panel CMS | ✅ hecho (18 recursos Filament) |
+| S7 | 7–11 sep | Pruebas globales, dispositivos reales, **bugs que reporta la tutora** | ❌ sin empezar |
+| S8 | 14–18 sep | Dominio + SSL, **capacitación**, **manual de usuario**, documentación técnica, BD exportada | ❌ sin empezar |
+
+**Fecha límite dura: 22 de septiembre de 2026.** Quedan cinco semanas. El adelanto en funcionalidad es real pero no compra nada: **de las cuatro cosas que aún no existen, ninguna es código de producto** — hosting, manual, capacitación y documentación de entrega. Son exactamente los ítems que el cronograma pone al final y que no se pueden apurar el último día porque dependen de terceros (la tutora tiene que probar, la junta tiene que decidir la cuenta).
+
+**Carril universidad** — asesoría de César Augusto Granada. Detalle vivo en `claude/pendientes-practica.md` del Project de claude.ai.
+
+### 23.2 Lo que ha dicho César, con fecha y textual
+
+César **no revisa código** — ese rol es de la tutora empresarial (Natalia Gutiérrez). Lo suyo es el documento de práctica GU-DO-007. Pero lo que califica sí depende del repositorio, y por eso está aquí.
+
+- **10 ago, «Documento de práctica - Semana 5»** (sigue vigente, es la instrucción de fondo): aplicar las correcciones del adjunto `Semana 4 - Documento - Juan José Sua - Revisión CG.docx`; **capítulos 1 a 4 completos** e **iniciar avances de los capítulos 5, 7 y anexos**; ⚠️ «tanto usted como Ingrid deben tener documentos **diferentes**»; respetar **la longitud por capítulo** de la guía de elaboración; entregar **en `.docx`**, no en PDF.
+- **12 ago, «Práctica empresarial»**: por el sismo del 10 de agosto, **no hubo entrega esa semana**. Todo se corre al **viernes 21 de agosto, 11:59:59 p. m.** — «al menos por el momento».
+- **18 ago, «Información urgente sobre estado de prácticas»**: encuesta de la coordinación (afectación por el terremoto, normalidad de la práctica, modalidad). **Ya respondida** el mismo día: sin novedades, se retoman actividades, modalidad híbrida.
+- **18 ago, «Re: PLANEADOR FIRMADO»** — lo más reciente y lo único abierto que él pidió directamente: se envió el planeador con la firma del estudiante y respondió **«haga firmar el documento de la tutora empresarial y me lo vuelve a enviar»**. Requiere la firma de **Natalia**, no la del practicante.
+
+**Reglas de fondo del curso** (correo de inicio, 14 jul): avances todos los viernes 11:59 p. m. sin excepción, tarde = 0.0, la nota del corte es el promedio semanal. Cortes C1 20 % · C2 20 % · C3 60 %.
+
+**El viernes 21 cierra el corte 2 (20 %), y evalúa cuatro cosas:**
+
+1. Fundamentación teórica terminada.
+2. **≥ 80 % del capítulo de desarrollo** (cap. 5, 8 páginas según GU-DO-007).
+3. **Retroalimentación del empresario.**
+4. Cumplimiento de entregas y asesorías.
+
+**Dónde toca esto al código:** el punto 2 se escribe con el repositorio en la mano — 599 pruebas, 22 modelos, 32 migraciones, 18 recursos Filament, el historial de commits, los diagramas y las decisiones de arquitectura de las §15–22 son el material del capítulo 5. Y el punto 3 no se produce escribiendo: **hay que conseguirlo de Natalia y dejarlo por escrito.** Es el único de los cuatro que depende de otra persona, y es el que está en riesgo (§23.3–23.4).
+
+### 23.3 El despliegue pasa de tarea a riesgo (decisión del dueño, 18 ago)
+
+La decisión del §20 sigue en pie y **no se reabre**: Laravel Cloud, plan Starter, cuenta institucional. Lo que cambió es la clasificación. El bloqueo del §20.3 no es una tarea pendiente de un agente ni del practicante: es **el correo y el medio de pago del gremio**, y eso lo decide la junta.
+
+Se registra formalmente, en la línea de los riesgos de la ERS v3:
+
+> **R-14 — La plataforma no vive en ningún servidor por falta de cuenta institucional.** Materializado desde el 15 de agosto. Impacto: el hosting de pruebas era ítem de la S3 (vencida); sin URL viva no hay SSL (S8), no hay pruebas en dispositivos reales de la tutora (S7), y el corte 2 se queda sin su canal natural de retroalimentación del empresario. Dueño del riesgo: la dirección ejecutiva, no el equipo de práctica. Mitigación mientras tanto: §23.4.
+
+**No lo resuelvas desplegando con cuenta personal.** El §20.6 ya lo dice y el consejo de decisión fue unánime en el modo de muerte: la demo sale bien, nadie migra lo que funciona, la práctica termina el 22 de septiembre y las llaves se van con el practicante. Si por urgencia extrema se hiciera, **queda anotado aquí con fecha de traspaso** — no se hace en silencio.
+
+Lo que sí toca hacer es **nombrarlo en la reunión del viernes** (§23.7, punto 5) y dejar constancia. Un riesgo escalado por escrito es evidencia de gestión de proyecto y sirve para el capítulo 6; un riesgo callado es una omisión del practicante.
+
+### 23.4 Cómo conseguir la retroalimentación del empresario sin URL viva
+
+Es el punto que más fácil se pasa por alto porque no parece trabajo de desarrollo, y es el que califica el viernes.
+
+- **La reunión semanal con Natalia es el viernes a las 9:00 a. m.** (acuerdo de la Reunión 1; ⚠️ confirmar que se mantiene tras el sismo, porque la práctica se retomó apenas el 18) — mismo día del cierre del corte 2, con catorce horas de margen. Ahí se resuelven dos cosas de una sentada: la **firma del planeador** que pidió César el 18 (§23.2) y la **retroalimentación**.
+- **Demo sin hosting:** `php artisan serve` desde el portátil, o recorrido grabado. Ya hay precedente: los tres vídeos con `playwright-cli` sobre Chromium real del 17 de agosto (§21.4). Un recorrido de 8 capítulos grabado se le puede dejar a la tutora para que lo revise con calma y reporte por escrito, que es justo el bucle que el cronograma pide para la S7.
+- ⚠️ **La retroalimentación tiene que quedar escrita y fechada.** Un «está muy bonito» dicho en la reunión no es evidencia para el corte 2. Sirve: un acta corta firmada, un formato de retroalimentación, o un correo suyo respondiendo. Lo que se lleve, se anexa al documento de práctica.
+- **Abre el registro de bugs de la tutora ya**, aunque tenga una sola entrada. El cronograma nombra explícitamente «corrección de errores reportados por el tutor de práctica» como el contenido de la S7: llegar a septiembre con un registro que arrancó en agosto se lee muy distinto a improvisarlo.
+
+### 23.5 Orden de trabajo hasta el viernes 21 — Fase 4, la parte que no depende del hosting
+
+Cuatro artefactos que el cronograma exige, que **no necesitan servidor**, y que alimentan a la vez la entrega a la empresa y los capítulos 5, 7 y anexos que pide César. Ese doble uso es el criterio por el que están primero.
+
+> ✅ **Los puntos 1, 2 y 3 se ejecutaron el 18 de agosto.** Existe `docs/ingenieria/` con la matriz de pruebas, el manual de usuario y siete diagramas con sus fuentes. Lo que sigue abierto está en el §23.9. El índice de la carpeta es `docs/ingenieria/README.md` y es el que deben citar los anexos del documento de práctica.
+
+1. ✅ **Diagramas UML/BPMN a `docs/ingenieria/`.** Los cuatro de la S2 ya existen (casos de uso, contexto nivel 0, BPMN de afiliación, BPMN de guía normativa) con sus fuentes PlantUML en `claude/diagramas-uml-bpmn-fuentes.md` del Project — pero **viven fuera del repositorio** — verificado el 18 de agosto: `docs/ingenieria/` no existe y en `docs/` solo está `superpowers/`. Es justo lo que la auditoría del 14 de agosto marcó y sigue igual. Falta además el flujograma del proceso propio del equipo. ⚠️ Van a `docs/ingenieria/`, **no** a `docs/superpowers/`: eso último es área de trabajo de agentes y los anexos del documento no deben apuntar ahí.
+2. ✅ **Manual de usuario** (texto completo; faltan 11 capturas, §23.9). El panel está terminado, así que ya se puede escribir; no hay razón para dejarlo a la S8. Los cinco guiones del README (flujo de aprobación, pago simulado, cartera del afiliado, importar CSV de la contadora, PQR con radicado) son el esqueleto. ⚠️ El destinatario es **personal no técnico** — es literalmente el RNF-14. Capturas del panel real, no prosa. El cronograma acepta PDF o vídeo.
+3. ✅ **Matriz de pruebas.** Existen 599 pruebas automatizadas y **cero** matriz legible por un humano. Son cosas distintas y el cronograma nombra la segunda. No hay que escribir pruebas nuevas: hay que **mapear las que ya pasan contra los códigos RF-01…RF-62 de la ERS v3**, que es exactamente la trazabilidad que el Anexo C ya promete. Es trabajo de tabla, no de desarrollo. **Hallazgo al construirla:** el árbol tiene **460 métodos de prueba en 48 archivos**, que se ejecutan como **599 casos** porque 15 métodos usan proveedor de datos y expanden a varios casos cada uno. Las dos cifras son correctas y miden cosas distintas — al citarlas en el documento, decir cuál es cuál.
+4. ⬜ **Base de datos exportada.** Entregable final explícito: esquema + datos semilla. Trivial hoy, y evita la carrera de septiembre.
+
+Y uno barato que da un número citable:
+
+5. ⬜ **Medición de móvil y de los 2,5 s.** El cronograma manda mobile-first y portada por debajo de 2,5 segundos, y la auditoría anotó que **no hay ninguna medición**, solo marcado responsive. Lighthouse o `playwright-cli` sobre las rutas públicas reales, en los dos temas. Media hora, y el capítulo 5 pasa de «se implementó mobile-first» a una cifra verificable. El §22.1 ya dejó el instrumental montado para medir en el navegador real.
+
+### 23.6 Lo que NO se toca esta semana
+
+- **El pase de interfaz iOS (§22.4) queda en pausa.** Los siete hallazgos vivos —foco, ayuda del campo, objetivos táctiles, `.pulsable`, escala tipográfica, `transition-colors`, flechas sin Poppins, navbar en dos líneas— siguen abiertos y siguen siendo válidos, pero **ninguno bloquea la entrega, ninguno está en el cronograma y ninguno lo califica César.** Abrir interfaz ahora se come la semana y no mueve nada de lo que vence el viernes. Única excepción razonable si sobra un hueco: `campo.blade.php:16`, porque es **una línea** (`focus:outline-none` fuera) y arregla el único indicador de foco de todos los formularios del sitio, que hoy incumple.
+- **Ningún módulo nuevo.** La congelación de alcance del 14 de agosto sigue vigente y ahora tiene más razón, no menos.
+- **La firma de la ERS v3 no es trabajo de código.** Es un punto de la reunión del viernes (§23.7).
+
+### 23.7 Qué llevar a la reunión del viernes 21, 9:00 a. m.
+
+Una sola lista, porque es la única ventana de la semana con la tutora y de ahí sale medio corte 2:
+
+1. **Planeador FO-DO-100 para la firma de Natalia como tutora empresarial** — es lo que César pidió el 18 de agosto y lo único suyo que está abierto. Reenviárselo apenas esté firmado.
+2. **ERS v3 para firma** y las **13 decisiones DPV**. Primero la **DPV-02**: la contradicción de qué se ve con sesión y qué sin ella condiciona ocho requisitos que **ya están codificados**. Es la única de las trece que puede obligar a reescribir código, así que se pregunta antes que las otras doce.
+3. **Demo + formato de retroalimentación por escrito** (§23.4).
+4. **P-06: la base de los ~60 asociados con sus autorizaciones de publicación.** Sin ella el directorio se lanza vacío — riesgo R-02, ya materializado. Se lleva pidiendo desde principios de agosto; conviene ponerle fecha comprometida en el acta, no volver a pedirlo de palabra.
+5. **La cuenta institucional para el hosting** (§23.3): correo `asobaresquindio@asobares.org` y medio de pago del gremio. Se plantea como decisión de la junta con su consecuencia dicha en voz alta — sin esto no hay SSL, no hay pruebas en dispositivos y no hay sitio en vivo el 22 de septiembre.
+
+### 23.8 Estado del árbol al escribir esto
+
+- `main` en **`4f15d24`** («Anota en el prompt maestro el pase de interfaz iOS»), **sincronizado con `origin`** — el hueco de 71 commits que denunció la auditoría del 14 de agosto **está cerrado**, y con él el incumplimiento de commits semanales en GitHub. `origin/main` refleja hoy el trabajo real.
+- Suite: **599 pruebas** (588 pasan, 11 omitidas, 0 fallos) — cifra **registrada por la sesión del 18 de agosto (§22), no re-ejecutada en esta revisión**: el entorno desde el que se escribe esto no tiene PHP, así que la verificación es documental. Confírmala con `php artisan test` antes de citarla en el documento de práctica. Las 11 omisiones siguen siendo legítimas (recursos sin página de creación/edición: Cartera, Postulación, Vacante).
+- Árbol limpio salvo `.claude/settings.local.json` sin seguir — correcto, es configuración local.
+- `.env` local: `DB_CONNECTION=sqlite`, `PAYMENT_DRIVER=fake`, `MAIL_MAILER=log`, `QUEUE_CONNECTION=sync`. Es el perfil de demostración local; el de despliegue está en el §20.5 y no se ha usado.
+- ⚠️ Rama **`claude/suspicious-colden-d9e9e8`** parada desde el 4 de agosto (`82398a6`), 14 días atrás de `main`. Verificar que su contenido esté fusionado y borrarla; una rama muerta en un repositorio que la universidad va a mirar es ruido.
+- El repositorio sigue siendo **`Jsua3/asobares`, cuenta personal de GitHub**. Misma familia de problema que el §20.2: recomendado moverlo a una organización del gremio o añadir un segundo administrador antes del 22 de septiembre.
+
+
+### 23.9 Lo que queda de la Fase 4, y quién puede hacerlo
+
+Los tres artefactos de escritorio están cerrados (§23.5). Lo que sigue **exige ejecutar la aplicación**, así que corresponde a una sesión con PHP en la máquina, no a una que solo edite archivos.
+
+| Pendiente | Cómo se cierra | Alimenta |
+|---|---|---|
+| **Re-ejecutar la suite** | `php artisan test` y actualizar la tabla del §2 de `matriz-de-pruebas.md` con la salida real | La matriz declara explícitamente que su cifra es documental hasta que esto ocurra |
+| **Las 11 capturas del manual** | `php artisan migrate:fresh --seed`, tema claro, 1440 px, sin datos personales reales. Los marcadores `[CAPTURA: …]` dicen exactamente qué pantalla va en cada hueco | Manual de usuario (S8 del cronograma) |
+| **Base de datos exportada** | Esquema + datos semilla, en el formato que se entregue al gremio | Entregable final explícito del cronograma |
+| **Medición de rendimiento** | Lighthouse o `playwright-cli` sobre las rutas públicas, en los dos temas. Es media hora | RNF-02 y el capítulo 5: convierte «mobile-first» de promesa en cifra |
+| **Dispositivos reales** | Android + iOS sobre el árbol local | RNF-01 y RNF-07, contenido declarado de la S7 |
+
+⚠️ **Dos cosas que la matriz destapó y que son decisiones, no tareas:**
+
+1. **RF-19 — el calendario de eventos.** El cronograma firmado dice «calendario + formularios»; lo construido es una grilla Próximos/Pasados. Es una diferencia con el documento que firmó la dirección ejecutiva. Se cierra de una de dos formas, y ambas valen: construir la vista de calendario, o **acordar por escrito con Natalia que la grilla la sustituye**. Lo que no vale es dejarlo sin nombrar y que aparezca en la revisión final.
+2. **RNF-12 — el foco visible.** `campo.blade.php:16` anula el indicador de foco de todos los formularios del sitio. Ya estaba anotado en el §22.4 como parte del pase de iOS en pausa, pero la matriz lo eleva: es incumplimiento de un requisito no funcional contratado, no un pulido de interfaz. **Es una línea.** Tómala aunque el resto del §22 siga en pausa.
+
+### 23.10 Regla para la carpeta nueva
+
+`docs/ingenieria/` es **documentación de entrega**: la lee el gremio, la citan los anexos del documento de práctica y sobrevive al 22 de septiembre.
+
+`docs/superpowers/` es **área de trabajo de agentes**: especificaciones y planes de ejecución. No se referencia desde los anexos ni se le entrega a nadie.
+
+No las mezcles. Un plan de agente citado como anexo académico se lee exactamente como lo que es.
+
+⚠️ El `06-modelo-de-datos.puml` se construyó leyendo las migraciones y las relaciones declaradas en los modelos: documenta **lo que existe**, no lo que se pensaba construir. Si cambia el esquema y no se regenera, pasa a mentir. Regenerarlo es `java -jar plantuml.jar -charset UTF-8 -tpng docs/ingenieria/diagramas/fuentes/*.puml` con PlantUML 1.2024.8.
+
+### 23.9 Fase 4 — lo que se cerró la noche del 18 de agosto
+
+El §23.5 pedía cinco artefactos que no dependen del hosting. **Los cinco están hechos.** `docs/ingenieria/` ya existe y ya no es una carpeta prometida.
+
+| # | Artefacto | Estado |
+|---|---|---|
+| 1 | Diagramas UML/BPMN en `docs/ingenieria/diagramas/` | ✅ 7 diagramas en PNG con sus fuentes PlantUML editables, incluidos el flujograma del proceso del equipo y el modelo de datos real |
+| 2 | Manual de usuario | ✅ Texto **y las 11 capturas** del panel real. Falta solo exportarlo a PDF |
+| 3 | Matriz de pruebas | ✅ Trazabilidad RF-01…RF-62 y RNF-01…RNF-14, con los huecos declarados |
+| 4 | Base de datos exportada | ✅ `docs/ingenieria/base-de-datos/`: esquema, volcado completo e inventario de las 37 tablas |
+| 5 | Medición de móvil y de los 2,5 s | ✅ `docs/ingenieria/medicion-de-rendimiento.md` |
+
+**Las dos cifras que antes eran documentales y ahora están verificadas:**
+
+- **La suite se re-ejecutó**, como pedía el §23.8: **599 pruebas · 588 pasan · 11 omitidas · 0 fallos · 1.699 aserciones · 169 s**. Coincide exactamente con lo que se venía citando. Ya es citable en el capítulo 5 sin advertencia.
+- **RNF-02 dejó de ser una promesa.** 78 mediciones con Chromium real —12 rutas públicas, móvil 4G estrangulado y escritorio, los dos temas, tres corridas por combinación, caché en frío—: **la portada pinta en 972 ms contra un techo contractual de 2.500 ms**. Ninguna ruta lo incumple. La más lenta es `/boletin` con 2.132 ms, y es la que hay que vigilar si crecen las portadas del boletín.
+
+**El residuo honesto de esa medición:** está tomada contra `localhost`, así que **no incluye la latencia real hasta un servidor**. Hay que repetirla contra el dominio cuando exista despliegue — es decir, cuando se levante R-14. Y sigue sin haber dispositivos reales: RNF-01 y RNF-07 continúan abiertos y son contenido de la S7.
+
+**Verificado de paso:** la rama `claude/suspicious-colden-d9e9e8` que el §23.8 mandaba comprobar **está totalmente fusionada en `main`** (`git log main..rama` sale vacío). Se puede borrar sin perder nada.
+
+**Lo que queda de Fase 4 ya no lo puede hacer un agente:** exportar el manual a PDF, la capacitación con su constancia, las pruebas en dispositivos de la tutora, y todo lo que cuelga de R-14.
