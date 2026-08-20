@@ -6,19 +6,9 @@
 
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
-        <div class="inline-flex rounded-xl border border-linea p-1" role="group" aria-label="Filtrar por fecha">
-            @foreach (['proximos' => "Próximos ({$totalProximos})", 'pasados' => "Pasados ({$totalPasados})"] as $clave => $texto)
-                <a href="{{ route('eventos.index', ['cuando' => $clave]) }}"
-                   @class([
-                       'rounded-lg px-5 py-2 text-sm transition-colors',
-                       'bg-marca-500 font-medium text-white' => $cuando === $clave,
-                       'text-tenue hover:text-fuerte' => $cuando !== $clave,
-                   ])
-                   @if ($cuando === $clave) aria-current="true" @endif>
-                    {{ $texto }}
-                </a>
-            @endforeach
-        </div>
+        <x-publico.conmutador-eventos :activo="$cuando"
+                                      :total-proximos="$totalProximos"
+                                      :total-pasados="$totalPasados" />
 
         @if ($eventos->isEmpty())
             <div class="tarjeta mt-8 p-12 text-center">
@@ -30,7 +20,7 @@
         @else
             <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($eventos as $evento)
-                    <article class="tarjeta tarjeta-hover flex flex-col overflow-hidden">
+                    <article class="tarjeta tarjeta-hover tarjeta-pulsable flex flex-col overflow-hidden">
                         <a href="{{ route('eventos.show', $evento) }}" class="flex flex-1 flex-col">
                             @if ($evento->imagen)
                                 <img src="{{ Storage::disk('public')->url($evento->imagen) }}" alt=""
@@ -64,7 +54,7 @@
                                     {{ Str::limit(strip_tags($evento->descripcion), 130) }}
                                 </p>
 
-                                <span class="mt-4 text-sm font-medium text-acento">Ver detalle →</span>
+                                <span class="mt-4 text-sm font-medium text-acento">Ver detalle&nbsp;<x-publico.flecha /></span>
                             </div>
                         </a>
                     </article>
