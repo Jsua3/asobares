@@ -35,9 +35,9 @@
 
     <nav aria-label="Ruta de navegación" class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
         <ol class="flex flex-wrap items-center gap-2 text-xs text-apagado">
-            <li><a href="{{ route('inicio') }}" class="hover:text-acento">Inicio</a></li>
+            <li><a href="{{ route('inicio') }}" class="enlace-accion flex min-h-11 min-w-11 items-center justify-center hover:text-acento">Inicio</a></li>
             <li aria-hidden="true">/</li>
-            <li><a href="{{ route('directorio.index') }}" class="hover:text-acento">Directorio</a></li>
+            <li><a href="{{ route('directorio.index') }}" class="enlace-accion flex min-h-11 min-w-11 items-center justify-center hover:text-acento">Directorio</a></li>
             <li aria-hidden="true">/</li>
             <li class="text-suave" aria-current="page">{{ $asociado->nombre }}</li>
         </ol>
@@ -99,8 +99,8 @@
                                         @if ($vacante->franja_horaria) · {{ $vacante->franja_horaria }} @endif
                                     </p>
                                 </div>
-                                <a href="{{ route('empleo.index') }}" class="enlace-accion text-sm text-acento hover:text-acento-fuerte">
-                                    Ver en la bolsa →
+                                <a href="{{ route('empleo.index') }}" class="enlace-accion relative text-sm text-acento after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento-fuerte">
+                                    Ver en la bolsa&nbsp;<x-publico.flecha />
                                 </a>
                             </li>
                         @endforeach
@@ -143,8 +143,8 @@
                         ] as $campo => $texto)
                             @if ($asociado->{$campo})
                                 <a href="{{ $asociado->{$campo} }}" target="_blank" rel="noopener nofollow"
-                                   class="block rounded-xl border border-linea px-4 py-2.5 text-center text-sm text-tinta transition-colors hover:border-marca-500/50">
-                                    {{ $texto }} ↗
+                                   class="pulsable block min-h-11 rounded-xl border border-linea px-4 py-2.5 text-center text-sm text-tinta hover:border-marca-500/50">
+                                    {{ $texto }}&nbsp;<x-publico.flecha direccion="externa" />
                                 </a>
                             @endif
                         @endforeach

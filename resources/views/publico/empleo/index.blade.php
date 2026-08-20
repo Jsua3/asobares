@@ -38,7 +38,7 @@
                     </x-publico.boton>
                     @if (array_filter($filtros ?? []))
                         <a href="{{ route('empleo.index') }}"
-                           class="rounded-xl border border-linea px-4 py-2.5 text-sm text-tenue hover:text-fuerte">Limpiar</a>
+                           class="pulsable min-h-11 rounded-xl border border-linea px-4 py-2.5 text-sm text-tenue hover:text-fuerte">Limpiar</a>
                     @endif
                 </div>
             </form>
@@ -66,7 +66,7 @@
                                     </div>
 
                                     <h3 class="mt-3 font-display text-lg font-semibold">
-                                        <a href="{{ route('empleo.show', $vacante) }}" class="hover:text-acento">
+                                        <a href="{{ route('empleo.show', $vacante) }}" class="enlace-accion hover:text-acento">
                                             {{ $vacante->cargo }}
                                         </a>
                                     </h3>

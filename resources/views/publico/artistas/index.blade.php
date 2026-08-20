@@ -19,7 +19,7 @@
                 </x-publico.boton>
                 @if (array_filter($filtros ?? []))
                     <a href="{{ route('artistas.index') }}"
-                       class="rounded-xl border border-linea px-4 py-2.5 text-sm text-tenue hover:text-fuerte">Limpiar</a>
+                       class="pulsable min-h-11 rounded-xl border border-linea px-4 py-2.5 text-sm text-tenue hover:text-fuerte">Limpiar</a>
                 @endif
             </div>
         </form>
@@ -32,7 +32,7 @@
         @else
             <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($artistas as $artista)
-                    <article class="tarjeta tarjeta-hover flex flex-col overflow-hidden">
+                    <article class="tarjeta tarjeta-hover tarjeta-pulsable flex flex-col overflow-hidden">
                         <a href="{{ route('artistas.show', $artista) }}" class="flex flex-1 flex-col">
                             @if ($artista->foto)
                                 <img src="{{ Storage::disk('public')->url($artista->foto) }}" alt=""
@@ -47,7 +47,7 @@
                                         {{ $artista->tipo->getLabel() }}
                                     </span>
                                     @if ($artista->tieneVideo())
-                                        <span class="rounded-full border border-linea px-2.5 py-1 text-tenue">▶ Con video</span>
+                                        <span class="inline-flex items-center gap-1 rounded-full border border-linea px-2.5 py-1 text-tenue"><svg class="size-[.85em]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5 19.5 12 6 19.5Z"/></svg>Con video</span>
                                     @endif
                                 </div>
 
@@ -65,7 +65,7 @@
                                             {{ $artista->tarifa_desde ? pesos($artista->tarifa_desde) : 'A convenir' }}
                                         </p>
                                     </div>
-                                    <span class="text-sm font-medium text-acento">Ver ficha →</span>
+                                    <span class="text-sm font-medium text-acento">Ver ficha&nbsp;<x-publico.flecha /></span>
                                 </div>
                             </div>
                         </a>

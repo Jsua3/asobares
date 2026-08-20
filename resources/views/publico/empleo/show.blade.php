@@ -32,7 +32,7 @@
 
     <div class="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
 
-        <a href="{{ route('empleo.index') }}" class="enlace-accion text-sm text-acento hover:text-acento-fuerte">← Todas las vacantes</a>
+        <a href="{{ route('empleo.index') }}" class="enlace-accion relative inline-block text-sm text-acento after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento-fuerte"><x-publico.flecha direccion="izquierda" />&nbsp;Todas las vacantes</a>
 
         <header class="mt-4">
             <div class="flex flex-wrap items-center gap-2 text-xs">
@@ -115,8 +115,10 @@
             @if ($enlace = enlaceWhatsapp($vacante->whatsapp_contacto, "Hola, vi la vacante de {$vacante->cargo} en la bolsa de empleo de ASOBARES Quindío."))
                 <p class="mt-6 text-xs text-apagado">
                     ¿Prefieres escribir?
+                    {{-- `whitespace-nowrap` por lo mismo que en `inicio.blade.php`: el espacio duro no
+                         frena el salto delante del SVG. Aquí la flecha quedaba huérfana a 368-376 px. --}}
                     <a href="{{ $enlace }}" target="_blank" rel="noopener nofollow"
-                       class="enlace-accion text-acento hover:text-acento-fuerte">Contactar por WhatsApp ↗</a>
+                       class="enlace-accion whitespace-nowrap text-acento hover:text-acento-fuerte">Contactar por WhatsApp&nbsp;<x-publico.flecha direccion="externa" /></a>
                 </p>
             @endif
         </section>
@@ -126,7 +128,7 @@
                 <h2 id="similares" class="font-display text-xl font-bold">Otras vacantes del área</h2>
                 <ul class="mt-5 space-y-3">
                     @foreach ($similares as $similar)
-                        <li class="tarjeta tarjeta-hover p-5">
+                        <li class="tarjeta tarjeta-hover tarjeta-pulsable p-5">
                             <a href="{{ route('empleo.show', $similar) }}" class="block">
                                 <p class="font-display text-base font-semibold">{{ $similar->cargo }}</p>
                                 <p class="mt-1 text-xs text-apagado">

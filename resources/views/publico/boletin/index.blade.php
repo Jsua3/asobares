@@ -8,7 +8,7 @@
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('boletin.index') }}"
                @class([
-                   'rounded-xl border px-4 py-2 text-sm transition-colors',
+                   'pulsable inline-flex min-h-11 items-center rounded-xl border px-4 text-sm',
                    'border-marca-500 bg-marca-500/10 font-medium text-acento-fuerte' => empty($filtros['categoria']),
                    'border-linea text-suave hover:border-marca-500/40' => ! empty($filtros['categoria']),
                ])
@@ -17,7 +17,7 @@
             @foreach ($categorias as $categoria)
                 <a href="{{ route('boletin.index', ['categoria' => $categoria->value]) }}"
                    @class([
-                       'rounded-xl border px-4 py-2 text-sm transition-colors',
+                       'pulsable inline-flex min-h-11 items-center rounded-xl border px-4 text-sm',
                        'border-marca-500 bg-marca-500/10 font-medium text-acento-fuerte' => ($filtros['categoria'] ?? null) === $categoria->value,
                        'border-linea text-suave hover:border-marca-500/40' => ($filtros['categoria'] ?? null) !== $categoria->value,
                    ])
@@ -33,7 +33,7 @@
         @else
             <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($noticias as $noticia)
-                    <article class="tarjeta tarjeta-hover flex flex-col overflow-hidden">
+                    <article class="tarjeta tarjeta-hover tarjeta-pulsable flex flex-col overflow-hidden">
                         <a href="{{ route('boletin.show', $noticia) }}" class="flex flex-1 flex-col">
                             @if ($noticia->imagen)
                                 <img src="{{ Storage::disk('public')->url($noticia->imagen) }}" alt=""
@@ -51,7 +51,7 @@
                                 </div>
                                 <h2 class="mt-3 font-display text-base font-semibold leading-snug">{{ $noticia->titulo }}</h2>
                                 <p class="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-tenue">{{ $noticia->extracto }}</p>
-                                <span class="mt-4 text-sm font-medium text-acento">Leer →</span>
+                                <span class="mt-4 text-sm font-medium text-acento">Leer&nbsp;<x-publico.flecha /></span>
                             </div>
                         </a>
                     </article>

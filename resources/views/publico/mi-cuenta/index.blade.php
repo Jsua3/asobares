@@ -95,7 +95,7 @@
                 <p class="mt-3 text-xs text-apagado">
                     Información actualizada {{ $cartera->actualizado_at->diffForHumans() }}.
                     Si no coincide con tus registros, escríbenos a
-                    <a href="mailto:{{ ajuste('contacto_correo') }}" class="text-acento">{{ ajuste('contacto_correo') }}</a>.
+                    <a href="mailto:{{ ajuste('contacto_correo') }}" class="enlace-accion text-acento">{{ ajuste('contacto_correo') }}</a>.
                 </p>
             @endif
         </section>
@@ -170,8 +170,8 @@
 
                         @if ($aliado->url)
                             <a href="{{ $aliado->url }}" target="_blank" rel="noopener"
-                               class="enlace-accion mt-4 inline-block text-sm text-acento hover:text-acento-fuerte">
-                                Sitio del aliado ↗
+                               class="enlace-accion relative mt-4 inline-block text-sm text-acento after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento-fuerte">
+                                Sitio del aliado&nbsp;<x-publico.flecha direccion="externa" />
                             </a>
                         @endif
                     </div>

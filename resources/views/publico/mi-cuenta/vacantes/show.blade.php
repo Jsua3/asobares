@@ -4,8 +4,8 @@
     <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
 
         <header>
-            <a href="{{ route('mi-cuenta.vacantes.index') }}" class="enlace-accion text-sm text-acento hover:text-acento-fuerte">
-                ← Mis vacantes
+            <a href="{{ route('mi-cuenta.vacantes.index') }}" class="enlace-accion relative inline-block text-sm text-acento after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento-fuerte">
+                <x-publico.flecha direccion="izquierda" />&nbsp;Mis vacantes
             </a>
             <h1 class="mt-3 font-display text-3xl font-bold tracking-tight">{{ $vacante->cargo }}</h1>
             <p class="mt-1.5 text-sm text-tenue">
@@ -55,15 +55,26 @@
                                   class="flex shrink-0 items-center gap-2">
                                 @csrf
                                 @method('PATCH')
+                                {{-- En una lista de N postulaciones hay N selects
+                                     idénticos y N botones que dicen «Guardar»: sin el
+                                     nombre de la persona, un lector de pantalla anuncia
+                                     «cuadro combinado» y nada más (SC 4.1.2 y 3.3.2).
+                                     La utilidad que esta clase llevaba para apagar el
+                                     outline dejaba el foco en manos de un anillo de
+                                     2,21:1, por debajo del 3:1 de SC 1.4.11; el borde
+                                     opaco repone el acuse que `:focus-visible` no da
+                                     al desplegar el select con ratón. --}}
                                 <select name="estado"
-                                        class="rounded-xl border border-linea bg-fondo px-3 py-2 text-sm text-tinta focus:outline-none focus:ring-2 focus:ring-marca-500/60">
+                                        aria-label="Estado de la postulación de {{ $postulacion->nombre }}"
+                                        class="min-h-11 rounded-xl border border-linea bg-fondo px-3 py-2 text-sm text-tinta focus:border-marca-500">
                                     @foreach ($estados as $estado)
                                         <option value="{{ $estado->value }}" @selected($postulacion->estado === $estado)>
                                             {{ $estado->getLabel() }}
                                         </option>
                                     @endforeach
                                 </select>
-                                <x-publico.boton variante="contorno">
+                                <x-publico.boton variante="contorno"
+                                                 aria-label="Guardar el estado de la postulación de {{ $postulacion->nombre }}">
                                     Guardar
                                 </x-publico.boton>
                             </form>

@@ -22,9 +22,11 @@
                 <x-publico.campo nombre="email" etiqueta="Correo electrónico" tipo="email" requerido />
                 <x-publico.campo nombre="password" etiqueta="Contraseña" tipo="password" requerido />
 
-                <label class="flex items-center gap-2.5 text-sm text-tenue">
+                {{-- La etiqueta ES el objetivo: envuelve a la casilla de 16 px y dispara
+                     el mismo control. Con `min-h-11` toda la fila pasa a 44. --}}
+                <label class="flex min-h-11 items-center gap-2.5 text-sm text-tenue">
                     <input type="checkbox" name="recordarme" value="1"
-                           class="h-4 w-4 rounded border-linea-fuerte bg-fondo text-marca-500 focus:ring-2 focus:ring-marca-500/60">
+                           class="h-4 w-4 rounded border-linea-fuerte bg-fondo text-marca-500">
                     Mantener la sesión iniciada
                 </label>
 

@@ -53,7 +53,7 @@
     <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="grid gap-5 md:grid-cols-2">
             <a href="{{ route('guia.index') }}"
-               class="tarjeta tarjeta-hover group flex flex-col justify-between p-7">
+               class="tarjeta tarjeta-hover tarjeta-pulsable group flex flex-col justify-between p-7">
                 <div>
                     <span class="inline-flex rounded-xl bg-marca-500/10 p-3 text-acento">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true">
@@ -66,11 +66,11 @@
                         con checklist, costos y los formatos oficiales listos para descargar.
                     </p>
                 </div>
-                <span class="enlace-accion mt-6 text-sm font-medium text-acento group-hover:text-acento-fuerte">Ver la guía →</span>
+                <span class="enlace-accion mt-6 text-sm font-medium text-acento group-hover:text-acento-fuerte">Ver la guía&nbsp;<x-publico.flecha /></span>
             </a>
 
             <a href="{{ route('empleo.index') }}"
-               class="tarjeta tarjeta-hover group flex flex-col justify-between p-7">
+               class="tarjeta tarjeta-hover tarjeta-pulsable group flex flex-col justify-between p-7">
                 <div>
                     <span class="inline-flex rounded-xl bg-marca-500/10 p-3 text-acento">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24" aria-hidden="true">
@@ -83,7 +83,7 @@
                         Publican solo los establecimientos asociados.
                     </p>
                 </div>
-                <span class="enlace-accion mt-6 text-sm font-medium text-acento group-hover:text-acento-fuerte">Ver vacantes →</span>
+                <span class="enlace-accion mt-6 text-sm font-medium text-acento group-hover:text-acento-fuerte">Ver vacantes&nbsp;<x-publico.flecha /></span>
             </a>
         </div>
     </section>
@@ -96,8 +96,8 @@
                     <h2 id="destacados" class="font-display text-2xl font-bold sm:text-3xl">La noche del Quindío</h2>
                     <p class="mt-2 text-sm text-tenue">Algunos de los establecimientos afiliados al gremio.</p>
                 </div>
-                <a href="{{ route('directorio.index') }}" class="enlace-accion text-sm font-medium text-acento hover:text-acento-fuerte">
-                    Ver el directorio completo →
+                <a href="{{ route('directorio.index') }}" class="enlace-accion relative text-sm font-medium text-acento after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento-fuerte">
+                    Ver el directorio completo&nbsp;<x-publico.flecha />
                 </a>
             </div>
 
@@ -136,14 +136,14 @@
         <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" aria-labelledby="eventos">
             <div class="flex flex-wrap items-end justify-between gap-4">
                 <h2 id="eventos" class="font-display text-2xl font-bold sm:text-3xl">Próximos eventos del gremio</h2>
-                <a href="{{ route('eventos.index') }}" class="enlace-accion text-sm font-medium text-acento hover:text-acento-fuerte">
-                    Ver todos →
+                <a href="{{ route('eventos.index') }}" class="enlace-accion relative text-sm font-medium text-acento after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento-fuerte">
+                    Ver todos&nbsp;<x-publico.flecha />
                 </a>
             </div>
 
             <div class="mt-8 grid gap-5 md:grid-cols-3">
                 @foreach ($proximosEventos as $evento)
-                    <article class="tarjeta tarjeta-hover overflow-hidden">
+                    <article class="tarjeta tarjeta-hover tarjeta-pulsable overflow-hidden">
                         <a href="{{ route('eventos.show', $evento) }}">
                             @if ($evento->imagen)
                                 <img src="{{ Storage::disk('public')->url($evento->imagen) }}" alt=""
@@ -194,7 +194,11 @@
                 </div>
                 <p class="mt-4 text-xs text-apagado">
                     El detalle de cada convenio es información privada de los afiliados.
-                    <a href="{{ route('mi-cuenta.index') }}" class="enlace-accion text-acento hover:text-acento-fuerte">Inicia sesión para verlo →</a>
+                    {{-- `whitespace-nowrap` porque el espacio duro NO basta: Chromium parte la línea
+                         delante de una caja atómica aunque la preceda un espacio de no separación
+                         (medido; con el carácter de antes sí bastaba). Sin esto la flecha cae sola
+                         al renglón siguiente entre 328 y 336 px y otra vez cerca de 600. --}}
+                    <a href="{{ route('mi-cuenta.index') }}" class="enlace-accion whitespace-nowrap text-acento hover:text-acento-fuerte">Inicia sesión para verlo&nbsp;<x-publico.flecha /></a>
                 </p>
             </div>
         </section>
@@ -213,8 +217,8 @@
                         <p class="mt-2 max-w-2xl text-sm text-tenue">{{ ajuste('iniciativas_intro') }}</p>
                     </div>
                     <a href="{{ route('quienes-somos') }}#iniciativas"
-                       class="enlace-accion text-sm font-medium text-acento hover:text-acento-fuerte">
-                        Ver el detalle →
+                       class="enlace-accion relative text-sm font-medium text-acento after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento-fuerte">
+                        Ver el detalle&nbsp;<x-publico.flecha />
                     </a>
                 </div>
 

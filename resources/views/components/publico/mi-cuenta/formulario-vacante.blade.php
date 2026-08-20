@@ -34,6 +34,6 @@
         <x-publico.boton>
             {{ $textoBoton }}
         </x-publico.boton>
-        <a href="{{ route('mi-cuenta.vacantes.index') }}" class="enlace-accion text-sm text-tenue hover:text-fuerte">Cancelar</a>
+        <a href="{{ route('mi-cuenta.vacantes.index') }}" class="enlace-accion flex min-h-11 items-center text-sm text-tenue hover:text-fuerte">Cancelar</a>
     </div>
 </form>

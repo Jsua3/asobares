@@ -1,7 +1,10 @@
 @props(['asociado'])
 
 <article class="tarjeta tarjeta-hover group overflow-hidden">
-    <a href="{{ route('directorio.show', $asociado) }}" class="block">
+    {{-- El portador va en este <a> y NO en el <article>: `:active` casa
+         también con los ancestros, así que arriba haría que pulsar «Ver ficha»
+         encogiera la tarjeta entera y atenuara el enlace a la vez. --}}
+    <a href="{{ route('directorio.show', $asociado) }}" class="tarjeta-pulsable block">
         <div class="relative aspect-[4/3] overflow-hidden bg-superficie-alta">
             @if ($asociado->foto_portada)
                 <img src="{{ Storage::disk('public')->url($asociado->foto_portada) }}"
@@ -33,13 +36,16 @@
 
         <div class="mt-4 flex items-center justify-between gap-3">
             <a href="{{ route('directorio.show', $asociado) }}"
-               class="enlace-accion text-sm font-medium text-acento hover:text-acento-fuerte">
+               class="enlace-accion relative text-sm font-medium text-acento after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento-fuerte">
                 Ver ficha
             </a>
 
             @if ($enlace = enlaceWhatsapp($asociado->whatsapp, "Hola {$asociado->nombre}, los vi en la página de ASOBARES Quindío."))
                 <a href="{{ $enlace }}" target="_blank" rel="noopener nofollow"
-                   class="rounded-lg border border-linea px-3 py-1.5 text-xs text-suave transition-colors hover:border-marca-500/50 hover:text-fuerte">
+                   {{-- ::after y no `min-h-11`: el chip tiene borde visible y a 44 px
+                        de alto se leería como una pastilla pesada junto a un enlace de
+                        texto. 33,2 + 16 = 49,2 px de área, con el dibujo intacto. --}}
+                   class="pulsable relative rounded-lg border border-linea px-3 py-1.5 text-xs text-suave after:absolute after:inset-x-0 after:-inset-y-2 after:content-[''] hover:border-marca-500/50 hover:text-fuerte">
                     WhatsApp
                 </a>
             @endif

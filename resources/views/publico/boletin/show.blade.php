@@ -30,7 +30,7 @@
     @endpush
 
     <article class="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-        <a href="{{ route('boletin.index') }}" class="enlace-accion text-sm text-apagado hover:text-acento">← Volver al boletín</a>
+        <a href="{{ route('boletin.index') }}" class="enlace-accion relative inline-block text-sm text-apagado after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento"><x-publico.flecha direccion="izquierda" />&nbsp;Volver al boletín</a>
 
         <div class="mt-5 flex items-center gap-2 text-xs">
             <span class="rounded-full bg-marca-500/15 px-3 py-1 font-medium text-acento-fuerte">
@@ -68,7 +68,7 @@
                     @foreach ($relacionadas as $relacionada)
                         <li>
                             <a href="{{ route('boletin.show', $relacionada) }}"
-                               class="tarjeta tarjeta-hover block p-5">
+                               class="tarjeta tarjeta-hover tarjeta-pulsable block p-5">
                                 <span class="text-xs text-apagado">
                                     {{ $relacionada->categoria->getLabel() }} ·
                                     {{ $relacionada->publicado_at->translatedFormat('d M Y') }}

@@ -37,7 +37,7 @@
                 x-bind:class="$store.tema.preferencia === '{{ $opcion['valor'] }}'
                     ? 'bg-marca-500/15 text-acento ring-1 ring-acento'
                     : 'text-apagado hover:bg-superficie-alta hover:text-tinta'"
-                class="flex flex-1 items-center justify-center rounded-lg px-3 py-2 transition-colors"
+                class="pulsable flex min-h-11 flex-1 items-center justify-center rounded-lg px-3"
                 title="{{ $opcion['etiqueta'] }}">
             <svg class="h-[1.125rem] w-[1.125rem]" fill="none" stroke="currentColor" stroke-width="1.7"
                  viewBox="0 0 24 24" aria-hidden="true">

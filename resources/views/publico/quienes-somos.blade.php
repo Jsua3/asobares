@@ -128,7 +128,7 @@
                 </ol>
 
                 <p class="mt-5 text-xs text-apagado">
-                    Formulación → Escalando → En ejecución. El estado de cada iniciativa se actualiza desde el panel.
+                    Formulación › Escalando › En ejecución. El estado de cada iniciativa se actualiza desde el panel.
                 </p>
             </section>
         @endif
@@ -222,7 +222,7 @@
             </p>
             @if ($enlaceNacional = enlaceSeguro(ajuste('url_nacional')))
                 <x-publico.boton variante="contorno" :href="$enlaceNacional" target="_blank" rel="noopener" class="mt-6">
-                    Ir a Asobares Nacional ↗
+                    Ir a Asobares Nacional&nbsp;<x-publico.flecha direccion="externa" />
                 </x-publico.boton>
             @endif
         </section>

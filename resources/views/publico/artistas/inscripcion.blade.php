@@ -3,7 +3,7 @@
 
     <div class="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
 
-        <a href="{{ route('artistas.index') }}" class="enlace-accion text-sm text-acento hover:text-acento-fuerte">← Ver el directorio</a>
+        <a href="{{ route('artistas.index') }}" class="enlace-accion relative inline-block text-sm text-acento after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento-fuerte"><x-publico.flecha direccion="izquierda" />&nbsp;Ver el directorio</a>
 
         <h1 class="mt-4 font-display text-3xl font-bold tracking-tight">Inscríbete en la bolsa de artistas</h1>
         <p class="mt-2 text-sm text-tenue">
@@ -44,7 +44,7 @@
             <div>
                 <label for="foto" class="mb-1.5 block text-sm font-medium text-tinta">Foto</label>
                 <input type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/webp"
-                       class="w-full rounded-xl border border-linea bg-fondo px-4 py-2.5 text-sm text-tinta file:mr-4 file:rounded-lg file:border-0 file:bg-marca-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white">
+                       class="w-full rounded-xl border border-linea bg-fondo px-4 py-1.5 text-sm text-tinta file:mr-4 file:min-h-11 file:rounded-lg file:border-0 file:bg-marca-500 file:px-4 file:text-sm file:font-semibold file:text-white">
                 <p class="mt-1.5 text-xs text-apagado">JPG, PNG o WebP. Máximo 5 MB.</p>
                 @error('foto')
                     <p class="mt-1.5 text-xs text-acento">{{ $message }}</p>

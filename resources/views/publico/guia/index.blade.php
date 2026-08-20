@@ -14,7 +14,7 @@
                 @foreach ($municipios as $municipio)
                     <a href="{{ route('guia.index', ['municipio' => $municipio->slug]) }}"
                        @class([
-                           'rounded-xl border px-4 py-2 text-sm transition-colors',
+                           'pulsable inline-flex min-h-11 items-center rounded-xl border px-4 text-sm',
                            'border-marca-500 bg-marca-500/10 font-medium text-acento-fuerte' => $seleccionado?->is($municipio),
                            'border-linea text-suave hover:border-marca-500/40 hover:text-fuerte' => ! $seleccionado?->is($municipio),
                        ])
@@ -53,7 +53,10 @@
             <div class="mt-8 space-y-4">
                 @foreach ($requisitos as $indice => $requisito)
                     <details class="tarjeta group overflow-hidden" @if ($indice === 0) open @endif>
-                        <summary class="flex cursor-pointer list-none items-start gap-4 p-6">
+                        {{-- `fila-pulsable` y no `pulsable`: encoger el <summary> movería la
+                             flecha de `group-open:rotate-180` y se leerían dos movimientos
+                             peleados sobre el mismo gesto. --}}
+                        <summary class="fila-pulsable flex cursor-pointer list-none items-start gap-4 p-6">
                             <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-marca-500/15 font-display text-sm font-bold text-acento">
                                 {{ $indice + 1 }}
                             </span>
@@ -116,8 +119,8 @@
 
                                 @if ($requisito->enlace_externo)
                                     <a href="{{ $requisito->enlace_externo }}" target="_blank" rel="noopener"
-                                       class="inline-flex items-center rounded-xl border border-linea px-4 py-2.5 text-sm text-tinta transition-colors hover:border-marca-500/50">
-                                        Sitio de la entidad ↗
+                                       class="pulsable inline-flex min-h-11 items-center rounded-xl border border-linea px-4 py-2.5 text-sm text-tinta hover:border-marca-500/50">
+                                        Sitio de la entidad&nbsp;<x-publico.flecha direccion="externa" />
                                     </a>
                                 @endif
                             </div>

@@ -54,7 +54,10 @@
             x-on:click="abierto = ! abierto"
             x-bind:aria-expanded="abierto ? 'true' : 'false'"
             aria-controls="menu-configuracion"
-            class="flex items-center gap-2 rounded-full text-tenue transition-colors hover:text-tinta">
+            {{-- Padding negativo óptico: `p-1` lleva el botón a 44x44 y `-m-1`
+                 devuelve al flujo los 36x36 del avatar, que es marca y no se
+                 puede agrandar. --}}
+            class="pulsable -m-1 flex items-center gap-2 rounded-full p-1 text-tenue hover:text-tinta">
         @if ($usuario)
             <span class="sr-only">Configuración y sesión de {{ $usuario->name }}</span>
             <span aria-hidden="true"
@@ -108,7 +111,7 @@
             <div class="border-t border-linea pt-2">
                 @if ($esDelEquipo)
                     <a href="{{ route('filament.admin.pages.dashboard') }}"
-                       class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-suave transition-colors hover:bg-superficie-alta hover:text-fuerte">
+                       class="fila-pulsable flex items-center gap-2.5 rounded-lg px-3 py-3 text-sm text-suave hover:text-fuerte">
                         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.7"
                              viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -118,7 +121,7 @@
                     </a>
                 @else
                     <a href="{{ route('mi-cuenta.index') }}"
-                       class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-suave transition-colors hover:bg-superficie-alta hover:text-fuerte">
+                       class="fila-pulsable flex items-center gap-2.5 rounded-lg px-3 py-3 text-sm text-suave hover:text-fuerte">
                         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.7"
                              viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -128,7 +131,7 @@
                     </a>
 
                     <a href="{{ route('mi-cuenta.vacantes.index') }}"
-                       class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-suave transition-colors hover:bg-superficie-alta hover:text-fuerte">
+                       class="fila-pulsable flex items-center gap-2.5 rounded-lg px-3 py-3 text-sm text-suave hover:text-fuerte">
                         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.7"
                              viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -141,7 +144,7 @@
                 <form method="POST" action="{{ route('mi-cuenta.salir') }}">
                     @csrf
                     <button type="submit"
-                            class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-suave transition-colors hover:bg-superficie-alta hover:text-fuerte">
+                            class="fila-pulsable flex w-full items-center gap-2.5 rounded-lg px-3 py-3 text-left text-sm text-suave hover:text-fuerte">
                         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.7"
                              viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round"
