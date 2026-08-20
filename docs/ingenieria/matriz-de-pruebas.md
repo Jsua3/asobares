@@ -27,16 +27,18 @@ No se confunde con la suite automatizada: la suite es el **instrumento**, esta m
 
 | Métrica | Valor |
 |---|---|
-| Archivos de prueba | 48 |
-| **Métodos de prueba** | **460** |
-| **Casos ejecutados** | **599** (15 métodos usan proveedor de datos y expanden a varios casos cada uno) |
-| Resultado de la última ejecución **verificada** | 588 pasan · 11 omitidas · **0 fallos** |
-| Aserciones | **1.699** |
-| Duración de la suite completa | 169 s |
-| Requisitos funcionales V1 con cobertura total o parcial | 44 de 50 |
+| Archivos de prueba | 56 |
+| **Métodos de prueba** | **537** |
+| **Casos ejecutados** | **747** (los métodos con proveedor de datos expanden a varios casos cada uno) |
+| Resultado de la última ejecución **verificada** | 736 pasan · 11 omitidas · **0 fallos** |
+| Aserciones | **2.719** |
+| Duración de la suite completa | 372 s |
+| Requisitos funcionales V1 con cobertura total o parcial | 45 de 50 |
 | Requisitos no funcionales con cobertura total o parcial | 11 de 14 |
 
-> ✅ **Nota de verificación.** La suite se **re-ejecutó el 18 de agosto de 2026** sobre `main` en `4f15d24` con `php artisan test --compact`, y la salida confirma las cifras de esta tabla: **599 casos · 588 pasan · 11 omitidas · 0 fallos · 1.699 aserciones · 169 segundos**. El conteo de 460 métodos y 48 archivos se verificó directamente sobre el árbol de trabajo. Ya no queda ninguna cifra de este documento sin respaldo de una ejecución real.
+> ✅ **Nota de verificación.** La suite se **re-ejecutó el 19 de agosto de 2026** con `php artisan test --compact`, y la salida confirma las cifras de esta tabla: **747 casos · 736 pasan · 11 omitidas · 0 fallos · 2.719 aserciones**. El conteo de 537 métodos y 56 archivos se verificó directamente sobre el árbol de trabajo. Ya no queda ninguna cifra de este documento sin respaldo de una ejecución real.
+>
+> **Crecimiento respecto al 18 de agosto:** de 599 a 747 casos, **+148 pruebas y cero regresiones**. Las nuevas cubren el calendario de eventos (RF-19), el foco visible y los objetivos táctiles (RNF-12), la escala tipográfica, los portadores de acuse al pulsar, la configuración de despliegue, el almacenamiento de archivos y las transiciones de vista.
 >
 > Si el código cambia antes de la entrega final, hay que repetir la ejecución y actualizar esta tabla: una matriz que cita una corrida vieja es exactamente el tipo de falso verde que este proyecto ya pagó caro.
 
@@ -81,7 +83,7 @@ No se confunde con la suite automatizada: la suite es el **instrumento**, esta m
 
 | RF | HU | Criterio verificado | Prueba | Estado |
 |---|---|---|---|---|
-| RF-19 | HU-EVE-01 | Listado de eventos próximos e históricos | `SitioPublicoTest::test_las_rutas_publicas_responden` | ⚠️ **Hallazgo abierto:** el cronograma firmado dice «calendario + formularios» y lo implementado es una grilla Próximos/Pasados. Falta vista de calendario |
+| RF-19 | HU-EVE-01 | Listado de eventos próximos e históricos, **y vista de calendario** | `CalendarioDeEventosTest` (16 casos) · `SitioPublicoTest::test_las_rutas_publicas_responden` | ✅ **Cerrado el 19 de agosto de 2026.** Se construyó la vista de calendario que pide el cronograma firmado: rejilla mensual en escritorio y agenda por día en móvil, navegable entre meses sin JavaScript. La grilla Próximos/Pasados se conserva y el conmutador pasa a tres destinos. Al construirlo se corrigió un defecto anterior: un evento de varios días en curso se listaba como pasado desde su segundo día |
 | RF-20 | HU-EVE-02 | Ficha con aforo; el cupo lleno bloquea la inscripción | `CuposDeEventoTest` (4 casos) | ✅ |
 | RF-21 | HU-EVE-03 | Inscripción con habeas data obligatorio y constancia | `FormulariosPublicosTest::test_la_inscripcion_exige_la_autorizacion_de_datos` · `EvidenciaDelConsentimientoTest::test_inscribirse_a_un_evento_guarda_la_evidencia_del_consentimiento` | ✅ |
 | RF-22 | HU-EVE-04 | Pago de la inscripción y confirmación solo con transacción aprobada | `FlujoDePagoTest` (26 casos) · `ConfirmacionDeInscripcionTest` (5 casos) | ✅ |
@@ -193,7 +195,7 @@ No se confunde con la suite automatizada: la suite es el **instrumento**, esta m
 | RNF-09 | Nada quemado en código | `AccionesDelPanelTest::test_guardar_los_ajustes_actualiza_el_sitio` · `PanelCompletoTest` | ✅ |
 | RNF-10 | Manual de marca aplicado | `Panel/TemaDelPanelTest` · `TemaClaroOscuroTest::test_ninguna_vista_publica_conserva_clases_de_tema_cableadas` | ✅ La prueba recorre las vistas y falla si reaparece un color cableado |
 | RNF-11 | Commits descriptivos semanales | Historial de `Jsua3/asobares` | ✅ Evidencia documental, no automatizable. `origin/main` sincronizado al 18 de agosto |
-| RNF-12 | Accesibilidad básica | `Panel/ComponentesDelPanelTest::test_la_cola_marca_lo_urgente_con_algo_mas_que_color` · `MovimientoTest::test_el_movimiento_reducido_anula_el_desplazamiento_y_no_el_reloj` | ⚠️ **Hallazgo abierto:** una auditoría del 18 de agosto detectó que `campo.blade.php` anula el foco visible de todos los formularios del sitio, y que 41 de 75 objetivos táctiles quedan por debajo de 44 px |
+| RNF-12 | Accesibilidad básica | `FocoVisibleTest` (6 casos, uno **recalcula el contraste**) · `ObjetivoTactilTest` · `Panel/ComponentesDelPanelTest::test_la_cola_marca_lo_urgente_con_algo_mas_que_color` · `MovimientoTest::test_el_movimiento_reducido_anula_el_desplazamiento_y_no_el_reloj` | ✅ **Cerrado el 19 de agosto de 2026.** El foco visible se restituyó en todo el sitio: el indicador mide **3,49:1 en tema claro y 5,15:1 en oscuro**, por encima del mínimo de 3:1 de WCAG 2.1 §1.4.11. Objetivos táctiles: **594 elementos interactivos verificados en 20 rutas a 320, 390 y 1280 px, ninguno por debajo de 44×44 px**; 26 quedan exceptuados por la propia norma (enlace dentro de una frase, o equivalente mayor al mismo destino). Se comprobó además con `elementFromPoint` que ningún objetivo ampliado le roba la pulsación a su vecino |
 | RNF-13 | Escalabilidad a Fase II sin rehacer | `BancoDeTalentoTest` | ✅ |
 | RNF-14 | Operación autónoma del panel por personal no técnico | `PanelCompletoTest` (19 recursos, listado + creación + edición) | ⚠️ El software responde; **la verificación contractual es la capacitación**: que el personal publique un asociado, un evento y una noticia sin ayuda. Pendiente (S8) |
 
@@ -206,8 +208,8 @@ Un documento de pruebas que solo enumera lo que pasa no sirve para gestionar. Es
 1. ~~**RNF-02 — Ningún dato de rendimiento.**~~ **Cerrado el 18 de agosto de 2026.** Se midieron las 12 rutas públicas con Chromium real, en móvil 4G estrangulado y escritorio, en los dos temas, tres corridas por combinación y con la caché desactivada: 78 mediciones, 0 errores. La portada pinta en **972 ms** contra un techo de 2.500. Informe completo en `medicion-de-rendimiento.md`. **Queda un residuo honesto:** la medición es contra `localhost`, así que no incluye la latencia real de red hasta un servidor — hay que repetirla tras el despliegue (bloqueado por R-14).
 2. **RNF-01 y RNF-07 — Sin dispositivos reales.** Las pruebas verifican marcado y comportamiento; ninguna abre un teléfono. Es contenido explícito de la Semana 7.
 3. **RNF-03 y RNF-08 (respaldos) — Bloqueados por el despliegue.** No son deuda técnica: dependen del riesgo R-14 (cuenta institucional del gremio pendiente de la junta).
-4. **RF-19 — El calendario de eventos.** El cronograma firmado dice «calendario + formularios»; hay grilla Próximos/Pasados. Es una diferencia con el documento firmado y conviene resolverla explícitamente: construir la vista, o acordar por escrito con la dirección que la grilla la sustituye.
-5. **RNF-12 — Foco visible y objetivos táctiles.** Detectado y documentado el 18 de agosto; el arreglo del foco es de una línea.
+4. ~~**RF-19 — El calendario de eventos.**~~ **Cerrado el 19 de agosto de 2026** por la vía de construirlo, no de negociarlo: existe la vista de calendario que pide el cronograma firmado, con 16 pruebas propias. Dos de ellas cubren defectos que no se ven: que la ficha por slug no capture la ruta del calendario —un evento con slug «calendario» daría 404 sin que nada avise— y que la rejilla no consulte dentro del bucle de celdas.
+5. ~~**RNF-12 — Foco visible y objetivos táctiles.**~~ **Cerrado el 19 de agosto de 2026.** Cifras en la fila de RNF-12. Una excepción declarada y razonada: las pastillas de evento dentro de la rejilla mensual miden 27 px de alto. Es deliberado —la rejilla solo existe de `sm:` para arriba, donde el puntero es un ratón, y el mismo evento tiene su objetivo de 44 px en la agenda móvil— y supera el mínimo de 24×24 px que exige WCAG 2.5.8; los 44 px son el listón propio del proyecto, más exigente que la norma.
 6. **RF-05 y RF-60 — Sin cobertura.** El primero espera la decisión DPV-05; el segundo admite el dato pero no prueba la vigencia de decretos transitorios.
 
 **Los requisitos marcados ➖ no son huecos:** la ERS v3 los movió a Fase II con criterios de aceptación escritos, y la arquitectura los soporta sin migraciones destructivas (RNF-13, verificado).

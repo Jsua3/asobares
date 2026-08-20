@@ -2,7 +2,7 @@
 
 Entregables de la **Fase 4** del cronograma firmado por la dirección ejecutiva. Todo lo que hay aquí es material del expediente del proyecto: se referencia desde el documento de práctica (capítulos 5 y 7, y anexos) y se entrega al gremio junto con el código fuente.
 
-**Última actualización:** 18 de agosto de 2026 · repositorio en `4f15d24`
+**Última actualización:** 19 de agosto de 2026 · repositorio en `1ff87d0` más el trabajo sin confirmar de esa fecha
 
 ---
 
@@ -11,11 +11,15 @@ Entregables de la **Fase 4** del cronograma firmado por la dirección ejecutiva.
 | Archivo | Qué es | Estado |
 |---|---|---|
 | `Informe de cumplimiento del cronograma - ASOBARES Quindio.docx` | Informe de entrega: contrasta cada exigencia del cronograma firmado, semana a semana, con lo ejecutado. Incluye brechas con responsable y fecha, y hoja de constancia para la firma de la tutora empresarial | ✅ Completo · 20 páginas |
-| `matriz-de-pruebas.md` | Trazabilidad RF-01…RF-62 y RNF-01…RNF-14 contra las pruebas que los verifican, con los huecos declarados | ✅ Completo · suite **re-ejecutada y verificada** el 18 de agosto (599 casos, 0 fallos, 1.699 aserciones) |
+| `matriz-de-pruebas.md` | Trazabilidad RF-01…RF-62 y RNF-01…RNF-14 contra las pruebas que los verifican, con los huecos declarados | ✅ Completo · suite **re-ejecutada y verificada** el 19 de agosto: **747 casos · 736 pasan · 11 omitidas · 0 fallos · 2.719 aserciones**. RF-19 (calendario) y RNF-12 (foco y objetivos táctiles) pasaron de hueco declarado a **verificados** |
 | `medicion-de-rendimiento.md` | Verificación de RNF-02: 78 mediciones con Chromium real sobre las 12 rutas públicas, en móvil 4G y escritorio, en los dos temas | ✅ Completo · **la portada pinta en 972 ms contra un techo de 2.500 ms** |
 | `base-de-datos/` | Entregable final «base de datos exportada»: esquema y volcado completo con datos de demostración, más el inventario de las 37 tablas | ✅ Completo |
-| `manual-de-usuario.md` | Manual del panel para personal no técnico (RNF-14) | ✅ Texto **y las 11 capturas** del panel real · falta exportarlo a PDF |
-| `capturas/` | Las 11 capturas del panel, tomadas sobre la base de demostración en tema claro a 1440 px | ✅ Completo |
+| `runbook-despliegue.md` | Riesgo R-14: el procedimiento de despliegue en Laravel Cloud — paso humano bloqueante, secuencia de comandos, tabla de variables, límite de gasto, qué hacer si falla, y la hoja de «a nombre de quién quedó todo» | ⚠️ Técnicamente listo · **falta la cuenta institucional del gremio**, que no la puede crear un agente |
+| `manual-de-usuario.md` | Manual del panel para personal no técnico (RNF-14). **Es la fuente: edite este archivo, nunca el PDF** | ✅ Completo · texto, las 11 capturas y el PDF |
+| `Manual de usuario - Panel ASOBARES Quindio.pdf` | El manual en el formato que pide el cronograma. 24 páginas, tipografía de marca incrustada | ✅ Completo · se regenera con `node herramientas/manual-a-pdf.mjs` |
+| `constancias/` | Los tres formatos de firma: aprobación del diseño (hito S2), constancia de capacitación (S8) y retroalimentación del empresario con registro de hallazgos (S7) | ✅ Emitidos · **falta diligenciarlos y firmarlos** |
+| `herramientas/` | Los generadores de los PDF de esta carpeta. No es documentación de entrega: es lo que la produce | ✅ Sin dependencias de npm, usan el navegador ya instalado |
+| `capturas/` | Las 11 capturas del panel, tomadas sobre la base de demostración en tema claro a 1440 px | ✅ Completo · **verificado el 19 de agosto que el trabajo de interfaz no las invalida**: la escala tipográfica nueva vive en `app.css`, que `/admin` no carga |
 | `diagramas/` | Diagramas UML y BPMN en PNG | ✅ Completo |
 | `diagramas/fuentes/` | Fuentes PlantUML editables de cada diagrama | ✅ Completo |
 
@@ -45,14 +49,16 @@ Generados con **PlantUML 1.2024.8**. Estilo acordado: fondo blanco, textos en es
 
 ## Lo que todavía no está en esta carpeta
 
-- **Exportar el manual de usuario a PDF** para la entrega formal.
+Ninguno de estos es deuda técnica del equipo de desarrollo: dependen del **riesgo R-14** (la cuenta institucional, pendiente de la junta) o de sentarse con una persona.
+
 - **Verificación en dispositivos reales** (RNF-01, RNF-07) — un Android y un iOS de verdad. El rendimiento ya está medido, pero con un viewport emulado y la red estrangulada, no con un teléfono. Es contenido explícito de la Semana 7.
-- **Constancia de capacitación** — el criterio contractual es que el personal publique un asociado, un evento y una noticia sin ayuda.
 - **Repetir la medición de rendimiento contra el dominio real** una vez exista despliegue. La cifra actual es contra `localhost` y no incluye la latencia de red hasta un servidor.
+- **Diligenciar y firmar los tres formatos de `constancias/`.** Los documentos existen; lo que falta es la reunión, la sesión de capacitación y las firmas. Un formato en blanco no es evidencia.
+- **El bucket de objetos.** La aplicación ya sabe usarlo y está probada contra un almacén compatible con S3; lo que falta es crearlo con la cuenta del gremio. Ver el apartado 8 del runbook, y en particular el 8.3: **la política obvia del bucket abre los formatos de la guía normativa**, y eso hay que hacerlo bien a la primera.
 
-Los tres últimos dependen del **riesgo R-14** (cuenta institucional del gremio pendiente de la junta) o de agendar con el personal: no son deuda técnica del equipo de desarrollo.
+**Cerrado el 18 de agosto de 2026:** la base de datos exportada y la medición de rendimiento.
 
-**Cerrado el 18 de agosto de 2026:** la base de datos exportada y la medición de rendimiento, que hasta esa fecha figuraban aquí como pendientes.
+**Cerrado el 19 de agosto de 2026:** el manual en PDF, los tres formatos de constancia, el runbook de despliegue con la aplicación validada contra PostgreSQL 17 real, y el almacenamiento de objetos probado de punta a punta.
 
 ## Documentos relacionados fuera de esta carpeta
 

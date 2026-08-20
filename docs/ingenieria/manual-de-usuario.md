@@ -1,7 +1,7 @@
 # Manual de usuario — Panel de administración
 ## Plataforma Web ASOBARES Capítulo Quindío
 
-**Versión:** 1.1 · **Fecha:** 18 de agosto de 2026
+**Versión:** 1.2 · **Fecha:** 19 de agosto de 2026
 **Dirigido a:** dirección ejecutiva, secretaría y practicantes del capítulo
 **No necesita conocimientos técnicos.** Si sabe usar el correo, sabe usar esto.
 
@@ -230,13 +230,15 @@ Arriba a la derecha. Su elección se recuerda y vale también para el sitio púb
 
 ## 11. Qué falta para dar este manual por terminado
 
-**Contenido y capturas: completos** (18 de agosto de 2026). Las once imágenes se tomaron del panel real con la base de demostración cargada. Queda:
+**Contenido, capturas y PDF: completos** (19 de agosto de 2026). Las once imágenes se tomaron del panel real con la base de demostración cargada. Queda:
 
-1. **Exportar a PDF** para la entrega formal. El cronograma pide «manual de usuario sencillo (guía en PDF o vídeo)».
+1. ✅ ~~Exportar a PDF~~ — hecho. `Manual de usuario - Panel ASOBARES Quindio.pdf`, 24 páginas, en esta misma carpeta. Se regenera con `node docs/ingenieria/herramientas/manual-a-pdf.mjs`; **edite siempre este `.md`, nunca el PDF.**
 2. **Complementar con vídeo** si se prefiere: un recorrido de 10 minutos que siga las secciones 2, 3, 5 y 8 cubre el 90 % del uso diario.
-3. **Verificar contra la realidad de la capacitación:** el criterio contractual no es que el manual exista, sino que **al terminar la sesión el personal publique un asociado, un evento y una noticia sin ayuda**. Lo que falle en esa prueba es lo que hay que reescribir aquí. Mientras esa sesión no ocurra, este manual está probado contra el software pero no contra sus lectores.
+3. **Verificar contra la realidad de la capacitación:** el criterio contractual no es que el manual exista, sino que **al terminar la sesión el personal publique un asociado, un evento y una noticia sin ayuda**. Lo que falle en esa prueba es lo que hay que reescribir aquí. Mientras esa sesión no ocurra, este manual está probado contra el software pero no contra sus lectores. El formato para dejar constancia de esa sesión es `constancias/Acta 02 - Constancia de capacitacion.pdf`.
 
 > ⚠️ **Si el panel cambia, estas capturas mienten.** Son fotografías de una versión concreta (`main` en `4f15d24`). Cualquier cambio de interfaz obliga a repetir la que corresponda; una captura vieja en un manual es peor que ninguna, porque el lector busca en pantalla algo que ya no está.
+>
+> El trabajo de interfaz del 19 de agosto **no las invalida**: toca `resources/css/app.css` y las vistas de `resources/views/publico/`, y ninguna de las dos cosas se carga en `/admin`. Lo único que cambió del panel es el fichero del logotipo, y son los mismos píxeles.
 
 ---
 

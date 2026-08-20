@@ -266,7 +266,7 @@ manual. El componente `<x-publico.logo>` es el único punto que lo dibuja.
 
 | Archivo | Cuándo |
 |---|---|
-| `public/img/logo-asobares.svg` | Por defecto (rojo sobre fondo oscuro) |
+| `public/img/logo-asobares.png` | Por defecto (rojo sobre fondo oscuro). El `.svg` que había aquí nunca fue un vector: eran 49 KB de un PNG envuelto en base64 con el MIME mal escrito, y llegaba tarde al primer pintado. El sitio público y el panel usan ya el PNG |
 | `public/img/logo-asobares-blanco.png` | Fondos rojos o fotografías |
 | `public/img/monograma-asobares.png` | Símbolo «ab» suelto |
 | `public/img/favicon.png` | Monograma sobre Pub Black |

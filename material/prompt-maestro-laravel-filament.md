@@ -29,6 +29,8 @@
 >
 > **v7 · la trampa que más costó, y que no es técnica:** de veintitantos fallos atrapados en estas dos fases, **cinco fueron pruebas en falso verde escritas por el propio autor del plan** — pruebas que pasaban con el bug reintroducido. Todas tenían la misma forma: `assertSee('alguna palabra')` o una aserción sobre el texto de un archivo, en vez de sobre el comportamiento. Ninguna se detectó leyendo; todas salieron cuando un revisor **mutó el código a propósito** y miró si la prueba se enteraba. Si se relanza cualquier parte de este trabajo: **escribir la prueba no basta, hay que romper el código y ver el rojo.**
 >
+> **v10 (19 ago 2026) — FASE 4 CERRADA, SOLO QUEDA LO QUE EXIGE SERVIDOR:** todo el expediente de entrega existe y está commiteado en `docs/ingenieria/` (matriz de pruebas, manual con capturas, siete diagramas, base de datos exportada, medición de rendimiento e informe de cumplimiento en `.docx`). Las dos cifras que eran documentales están **verificadas**: la suite re-ejecutada (599 casos, 0 fallos, 1.699 aserciones) y el RNF-02 medido (**portada en 972 ms contra un techo de 2.500**, 78 mediciones sobre navegador real). Lee la **§23.11** y la **§23.12**; la §23.9 quedó superada y así está marcada. Lo único vivo es el hosting institucional (R-14) y lo que cuelga de él, más cuatro pendientes menores que la §23.12 enumera.
+>
 > **v9 (18 ago 2026) — EL CUELLO DE BOTELLA YA NO ES TÉCNICO:** revisión de estado con el repositorio, el cronograma firmado y los correos del docente asesor a la vista. El producto va dos o tres semanas por delante del cronograma y **las cuatro cosas que faltan no son código de producto**: hosting, manual de usuario, capacitación y documentación de entrega. El despliegue del §20 deja de ser tarea y pasa a **riesgo escalado a la junta (R-14)** — el bloqueo es la cuenta y el medio de pago institucionales, no un paso de ingeniería, y no se resuelve desplegando con cuenta personal. El pase de interfaz del §22 **queda en pausa**: ninguno de sus siete hallazgos vivos bloquea la entrega. La nueva **sección 23 manda sobre el orden de trabajo** hasta el 21 de agosto y es lo primero que debe leer una sesión nueva.
 >
 > **v8 (15 ago 2026) — HOSTING DECIDIDO, DESPLIEGUE EN ESPERA DE UN TRÁMITE HUMANO:** un consejo de decisión multiagente (cinco asientos con encargos distintos, prueba de fuga del expediente y refutación cruzada) eligió **Laravel Cloud** para el hosting de pruebas y como candidato definitivo, con una condición que es la mitad del veredicto: **la cuenta nace institucional, no personal**. El despliegue quedó bloqueado únicamente por el paso que un agente no puede dar — el registro/OAuth y el medio de pago son del dueño. **Toda sesión nueva: lee la sección 20 antes de proponer o tocar hosting.** El CLI de Cloud, su skill de despliegue y los certificados ya quedaron listos en esta máquina.
@@ -803,7 +805,9 @@ Una sola lista, porque es la única ventana de la semana con la tutora y de ahí
 - El repositorio sigue siendo **`Jsua3/asobares`, cuenta personal de GitHub**. Misma familia de problema que el §20.2: recomendado moverlo a una organización del gremio o añadir un segundo administrador antes del 22 de septiembre.
 
 
-### 23.9 Lo que queda de la Fase 4, y quién puede hacerlo
+### 23.9 SUPERADA — el reparto de la Fase 4 (18 ago)
+
+> ⛔ **Esta sección ya no describe la realidad. Se conserva porque explica el reparto de trabajo que se hizo, no el estado.** Los cinco artefactos que aquí figuran como pendientes están **todos entregados**: ve directo a la **§23.11**. Las dos advertencias del final —el calendario de eventos y el foco visible— **siguen vigentes** y son lo único de esta sección que hay que seguir leyendo.
 
 Los tres artefactos de escritorio están cerrados (§23.5). Lo que sigue **exige ejecutar la aplicación**, así que corresponde a una sesión con PHP en la máquina, no a una que solo edite archivos.
 
@@ -830,7 +834,7 @@ No las mezcles. Un plan de agente citado como anexo académico se lee exactament
 
 ⚠️ El `06-modelo-de-datos.puml` se construyó leyendo las migraciones y las relaciones declaradas en los modelos: documenta **lo que existe**, no lo que se pensaba construir. Si cambia el esquema y no se regenera, pasa a mentir. Regenerarlo es `java -jar plantuml.jar -charset UTF-8 -tpng docs/ingenieria/diagramas/fuentes/*.puml` con PlantUML 1.2024.8.
 
-### 23.9 Fase 4 — lo que se cerró la noche del 18 de agosto
+### 23.11 Fase 4 CERRADA — lo que se ejecutó entre el 18 y el 19 de agosto
 
 El §23.5 pedía cinco artefactos que no dependen del hosting. **Los cinco están hechos.** `docs/ingenieria/` ya existe y ya no es una carpeta prometida.
 
@@ -852,3 +856,118 @@ El §23.5 pedía cinco artefactos que no dependen del hosting. **Los cinco está
 **Verificado de paso:** la rama `claude/suspicious-colden-d9e9e8` que el §23.8 mandaba comprobar **está totalmente fusionada en `main`** (`git log main..rama` sale vacío). Se puede borrar sin perder nada.
 
 **Lo que queda de Fase 4 ya no lo puede hacer un agente:** exportar el manual a PDF, la capacitación con su constancia, las pruebas en dispositivos de la tutora, y todo lo que cuelga de R-14.
+
+
+### 23.12 Estado al 19 de agosto — qué queda vivo
+
+`main` en **`1ff87d0`**, sincronizado con `origin`. Árbol limpio salvo `.claude/settings.local.json`. Suite sin cambios: 460 métodos en 48 archivos, 599 casos.
+
+**El expediente de entrega está completo.** `docs/ingenieria/` reúne matriz de pruebas, manual con capturas, siete diagramas con sus fuentes, base de datos exportada, medición de rendimiento y el informe de cumplimiento del cronograma en `.docx`. Nada de la Fase 4 que pueda hacerse sin servidor sigue pendiente.
+
+⚠️ **El informe `.docx` se regeneró el 19 de agosto.** La versión del 18 declaraba como pendientes cuatro cosas que ya estaban hechas —la medición de rendimiento, las capturas del manual, la re-ejecución de la suite y la base de datos exportada— y por tanto **subestimaba el proyecto ante la dirección y ante la universidad**. Si aparece una copia con fecha del 18, no la entregues. Regla general para este documento: **cada vez que se cierre una brecha hay que regenerarlo**, porque su §8.3 enumera brechas por nombre y envejece rápido.
+
+**Lo único que sigue abierto, en orden:**
+
+1. **R-14 / hosting institucional** (§23.3). Sin resolver no hay SSL, ni dispositivos reales, ni medición contra dominio, ni revisión autónoma de la tutora. Es el camino crítico entero.
+2. **El calendario de eventos** (§23.9). El cronograma firmado pide «calendario + formularios» y hay grilla. Decisión de la dirección, por escrito, en cualquiera de los dos sentidos.
+3. **El foco visible** — `campo.blade.php:16` **sigue con `focus:outline-none`**, verificado el 19 de agosto. Es una línea y es incumplimiento del RNF-12.
+4. **41 de 75 objetivos táctiles** por debajo de 44 px.
+5. **Exportar el manual a PDF** y la constancia de capacitación.
+6. **El hito de aprobación del diseño** de la S2, que nunca quedó por escrito.
+
+Los puntos 2 y 6 son de la dirección; el resto es del equipo. Ninguno es de construcción de producto: el alcance está congelado y debe seguir congelado.
+
+---
+
+## 24. EL EQUIPO — dos practicantes, no uno (19 ago 2026)
+
+**Se anota aquí porque el expediente salió mal por no tenerlo escrito.** Los tres formatos de firma generados el 19 de agosto llevaban una sola línea del lado de la universidad, y hubo que rehacerlos. Cualquier documento, acta, informe o crédito que produzca este proyecto lleva a **las dos personas**.
+
+| | **Juan José Sua Gómez** | **Ingrid Montoya Warski** |
+|---|---|---|
+| Correo institucional | `jjsua_542@unihumboldt.edu.co` | `imontoya_624@unihumboldt.edu.co` |
+| Frente | A — arquitectura, backend, panel Filament, pasarela de pagos, SEO técnico, despliegue y documentación técnica | B — maquetación mobile-first del sitio público, directorio de asociados, módulo de eventos e inscripciones, optimización de imágenes, matriz de pruebas y manual de usuario |
+| Rol | Practicante · Universidad Alexander von Humboldt | Practicante · Universidad Alexander von Humboldt |
+
+Ambas desarrollan; lo que cambia es el frente, no la categoría. El docente asesor las trata como equipo y les escribe juntas.
+
+### 24.1 La regla, y su única excepción
+
+**Regla:** todo artefacto del proyecto —actas, formatos de firma, informe de cumplimiento, manual, créditos, README— nombra a las dos.
+
+⚠️ **Única excepción, y es importante no confundirla:** el **documento de práctica de la universidad (GU-DO-007)** es **individual**. César lo dijo por escrito el 10 de agosto: «tanto usted como Ingrid deben tener **documentos diferentes**». Ese documento no se firma en conjunto ni se comparte redacción; cada quien entrega el suyo.
+
+La distinción es limpia: **lo que se le entrega a la empresa es del equipo; lo que se le entrega a la universidad es de cada persona.** Los artefactos técnicos de `docs/ingenieria/` son del equipo y ambas los citan como anexo de su propio documento — anexar el mismo artefacto no es tener el mismo documento.
+
+### 24.2 Dónde quedó aplicado
+
+- `docs/ingenieria/herramientas/constancias.mjs` — las tres constancias llevan las tres firmas (dirección + los dos practicantes), con la variante `.firmas.tres` de `imprimir.mjs`.
+- `docs/ingenieria/Informe de cumplimiento...docx` — ficha de portada, bloque de firmas y pie de autoría.
+- `estado-proyecto-web.md` del Project de claude.ai.
+
+Si generas un artefacto nuevo y solo pones un nombre, está mal. Revísalo antes de imprimirlo.
+
+
+---
+
+## 25. LA JORNADA DEL 19 DE AGOSTO — el pase de interfaz cerrado y el despliegue a un comando
+
+**Lee esto antes de tocar interfaz, despliegue o el expediente.** Cierra el §22, que estaba en pausa; cierra el §20 por su lado técnico; y cierra cinco de las seis brechas que el §23.12 dejaba vivas. Lo que queda abierto está en el §25.4, y es corto.
+
+Se ejecutó con dos frentes en paralelo —despliegue e interfaz— y **verificación independiente del orquestador sobre cada afirmación medible**. Esa doble medición encontró cuatro defectos que ningún documento registraba (§25.2) y descartó ocho propuestas del reconocimiento que no se sostenían al comprobarlas.
+
+### 25.1 Qué quedó cerrado
+
+| Brecha | Cómo se comprobó |
+|---|---|
+| **RNF-12 · foco visible** | Se fueron las dos anulaciones. El trazo mide 3,49:1 en claro y 5,15:1 en oscuro contra el mínimo de 3:1. Seis guardias, y una **recalcula el contraste** en vez de comparar cadenas |
+| **Ranura de ayuda del campo** | Se emite siempre: la rejilla ya no salta al errar, y la ayuda queda asociada al control con `aria-describedby` |
+| **Escala tipográfica** | 14 pasos con tracking monótono que **cruza cero exacto en `text-base`** y leading inverso al tamaño. Vive en `app.css`, y está verificado sobre el CSS **compilado** que no llegó a `/admin` |
+| **`transition-colors` fuera de los tokens** | `--default-transition-*` en un `@theme` de `app.css`: las 21 pasan a los tokens sin editar una sola vista |
+| **Las 27 flechas** | Componente `x-publico.flecha` con SVG de Heroicons. Cero caracteres de flecha en las vistas, verificado por codepoint |
+| **Objetivos táctiles** | **547 objetivos en 18 rutas a 320 y a 390 px, y 674 a 1280 px: cero por debajo de 44 px**, 26 exceptuados por WCAG 2.5.8, y **cero robos de clic** |
+| **Acuse al pulsar** | `.pulsable` pasa de 1 a 39 consumidores. Medido con el ratón abajo: `:active` cierto, `matrix(0.97)` y `transition-duration: 0s` |
+| **Navbar en dos líneas** | Ocho enlaces a cinco controles. Cabecera de **83 a 62 px**, medida a 1280, 1440, 1600 y 1920 |
+| **RF-19 · calendario** | Rejilla `<table>` en escritorio y agenda `<ol>` en móvil. **4 consultas por mes, no 42** |
+| **Manual en PDF** | 24 páginas, Poppins incrustada, las 11 capturas |
+| **Constancias** | Los tres formatos de firma, con las **tres** líneas que exige el §24 |
+| **R-14, lado técnico** | 33 migraciones y 20 sembradores verdes en **PostgreSQL 17.11 real**; runbook de 512 líneas; `.env.staging.example` de 52 variables |
+
+### 25.2 Los cuatro defectos que nadie había registrado
+
+Ninguno estaba en el §22.4 ni en el §23.12. Los tres primeros **solo se habrían visto con la plataforma ya publicada**, que es el peor momento posible.
+
+1. **El buscador del directorio encontraba 4 de cada 10 establecimientos.** `LIKE` es insensible a mayúsculas en SQLite y **sensible** en PostgreSQL. Medido contra el motor real: `like '%bar%'` devuelve 4 filas; `ilike`, 10. La suite corre sobre SQLite, así que ninguna prueba lo veía. Arreglado con `whereLike(caseSensitive: false)`, que lo resuelve la gramática de Laravel sin un `match` por driver que mantener. **La prueba afirma la SQL emitida por cada gramática**, no el resultado: una prueba de comportamiento habría pasado en verde con el código roto.
+
+2. **La política obvia del bucket reabre un agujero ya cerrado.** Conceder `s3:GetObject` sobre `arn:...:<bucket>/*` deja los formatos oficiales de la guía normativa descargables por URL directa — medido: 200, sin pasar por `GuiaController`, que es donde se comprueba que el requisito esté publicado. Acotada al prefijo `publico/`: 403. Los dos prefijos son la frontera de seguridad, y `AlmacenamientoTest` afirma que siguen siendo distintos.
+
+3. **La coraza de configuración protegía el entorno equivocado.** Estaba atada a `production`, y el despliegue usa `APP_ENV=staging`: el único entorno de verdad expuesto era justo el que no se endurecía. El criterio ya no es cómo se llama el entorno, es si está expuesto.
+
+4. **Seis advertencias de seguridad activas** en `league/commonmark`, tres de severidad alta, en el camino de los cinco correos transaccionales. Se cerraban **dentro de la restricción que ya declaraba Laravel**, así que se aplicó el parche 2.8.3 a 2.10.0 sin tocar ninguna restricción. `composer audit` sale limpio.
+
+Y uno menor, anterior a esta jornada: a 320 px `/proveedores` desbordaba 45 px, por un correo de 299 px sin punto de corte. ⚠️ **`overflow-wrap: break-word` NO reduce el ancho mínimo de contenido** —solo parte al desbordar—, y la tarjeta es un elemento flex cuyo ancho lo fija ese mínimo. Hace falta `wrap-anywhere`.
+
+### 25.3 Trampas nuevas, para no volver a pagarlas
+
+- **Una guardia que lee ficheros crudos también lee los comentarios.** La guardia de flechas prohíbe codepoints; si explicas por qué quitaste una, **nombra el codepoint** en vez de pegarlo. Ya mordió una vez.
+- **El espacio de no separación NO protege a un SVG.** Sirve para pegar dos palabras, no una palabra a una caja atómica: medido, la línea se parte igual. Con el carácter de antes sí funcionaba, porque un carácter no es una caja. Donde el ancho aprieta, la única defensa es `whitespace-nowrap` en el portador.
+- **Ampliar el subconjunto de Poppins no era caro: era imposible.** Medido con fontTools sobre los seis `.woff2`: 217 glifos por peso y ninguna flecha, ni siquiera los codepoints que el propio `@font-face` promete en su `unicode-range`. La familia no los dibuja.
+- **`text-2xs` no compila hasta que una vista lo usa.** Tailwind poda los pasos sin consumidores; el primero fue el calendario. Hasta entonces el paso existía en `@theme` y no en el CSS, y quien mirara el bundle habría concluido que la escala estaba rota.
+- **`--window-size` no fija el viewport de maqueta en headless.** Hay que imponerlo por CDP con `Emulation.setDeviceMetricsOverride`, o se mide la variante equivocada y se diagnostican defectos que no existen. Pasó, y costó tres rondas.
+- **`html { scroll-behavior: smooth }` rompe `scrollIntoView` seguido de `getBoundingClientRect`**: la caja se lee a mitad del recorrido y el clic sintético cae en otro elemento. Hay que usar `behavior: 'instant'` y esperar un fotograma.
+- **Ampliar objetivos táctiles a 44 px introduce robos de clic** si el paso entre vecinos es menor. Donde el paso sea corto hay que **abrir el paso**, no meter margen negativo. Se comprueba con `elementFromPoint`, no midiendo rectángulos.
+
+### 25.4 Lo que sigue abierto
+
+1. **R-14, la cuenta institucional.** Sigue siendo el camino crítico entero y **no es técnico**: correo y medio de pago del gremio. Todo lo demás está escrito y esperando.
+2. **El bucket de objetos.** La aplicación ya sabe usarlo y está probada contra un almacén compatible con S3; falta crearlo. Léase el §8.3 del runbook **antes** de crearlo, no después.
+3. **Correo saliente.** `smtp` es el único transporte instalado. Sin proveedor, los códigos MFA se leen por `cloud environment:logs`, y eso exige `LOG_STACK=stderr`.
+4. **Dispositivos reales** (RNF-01, RNF-07). Lo medido es emulación de navegador, no un teléfono.
+5. **Firmar los tres formatos.** Existen; falta la reunión, la sesión de capacitación y las firmas. Un formato en blanco no es evidencia.
+6. **Deuda anotada, ninguna bloquea:** los 74 `leading-*`/`tracking-*` sueltos que secuestran la escala tipográfica en su propio elemento; los seis enlaces de atribución de Leaflet en 51 por 15 px, que son pieza de terceros exigida por la licencia de las teselas; `@alpinejs/collapse` importado y registrado sin ningún consumidor; y el consecutivo de PQR bajo concurrencia en PostgreSQL, que **falla cerrado** gracias al índice único.
+
+### 25.5 El instrumental que queda
+
+- `docs/ingenieria/herramientas/` — los generadores de los PDF del expediente, manual y constancias, **sin dependencias de npm**: un conversor de Markdown propio y el Chrome ya instalado, conducido por el protocolo DevTools sobre el WebSocket nativo de Node. `imprimir.mjs` es el motor compartido, y es el único sitio donde tocar la hoja de estilo del papel.
+- **Contenedores de verificación**, que no viven en el repositorio y se levantan cuando hagan falta: `postgres:17-alpine` para el motor de Cloud y `minio/minio` para el almacenamiento de objetos.
+  ⚠️ El contenedor de Postgres **no es fiel a Cloud en colación**: alpine es musl y ordena como `COLLATE "C"`, igual que SQLite; el de Cloud será glibc o ICU y **el orden alfabético del directorio, los municipios y las categorías cambiará**. No rompe nada, pero lo parecerá el día de la demostración, y el contenedor local no permite anticiparlo.
