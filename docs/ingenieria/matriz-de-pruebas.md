@@ -28,15 +28,19 @@ No se confunde con la suite automatizada: la suite es el **instrumento**, esta m
 | Métrica | Valor |
 |---|---|
 | Archivos de prueba | 56 |
-| **Métodos de prueba** | **537** |
-| **Casos ejecutados** | **747** (los métodos con proveedor de datos expanden a varios casos cada uno) |
-| Resultado de la última ejecución **verificada** | 736 pasan · 11 omitidas · **0 fallos** |
-| Aserciones | **2.719** |
-| Duración de la suite completa | 372 s |
+| **Métodos de prueba** | **541** |
+| **Casos ejecutados** | **759** (los métodos con proveedor de datos expanden a varios casos cada uno) |
+| Resultado de la última ejecución **verificada** | 748 pasan · 11 omitidas · **0 fallos** |
+| Aserciones | **2.733** |
+| Duración de la suite completa | 193 s |
 | Requisitos funcionales V1 con cobertura total o parcial | 45 de 50 |
 | Requisitos no funcionales con cobertura total o parcial | 11 de 14 |
 
-> ✅ **Nota de verificación.** La suite se **re-ejecutó el 19 de agosto de 2026** con `php artisan test --compact`, y la salida confirma las cifras de esta tabla: **747 casos · 736 pasan · 11 omitidas · 0 fallos · 2.719 aserciones**. El conteo de 537 métodos y 56 archivos se verificó directamente sobre el árbol de trabajo. Ya no queda ninguna cifra de este documento sin respaldo de una ejecución real.
+> ✅ **Nota de verificación — 20 de agosto de 2026.** La suite se re-ejecutó sobre un **clon limpio de `origin/main`** en un entorno recién montado (PHP 8.4.21 con `intl` y `gd`, `composer install` y `npm run build` desde cero), no sobre el árbol de trabajo. La salida: **759 casos · 748 pasan · 11 omitidas · 0 fallos · 2.733 aserciones · 193 s**. Reproducir el verde fuera de la máquina donde se programó es justo lo que la auditoría del 19 de agosto no pudo hacer, y es lo que convierte estas cifras en evidencia.
+>
+> Los 12 casos nuevos respecto al 19 de agosto son las guardias de los dos hallazgos que esa auditoría dejó en el bloque de la Persona 1: las extensiones de PHP declaradas en la raíz y en el candado (10 casos), y las transacciones fijadas como recurso de solo lectura (2 casos).
+>
+> **Ejecución anterior.** El 19 de agosto de 2026 con `php artisan test --compact`, y la salida confirma las cifras de esta tabla: **747 casos · 736 pasan · 11 omitidas · 0 fallos · 2.719 aserciones**. El conteo de 537 métodos y 56 archivos se verificó directamente sobre el árbol de trabajo. Ya no queda ninguna cifra de este documento sin respaldo de una ejecución real.
 >
 > **Crecimiento respecto al 18 de agosto:** de 599 a 747 casos, **+148 pruebas y cero regresiones**. Las nuevas cubren el calendario de eventos (RF-19), el foco visible y los objetivos táctiles (RNF-12), la escala tipográfica, los portadores de acuse al pulsar, la configuración de despliegue, el almacenamiento de archivos y las transiciones de vista.
 >
