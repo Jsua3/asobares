@@ -14,6 +14,11 @@ class GuardarPostulacionRequest extends FormRequest
         return true;
     }
 
+    protected function getRedirectUrl(): string
+    {
+        return route('empleo.show', $this->route('vacante')).'#postularme';
+    }
+
     /** @return array<string, mixed> */
     public function rules(): array
     {
