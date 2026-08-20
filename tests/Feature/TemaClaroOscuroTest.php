@@ -135,7 +135,8 @@ class TemaClaroOscuroTest extends TestCase
             ->assertSee('Secretaría del gremio')
             ->assertSee('Apariencia del sitio', false)
             ->assertSee('Ir al panel del gremio')
-            ->assertSee('Cerrar sesión');
+            ->assertSee('Cerrar sesión')
+            ->assertDontSee('Mis vacantes');
     }
 
     public function test_la_direccion_tambien_tiene_el_desplegable_en_el_sitio_publico(): void

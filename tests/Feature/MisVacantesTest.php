@@ -144,7 +144,10 @@ class MisVacantesTest extends TestCase
         $huerfano = User::factory()->create(['asociado_id' => null]);
         $huerfano->syncRoles([User::ROL_ASOCIADO]);
 
-        $this->actingAs($huerfano->fresh())->get(route('mi-cuenta.vacantes.crear'))->assertForbidden();
+        $this->actingAs($huerfano->fresh())
+            ->get(route('mi-cuenta.vacantes.crear'))
+            ->assertForbidden()
+            ->assertSee('Esta sección es para los establecimientos afiliados');
     }
 
     public function test_editar_una_vacante_publicada_la_devuelve_a_revision(): void

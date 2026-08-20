@@ -5,7 +5,10 @@
 
         <header class="flex flex-wrap items-end justify-between gap-4">
             <div>
-                <p class="text-sm text-apagado">{{ $asociado->nombre }}</p>
+                <a href="{{ route('mi-cuenta.index') }}" class="enlace-accion text-sm text-acento hover:text-acento-fuerte">
+                    ← Mi cuenta
+                </a>
+                <p class="mt-3 text-sm text-apagado">{{ $asociado->nombre }}</p>
                 <h1 class="mt-1 font-display text-3xl font-bold tracking-tight">Mis vacantes</h1>
                 <p class="mt-1.5 text-sm text-tenue">
                     Las publicas tú y las aprueba la secretaría. Nadie del gremio edita lo que escribiste.
@@ -41,8 +44,10 @@
                                     <span @class([
                                         'rounded-full px-2.5 py-1 font-medium',
                                         'bg-emerald-500/15 text-exito' => $vacante->estaPublicado() && $vacante->estaVigente(),
-                                        'bg-amber-500/15 text-aviso' => $vacante->estado === \App\Enums\EstadoPublicacion::PendienteAprobacion,
-                                        'bg-marca-500/15 text-acento-fuerte' => $vacante->estado === \App\Enums\EstadoPublicacion::Borrador,
+                                        'bg-amber-500/15 text-aviso' => $vacante->estado === \App\Enums\EstadoPublicacion::PendienteAprobacion && ! $vacante->estaCerrada() && ! $vacante->estaVencida(),
+                                        'bg-marca-500/15 text-acento-fuerte' => $vacante->estado === \App\Enums\EstadoPublicacion::Borrador && ! $vacante->estaCerrada() && ! $vacante->estaVencida(),
+                                        'bg-superficie-alta text-tenue' => $vacante->estaCerrada(),
+                                        'bg-marca-500/15 text-aviso' => $vacante->estaVencida() && ! $vacante->estaCerrada(),
                                     ])>
                                         @if ($vacante->estaCerrada())
                                             Cerrada

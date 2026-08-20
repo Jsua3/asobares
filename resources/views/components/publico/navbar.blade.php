@@ -152,9 +152,13 @@
                            class="block rounded-lg px-3 py-2.5 text-sm text-suave hover:bg-superficie-alta hover:text-fuerte">
                             Ir al panel del gremio
                         </a>
-                    @else
+                    @endif
+                    @if ($usuario?->esAsociado())
                         <a href="{{ route('mi-cuenta.index') }}" class="block rounded-lg px-3 py-2.5 text-sm text-suave hover:bg-superficie-alta hover:text-fuerte">
                             Mi cuenta
+                        </a>
+                        <a href="{{ route('mi-cuenta.vacantes.index') }}" class="block rounded-lg px-3 py-2.5 text-sm text-suave hover:bg-superficie-alta hover:text-fuerte">
+                            Mis vacantes
                         </a>
                     @endif
                     <form method="POST" action="{{ route('mi-cuenta.salir') }}">

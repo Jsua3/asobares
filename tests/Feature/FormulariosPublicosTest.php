@@ -362,6 +362,67 @@ class FormulariosPublicosTest extends TestCase
         $respuesta->assertSee($convenio->detalle_convenio);
     }
 
+    public function test_el_asociado_al_dia_ve_el_estado_sin_deuda(): void
+    {
+        $this->seed(RolYPermisoSeeder::class);
+
+        $asociado = Asociado::factory()->publicado()->create(['nombre' => 'Bar Al Día']);
+        $duenio = User::factory()->create(['asociado_id' => $asociado->id]);
+        $duenio->syncRoles([User::ROL_ASOCIADO]);
+
+        $respuesta = $this->actingAs($duenio->fresh())->get(route('mi-cuenta.index'));
+
+        $respuesta->assertSuccessful();
+        $respuesta->assertSee('Bar Al Día');
+        $respuesta->assertSee('Estás al día');
+        $respuesta->assertDontSee('Pagar ahora');
+    }
+
+    public function test_sin_convenios_el_portal_muestra_el_estado_vacio(): void
+    {
+        $this->seed(RolYPermisoSeeder::class);
+
+        $asociado = Asociado::factory()->publicado()->create();
+        $duenio = User::factory()->create(['asociado_id' => $asociado->id]);
+        $duenio->syncRoles([User::ROL_ASOCIADO]);
+
+        $this->actingAs($duenio->fresh())
+            ->get(route('mi-cuenta.index'))
+            ->assertSuccessful()
+            ->assertSee('Todavía no hay convenios publicados');
+    }
+
+    public function test_un_asociado_sin_establecimiento_ve_la_explicacion(): void
+    {
+        $this->seed(RolYPermisoSeeder::class);
+
+        $huerfano = User::factory()->create(['name' => 'Dueño sin ficha', 'asociado_id' => null]);
+        $huerfano->syncRoles([User::ROL_ASOCIADO]);
+
+        $respuesta = $this->actingAs($huerfano->fresh())->get(route('mi-cuenta.index'));
+
+        $respuesta->assertForbidden();
+        $respuesta->assertSee('Dueño sin ficha');
+        $respuesta->assertSee('un usuario sin establecimiento vinculado');
+        $respuesta->assertSee('Cerrar sesión y entrar como afiliado');
+    }
+
+    public function test_un_directivo_que_tambien_es_asociado_ve_los_atajos_del_portal(): void
+    {
+        $this->seed(RolYPermisoSeeder::class);
+
+        $asociado = Asociado::factory()->publicado()->create();
+        $directivo = User::factory()->create(['asociado_id' => $asociado->id]);
+        $directivo->syncRoles([User::ROL_ASOCIADO, User::ROL_SUBADMIN]);
+
+        $this->actingAs($directivo->fresh())
+            ->get(route('contacto'))
+            ->assertSuccessful()
+            ->assertSee('Ir al panel del gremio')
+            ->assertSee('Mi cuenta')
+            ->assertSee('Mis vacantes');
+    }
+
     public function test_el_detalle_de_convenio_no_aparece_en_el_sitio_publico(): void
     {
         Aliado::create([

@@ -8,8 +8,9 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * /mi-cuenta es exclusiva de los dueños de establecimiento. Ni la dirección
- * ni la secretaría entran: ellas tienen el panel.
+ * /mi-cuenta es exclusiva de los dueños de establecimiento con ficha vinculada.
+ * Ni la dirección ni la secretaría entran: ellas tienen el panel. Un usuario
+ * con rol asociado pero sin establecimiento ve la misma explicación.
  *
  * El panel y /mi-cuenta comparten el guard `web`, así que es muy fácil
  * llegar aquí con la sesión del equipo abierta —pasa en cada demostración—.
@@ -22,7 +23,7 @@ class AsegurarRolAsociado
     {
         $usuario = $request->user();
 
-        if ($usuario instanceof User && $usuario->esAsociado()) {
+        if ($usuario instanceof User && $usuario->esAsociado() && $usuario->asociado_id !== null) {
             return $siguiente($request);
         }
 
