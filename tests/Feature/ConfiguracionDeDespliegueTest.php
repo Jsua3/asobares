@@ -334,4 +334,69 @@ class ConfiguracionDeDespliegueTest extends TestCase
             $this->assertStringContainsString($aviso, $runbook, "El runbook ya no menciona `{$aviso}`.");
         }
     }
+
+    /**
+     * La trampa que le costó media jornada a la Persona 2 el 19 de agosto: su
+     * PHP (Herd Lite) no trae `intl` ni `gd`, y la suite le devolvió 194
+     * pruebas rotas 350 segundos después en vez de un error inmediato.
+     *
+     * La causa está medida, y NO es la que parecía: `ext-intl` ya venía
+     * exigida de forma transitiva por `filament/support`, pero `ext-gd` no la
+     * pide NADIE en todo el árbol de dependencias —`spatie/image` acepta
+     * Imagick como alternativa— y la raíz solo declaraba `php: ^8.3`. Con el
+     * `vendor/` ya instalado, `composer install` ni siquiera vuelve a mirar.
+     *
+     * Declararlas en la raíz las sube al bloque `platform` del `composer.lock`,
+     * que es lo que leen `composer install` y `composer check-platform-reqs`:
+     * el fallo pasa de 350 segundos disfrazados a un mensaje con el nombre de
+     * la extensión que falta. El README ya las exigía en prosa desde el
+     * principio; esto es hacer que el gestor de paquetes las exija también.
+     *
+     * @return array<string, array{string}>
+     */
+    public static function extensionesQueElProyectoExige(): array
+    {
+        return [
+            // Filament formatea fechas y moneda con ella: sin intl, HTTP 500
+            // al renderizar cualquier tabla del panel.
+            'ext-intl' => ['ext-intl'],
+            // Las conversiones de imagen de medialibrary: sin gd,
+            // imagecreatetruecolor() no existe y toda subida revienta.
+            'ext-gd' => ['ext-gd'],
+            'ext-exif' => ['ext-exif'],
+            'ext-fileinfo' => ['ext-fileinfo'],
+            'ext-mbstring' => ['ext-mbstring'],
+        ];
+    }
+
+    #[DataProvider('extensionesQueElProyectoExige')]
+    public function test_la_raiz_declara_la_extension(string $extension): void
+    {
+        /** @var array{require?: array<string, string>} $composer */
+        $composer = json_decode((string) file_get_contents(base_path('composer.json')), true);
+
+        $this->assertArrayHasKey(
+            $extension,
+            $composer['require'] ?? [],
+            "composer.json no exige `{$extension}`: `composer install` pasará limpio en un entorno incompleto y el fallo aparecerá a mitad de la suite."
+        );
+    }
+
+    /**
+     * El bloque `platform` del candado es el que de verdad se comprueba al
+     * instalar. Si composer.json y composer.lock se separan, la declaración
+     * anterior no sirve de nada.
+     */
+    #[DataProvider('extensionesQueElProyectoExige')]
+    public function test_el_candado_lleva_la_extension_a_su_bloque_de_plataforma(string $extension): void
+    {
+        /** @var array{platform?: array<string, string>} $candado */
+        $candado = json_decode((string) file_get_contents(base_path('composer.lock')), true);
+
+        $this->assertArrayHasKey(
+            $extension,
+            $candado['platform'] ?? [],
+            "composer.lock no lleva `{$extension}` en `platform`: hay que regenerarlo con `composer update --lock`."
+        );
+    }
 }
