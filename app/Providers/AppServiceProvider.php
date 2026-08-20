@@ -63,7 +63,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->asegurarConfiguracionDeProduccion();
+        $this->asegurarConfiguracionDeEntornoExpuesto();
 
         foreach (self::MODELOS_PUBLICABLES as $modelo) {
             $modelo::observe(FlujoDeAprobacionObserver::class);
@@ -85,15 +85,26 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Producción no arranca con la configuración del demo.
+     * Ningún entorno remoto arranca con la configuración del demo.
      *
      * Vale más un despliegue que se cae en el primer minuto que uno que sirve
      * la página de error de Laravel con las llaves de Bold dentro, o que
      * escribe cada PQR con los datos del ciudadano en storage/logs.
+     *
+     * La coraza se ató a `production` mientras el hosting no existía. El
+     * despliegue de Laravel Cloud usa `APP_ENV=staging` (§20.5 del prompt
+     * maestro), y con la condición anterior ese entorno —el único que de
+     * verdad está en internet— era justo el que no se endurecía: sin https
+     * forzado, sin cookie `Secure`, y libre de arrancar con `APP_DEBUG=true`.
+     *
+     * Por eso la condición ahora es al revés: se salta en desarrollo y en la
+     * suite, y se aplica en todo lo demás. Un entorno remoto que se llame
+     * `dev`, `demo` o `qa` también queda cubierto, que es lo que se quiere:
+     * el criterio no es cómo se llama el entorno, es si está expuesto.
      */
-    private function asegurarConfiguracionDeProduccion(): void
+    private function asegurarConfiguracionDeEntornoExpuesto(): void
     {
-        if (! $this->app->isProduction()) {
+        if ($this->app->environment('local', 'testing')) {
             return;
         }
 
@@ -102,20 +113,20 @@ class AppServiceProvider extends ServiceProvider
         // `forceScheme` sólo cambia las URLs que genera Laravel: no marca la
         // cookie de sesión. Sin el atributo `Secure`, el navegador la manda
         // también por http y cualquiera en la misma red la captura y la
-        // reutiliza. En producción no se deja a criterio del .env.
+        // reutiliza. Fuera de local no se deja a criterio del .env.
         config(['session.secure' => true]);
 
         if (config('app.debug')) {
             throw new RuntimeException(
-                'APP_DEBUG tiene que estar en false en producción: la página de error publica '
+                'APP_DEBUG tiene que estar en false fuera de local: la página de error publica '
                 .'el cuerpo de la petición, las cabeceras y las variables de entorno.'
             );
         }
 
         if (config('mail.default') === 'log') {
             throw new RuntimeException(
-                'MAIL_MAILER=log en producción escribe el contenido de cada PQR, con los datos '
-                .'personales del ciudadano, en storage/logs. Configura un mailer real.'
+                'MAIL_MAILER=log fuera de local escribe el contenido de cada PQR, con los datos '
+                .'personales del ciudadano, en storage/logs. Configura un mailer real (smtp).'
             );
         }
     }

@@ -29,3 +29,7 @@ Thumbs.db
 
 # Artefactos de trabajo de subagent-driven-development (scratch, no versionar)
 /.superpowers
+
+# Ficheros de bloqueo de Word: aparecen mientras un .docx del expediente
+# esta abierto y desaparecen al cerrarlo. No son del proyecto.
+~$*

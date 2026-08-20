@@ -32,6 +32,17 @@ class CabecerasDeSeguridad
         // El sitio no usa ninguna de las tres; declararlo evita que un script
         // inyectado las pida en nombre del origen.
         'Permissions-Policy' => 'geolocation=(), camera=(), microphone=()',
+        /*
+         * Un año, subdominios incluidos y SIN `preload`.
+         *
+         * Sólo tiene efecto sobre https, que es lo único que sirve el hosting;
+         * el navegador la ignora en http, así que no estorba en desarrollo.
+         * `preload` queda fuera a propósito: mete el dominio en una lista que
+         * traen los navegadores compilada y salir de ella tarda meses. Eso se
+         * decide cuando el dominio definitivo del gremio esté en su sitio, no
+         * en el primer despliegue de pruebas.
+         */
+        'Strict-Transport-Security' => 'max-age=31536000; includeSubDomains',
     ];
 
     public function handle(Request $request, Closure $siguiente): Response

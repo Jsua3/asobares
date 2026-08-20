@@ -241,6 +241,29 @@ class MisVacantesTest extends TestCase
         $this->assertSame($vacante->id, $postulacion->vacante_id);
     }
 
+    /**
+     * Cada postulación trae un `<select>` de estado y un botón que dice solo
+     * «Guardar». En una lista de N son N controles idénticos: un lector de
+     * pantalla anuncia «cuadro combinado» y «Guardar» sin decir de quién, y no
+     * hay manera de saber cuál se está tocando (SC 4.1.2 y SC 3.3.2, el mismo
+     * RNF-12 que el indicador de foco). Lo que los distingue entre sí es el
+     * nombre de la persona, y por eso se afirma sobre el HTML rendido y no
+     * sobre la plantilla: lo que importa es lo que llega al lector.
+     */
+    public function test_los_controles_de_cada_postulacion_dicen_de_quien_son(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create();
+        $vacante = Vacante::factory()->for($asociado)->publicado()->create();
+        Postulacion::factory()->for($vacante)->create(['nombre' => 'Duván Marín']);
+
+        $respuesta = $this->actingAs($this->duenioDe($asociado))
+            ->get(route('mi-cuenta.vacantes.show', $vacante));
+
+        $respuesta->assertSuccessful();
+        $respuesta->assertSee('aria-label="Estado de la postulación de Duván Marín"', false);
+        $respuesta->assertSee('aria-label="Guardar el estado de la postulación de Duván Marín"', false);
+    }
+
     public function test_un_asociado_no_ve_las_postulaciones_de_otro(): void
     {
         $ajena = Vacante::factory()->publicado()->create();

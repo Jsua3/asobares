@@ -22,7 +22,7 @@ class EventosTable
             ->columns([
                 ImageColumn::make('imagen')
                     ->label('Imagen')
-                    ->disk('public')
+                    ->disk(config('almacenamiento.publico'))
                     ->height(40)
                     ->width(60),
                 TextColumn::make('titulo')

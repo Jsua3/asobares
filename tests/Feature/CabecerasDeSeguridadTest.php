@@ -22,7 +22,20 @@ class CabecerasDeSeguridadTest extends TestCase
             'nosniff' => ['X-Content-Type-Options', 'nosniff'],
             'sin enmarcado' => ['X-Frame-Options', 'DENY'],
             'referente acotado' => ['Referrer-Policy', 'strict-origin-when-cross-origin'],
+            // Sin `preload`: entrar en esa lista es fácil y salir tarda meses.
+            'https obligatorio un año' => ['Strict-Transport-Security', 'max-age=31536000; includeSubDomains'],
         ];
+    }
+
+    /**
+     * `preload` mete el dominio en una lista que los navegadores traen
+     * compilada: hasta que no haya dominio definitivo del gremio, no entra.
+     */
+    public function test_el_https_obligatorio_no_lleva_preload(): void
+    {
+        $cabecera = (string) $this->get('/')->headers->get('Strict-Transport-Security');
+
+        $this->assertStringNotContainsString('preload', $cabecera);
     }
 
     #[DataProvider('cabecerasEsperadas')]

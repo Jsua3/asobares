@@ -21,6 +21,7 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Livewire\Livewire;
+use Tests\Support\MideContraste;
 use Tests\TestCase;
 
 /**
@@ -28,6 +29,7 @@ use Tests\TestCase;
  */
 class ObservatorioTest extends TestCase
 {
+    use MideContraste;
     use RefreshDatabase;
 
     /**
@@ -729,29 +731,5 @@ class ObservatorioTest extends TestCase
         $this->assertSame(1, $encontrado, 'No se pudo leer `--asb-superficie` de tokens.css: la prueba se quedaría sin referencia contra la que medir.');
 
         return strtolower($coincidencias[1]);
-    }
-
-    /** Razón de contraste WCAG 2.1 entre dos colores hexadecimales. */
-    private function contraste(string $unColor, string $otroColor): float
-    {
-        $uno = $this->luminanciaRelativa($unColor);
-        $otro = $this->luminanciaRelativa($otroColor);
-
-        return (max($uno, $otro) + 0.05) / (min($uno, $otro) + 0.05);
-    }
-
-    /** Luminancia relativa WCAG 2.1, la que entra en la razón de contraste. */
-    private function luminanciaRelativa(string $hex): float
-    {
-        $canales = array_map(
-            static function (string $par): float {
-                $canal = hexdec($par) / 255;
-
-                return $canal <= 0.03928 ? $canal / 12.92 : (($canal + 0.055) / 1.055) ** 2.4;
-            },
-            str_split(ltrim($hex, '#'), 2)
-        );
-
-        return 0.2126 * $canales[0] + 0.7152 * $canales[1] + 0.0722 * $canales[2];
     }
 }

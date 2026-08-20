@@ -21,6 +21,7 @@ use Database\Seeders\RolYPermisoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
+use RuntimeException;
 use Tests\TestCase;
 
 /**
@@ -126,6 +127,88 @@ class FlujoDePagoTest extends TestCase
 
         $this->assertSame(EstadoTransaccion::Rechazada, $transaccion->fresh()->estado);
         $this->assertSame(EstadoInscripcion::Registrada, Inscripcion::firstOrFail()->estado);
+    }
+
+    /**
+     * Sustituye la pasarela por una que se cae al pedirle el enlace de pago.
+     *
+     * Es exactamente lo que hará el entorno remoto: se despliega con
+     * `PAYMENT_DRIVER=bold` y sin llaves de Bold (§20.5.2), así que
+     * `PasarelaBold::crearEnlaceDePago` lanza en cuanto alguien pulsa pagar.
+     */
+    private function pasarelaCaida(): void
+    {
+        $this->app->bind(PasarelaDePago::class, fn (): PasarelaDePago => new class implements PasarelaDePago
+        {
+            public function crearEnlaceDePago(Transaccion $transaccion): string
+            {
+                throw new RuntimeException('Bold está seleccionado como pasarela pero faltan las llaves.');
+            }
+
+            public function firmaValida(Request $request): bool
+            {
+                return false;
+            }
+
+            public function interpretarConfirmacion(Request $request): ?ResultadoDePago
+            {
+                return null;
+            }
+
+            public function nombre(): string
+            {
+                return 'caida';
+            }
+        });
+    }
+
+    /**
+     * Sin esto el visitante veía una página 500 pelada —con APP_DEBUG=false,
+     * sin ninguna explicación— en una de las dos rutas de pago que la
+     * dirección va a pulsar en la demostración.
+     */
+    public function test_si_la_pasarela_no_responde_la_inscripcion_avisa_en_vez_de_reventar(): void
+    {
+        $this->pasarelaCaida();
+        $evento = $this->eventoPago();
+
+        $respuesta = $this->from(route('eventos.show', $evento))->post(route('eventos.inscribir', $evento), [
+            'nombre' => 'Aurora Betancur',
+            'correo' => 'aurora@ejemplo.test',
+            'telefono' => '3151122334',
+            'acepta_datos' => '1',
+        ]);
+
+        $respuesta->assertRedirect(route('eventos.show', $evento));
+        $respuesta->assertSessionHas('error');
+
+        // No se ha duplicado nada y el cobro sigue vivo para reintentarlo.
+        $this->assertSame(EstadoInscripcion::Registrada, Inscripcion::firstOrFail()->estado);
+        $this->assertSame(EstadoTransaccion::Pendiente, Transaccion::firstOrFail()->estado);
+    }
+
+    /** La otra ruta de pago ya lo hacía; se fija para que no se pierda. */
+    public function test_si_la_pasarela_no_responde_la_mensualidad_avisa_en_vez_de_reventar(): void
+    {
+        $this->seed(RolYPermisoSeeder::class);
+        $this->pasarelaCaida();
+
+        $asociado = Asociado::factory()->publicado()->create();
+        Cartera::create([
+            'asociado_id' => $asociado->id,
+            'saldo_pendiente' => 150000,
+            'meses_mora' => 3,
+            'actualizado_at' => now(),
+        ]);
+
+        $duenio = User::factory()->create(['asociado_id' => $asociado->id]);
+        $duenio->syncRoles([User::ROL_ASOCIADO]);
+
+        $respuesta = $this->actingAs($duenio->fresh())->post(route('mi-cuenta.pagar'));
+
+        $respuesta->assertRedirect(route('mi-cuenta.index'));
+        $respuesta->assertSessionHas('error');
+        $this->assertSame(EstadoTransaccion::Pendiente, Transaccion::firstOrFail()->estado);
     }
 
     public function test_pagar_la_mensualidad_deja_la_cartera_al_dia(): void

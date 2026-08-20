@@ -46,6 +46,21 @@ class Mensaje extends Model
         $prefijo = "PQR-{$anio}-";
 
         return DB::transaction(function () use ($prefijo): string {
+            // Este `like` se queda sensible a mayúsculas a propósito, y por eso
+            // no se convirtió a `whereLike(caseSensitive: false)` como el
+            // buscador del directorio.
+            //
+            // El cambio de semántica entre SQLite (insensible) y PostgreSQL
+            // (sensible) no puede morder aquí: `radicado` no lo escribe nadie.
+            // Lo produce siempre este mismo método con el prefijo en
+            // mayúsculas, sus dos únicos llamadores son `ContactoController` y
+            // `MensajeSeeder`, y el campo del panel está `->disabled()`
+            // (MensajeForm.php:33). Verificado además contra PostgreSQL 17:
+            // el consecutivo sale igual en los dos motores.
+            //
+            // Y si algún día se ensuciara, insensible sería la respuesta
+            // equivocada: ampliaría el barrido a radicados de otro prefijo y
+            // el consecutivo dejaría de ser el del año.
             $ultimo = static::query()
                 ->where('radicado', 'like', "{$prefijo}%")
                 ->lockForUpdate()

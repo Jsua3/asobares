@@ -26,7 +26,11 @@ class DirectorioController
         $consulta = Asociado::publicado()->with(['categoria', 'municipio']);
 
         if (filled($datos['q'] ?? null)) {
-            $consulta->where('nombre', 'like', '%'.$datos['q'].'%');
+            // El «no distingue mayúsculas» no es cosmético: es la diferencia
+            // entre encontrar diez establecimientos y encontrar cuatro cuando
+            // el motor pasa de SQLite a PostgreSQL. Está en el scope, con su
+            // explicación y su guardia.
+            $consulta->buscarPorNombre($datos['q']);
         }
 
         if (filled($datos['municipio'] ?? null)) {

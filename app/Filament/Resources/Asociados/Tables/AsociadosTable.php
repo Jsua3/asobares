@@ -22,7 +22,7 @@ class AsociadosTable
             ->columns([
                 ImageColumn::make('foto_portada')
                     ->label('Portada')
-                    ->disk('public')
+                    ->disk(config('almacenamiento.publico'))
                     ->height(40)
                     ->width(60),
                 TextColumn::make('nombre')

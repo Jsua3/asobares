@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\EstadoPublicacion;
 use App\Models\Concerns\EsPublicable;
 use Database\Factories\AsociadoFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -58,6 +59,33 @@ class Asociado extends Model implements HasMedia
         return 'slug';
     }
 
+    /**
+     * El buscador por nombre del directorio público, sin distinguir mayúsculas.
+     *
+     * `whereLike(caseSensitive: false)` y NO `where(…, 'like', …)`. El `LIKE`
+     * de SQLite es insensible a mayúsculas para ASCII y el de PostgreSQL es
+     * sensible: con la forma antigua, buscar «bar merlín» dejaba de encontrar
+     * «Bar Merlín» el día del despliegue, en silencio y sin ningún error.
+     * Medido contra PostgreSQL 17 sobre los diez establecimientos sembrados,
+     * `like '%bar%'` devolvía 4 filas donde `ilike '%bar%'` devuelve 10.
+     *
+     * Lo resuelve la gramática del propio Laravel —emite `ilike` en Postgres y
+     * `like` en SQLite—, así que no hay que mantener un `match` por driver ni
+     * arriesgarse a mandarle a SQLite un operador que no existe.
+     *
+     * Vive aquí y no en el controlador para que la guardia pueda afirmar la
+     * SQL generada por los dos motores: la suite corre sobre SQLite, donde el
+     * defecto NO se reproduce, y una prueba de comportamiento sola pasaría
+     * igual de verde con el código roto.
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeBuscarPorNombre(Builder $query, string $texto): Builder
+    {
+        return $query->whereLike('nombre', '%'.$texto.'%', caseSensitive: false);
+    }
+
     /** @return BelongsTo<Categoria, $this> */
     public function categoria(): BelongsTo
     {
@@ -97,7 +125,7 @@ class Asociado extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('galeria')
-            ->useDisk('public')
+            ->useDisk(config('almacenamiento.publico'))
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
     }
 
