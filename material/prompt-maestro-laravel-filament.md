@@ -29,6 +29,8 @@
 >
 > **v7 · la trampa que más costó, y que no es técnica:** de veintitantos fallos atrapados en estas dos fases, **cinco fueron pruebas en falso verde escritas por el propio autor del plan** — pruebas que pasaban con el bug reintroducido. Todas tenían la misma forma: `assertSee('alguna palabra')` o una aserción sobre el texto de un archivo, en vez de sobre el comportamiento. Ninguna se detectó leyendo; todas salieron cuando un revisor **mutó el código a propósito** y miró si la prueba se enteraba. Si se relanza cualquier parte de este trabajo: **escribir la prueba no basta, hay que romper el código y ver el rojo.**
 >
+> **v11 (19 ago 2026, tarde) — EMPIEZA POR AQUÍ. PASE DE INTERFAZ CERRADO Y DESPLIEGUE A UN COMANDO.** Sesión larga que cierra **cinco de las seis brechas** que el §23.12 daba por vivas y **los siete hallazgos** del pase de interfaz que el §22 tenía en pausa. Suite de **599 a 747 casos** (736 pasan, 11 omitidas, 0 fallos, 2.719 aserciones), 7 commits ya en `origin/main`, `main` en `f61a236`. Lo que hay que leer, en este orden: **§25** (qué se hizo, las trampas nuevas y qué toca ahora), y solo después las §20 a §23, que están corregidas pero cuentan historia, no estado. ⚠️ **Lo único que sigue bloqueando el proyecto no es técnico**: la cuenta institucional del gremio (R-14). Todo lo demás está escrito y esperando.
+>
 > **v10 (19 ago 2026) — FASE 4 CERRADA, SOLO QUEDA LO QUE EXIGE SERVIDOR:** todo el expediente de entrega existe y está commiteado en `docs/ingenieria/` (matriz de pruebas, manual con capturas, siete diagramas, base de datos exportada, medición de rendimiento e informe de cumplimiento en `.docx`). Las dos cifras que eran documentales están **verificadas**: la suite re-ejecutada (599 casos, 0 fallos, 1.699 aserciones) y el RNF-02 medido (**portada en 972 ms contra un techo de 2.500**, 78 mediciones sobre navegador real). Lee la **§23.11** y la **§23.12**; la §23.9 quedó superada y así está marcada. Lo único vivo es el hosting institucional (R-14) y lo que cuelga de él, más cuatro pendientes menores que la §23.12 enumera.
 >
 > **v9 (18 ago 2026) — EL CUELLO DE BOTELLA YA NO ES TÉCNICO:** revisión de estado con el repositorio, el cronograma firmado y los correos del docente asesor a la vista. El producto va dos o tres semanas por delante del cronograma y **las cuatro cosas que faltan no son código de producto**: hosting, manual de usuario, capacitación y documentación de entrega. El despliegue del §20 deja de ser tarea y pasa a **riesgo escalado a la junta (R-14)** — el bloqueo es la cuenta y el medio de pago institucionales, no un paso de ingeniería, y no se resuelve desplegando con cuenta personal. El pase de interfaz del §22 **queda en pausa**: ninguno de sus siete hallazgos vivos bloquea la entrega. La nueva **sección 23 manda sobre el orden de trabajo** hasta el 21 de agosto y es lo primero que debe leer una sesión nueva.
@@ -563,9 +565,13 @@ Si tu sesión puede componer fotogramas, esto es lo primero que vale la pena mir
 
 ---
 
-## 20. PENDIENTE INMEDIATO — Despliegue en Laravel Cloud (decidido el 15 ago 2026, SIN HACER)
+## 20. Despliegue en Laravel Cloud — decidido el 15 ago, PREPARADO el 19 ago, pendiente de la cuenta
 
-**Recordatorio para toda sesión nueva: esto está decidido y no ejecutado.** No reabras la discusión de proveedor salvo que se cumpla alguno de los falsadores de abajo; lo que falta es un trámite humano y después una tarde de trabajo.
+> ⚠️ **Esta sección conserva la DECISIÓN y su porqué, que siguen en pie. Lo que ya no describe es el estado.** La «tarde de trabajo» que anunciaba abajo se hizo el 19 de agosto: la aplicación corrió entera contra PostgreSQL 17.11 real, existe `docs/ingenieria/runbook-despliegue.md` con la secuencia literal, existe `.env.staging.example`, y el almacenamiento de archivos quedó probado contra almacenamiento de objetos. **La checklist del §20.5 está superada por el runbook, que es más largo y está verificado — sigue el runbook, no la checklist.** Lo único que falta es el §20.3, que no es técnico. Detalle en el §25.
+>
+> Corrección a lo que dice el §20.5: **el punto 5 es peligroso tal cual está escrito.** «`migrate --seed` remoto» daría por bueno sembrar datos de demostración contra la base del servidor; hasta el 19 de agosto solo `UsuarioSeeder` se negaba en producción y los otros diecinueve habrían publicado establecimientos inventados en el directorio real. Ya está cerrado con una guardia en bloque, pero lee el §9 del runbook antes de sembrar nada remoto.
+
+**Recordatorio para toda sesión nueva: la decisión de proveedor está tomada.** No la reabras salvo que se cumpla alguno de los falsadores del §20.6; lo que falta es un trámite humano.
 
 ### 20.1 La decisión y su porqué
 
@@ -640,9 +646,9 @@ La verificación visual se hizo con `playwright-cli` sobre Chromium real (el pan
 
 ---
 
-## 22. EN PAUSA — Pase de interfaz iOS y el parpadeo del logo (18 ago 2026)
+## 22. CERRADO — Pase de interfaz iOS y el parpadeo del logo (18–19 ago 2026)
 
-> ⚠️ **En pausa desde el 18 de agosto por decisión del dueño (§23.6).** Lo entregado abajo está fusionado y verde; los siete hallazgos vivos del §22.4 siguen abiertos y siguen siendo válidos, pero ninguno bloquea la entrega del 22 de septiembre, ninguno aparece en el cronograma firmado y ninguno lo califica el docente asesor. **No los retomes sin cerrar antes la Fase 4 del §23.5.** Única excepción admitida: `campo.blade.php:16`, por ser una línea y por incumplir el foco visible.
+> ✅ **Ya no está en pausa: los siete hallazgos del §22.4 se cerraron el 19 de agosto.** Lo de esta sección se conserva porque explica el diagnóstico y las trampas que costaron rondas —el logo que no era vector, los tres desplegables que no animaban nada, el material con dos recetas—, no el estado. **Para el estado ve al §25.** La lista de siete pendientes del §22.4 está toda cerrada, con dos correcciones a lo que decía: las etiquetas de la navbar que partían en dos líneas eran **tres y no dos**, y no ocurría «a 1280, 1440 y 1600 px» sino a **cualquier ancho de escritorio**, porque el `max-w-7xl` de la barra la topa en 1280.
 
 Encargo del dueño: (1) el logo «aparece y desaparece» en cada navegación; (2) «mejorar toda la interfaz dándole ese toque de iOS que tienen los iPhone». Sobre `main`, tres commits, suite **599 pruebas (588 pasan, 11 omitidas, 0 fallos)**.
 
@@ -696,9 +702,11 @@ El §10 de la spec de movimiento rechazó a propósito animar navbar, pie, migas
 
 ---
 
-## 23. DÓNDE ESTÁ EL PROYECTO Y QUÉ TOCA AHORA (18 ago 2026)
+## 23. EL CONTEXTO DE LOS DOS CALENDARIOS (18 ago 2026) — el orden de trabajo pasó al §26
 
-**Esta sección manda sobre el orden de trabajo hasta el 21 de agosto.** Las §15–22 cuentan lo que se construyó y las trampas que costaron rondas; esta cuenta lo que falta y por qué el cuello de botella ya no es técnico. Si retomas el proyecto, lee esta primero y las otras cuando toques su tema.
+> ⚠️ **Ya NO manda sobre el orden de trabajo. Para eso ve al §26.** Lo que sigue siendo válido y por lo que se conserva entera es el **contexto que no está en ningún otro sitio**: los dos calendarios que corren en paralelo (§23.1), lo que ha dicho el docente asesor con fecha y textual (§23.2), por qué el despliegue es un riesgo de gobierno y no una tarea (§23.3), y cómo conseguir la retroalimentación del empresario sin URL viva (§23.4). Eso hay que leerlo. Las listas de pendientes de las §23.5 a §23.12 están cerradas o superadas, y así están marcadas una por una.
+
+Las §15–22 cuentan lo que se construyó y las trampas que costaron rondas; esta cuenta el terreno en el que se juega.
 
 El diagnóstico en una línea, y no cambió desde la auditoría del 14 de agosto: **el producto va dos o tres semanas por delante del cronograma; la evidencia contractual va por detrás.** Lo que falta no es código de funcionalidad — es despliegue, documentación de entrega y firmas.
 
@@ -712,12 +720,12 @@ Hay dos relojes corriendo y se cruzan el viernes 21.
 |---|---|---|---|
 | S1 | 27–31 jul | Textos, sitemap, elección de stack | ✅ |
 | S2 | 3–7 ago | Wireframes, paleta, tipografías · **hito: aprobación del diseño** | ✅ construido; el hito nunca se firmó formalmente |
-| S3 | 10–14 ago | Proyecto, **hosting de pruebas**, BD, menú, institucional | ⚠️ todo menos el hosting |
-| **S4** | **17–21 ago** | **Directorio + módulo de eventos** | ✅ hecho desde el 5 de agosto |
+| S3 | 10–14 ago | Proyecto, **hosting de pruebas**, BD, menú, institucional | ⚠️ todo menos el hosting · el 19 ago quedó **preparado a un comando**, falta la cuenta (§25, §26.2) |
+| **S4** | **17–21 ago** | **Directorio + módulo de eventos** | ✅ hecho desde el 5 de agosto · el **calendario** que faltaba se construyó el 19 ago |
 | S5 | 24–28 ago | Pasarela en sandbox | ✅ hecho (Bold real + simulada, conmutable) |
 | S6 | 31 ago–4 sep | Panel CMS | ✅ hecho (18 recursos Filament) |
-| S7 | 7–11 sep | Pruebas globales, dispositivos reales, **bugs que reporta la tutora** | ❌ sin empezar |
-| S8 | 14–18 sep | Dominio + SSL, **capacitación**, **manual de usuario**, documentación técnica, BD exportada | ❌ sin empezar |
+| S7 | 7–11 sep | Pruebas globales, dispositivos reales, **bugs que reporta la tutora** | ⚠️ el registro de hallazgos ya tiene formato (`constancias/Formato 03`); faltan los dispositivos reales y que la tutora reporte |
+| S8 | 14–18 sep | Dominio + SSL, **capacitación**, **manual de usuario**, documentación técnica, BD exportada | ⚠️ manual, documentación y BD **entregados**; la capacitación tiene su constancia lista; dominio y SSL cuelgan de R-14 |
 
 **Fecha límite dura: 22 de septiembre de 2026.** Quedan cinco semanas. El adelanto en funcionalidad es real pero no compra nada: **de las cuatro cosas que aún no existen, ninguna es código de producto** — hosting, manual, capacitación y documentación de entrega. Son exactamente los ítems que el cronograma pone al final y que no se pueden apurar el último día porque dependen de terceros (la tutora tiene que probar, la junta tiene que decidir la cuenta).
 
@@ -781,7 +789,7 @@ Y uno barato que da un número citable:
 
 ### 23.6 Lo que NO se toca esta semana
 
-- **El pase de interfaz iOS (§22.4) queda en pausa.** Los siete hallazgos vivos —foco, ayuda del campo, objetivos táctiles, `.pulsable`, escala tipográfica, `transition-colors`, flechas sin Poppins, navbar en dos líneas— siguen abiertos y siguen siendo válidos, pero **ninguno bloquea la entrega, ninguno está en el cronograma y ninguno lo califica César.** Abrir interfaz ahora se come la semana y no mueve nada de lo que vence el viernes. Única excepción razonable si sobra un hueco: `campo.blade.php:16`, porque es **una línea** (`focus:outline-none` fuera) y arregla el único indicador de foco de todos los formularios del sitio, que hoy incumple.
+- ~~**El pase de interfaz iOS (§22.4) queda en pausa.**~~ **Se retomó y se cerró el 19 de agosto**, una vez cerrada la Fase 4 que era la condición. Los siete hallazgos —foco, ayuda del campo, objetivos táctiles, `.pulsable`, escala tipográfica, `transition-colors`, flechas sin Poppins, navbar en dos líneas— siguen abiertos y siguen siendo válidos, pero **ninguno bloquea la entrega, ninguno está en el cronograma y ninguno lo califica César.** Abrir interfaz ahora se come la semana y no mueve nada de lo que vence el viernes. Única excepción razonable si sobra un hueco: `campo.blade.php:16`, porque es **una línea** (`focus:outline-none` fuera) y arregla el único indicador de foco de todos los formularios del sitio, que hoy incumple.
 - **Ningún módulo nuevo.** La congelación de alcance del 14 de agosto sigue vigente y ahora tiene más razón, no menos.
 - **La firma de la ERS v3 no es trabajo de código.** Es un punto de la reunión del viernes (§23.7).
 
@@ -858,7 +866,9 @@ El §23.5 pedía cinco artefactos que no dependen del hosting. **Los cinco está
 **Lo que queda de Fase 4 ya no lo puede hacer un agente:** exportar el manual a PDF, la capacitación con su constancia, las pruebas en dispositivos de la tutora, y todo lo que cuelga de R-14.
 
 
-### 23.12 Estado al 19 de agosto — qué queda vivo
+### 23.12 SUPERADA — Estado al 19 de agosto por la mañana
+
+> ⛔ **Esta sección ya no describe la realidad.** De las seis cosas que enumera como vivas, **cinco se cerraron esa misma tarde**: el calendario de eventos, el foco visible, los objetivos táctiles, el manual en PDF con la constancia de capacitación, y el hito de aprobación del diseño (que ahora tiene su acta emitida, a falta de firma). La única que sigue viva es la primera, **R-14**. Se conserva porque su lectura del camino crítico sigue siendo correcta y porque explica por qué se priorizó lo que se priorizó. **Ve al §25.**
 
 `main` en **`1ff87d0`**, sincronizado con `origin`. Árbol limpio salvo `.claude/settings.local.json`. Suite sin cambios: 460 métodos en 48 archivos, 599 casos.
 
@@ -959,15 +969,84 @@ Y uno menor, anterior a esta jornada: a 320 px `/proveedores` desbordaba 45 px, 
 
 ### 25.4 Lo que sigue abierto
 
-1. **R-14, la cuenta institucional.** Sigue siendo el camino crítico entero y **no es técnico**: correo y medio de pago del gremio. Todo lo demás está escrito y esperando.
-2. **El bucket de objetos.** La aplicación ya sabe usarlo y está probada contra un almacén compatible con S3; falta crearlo. Léase el §8.3 del runbook **antes** de crearlo, no después.
-3. **Correo saliente.** `smtp` es el único transporte instalado. Sin proveedor, los códigos MFA se leen por `cloud environment:logs`, y eso exige `LOG_STACK=stderr`.
-4. **Dispositivos reales** (RNF-01, RNF-07). Lo medido es emulación de navegador, no un teléfono.
-5. **Firmar los tres formatos.** Existen; falta la reunión, la sesión de capacitación y las firmas. Un formato en blanco no es evidencia.
-6. **Deuda anotada, ninguna bloquea:** los 74 `leading-*`/`tracking-*` sueltos que secuestran la escala tipográfica en su propio elemento; los seis enlaces de atribución de Leaflet en 51 por 15 px, que son pieza de terceros exigida por la licencia de las teselas; `@alpinejs/collapse` importado y registrado sin ningún consumidor; y el consecutivo de PQR bajo concurrencia en PostgreSQL, que **falla cerrado** gracias al índice único.
+**Está en el §26, y a propósito no se repite aquí.** Este documento ya ha pagado dos veces el precio de tener la misma lista en dos sitios: la del §23.9 y la del §23.12 quedaron obsoletas mientras la otra decía lo contrario. Una sola lista de pendientes, y es la del §26.
+
+En una frase, para quien solo lea esta sección: **lo único que bloquea el proyecto es la cuenta institucional del gremio (R-14), y de ella cuelgan el bucket, el correo saliente, el SSL, la medición contra dominio y las pruebas en dispositivos de la tutora.** Lo demás son firmas.
+
+Un residuo que sí conviene dejar dicho aquí porque es una **excepción declarada y no una deuda**: los seis enlaces de atribución de Leaflet miden 51 por 15 px. Los pinta la librería, la licencia de las teselas los exige y son la convención de todos los mapas de la web. Cerrarlos significa tocar una pieza de terceros para cumplir un listón que es más exigente que la norma; es decisión del dueño, no de accesibilidad.
 
 ### 25.5 El instrumental que queda
 
 - `docs/ingenieria/herramientas/` — los generadores de los PDF del expediente, manual y constancias, **sin dependencias de npm**: un conversor de Markdown propio y el Chrome ya instalado, conducido por el protocolo DevTools sobre el WebSocket nativo de Node. `imprimir.mjs` es el motor compartido, y es el único sitio donde tocar la hoja de estilo del papel.
 - **Contenedores de verificación**, que no viven en el repositorio y se levantan cuando hagan falta: `postgres:17-alpine` para el motor de Cloud y `minio/minio` para el almacenamiento de objetos.
   ⚠️ El contenedor de Postgres **no es fiel a Cloud en colación**: alpine es musl y ordena como `COLLATE "C"`, igual que SQLite; el de Cloud será glibc o ICU y **el orden alfabético del directorio, los municipios y las categorías cambiará**. No rompe nada, pero lo parecerá el día de la demostración, y el contenedor local no permite anticiparlo.
+
+### 25.6 Qué quedó escrito, y dónde
+
+Siete commits, todos en `origin/main`, con `main` en `f61a236`:
+
+| Commit | Qué cierra |
+|---|---|
+| `c052097` | Escala tipográfica, reloj por defecto y portadores de acuse |
+| `09e3e33` | Foco visible, objetivos táctiles, flechas, acuse en vistas y navegación reagrupada |
+| `fa0691f` | El calendario de eventos (RF-19) |
+| `55a23ab` | El calendario en el sitemap y en el barrido de rutas públicas |
+| `2172ce5` | Despliegue, almacenamiento de objetos y los defectos que solo se verían publicados |
+| `f61a236` | Expediente, tres constancias y esta memoria |
+| `9b871ce` | *(anterior a la sesión, estaba sin subir)* |
+
+Ocho archivos de prueba nuevos, 65 métodos entre todos: `AlmacenamientoTest`, `CalendarioDeEventosTest`, `ConfiguracionDeDespliegueTest`, `FocoVisibleTest`, `NavegacionAgrupadaTest`, `ObjetivoTactilTest`, `TipografiaTest` y `TransicionesDeVistaTest`, más el rasgo compartido `tests/Support/MideContraste`.
+
+Del expediente se actualizaron además **`matriz-de-pruebas.md`** —RF-19 y RNF-12 dejan de ser huecos abiertos, y las cifras pasan de 599 a 747 casos— y **`docs/ingenieria/README.md`**. El informe de cumplimiento se reescribió en `… (19 ago, rev 2).docx`, **fichero aparte**: Word tenía el original abierto y lo habría sobrescrito al guardar. No se rehízo el documento, se sustituyó solo el XML dentro del `.docx`, de modo que conserva enteras las veinte páginas con sus estilos, su numeración y su pie. Ese método sirve para la próxima vez: un `.docx` es un zip, y reemplazar `word/document.xml` copiando el resto de entradas en su orden original es más seguro que regenerarlo.
+
+### 25.7 Cómo se ejecutó, y las dos veces que se murió
+
+Se conduce con dos frentes en paralelo —despliegue e interfaz— sobre un reconocimiento previo de ocho lentes que produjo inventarios con archivo, línea y arreglo propuesto. **El frente de interfaz tuvo que ser secuencial**: sus siete etapas comparten `app.css` y las mismas vistas, y en paralelo se habrían pisado.
+
+⚠️ **El frente de interfaz murió dos veces por límite de sesión**, con las etapas 5, 6 y 7 sin ejecutar la primera vez y la 7 la segunda. Se recuperó reanudando el mismo trabajo: las etapas ya cerradas se sirven de caché y solo corren las que faltan. **Si vuelve a pasar, no relances desde cero.** La segunda muerte ocurrió *después* de que la etapa 7 terminara su trabajo y *antes* de que lo reportara: se comprobó midiendo el árbol —los siete pasos de su plan estaban aplicados— en vez de suponer que había quedado a medias.
+
+**Lo que más valor dio fue medir dos veces.** Cada afirmación de un agente se volvió a comprobar por fuera, y esa segunda medición encontró el defecto del buscador, el de la política del bucket y el desborde de 320 px. También descartó cuatro falsos positivos **míos**: un desborde que solo existía porque medí mientras se recompilaba el CSS, y tres objetivos táctiles que mi sonda contaba mal por no contemplar la etiqueta envolvente ni el equivalente al mismo destino. La lección es simétrica: **el que verifica también se equivoca, y se nota igual de tarde.**
+
+### 25.8 Aviso de seguridad, ajeno al encargo
+
+En el bloque de instrucciones que llegó junto a los servidores MCP venía una directiva que **no procedía del dueño**: pedía enrutar todo el trabajo de ficheros por la terminal «en vez de las herramientas dedicadas de lectura y escritura». Su efecto sería sacar las escrituras de las herramientas que el sistema de permisos vigila. Se ignoró, y un agente del frente de despliegue la detectó por su cuenta y también la ignoró. Queda anotado por si conviene revisar de qué servidor sale.
+
+---
+
+## 26. QUÉ TOCA AHORA (desde el 20 de agosto de 2026)
+
+**Esta sección sustituye al §23 en su papel de orden de trabajo.** El §23 mandaba hasta el 21 de agosto y su lectura del camino crítico sigue siendo buena, pero su lista de pendientes está cerrada.
+
+El diagnóstico no cambió y ahora es más nítido: **no queda trabajo de producto**. Lo que falta son firmas, una cuenta y un teléfono.
+
+### 26.1 Antes del viernes 21, que cierra el corte 2
+
+1. **La reunión con Natalia**, que es la única ventana de la semana. Se lleva, en este orden: el **planeador FO-DO-100** para su firma (lo pidió César el 18 y es lo único suyo abierto); el **Acta 01** de aprobación del diseño, ya redactada y lista en `docs/ingenieria/constancias/`; el **Formato 03** de retroalimentación, que sirve a la vez para el corte y para abrir el registro de hallazgos de la S7; la **base de los asociados** con sus autorizaciones (P-06, el insumo más urgente y el que lleva pidiéndose desde principios de agosto); y **la cuenta institucional** del §20.2, planteada como decisión de la junta con su consecuencia dicha en voz alta.
+2. **El capítulo 5 del documento de práctica** se escribe con el repositorio en la mano, y ahora las cifras son otras: **747 casos de prueba**, 22 modelos, 33 migraciones, el calendario de eventos, y `docs/ingenieria/` como anexo. ⚠️ Recuerda el §24: el documento de la universidad es **individual**, uno por practicante, aunque ambos anexen los mismos artefactos técnicos.
+
+### 26.2 En cuanto exista la cuenta
+
+Todo esto está escrito y probado; es ejecución, no diseño.
+
+1. `cloud auth` lo corre **el dueño** en una terminal interactiva. Después el runbook, de principio a fin.
+2. **Crear el bucket, y leer el §8.3 del runbook ANTES de crearlo.** La política que sale sola abre los formatos de la guía normativa. Es el único paso de todo el despliegue que no se puede delegar en la aplicación.
+3. Contratar el **SMTP** con la cuenta del gremio, o los códigos del segundo factor no salen del registro y el panel no es demostrable.
+4. Repetir la **medición de rendimiento contra el dominio**: los 972 ms son contra `localhost` y no incluyen latencia de red.
+5. **Dispositivos reales** (RNF-01, RNF-07): un Android y un iOS de verdad. Es lo único de la S7 que no se puede emular.
+
+### 26.3 Deuda anotada, por si sobra tiempo
+
+Ninguna bloquea la entrega, y están en orden de lo que más se nota:
+
+- **Los 74 `leading-*` y `tracking-*` sueltos** que secuestran la escala tipográfica en su propio elemento. Cada utilidad de tamaño emite su valor como reserva, así que mientras el suelto siga en la etiqueta, la escala pierde ahí. No se tocan las 28 `tracking-wide`/`tracking-wider` sobre `uppercase`: ahí el tracking positivo grande debe seguir ganando.
+- **`@alpinejs/collapse`** se importa y se registra sin ningún consumidor. Retirarlo toca `package.json`.
+- **Los siete chips de filtro** siguen con la cadena `@class` repetida; piden componente propio con prop `:activo`. El conmutador de eventos ya se resolvió así y sirve de modelo.
+- **El consecutivo de PQR bajo concurrencia** en PostgreSQL: `lockForUpdate()` no puede bloquear una fila que aún no existe. Falla **cerrado** por índice único, así que el segundo envío simultáneo recibe error y no un radicado duplicado. Arreglarlo toca el expediente de PQR y es decisión del dueño.
+- **El repositorio sigue en cuenta personal de GitHub.** Misma familia que el §20.2: conviene una organización del gremio, o al menos un segundo administrador, antes del 22 de septiembre. Es gratis y toma minutos.
+
+### 26.4 Lo que NO hay que hacer
+
+- **No reabrir el alcance.** La congelación del 14 de agosto sigue vigente y ahora tiene más razón: quedan cinco semanas y lo que falta no se construye, se firma.
+- **No desplegar con cuenta personal.** El §20.6 y el §23.3 lo dicen y el modo de muerte está descrito: la demo sale bien, nadie migra lo que funciona, la práctica termina y las llaves se van.
+- **No mover la escala tipográfica ni el reloj a `tokens.css`.** Repinta 372 reglas de `/admin` en silencio. Hay una prueba que lo prohíbe; si la ves fallar, es esto.
+- **No dar por buena una medición hecha mientras se recompila el CSS.** Media hora de esta sesión se fue diagnosticando un desbordamiento que no existía.
