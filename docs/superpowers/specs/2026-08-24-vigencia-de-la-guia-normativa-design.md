@@ -98,10 +98,9 @@ Un scope nuevo que **se compone** con el existente. `publicado()` viene del trai
 
 ```php
 /** Un requisito sin fecha de vencimiento es permanente; uno con fecha vive hasta su último día, inclusive. */
-#[Scope]
-protected function vigente(Builder $consulta): void
+public function scopeVigente(Builder $query): Builder
 {
-    $consulta->where(fn (Builder $q) => $q
+    return $query->where(fn (Builder $q) => $q
         ->whereNull('vigente_hasta')
         ->orWhere('vigente_hasta', '>=', now()->toDateString()));
 }
