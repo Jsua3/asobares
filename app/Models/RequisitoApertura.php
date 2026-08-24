@@ -31,6 +31,8 @@ class RequisitoApertura extends Model
             'estado' => EstadoPublicacion::class,
             'checklist' => 'array',
             'costo_aproximado' => 'decimal:2',
+            'verificado_el' => 'date',
+            'vigente_hasta' => 'date',
         ];
     }
 
@@ -53,7 +55,12 @@ class RequisitoApertura extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['entidad', 'estado', 'municipio_id', 'costo_aproximado'])
+            ->logOnly([
+                'entidad', 'estado', 'municipio_id', 'costo_aproximado',
+                // Cambiar una fecha de verificación es afirmar autoridad sobre
+                // información legal: tiene que quedar quién y cuándo.
+                'verificado_el', 'verificado_con', 'vigente_hasta',
+            ])
             ->logOnlyDirty()
             ->useLogName('requisito')
             ->setDescriptionForEvent(fn (string $evento): string => "Requisito {$this->entidad}: {$evento}");

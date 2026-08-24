@@ -32,4 +32,27 @@ class RequisitoAperturaFactory extends Factory
             'estado' => 'publicado',
         ]);
     }
+
+    public function verificado(?string $fecha = null): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'verificado_el' => $fecha ?? now()->toDateString(),
+            'verificado_con' => 'Documento oficial entregado por la entidad',
+        ]);
+    }
+
+    /** Un decreto transitorio: caduca, pero todavía no. */
+    public function transitorio(?string $hasta = null): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'vigente_hasta' => $hasta ?? now()->addMonth()->toDateString(),
+        ]);
+    }
+
+    public function caducado(): self
+    {
+        return $this->state(fn (array $attributes) => [
+            'vigente_hasta' => now()->subDay()->toDateString(),
+        ]);
+    }
 }
