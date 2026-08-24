@@ -917,6 +917,45 @@ La distinción es limpia: **lo que se le entrega a la empresa es del equipo; lo 
 
 Si generas un artefacto nuevo y solo pones un nombre, está mal. Revísalo antes de imprimirlo.
 
+### 24.3 El reparto del trabajo (acordado el 20 de agosto)
+
+Ingrid levantó su propia auditoría del proyecto y propuso repartirlo en dos bloques **por responsabilidad funcional, no por frontend/backend**. Sua eligió el bloque 1. El reparto queda así:
+
+| | **Persona 1 — Sua** | **Persona 2 — Ingrid** |
+|---|---|---|
+| Eje | Plataforma, administración y producción | Producto, usuario y módulos públicos |
+| Bloques | Entorno · panel Filament (19 recursos, 5 páginas, MFA, roles, policies, aprobación) · cartera e importación CSV · pagos y webhook de Bold · observatorio · infraestructura (hosting, HTTPS, correo, colas) · **salud global de la suite** | Directorio y municipios · guía normativa · bolsa de empleo · eventos · artistas · proveedores · boletín · contacto/PQRS/afiliación · portal `/mi-cuenta` |
+
+**Las dos reglas de frontera, que son lo que evita los conflictos de Git:**
+
+1. Durante la estabilización, **solo la Persona 1 toca PHP, Composer, `.env` y migraciones**.
+2. La Persona 1 **no rediseña ni amplía los módulos públicos** de la Persona 2.
+
+El ejemplo que ella misma da y que resuelve casi todas las dudas: en la bolsa de empleo, **Persona 2 responde por crear, publicar y postular desde la experiencia funcional; Persona 1 por permisos, Filament, moderación administrativa y estabilidad técnica.**
+
+### 24.4 Cómo leer su auditoría sin repetir trabajo
+
+Su documento es serio y encontró cosas reales, pero **se levantó sobre un árbol sin actualizar y sobre un PHP incompleto**. Antes de aceptar su lista de pendientes, aplica esta lectura:
+
+- **La suite NO está rota.** Su corrida dio 405 pasan / 22 fallan / 172 error porque **su PHP (Herd Lite) no trae `intl` ni `gd`** — ella misma lo diagnostica y avisa de no leerlo como 194 funcionalidades defectuosas. En un PHP con esas extensiones la suite del día de su auditoría salía **747 casos · 736 pasan · 11 omitidas · 0 fallos · 2.719 aserciones**, y hoy sale **791 · 780 · 11 · 0 · 2.818**. Su «0 skipped» es consecuencia de lo mismo: una corrida que revienta no llega a registrar omisiones. ⚠️ **Esta línea citó durante tres días «599 casos · 588 pasan · 1.699 aserciones»**, que era la cifra del 18 de agosto y ya estaba vencida cuando se escribió —el encabezado v11 de este mismo documento decía 747—. Rebatir una cifra obsoleta con otra obsoleta no rebate nada.
+- **`InscripcionesDelMes` es un falso positivo.** No es residuo de autoload: `TableroTest` afirma a propósito que **la clase NO existe** (`test_el_recaudo_mensual_reemplazo_a_las_inscripciones_de_30_dias`). Es una guarda de regresión. El `use` de una clase inexistente es legal en PHP mientras solo se pase a `class_exists()`. Si «se arregla», se rompe la guarda.
+- **Los pendientes de documentación ya no aplican.** Pide generar diagramas, capturas y alinear el rendimiento: **las tres cosas existen y están commiteadas** desde el 19 de agosto en `docs/ingenieria/`. Su copia era anterior.
+
+**Lo que sí encontró y hay que atender:**
+
+| Hallazgo | Veredicto | De quién |
+|---|---|---|
+| `CreateAction` huérfano en Transacciones | ✅ **Real** · **cerrado el 20 ago en `b6418e0`.** `ListTransaccions.php:16` montaba el botón sin existir página `CreateTransaccion`, y Filament no se queda quieto ante eso: abre el formulario del recurso en un modal, concediendo justo lo que el hallazgo G9 prohíbe. Retirada la acción, con dos pruebas que fijan el recurso como de solo lectura | Persona 1 |
+| Catálogo de municipios incompleto | ✅ **Real.** El seeder trae 7 y el Quindío tiene 12 | Persona 2 |
+| La suite muere en PHP 8.5.8 al llegar a una prueba de imágenes, y esa prueba pasa aislada | ✅ **Real en su máquina** · **no reproduce en 8.5.9**: el 23 de agosto la suite completa salió entera y verde dos veces (791 · 780 · 11 omitidas · 0 fallos). Deja de ser un defecto que diagnosticar y pasa a ser lo que ya era el punto siguiente: unificar el intérprete del equipo | Persona 1 |
+| Migraciones pendientes en la base local | ⚠️ Es de **su** base local, no del repositorio | Persona 1 la acompaña |
+
+⚠️ **La raíz del bloqueo de Ingrid ya estaba documentada y aun así la mordió:** el README declara `intl`, `gd`, `exif`, `fileinfo` y `mbstring` como requisito, y menciona Herd Lite por su nombre. Lo que faltaba era que **`composer.json` las declarara**: solo pedía `php ^8.3`, así que `composer install` pasaba limpio en un entorno incompleto y el fallo aparecía 350 segundos después, disfrazado de 194 pruebas rotas. **Cerrado el 20 de agosto en `3f612fa`**: las cinco extensiones están en el `require` de la raíz y subidas al bloque `platform` del candado, con diez casos que impiden que raíz y candado se vuelvan a separar. El diagnóstico pasa de media jornada a una línea de salida.
+
+### 24.5 Lo que su §7 acierta, y conviene adoptar
+
+Su documento incluye una lista de «elementos que NO deben asumirse como pendientes obligatorios» —API REST, membresías, suscripción automática, integración con redes, certificado de afiliación, cobro a proveedores, motor PDF nativo y calendario de eventos— con la regla de comprobar el alcance antes de construir. **Es la misma congelación de alcance que sostiene este documento desde el 14 de agosto.** Adoptarla explícitamente: la ausencia de una funcionalidad no es un incumplimiento mientras no esté en el cronograma firmado o en la ERS.
+
 
 ---
 
