@@ -27,18 +27,22 @@ No se confunde con la suite automatizada: la suite es el **instrumento**, esta m
 
 | Métrica | Valor |
 |---|---|
-| Archivos de prueba | 56 |
-| **Métodos de prueba** | **541** |
-| **Casos ejecutados** | **759** (los métodos con proveedor de datos expanden a varios casos cada uno) |
-| Resultado de la última ejecución **verificada** | 748 pasan · 11 omitidas · **0 fallos** |
-| Aserciones | **2.733** |
-| Duración de la suite completa | 193 s |
+| Archivos de prueba | 58 |
+| **Métodos de prueba** | **563** |
+| **Casos ejecutados** | **791** (los métodos con proveedor de datos expanden a varios casos cada uno) |
+| Resultado de la última ejecución **verificada** | 780 pasan · 11 omitidas · **0 fallos** |
+| Aserciones | **2.818** |
+| Duración de la suite completa | 267 s |
 | Requisitos funcionales V1 con cobertura total o parcial | 45 de 50 |
 | Requisitos no funcionales con cobertura total o parcial | 11 de 14 |
 
-> ✅ **Nota de verificación — 20 de agosto de 2026.** La suite se re-ejecutó sobre un **clon limpio de `origin/main`** en un entorno recién montado (PHP 8.4.21 con `intl` y `gd`, `composer install` y `npm run build` desde cero), no sobre el árbol de trabajo. La salida: **759 casos · 748 pasan · 11 omitidas · 0 fallos · 2.733 aserciones · 193 s**. Reproducir el verde fuera de la máquina donde se programó es justo lo que la auditoría del 19 de agosto no pudo hacer, y es lo que convierte estas cifras en evidencia.
+> ✅ **Última ejecución — 23 de agosto de 2026.** Sobre el árbol de trabajo, con `php artisan test --compact` y PHP 8.5.9 con `intl` y `gd`: **791 casos · 780 pasan · 11 omitidas · 0 fallos · 2.818 aserciones · 267 s**. Es la corrida que respalda la tabla de arriba, y la primera que incluye la carga de la base real de asociados.
 >
-> Los 12 casos nuevos respecto al 19 de agosto son las guardias de los dos hallazgos que esa auditoría dejó en el bloque de la Persona 1: las extensiones de PHP declaradas en la raíz y en el candado (10 casos), y las transacciones fijadas como recurso de solo lectura (2 casos).
+> ✅ **Reproducibilidad — 20 de agosto de 2026.** La suite se re-ejecutó sobre un **clon limpio de `origin/main`** en un entorno montado desde cero (PHP 8.4.21 con `intl` y `gd`, `composer install` y `npm run build` de cero), no sobre el árbol de trabajo. La salida de aquel día: **759 casos · 748 pasan · 11 omitidas · 0 fallos · 2.733 aserciones · 193 s**. Reproducir el verde fuera de la máquina donde se programó es lo que la auditoría del 19 de agosto no pudo hacer, y es lo que convierte estas cifras en evidencia. La duración baja de 372 a 193 s porque es otra máquina, no porque el proyecto haya mejorado.
+>
+> ⚠️ **Las dos notas no son la misma corrida y no hay que fundirlas.** El clon limpio del 20 de agosto verificó los 759 casos que entonces vivían en `origin/main`; los 32 que añade el bloque de importación se verifican hoy sobre el árbol de trabajo, porque hasta este commit no existían en el repositorio. Cuando el bloque esté publicado, **la corrida sobre clon limpio hay que repetirla**: una cifra de árbol de trabajo no sustituye a una reproducida fuera.
+>
+> **Los 44 casos nuevos respecto al 19 de agosto** se reparten en cuatro frentes, todos del bloque de la Persona 1: las extensiones de PHP declaradas en la raíz y en el candado (10), las transacciones fijadas como recurso de solo lectura (2), la carga de la base real de asociados (15) y la frontera entre datos internos y ficha pública del asociado (17), que hasta ahora era una declaración en el modelo que **ninguna prueba ejercitaba**.
 >
 > **Ejecución anterior.** El 19 de agosto de 2026 con `php artisan test --compact`, y la salida confirma las cifras de esta tabla: **747 casos · 736 pasan · 11 omitidas · 0 fallos · 2.719 aserciones**. El conteo de 537 métodos y 56 archivos se verificó directamente sobre el árbol de trabajo. Ya no queda ninguna cifra de este documento sin respaldo de una ejecución real.
 >
