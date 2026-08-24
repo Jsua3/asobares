@@ -37,9 +37,15 @@ class Asociado extends Model implements HasMedia
      */
     public const array CAMPOS_INTERNOS = [
         'representante',
+        // NIT o cedula del titular. En la base real del gremio 24 de 41 filas
+        // traen cedula de persona natural, no NIT de empresa: es un dato de
+        // identificacion y no se publica jamas.
+        'documento',
         'correo_interno',
         'telefono_interno',
         'fecha_afiliacion',
+        'autorizacion_datos_at',
+        'autorizacion_datos_origen',
         'notas_internas',
     ];
 
@@ -51,6 +57,7 @@ class Asociado extends Model implements HasMedia
             'lat' => 'float',
             'lng' => 'float',
             'fecha_afiliacion' => 'date',
+            'autorizacion_datos_at' => 'datetime',
         ];
     }
 
@@ -156,6 +163,17 @@ class Asociado extends Model implements HasMedia
         return collect($this->attributesToArray())
             ->except(self::CAMPOS_INTERNOS)
             ->all();
+    }
+
+    /**
+     * ¿Hay evidencia de que el titular autorizó el tratamiento de sus datos?
+     *
+     * No basta con que alguien lo recuerde: la Ley 1581 pregunta cuándo y con
+     * qué soporte. Mientras esto sea falso, la ficha no debería publicarse.
+     */
+    public function tieneAutorizacionDeDatos(): bool
+    {
+        return $this->autorizacion_datos_at !== null;
     }
 
     public function tieneUbicacion(): bool
