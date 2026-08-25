@@ -33,13 +33,17 @@ class VigenciaEnElPanelTest extends TestCase
         return $usuario->fresh();
     }
 
-    public function test_la_direccion_registra_la_verificacion_desde_el_formulario(): void
+    public function test_la_direccion_registra_la_verificacion_y_quita_la_vigencia_transitoria_desde_el_formulario(): void
     {
         $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
 
-        $requisito = RequisitoApertura::factory()->publicado()->create([
+        $requisito = RequisitoApertura::factory()->publicado()->transitorio()->create([
             'municipio_id' => Municipio::factory(),
         ]);
+
+        // El punto de partida importa: si el registro ya naciera con
+        // `vigente_hasta` en null, la aserción final no demostraría nada.
+        $this->assertNotNull($requisito->vigente_hasta);
 
         Livewire::test(EditRequisitoApertura::class, ['record' => $requisito->getRouteKey()])
             ->fillForm([
@@ -54,7 +58,10 @@ class VigenciaEnElPanelTest extends TestCase
 
         $this->assertSame('2026-08-20', $requisito->verificado_el->toDateString());
         $this->assertSame('Documento oficial de la Alcaldía de Armenia', $requisito->verificado_con);
-        $this->assertNull($requisito->vigente_hasta, 'Vacío significa permanente.');
+        $this->assertNull(
+            $requisito->vigente_hasta,
+            'Vacío significa permanente: el campo tiene que poder pasar de fecha a nulo, y por eso el registro nace transitorio.'
+        );
     }
 
     public function test_la_tabla_muestra_el_nombre_del_municipio_y_no_su_numero(): void
