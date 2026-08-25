@@ -9,8 +9,10 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class RequisitoAperturasTable
 {
@@ -69,6 +71,25 @@ class RequisitoAperturasTable
                 SelectFilter::make('estado')
                     ->label('Estado')
                     ->options(EstadoPublicacion::class),
+
+                Filter::make('necesita_revision')
+                    ->label('Necesita revisión')
+                    // Junta las dos mitades de la pila de trabajo: lo que nadie
+                    // verificó nunca y lo que se verificó hace más de un año.
+                    // El borde coincide con RequisitoApertura::necesitaRevision().
+                    ->query(fn (Builder $query): Builder => $query->where(fn (Builder $q) => $q
+                        ->whereNull('verificado_el')
+                        ->orWhere(
+                            'verificado_el',
+                            '<',
+                            now()->subMonths(RequisitoApertura::MESES_HASTA_REVISION)->toDateString()
+                        ))),
+
+                Filter::make('caducados')
+                    ->label('Caducados')
+                    ->query(fn (Builder $query): Builder => $query
+                        ->whereNotNull('vigente_hasta')
+                        ->where('vigente_hasta', '<', now()->toDateString())),
             ])
             ->recordActions([
                 ...AccionesDeAprobacion::paraFila(),
