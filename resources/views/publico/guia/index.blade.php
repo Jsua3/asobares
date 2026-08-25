@@ -79,6 +79,20 @@
                                     @if ($requisito->tieneAdjunto())
                                         <span class="text-acento">· Formato descargable</span>
                                     @endif
+
+                                    @if ($requisito->estaVerificado())
+                                        <span class="text-exito-suave">
+                                            · Verificado el {{ $requisito->verificado_el->translatedFormat('d \d\e F \d\e Y') }}
+                                        </span>
+                                    @else
+                                        <span class="text-aviso-suave">· Sin verificar contra la fuente oficial</span>
+                                    @endif
+
+                                    @if ($requisito->esTransitorio())
+                                        <span class="rounded-full border border-aviso-linea bg-aviso-fondo px-2.5 py-0.5 text-aviso-suave">
+                                            Vigente hasta el {{ $requisito->vigente_hasta->translatedFormat('d \d\e F \d\e Y') }}
+                                        </span>
+                                    @endif
                                 </span>
                             </span>
 
@@ -91,6 +105,12 @@
                         <div class="border-t border-linea px-6 py-6 sm:pl-19">
                             @if ($requisito->descripcion)
                                 <p class="text-sm leading-relaxed text-suave">{{ $requisito->descripcion }}</p>
+                            @endif
+
+                            @if ($requisito->verificado_con)
+                                <p class="mt-3 text-xs text-apagado">
+                                    Fuente: {{ $requisito->verificado_con }}
+                                </p>
                             @endif
 
                             @if ($requisito->checklist)

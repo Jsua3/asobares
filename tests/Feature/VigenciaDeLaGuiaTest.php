@@ -280,4 +280,54 @@ class VigenciaDeLaGuiaTest extends TestCase
         $respuesta->assertSee(route('guia.index', ['municipio' => $vivo->slug]), escape: false);
         $respuesta->assertDontSee(route('guia.index', ['municipio' => $apagado->slug]), escape: false);
     }
+
+    public function test_un_tramite_verificado_ensena_su_fecha_y_su_fuente(): void
+    {
+        $municipio = Municipio::factory()->create();
+        $this->requisitoPublicado($municipio, [
+            'verificado_el' => '2026-08-20',
+            'verificado_con' => 'Documento oficial de la Alcaldía de Armenia',
+        ]);
+
+        $this->get(route('guia.index', ['municipio' => $municipio->slug]))
+            ->assertSuccessful()
+            ->assertSee('Verificado el 20 de agosto de 2026')
+            ->assertSee('Documento oficial de la Alcaldía de Armenia');
+    }
+
+    public function test_un_tramite_sin_fechar_lo_dice_en_su_cara(): void
+    {
+        $municipio = Municipio::factory()->create();
+        $this->requisitoPublicado($municipio);
+
+        $this->get(route('guia.index', ['municipio' => $municipio->slug]))
+            ->assertSuccessful()
+            ->assertSee('Sin verificar contra la fuente oficial')
+            ->assertDontSee('Verificado el');
+    }
+
+    public function test_un_decreto_transitorio_anuncia_hasta_cuando_vale(): void
+    {
+        $municipio = Municipio::factory()->create();
+        $this->requisitoPublicado($municipio, ['vigente_hasta' => '2026-11-30']);
+
+        $this->get(route('guia.index', ['municipio' => $municipio->slug]))
+            ->assertSuccessful()
+            ->assertSee('Vigente hasta el 30 de noviembre de 2026');
+    }
+
+    /**
+     * Contraprueba. Sin ella, una vista que no renderizara ningún trámite
+     * pasaría las tres pruebas anteriores en verde.
+     */
+    public function test_un_tramite_permanente_no_anuncia_ninguna_caducidad(): void
+    {
+        $municipio = Municipio::factory()->create();
+        $requisito = $this->requisitoPublicado($municipio, ['entidad' => 'Cámara de Comercio']);
+
+        $this->get(route('guia.index', ['municipio' => $municipio->slug]))
+            ->assertSuccessful()
+            ->assertSee($requisito->entidad)
+            ->assertDontSee('Vigente hasta');
+    }
 }
