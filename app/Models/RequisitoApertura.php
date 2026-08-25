@@ -25,6 +25,18 @@ class RequisitoApertura extends Model
 
     protected $guarded = ['id'];
 
+    /**
+     * Cuánto dura la tranquilidad de una verificación.
+     *
+     * Doce meses porque los trámites de apertura se mueven al ritmo de los
+     * acuerdos municipales y de las tarifas anuales —la matrícula mercantil se
+     * renueva antes del 31 de marzo de cada año—, así que un año es el ciclo
+     * natural en el que algo cambia sin que nadie avise. No es una norma: es
+     * criterio del gremio, y por eso vive aquí con su razón al lado y no en un
+     * ajuste que nadie va a mirar.
+     */
+    public const int MESES_HASTA_REVISION = 12;
+
     protected function casts(): array
     {
         return [
@@ -50,6 +62,43 @@ class RequisitoApertura extends Model
     public function tieneCosto(): bool
     {
         return $this->costo_aproximado !== null && (float) $this->costo_aproximado > 0;
+    }
+
+    public function estaVerificado(): bool
+    {
+        return $this->verificado_el !== null;
+    }
+
+    /**
+     * La pila de trabajo de la oficina: lo que nadie verificó nunca y lo que
+     * se verificó hace demasiado. Son dos estados distintos para el lector
+     * —la vista los distingue— pero el mismo trabajo pendiente.
+     *
+     * El borde es estricto: a los doce meses exactos todavía sirve; al día
+     * siguiente, no.
+     */
+    public function necesitaRevision(): bool
+    {
+        if ($this->verificado_el === null) {
+            return true;
+        }
+
+        return $this->verificado_el->startOfDay()->lt(
+            now()->subMonths(self::MESES_HASTA_REVISION)->startOfDay()
+        );
+    }
+
+    /** Un decreto con fecha de muerte. Lo normal es que un trámite no la tenga. */
+    public function esTransitorio(): bool
+    {
+        return $this->vigente_hasta !== null;
+    }
+
+    /** «Vigente hasta el 30 de noviembre» incluye el 30: la comparación es estricta contra ayer. */
+    public function haCaducado(): bool
+    {
+        return $this->vigente_hasta !== null
+            && $this->vigente_hasta->startOfDay()->lt(now()->startOfDay());
     }
 
     public function getActivitylogOptions(): LogOptions

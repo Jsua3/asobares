@@ -68,4 +68,55 @@ class VigenciaDeLaGuiaTest extends TestCase
         $this->assertTrue(RequisitoApertura::factory()->caducado()->create()->vigente_hasta->isPast());
         $this->assertTrue(RequisitoApertura::factory()->transitorio()->create()->vigente_hasta->isFuture());
     }
+
+    public function test_esta_verificado_solo_si_hay_fecha(): void
+    {
+        $this->assertFalse(RequisitoApertura::factory()->create()->estaVerificado());
+        $this->assertTrue(RequisitoApertura::factory()->verificado()->create()->estaVerificado());
+    }
+
+    /**
+     * El borde es estricto y por eso tiene tres casos y no dos: «más de un
+     * año» y «un año o más» son reglas distintas y se leen igual en prosa.
+     */
+    public function test_el_umbral_de_revision_cuenta_desde_el_dia_siguiente_al_ano(): void
+    {
+        $meses = RequisitoApertura::MESES_HASTA_REVISION;
+
+        $reciente = RequisitoApertura::factory()
+            ->verificado(now()->subMonths($meses)->addDay()->toDateString())->create();
+        $justoEnElBorde = RequisitoApertura::factory()
+            ->verificado(now()->subMonths($meses)->toDateString())->create();
+        $pasado = RequisitoApertura::factory()
+            ->verificado(now()->subMonths($meses)->subDay()->toDateString())->create();
+
+        $this->assertFalse($reciente->necesitaRevision(), 'Once meses no es revisión pendiente.');
+        $this->assertFalse($justoEnElBorde->necesitaRevision(), 'A los doce meses exactos todavía sirve.');
+        $this->assertTrue($pasado->necesitaRevision(), 'Al día siguiente del año, sí.');
+    }
+
+    public function test_lo_que_nadie_verifico_nunca_tambien_necesita_revision(): void
+    {
+        // No son el mismo estado para el lector, pero son la misma pila de
+        // trabajo para la oficina, y el filtro del panel ataca esa pila.
+        $this->assertTrue(RequisitoApertura::factory()->create()->necesitaRevision());
+    }
+
+    public function test_es_transitorio_solo_lo_que_tiene_fecha_de_vencimiento(): void
+    {
+        $this->assertFalse(RequisitoApertura::factory()->create()->esTransitorio());
+        $this->assertTrue(RequisitoApertura::factory()->transitorio()->create()->esTransitorio());
+    }
+
+    /** «Vigente hasta el 30 de noviembre» incluye el 30. */
+    public function test_un_decreto_vive_hasta_el_final_de_su_ultimo_dia(): void
+    {
+        $permanente = RequisitoApertura::factory()->create();
+        $hoyEsSuUltimoDia = RequisitoApertura::factory()->transitorio(now()->toDateString())->create();
+        $vencioAyer = RequisitoApertura::factory()->caducado()->create();
+
+        $this->assertFalse($permanente->haCaducado(), 'Sin fecha no caduca nunca.');
+        $this->assertFalse($hoyEsSuUltimoDia->haCaducado(), 'El último día todavía cuenta.');
+        $this->assertTrue($vencioAyer->haCaducado());
+    }
 }
