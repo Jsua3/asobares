@@ -5,10 +5,12 @@ namespace Tests\Feature;
 use App\Enums\EstadoPublicacion;
 use App\Models\Municipio;
 use App\Models\RequisitoApertura;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
 
 /**
@@ -21,6 +23,18 @@ use Tests\TestCase;
 class VigenciaDeLaGuiaTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Varias pruebas de borde llaman now() más de una vez (para fechar
+        // el registro y luego para calcular el texto que se espera ver).
+        // Sin fijar el reloj, una corrida que cruce medianoche entre esas
+        // llamadas movería el borde bajo los pies de la prueba. Laravel
+        // restaura el reloj real solo al terminar cada prueba.
+        Carbon::setTestNow(Carbon::create(2026, 8, 24, 12, 0, 0, 'America/Bogota'));
+    }
 
     public function test_la_tabla_gana_las_tres_columnas_de_procedencia(): void
     {
@@ -45,7 +59,8 @@ class VigenciaDeLaGuiaTest extends TestCase
         $this->assertSame('2026-08-20', $requisito->verificado_el->toDateString());
     }
 
-    public function test_los_tres_campos_nacen_vacios_porque_nadie_ha_verificado_nada(): void
+    /** La factory base no rellena procedencia: es la fábrica, no la decisión de no rellenar retroactivamente. */
+    public function test_la_factory_base_deja_en_null_los_tres_campos_de_procedencia(): void
     {
         $requisito = RequisitoApertura::factory()->create();
 
@@ -54,15 +69,35 @@ class VigenciaDeLaGuiaTest extends TestCase
         $this->assertNull($requisito->vigente_hasta);
     }
 
+    /**
+     * Declarar «verifiqué esto contra la Alcaldía» es una afirmación de
+     * autoridad sobre información legal: tiene que quedar rastro de quién lo
+     * dijo y qué cambió. Se ejerce un `update()` real y se lee la fila de
+     * `Activity` que quedó — no basta con leer `getActivitylogOptions()` en
+     * el propio modelo, porque ese método sigue existiendo y devolviendo lo
+     * mismo aunque alguien borre `LogsActivity` del `use` de la clase, y
+     * entonces ninguna fila se escribiría de verdad.
+     */
     public function test_la_bitacora_registra_quien_cambia_una_fecha_de_verificacion(): void
     {
-        // Declarar «verifiqué esto contra la Alcaldía» es una afirmación de
-        // autoridad sobre información legal: tiene que quedar rastro.
-        $registrados = (new RequisitoApertura)->getActivitylogOptions()->logAttributes;
+        $secretaria = User::factory()->create();
+        $this->actingAs($secretaria);
 
-        $this->assertContains('verificado_el', $registrados);
-        $this->assertContains('verificado_con', $registrados);
-        $this->assertContains('vigente_hasta', $registrados);
+        $requisito = RequisitoApertura::factory()->create();
+
+        $requisito->update(['verificado_el' => '2026-08-20']);
+
+        $registro = Activity::forSubject($requisito)->causedBy($secretaria)->latest('id')->first();
+
+        $this->assertNotNull(
+            $registro,
+            'La actualización de verificado_el debió quedar en la bitácora con esta persona como causante.'
+        );
+        $this->assertArrayHasKey(
+            'verificado_el',
+            $registro->attribute_changes->get('attributes', []),
+            'La bitácora registró algo, pero no el atributo que en realidad cambió.'
+        );
     }
 
     public function test_los_estados_de_factory_producen_lo_que_prometen(): void
@@ -143,6 +178,13 @@ class VigenciaDeLaGuiaTest extends TestCase
      * delatar la fuga: por semántica NULL, un borrador permanente (sin
      * fecha) jamás pasaría "vigente_hasta >= hoy" aunque el `orWhere`
      * saliera suelto, porque `NULL >= fecha` no es verdadero en SQL.
+     *
+     * Las dos negaciones por sí solas las cumpliría también un conjunto
+     * vacío —una mutación que rompiera el scope hacia el otro lado, por
+     * ejemplo cambiando el `orWhere` por un `where` y dejando la condición
+     * imposible, dejaría `$ids` vacío y ambas pasarían igual—. El control
+     * positivo es lo que obliga a que el scope de verdad esté dejando pasar
+     * algo.
      */
     public function test_el_scope_no_anula_el_publicado_que_lo_precede(): void
     {
@@ -152,9 +194,15 @@ class VigenciaDeLaGuiaTest extends TestCase
         $borradorPermanente = RequisitoApertura::factory()->create([
             'estado' => EstadoPublicacion::Borrador,
         ]);
+        $publicadoVigente = RequisitoApertura::factory()->publicado()->create();
 
         $ids = RequisitoApertura::publicado()->vigente()->pluck('id');
 
+        $this->assertContains(
+            $publicadoVigente->id,
+            $ids,
+            'Control positivo: sin él, las dos negaciones de abajo las cumpliría también un conjunto vacío.'
+        );
         $this->assertNotContains(
             $borradorTransitorio->id,
             $ids,
@@ -164,14 +212,18 @@ class VigenciaDeLaGuiaTest extends TestCase
     }
 
     /**
-     * Demuestra el peligro en vez de solo describirlo: la misma lógica del
-     * scope, escrita en línea y sin el cierre que agrupa el `orWhere` —como
-     * quedaría si alguien la copia a un controlador sin pasar por el
-     * scope—, SÍ deja colar un borrador con `vigente_hasta` futuro, porque
-     * el `orWhere` deja de depender del `estado`. Por scope, Eloquent aísla
-     * las condiciones y el borrador no se cuela.
+     * Esta prueba no puede detectar una regresión de `scopeVigente()`:
+     * Eloquent reagrupa los scopes locales en su propio paréntesis, con o
+     * sin el cierre que el código fuente escribe alrededor del `orWhere`, así
+     * que `publicado()->vigente()` sale agrupado de cualquier forma.
+     *
+     * Lo que sí demuestra es el peligro fuera de un scope: la misma lógica,
+     * escrita en línea sin ese cierre —como quedaría si alguien la copia a
+     * un controlador, un `whereRaw` o tras un `toBase()`—, SÍ deja colar un
+     * borrador con `vigente_hasta` futuro, porque ahí el `orWhere` sí deja
+     * de depender del `estado`.
      */
-    public function test_sin_el_cierre_del_orwhere_un_borrador_transitorio_se_cuela(): void
+    public function test_el_orwhere_suelto_fuera_de_un_scope_si_anula_el_publicado(): void
     {
         $borradorTransitorio = RequisitoApertura::factory()->transitorio()->create([
             'estado' => EstadoPublicacion::Borrador,
@@ -230,6 +282,30 @@ class VigenciaDeLaGuiaTest extends TestCase
 
         $respuesta->assertSee('Armenia');
         $respuesta->assertDontSee(route('guia.index', ['municipio' => $apagado->slug]), escape: false);
+    }
+
+    /**
+     * La URL `?municipio=X` de un municipio apagado no desaparece —sigue
+     * respondiendo 200 con «Todavía no hay guía publicada»— pero deja de ser
+     * indexable. Mismo patrón que ya usa el calendario de eventos para un
+     * mes sin datos: navegable, no indexado.
+     */
+    public function test_la_guia_de_un_municipio_apagado_no_se_indexa(): void
+    {
+        $vivo = Municipio::factory()->create();
+        $apagado = Municipio::factory()->create();
+
+        $this->requisitoPublicado($vivo);
+        $this->requisitoPublicado($apagado, ['vigente_hasta' => now()->subDay()->toDateString()]);
+
+        $this->get(route('guia.index', ['municipio' => $vivo->slug]))
+            ->assertSuccessful()
+            ->assertDontSee('noindex', escape: false);
+
+        $this->get(route('guia.index', ['municipio' => $apagado->slug]))
+            ->assertSuccessful()
+            ->assertSee('Todavía no hay guía publicada')
+            ->assertSee('name="robots" content="noindex, follow"', escape: false);
     }
 
     /**
@@ -306,14 +382,21 @@ class VigenciaDeLaGuiaTest extends TestCase
             ->assertDontSee('Verificado el');
     }
 
+    /**
+     * `vigente_hasta` sale de `now()` (con el reloj fijo en el setUp) y no de
+     * una fecha escrita a mano: una fecha bomba como '2026-11-30' pasa hoy
+     * pero deja de pasar el día que el scope `vigente()` la excluya por
+     * vencida — y fallaría por eso, no porque el código se rompiera.
+     */
     public function test_un_decreto_transitorio_anuncia_hasta_cuando_vale(): void
     {
         $municipio = Municipio::factory()->create();
-        $this->requisitoPublicado($municipio, ['vigente_hasta' => '2026-11-30']);
+        $vigenteHasta = now()->addMonths(3);
+        $this->requisitoPublicado($municipio, ['vigente_hasta' => $vigenteHasta->toDateString()]);
 
         $this->get(route('guia.index', ['municipio' => $municipio->slug]))
             ->assertSuccessful()
-            ->assertSee('Vigente hasta el 30 de noviembre de 2026');
+            ->assertSee('Vigente hasta el '.$vigenteHasta->translatedFormat('d \d\e F \d\e Y'));
     }
 
     /**

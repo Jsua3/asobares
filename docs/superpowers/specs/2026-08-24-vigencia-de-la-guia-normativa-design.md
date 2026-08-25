@@ -165,6 +165,8 @@ Un trámite caducado **no se renderiza nunca**: ya salió en la consulta. La vis
 
 Colores desde los tokens semánticos existentes. Cero hexadecimales en la vista, que ya lo vigila una guardia.
 
+**Efecto secundario en el observatorio, declarado a propósito.** `GuiaController::index()` calcula `$seleccionado` sobre `$municipiosConGuia`, que ya excluye los municipios sin ningún trámite `publicado()->vigente()`. Antes de este diseño, visitar un municipio con `?municipio=X` registraba una `ConsultaGuia` aunque su guía estuviera vacía; ahora, si toda la guía de ese municipio caducó, `$seleccionado` sale `null` y esa visita deja de registrarse. Es el comportamiento que se quiere —`consultas_guia` es la métrica que la dirección lleva a las alcaldías, y una consulta a una guía que ya no existe no es evidencia de nada—, pero es un cambio de qué cuenta como "consulta", y por eso queda dicho aquí y no solo implícito en el código.
+
 ## §6 · Datos existentes y el seeder
 
 La migración es aditiva y nullable: los 18 registros sembrados quedan en `NULL` y se muestran honestamente como **sin verificar**. **No hay relleno retroactivo**, y esa ausencia es la decisión, no un olvido.

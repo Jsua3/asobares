@@ -1,6 +1,16 @@
 <x-layouts.publico :titulo="ajuste('guia_titulo').' — ASOBARES Quindío'"
                    descripcion="Requisitos para abrir un bar, gastrobar o café en el Quindío: qué pide cada entidad, cuánto cuesta y qué formatos descargar, municipio por municipio.">
 
+    @if (! ($seleccionado && $requisitos->isNotEmpty()))
+        {{-- Un municipio cuya guía entera caducó (o que nunca la tuvo) deja
+             esta URL respondiendo 200 con «Todavía no hay guía publicada»:
+             sin esto seguiría siendo indexable aunque ya no salga del
+             selector ni del sitemap. --}}
+        @push('cabeza')
+            <meta name="robots" content="noindex, follow">
+        @endpush
+    @endif
+
     <x-publico.hero :titulo="ajuste('guia_titulo')" :subtitulo="ajuste('guia_intro')" />
 
     <div class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">

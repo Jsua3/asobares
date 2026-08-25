@@ -84,7 +84,7 @@ class RequisitoApertura extends Model
             return true;
         }
 
-        return $this->verificado_el->startOfDay()->lt(
+        return $this->verificado_el->copy()->startOfDay()->lt(
             now()->subMonths(self::MESES_HASTA_REVISION)->startOfDay()
         );
     }
@@ -99,7 +99,7 @@ class RequisitoApertura extends Model
     public function haCaducado(): bool
     {
         return $this->vigente_hasta !== null
-            && $this->vigente_hasta->startOfDay()->lt(now()->startOfDay());
+            && $this->vigente_hasta->copy()->startOfDay()->lt(now()->startOfDay());
     }
 
     /**

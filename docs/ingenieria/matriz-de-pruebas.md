@@ -28,14 +28,18 @@ No se confunde con la suite automatizada: la suite es el **instrumento**, esta m
 | Métrica | Valor |
 |---|---|
 | Archivos de prueba | 60 |
-| **Métodos de prueba** | **591** |
-| **Casos ejecutados** | **819** (los métodos con proveedor de datos expanden a varios casos cada uno) |
-| Resultado de la última ejecución **verificada** | 808 pasan · 11 omitidas · **0 fallos** |
-| Aserciones | **2.899** |
-| Duración de la suite completa | 350 s |
-| Requisitos funcionales V1 con cobertura total o parcial | 46 de 50 |
+| **Métodos de prueba** | **592** |
+| **Casos ejecutados** | **820** (los métodos con proveedor de datos expanden a varios casos cada uno) |
+| Resultado de la última ejecución **verificada** | 809 pasan · 11 omitidas · **0 fallos** |
+| Aserciones | **2.904** |
+| Duración de la suite completa | 348 s |
+| Requisitos funcionales V1 con cobertura total o parcial | 52 de 53 |
 | Requisitos no funcionales con cobertura total o parcial | 11 de 14 |
 
+> **Cómo se cuenta la fila de arriba.** Se cuentan **filas** de la tabla de la §3 (una fila que agrupa varios RF, como «RF-03, RF-04», cuenta una sola vez). La §3 tiene 58 filas; se excluyen las 5 marcadas ➖ —fuera del alcance V1 por decisión de la ERS v3: RF-55, RF-58, RF-59, RF-61 y RF-62—, lo que deja **53 filas en alcance V1**. De esas, cuentan como cobertura total o parcial las marcadas ✅ o ⚠️ (**52**); la única ❌ es RF-05, cuya columna Prueba está vacía. Reconstruible fila por fila leyendo la §3, o contando los símbolos de la columna Estado sobre las líneas que empiezan por `| RF-`.
+
+> ✅ **Última ejecución — 25 de agosto de 2026.** Sobre el árbol de trabajo, con `php artisan test --compact` y PHP 8.5.9 con `intl` y `gd`: **820 casos · 809 pasan · 11 omitidas · 0 fallos · 2.904 aserciones · 348 s**. Es la revisión final de RF-60: cinco pruebas de `VigenciaDeLaGuiaTest` que podían pasar sin ejercer lo que decían proteger —una fecha bomba, una bitácora que solo leía su propia configuración, un scope cuyas dos negaciones las cumplía un conjunto vacío— quedaron corregidas con reloj fijo, un `update()` real contra `Activity` y un control positivo; el caso nuevo (+1) cubre el `noindex` de un municipio cuya guía entera caducó.
+>
 > ✅ **Última ejecución — 24 de agosto de 2026.** Sobre el árbol de trabajo, con `php artisan test --compact` y PHP 8.5.9 con `intl` y `gd`: **819 casos · 808 pasan · 11 omitidas · 0 fallos · 2.899 aserciones · 350 s**. Los casos nuevos respecto al 23 de agosto cierran RF-60: la vigencia de la guía normativa en el modelo, en las cuatro puertas por las que sale y en el panel.
 >
 > ✅ **Última ejecución — 23 de agosto de 2026.** Sobre el árbol de trabajo, con `php artisan test --compact` y PHP 8.5.9 con `intl` y `gd`: **791 casos · 780 pasan · 11 omitidas · 0 fallos · 2.818 aserciones · 267 s**. Es la corrida que respalda la tabla de arriba, y la primera que incluye la carga de la base real de asociados.
@@ -65,7 +69,7 @@ No se confunde con la suite automatizada: la suite es el **instrumento**, esta m
 | RF-01 | HU-INS-01 | La página de inicio responde y aplica el tema | `SitioPublicoTest::test_las_rutas_publicas_responden` · `TemaClaroOscuroTest` | ✅ |
 | RF-02 | HU-INS-02 | «Quiénes somos» responde y su contenido es editable desde el panel | `SitioPublicoTest` · `AccionesDelPanelTest::test_guardar_los_ajustes_actualiza_el_sitio` | ✅ |
 | RF-03, RF-04 | HU-INS-03 | Respaldo nacional, contacto y redes; los enlaces configurables no admiten esquemas peligrosos | `EnlacesDeAjustesTest` (4 casos) · `AccionesDelPanelTest` | ✅ |
-| RF-05 | HU-INS-04 | Estructura normativa institucional | — | ⚠️ Prioridad Could; contenido servido como página estática, sin prueba propia. Pendiente **DPV-05**: la ERS pregunta si duplica la guía normativa |
+| RF-05 | HU-INS-04 | Estructura normativa institucional | — | ❌ Prioridad Could; contenido servido como página estática, sin prueba propia. Pendiente **DPV-05**: la ERS pregunta si duplica la guía normativa |
 
 ### EP-02 · Directorio de asociados *(top-3 del cliente)*
 
