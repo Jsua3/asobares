@@ -317,8 +317,15 @@ class VigenciaDeLaGuiaTest extends TestCase
     }
 
     /**
-     * Contraprueba. Sin ella, una vista que no renderizara ningún trámite
-     * pasaría las tres pruebas anteriores en verde.
+     * Contraprueba. No es que una vista en blanco fuera a colarse: las tres
+     * pruebas anteriores usan assertSee sobre texto que sólo existe si el
+     * trámite se renderiza, así que ya caen solas ante eso.
+     *
+     * Lo que esta prueba sí atrapa, confirmado forzando el bug a mano, es la
+     * insignia «Vigente hasta» filtrándose a un trámite que no es
+     * transitorio —por ejemplo si la condición esTransitorio() quedara mal
+     * escrita, invertida o desaparecida—. Sin esta prueba, un visitante
+     * vería una fecha de caducidad falsa en un trámite permanente.
      */
     public function test_un_tramite_permanente_no_anuncia_ninguna_caducidad(): void
     {
