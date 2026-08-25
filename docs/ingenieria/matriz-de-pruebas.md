@@ -27,15 +27,17 @@ No se confunde con la suite automatizada: la suite es el **instrumento**, esta m
 
 | Métrica | Valor |
 |---|---|
-| Archivos de prueba | 58 |
-| **Métodos de prueba** | **563** |
-| **Casos ejecutados** | **791** (los métodos con proveedor de datos expanden a varios casos cada uno) |
-| Resultado de la última ejecución **verificada** | 780 pasan · 11 omitidas · **0 fallos** |
-| Aserciones | **2.818** |
-| Duración de la suite completa | 267 s |
-| Requisitos funcionales V1 con cobertura total o parcial | 45 de 50 |
+| Archivos de prueba | 60 |
+| **Métodos de prueba** | **591** |
+| **Casos ejecutados** | **819** (los métodos con proveedor de datos expanden a varios casos cada uno) |
+| Resultado de la última ejecución **verificada** | 808 pasan · 11 omitidas · **0 fallos** |
+| Aserciones | **2.899** |
+| Duración de la suite completa | 350 s |
+| Requisitos funcionales V1 con cobertura total o parcial | 46 de 50 |
 | Requisitos no funcionales con cobertura total o parcial | 11 de 14 |
 
+> ✅ **Última ejecución — 24 de agosto de 2026.** Sobre el árbol de trabajo, con `php artisan test --compact` y PHP 8.5.9 con `intl` y `gd`: **819 casos · 808 pasan · 11 omitidas · 0 fallos · 2.899 aserciones · 350 s**. Los casos nuevos respecto al 23 de agosto cierran RF-60: la vigencia de la guía normativa en el modelo, en las cuatro puertas por las que sale y en el panel.
+>
 > ✅ **Última ejecución — 23 de agosto de 2026.** Sobre el árbol de trabajo, con `php artisan test --compact` y PHP 8.5.9 con `intl` y `gd`: **791 casos · 780 pasan · 11 omitidas · 0 fallos · 2.818 aserciones · 267 s**. Es la corrida que respalda la tabla de arriba, y la primera que incluye la carga de la base real de asociados.
 >
 > ✅ **Reproducibilidad — 20 de agosto de 2026.** La suite se re-ejecutó sobre un **clon limpio de `origin/main`** en un entorno montado desde cero (PHP 8.4.21 con `intl` y `gd`, `composer install` y `npm run build` de cero), no sobre el árbol de trabajo. La salida de aquel día: **759 casos · 748 pasan · 11 omitidas · 0 fallos · 2.733 aserciones · 193 s**. Reproducir el verde fuera de la máquina donde se programó es lo que la auditoría del 19 de agosto no pudo hacer, y es lo que convierte estas cifras en evidencia. La duración baja de 372 a 193 s porque es otra máquina, no porque el proyecto haya mejorado.
@@ -83,7 +85,7 @@ No se confunde con la suite automatizada: la suite es el **instrumento**, esta m
 | RF-16 | HU-GUI-02 | Cada trámite lleva entidad, pasos y costo | `Panel/ConsultasDeGuiaTest` · `PanelCompletoTest` (recurso RequisitoApertura) | ✅ |
 | RF-17 | HU-GUI-03 | Descarga de formatos, con métrica de uso y protección | `Panel/ConsultasDeGuiaTest::test_descargar_formato_valido_registra_la_consulta` · `::test_intentar_descargar_sin_adjunto_no_registra` · `::test_intentar_descargar_no_publicado_no_registra` · `SitioPublicoTest::test_descargar_formato_de_la_guia_tiene_limite_de_peticiones` | ✅ |
 | RF-18 | HU-GUI-04 | CRUD de municipios, trámites y formatos sin código | `PanelCompletoTest` (Municipios, RequisitoAperturas) | ✅ |
-| RF-60 | *(nuevo ERS v3)* | Normativa vigente y decretos transitorios por municipio | — | ⚠️ El modelo `RequisitoApertura` admite el dato; no hay prueba de vigencia ni de decretos con fecha de caducidad |
+| RF-60 | *(nuevo ERS v3)* | Normativa vigente y decretos transitorios por municipio | `VigenciaDeLaGuiaTest`, `VigenciaEnElPanelTest` | ✅ Cada trámite guarda con qué fuente y en qué fecha se verificó; los decretos transitorios caducan solos y desaparecen del sitio por las cuatro puertas, incluida la descarga del formato |
 
 > **Métrica anónima.** `consultas_guia` demuestra el uso del módulo insignia sin registrar a quien consulta: `Panel/ConsultasDeGuiaTest::test_la_tabla_no_guarda_ningun_dato_personal` lo verifica. Es la evidencia que la dirección puede llevar a las alcaldías.
 
@@ -218,7 +220,7 @@ Un documento de pruebas que solo enumera lo que pasa no sirve para gestionar. Es
 3. **RNF-03 y RNF-08 (respaldos) — Bloqueados por el despliegue.** No son deuda técnica: dependen del riesgo R-14 (cuenta institucional del gremio pendiente de la junta).
 4. ~~**RF-19 — El calendario de eventos.**~~ **Cerrado el 19 de agosto de 2026** por la vía de construirlo, no de negociarlo: existe la vista de calendario que pide el cronograma firmado, con 16 pruebas propias. Dos de ellas cubren defectos que no se ven: que la ficha por slug no capture la ruta del calendario —un evento con slug «calendario» daría 404 sin que nada avise— y que la rejilla no consulte dentro del bucle de celdas.
 5. ~~**RNF-12 — Foco visible y objetivos táctiles.**~~ **Cerrado el 19 de agosto de 2026.** Cifras en la fila de RNF-12. Una excepción declarada y razonada: las pastillas de evento dentro de la rejilla mensual miden 27 px de alto. Es deliberado —la rejilla solo existe de `sm:` para arriba, donde el puntero es un ratón, y el mismo evento tiene su objetivo de 44 px en la agenda móvil— y supera el mínimo de 24×24 px que exige WCAG 2.5.8; los 44 px son el listón propio del proyecto, más exigente que la norma.
-6. **RF-05 y RF-60 — Sin cobertura.** El primero espera la decisión DPV-05; el segundo admite el dato pero no prueba la vigencia de decretos transitorios.
+6. ~~**RF-60 — Sin cobertura.**~~ **Cerrado el 24 de agosto de 2026.** La tabla admitía el dato pero no probaba la vigencia; ahora `vigente_hasta` saca del sitio lo que venció, con prueba en las cuatro puertas por las que sale la guía —lista, selector de municipios, sitemap y **descarga del formato**, que era la única con consecuencia de seguridad—. **RF-05 sigue sin cobertura** a la espera de la decisión DPV-05.
 
 **Los requisitos marcados ➖ no son huecos:** la ERS v3 los movió a Fase II con criterios de aceptación escritos, y la arquitectura los soporta sin migraciones destructivas (RNF-13, verificado).
 

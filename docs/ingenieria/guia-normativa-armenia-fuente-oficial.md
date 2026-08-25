@@ -31,6 +31,8 @@ El seeder ya tenía un bloque `'armenia'` con cinco trámites redactados durante
 
 Resultado: de 5 trámites sembrados a **7 reales**, y cuatro de los cinco que ya estaban ganan datos que solo tiene el gremio.
 
+> ✅ **Estos siete entran fechados.** Desde el 24 de agosto la tabla tiene `verificado_el` y `verificado_con`, así que el contenido oficial no llega como los 18 anteriores —sin procedencia y sin fecha— sino con el documento del que salió. El bloque de la §3 ya los trae rellenos: pégalos tal cual. Si algún trámite fuera transitorio habría además un `'vigente_hasta'`, pero ninguno de los siete lo es: son todos permanentes.
+
 ---
 
 ## 3. Los siete trámites, en el formato del seeder
@@ -49,6 +51,8 @@ Listo para pegar dentro de `'armenia' => [ … ]`. El orden es el del documento 
         ],
         'enlace_externo' => 'https://armenia.gov.co',
         'orden' => 1,
+        'verificado_el' => '2026-08-20',
+        'verificado_con' => 'Documento oficial de la Alcaldía de Armenia, campaña «Blindemos tu Negocio», entregado al gremio el 20 de agosto de 2026',
     ],
     [
         'entidad' => 'Cámara de Comercio de Armenia y del Quindío',
@@ -62,6 +66,8 @@ Listo para pegar dentro de `'armenia' => [ … ]`. El orden es el del documento 
         ],
         'enlace_externo' => 'https://camaraarmenia.org.co',
         'orden' => 2,
+        'verificado_el' => '2026-08-20',
+        'verificado_con' => 'Documento oficial de la Alcaldía de Armenia, campaña «Blindemos tu Negocio», entregado al gremio el 20 de agosto de 2026',
     ],
     [
         'entidad' => 'Secretaría de Salud Municipal — Concepto sanitario',
@@ -75,6 +81,8 @@ Listo para pegar dentro de `'armenia' => [ … ]`. El orden es el del documento 
             'Acta de visita con concepto favorable, o la solicitud de visita radicada',
         ],
         'orden' => 3,
+        'verificado_el' => '2026-08-20',
+        'verificado_con' => 'Documento oficial de la Alcaldía de Armenia, campaña «Blindemos tu Negocio», entregado al gremio el 20 de agosto de 2026',
     ],
     [
         'entidad' => 'Cuerpo Oficial de Bomberos de Armenia',
@@ -87,6 +95,8 @@ Listo para pegar dentro de `'armenia' => [ … ]`. El orden es el del documento 
         ],
         // El formato de solicitud de visita que ya genera el seeder sigue sirviendo.
         'orden' => 4,
+        'verificado_el' => '2026-08-20',
+        'verificado_con' => 'Documento oficial de la Alcaldía de Armenia, campaña «Blindemos tu Negocio», entregado al gremio el 20 de agosto de 2026',
     ],
     [
         'entidad' => 'Corporación Autónoma Regional del Quindío (CRQ) — Intensidad auditiva',
@@ -98,6 +108,8 @@ Listo para pegar dentro de `'armenia' => [ … ]`. El orden es el del documento 
         ],
         'enlace_externo' => 'https://crq.gov.co',
         'orden' => 5,
+        'verificado_el' => '2026-08-20',
+        'verificado_con' => 'Documento oficial de la Alcaldía de Armenia, campaña «Blindemos tu Negocio», entregado al gremio el 20 de agosto de 2026',
     ],
     [
         'entidad' => 'Sayco y Acinpro — Derechos de autor',
@@ -108,6 +120,8 @@ Listo para pegar dentro de `'armenia' => [ … ]`. El orden es el del documento 
             'Consultar con ASOBARES la revisión de tarifa para afiliados',
         ],
         'orden' => 6,
+        'verificado_el' => '2026-08-20',
+        'verificado_con' => 'Documento oficial de la Alcaldía de Armenia, campaña «Blindemos tu Negocio», entregado al gremio el 20 de agosto de 2026',
     ],
     [
         'entidad' => 'Policía Nacional — Notificación de apertura',
@@ -117,6 +131,8 @@ Listo para pegar dentro de `'armenia' => [ … ]`. El orden es el del documento 
             'Aplica únicamente si el establecimiento abrió después de 2019',
         ],
         'orden' => 7,
+        'verificado_el' => '2026-08-20',
+        'verificado_con' => 'Documento oficial de la Alcaldía de Armenia, campaña «Blindemos tu Negocio», entregado al gremio el 20 de agosto de 2026',
     ],
 ],
 ```
