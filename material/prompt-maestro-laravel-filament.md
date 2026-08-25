@@ -29,6 +29,8 @@
 >
 > **v7 · la trampa que más costó, y que no es técnica:** de veintitantos fallos atrapados en estas dos fases, **cinco fueron pruebas en falso verde escritas por el propio autor del plan** — pruebas que pasaban con el bug reintroducido. Todas tenían la misma forma: `assertSee('alguna palabra')` o una aserción sobre el texto de un archivo, en vez de sobre el comportamiento. Ninguna se detectó leyendo; todas salieron cuando un revisor **mutó el código a propósito** y miró si la prueba se enteraba. Si se relanza cualquier parte de este trabajo: **escribir la prueba no basta, hay que romper el código y ver el rojo.**
 >
+> **v12 (25 ago 2026) — EMPIEZA POR AQUÍ. RF-60 CERRADO Y LA COMPAÑERA YA COMMITEA.** Cerrado **RF-60** —normativa vigente y decretos transitorios—, que era uno de los dos únicos requisitos funcionales sin ninguna cobertura: la guía normativa guarda ahora `verificado_el`, `verificado_con` y `vigente_hasta`; una ficha sin fechar se publica igual pero lo dice en su cara, y lo caducado desaparece por **las cuatro puertas** por las que sale la guía —lista, selector, sitemap y **descarga del formato**, que era la única con consecuencia de seguridad—. Suite de 791 a **820 casos** (809 pasan, 11 omitidas, 0 fallos, 2.904 aserciones). `main` en `bad0143`, empujado. ⚠️ **Dato nuevo que cambia un riesgo del expediente:** existe `origin/p2-directorio` con **tres commits de Ingrid**, con pruebas propias. Deja de ser cierto que su trabajo no pasa por el repositorio — pero **no está fusionada y hoy no fusionaría limpio** (cuatro conflictos, todos contra `09e3e33`, el pase de foco y objetivos táctiles). Ver §11 del estado del proyecto. ⚠️ **Y la lección de método de esta sesión, que confirma la del v7:** ocho tareas con revisión independiente encontraron **seis pruebas que pasaban sin ejercer lo que decían proteger**, y **ninguna era un defecto de producción**. Las cuatro justificaciones falsas las había escrito el propio plan. Ver §24.6.
+>
 > **v11 (19 ago 2026, tarde) — EMPIEZA POR AQUÍ. PASE DE INTERFAZ CERRADO Y DESPLIEGUE A UN COMANDO.** Sesión larga que cierra **cinco de las seis brechas** que el §23.12 daba por vivas y **los siete hallazgos** del pase de interfaz que el §22 tenía en pausa. Suite de **599 a 747 casos** (736 pasan, 11 omitidas, 0 fallos, 2.719 aserciones), 7 commits ya en `origin/main`, `main` en `f61a236`. Lo que hay que leer, en este orden: **§25** (qué se hizo, las trampas nuevas y qué toca ahora), y solo después las §20 a §23, que están corregidas pero cuentan historia, no estado. ⚠️ **Lo único que sigue bloqueando el proyecto no es técnico**: la cuenta institucional del gremio (R-14). Todo lo demás está escrito y esperando.
 >
 > **v10 (19 ago 2026) — FASE 4 CERRADA, SOLO QUEDA LO QUE EXIGE SERVIDOR:** todo el expediente de entrega existe y está commiteado en `docs/ingenieria/` (matriz de pruebas, manual con capturas, siete diagramas, base de datos exportada, medición de rendimiento e informe de cumplimiento en `.docx`). Las dos cifras que eran documentales están **verificadas**: la suite re-ejecutada (599 casos, 0 fallos, 1.699 aserciones) y el RNF-02 medido (**portada en 972 ms contra un techo de 2.500**, 78 mediciones sobre navegador real). Lee la **§23.11** y la **§23.12**; la §23.9 quedó superada y así está marcada. Lo único vivo es el hosting institucional (R-14) y lo que cuelga de él, más cuatro pendientes menores que la §23.12 enumera.
@@ -933,6 +935,12 @@ Ingrid levantó su propia auditoría del proyecto y propuso repartirlo en dos bl
 
 El ejemplo que ella misma da y que resuelve casi todas las dudas: en la bolsa de empleo, **Persona 2 responde por crear, publicar y postular desde la experiencia funcional; Persona 1 por permisos, Filament, moderación administrativa y estabilidad técnica.**
 
+> ✅ **Actualización del 25 de agosto: el reparto dejó de ser un acuerdo y pasó a tener commits detrás.** `origin/p2-directorio` trae tres commits de Ingrid (`imontoya_624@unihumboldt.edu.co`), del 20 y el 25 de agosto, exactamente sobre su bloque —directorio, bolsa de empleo, portal `/mi-cuenta`— y **con pruebas propias** (`DirectorioTest`, 168 líneas nuevas, más casos en `BolsaDeEmpleoTest` y `FormulariosPublicosTest`). Las dos reglas de frontera se respetaron por ambos lados: ella no tocó PHP de aplicación, migraciones ni `composer.json`; el bloque de la Persona 1 no rediseñó ninguno de sus módulos públicos.
+>
+> ⚠️ **Lo que el reparto no previó, y hay que resolver una vez:** su rama sale de `1ff87d0` y `main` lleva 16 commits por delante. Fusionar da **cuatro conflictos, todos contra `09e3e33`** —el pase de foco visible y objetivos táctiles— en `navbar`, `directorio/index`, `directorio/show` y `mi-cuenta/index`. Son vistas suyas, así que las resuelve ella, **pero conservando de `main` todo lo que sea `focus-visible` y área táctil mínima**: resolverlo tomando su versión en bloque revierte RNF-12, que es un requisito contratado y hoy declarado verificado. `FocoVisibleTest` y `ObjetivoTactilTest` lo cazan si se corre la suite después.
+>
+> La frontera que sí faltaba declarar: **quien lleve más tiempo sin sincronizar es quien fusiona `main` dentro de su rama**, no al revés.
+
 ### 24.4 Cómo leer su auditoría sin repetir trabajo
 
 Su documento es serio y encontró cosas reales, pero **se levantó sobre un árbol sin actualizar y sobre un PHP incompleto**. Antes de aceptar su lista de pendientes, aplica esta lectura:
@@ -955,6 +963,34 @@ Su documento es serio y encontró cosas reales, pero **se levantó sobre un árb
 ### 24.5 Lo que su §7 acierta, y conviene adoptar
 
 Su documento incluye una lista de «elementos que NO deben asumirse como pendientes obligatorios» —API REST, membresías, suscripción automática, integración con redes, certificado de afiliación, cobro a proveedores, motor PDF nativo y calendario de eventos— con la regla de comprobar el alcance antes de construir. **Es la misma congelación de alcance que sostiene este documento desde el 14 de agosto.** Adoptarla explícitamente: la ausencia de una funcionalidad no es un incumplimiento mientras no esté en el cronograma firmado o en la ERS.
+
+### 24.6 Seis falsos verdes, y por qué el §7 se quedó corto
+
+RF-60 se construyó con un plan escrito de antemano, ocho tareas, revisión independiente por tarea y una revisión final de toda la rama. El resultado más útil no es el código: es el recuento.
+
+**Seis pruebas pasaban sin ejercer lo que decían proteger. Ninguna era un defecto de producción.** El código funcionó desde el primer commit. Lo que fallaba, una y otra vez, era lo que las pruebas *afirmaban*.
+
+| # | La prueba decía | La verdad |
+|---|---|---|
+| 1 | Que sin el paréntesis que agrupa el `orWhere`, el filtro de publicación se anulaba | **Falso para un scope local.** `Builder::callScope()` cuenta los `where` antes y después y llama a `addNewWheresWithinGroup()`. El peligro sólo existe **fuera** del scope. La mutación que el plan mandaba era imposible |
+| 2 | Que un borrador no se cuela por el `orWhere` | Usaba un borrador **sin** `vigente_hasta`, y ése no se colaría ni con la SQL rota: el término sería `NULL >= ?`. El que delata la fuga es uno con fecha **futura** |
+| 3 | Que vaciar `vigente_hasta` desde el panel lo deja nulo | El registro **ya nacía nulo**. Entrada igual a salida: el `DatePicker` podía estar desconectado y pasaba en verde |
+| 4 | Que la contraprueba protegía de una vista que no renderizara nada | Las pruebas de marcas usan `assertSee` de texto que sólo existe si el trámite se renderiza: ya caían solas. Lo que protege es otra cosa |
+| 5 | Que el scope no anula el `publicado()` | Creaba dos borradores y **ningún publicado**: la consulta salía vacía y las dos negaciones pasaban por vacuidad. Faltaba el control positivo |
+| 6 | *(evitado)* Que la bitácora registra el cambio | Iba a leer `properties`, pero activitylog v5 guarda el diff en `attribute_changes`. Lo descubrió el implementador **corriendo la suite**, no razonando |
+
+**Las cuatro justificaciones falsas las escribió el plan**, no los implementadores. Y ahí está la lección que el §7 no vio:
+
+> **El código de producción se valida al ejecutarse. Una prueba mal pensada se valida a sí misma.**
+
+Por eso un plan que incluye código de prueba es más peligroso que uno que no lo incluye: le da al implementador algo que parece verificado y no lo está. Tres consecuencias prácticas:
+
+1. **Todo paso de mutación es obligatorio, y hay que comprobar que puede ponerse rojo.** El único que resultó imposible (el nº 1) fue precisamente el que dejó pasar el error. Una mutación que no rompe nada no es tranquilizadora: es una señal de que la prueba no toca lo que crees.
+2. **Para cada aserción, preguntar qué tendría que romperse para que fallara.** Si la respuesta es «nada», no es una prueba. Los casos 3 y 5 se detectan enteros con esa sola pregunta.
+3. **El punto ciego no está donde uno lo teme.** Las Tasks 6-8 no pasaron por revisión de subagente fresco y se temió que fueran el hueco; aguantaron. Los dos defectos serios de la revisión final estaban en las Tasks 1 y 3, **dentro del tramo que sí se revisó**.
+
+Y un cuarto hallazgo, que no es de pruebas sino de cifras: la matriz declaraba **«46 de 50» requisitos funcionales cubiertos** y ese número **no se podía reconstruir bajo ningún método de conteo**. Quedó en **52 de 53** con la metodología escrita al lado. Es la segunda vez que este proyecto publica una cifra calculada en vez de medida —la primera fue el «789 casos» del 21 de agosto, que la corrida real desmintió con 791—. **Ninguna cifra del expediente debe salir de una suma.**
+
 
 
 ---

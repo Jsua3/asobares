@@ -1,11 +1,13 @@
 # Estado del proyecto — Plataforma Web ASOBARES Capítulo Quindío
 
-**Actualizado:** 19 de agosto de 2026, 8:30 a. m. · **Anclado a:** `main` en `1ff87d0` (196 commits)
+**Actualizado:** 25 de agosto de 2026 · **Anclado a:** `main` en `bad0143` (230 commits), sincronizado con `origin`
 **Documento único de estado.** La investigación de fondo está en [`investigacion-asobares-quindio.md`](investigacion-asobares-quindio.md); el historial de decisiones técnicas y sus trampas, en [`prompt-maestro-laravel-filament.md`](prompt-maestro-laravel-filament.md) §15–§23.
 
 > ⚠️ **Este documento envejece en horas, no en semanas.** Su versión anterior estuvo dieciséis días sin tocarse mientras se ordenaba a sí misma «mantener este doc al día», y llegó a describir un proyecto tres semanas atrasado. Cómo re-verificarlo está al final, en §12.
 >
-> **El árbol de trabajo NO está limpio al escribir esto.** `git status` devuelve cuatro entradas: el informe de cumplimiento del 18 de agosto borrado del árbol pero aún rastreado en `HEAD`, el prompt maestro modificado (+26/−2, una nota v10 de hoy), el informe «(19 ago).docx» sin rastrear y un archivo de bloqueo de Word abierto a las 08:05. **Hay trabajo de otra sesión en curso sobre el expediente**: no se commitea nada de `docs/ingenieria/*.docx` sin hablarlo antes.
+> **El árbol de trabajo está limpio al escribir esto**, y `main` está empujado. La única entrada sin rastrear es `docs/ingenieria/reuniones/`, que no es de esta sesión.
+>
+> ⚠️ **Hay una rama viva que no es de este hilo:** `origin/p2-directorio`, con tres commits de Ingrid Montoya. **No está fusionada en `main`** y hoy no fusionaría limpio — ver §11.
 
 ---
 
@@ -27,19 +29,19 @@ El documento rector es **`material/CRONOGRAMA SITIO WEB - 2026.pdf`** (7 página
 
 ---
 
-## 3. Qué está construido (verificado el 19 de agosto)
+## 3. Qué está construido (verificado el 25 de agosto)
 
 Cifras contadas sobre el árbol de trabajo, no heredadas de documentos anteriores.
 
 | Medida | Valor |
 |---|---|
-| Commits | **196**, del 1 al 19 de agosto, autor único `Jsua3` |
+| Commits | **230**, del 1 al 25 de agosto. En `main`, autor único `Jsua3`; hay tres más de Ingrid en una rama sin fusionar (§11) |
 | Modelos Eloquent | 21 |
-| Migraciones | 33 |
+| Migraciones | 35 |
 | Recursos de Filament | **19** (las versiones anteriores de este documento decían 18 y omitían el Observatorio) |
-| Rutas registradas | 114 — 40 públicas, 55 del panel `/admin`, 14 bajo `/mi-cuenta`, resto infraestructura |
-| Archivos de prueba | 48 |
-| Suite | **599 casos · 588 pasan · 11 omitidas · 0 fallos · 1.699 aserciones** |
+| Rutas registradas | 101 propias del proyecto (`route:list --except-vendor`). La cifra de 114 de la versión anterior incluía rutas de paquetes |
+| Archivos de prueba | 60 |
+| Suite | **820 casos · 809 pasan · 11 omitidas · 0 fallos · 2.904 aserciones** |
 
 **Stack real:** Laravel **13.23.0** + Filament **4.12.5** + Livewire **3.8.3** sobre PHP **8.5.9**, PHPUnit 12.5.33, SQLite en desarrollo. Es la única afirmación técnica de las versiones anteriores de este documento que sigue siendo exacta.
 
@@ -90,7 +92,7 @@ Ordenado por lo que bloquea a más cosas. Cada uno con su dueño, porque un pend
 
 1. **R-14a · Cuenta institucional de hosting.** *Dueño: dirección ejecutiva.* Laravel Cloud plan Starter quedó decidido el 15 de agosto (techo ~US$10/mes) y el despliegue está bloqueado solo por el registro y el medio de pago, que deben ser del gremio (`asobaresquindio@asobares.org`). **No se resuelve desplegando con cuenta personal**: la demo saldría bien, nadie migraría lo que funciona, y las llaves se irían con el practicante el 22 de septiembre. Bloquea S3, S5, S7 y S8: sin servidor no hay SSL, ni sandbox de Bold, ni pruebas en dispositivos, ni sitio vivo.
 2. **R-14b · Dominio.** *Dueño: dirección ejecutiva.* Cuál (`asobaresquindio.com`/`.com.co` o subdominio de `asobares.org`), quién lo paga y **a nombre de quién queda registrado**. Nada registrado. Es exigencia de la S8 y es distinto de la cuenta de hosting: se puede tener servidor y no tener dominio.
-3. **Contenido normativo real.** *Dueño: Natalia + quien el gremio designe.* El módulo insignia tiene **3 municipios con contenido de los 12 del departamento** — y solo 8 existen siquiera como registro. Los 18 trámites están escritos a mano, sin verificar contra la fuente y sin fechar, y **los formatos descargables son PDF de relleno generados por el sembrador**. Publicarlo así es peor que no tener la guía. Además, cerrarlo no es solo cargar contenido: la tabla `requisitos_apertura` **no tiene columna de fecha de verificación ni de vigencia**, así que fechar la normativa exige una migración.
+3. **Contenido normativo real.** *Dueño: Natalia + quien el gremio designe.* El módulo insignia tiene **3 municipios con contenido de los 12 del departamento** — y solo 8 existen siquiera como registro. Los 18 trámites están escritos a mano, sin verificar contra la fuente y sin fechar, y **los formatos descargables son PDF de relleno generados por el sembrador**. Publicarlo así es peor que no tener la guía. ~~Además, cerrarlo no es solo cargar contenido: la tabla `requisitos_apertura` **no tiene columna de fecha de verificación ni de vigencia**.~~ **Resuelto el 25 de agosto (RF-60).** La tabla ya guarda `verificado_el`, `verificado_con` y `vigente_hasta`; una ficha sin fechar se publica igual pero lo dice en su cara, y los decretos transitorios caducan solos por las cuatro puertas por las que sale la guía —incluida la descarga del formato—. **Lo que queda es contenido, no esquema:** los siete trámites oficiales de Armenia están transcritos y ya fechados en `docs/ingenieria/guia-normativa-armenia-fuente-oficial.md`, listos para sembrar, y siguen faltando los otros once municipios y los formatos reales.
 4. **Correo saliente.** *Dueño: dirección + equipo.* Laravel Cloud no lo incluye. Sin proveedor (Resend/Postmark/SES a nombre del gremio), **los códigos MFA mueren en el log y el login del panel no se puede demostrar** ante la dirección aunque haya hosting.
 5. **Resto de G12, Ley 1581.** *Sin dueño asignado — riesgo jurídico.* Nombrar a los encargados del tratamiento (incluida la pasarela), abrir el canal de supresión a petición del titular, y que **alguien que responda legalmente por el gremio revise el texto** de la política, hoy redactada por un agente describiendo el comportamiento del código.
 6. **Datos de los ~60 asociados y sus autorizaciones de publicación.** *Dueño: Natalia.* Sin ellos el directorio se lanza vacío. Se lleva pidiendo desde principios de agosto; conviene fecha comprometida en acta, no otra petición de palabra.
@@ -184,7 +186,16 @@ Esta sección existe porque su ausencia es lo que convirtió a la versión anter
 
 **Todo lo posterior al 19 de agosto a las 08:05.** Si la reunión del viernes 21 se confirmó tras el sismo y qué salió de ella; si Natalia firmó el planeador; si se consiguió la retroalimentación escrita del empresario; si se entregó el corte 2 y con qué nota; si la dirección respondió sobre la cuenta de hosting; si existe ya despliegue, dominio o SSL. **La ausencia de anotación no prueba que no ocurriera: prueba que nadie escribió el resultado.**
 
-**El trabajo de la compañera de práctica.** 196 commits con autor único, sin ramas, sin PRs y sin coautoría. Esto no prueba que no trabajara: prueba que su trabajo no pasó por este repositorio. ⚠️ **Es un riesgo académico concreto**, porque el reparto de frentes le asignaba la matriz de pruebas y el manual de usuario, y ambos existen hoy en `docs/ingenieria/` bajo autoría única, mientras el docente exige documentos distintos para cada practicante.
+~~**El trabajo de la compañera de práctica.** 196 commits con autor único, sin ramas, sin PRs y sin coautoría.~~ **Dejó de ser cierto el 25 de agosto**, y se mueve aquí con su fecha en vez de borrarse, como manda el cierre de esta sección.
+
+Existe `origin/p2-directorio` con **tres commits de Ingrid Montoya** (`imontoya_624@unihumboldt.edu.co`), del 20 y el 25 de agosto, sobre su propio bloque del reparto —directorio, bolsa de empleo y portal `/mi-cuenta`— y **con pruebas propias**: `DirectorioTest` son 168 líneas nuevas, más casos añadidos a `BolsaDeEmpleoTest` y `FormulariosPublicosTest`. Eso es exactamente la evidencia de autoría separada que el corte pide.
+
+⚠️ **El riesgo baja, no se cierra**, y la diferencia importa:
+
+- **Su rama NO está en `main`.** Mientras no se fusione, un clon del proyecto sigue enseñando autoría única.
+- **Hoy no fusionaría limpio.** Sale de `1ff87d0` (19 de agosto) y choca en cuatro vistas —`navbar`, `directorio/index`, `directorio/show` y `mi-cuenta/index`— **todas contra el mismo commit**, `09e3e33`, que es el pase de foco visible y objetivos táctiles. Otros nueve ficheros se fusionan solos y nada de RF-60 estorba. Medido con `git merge-tree`, sin tocar su rama.
+- **Resolver esos conflictos a la ligera revierte RNF-12 en silencio**, que es un requisito no funcional contratado y hoy declarado verificado. Las guardias `FocoVisibleTest` y `ObjetivoTactilTest` lo cazarían, pero sólo si alguien corre la suite después de resolver.
+- **El expediente todavía afirma lo contrario.** El informe de avance del 21 de agosto §2 justifica su alcance diciendo que los commits tienen autor único. No se corrige retroactivamente un informe ya entregado: la nota va en el siguiente.
 
 **Otras cosas sin rastro:** si alguien ha visto el archivo de cartera de la contadora; si se abrió el registro de bugs de la tutora; el patrocinio de Claude Max; el horario de los miércoles presenciales; los 51 hallazgos restantes de la auditoría de interfaz; y si la integración con Bold funciona contra el sandbox real, con las dos incógnitas de su documentación aún sin resolver.
 
