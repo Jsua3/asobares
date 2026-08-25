@@ -61,7 +61,7 @@ class DirectorioController
 
         return view('publico.directorio.show', [
             'asociado' => $asociado,
-            'vacantes' => $asociado->vacantes()->publicado()->get(),
+            'vacantes' => $asociado->vacantes()->publicado()->vigente()->get(),
             'similares' => Asociado::publicado()
                 ->where('id', '!=', $asociado->id)
                 ->where('municipio_id', $asociado->municipio_id)
