@@ -64,7 +64,9 @@ class SitemapController
         );
 
         // La guía por municipio son URLs distintas y de mucho valor para SEO.
-        Municipio::whereHas('requisitos', fn ($q) => $q->publicado())
+        // Con `vigente()`, porque anunciarle a Google una guía vacía es peor
+        // que no anunciarla.
+        Municipio::whereHas('requisitos', fn ($q) => $q->publicado()->vigente())
             ->get()
             ->each(fn (Municipio $municipio) => $mapa->add(
                 Url::create(route('guia.index', ['municipio' => $municipio->slug]))

@@ -20,8 +20,10 @@ class GuiaController
     {
         $request->validate(['municipio' => ['nullable', 'string', 'exists:municipios,slug']]);
 
-        // Solo se ofrecen municipios que ya tienen la guía levantada.
-        $municipiosConGuia = Municipio::whereHas('requisitos', fn ($q) => $q->publicado())
+        // Sólo se ofrecen municipios que ya tienen la guía levantada Y vigente:
+        // uno cuyos trámites hayan caducado todos saldría en el selector con la
+        // guía vacía.
+        $municipiosConGuia = Municipio::whereHas('requisitos', fn ($q) => $q->publicado()->vigente())
             ->orderBy('nombre')
             ->get();
 
@@ -31,6 +33,7 @@ class GuiaController
 
         $requisitos = $seleccionado
             ? RequisitoApertura::publicado()
+                ->vigente()
                 ->where('municipio_id', $seleccionado->id)
                 ->orderBy('orden')
                 ->get()
@@ -61,7 +64,14 @@ class GuiaController
      */
     public function descargarFormato(RequisitoApertura $requisito): StreamedResponse
     {
-        abort_unless($requisito->estaPublicado() && $requisito->tieneAdjunto(), 404);
+        // La caducidad se comprueba AQUÍ y no sólo en la vista: los formatos
+        // viven en el disco privado justamente para que esta sea la única
+        // puerta, y un decreto vencido con PDF descargable por URL directa
+        // sería el mismo agujero del §8.3 del runbook.
+        abort_unless(
+            $requisito->estaPublicado() && ! $requisito->haCaducado() && $requisito->tieneAdjunto(),
+            404
+        );
 
         // La ruta viene de la base y la escribe el panel: se acota a su
         // carpeta para que no pueda apuntar a ningún otro sitio del disco.

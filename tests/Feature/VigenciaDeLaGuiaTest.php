@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Enums\EstadoPublicacion;
+use App\Models\Municipio;
 use App\Models\RequisitoApertura;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -192,5 +194,90 @@ class VigenciaDeLaGuiaTest extends TestCase
             $enLineaSinCierre,
             'La misma logica sin el cierre y fuera del scope SI deja colar el borrador: el peligro es real.'
         );
+    }
+
+    private function requisitoPublicado(Municipio $municipio, array $atributos = []): RequisitoApertura
+    {
+        return RequisitoApertura::factory()->publicado()->create(
+            array_merge(['municipio_id' => $municipio->id], $atributos)
+        );
+    }
+
+    public function test_un_decreto_vencido_no_aparece_en_la_guia(): void
+    {
+        $municipio = Municipio::factory()->create();
+        $vivo = $this->requisitoPublicado($municipio, ['entidad' => 'Cuerpo de Bomberos']);
+        $vencido = $this->requisitoPublicado($municipio, [
+            'entidad' => 'Decreto de restricción horaria',
+            'vigente_hasta' => now()->subDay()->toDateString(),
+        ]);
+
+        $this->get(route('guia.index', ['municipio' => $municipio->slug]))
+            ->assertSuccessful()
+            ->assertSee($vivo->entidad)
+            ->assertDontSee($vencido->entidad);
+    }
+
+    public function test_un_municipio_cuya_guia_entera_vencio_no_sale_en_el_selector(): void
+    {
+        $vivo = Municipio::factory()->create(['nombre' => 'Armenia']);
+        $apagado = Municipio::factory()->create(['nombre' => 'Pijao']);
+
+        $this->requisitoPublicado($vivo);
+        $this->requisitoPublicado($apagado, ['vigente_hasta' => now()->subDay()->toDateString()]);
+
+        $respuesta = $this->get(route('guia.index'))->assertSuccessful();
+
+        $respuesta->assertSee('Armenia');
+        $respuesta->assertDontSee(route('guia.index', ['municipio' => $apagado->slug]), escape: false);
+    }
+
+    /**
+     * La puerta que importa. Comprobar la caducidad sólo en la vista dejaría
+     * el PDF del decreto vencido descargable por URL directa — el mismo
+     * agujero que el §8.3 del runbook encontró en la política del bucket.
+     */
+    public function test_el_formato_de_un_decreto_vencido_no_se_puede_descargar(): void
+    {
+        Storage::fake(config('almacenamiento.privado'));
+        Storage::disk(config('almacenamiento.privado'))->put('formatos/decreto.pdf', '%PDF-1.4');
+
+        $municipio = Municipio::factory()->create();
+        $vencido = $this->requisitoPublicado($municipio, [
+            'adjunto' => 'formatos/decreto.pdf',
+            'adjunto_nombre' => 'Decreto de restricción horaria',
+            'vigente_hasta' => now()->subDay()->toDateString(),
+        ]);
+
+        $this->get(route('guia.formato', $vencido))->assertNotFound();
+    }
+
+    public function test_el_formato_de_un_tramite_vigente_si_se_descarga(): void
+    {
+        // Contraprueba: sin ella, una descarga rota pasaría la prueba anterior.
+        Storage::fake(config('almacenamiento.privado'));
+        Storage::disk(config('almacenamiento.privado'))->put('formatos/bomberos.pdf', '%PDF-1.4');
+
+        $municipio = Municipio::factory()->create();
+        $vivo = $this->requisitoPublicado($municipio, [
+            'adjunto' => 'formatos/bomberos.pdf',
+            'adjunto_nombre' => 'Solicitud de visita',
+        ]);
+
+        $this->get(route('guia.formato', $vivo))->assertSuccessful();
+    }
+
+    public function test_el_sitemap_no_anuncia_un_municipio_cuya_guia_vencio(): void
+    {
+        $vivo = Municipio::factory()->create();
+        $apagado = Municipio::factory()->create();
+
+        $this->requisitoPublicado($vivo);
+        $this->requisitoPublicado($apagado, ['vigente_hasta' => now()->subDay()->toDateString()]);
+
+        $respuesta = $this->get('/sitemap.xml')->assertSuccessful();
+
+        $respuesta->assertSee(route('guia.index', ['municipio' => $vivo->slug]), escape: false);
+        $respuesta->assertDontSee(route('guia.index', ['municipio' => $apagado->slug]), escape: false);
     }
 }
