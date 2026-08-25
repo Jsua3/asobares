@@ -106,7 +106,16 @@ public function scopeVigente(Builder $query): Builder
 }
 ```
 
-> ⚠️ **El paréntesis no es cosmético.** Sin el grupo, el `orWhere` se suelta y anula el `publicado()` que lo precede: la guía empezaría a servir borradores. Necesita prueba propia.
+> ⚠️ **Corregido el 24 de agosto, durante la implementación.** Esta spec afirmaba aquí que sin el grupo el `orWhere` se suelta y anula el `publicado()` que lo precede. **Es falso para un scope local:** `Builder::callScope()` cuenta los `where` antes y después de ejecutar el scope y llama a `addNewWheresWithinGroup()` si añadió alguno, de modo que `publicado()->vigente()` sale agrupado con o sin cierre explícito. El paso de mutación que el plan mandaba para «demostrarlo» era imposible.
+>
+> El peligro sí es real, pero **fuera** del scope: las mismas dos líneas escritas en un controlador, en un `whereRaw` o tras un `toBase()` sueltan el `orWhere` y anulan el filtro de publicación. Medido:
+>
+> ```
+> scope  → where "estado" = ? and ("vigente_hasta" is null or "vigente_hasta" >= ?)
+> inline → where "estado" = ? and  "vigente_hasta" is null or "vigente_hasta" >= ?
+> ```
+>
+> El cierre se conserva por eso: hace seguro copiar el bloque. Y hay un segundo borde que sólo apareció al escribir la prueba: **el caso que delata la fuga tiene que ser un borrador con `vigente_hasta` futuro.** Uno sin fecha no se colaría ni con la SQL rota, porque el segundo término sería `NULL >= ?`, que no es verdadero. La primera versión de la prueba usaba justo ese dato inútil.
 
 Se aplica en **cuatro** sitios. Tres son fáciles de olvidar y cada uno falla distinto:
 
@@ -155,6 +164,8 @@ En el cuerpo desplegado, la procedencia en pequeño bajo la descripción: *«Fue
 Un trámite caducado **no se renderiza nunca**: ya salió en la consulta. La vista no tiene rama para él, y eso es deliberado — si aparece, es que una de las cuatro puertas del §3 se dejó abierta.
 
 Colores desde los tokens semánticos existentes. Cero hexadecimales en la vista, que ya lo vigila una guardia.
+
+**Efecto secundario en el observatorio, declarado a propósito.** `GuiaController::index()` calcula `$seleccionado` sobre `$municipiosConGuia`, que ya excluye los municipios sin ningún trámite `publicado()->vigente()`. Antes de este diseño, visitar un municipio con `?municipio=X` registraba una `ConsultaGuia` aunque su guía estuviera vacía; ahora, si toda la guía de ese municipio caducó, `$seleccionado` sale `null` y esa visita deja de registrarse. Es el comportamiento que se quiere —`consultas_guia` es la métrica que la dirección lleva a las alcaldías, y una consulta a una guía que ya no existe no es evidencia de nada—, pero es un cambio de qué cuenta como "consulta", y por eso queda dicho aquí y no solo implícito en el código.
 
 ## §6 · Datos existentes y el seeder
 

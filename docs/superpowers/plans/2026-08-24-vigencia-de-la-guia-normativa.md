@@ -443,6 +443,13 @@ git commit -m "Ensena al requisito a decir si esta rancio o si ya vencio" -m "Cu
 
 ## Task 3: El scope `vigente()`
 
+> ⚠️ **Enmendada durante la ejecución, el 24 de agosto.** Los pasos de abajo se conservan como está —son lo que se planeó— pero **dos cosas de esta tarea resultaron falsas y no deben repetirse en otro plan**:
+>
+> 1. **El Step 5 es imposible.** Eloquent ya aísla las condiciones de un scope local en su propio grupo (`Builder::callScope()` → `addNewWheresWithinGroup()`), así que quitar el cierre no cambia la SQL y la mutación no puede ponerse roja. El cierre se mantiene, pero como defensa para quien copie el bloque **fuera** de un scope, que es donde el peligro sí existe.
+> 2. **El caso de prueba del Step 1 no puede delatar la fuga.** Un borrador sin `vigente_hasta` no se colaría ni con la SQL rota: el segundo término sería `NULL >= ?`, que no es verdadero. Tiene que ser un borrador con `vigente_hasta` **futuro**.
+>
+> Lo implementado corrige ambas. La lección para el próximo plan: **una justificación que no se ha ejecutado es una hipótesis**, y ésta iba escrita con la confianza de un hecho medido.
+
 **Files:**
 - Modify: `app/Models/RequisitoApertura.php`
 - Test: `tests/Feature/VigenciaDeLaGuiaTest.php`
