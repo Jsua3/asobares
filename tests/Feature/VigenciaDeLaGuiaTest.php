@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\EstadoPublicacion;
 use App\Models\RequisitoApertura;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -118,5 +119,60 @@ class VigenciaDeLaGuiaTest extends TestCase
         $this->assertFalse($permanente->haCaducado(), 'Sin fecha no caduca nunca.');
         $this->assertFalse($hoyEsSuUltimoDia->haCaducado(), 'El último día todavía cuenta.');
         $this->assertTrue($vencioAyer->haCaducado());
+    }
+
+    public function test_el_scope_deja_pasar_lo_permanente_y_lo_que_aun_no_vence(): void
+    {
+        $permanente = RequisitoApertura::factory()->create();
+        $futuro = RequisitoApertura::factory()->transitorio()->create();
+        $hoy = RequisitoApertura::factory()->transitorio(now()->toDateString())->create();
+        $vencido = RequisitoApertura::factory()->caducado()->create();
+
+        $vigentes = RequisitoApertura::vigente()->pluck('id');
+
+        $this->assertContains($permanente->id, $vigentes);
+        $this->assertContains($futuro->id, $vigentes);
+        $this->assertContains($hoy->id, $vigentes, 'El último día todavía cuenta.');
+        $this->assertNotContains($vencido->id, $vigentes);
+    }
+
+    /**
+     * Fija el comportamiento observable: componer `publicado()->vigente()`
+     * nunca devuelve borradores, tengan o no fecha de vencimiento.
+     */
+    public function test_el_scope_no_anula_el_publicado_que_lo_precede(): void
+    {
+        $borradorPermanente = RequisitoApertura::factory()->create([
+            'estado' => EstadoPublicacion::Borrador,
+        ]);
+
+        $ids = RequisitoApertura::publicado()->vigente()->pluck('id');
+
+        $this->assertNotContains(
+            $borradorPermanente->id,
+            $ids,
+            'Un borrador sin fecha de vencimiento NO puede colarse por el orWhere.'
+        );
+    }
+
+    /**
+     * `test_el_scope_no_anula_el_publicado_que_lo_precede` no puede
+     * detectar si alguien le quita el grupo al `orWhere`: Eloquent ya aísla
+     * las condiciones de un scope local en su propio grupo, con o sin el
+     * cierre manual (`Builder::callScope()` -> `addNewWheresWithinGroup()`).
+     * Por eso esta prueba afirma la SQL emitida en vez del resultado: es la
+     * única forma de que el grupo del `orWhere` tenga una prueba que de
+     * verdad se rompa si el bloque se copia fuera del scope y pierde el
+     * cierre.
+     */
+    public function test_la_sql_del_scope_mantiene_el_grupo_del_orwhere(): void
+    {
+        $sql = RequisitoApertura::publicado()->vigente()->toSql();
+
+        $this->assertStringContainsString(
+            'and ("vigente_hasta" is null or "vigente_hasta" >= ?)',
+            $sql,
+            'El orWhere tiene que salir agrupado entre parentesis: suelto, anularia el estado = publicado que lo precede.'
+        );
     }
 }

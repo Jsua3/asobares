@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\EstadoPublicacion;
 use App\Models\Concerns\EsPublicable;
 use Database\Factories\RequisitoAperturaFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -99,6 +100,31 @@ class RequisitoApertura extends Model
     {
         return $this->vigente_hasta !== null
             && $this->vigente_hasta->startOfDay()->lt(now()->startOfDay());
+    }
+
+    /**
+     * Lo que el sitio puede mostrar hoy: lo permanente y lo que aún no vence.
+     *
+     * Se compone con `publicado()` en vez de meterse dentro de él, porque el
+     * panel y el observer usan `publicado()` y ahí un decreto vencido sí tiene
+     * que seguir viéndose: alguien tiene que poder renovarlo.
+     *
+     * El cierre que agrupa el `orWhere` es cinturón y tirantes, no la guarda
+     * que este proyecto creyó al principio: Eloquent ya aísla las condiciones
+     * de un scope local en su propio grupo —`Builder::callScope()` cuenta los
+     * `where` antes y después y llama a `addNewWheresWithinGroup()`—, así que
+     * `publicado()->vigente()` sale agrupado con o sin él.
+     *
+     * Se conserva porque el peligro es real fuera del scope: estas mismas dos
+     * líneas escritas en un controlador, en un `whereRaw` o tras un `toBase()`
+     * sí sueltan el `orWhere` y anulan el filtro de publicación, y entonces la
+     * guía sirve borradores. El cierre hace que copiar el bloque sea seguro.
+     */
+    public function scopeVigente(Builder $query): Builder
+    {
+        return $query->where(fn (Builder $q) => $q
+            ->whereNull('vigente_hasta')
+            ->orWhere('vigente_hasta', '>=', now()->toDateString()));
     }
 
     public function getActivitylogOptions(): LogOptions
