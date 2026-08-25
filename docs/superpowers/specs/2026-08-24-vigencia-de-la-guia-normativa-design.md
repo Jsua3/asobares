@@ -106,7 +106,16 @@ public function scopeVigente(Builder $query): Builder
 }
 ```
 
-> ⚠️ **El paréntesis no es cosmético.** Sin el grupo, el `orWhere` se suelta y anula el `publicado()` que lo precede: la guía empezaría a servir borradores. Necesita prueba propia.
+> ⚠️ **Corregido el 24 de agosto, durante la implementación.** Esta spec afirmaba aquí que sin el grupo el `orWhere` se suelta y anula el `publicado()` que lo precede. **Es falso para un scope local:** `Builder::callScope()` cuenta los `where` antes y después de ejecutar el scope y llama a `addNewWheresWithinGroup()` si añadió alguno, de modo que `publicado()->vigente()` sale agrupado con o sin cierre explícito. El paso de mutación que el plan mandaba para «demostrarlo» era imposible.
+>
+> El peligro sí es real, pero **fuera** del scope: las mismas dos líneas escritas en un controlador, en un `whereRaw` o tras un `toBase()` sueltan el `orWhere` y anulan el filtro de publicación. Medido:
+>
+> ```
+> scope  → where "estado" = ? and ("vigente_hasta" is null or "vigente_hasta" >= ?)
+> inline → where "estado" = ? and  "vigente_hasta" is null or "vigente_hasta" >= ?
+> ```
+>
+> El cierre se conserva por eso: hace seguro copiar el bloque. Y hay un segundo borde que sólo apareció al escribir la prueba: **el caso que delata la fuga tiene que ser un borrador con `vigente_hasta` futuro.** Uno sin fecha no se colaría ni con la SQL rota, porque el segundo término sería `NULL >= ?`, que no es verdadero. La primera versión de la prueba usaba justo ese dato inútil.
 
 Se aplica en **cuatro** sitios. Tres son fáciles de olvidar y cada uno falla distinto:
 
