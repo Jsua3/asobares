@@ -4,6 +4,7 @@ namespace App\Filament\Resources\RequisitoAperturas\Schemas;
 
 use App\Enums\EstadoPublicacion;
 use App\Filament\Forms\Components\SubidaSegura;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -95,6 +96,27 @@ class RequisitoAperturaForm
                             ->helperText(fn (): string => auth()->user()?->can('publicar_requisito')
                                 ? 'Puedes publicar directamente.'
                                 : 'Al guardar, quedará pendiente de aprobación de la dirección.'),
+                    ]),
+
+                Section::make('Verificación y vigencia')
+                    ->description('De dónde salió este trámite y hasta cuándo vale. Es información legal: alguien va a decidir si abre un negocio con esto.')
+                    ->columns(2)
+                    ->schema([
+                        DatePicker::make('verificado_el')
+                            ->label('Verificado el')
+                            ->native(false)
+                            ->maxDate(now())
+                            ->helperText('El día en que alguien contrastó este trámite contra la entidad. Déjalo vacío si nadie lo ha hecho: el sitio lo dirá.'),
+                        TextInput::make('verificado_con')
+                            ->label('Verificado con')
+                            ->maxLength(255)
+                            ->placeholder('Documento oficial de la Alcaldía de Armenia, 20 ago 2026')
+                            ->helperText('Con qué. Un documento, un acta, un correo de la entidad.'),
+                        DatePicker::make('vigente_hasta')
+                            ->label('Vigente hasta')
+                            ->native(false)
+                            ->helperText('Sólo para decretos transitorios. Vacío significa permanente. Al pasar la fecha, el trámite deja de mostrarse en el sitio.')
+                            ->columnSpanFull(),
                     ]),
             ]);
     }

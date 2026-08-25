@@ -4,6 +4,7 @@ namespace App\Filament\Resources\RequisitoAperturas\Tables;
 
 use App\Enums\EstadoPublicacion;
 use App\Filament\Support\AccionesDeAprobacion;
+use App\Models\RequisitoApertura;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -17,8 +18,10 @@ class RequisitoAperturasTable
     {
         return $table
             ->columns([
-                TextColumn::make('municipio.id')
-                    ->searchable(),
+                TextColumn::make('municipio.nombre')
+                    ->label('Municipio')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('entidad')
                     ->searchable(),
                 TextColumn::make('enlace_externo')
@@ -36,6 +39,23 @@ class RequisitoAperturasTable
                 TextColumn::make('estado')
                     ->badge()
                     ->searchable(),
+                TextColumn::make('verificado_el')
+                    ->label('Verificado')
+                    ->date('d/m/Y')
+                    ->placeholder('Sin verificar')
+                    ->badge()
+                    ->color(fn (RequisitoApertura $record): string => match (true) {
+                        ! $record->estaVerificado() => 'gray',
+                        $record->necesitaRevision() => 'warning',
+                        default => 'success',
+                    })
+                    ->sortable(),
+                TextColumn::make('vigente_hasta')
+                    ->label('Vigente hasta')
+                    ->date('d/m/Y')
+                    ->placeholder('Permanente')
+                    ->color(fn (RequisitoApertura $record): string => $record->haCaducado() ? 'danger' : 'gray')
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
