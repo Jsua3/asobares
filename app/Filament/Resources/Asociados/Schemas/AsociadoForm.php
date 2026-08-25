@@ -61,13 +61,21 @@ class AsociadoForm
                     ->columns(2)
                     ->schema([
                         TextInput::make('direccion')->label('Dirección')->maxLength(255),
-                        TextInput::make('horario')->label('Horario')->maxLength(255)
-                            ->placeholder('Jue a sáb, 6:00 p. m. – 2:00 a. m.'),
+                        // La base real del gremio trae 19 de 41 horarios en
+                        // varias lineas, un renglon por franja. Cabian en un
+                        // TextInput solo mientras los datos eran inventados.
+                        Textarea::make('horario')->label('Horario')->rows(3)
+                            ->placeholder("Lunes a viernes de 6:00 p. m. a 2:00 a. m.\nSabado de 4:00 p. m. a 3:00 a. m."),
                         TextInput::make('whatsapp')->label('WhatsApp')->tel()->maxLength(30),
                         TextInput::make('sitio_web')->label('Sitio web')->url()->maxLength(255),
                         TextInput::make('instagram_url')->label('Instagram')->url()->maxLength(255),
                         TextInput::make('google_maps_url')->label('Google Maps / Business')->url()->maxLength(255),
                         TextInput::make('tripadvisor_url')->label('TripAdvisor')->url()->maxLength(255),
+                        Textarea::make('genero_musical')->label('Género musical')->rows(3)
+                            ->helperText('Un género por renglón. Es por lo que la gente filtra el directorio.')
+                            ->placeholder("Salsa\nCrossover"),
+                        Textarea::make('servicios')->label('Servicios ofrecidos')->rows(3)
+                            ->placeholder('Pista de baile, licores, DJ en vivo, parqueadero'),
                     ]),
 
                 Section::make('Ubicación en el mapa')
@@ -128,10 +136,22 @@ class AsociadoForm
                     ->collapsed()
                     ->schema([
                         TextInput::make('representante')->label('Representante')->maxLength(255),
+                        TextInput::make('documento')->label('NIT o cédula')->maxLength(40)
+                            ->helperText('Dato de identificación del titular. No sale al sitio público.'),
                         TextInput::make('correo_interno')->label('Correo interno')->email()->maxLength(255),
                         TextInput::make('telefono_interno')->label('Teléfono interno')->tel()->maxLength(30),
                         DatePicker::make('fecha_afiliacion')->label('Fecha de afiliación')->native(false),
-                        Textarea::make('notas_internas')->label('Notas internas')->rows(3)->columnSpanFull(),
+                        DatePicker::make('autorizacion_datos_at')
+                            ->label('Autorización de datos (fecha)')
+                            ->native(false)
+                            ->helperText('Ley 1581/2012: sin esta fecha y su soporte, la ficha no debería publicarse.'),
+                        TextInput::make('autorizacion_datos_origen')
+                            ->label('Soporte de la autorización')
+                            ->maxLength(255)
+                            ->placeholder('Formato firmado, acta 04, correo del titular…')
+                            ->columnSpanFull(),
+                        Textarea::make('notas_internas')->label('Notas internas')->rows(3)->columnSpanFull()
+                            ->helperText('Valoración comercial de la oficina. Nunca se publica.'),
                     ]),
             ]);
     }

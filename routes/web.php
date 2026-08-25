@@ -105,6 +105,20 @@ Route::post('/proveedores/inscripcion', [ProveedorController::class, 'guardarIns
 
 // Eventos del gremio.
 Route::get('/eventos', [EventoController::class, 'index'])->name('eventos.index');
+// Antes que la ruta con slug, por el mismo motivo y con el mismo remedio que
+// `artistas.inscripcion` unas líneas más arriba: `/eventos/calendario` tiene
+// dos segmentos igual que `/eventos/{evento:slug}`, así que registrada después
+// no se alcanzaría NUNCA y Laravel devolvería 404 buscando un evento con slug
+// «calendario». No avisa nada: es una URL que simplemente deja de existir.
+//
+// Y son dos rutas y no una con parámetros opcionales, para que cada mes tenga
+// una URL canónica única y `/eventos/calendario` a secas redirija al mes en
+// curso en vez de servir el mismo contenido bajo dos direcciones.
+Route::get('/eventos/calendario', [EventoController::class, 'calendarioDeHoy'])
+    ->name('eventos.calendario.hoy');
+Route::get('/eventos/calendario/{anio}/{mes}', [EventoController::class, 'calendario'])
+    ->where(['anio' => '[0-9]{4}', 'mes' => '0[1-9]|1[0-2]'])
+    ->name('eventos.calendario');
 Route::get('/eventos/{evento:slug}', [EventoController::class, 'show'])->name('eventos.show');
 Route::post('/eventos/{evento:slug}/inscripcion', [EventoController::class, 'inscribir'])
     ->middleware('throttle:6,1')

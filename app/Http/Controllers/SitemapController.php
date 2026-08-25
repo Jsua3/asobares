@@ -48,6 +48,21 @@ class SitemapController
             $mapa->add(Url::create(route($ruta))->setChangeFrequency($frecuencia)->setPriority($prioridad));
         }
 
+        /*
+         * El calendario, y sólo el mes en curso. Enumerar meses sería una lista
+         * infinita —los enlaces de anterior y siguiente no tienen tope—, y los
+         * meses sin datos ya se marcan `noindex` en la propia página.
+         *
+         * Va aparte del bucle de `$fijas` porque ese llama a `route($ruta)` sin
+         * parámetros, y va la URL FECHADA y no `eventos.calendario.hoy`: un
+         * sitemap no debe listar una redirección.
+         */
+        $mapa->add(
+            Url::create(route('eventos.calendario', [now()->year, now()->format('m')]))
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
+                ->setPriority(0.6)
+        );
+
         // La guía por municipio son URLs distintas y de mucho valor para SEO.
         Municipio::whereHas('requisitos', fn ($q) => $q->publicado())
             ->get()

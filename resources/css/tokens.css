@@ -182,6 +182,27 @@
     --asb-levante: -2px;
     --asb-desplazamiento-panel: -4%;
     --asb-desplazamiento-alerta: -25%;
+
+    /*
+     * Acuses de pulsación de los portadores nuevos. Cada familia de control
+     * responde con lo suyo: el texto se atenúa, la fila se tiñe y la tarjeta
+     * encoge. Viven aquí y no en `app.css` porque uno de los tres cambia con el
+     * tema, como el resto de los materiales.
+     *
+     * Que el tema del panel importe este archivo no cambia nada en /admin:
+     * ninguno toca un namespace de Tailwind (`--text-*`, `--ease-*`,
+     * `--color-*`, `--font-*`) y nadie en Filament los consume.
+     */
+    --asb-atenuacion-pulsada: 0.55;
+    --asb-fila-pulsada: rgb(11 9 10 / 0.09);
+
+    /* Geometría, y por eso token: el interruptor del final lo pone a 1. */
+    --asb-encogimiento-tarjeta: 0.985;
+
+    /* Los dos botones de zoom del mapa encogen más que una tarjeta —94 % contra
+       98,5 %— porque son cajas de 44 px y no de 380: el mismo porcentaje sobre
+       una caja pequeña casi no se ve. También es geometría. */
+    --asb-encogimiento-control: 0.94;
 }
 
 .dark {
@@ -254,6 +275,11 @@
     --asb-hoja-sombra:
         inset 0 1px 0 rgb(255 255 255 / 0.07),
         0 16px 40px rgb(0 0 0 / 0.55);
+
+    /* Sobre Pub Black un velo negro no existe: el acuse se pinta con luz. Es la
+       misma receta doble del vidrio y de la sombra de tarjeta. Los otros dos
+       acuses no se repiten aquí porque no dependen del tema. */
+    --asb-fila-pulsada: rgb(255 255 255 / 0.11);
 }
 
 /*
@@ -339,5 +365,11 @@
         --asb-levante: 0px;
         --asb-desplazamiento-panel: 0%;
         --asb-desplazamiento-alerta: 0%;
+
+        /* Se anulan los dos encogimientos y NADA más de los acuses: la
+           atenuación del enlace y el tinte de la fila son fundidos, que es
+           justo lo que la regla manda conservar. */
+        --asb-encogimiento-tarjeta: 1;
+        --asb-encogimiento-control: 1;
     }
 }

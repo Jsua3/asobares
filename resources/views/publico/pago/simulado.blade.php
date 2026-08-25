@@ -58,7 +58,7 @@
                                     'pse' => ['PSE', 'Débito desde tu banco'],
                                     'tarjeta' => ['Tarjeta', 'Crédito o débito'],
                                 ] as $valor => [$titulo, $detalle])
-                                    <label class="cursor-pointer rounded-xl border p-4 transition-colors"
+                                    <label class="pulsable cursor-pointer rounded-xl border p-4"
                                            :class="metodo === '{{ $valor }}' ? 'border-marca-500 bg-marca-500/10' : 'border-linea hover:border-linea-fuerte'">
                                         <input type="radio" name="metodo" value="{{ $valor }}" x-model="metodo" class="sr-only"
                                                @checked($valor === 'pse')>
@@ -83,7 +83,7 @@
                             <button type="submit" name="decision" value="rechazar"
                                     x-bind:disabled="enviando"
                                     x-bind:class="enviando && 'opacity-55'"
-                                    class="w-full rounded-xl border border-linea px-6 py-3 text-sm text-tenue transition-colors hover:border-marca-500/40 hover:text-fuerte">
+                                    class="pulsable w-full rounded-xl border border-linea px-6 py-3 text-sm text-tenue hover:border-marca-500/40 hover:text-fuerte">
                                 Simular pago rechazado
                             </button>
                         </div>

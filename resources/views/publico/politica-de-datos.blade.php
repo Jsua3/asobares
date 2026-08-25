@@ -112,9 +112,9 @@
         <section>
             <h2 class="font-display text-lg font-semibold text-fuerte">8. Cómo ejercer tus derechos</h2>
             <p class="mt-3">
-                Escribe a <a href="mailto:{{ ajuste('contacto_correo') }}" class="text-acento underline underline-offset-2">{{ ajuste('contacto_correo') }}</a>
+                Escribe a <a href="mailto:{{ ajuste('contacto_correo') }}" class="enlace-accion text-acento underline underline-offset-2">{{ ajuste('contacto_correo') }}</a>
                 o radica tu solicitud como PQR en la
-                <a href="{{ route('contacto') }}" class="text-acento underline underline-offset-2">página de contacto</a>,
+                <a href="{{ route('contacto') }}" class="enlace-accion text-acento underline underline-offset-2">página de contacto</a>,
                 donde recibirás un número de radicado.
             </p>
             <p class="mt-3">

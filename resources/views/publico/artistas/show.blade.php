@@ -3,7 +3,7 @@
                    :ogImagen="$artista->foto ? Storage::disk('public')->url($artista->foto) : null">
 
     <article class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-        <a href="{{ route('artistas.index') }}" class="enlace-accion text-sm text-apagado hover:text-acento">← Todos los artistas</a>
+        <a href="{{ route('artistas.index') }}" class="enlace-accion relative inline-block text-sm text-apagado after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento"><x-publico.flecha direccion="izquierda" />&nbsp;Todos los artistas</a>
 
         <div class="mt-6 grid gap-10 lg:grid-cols-3">
             <div class="lg:col-span-2">
@@ -63,8 +63,8 @@
                         @endif
                         @if ($artista->instagram_url)
                             <a href="{{ $artista->instagram_url }}" target="_blank" rel="noopener nofollow"
-                               class="block rounded-xl border border-linea px-4 py-2.5 text-center text-sm hover:border-marca-500/50">
-                                Instagram ↗
+                               class="pulsable block min-h-11 rounded-xl border border-linea px-4 py-2.5 text-center text-sm hover:border-marca-500/50">
+                                Instagram&nbsp;<x-publico.flecha direccion="externa" />
                             </a>
                         @endif
                     </div>
@@ -78,7 +78,7 @@
                 <ul class="mt-6 grid gap-4 sm:grid-cols-3">
                     @foreach ($similares as $similar)
                         <li>
-                            <a href="{{ route('artistas.show', $similar) }}" class="tarjeta tarjeta-hover block p-5">
+                            <a href="{{ route('artistas.show', $similar) }}" class="tarjeta tarjeta-hover tarjeta-pulsable block p-5">
                                 <span class="block font-display text-sm font-semibold">{{ $similar->nombre }}</span>
                                 <span class="mt-1 block text-xs text-acento">{{ $similar->genero_musical }}</span>
                             </a>

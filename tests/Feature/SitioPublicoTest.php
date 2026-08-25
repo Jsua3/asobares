@@ -126,6 +126,10 @@ class SitioPublicoTest extends TestCase
             '/proveedores',
             '/eventos',
             '/eventos?cuando=pasados',
+            // El proveedor es estático, así que la fecha va literal y no
+            // `now()`: un mes sin eventos tiene que devolver 200 igual —la
+            // rejilla se pinta vacía— y eso es justo lo que se afirma.
+            '/eventos/calendario/2026/09',
             '/boletin',
             '/boletin?categoria=observatorio',
             '/afiliate',
@@ -168,6 +172,20 @@ class SitioPublicoTest extends TestCase
 
         $this->get(route('directorio.show', $borrador))->assertNotFound();
         $this->get('/directorio')->assertDontSee($borrador->nombre);
+    }
+
+    /**
+     * El calendario entra al sitemap con el mes EN CURSO y fechado. Con la ruta
+     * sin fecha (`eventos.calendario.hoy`) el mapa listaría una redirección, y
+     * enumerando meses listaría una lista infinita: los enlaces de mes anterior
+     * y siguiente no tienen tope por diseño.
+     */
+    public function test_el_sitemap_lista_el_calendario_del_mes_en_curso(): void
+    {
+        $respuesta = $this->get('/sitemap.xml')->assertSuccessful();
+
+        $respuesta->assertSee(route('eventos.calendario', [now()->year, now()->format('m')]), escape: false);
+        $respuesta->assertDontSee(route('eventos.calendario.hoy').'<', escape: false);
     }
 
     public function test_una_pagina_inexistente_devuelve_404_con_la_marca(): void

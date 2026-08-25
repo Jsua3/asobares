@@ -8,8 +8,28 @@
     inglés dentro de un sitio íntegramente en español.
 --}}
 @php
-    $pastilla = 'inline-flex items-center px-4 py-2 text-sm font-medium';
-    $enlace = "{$pastilla} bg-superficie text-tenue transition-colors duration-(--duracion-boton) ease-color hover:bg-superficie-alta hover:text-fuerte";
+    $pastilla = 'inline-flex min-h-11 min-w-11 items-center justify-center px-4 text-sm font-medium';
+    /*
+     * Este renglón es el peor caso del inventario de acuse: para que
+     * `.pulsable` funcione hubo que quitarle TRES utilidades y no una — la de
+     * fundido de color, la de duración y la de curva.
+     *
+     * Las dos últimas parecían impecables: paréntesis en vez de corchete,
+     * duración por token, y pasan todos los patrones prohibidos de
+     * `MovimientoTest`. Y eran justo las que mataban el acuse. Las utilidades
+     * compilan en `@layer utilities`, que en Tailwind 4 gana siempre a
+     * `@layer components` sin importar la especificidad, así que pisaban la
+     * `transition` del portador y con ella la duración cero de su `:active`:
+     * las cinco pastillas bajaban 140 ms tarde. El fundido de color no se
+     * pierde, viaja dentro de `.pulsable`.
+     *
+     * El fondo de hover sí se queda: `.pulsable:active` solo escribe
+     * `transform`, así que ahí no hay nada que pisar.
+     *
+     * Las tres se nombran y no se pegan a propósito: la guardia lee este
+     * archivo crudo, comentarios incluidos.
+     */
+    $enlace = "{$pastilla} pulsable bg-superficie text-tenue hover:bg-superficie-alta hover:text-fuerte";
     $inerte = "{$pastilla} bg-superficie text-apagado cursor-not-allowed";
     $actual = "{$pastilla} bg-marca-500 text-white";
 @endphp

@@ -14,6 +14,42 @@
     @push('cabeza')
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
               integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+        {{-- Los dos botones de zoom vienen de la hoja del CDN con 30x30 y son
+             el único control del mapa que se pulsa con el dedo. La regla va
+             AQUÍ y no en `app.css` por dos motivos: el orden —tiene que cargar
+             después del <link>, y `app.css` va antes— y porque este archivo
+             dice por escrito que todo el mapa vive en él. Misma especificidad
+             que `.leaflet-touch .leaflet-bar a`, más tarde en el documento. --}}
+        <style>
+            .leaflet-bar a,
+            .leaflet-touch .leaflet-bar a {
+                width: 44px;
+                height: 44px;
+                line-height: 44px;
+            }
+
+            /*
+             * Y el acuse al pulsarlos, que es lo mismo que hace `.pulsable` en
+             * los 43 botones del sitio. Va aquí y no en `app.css` por lo mismo
+             * que el tamaño: `app.css` declara sus portadores en
+             * `@layer components`, y una regla EN CAPA pierde siempre contra la
+             * hoja sin capa que Leaflet sirve desde el CDN, da igual la
+             * especificidad.
+             *
+             * Solo `transform`, que es la única propiedad que Leaflet no
+             * escribe en estos anclajes: así el acuse entra sin pelear con su
+             * fondo ni con su borde. El token se anula a 1 con movimiento
+             * reducido, igual que el de la tarjeta.
+             */
+            .leaflet-control-zoom a {
+                transition: transform var(--duracion-instante) var(--ease-out);
+            }
+
+            .leaflet-control-zoom a:active {
+                transform: scale(var(--asb-encogimiento-control));
+                transition-duration: 0ms;
+            }
+        </style>
     @endpush
     @push('scripts')
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -21,7 +57,13 @@
     @endpush
 @endonce
 
-<div {{ $attributes->merge(['class' => "overflow-hidden rounded-2xl border border-linea {$alto}"]) }}
+{{-- `relative z-0` no es decoracion: Leaflet apila sus paneles internos hasta
+     z-index 800 y `.leaflet-container` no crea contexto de apilamiento propio,
+     asi que esos 800 competian en la raiz contra el `z-40` de la barra. Medido:
+     con el mapa en pantalla, abrir el menu movil dejaba los botones de zoom del
+     mapa POR ENCIMA de las filas del menu, y el clic se lo llevaba el mapa.
+     Con un contexto propio a z-0, los 800 de Leaflet se quedan dentro. --}}
+<div {{ $attributes->merge(['class' => "relative z-0 overflow-hidden rounded-2xl border border-linea {$alto}"]) }}
      x-data
      x-init="
         const dibujar = () => {

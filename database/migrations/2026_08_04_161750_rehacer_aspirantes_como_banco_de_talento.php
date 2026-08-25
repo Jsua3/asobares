@@ -36,13 +36,15 @@ return new class extends Migration
 
         // De cada correo repetido sobrevive el registro más reciente.
         $vistos = [];
+        $copiados = 0;
 
-        DB::table('aspirantes')->orderByDesc('id')->get()->each(function (object $fila) use (&$vistos): void {
+        DB::table('aspirantes')->orderByDesc('id')->get()->each(function (object $fila) use (&$vistos, &$copiados): void {
             if (isset($vistos[$fila->correo])) {
                 return;
             }
 
             $vistos[$fila->correo] = true;
+            $copiados++;
 
             DB::table('aspirantes_nuevo')->insert([
                 'id' => $fila->id,
@@ -59,6 +61,28 @@ return new class extends Migration
                 'updated_at' => $fila->updated_at,
             ]);
         });
+
+        // Insertar `id` explícito NO adelanta la secuencia de identidad en
+        // PostgreSQL: el rowid de SQLite se deriva de MAX(id) y se acomoda
+        // solo, pero la secuencia de Postgres se queda donde estaba y el
+        // primer aspirante nuevo choca con clave duplicada en la primaria.
+        //
+        // Sobre base vacía —el `migrate` de un despliegue limpio— el bucle de
+        // arriba no inserta nada y aquí no hay nada que hacer; por eso se mira
+        // `$copiados` y no se llama a `setval` a ciegas: con la tabla vacía
+        // dejaría la secuencia en 1 «ya usado» y el primer aspirante saldría
+        // con id 2. Muerde de verdad el día que se importe el volcado de
+        // `docs/ingenieria/base-de-datos/` y se corran las migraciones encima.
+        //
+        // Va aquí, antes del `rename`: después, `pg_get_serial_sequence` ya no
+        // encontraría la tabla `aspirantes_nuevo` y la migración fallaría en
+        // Postgres pasando en SQLite, que es el peor sitio donde descubrirlo.
+        if ($copiados > 0 && DB::connection()->getDriverName() === 'pgsql') {
+            DB::statement(
+                "SELECT setval(pg_get_serial_sequence('aspirantes_nuevo', 'id'), "
+                .'(SELECT MAX(id) FROM aspirantes_nuevo))'
+            );
+        }
 
         Schema::drop('aspirantes');
         Schema::rename('aspirantes_nuevo', 'aspirantes');

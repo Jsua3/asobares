@@ -41,6 +41,42 @@ class MovimientoTest extends TestCase
     }
 
     /**
+     * Tailwind por defecto funde en 150 ms con `cubic-bezier(0.4, 0, 0.2, 1)`,
+     * y ahí caían 21 de las 22 `transition-colors` del sitio público: las que
+     * no escriben `duration-*` no caen en los tokens, caen en el default. Se
+     * cierra declarando el default con los tokens, no editando 21 vistas.
+     *
+     * La UBICACIÓN es la mitad de la prueba. `--default-transition-*` es
+     * variable de Tailwind, no nuestra, y `tokens.css` lo importa también el
+     * tema del panel: declararla allí reescribiría el reloj de todas las
+     * transiciones de Filament en /admin —barra lateral, modales, tablas,
+     * notificaciones— con una curva de COLOR aplicada a paneles que deslizan,
+     * y sin que nadie lo haya pedido ni medido.
+     */
+    public function test_el_reloj_por_defecto_de_tailwind_usa_los_tokens(): void
+    {
+        $app = File::get(resource_path('css/app.css'));
+        $tokens = File::get(resource_path('css/tokens.css'));
+
+        $this->assertMatchesRegularExpression(
+            '/@theme\s*\{[^}]*--default-transition-duration:\s*var\(--duracion-boton\)\s*;/',
+            $app,
+            'El default de duración debe declararse en un @theme de app.css con el token.'
+        );
+        $this->assertMatchesRegularExpression(
+            '/@theme\s*\{[^}]*--default-transition-timing-function:\s*var\(--ease-color\)\s*;/',
+            $app,
+            'El default de curva debe declararse en un @theme de app.css con el token.'
+        );
+
+        $this->assertStringNotContainsString(
+            '--default-transition',
+            $tokens,
+            'El default de Tailwind en tokens.css cambiaría en silencio el reloj de /admin.'
+        );
+    }
+
+    /**
      * La regla no dice «quitar toda animación»: dice quitar el movimiento y
      * conservar los fundidos de opacidad y color, que ayudan a comprender.
      * Por eso se anulan los desplazamientos y NO las duraciones — si se
@@ -173,6 +209,77 @@ class MovimientoTest extends TestCase
         $this->assertStringContainsString('transition-duration: 0ms', $app);
     }
 
+    /**
+     * `.pulsable` acusaba el dedo en 43 botones y nada más: encoger un 3 % una
+     * fila de 350 px se lee como una arruga y sobre texto en prosa saca las
+     * letras de la rejilla de píxeles. De ahí que sean tres portadores y no
+     * uno, cada uno con la respuesta que le corresponde a su forma.
+     *
+     * Lo que se vigila aquí no es que existan —eso se ve— sino las tres cosas
+     * que se pierden en silencio si alguien los reescribe:
+     */
+    public function test_los_portadores_de_acuse_cubren_las_tres_formas_de_control(): void
+    {
+        $app = File::get(resource_path('css/app.css'));
+        $tokens = File::get(resource_path('css/tokens.css'));
+
+        /*
+         * 1. `.tarjeta-pulsable` declara la transición COMPLETA y viaja junto a
+         *    `.tarjeta-hover`. Dos atajos `transition` sobre el mismo elemento
+         *    no se suman: gana el último de la capa. Si alguien recorta este a
+         *    `transform`, el fundido del borde a rojo muere en las diez
+         *    tarjetas sin ningún error.
+         */
+        $this->assertMatchesRegularExpression(
+            '/\.tarjeta-pulsable\s*\{[^}]*\bborder-color\b/',
+            $app,
+            '.tarjeta-pulsable pisa a .tarjeta-hover: si no nombra border-color, el borde deja de fundir.'
+        );
+
+        /*
+         * 2. Y se define DESPUÉS del `:hover` de `.tarjeta-hover`, que es lo
+         *    que hace que su `:active` gane al levante y la tarjeta se hunda
+         *    al pulsarla en vez de quedarse arriba.
+         */
+        $this->assertGreaterThan(
+            strpos($app, '.tarjeta-hover:hover'),
+            strpos($app, '.tarjeta-pulsable'),
+            '.tarjeta-pulsable tiene que ir después de .tarjeta-hover:hover o pierde por orden.'
+        );
+
+        /*
+         * 3. Los tres acuses salen de tokens y no de literales, porque el
+         *    encogimiento es geometría y el interruptor de movimiento reducido
+         *    lo anula por token. Los otros dos son fundidos y sobreviven: eso
+         *    es la regla del proyecto escrita en CSS.
+         */
+        $this->assertMatchesRegularExpression(
+            '/\.tarjeta-pulsable:active\s*\{[^}]*transform:\s*scale\(var\(--asb-encogimiento-tarjeta\)\)/',
+            $app,
+            'El encogimiento de la tarjeta debe salir del token, o el movimiento reducido no puede anularlo.'
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.fila-pulsable:active\s*\{[^}]*background-color:\s*var\(--asb-fila-pulsada\)/',
+            $app
+        );
+        $this->assertMatchesRegularExpression(
+            '/\.enlace-accion:active\s*\{[^}]*opacity:\s*var\(--asb-atenuacion-pulsada\)/',
+            $app
+        );
+
+        $this->assertStringContainsString('--asb-atenuacion-pulsada: 0.55', $tokens);
+        $this->assertStringContainsString('--asb-encogimiento-tarjeta: 0.985', $tokens);
+
+        // La fila se tiñe con velo en claro y con luz en oscuro: sobre Pub
+        // Black un velo negro no existe. Es la misma receta doble del vidrio.
+        $this->assertStringContainsString('--asb-fila-pulsada: rgb(11 9 10 / 0.09)', $tokens);
+        $this->assertStringContainsString('--asb-fila-pulsada: rgb(255 255 255 / 0.11)', $tokens);
+
+        // Se anula la geometría y NADA más: los otros dos son fundidos.
+        $this->assertStringContainsString('--asb-encogimiento-tarjeta: 1;', $tokens);
+        $this->assertStringNotContainsString('--asb-atenuacion-pulsada: 1', $tokens);
+    }
+
     /** El `translateY(-2px)` y el `200ms ease` estaban duplicados literales. */
     public function test_los_portadores_no_repiten_valores_de_movimiento(): void
     {
@@ -236,6 +343,22 @@ class MovimientoTest extends TestCase
              * porque entonces quien lo escribió sabía que son distintas.
              */
             '/transition-\[[^\]]*\btransform\b(?![^\]]*\btranslate\b)/' => 'translate/scale/rotate no son `transform` en Tailwind 4: usa el portador .transicion-desplegable',
+
+            /*
+             * Poppins no dibuja flechas. Su subconjunto trae 217 glifos por
+             * peso y no incluye ni U+2191 ni U+2193, que el `@font-face` sí
+             * promete en su `unicode-range`; U+2192, U+2190 y U+2197 ni
+             * siquiera entran en ese rango. Una flecha escrita como carácter
+             * la pinta la fuente del sistema y nadie la ve fallar: solo se ve
+             * distinta en cada equipo, en medio de una línea en Poppins.
+             * Van por `<x-publico.flecha />`, que es un SVG y hereda color y
+             * tamaño del texto.
+             *
+             * Ojo al editar este archivo: el barrido lee el fichero crudo,
+             * comentarios incluidos, así que aquí los codepoints se nombran y
+             * no se pegan.
+             */
+            '/[\x{2190}-\x{21FF}\x{25B6}\x{25C0}\x{2B00}-\x{2BFF}]/u' => 'Poppins no trae glifos de flecha: usa <x-publico.flecha /> en vez del carácter',
         ];
     }
 
@@ -265,14 +388,20 @@ class MovimientoTest extends TestCase
     }
 
     /**
-     * Los tres desplegables tienen que usar el portador. Si uno se queda con
-     * su propia lista, se mueve distinto que los otros dos y nadie lo nota.
+     * Todos los desplegables tienen que usar el portador. Si uno se queda con
+     * su propia lista, se mueve distinto que los demás y nadie lo nota.
+     *
+     * Eran tres —menú móvil, hamburguesa y menú de usuario— y con la
+     * reagrupación de la barra son cinco: los dos grupos de escritorio salen
+     * del mismo componente, así que basta con que ese componente entre en la
+     * lista.
      */
     public function test_los_desplegables_usan_el_portador(): void
     {
         $vistas = [
             'components/publico/navbar.blade.php',
             'components/publico/menu-usuario.blade.php',
+            'components/publico/menu-grupo.blade.php',
         ];
 
         foreach ($vistas as $vista) {
@@ -318,7 +447,22 @@ class MovimientoTest extends TestCase
                 $ruta = str_replace(base_path().DIRECTORY_SEPARATOR, '', $archivo->getPathname());
 
                 foreach (self::patronesProhibidos() as $patron => $motivo) {
-                    if (preg_match_all($patron, $contenido, $coincidencias) > 0) {
+                    $veces = preg_match_all($patron, $contenido, $coincidencias);
+
+                    /*
+                     * Desde que hay un patrón con el modificador `/u`, este
+                     * barrido puede fallar en vez de no encontrar nada: sobre
+                     * un archivo que no sea UTF-8 válido, `preg_match_all`
+                     * devuelve `false`, y `false > 0` es falso. El archivo se
+                     * saltaría en silencio, que es exactamente el modo de
+                     * fallo contra el que existe toda esta clase.
+                     */
+                    $this->assertNotFalse(
+                        $veces,
+                        "No se pudo barrer {$ruta} con {$patron}: revisa que el archivo sea UTF-8 válido."
+                    );
+
+                    if ($veces > 0) {
                         $hallazgos[] = sprintf(
                             '%s → %s (%s)',
                             $ruta,
@@ -516,5 +660,291 @@ class MovimientoTest extends TestCase
         // La guarda propia: el barrido con `*` no llega a estos pseudoelementos.
         $this->assertStringContainsString('::view-transition-group(*)', $app);
         $this->assertStringContainsString('animation: none !important', $app);
+    }
+
+    /**
+     * Los cuatro portadores de acuse: los que declaran su propia `transition`
+     * COMPLETA y un `:active` con `transition-duration: 0ms`.
+     *
+     * `.transicion-desplegable` no está aquí, y es la excepción explícita: es el
+     * único portador del sistema que dice QUÉ se anima y deja el CUÁNTO a la
+     * vista, así que convive con `duration-(--duracion-*)` y `ease-*` por
+     * diseño. Meterlo en esta lista pondría en rojo los tres desplegables.
+     *
+     * @return list<string>
+     */
+    public static function portadoresDeAcuse(): array
+    {
+        return ['pulsable', 'enlace-accion', 'fila-pulsable', 'tarjeta-pulsable'];
+    }
+
+    /**
+     * Toda lista de clases de un archivo, venga de donde venga: el atributo
+     * `class`, los que escribe Alpine (`:class`, `x-bind:class`), las cadenas de
+     * `@class([...])` —donde viven los chips y los conmutadores— y las variables
+     * de cadena de un bloque `@php`.
+     *
+     * Las variables no son un extra. El paginador declara su lista una sola vez
+     * en `$enlace` y la pinta cinco veces: un barrido que solo mirara
+     * `class="..."` no vería la única línea del repositorio donde había que
+     * quitar TRES utilidades en vez de una.
+     *
+     * @return list<string>
+     */
+    private function listasDeClases(string $contenido): array
+    {
+        $listas = [];
+
+        preg_match_all('/(?:x-bind)?:?class="([^"]*)"/s', $contenido, $atributos);
+        foreach ($atributos[1] as $lista) {
+            $listas[] = $lista;
+        }
+
+        preg_match_all('/@class\(\[(.*?)\]\)/s', $contenido, $arreglos);
+        foreach ($arreglos[1] as $arreglo) {
+            preg_match_all("/'([^'\n]*)'/", $arreglo, $cadenas);
+            foreach ($cadenas[1] as $lista) {
+                $listas[] = $lista;
+            }
+        }
+
+        preg_match_all('/\$\w+ = (?:"([^"\n]*)"|\'([^\'\n]*)\');/', $contenido, $variables);
+        foreach (array_merge($variables[1], $variables[2]) as $lista) {
+            $listas[] = $lista;
+        }
+
+        return $listas;
+    }
+
+    /**
+     * Lo mismo pero por ELEMENTO: todas las listas de clases de una etiqueta
+     * fundidas en una, para pillar al portador y a la utilidad repartidos entre
+     * dos atributos de la misma etiqueta (`class` y `x-bind:class`). El
+     * navegador los ve juntos y la vista por listas no.
+     *
+     * Se funden solo los atributos de CLASE, no la etiqueta entera: un
+     * `data-algo="transition-colors"` no pinta nada y no es un defecto.
+     *
+     * Se quitan antes los valores de `x-transition:*`: son clases que Alpine
+     * pone solo mientras dura la transición y llevan `duration-*` por diseño.
+     * Sin quitarlas, el único sitio donde la convivencia es CORRECTA sería el
+     * único que saldría en rojo.
+     *
+     * El `(?<![=-])` del cierre es lo que deja pasar `=>` y `->` sin cortar la
+     * etiqueta: dentro de un `@class([...])` y de un `{{ $a->b }}` hay `>` que
+     * no cierran nada.
+     *
+     * @return list<string>
+     */
+    private function elementos(string $contenido): array
+    {
+        $sinAlpine = preg_replace('/x-transition:[\w-]+="[^"]*"/', '', $contenido);
+
+        preg_match_all('/<[a-zA-Z][^<]*?(?<![=-])>/s', $sinAlpine, $etiquetas);
+
+        $elementos = [];
+
+        foreach ($etiquetas[0] as $etiqueta) {
+            $listas = $this->listasDeClases($etiqueta);
+
+            if ($listas !== []) {
+                $elementos[] = implode(' ', $listas);
+            }
+        }
+
+        return $elementos;
+    }
+
+    /**
+     * Un portador y una utilidad de transición en el mismo elemento: el modo de
+     * fallo que no da ningún error y ya costó cinco rondas.
+     *
+     * En Tailwind 4 una utilidad de `@layer utilities` gana SIEMPRE a un
+     * portador de `@layer components`, sin importar la especificidad. Así que
+     * una `transition-colors`, una `duration-*` o una `ease-*` sueltas en la
+     * misma etiqueta reescriben la `transition` que el portador declara — y con
+     * ella el `transition-duration: 0ms` de su `:active`. El control deja de
+     * acusar el dedo, o lo acusa 140 ms tarde. Nada peta y nada se ve rojo.
+     *
+     * La peor de las tres es `duration-(--duracion-boton)`: usa el paréntesis,
+     * usa el token y pasa todos los patrones prohibidos de arriba. Parece
+     * exactamente lo que el proyecto pide escribir, y es la que mata el acuse.
+     * Estuvo en el paginador, que alimenta cinco anclajes en ocho vistas.
+     *
+     * Se barre en dos pasadas porque el defecto puede esconderse en dos sitios:
+     * por LISTA (que alcanza a la variable PHP del paginador, fuera de toda
+     * etiqueta) y por ETIQUETA (que alcanza a los dos atributos de clase de un
+     * mismo elemento).
+     */
+    public function test_ningun_portador_de_acuse_convive_con_una_utilidad_que_lo_pise(): void
+    {
+        $directorios = array_filter([
+            resource_path('views/publico'),
+            resource_path('views/components/publico'),
+            resource_path('views/components/layouts'),
+            resource_path('views/components/panel'),
+            resource_path('views/filament'),
+            resource_path('views/errors'),
+            resource_path('views/vendor'),
+        ], File::isDirectory(...));
+
+        $this->assertNotEmpty($directorios, 'No hay vistas que vigilar.');
+
+        // El prefijo opcional son las variantes: `sm:`, `focus:`, `hover:`...
+        $utilidadDeReloj = '/^(?:[^\s:]+:)*(?:transition|duration|ease|delay)(?:-|$)/';
+
+        $hallazgos = [];
+
+        foreach ($directorios as $directorio) {
+            foreach (File::allFiles($directorio) as $archivo) {
+                if ($archivo->getExtension() !== 'php') {
+                    continue;
+                }
+
+                $contenido = $archivo->getContents();
+                $ruta = str_replace(base_path().DIRECTORY_SEPARATOR, '', $archivo->getPathname());
+
+                $trozos = array_merge(
+                    $this->listasDeClases($contenido),
+                    $this->elementos($contenido),
+                );
+
+                foreach ($trozos as $trozo) {
+                    /*
+                     * Las comillas se caen del token porque un `x-bind:class`
+                     * es una EXPRESIÓN, no una lista: la clase viaja dentro de
+                     * `'…'` en cada rama del ternario.
+                     */
+                    $piezas = array_map(
+                        static fn (string $pieza): string => trim($pieza, "'\"`"),
+                        preg_split('/\s+/', trim($trozo)) ?: []
+                    );
+
+                    $portadores = array_values(array_intersect(self::portadoresDeAcuse(), $piezas));
+
+                    if ($portadores === []) {
+                        continue;
+                    }
+
+                    foreach ($piezas as $pieza) {
+                        if (preg_match($utilidadDeReloj, $pieza)) {
+                            $hallazgos[] = sprintf(
+                                '%s -> `.%s` convive con `%s`: la utilidad pisa al portador y muere su :active',
+                                $ruta,
+                                implode('`/`.', $portadores),
+                                $pieza
+                            );
+                        }
+                    }
+
+                    /*
+                     * `.fila-pulsable` tiñe el fondo en `:active` y trae su
+                     * propio `:hover` tras la puerta táctil. Una utilidad
+                     * `hover:bg-*` no es una transición, pero escribe la MISMA
+                     * propiedad desde la capa que gana: mientras el puntero está
+                     * encima, el fondo del `:active` no llega a verse.
+                     */
+                    if (in_array('fila-pulsable', $portadores, true)) {
+                        foreach ($piezas as $pieza) {
+                            if (str_starts_with($pieza, 'hover:bg-')) {
+                                $hallazgos[] = sprintf(
+                                    '%s -> `.fila-pulsable` convive con `%s`: el hover se declara en el portador, no en la vista',
+                                    $ruta,
+                                    $pieza
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $hallazgos = array_values(array_unique($hallazgos));
+
+        $this->assertSame([], $hallazgos, "Portadores pisados por una utilidad:\n".implode("\n", $hallazgos));
+    }
+
+    /**
+     * Las once filas de los dos desplegables cambiaron de dueño: su fondo de
+     * hover se mudó de la vista al portador, porque en la vista pisaba al
+     * `:active`. Si alguien devuelve la utilidad, la prueba de arriba lo caza;
+     * si alguien quita el portador y se olvida de devolverla, esas filas se
+     * quedan sin ningún hover en escritorio y no lo caza nadie. Esto es esa
+     * segunda mitad.
+     *
+     * Las seis filas de los dos grupos nuevos de la barra nacieron ya con esta
+     * regla, y entran aquí para que no puedan salirse de ella.
+     */
+    public function test_las_filas_de_los_dos_desplegables_ceden_su_hover_al_portador(): void
+    {
+        $vistas = [
+            'components/publico/navbar.blade.php',
+            'components/publico/menu-usuario.blade.php',
+            'components/publico/menu-grupo.blade.php',
+        ];
+
+        foreach ($vistas as $vista) {
+            $contenido = File::get(resource_path('views/'.$vista));
+
+            $this->assertStringContainsString(
+                'fila-pulsable',
+                $contenido,
+                "{$vista} perdió el portador de acuse de sus filas: en táctil no hay hover, así que el :active era el único acuse que existía."
+            );
+
+            $this->assertStringNotContainsString(
+                'hover:bg-superficie-alta',
+                $contenido,
+                "{$vista} declara el fondo de hover en la vista: `.fila-pulsable` lo trae detrás de la puerta táctil y la utilidad lo pisaría."
+            );
+        }
+    }
+
+    /**
+     * El paginador aparte, porque es el peor caso del inventario y el único
+     * donde había que quitar tres utilidades y no una. Vale la pena que el
+     * mensaje de fallo las nombre en vez de que salgan en una lista genérica.
+     */
+    public function test_la_paginacion_acusa_el_dedo_y_no_recupera_su_reloj_propio(): void
+    {
+        $paginador = File::get(resource_path('views/vendor/pagination/tailwind.blade.php'));
+
+        $this->assertStringContainsString(
+            'pulsable',
+            $paginador,
+            'Los cinco anclajes del paginador salen de $enlace: sin el portador, ninguno acusa el dedo.'
+        );
+
+        foreach (['transition-colors', 'duration-(--duracion-boton)', 'ease-color'] as $utilidad) {
+            $this->assertStringNotContainsString(
+                $utilidad,
+                $paginador,
+                "El paginador recuperó `{$utilidad}`: pisa a `.pulsable` y la pastilla vuelve a bajar con retardo."
+            );
+        }
+    }
+
+    /**
+     * Los dos botones de zoom del mapa son los únicos controles del sitio cuyo
+     * CSS no escribimos: lo sirve Leaflet desde un CDN, sin capa, y una regla en
+     * `@layer components` pierde siempre contra una hoja sin capa. Por eso su
+     * acuse vive junto al `<link>`, en el componente, y no en `app.css`.
+     */
+    public function test_los_controles_del_mapa_acusan_el_dedo_desde_el_componente(): void
+    {
+        $mapa = File::get(resource_path('views/components/publico/mapa.blade.php'));
+        $app = File::get(resource_path('css/app.css'));
+
+        $this->assertMatchesRegularExpression(
+            '/\.leaflet-control-zoom a:active\s*\{[^}]*transform:\s*scale\(var\(--asb-encogimiento-control\)\)/',
+            $mapa,
+            'El acuse del zoom sale del token, o el movimiento reducido no puede anularlo.'
+        );
+
+        $this->assertStringNotContainsString(
+            'leaflet-control-zoom',
+            $app,
+            'En `app.css` la regla iría en capa y perdería contra la hoja del CDN: va en el componente.'
+        );
     }
 }

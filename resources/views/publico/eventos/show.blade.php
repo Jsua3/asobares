@@ -28,7 +28,7 @@
     @endpush
 
     <article class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-        <a href="{{ route('eventos.index') }}" class="enlace-accion text-sm text-apagado hover:text-acento">← Todos los eventos</a>
+        <a href="{{ route('eventos.index') }}" class="enlace-accion relative inline-block text-sm text-apagado after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento"><x-publico.flecha direccion="izquierda" />&nbsp;Todos los eventos</a>
 
         <div class="mt-5 flex flex-wrap items-center gap-2 text-xs">
             <span class="rounded-full bg-marca-500/15 px-3 py-1 font-medium text-acento-fuerte">{{ $evento->tipo->getLabel() }}</span>
@@ -89,7 +89,7 @@
 
                     @if ($evento->delegaRegistroExterno())
                         <x-publico.boton :href="$evento->enlace_externo" target="_blank" rel="noopener" class="mt-6 w-full">
-                            Registrarme en la Nacional ↗
+                            Registrarme en la Nacional&nbsp;<x-publico.flecha direccion="externa" />
                         </x-publico.boton>
                         <p class="mt-2.5 text-xs text-apagado">
                             La inscripción de este evento la gestiona directamente Asobares Colombia.

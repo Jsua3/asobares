@@ -84,17 +84,17 @@
                                     {{ $vacante->postulaciones_count === 1 ? 'postulación' : 'postulaciones' }}
                                 </x-publico.boton>
                                 <a href="{{ route('mi-cuenta.vacantes.editar', $vacante) }}"
-                                   class="enlace-accion text-sm text-acento hover:text-acento-fuerte">Editar</a>
+                                   class="enlace-accion flex min-h-11 min-w-11 items-center justify-end text-sm text-acento hover:text-acento-fuerte">Editar</a>
 
                                 @if ($vacante->estaCerrada())
                                     <form method="POST" action="{{ route('mi-cuenta.vacantes.reabrir', $vacante) }}">
                                         @csrf
-                                        <button type="submit" class="enlace-accion text-sm text-acento hover:text-acento-fuerte">Reabrir</button>
+                                        <button type="submit" class="enlace-accion flex min-h-11 min-w-11 items-center justify-end text-sm text-acento hover:text-acento-fuerte">Reabrir</button>
                                     </form>
                                 @else
                                     <form method="POST" action="{{ route('mi-cuenta.vacantes.cerrar', $vacante) }}">
                                         @csrf
-                                        <button type="submit" class="enlace-accion text-sm text-tenue hover:text-fuerte">Ya contraté</button>
+                                        <button type="submit" class="enlace-accion flex min-h-11 min-w-11 items-center justify-end text-sm text-tenue hover:text-fuerte">Ya contraté</button>
                                     </form>
                                 @endif
                             </div>

@@ -66,14 +66,14 @@ class GuiaController
         // La ruta viene de la base y la escribe el panel: se acota a su
         // carpeta para que no pueda apuntar a ningún otro sitio del disco.
         abort_unless(str_starts_with($requisito->adjunto, 'formatos/'), 404);
-        abort_unless(Storage::disk('local')->exists($requisito->adjunto), 404);
+        abort_unless(Storage::disk(config('almacenamiento.privado'))->exists($requisito->adjunto), 404);
 
         // Descargar el formato es la señal más fuerte de intención real.
         ConsultaGuia::registrar($requisito->municipio_id, $requisito->id);
 
         $nombre = Str::slug($requisito->adjunto_nombre ?? $requisito->entidad).'.pdf';
 
-        return Storage::disk('local')->download($requisito->adjunto, $nombre, [
+        return Storage::disk(config('almacenamiento.privado'))->download($requisito->adjunto, $nombre, [
             'Content-Type' => 'application/pdf',
             'X-Content-Type-Options' => 'nosniff',
         ]);

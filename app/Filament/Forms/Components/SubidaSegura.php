@@ -39,7 +39,7 @@ class SubidaSegura extends FileUpload
     {
         parent::setUp();
 
-        $this->disk('public')
+        $this->disk(config('almacenamiento.publico'))
             ->maxSize(5120)
             ->getUploadedFileNameForStorageUsing(
                 static fn (TemporaryUploadedFile $file): string => Str::ulid()
@@ -63,7 +63,7 @@ class SubidaSegura extends FileUpload
      */
     public function documentoPdf(): static
     {
-        return $this->disk('local')
+        return $this->disk(config('almacenamiento.privado'))
             ->acceptedFileTypes(['application/pdf'])
             ->helperText('PDF, máximo 5 MB. Se descarga desde la guía con un nombre limpio.');
     }

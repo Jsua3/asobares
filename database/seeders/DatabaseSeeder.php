@@ -6,8 +6,28 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Los datos de demostración no entran en producción.
+     *
+     * De los veinte sembradores sólo `UsuarioSeeder` se negaba por su cuenta.
+     * Los demás corrían sin freno con `db:seed --force`: `MensajeSeeder`
+     * inserta PQR ficticias con nombre, correo y teléfono —y consume
+     * radicados del consecutivo anual de verdad—, `TransaccionSeeder` inserta
+     * pagos aprobados que la conciliación y el widget de recaudo suman, y
+     * `AsociadoSeeder` publica establecimientos inventados en el directorio.
+     *
+     * La guardia va aquí y no en cada sembrador porque cubre los veinte de
+     * una sola vez y no toca la suite: ninguna prueba invoca `DatabaseSeeder`
+     * en producción, y las que siembran llaman a los sembradores sueltos.
+     */
     public function run(): void
     {
+        if (app()->isProduction()) {
+            $this->command?->warn('DatabaseSeeder omitido: los datos de demostración no entran en producción.');
+
+            return;
+        }
+
         $this->call([
             // Catálogos y contenido institucional.
             MunicipioSeeder::class,

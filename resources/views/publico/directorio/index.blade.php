@@ -14,7 +14,7 @@
             'nombre' => $a->nombre,
             'html' => '<strong>'.e($a->nombre).'</strong><br>'
                 .e($a->categoria->nombre).' · '.e($a->municipio->nombre).'<br>'
-                .'<a href="'.route('directorio.show', $a).'">Ver ficha</a>',
+                .'<a href="'.route('directorio.show', $a).'" style="display:inline-flex;min-height:44px;align-items:center">Ver ficha</a>',
         ])->values()->all()
         : [];
 @endphp
@@ -49,7 +49,7 @@
                 </x-publico.boton>
                 @if ($hayFiltros)
                     <a href="{{ $listado }}"
-                       class="rounded-xl border border-linea px-4 py-2.5 text-sm text-tenue hover:text-fuerte">
+                       class="pulsable min-h-11 rounded-xl border border-linea px-4 py-2.5 text-sm text-tenue hover:text-fuerte">
                         Limpiar
                     </a>
                 @endif
@@ -61,7 +61,7 @@
             <div class="mt-6 flex flex-wrap items-center justify-between gap-4">
                 <p class="text-sm text-tenue">
                     @if ($vista === 'mapa')
-                        {{ $asociados->count() }} {{ Str::plural('establecimiento', $asociados->count()) }}
+                        {{ $asociados->count() }} {{ Str::plural('establecimiento', $asociados->count()) }} en el mapa
                     @else
                         {{ $asociados->total() }} {{ Str::plural('establecimiento', $asociados->total()) }}
                     @endif
@@ -71,7 +71,7 @@
                     @foreach (['grid' => 'Tarjetas', 'mapa' => 'Mapa'] as $clave => $texto)
                         <a href="{{ request()->fullUrlWithQuery(['vista' => $clave, 'page' => null]) }}"
                            @class([
-                               'rounded-lg px-4 py-1.5 text-sm transition-colors',
+                               'pulsable inline-flex min-h-11 items-center rounded-lg px-4 text-sm',
                                'bg-marca-500 font-medium text-white' => $vista === $clave,
                                'text-tenue hover:text-fuerte' => $vista !== $clave,
                            ])
@@ -94,7 +94,7 @@
                     @endif
                     @if ($hayFiltros)
                         <a href="{{ $listado }}"
-                           class="mt-5 inline-block rounded-xl border border-linea-fuerte px-5 py-2.5 text-sm hover:border-marca-500/50">
+                           class="pulsable mt-5 inline-block min-h-11 rounded-xl border border-linea-fuerte px-5 py-2.5 text-sm hover:border-marca-500/50">
                             Ver todos
                         </a>
                     @endif

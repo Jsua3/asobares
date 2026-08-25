@@ -10,6 +10,8 @@ use App\Filament\Resources\Asociados\Pages\CreateAsociado;
 use App\Filament\Resources\Asociados\Pages\ListAsociados;
 use App\Filament\Resources\Carteras\Pages\ListCarteras;
 use App\Filament\Resources\Mensajes\Pages\ListMensajes;
+use App\Filament\Resources\Transaccions\Pages\ListTransaccions;
+use App\Filament\Resources\Transaccions\TransaccionResource;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Models\Asociado;
@@ -289,5 +291,40 @@ class AccionesDelPanelTest extends TestCase
 
         $this->assertSame('Nombre Corregido', $usuario->name);
         $this->assertTrue(Hash::check('ClaveOriginal2026*', $usuario->password));
+    }
+
+    /**
+     * El `CreateAction` huérfano de transacciones — hallazgo real de la
+     * auditoría del 19 de agosto. El recurso solo declara la página `index`,
+     * así que el botón no llevaba a ninguna parte; Filament lo habría
+     * resuelto abriendo el formulario en un modal y el personal habría podido
+     * fabricar a mano un cobro que la pasarela nunca hizo. Es la misma
+     * frontera que `FlujoDePagoTest` guarda del lado de las inscripciones.
+     */
+    public function test_las_transacciones_son_de_solo_lectura_y_no_ofrecen_crear_a_mano(): void
+    {
+        $this->assertSame(
+            ['index'],
+            array_keys(TransaccionResource::getPages()),
+            'El recurso de transacciones dejó de ser de solo lectura.'
+        );
+
+        $acciones = (new \ReflectionMethod(ListTransaccions::class, 'getHeaderActions'))
+            ->invoke(new ListTransaccions);
+
+        $this->assertSame(
+            [],
+            $acciones,
+            'La lista de transacciones volvió a montar una acción de cabecera; si es un CreateAction, no tiene página a la que ir.'
+        );
+    }
+
+    public function test_la_lista_de_transacciones_carga_sin_el_boton_de_crear(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(ListTransaccions::class)
+            ->assertOk()
+            ->assertDontSeeHtml('/admin/transacciones/create');
     }
 }

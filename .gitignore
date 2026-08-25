@@ -29,3 +29,19 @@ Thumbs.db
 
 # Artefactos de trabajo de subagent-driven-development (scratch, no versionar)
 /.superpowers
+
+# Ficheros de bloqueo de Word: aparecen mientras un .docx del expediente
+# esta abierto y desaparecen al cerrarlo. No son del proyecto.
+~$*
+
+# La base de establecimientos que mantiene la oficina del gremio.
+#
+# NO se versiona, y la razon no es de tamano: trae nombre, cedula, telefono,
+# correo y direccion de 41 propietarios, mas la valoracion comercial que la
+# oficina escribio sobre cada negocio. Este repositorio es publico -se clona
+# sin credenciales-, asi que subirla seria publicar datos personales de
+# terceros sin su autorizacion (Ley 1581/2012). Se carga con
+# `php artisan asociados:importar` desde una copia local y se queda ahi.
+Base de datos Cap*.xls*
+base-de-datos-cap*.xls*
+/material/*.xlsx

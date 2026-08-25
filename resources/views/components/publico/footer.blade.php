@@ -17,25 +17,31 @@
 
             <div>
                 <h2 class="font-display text-xs font-semibold uppercase tracking-wider text-apagado">El gremio</h2>
-                <ul class="mt-4 space-y-2.5 text-sm">
-                    <li><a href="{{ route('quienes-somos') }}" class="text-suave hover:text-acento">Quiénes somos</a></li>
-                    <li><a href="{{ route('afiliate') }}" class="text-suave hover:text-acento">Afíliate</a></li>
-                    <li><a href="{{ route('boletin.index') }}" class="text-suave hover:text-acento">Boletín</a></li>
-                    <li><a href="{{ route('eventos.index') }}" class="text-suave hover:text-acento">Eventos y capacitaciones</a></li>
+                {{-- Sin `space-y-2.5`: dos objetivos de 44 px con paso de 30 se
+                     solapan 14 y el segundo del DOM le roba el clic al primero.
+                     El paso lo abre el propio `min-h-11` y queda en 44 exactos.
+                     `mt-1` en vez de `mt-4` porque el objetivo ya trae 11,15 px
+                     de aire sobre el texto. Coste declarado: la columna pasa de
+                     148 a 220 px. --}}
+                <ul class="mt-1 text-sm">
+                    <li><a href="{{ route('quienes-somos') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Quiénes somos</a></li>
+                    <li><a href="{{ route('afiliate') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Afíliate</a></li>
+                    <li><a href="{{ route('boletin.index') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Boletín</a></li>
+                    <li><a href="{{ route('eventos.index') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Eventos y capacitaciones</a></li>
                     @if ($enlaceNacional = enlaceSeguro(ajuste('url_nacional')))
-                        <li><a href="{{ $enlaceNacional }}" rel="noopener" target="_blank" class="text-suave hover:text-acento">Asobares Nacional ↗</a></li>
+                        <li><a href="{{ $enlaceNacional }}" rel="noopener" target="_blank" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Asobares Nacional&nbsp;<x-publico.flecha direccion="externa" /></a></li>
                     @endif
                 </ul>
             </div>
 
             <div>
                 <h2 class="font-display text-xs font-semibold uppercase tracking-wider text-apagado">Directorios</h2>
-                <ul class="mt-4 space-y-2.5 text-sm">
-                    <li><a href="{{ route('directorio.index') }}" class="text-suave hover:text-acento">Establecimientos</a></li>
-                    <li><a href="{{ route('guia.index') }}" class="text-suave hover:text-acento">Abre tu negocio</a></li>
-                    <li><a href="{{ route('empleo.index') }}" class="text-suave hover:text-acento">Bolsa de empleo</a></li>
-                    <li><a href="{{ route('artistas.index') }}" class="text-suave hover:text-acento">Artistas</a></li>
-                    <li><a href="{{ route('proveedores.index') }}" class="text-suave hover:text-acento">Proveedores</a></li>
+                <ul class="mt-1 text-sm">
+                    <li><a href="{{ route('directorio.index') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Establecimientos</a></li>
+                    <li><a href="{{ route('guia.index') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Abre tu negocio</a></li>
+                    <li><a href="{{ route('empleo.index') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Bolsa de empleo</a></li>
+                    <li><a href="{{ route('artistas.index') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Artistas</a></li>
+                    <li><a href="{{ route('proveedores.index') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Proveedores</a></li>
                 </ul>
             </div>
 
@@ -45,20 +51,20 @@
                     <li>{{ ajuste('contacto_direccion') }}</li>
                     <li>{{ ajuste('contacto_ciudad') }}</li>
                     <li>
-                        <a href="mailto:{{ ajuste('contacto_correo') }}" class="hover:text-acento">
+                        <a href="mailto:{{ ajuste('contacto_correo') }}" class="enlace-accion flex min-h-11 items-center hover:text-acento">
                             {{ ajuste('contacto_correo') }}
                         </a>
                     </li>
                     @if ($whatsapp)
                         <li>
-                            <a href="{{ $whatsapp }}" rel="noopener" target="_blank" class="hover:text-acento">
+                            <a href="{{ $whatsapp }}" rel="noopener" target="_blank" class="enlace-accion flex min-h-11 items-center hover:text-acento">
                                 WhatsApp {{ ajuste('contacto_whatsapp_visible') }}
                             </a>
                         </li>
                     @endif
                     <li>
                         <a href="https://instagram.com/{{ ajuste('contacto_instagram') }}" rel="noopener" target="_blank"
-                           class="hover:text-acento">
+                           class="enlace-accion flex min-h-11 items-center hover:text-acento">
                             &#64;{{ ajuste('contacto_instagram') }}
                         </a>
                     </li>
@@ -69,8 +75,8 @@
         <div class="mt-12 flex flex-col gap-4 border-t border-linea pt-6 text-xs text-apagado sm:flex-row sm:items-center sm:justify-between">
             <p>&copy; {{ now()->year }} {{ ajuste('sitio_nombre') }}. Todos los derechos reservados.</p>
             <div class="flex flex-wrap gap-x-5 gap-y-2">
-                <a href="{{ route('politica-de-datos') }}" class="hover:text-acento">Política de tratamiento de datos</a>
-                <a href="{{ route('contacto') }}" class="hover:text-acento">Contacto y PQR</a>
+                <a href="{{ route('politica-de-datos') }}" class="enlace-accion flex min-h-11 items-center hover:text-acento">Política de tratamiento de datos</a>
+                <a href="{{ route('contacto') }}" class="enlace-accion flex min-h-11 items-center hover:text-acento">Contacto y PQR</a>
             </div>
         </div>
     </div>

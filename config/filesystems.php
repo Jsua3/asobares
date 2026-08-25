@@ -56,6 +56,31 @@ return [
             'report' => false,
         ],
 
+        /*
+         * Los dos discos de objetos son el mismo bucket leído de dos maneras, y
+         * son dos y no uno por la misma razón por la que `public` y `local` son
+         * dos: lo que distingue a los formatos de la guía normativa de una
+         * portada de evento no es dónde se guardan, es quién puede leerlos.
+         *
+         * LOS PREFIJOS SON LA FRONTERA DE SEGURIDAD, Y ESTÁ MEDIDO.
+         *
+         * La forma natural de abrir un bucket es una política que conceda
+         * `s3:GetObject` sobre `arn:aws:s3:::<bucket>/*`. Probado contra un
+         * almacén compatible con S3, esa política deja los PDF de la guía
+         * **descargables por cualquiera**: devuelven 200 sin pasar por
+         * `GuiaController`, que es justo el control que existe para que no se
+         * puedan bajar de un requisito sin publicar. La comprobación queda
+         * decorativa exactamente igual que cuando vivían en el disco `public`.
+         *
+         * Por eso el disco público cuelga de `publico/` y la política sólo
+         * puede abrir ESE prefijo:
+         *
+         *     "Resource": ["arn:aws:s3:::<bucket>/publico/*"]
+         *
+         * Con el comodín sobre la raíz del bucket, esta separación no existe.
+         * El apartado 8 del runbook lo repite porque quien cree el bucket real
+         * no va a leer este comentario.
+         */
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
@@ -65,6 +90,25 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'root' => 'publico',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
+        's3-privado' => [
+            'driver' => 's3',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'),
+            'bucket' => env('AWS_BUCKET'),
+            'endpoint' => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            // Sin `url` a propósito: nadie debe poder construir la dirección de
+            // un formato oficial. Se descargan por `GuiaController`, que
+            // comprueba antes que el requisito esté publicado.
+            'root' => 'privado',
+            'visibility' => 'private',
             'throw' => false,
             'report' => false,
         ],

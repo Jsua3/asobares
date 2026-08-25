@@ -42,7 +42,11 @@ class AdminPanelProvider extends PanelProvider
             ->profile(isSimple: false)
             ->brandName('ASOBARES Quindío')
             ->favicon(asset('img/favicon.png'))
-            ->brandLogo(asset('img/logo-asobares.svg'))
+            // El `.svg` que había aquí no era un vector: eran 49 KB de un
+            // `<svg><image xlink:href="data:img/png;base64,…">` con el MIME
+            // mal escrito. El `.png` son los mismos píxeles, 36 KB, y es el
+            // que ya usa el sitio público.
+            ->brandLogo(asset('img/logo-asobares.png'))
             ->brandLogoHeight('2rem')
             ->viteTheme('resources/css/filament/admin/theme.css')
             // Sin esto Filament ignora el `--font-family: 'Poppins'` de
