@@ -137,11 +137,16 @@ class VigenciaDeLaGuiaTest extends TestCase
     }
 
     /**
-     * Fija el comportamiento observable: componer `publicado()->vigente()`
-     * nunca devuelve borradores, tengan o no fecha de vencimiento.
+     * El borrador con `vigente_hasta` futuro es el único dato capaz de
+     * delatar la fuga: por semántica NULL, un borrador permanente (sin
+     * fecha) jamás pasaría "vigente_hasta >= hoy" aunque el `orWhere`
+     * saliera suelto, porque `NULL >= fecha` no es verdadero en SQL.
      */
     public function test_el_scope_no_anula_el_publicado_que_lo_precede(): void
     {
+        $borradorTransitorio = RequisitoApertura::factory()->transitorio()->create([
+            'estado' => EstadoPublicacion::Borrador,
+        ]);
         $borradorPermanente = RequisitoApertura::factory()->create([
             'estado' => EstadoPublicacion::Borrador,
         ]);
@@ -149,30 +154,43 @@ class VigenciaDeLaGuiaTest extends TestCase
         $ids = RequisitoApertura::publicado()->vigente()->pluck('id');
 
         $this->assertNotContains(
-            $borradorPermanente->id,
+            $borradorTransitorio->id,
             $ids,
-            'Un borrador sin fecha de vencimiento NO puede colarse por el orWhere.'
+            'Un borrador con vigente_hasta futuro NO puede colarse por el orWhere.'
         );
+        $this->assertNotContains($borradorPermanente->id, $ids);
     }
 
     /**
-     * `test_el_scope_no_anula_el_publicado_que_lo_precede` no puede
-     * detectar si alguien le quita el grupo al `orWhere`: Eloquent ya aísla
-     * las condiciones de un scope local en su propio grupo, con o sin el
-     * cierre manual (`Builder::callScope()` -> `addNewWheresWithinGroup()`).
-     * Por eso esta prueba afirma la SQL emitida en vez del resultado: es la
-     * única forma de que el grupo del `orWhere` tenga una prueba que de
-     * verdad se rompa si el bloque se copia fuera del scope y pierde el
-     * cierre.
+     * Demuestra el peligro en vez de solo describirlo: la misma lógica del
+     * scope, escrita en línea y sin el cierre que agrupa el `orWhere` —como
+     * quedaría si alguien la copia a un controlador sin pasar por el
+     * scope—, SÍ deja colar un borrador con `vigente_hasta` futuro, porque
+     * el `orWhere` deja de depender del `estado`. Por scope, Eloquent aísla
+     * las condiciones y el borrador no se cuela.
      */
-    public function test_la_sql_del_scope_mantiene_el_grupo_del_orwhere(): void
+    public function test_sin_el_cierre_del_orwhere_un_borrador_transitorio_se_cuela(): void
     {
-        $sql = RequisitoApertura::publicado()->vigente()->toSql();
+        $borradorTransitorio = RequisitoApertura::factory()->transitorio()->create([
+            'estado' => EstadoPublicacion::Borrador,
+        ]);
 
-        $this->assertStringContainsString(
-            'and ("vigente_hasta" is null or "vigente_hasta" >= ?)',
-            $sql,
-            'El orWhere tiene que salir agrupado entre parentesis: suelto, anularia el estado = publicado que lo precede.'
+        $porScope = RequisitoApertura::publicado()->vigente()->pluck('id');
+
+        $enLineaSinCierre = RequisitoApertura::publicado()
+            ->whereNull('vigente_hasta')
+            ->orWhere('vigente_hasta', '>=', now()->toDateString())
+            ->pluck('id');
+
+        $this->assertNotContains(
+            $borradorTransitorio->id,
+            $porScope,
+            'Por scope, Eloquent aisla el orWhere y el borrador no se cuela.'
+        );
+        $this->assertContains(
+            $borradorTransitorio->id,
+            $enLineaSinCierre,
+            'La misma logica sin el cierre y fuera del scope SI deja colar el borrador: el peligro es real.'
         );
     }
 }
