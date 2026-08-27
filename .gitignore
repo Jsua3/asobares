@@ -45,3 +45,7 @@ Thumbs.db
 Base de datos Cap*.xls*
 base-de-datos-cap*.xls*
 /material/*.xlsx
+
+# Material del gremio recibido el 26 ago 2026: bases con datos personales, certificado de un afiliado,
+# fotos de personas identificables y un PDF de 47 MB. Nunca se versiona; entra por importador/sembradores/medios.
+/material/nuevomaterial/
