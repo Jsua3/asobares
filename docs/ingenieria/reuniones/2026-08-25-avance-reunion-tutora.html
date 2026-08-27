@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Avance ASOBARES Quindío · 25 ago</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --bg: #F7F5F5;
+    --surface: #FFFFFF;
+    --surface-2: #F0ECEC;
+    --ink: #141213;
+    --ink-2: #3C3738;
+    --muted: #6B6465;
+    --line: #E3DDDD;
+    --accent: #EE4137;
+    --accent-ink: #C33429;
+    --accent-soft: #FCEAE8;
+    --ok: #1F7A4D;
+    --ok-soft: #E3F3EA;
+    --warn: #9A5B00;
+    --warn-soft: #FBEFD9;
+    --bad: #A4161A;
+    --bad-soft: #F9E1E2;
+    --code-bg: #F0ECEC;
+    --shadow: 0 1px 2px rgba(20,18,19,.06), 0 8px 24px -16px rgba(20,18,19,.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0B090A;
+      --surface: #161415;
+      --surface-2: #1F1C1D;
+      --ink: #F5F3F4;
+      --ink-2: #D9D4D5;
+      --muted: #A39C9D;
+      --line: #2E2A2B;
+      --accent: #EE4137;
+      --accent-ink: #F47F76;
+      --accent-soft: #3A1A18;
+      --ok: #5CCB93;
+      --ok-soft: #14301F;
+      --warn: #E8B04A;
+      --warn-soft: #33260E;
+      --bad: #F08084;
+      --bad-soft: #3B1516;
+      --code-bg: #1F1C1D;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0B090A;
+    --surface: #161415;
+    --surface-2: #1F1C1D;
+    --ink: #F5F3F4;
+    --ink-2: #D9D4D5;
+    --muted: #A39C9D;
+    --line: #2E2A2B;
+    --accent: #EE4137;
+    --accent-ink: #F47F76;
+    --accent-soft: #3A1A18;
+    --ok: #5CCB93;
+    --ok-soft: #14301F;
+    --warn: #E8B04A;
+    --warn-soft: #33260E;
+    --bad: #F08084;
+    --bad-soft: #3B1516;
+    --code-bg: #1F1C1D;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Poppins", "Segoe UI", Roboto, system-ui, sans-serif;
+    font-weight: 400;
+    font-size: 15.5px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-ink); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  code, kbd, .mono {
+    font-family: "JetBrains Mono", ui-monospace, Consolas, monospace;
+    font-size: .88em;
+  }
+  code { background: var(--code-bg); padding: .1em .4em; border-radius: 4px; color: var(--ink); }
+  kbd { background: var(--surface); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 .4em; }
+
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px 96px; }
+
+  /* Cabecera */
+  header.cab { padding: 56px 0 28px; border-bottom: 1px solid var(--line); }
+  .eyebrow {
+    font-size: .74rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent-ink); margin: 0 0 14px;
+  }
+  header.cab h1 {
+    font-weight: 900; font-size: clamp(1.9rem, 4.2vw, 3rem); line-height: 1.08; letter-spacing: -.02em;
+    margin: 0 0 16px; text-wrap: balance; max-width: 18ch;
+  }
+  header.cab .meta { color: var(--muted); font-size: .95rem; margin: 0; max-width: 70ch; }
+  header.cab .meta strong { color: var(--ink); font-weight: 500; }
+
+  /* Franja de cifras */
+  .cifras {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 28px 0 0;
+  }
+  .cifra {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .cifra .n { font-weight: 900; font-size: 1.9rem; letter-spacing: -.02em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .cifra .n small { font-size: .95rem; font-weight: 500; color: var(--muted); margin-left: .25em; }
+  .cifra .l { color: var(--muted); font-size: .84rem; margin-top: 4px; line-height: 1.4; }
+  @media (max-width: 760px) { .cifras { grid-template-columns: repeat(2, 1fr); } }
+
+  /* Navegación interna */
+  nav.indice {
+    position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+    margin: 0 -24px; padding: 10px 24px; overflow-x: auto; white-space: nowrap;
+  }
+  nav.indice a {
+    display: inline-block; font-size: .82rem; font-weight: 500; color: var(--ink-2); text-decoration: none;
+    padding: 6px 10px; border-radius: 999px; margin-right: 2px;
+  }
+  nav.indice a:hover { background: var(--surface-2); color: var(--ink); }
+
+  section { padding: 44px 0 8px; scroll-margin-top: 52px; }
+  section h2 {
+    font-weight: 700; font-size: 1.5rem; letter-spacing: -.015em; line-height: 1.2; margin: 0 0 6px; text-wrap: balance;
+  }
+  section .sub { color: var(--muted); margin: 0 0 22px; max-width: 72ch; }
+  p { max-width: 72ch; margin: 0 0 14px; }
+  .lede { font-weight: 300; font-size: 1.12rem; line-height: 1.6; max-width: 66ch; }
+  .lede strong { font-weight: 500; }
+
+  h3 { font-weight: 700; font-size: 1.05rem; margin: 26px 0 10px; letter-spacing: -.01em; }
+
+  /* Tablas */
+  .tabla { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); margin: 0 0 18px; }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { font-weight: 500; font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--surface-2); }
+  tr:last-child td { border-bottom: 0; }
+  td.num, th.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td strong { font-weight: 500; }
+
+  /* Chips de estado */
+  .chip {
+    display: inline-block; font-size: .74rem; font-weight: 500; letter-spacing: .02em; padding: 2px 9px; border-radius: 999px; white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .chip.ok { background: var(--ok-soft); color: var(--ok); }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); }
+  .chip.bad { background: var(--bad-soft); color: var(--bad); }
+  .chip.neutro { background: var(--surface-2); color: var(--ink-2); border-color: var(--line); }
+
+  /* Listas */
+  ul, ol { padding-left: 1.2em; margin: 0 0 14px; }
+  li { margin: 0 0 8px; max-width: 78ch; }
+  li strong { font-weight: 500; }
+
+  /* Tarjetas en rejilla */
+  .rejilla { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 0 0 18px; }
+  @media (max-width: 700px) { .rejilla { grid-template-columns: 1fr; } }
+  .tarjeta { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .tarjeta h4 { margin: 0 0 8px; font-size: .95rem; font-weight: 700; }
+  .tarjeta p, .tarjeta li { font-size: .92rem; }
+  .tarjeta ul { margin-bottom: 0; }
+
+  /* Guion de demo */
+  ol.guion { list-style: none; padding: 0; counter-reset: paso; }
+  ol.guion > li {
+    counter-increment: paso; position: relative; padding: 16px 18px 16px 62px; margin: 0 0 12px; max-width: none;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  }
+  ol.guion > li::before {
+    content: counter(paso); position: absolute; left: 18px; top: 16px;
+    width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff;
+    font-weight: 700; font-size: .95rem; display: grid; place-items: center;
+  }
+  ol.guion > li .t { font-weight: 700; margin: 0 0 4px; }
+  ol.guion > li .tiempo { color: var(--muted); font-size: .8rem; font-weight: 500; margin-left: .5em; }
+  ol.guion > li ul { margin: 8px 0 0; }
+  ol.guion > li li { font-size: .92rem; margin-bottom: 5px; }
+
+  /* Aviso */
+  .aviso { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 0 0 18px; max-width: 78ch; }
+  .aviso.ok { border-color: var(--ok); background: var(--ok-soft); }
+  .aviso.warn { border-color: var(--warn); background: var(--warn-soft); }
+  .aviso p { margin: 0 0 6px; }
+  .aviso p:last-child { margin: 0; }
+
+  /* Lista de chequeo */
+  .chequeo { list-style: none; padding: 0; }
+  .chequeo li { display: flex; gap: 12px; align-items: flex-start; padding: 9px 0; border-bottom: 1px dashed var(--line); max-width: none; }
+  .chequeo input { width: 18px; height: 18px; margin-top: 4px; accent-color: var(--accent); flex: 0 0 auto; cursor: pointer; }
+  .chequeo label { cursor: pointer; }
+  .chequeo li.hecho label { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+  .chequeo .quien { display: inline-block; margin-left: .4em; font-size: .74rem; font-weight: 500; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+
+  pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; margin: 0 0 14px; font-size: .84rem; line-height: 1.55; }
+  pre code { background: none; padding: 0; font-size: 1em; }
+
+  footer { color: var(--muted); font-size: .84rem; border-top: 1px solid var(--line); padding-top: 18px; margin-top: 48px; max-width: none; }
+
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+  @media print {
+    nav.indice { display: none; }
+    body { font-size: 11pt; background: #fff; color: #000; }
+    .cifra, .tarjeta, ol.guion > li, .tabla { box-shadow: none; break-inside: avoid; }
+    section { padding-top: 22px; }
+  }
+</style>
+</head><body>
+
+<div class="wrap">
+  <header class="cab">
+    <p class="eyebrow">ASOBARES Capítulo Quindío · Plataforma web · Práctica empresarial CUE</p>
+    <h1>Avance para la reunión con la tutora empresarial</h1>
+    <p class="meta">
+      <strong>Martes 25 de agosto de 2026 · 8:30 am</strong> · Semana 5 de 8 del cronograma firmado · Equipo de práctica:
+      Juan José Sua Gómez e Ingrid Montoya Warski · Tutora empresarial: Natalia Gutiérrez, directora ejecutiva.
+      Todas las cifras de esta página se verificaron esta madrugada sobre el repositorio (detalle en «Cifras verificadas»).
+    </p>
+    <div class="cifras" aria-label="Cifras clave">
+      <div class="cifra"><div class="n">230</div><div class="l">confirmaciones en el repositorio · 22 desde la última entrega (21 ago)</div></div>
+      <div class="cifra"><div class="n">820 <small>pruebas</small></div><div class="l">809 pasan · 11 omitidas a propósito · <strong>0 fallos</strong> · reproducido hoy en un clon limpio</div></div>
+      <div class="cifra"><div class="n">14 <small>módulos</small></div><div class="l">12 rutas públicas · panel con 19 recursos · portal del asociado · pagos</div></div>
+      <div class="cifra"><div class="n">3 <small>de 4 fases</small></div><div class="l">construidas y probadas; la fase 4 ya está documentada y solo espera la cuenta institucional</div></div>
+    </div>
+  </header>
+
+  <nav class="indice" aria-label="Índice">
+    <a href="#resumen">En un minuto</a>
+    <a href="#cronograma">Cronograma</a>
+    <a href="#construido">Qué está construido</a>
+    <a href="#nuevo">Lo nuevo</a>
+    <a href="#cifras">Cifras verificadas</a>
+    <a href="#documentos">Documentos</a>
+    <a href="#demo">Guion de la demo</a>
+    <a href="#tutorial">El tutorial</a>
+    <a href="#natalia">Lo que pedimos hoy</a>
+    <a href="#riesgos">Riesgos</a>
+    <a href="#antes">Antes de salir</a>
+  </nav>
+
+  <section id="resumen">
+    <h2>En un minuto, para abrir la reunión</h2>
+    <p class="lede">
+      La plataforma está <strong>construida de punta a punta y funciona</strong>: sitio público de 12 rutas, panel de administración
+      para la oficina, portal privado del asociado y pagos que recorren el mismo camino que recorrerán con Bold. Vamos por la
+      semana 5 del cronograma y ya están hechas las fases 1, 2 y 3 (levantamiento y diseño, desarrollo base y contenido, pasarela y
+      panel), más la documentación que la fase 4 exige: manual de usuario, matriz de pruebas, diagramas, base de datos exportada y
+      manual de despliegue.
+    </p>
+    <p class="lede">
+      Lo que falta ya no se programa: <strong>se firma</strong> (acta de aprobación del diseño, retroalimentación del empresario, la ERS),
+      <strong>se decide</strong> (la cuenta institucional del gremio para publicar el sitio) o <strong>lo entrega el gremio</strong>
+      (autorizaciones de los asociados, confirmación de los trámites de Armenia, aliados, textos institucionales).
+    </p>
+  </section>
+
+  <section id="cronograma">
+    <h2>El cronograma firmado, semana por semana</h2>
+    <p class="sub">Documento rector: «Cronograma Sitio Web 2026», 8 semanas en 4 fases. Entrega dura al gremio: 22 de septiembre.</p>
+    <div class="tabla"><table>
+      <thead><tr><th>Semana</th><th>Fechas</th><th>Compromiso del cronograma</th><th>Estado</th></tr></thead>
+      <tbody>
+        <tr><td>S1</td><td class="num">27–31 jul</td><td>Fase 1 · levantamiento, mapa del sitio, elección de tecnología</td><td><span class="chip ok">Cumplida</span></td></tr>
+        <tr><td>S2</td><td class="num">3–7 ago</td><td>Fase 1 · wireframes, paleta; hito de aprobación del diseño</td><td><span class="chip ok">Cumplida</span> <span class="chip warn">Acta 01 sin firmar</span></td></tr>
+        <tr><td>S3</td><td class="num">10–14 ago</td><td>Fase 2 · proyecto, hosting de pruebas, base de datos, sitio institucional</td><td><span class="chip ok">Cumplida</span> <span class="chip bad">Hosting: sin cuenta</span></td></tr>
+        <tr><td>S4</td><td class="num">17–21 ago</td><td>Fase 2 · directorio de asociados y eventos</td><td><span class="chip ok">Cumplida</span></td></tr>
+        <tr><td><strong>S5</strong></td><td class="num"><strong>24–28 ago</strong></td><td>Fase 3 · pasarela de pagos en sandbox</td><td><span class="chip ok">Adelantada desde el 4 ago</span></td></tr>
+        <tr><td>S6</td><td class="num">31 ago–4 sep</td><td>Fase 3 · panel de administración (CMS)</td><td><span class="chip ok">Adelantado desde el 9 ago</span></td></tr>
+        <tr><td>S7</td><td class="num">7–11 sep</td><td>Fase 4 · pruebas globales, corrección de errores que reporte la tutora</td><td><span class="chip warn">Lo que exige servidor depende de la cuenta</span></td></tr>
+        <tr><td>S8</td><td class="num">14–18 sep</td><td>Fase 4 · dominio + SSL, capacitación, documentación</td><td><span class="chip ok">Documentación lista</span> <span class="chip bad">Dominio/SSL bloqueados</span></td></tr>
+      </tbody>
+    </table></div>
+    <p>Además de lo contratado, se construyó por encima del cronograma: la guía normativa por municipio (el producto insignia que pidió la Reunión 2), las bolsas de empleo, artistas y proveedores, el estado de cartera del afiliado y el observatorio. El alcance está congelado desde el 14 de agosto: cualquier ampliación se registra por escrito.</p>
+  </section>
+
+  <section id="construido">
+    <h2>Qué está construido y funcionando</h2>
+    <p class="sub">14 módulos, 11 de ellos públicos. Todo sale de la base de datos; los formularios guardan de verdad y el flujo de aprobación se hace cumplir en el modelo, no en la pantalla.</p>
+    <div class="rejilla">
+      <div class="tarjeta">
+        <h4>Sitio público · <code>/</code></h4>
+        <ul>
+          <li>Inicio con cifras del Observatorio, destacados, beneficios y aliados; «Quiénes somos» con manifiesto, visión e iniciativas del gremio.</li>
+          <li><strong>Directorio de asociados</strong> con filtros por municipio y categoría, mapa y ficha por establecimiento.</li>
+          <li><strong>Guía normativa «Abre tu negocio»</strong> por municipio: checklist por entidad, costo aproximado y formatos descargables.</li>
+          <li><strong>Eventos y capacitaciones</strong> con vista de calendario mensual, aforo, inscripción y pago cuando aplica.</li>
+          <li>Bolsa de empleo (vacantes, aspirantes, postulación), directorio de artistas y bolsa de proveedores.</li>
+          <li>Afiliación, contacto y PQR con radicado, boletín y política de datos.</li>
+        </ul>
+      </div>
+      <div class="tarjeta">
+        <h4>Panel del gremio · <code>/admin</code></h4>
+        <ul>
+          <li>19 recursos agrupados en Contenido, Bolsas, Bandejas, Gremio y Configuración; 5 páginas (tablero, observatorio e informe, ajustes del sitio, bitácora); 12 indicadores.</li>
+          <li><strong>Flujo de aprobación:</strong> la secretaría redacta, la dirección publica; la campana avisa; aprobación en lote; nada se publica forzando el estado.</li>
+          <li>Segundo factor obligatorio, política de contraseñas, bitácora legible de quién hizo qué.</li>
+          <li>Cartera por importación del CSV de la contadora; transacciones de solo lectura.</li>
+        </ul>
+      </div>
+      <div class="tarjeta">
+        <h4>Portal del asociado · <code>/mi-cuenta</code></h4>
+        <ul>
+          <li>Estado de cuenta (cuánto debe y desde cuándo), pago de la mensualidad en línea, historial de movimientos.</li>
+          <li>Convenios privados de los aliados, visibles solo con sesión.</li>
+          <li>Publica, corrige, cierra y reabre <strong>sus propias vacantes</strong> y gestiona las postulaciones que recibe.</li>
+        </ul>
+      </div>
+      <div class="tarjeta">
+        <h4>Pagos, seguridad y datos personales</h4>
+        <ul>
+          <li>Pasarela simulada con la marca del gremio y adaptador de <strong>Bold</strong> (link de pago por API, webhook con firma verificada, conciliación); se conmutan por configuración.</li>
+          <li>Habeas data en todos los formularios con fecha, hora y versión del texto; depuración automática al vencer los plazos de retención.</li>
+          <li>Validado sobre PostgreSQL 17 (el motor de producción); auditoría de dependencias limpia.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="nuevo">
+    <h2>Lo nuevo desde la última entrega (21 de agosto)</h2>
+    <p class="sub">22 confirmaciones entre el 23 y el 25 de agosto. Ojo: 16 de ellas están solo en el computador de Sua; hay que subirlas a GitHub antes de la reunión.</p>
+    <ol>
+      <li><strong>Vigencia y procedencia de la guía normativa (RF-60, 24–25 ago).</strong> Cada trámite guarda con qué fuente y en qué fecha se verificó y hasta cuándo rige. Lo que vence sale solo del sitio por las cuatro puertas por las que se publica (lista, selector de municipios, mapa del sitio y descarga del formato). La tabla del panel pinta el estado de cada trámite (sin verificar, con más de un año sin revisar, vencido) y filtra los que necesitan revisión. Las fichas sin fecha se publican con la marca honesta <em>«Sin verificar contra la fuente oficial»</em>. Era uno de los dos requisitos que la matriz tenía sin cobertura; añadió 29 casos de prueba.</li>
+      <li><strong>Carga de la base real de asociados (23 ago).</strong> Un comando lee el Excel de la oficina («Base de Datos 2025», 41 registros en 6 municipios) y crea o actualiza las fichas <em>en borrador</em>, con la fecha del soporte de habeas data de cada titular. El archivo no se versiona: trae cédulas, teléfonos y la valoración interna de cada negocio, y el repositorio es público.</li>
+      <li><strong>Frontera entre datos internos y ficha pública (23 ago).</strong> La ficha comercial del asociado (representante, contacto interno, notas de la oficina) tiene columnas propias y una guardia de 17 pruebas que impide que se filtren al sitio.</li>
+      <li><strong>Los 7 trámites oficiales de Armenia</strong> («Blindemos tu Negocio», documento entregado el 20 ago) quedaron transcritos y fechados, listos para cargarse. Hasta que Natalia confirme por escrito que es la versión vigente, la guía sigue mostrando los trámites de muestra con su marca «Sin verificar».</li>
+      <li><strong>La entrega del corte 2</strong> (documento de práctica y anexos B–E) quedó versionada en el expediente, y la matriz de pruebas volvió a cerrarse con cifras de una corrida real.</li>
+    </ol>
+  </section>
+
+  <section id="cifras">
+    <h2>Cifras verificadas esta madrugada</h2>
+    <p class="sub">Regla del proyecto: solo se reporta lo reproducible. La suite se volvió a correr hoy fuera del computador donde se programó, sobre un clon limpio con las 16 confirmaciones locales aplicadas.</p>
+    <div class="tabla"><table>
+      <thead><tr><th>Indicador</th><th>Valor</th><th>Cómo se verificó (25 ago, 0:50–1:20 am)</th></tr></thead>
+      <tbody>
+        <tr><td>Confirmaciones</td><td class="num"><strong>230</strong> (22 desde el 21 ago; 16 sin subir)</td><td><code>git rev-list --count HEAD</code> · rama <code>main</code>, adelantada 16 respecto a <code>origin/main</code></td></tr>
+        <tr><td>Suite de pruebas</td><td class="num"><strong>820 casos · 809 pasan · 11 omitidas · 0 fallos · 2.904 aserciones · 200 s</strong></td><td><code>php artisan test --compact</code> sobre clon limpio, PHP 8.4.21 con <code>intl</code> y <code>gd</code>, <code>composer install</code> y <code>npm run build</code> desde cero. Misma cifra que la corrida de Sua de esta madrugada con PHP 8.5.9 (348 s), anotada en la matriz de pruebas</td></tr>
+        <tr><td>Archivos · métodos de prueba</td><td class="num">60 · 592</td><td>Conteo sobre <code>tests/</code></td></tr>
+        <tr><td>Migraciones · tablas</td><td class="num">35 · 37</td><td><code>migrate:status</code> (35 aplicadas) y esquema exportado</td></tr>
+        <tr><td>Modelos · recursos · páginas · widgets · policies</td><td class="num">21 · 19 · 5 · 12 · 20</td><td>Conteo sobre <code>app/</code></td></tr>
+        <tr><td>Vistas · sembradores</td><td class="num">63 · 20</td><td>Conteo sobre <code>resources/views</code> y <code>database/seeders</code></td></tr>
+        <tr><td>Arranque del sitio</td><td>Portada, directorio, guía, calendario, empleo, panel y portal responden 200</td><td>Servidor de desarrollo levantado sobre el clon; inicio de sesión del panel completado con el código del segundo factor</td></tr>
+        <tr><td>Rendimiento (RNF-02)</td><td class="num">Portada: 972 ms de LCP en móvil 4G (tope contratado: 2.500 ms)</td><td>Medición del 18 ago contra <code>localhost</code>; se repite contra el dominio cuando exista</td></tr>
+      </tbody>
+    </table></div>
+    <p>Las 11 pruebas omitidas son deliberadas: recursos del panel que no tienen página de creación o edición porque el dato entra por otra puerta (Cartera por CSV, Postulación desde el sitio, Vacante desde el portal del asociado).</p>
+  </section>
+
+  <section id="documentos">
+    <h2>Los documentos que existen hoy</h2>
+    <p class="sub">Todo el expediente de entrega vive versionado en <code>docs/ingenieria/</code> del repositorio. La columna «Hoy» marca lo que conviene tener a mano en la reunión.</p>
+
+    <h3>Expediente de entrega al gremio (<code>docs/ingenieria/</code>)</h3>
+    <div class="tabla"><table>
+      <thead><tr><th>Documento</th><th>Qué es</th><th>Hoy</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Manual de usuario del panel</strong> (PDF, 24 págs.) + <code>manual-de-usuario.md</code></td><td>Manual para personal no técnico con 11 capturas del panel real. Es el entregable «manual de usuario» del cronograma y el tutorial vigente de la oficina.</td><td><span class="chip ok">Mostrar</span></td></tr>
+        <tr><td><strong>Constancias para firma</strong>: Acta 01, Acta 02, Formato 03 (PDF)</td><td>Aprobación del diseño (hito S2), constancia de capacitación (S8) y retroalimentación del empresario. Con las tres firmas: dirección y los dos practicantes. Ninguna firmada aún.</td><td><span class="chip bad">Imprimir Acta 01 y Formato 03</span></td></tr>
+        <tr><td><strong>Informe de cumplimiento del cronograma</strong> (19 ago, rev 2, .docx, 20 págs.)</td><td>Fase por fase, con brechas declaradas en su sección 8.3. Se envió a la universidad como anexo; Natalia no lo ha revisado.</td><td><span class="chip ok">Llevar</span></td></tr>
+        <tr><td><code>matriz-de-pruebas.md</code> (+ PDF Anexo B)</td><td>RF-01…RF-62 y RNF-01…RNF-14 contra la prueba que los verifica; 52 de 53 RF de la V1 con cobertura; vacíos declarados.</td><td><span class="chip neutro">Si pregunta por calidad</span></td></tr>
+        <tr><td><code>diagramas/</code> (7 PNG + fuentes PlantUML)</td><td>Casos de uso, contexto, BPMN de afiliación y de guía normativa, proceso del equipo, ciclo semanal, modelo de datos.</td><td><span class="chip neutro">Opcional</span></td></tr>
+        <tr><td><code>base-de-datos/</code></td><td>Esquema de 37 tablas y volcado con datos de demostración (entregable «BD exportada»).</td><td><span class="chip neutro">Opcional</span></td></tr>
+        <tr><td><code>medicion-de-rendimiento.md</code> (+ PDF Anexo D)</td><td>78 mediciones en 12 rutas, móvil 4G y escritorio, dos temas.</td><td><span class="chip neutro">Opcional</span></td></tr>
+        <tr><td><code>runbook-despliegue.md</code> + <code>.env.staging.example</code></td><td>Manual de operación de 512 líneas para publicar en Laravel Cloud el día que exista la cuenta.</td><td><span class="chip warn">Citar al hablar de la cuenta</span></td></tr>
+        <tr><td><code>guia-normativa-armenia-fuente-oficial.md</code></td><td>Transcripción de los 7 trámites oficiales de Armenia, listos para cargar.</td><td><span class="chip bad">Pedir confirmación</span></td></tr>
+        <tr><td><code>entrega-2026-08-21/</code></td><td>Lo que recibió la universidad el 21 ago: el <strong>documento de práctica</strong> (29 págs., .docx y PDF), <strong>Anexo B</strong> matriz de trazabilidad (16 págs.), <strong>Anexo C</strong> manual de usuario (24 págs.), <strong>Anexo D</strong> verificación del rendimiento (5 págs.) y <strong>Anexo E</strong> informe de cumplimiento del cronograma (20 págs., .docx). El Anexo E trae en su apartado 10 la <strong>constancia de revisión de la tutora</strong> con espacio para observaciones, una tabla de cinco decisiones y las tres firmas. Ojo: sus cifras son del corte del 19 ago (599 pruebas, 460 métodos, 33 migraciones); si pregunta, hoy son 820, 592 y 35.</td><td><span class="chip ok">Mostrar C y E</span></td></tr>
+        <tr><td>Informe de avance Persona 1 (21 ago)</td><td>Informe del bloque de Sua (10–21 ago): lectura de la auditoría de Ingrid y deuda técnica.</td><td><span class="chip neutro">Académico</span></td></tr>
+        <tr><td><code>capturas/</code> · <code>herramientas/</code></td><td>Las 11 capturas del panel y los generadores de PDF del expediente.</td><td><span class="chip neutro">—</span></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Material del gremio y bitácora técnica (<code>material/</code>)</h3>
+    <div class="tabla"><table>
+      <thead><tr><th>Documento</th><th>Qué es</th></tr></thead>
+      <tbody>
+        <tr><td>Cronograma Sitio Web 2026 (PDF firmado) · Imágenes del cronograma</td><td>Documento rector del proyecto.</td></tr>
+        <tr><td>Plan Estratégico · TED gremial · Manual de marca · logo</td><td>Fuente de todos los textos institucionales, la paleta y la tipografía. Nada del sitio se inventó.</td></tr>
+        <tr><td>REQUISITOS APERTURA - ARMENIA.docx</td><td>Documento oficial recibido el 20 ago (campaña «Blindemos tu Negocio»).</td></tr>
+        <tr><td>Acta y transcripciones de las reuniones 1 y 2 · investigación previa</td><td>Registro de lo acordado el 28 y el 31 de julio.</td></tr>
+        <tr><td><code>prompt-maestro-laravel-filament.md</code> (26 secciones)</td><td>Bitácora técnica y de decisiones del proyecto; la sección 26 es la lista única de pendientes.</td></tr>
+        <tr><td><strong>Tutorial de la plataforma</strong> (HTML, 32 diapositivas) · prompt de diseño v2</td><td>Presentación interactiva por rol (fundamentos, dirección, secretaría, empresario, sitio público). Del 3 de agosto: sigue siendo buena para explicar el modelo, pero varias pantallas cambiaron después (ver «El tutorial»).</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Lado académico y gestión (Project de Cowork)</h3>
+    <ul>
+      <li><strong>ERS v3.0</strong> (5 ago, 68 págs.): 62 requisitos funcionales, 14 no funcionales, 13 decisiones abiertas (DPV-01 a DPV-13). <strong>Sigue sin la doble firma.</strong></li>
+      <li><strong>Planeador FO-DO-100</strong> firmado por Natalia y enviado a la universidad el 21 ago. <strong>Mockups de alta fidelidad</strong> (5 ago), anexo del documento de práctica.</li>
+      <li><strong>Documento de práctica GU-DO-007</strong> (individual, uno por practicante): estructura guía del 24 ago; el 95 % se entrega el viernes 4 de septiembre.</li>
+      <li><code>estado-unificado.md</code> (fuente de verdad del Project), <code>pendientes-practica.md</code>, guion de reescritura del documento, guía normativa de Armenia.</li>
+    </ul>
+  </section>
+
+  <section id="demo">
+    <h2>Guion de la demostración</h2>
+    <p class="sub">Unos 25 minutos. Todo corre en el computador de Sua, sin internet salvo el mapa del directorio (carga teselas de la web: si la oficina no tiene wifi, compartir datos del celular).</p>
+
+    <div class="aviso">
+      <p><strong>El detalle que puede dejar la demo colgada:</strong> el panel exige segundo factor y las cuentas de demostración lo reciben por correo. En local el correo no sale: se escribe en <code>storage/logs/laravel.log</code>. Tener una segunda terminal con <code>php artisan pail</code> (o el archivo abierto) para leer el código de 6 dígitos al entrar. Ensayarlo una vez antes de salir.</p>
+    </div>
+
+    <h3>Preparación en casa</h3>
+    <pre><code># Terminal 1 — el sitio
+php artisan serve            # queda en http://localhost:8000 (o composer run dev)
+
+# Terminal 2 — para leer el código del segundo factor
+php artisan pail
+
+# Solo si la base local NO tiene datos de demo (y NO tiene cargada la base real):
+php artisan migrate:fresh --seed</code></pre>
+    <div class="tabla"><table>
+      <thead><tr><th>Rol</th><th>Correo</th><th>Contraseña</th><th>Entra por</th></tr></thead>
+      <tbody>
+        <tr><td>Dirección (súper admin)</td><td class="mono">direccion@asobaresquindio.test</td><td class="mono">Asobares2026*</td><td><code>/admin</code> + código del log</td></tr>
+        <tr><td>Secretaría (subadmin)</td><td class="mono">oficina@asobaresquindio.test</td><td class="mono">Asobares2026*</td><td><code>/admin</code> + código del log</td></tr>
+        <tr><td>Empresario (asociado)</td><td class="mono">asociado@asobaresquindio.test</td><td class="mono">Asobares2026*</td><td><code>/mi-cuenta/entrar</code> · «Bruma Gastrobar», 3 meses de mora</td></tr>
+      </tbody>
+    </table></div>
+    <p>Pestañas listas antes de empezar: la <a href="https://claude.ai/code/artifact/8f6f968b-c8a4-4d7b-812e-13d9c11ef076">presentación «Lo nuevo desde el 10 de agosto»</a> (9 diapositivas, también en <code>docs/ingenieria/reuniones/</code>; conviene abrir con ella y pasar luego al tutorial), el tutorial (<code>material/Tutorial Plataforma ASOBARES Quindio.html</code>), <code>localhost:8000</code>, <code>localhost:8000/admin/login</code> y el manual de usuario en PDF. Los datos del demo son ficticios (24 establecimientos de muestra); decirlo al empezar para que nadie busque su bar.</p>
+
+    <h3>Recorrido</h3>
+    <ol class="guion">
+      <li>
+        <div class="t">El tutorial <span class="tiempo">5 min</span></div>
+        Abrir el HTML; <kbd>←</kbd> <kbd>→</kbd> cambian de diapositiva, <kbd>T</kbd> alterna claro/oscuro y los botones F · A · B · C · D de arriba a la derecha saltan de módulo (fundamentos, dirección, secretaría, empresario, sitio público).
+        <ul>
+          <li>Mostrar: 1 (portada), 2 (las tres puertas), 4 (el flujo editorial), 7–9 (tablero, campana, aprobar y devolver), 21 (el ciclo de la secretaría), 27–28 (mi cuenta y el pago), 30 (el recorrido público) y 32 (reglas de oro por rol).</li>
+          <li>Decir: «esto es del 3 de agosto y explica el modelo; el manual en PDF del 19 es la versión vigente para la oficina». Los matices están en la sección «El tutorial».</li>
+        </ul>
+      </li>
+      <li>
+        <div class="t">El sitio público <span class="tiempo">7 min</span></div>
+        <ul>
+          <li>Inicio: cifras del Observatorio, destacados, aliados. Probar el conmutador claro/oscuro y el menú en tamaño móvil (estrechar la ventana).</li>
+          <li><strong>Directorio:</strong> filtrar por municipio y categoría, abrir el mapa, entrar a una ficha. Recordar: el propietario decide qué se publica; nadie sale sin autorización.</li>
+          <li><strong>Abre tu negocio → Armenia:</strong> checklist por entidad, costo aproximado, formato descargable. Señalar la marca <em>«Sin verificar contra la fuente oficial»</em> y explicar que los 7 trámites oficiales entran cuando ella confirme la versión. Es el momento de pedir esa confirmación.</li>
+          <li><strong>Eventos → Calendario:</strong> vista mensual; abrir ExpoBar Quindío 2026 ($30.000) y, si hay tiempo, inscribirse y pagar en la pasarela simulada (guion 2 del README).</li>
+          <li><strong>Empleo:</strong> muro de vacantes y registro de aspirante. <strong>Contacto → PQR:</strong> el radicado en pantalla.</li>
+        </ul>
+      </li>
+      <li>
+        <div class="t">El panel de la oficina <span class="tiempo">8 min</span></div>
+        <ul>
+          <li>Entrar como dirección; leer el código en la terminal de <code>pail</code>. Tablero: «Te está esperando» (lo pendiente de aprobación, con antigüedad) y «El gremio hoy».</li>
+          <li><strong>La campana → Revisar → Aprobar y publicar.</strong> Si alcanza, hacerlo completo: entrar antes como secretaría, crear un asociado marcándolo «Publicado» y mostrar que queda «Pendiente» (guion 1 del README).</li>
+          <li><strong>Guía normativa:</strong> abrir un requisito y mostrar los campos nuevos «Verificado el», «Verificado con» y «Vigente hasta», y los filtros de la tabla.</li>
+          <li><strong>Gremio → Cartera:</strong> descargar la plantilla e importar un CSV (guion 4); una fila mala no aborta el resto y el resumen dice cuál falló.</li>
+          <li><strong>Configuración → Bitácora:</strong> quién hizo qué, en español. Usuarios: cómo se crea una secretaría y cómo se vincula un empresario.</li>
+        </ul>
+      </li>
+      <li>
+        <div class="t">El portal del empresario <span class="tiempo">4 min</span></div>
+        <ul>
+          <li>Entrar por <code>/mi-cuenta/entrar</code> como asociado: «Debes 3 meses · $150.000» en rojo → <strong>Pagar ahora → PSE → Aprobar</strong> → «Estás al día» y el movimiento en el historial. Es la respuesta al caso que planteó la directiva: la gente no paga porque no sabe cuánto debe.</li>
+          <li>Convenios privados de los aliados (no se ven sin sesión). <strong>Mis vacantes:</strong> crear una y mostrar que nace pendiente de aprobación.</li>
+        </ul>
+      </li>
+      <li>
+        <div class="t">Cierre <span class="tiempo">3 min</span></div>
+        Hojear el manual en PDF y la matriz de pruebas, y pasar a la lista de firmas, decisiones e insumos de la sección «Lo que pedimos hoy».
+      </li>
+    </ol>
+  </section>
+
+  <section id="tutorial">
+    <h2>El tutorial: qué sigue vigente y qué matizar</h2>
+    <p class="sub">El HTML de 32 diapositivas es del 3 de agosto. El modelo (tres puertas, flujo editorial, roles, cartera, pagos) sigue siendo exacto. Estas son las diferencias con lo que hoy hace el programa; conviene decirlas en voz alta si salen en pantalla.</p>
+    <div class="tabla"><table>
+      <thead><tr><th>Diapositiva</th><th>Dice</th><th>Hoy</th></tr></thead>
+      <tbody>
+        <tr><td class="num">5</td><td>«MFA opcional, por usuario»</td><td>El segundo factor es <strong>obligatorio</strong> en el panel: sin darlo de alta no se llega al escritorio.</td></tr>
+        <tr><td class="num">3 · 25</td><td>La secretaría no publica nada</td><td>Sigue sin publicar contenido institucional, pero <strong>sí aprueba las tres bolsas</strong> (vacantes, artistas y proveedores). Devolver una vacante exige motivo.</td></tr>
+        <tr><td class="num">13 · 29</td><td>El empresario «pide» vacantes a la oficina</td><td>Las <strong>publica él mismo</strong> desde Mi cuenta → Mis vacantes (nacen pendientes) y gestiona las postulaciones. Artistas y proveedores se inscriben solos desde el sitio.</td></tr>
+        <tr><td class="num">27</td><td>Saldo de $360.000</td><td>El demo actual muestra $150.000 (3 meses × $50.000).</td></tr>
+        <tr><td class="num">10 · 12 · 30</td><td>Menú y recorrido público</td><td>No aparecen, porque son posteriores: la bandeja de Postulaciones, el Observatorio y su informe, el calendario de eventos, ni la vigencia y procedencia de la guía normativa.</td></tr>
+      </tbody>
+    </table></div>
+    <p>Regenerar el tutorial con estas pantallas es tarea pendiente (el prompt v2 en <code>material/prompt-maestro-tutorial-design.md</code> ya las describe); para la capacitación de la semana 8 el material formal es el manual de usuario en PDF.</p>
+  </section>
+
+  <section id="natalia">
+    <h2>Lo que pedimos hoy</h2>
+    <p class="sub">Es lo que quedó sin resolver de la reunión que no se logró el 21 de agosto. Marcar lo que se consiga.</p>
+
+    <h3>Firmas</h3>
+    <ul class="chequeo">
+      <li><input type="checkbox" id="f1"><label for="f1"><strong>Acta 01</strong> · Aprobación del diseño de la interfaz (hito de la semana 2 que nunca quedó por escrito).</label></li>
+      <li><input type="checkbox" id="f2"><label for="f2"><strong>Formato 03</strong> · Retroalimentación del empresario. Es la evidencia de desempeño que califica el corte 3 en la universidad (60 % de la nota).</label></li>
+      <li><input type="checkbox" id="f3"><label for="f3"><strong>ERS v3.0</strong> · Firma de la dirección y del directivo, y respuesta a <strong>DPV-02</strong>: qué se ve con sesión y qué sin ella (condiciona 8 requisitos ya construidos).</label></li>
+      <li><input type="checkbox" id="f4"><label for="f4"><strong>Anexo E, apartado 10</strong> · Constancia de revisión y observaciones de la tutora sobre el informe de cumplimiento, con su tabla de decisiones (cuenta de hosting, calendario —ya resuelto—, acta de diseño, fecha de la base de asociados, congelación del alcance). Es la evidencia de «errores reportados por el tutor» que pide la semana 7.</label></li>
+    </ul>
+
+    <h3>Decisiones</h3>
+    <ul class="chequeo">
+      <li><input type="checkbox" id="d1"><label for="d1"><strong>Cuenta institucional del gremio</strong> con correo y medio de pago corporativo para el alojamiento (Laravel Cloud, ~US$5 al mes). Sin ella no hay publicación, SSL, dominio, correo saliente, pruebas en celulares reales ni revisión autónoma de la tutora: bloquea las semanas 7 y 8. No se resuelve con una cuenta personal: la práctica termina el 22 de septiembre y las llaves se irían con el practicante. Si la tarjeta internacional no es posible, hay alternativas en pesos: están comparadas, con costos y pros y contras, en <a href="https://claude.ai/code/artifact/03b7efa8-4d92-4f21-a640-7608746f9b7f">«Opciones para publicar la plataforma»</a> (también en <code>docs/ingenieria/reuniones/2026-08-25-opciones-despliegue.html</code>). <span class="quien">Decisión de la junta</span></label></li>
+      <li><input type="checkbox" id="d2"><label for="d2"><strong>Medio de pago definitivo con Bold</strong> (PSE o código QR) y cuenta receptora (DPV-04). El sistema los deja configurables.</label></li>
+      <li><input type="checkbox" id="d3"><label for="d3"><strong>Repositorio</strong> a una organización de GitHub del gremio, o un segundo administrador, antes del 22 de septiembre. Gratis, toma minutos.</label></li>
+      <li><input type="checkbox" id="d4"><label for="d4"><strong>Soporte después del 22 de septiembre</strong> (DPV-13): quién atiende el sitio y cómo, por escrito.</label></li>
+      <li><input type="checkbox" id="d5"><label for="d5">Confirmar por escrito nombre y cargo del directivo que asistió a la reunión del 31 de julio, para citarlo en los documentos formales.</label></li>
+    </ul>
+
+    <h3>Insumos que solo el gremio puede dar</h3>
+    <ul class="chequeo">
+      <li><input type="checkbox" id="i1"><label for="i1"><strong>Confirmación de que los 7 trámites de Armenia</strong> («Blindemos tu Negocio») son la versión vigente, para publicar la guía real.</label></li>
+      <li><input type="checkbox" id="i2"><label for="i2"><strong>Autorizaciones de publicación de los asociados</strong> (habeas data). La base ya llegó (41 registros); sin autorización, cada ficha se queda en borrador y el directorio sale vacío.</label></li>
+      <li><input type="checkbox" id="i3"><label for="i3"><strong>Lista vigente de aliados</strong> con el beneficio de cada uno (P-09).</label></li>
+      <li><input type="checkbox" id="i4"><label for="i4"><strong>Textos definitivos de «Quiénes somos»</strong> (P-11) y <strong>política de tratamiento de datos</strong> (P-15) del gremio.</label></li>
+      <li><input type="checkbox" id="i5"><label for="i5"><strong>Documentos que Bold exige</strong> para pasar a producción: RUT, cámara de comercio y cuenta bancaria del gremio.</label></li>
+      <li><input type="checkbox" id="i6"><label for="i6"><strong>Trámites de los otros 11 municipios</strong> y los formatos oficiales descargables de cada entidad.</label></li>
+    </ul>
+  </section>
+
+  <section id="riesgos">
+    <h2>Riesgos, dichos en voz alta</h2>
+    <ul>
+      <li><strong>R-14 · Sin cuenta institucional no hay sitio publicado.</strong> Es el único bloqueo real del proyecto y no es técnico. De él cuelgan el bucket de archivos, el correo saliente, el SSL, la medición contra el dominio y las pruebas en los celulares de la tutora.</li>
+      <li><strong>R-02 · Directorio vacío en el lanzamiento</strong> si no llegan las autorizaciones de los asociados.</li>
+      <li><strong>R-10 · Datos personales de terceros</strong> sin política de tratamiento formalizada; la base de la oficina se maneja fuera del repositorio.</li>
+      <li><strong>Gobierno del código:</strong> el repositorio está en la cuenta personal de Sua. Sin secretos versionados, pero conviene trasladarlo o sumar un administrador del gremio.</li>
+      <li><strong>Fin de la práctica sin esquema de soporte</strong> acordado por escrito (R-01/R-13).</li>
+    </ul>
+  </section>
+
+  <section id="antes">
+    <h2>Antes de salir de casa</h2>
+    <ul class="chequeo">
+      <li><input type="checkbox" id="a1"><label for="a1"><code>git push</code>: las 16 confirmaciones del 24–25 de agosto (RF-60) solo están en tu computador; ni Ingrid ni GitHub las tienen.</label></li>
+      <li><input type="checkbox" id="a2"><label for="a2">Levantar <code>php artisan serve</code> y <code>php artisan pail</code>, entrar a <code>/admin</code> con el código del log una vez, entrar a <code>/mi-cuenta</code> y abrir el tutorial. Dejar todo abierto.</label></li>
+      <li><input type="checkbox" id="a3"><label for="a3">Comprobar que la base local tiene los datos de demo (Bruma Gastrobar con 3 meses de mora, ExpoBar con precio). Si cargaste la base real en esa misma base, <strong>no</strong> correr <code>migrate:fresh</code>: se perdería.</label></li>
+      <li><input type="checkbox" id="a4"><label for="a4">Imprimir el Acta 01 y el Formato 03 (están en <code>docs/ingenieria/constancias/</code>), y llevar el informe de cumplimiento en pantalla o impreso.</label></li>
+      <li><input type="checkbox" id="a5"><label for="a5">No abrir en pantalla el Excel de la base real ni la carpeta donde está: trae cédulas y teléfonos de los propietarios.</label></li>
+      <li><input type="checkbox" id="a6"><label for="a6">Cargador, y datos del celular por si la oficina no tiene wifi (el mapa del directorio los necesita).</label></li>
+      <li><input type="checkbox" id="a7"><label for="a7">Limpieza opcional: en <code>.git/</code> quedaron dos archivos <code>index.lock.huerfano*</code> (uno del 20 de agosto y otro de esta noche, renombrado para que Git no se bloquee) y en <code>storage/logs/</code> el paquete <code>rf60-2026-08-25.bundle.log</code> que se usó para verificar la suite. Los tres se pueden borrar; Git los ignora.</label></li>
+    </ul>
+    <p>Después de la reunión: escanear lo firmado a <code>docs/ingenieria/constancias/</code>, anotar lo decidido en el estado unificado del Project, y pedirle la asesoría a César esta misma semana para validar el plan del documento del 4 de septiembre.</p>
+  </section>
+
+  <footer>
+    Preparado en la madrugada del 25 de agosto de 2026 a partir del repositorio <code>Jsua3/asobares</code> (rama <code>main</code> en <code>bad0143</code>), el expediente <code>docs/ingenieria/</code>, el prompt maestro (§26) y el estado unificado del Project. Las cifras de pruebas salen de una corrida real de esta madrugada; las de rendimiento, de la medición del 18 de agosto.
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var casillas = document.querySelectorAll('.chequeo input[type=checkbox]');
+    for (var i = 0; i < casillas.length; i++) {
+      casillas[i].addEventListener('change', function (e) {
+        var li = e.target.closest('li');
+        if (li) { li.classList.toggle('hecho', e.target.checked); }
+      });
+    }
+  })();
+</script>
+</body></html>

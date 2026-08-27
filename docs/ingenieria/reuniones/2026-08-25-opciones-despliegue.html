@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Opciones de despliegue ASOBARES Quindío</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --bg: #F7F5F5; --surface: #FFFFFF; --surface-2: #F0ECEC;
+    --ink: #141213; --ink-2: #3C3738; --muted: #6B6465; --line: #E3DDDD;
+    --accent: #EE4137; --accent-ink: #C33429; --accent-soft: #FCEAE8;
+    --ok: #1F7A4D; --ok-soft: #E3F3EA; --warn: #9A5B00; --warn-soft: #FBEFD9; --bad: #A4161A; --bad-soft: #F9E1E2;
+    --code-bg: #F0ECEC; --shadow: 0 1px 2px rgba(20,18,19,.06), 0 8px 24px -16px rgba(20,18,19,.18);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0B090A; --surface: #161415; --surface-2: #1F1C1D;
+      --ink: #F5F3F4; --ink-2: #D9D4D5; --muted: #A39C9D; --line: #2E2A2B;
+      --accent: #EE4137; --accent-ink: #F47F76; --accent-soft: #3A1A18;
+      --ok: #5CCB93; --ok-soft: #14301F; --warn: #E8B04A; --warn-soft: #33260E; --bad: #F08084; --bad-soft: #3B1516;
+      --code-bg: #1F1C1D; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0B090A; --surface: #161415; --surface-2: #1F1C1D;
+    --ink: #F5F3F4; --ink-2: #D9D4D5; --muted: #A39C9D; --line: #2E2A2B;
+    --accent: #EE4137; --accent-ink: #F47F76; --accent-soft: #3A1A18;
+    --ok: #5CCB93; --ok-soft: #14301F; --warn: #E8B04A; --warn-soft: #33260E; --bad: #F08084; --bad-soft: #3B1516;
+    --code-bg: #1F1C1D; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.6);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Poppins", "Segoe UI", Roboto, system-ui, sans-serif; font-weight: 400; font-size: 15.5px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent-ink); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  code, .mono { font-family: "JetBrains Mono", ui-monospace, Consolas, monospace; font-size: .88em; }
+  code { background: var(--code-bg); padding: .1em .4em; border-radius: 4px; color: var(--ink); }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px 96px; }
+  header.cab { padding: 56px 0 28px; border-bottom: 1px solid var(--line); }
+  .eyebrow { font-size: .74rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-ink); margin: 0 0 14px; }
+  header.cab h1 { font-weight: 900; font-size: clamp(1.9rem, 4.2vw, 3rem); line-height: 1.08; letter-spacing: -.02em; margin: 0 0 16px; text-wrap: balance; max-width: 20ch; }
+  header.cab .meta { color: var(--muted); font-size: .95rem; margin: 0; max-width: 72ch; }
+  header.cab .meta strong { color: var(--ink); font-weight: 500; }
+  nav.indice { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); margin: 0 -24px; padding: 10px 24px; overflow-x: auto; white-space: nowrap; }
+  nav.indice a { display: inline-block; font-size: .82rem; font-weight: 500; color: var(--ink-2); text-decoration: none; padding: 6px 10px; border-radius: 999px; margin-right: 2px; }
+  nav.indice a:hover { background: var(--surface-2); color: var(--ink); }
+  section { padding: 44px 0 8px; scroll-margin-top: 52px; }
+  section h2 { font-weight: 700; font-size: 1.5rem; letter-spacing: -.015em; line-height: 1.2; margin: 0 0 6px; text-wrap: balance; }
+  section .sub { color: var(--muted); margin: 0 0 22px; max-width: 74ch; }
+  p { max-width: 74ch; margin: 0 0 14px; }
+  .lede { font-weight: 300; font-size: 1.12rem; line-height: 1.6; max-width: 66ch; }
+  .lede strong { font-weight: 500; }
+  h3 { font-weight: 700; font-size: 1.05rem; margin: 26px 0 10px; letter-spacing: -.01em; }
+  .tabla { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); margin: 0 0 18px; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { font-weight: 500; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--surface-2); }
+  tr:last-child td { border-bottom: 0; }
+  td.num, th.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td strong { font-weight: 500; }
+  .chip { display: inline-block; font-size: .72rem; font-weight: 500; letter-spacing: .02em; padding: 2px 9px; border-radius: 999px; white-space: nowrap; border: 1px solid transparent; }
+  .chip.ok { background: var(--ok-soft); color: var(--ok); }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); }
+  .chip.bad { background: var(--bad-soft); color: var(--bad); }
+  .chip.neutro { background: var(--surface-2); color: var(--ink-2); border-color: var(--line); }
+  ul, ol { padding-left: 1.2em; margin: 0 0 14px; }
+  li { margin: 0 0 8px; max-width: 80ch; }
+  li strong { font-weight: 500; }
+  /* Tarjetas de opción */
+  .opcion { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin: 0 0 16px; box-shadow: var(--shadow); }
+  .opcion .cabecera { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; margin-bottom: 6px; }
+  .opcion .cabecera .chip { white-space: normal; line-height: 1.35; }
+  .opcion h3 { margin: 0; font-size: 1.15rem; }
+  .opcion .letra { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: #fff; font-weight: 700; font-size: .95rem; }
+  .opcion .resumen { color: var(--muted); margin: 0 0 12px; max-width: none; }
+  .datos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 0 0 14px; }
+  .dato { background: var(--surface-2); border-radius: 8px; padding: 9px 12px; }
+  .dato .k { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+  .dato .v { font-weight: 500; font-size: .92rem; line-height: 1.35; margin-top: 2px; }
+  .pc { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .pc h4 { margin: 0 0 6px; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 500; }
+  .pc .pros h4 { color: var(--ok); } .pc .contras h4 { color: var(--bad); }
+  .pc ul { margin: 0; padding-left: 1.1em; }
+  .pc li { font-size: .9rem; margin-bottom: 5px; }
+  @media (max-width: 760px) { .datos { grid-template-columns: repeat(2, 1fr); } .pc { grid-template-columns: 1fr; } }
+  .aviso { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 0 0 18px; max-width: 80ch; }
+  .aviso.ok { border-color: var(--ok); background: var(--ok-soft); }
+  .aviso.warn { border-color: var(--warn); background: var(--warn-soft); }
+  .aviso p { margin: 0 0 6px; max-width: none; } .aviso p:last-child { margin: 0; }
+  .rejilla { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 0 0 18px; }
+  @media (max-width: 700px) { .rejilla { grid-template-columns: 1fr; } }
+  .tarjeta { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .tarjeta h4 { margin: 0 0 8px; font-size: .95rem; font-weight: 700; }
+  .tarjeta p, .tarjeta li { font-size: .92rem; }
+  .tarjeta ul { margin-bottom: 0; }
+  .fuentes { font-size: .84rem; color: var(--muted); }
+  .fuentes li { max-width: none; margin-bottom: 4px; }
+  footer { color: var(--muted); font-size: .84rem; border-top: 1px solid var(--line); padding-top: 18px; margin-top: 48px; }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+  @media print { nav.indice { display: none; } body { font-size: 11pt; background: #fff; color: #000; } .opcion, .tarjeta, .tabla { box-shadow: none; break-inside: avoid; } }
+</style>
+</head><body>
+
+<div class="wrap">
+  <header class="cab">
+    <p class="eyebrow">ASOBARES Capítulo Quindío · Plataforma web · Para decidir con la dirección</p>
+    <h1>Opciones para publicar la plataforma</h1>
+    <p class="meta">
+      <strong>Martes 25 de agosto de 2026.</strong> Qué necesita el programa para vivir en internet, qué proveedores lo pueden alojar, cuánto cuesta cada uno, cómo se paga desde Colombia, quién lo tendría que operar y qué pasa con la base de datos. Precios consultados en las páginas de cada proveedor el 25 de agosto (fuentes al final); la tasa de cambio usada es la TRM del día, cerca de <strong>COP 3.050 por dólar</strong>.
+    </p>
+  </header>
+
+  <nav class="indice" aria-label="Índice">
+    <a href="#resumen">En un minuto</a>
+    <a href="#necesita">Qué necesita el programa</a>
+    <a href="#opciones">Las opciones</a>
+    <a href="#comparativa">Comparativa</a>
+    <a href="#base">La base de datos</a>
+    <a href="#dominio">Dominio y correo</a>
+    <a href="#gremio">Lo que pone el gremio</a>
+    <a href="#recomendacion">Recomendación</a>
+    <a href="#fuentes">Fuentes</a>
+  </nav>
+
+  <section id="resumen">
+    <h2>En un minuto</h2>
+    <p class="lede">
+      El programa no exige nada raro: es una aplicación PHP con una base de datos, unos archivos que la gente sube y un correo que envía códigos y acuses. Puede vivir en <strong>seis tipos de sitio</strong>, desde una nube especializada en Laravel por unos cinco dólares al mes hasta un hosting colombiano que se paga por PSE.
+    </p>
+    <p class="lede">
+      Lo que cambia entre opciones no es tanto el precio (todas caben entre <strong>US$0 y US$20 al mes</strong>) sino tres cosas: <strong>con qué se paga</strong> (tarjeta internacional o PSE en pesos), <strong>quién la mantiene</strong> después del 22 de septiembre, y <strong>cuánto trabajo falta</strong> para que quede en línea. Por eso la decisión es del gremio, no técnica.
+    </p>
+  </section>
+
+  <section id="necesita">
+    <h2>Qué necesita el programa de cualquier proveedor</h2>
+    <p class="sub">Es la lista de chequeo para descartar un proveedor en cinco minutos. Todo esto ya está resuelto del lado del código; lo que falta es el sitio donde ponerlo.</p>
+    <div class="tabla"><table>
+      <thead><tr><th>Necesidad</th><th>Detalle</th><th>Qué pasa si el proveedor no lo da</th></tr></thead>
+      <tbody>
+        <tr><td><strong>PHP 8.3 o superior</strong> con <code>intl</code>, <code>gd</code>, <code>exif</code>, <code>fileinfo</code>, <code>mbstring</code></td><td>Es lo que exige Laravel 13 y Filament 4; <code>composer.json</code> se niega a instalar sin esas extensiones.</td><td>No arranca. Es el primer filtro para un hosting compartido.</td></tr>
+        <tr><td><strong>Base de datos</strong></td><td>Validada en <strong>PostgreSQL 17</strong> (35 migraciones y 20 sembradores en verde) y en <strong>SQLite</strong> (toda la suite corre sobre ella). MySQL/MariaDB: ver la sección «La base de datos».</td><td>Con otro motor hay que repetir el barrido que se hizo para PostgreSQL (unas horas) antes de fiarse.</td></tr>
+        <tr><td><strong>Disco persistente o bucket S3</strong></td><td>Las fotos de los asociados y los formatos PDF de la guía se suben desde el panel. En un servidor normal se quedan en el disco; en una nube «serverless» el disco se borra en cada despliegue y hay que usar un bucket (el código ya lo soporta y está probado).</td><td>Las imágenes desaparecen al siguiente despliegue.</td></tr>
+        <tr><td><strong>Correo saliente (SMTP)</strong></td><td>Códigos del segundo factor del panel, acuses de PQR, avisos de la bolsa de empleo. Sirve cualquier cuenta con SMTP: el correo institucional del gremio o un servicio gratuito.</td><td>Nadie puede entrar al panel (el código no llega) y las PQR no acusan recibo.</td></tr>
+        <tr><td><strong>Tareas programadas (cron)</strong></td><td>Tres comandos diarios de madrugada depuran datos personales vencidos (bolsas, mensajes, inscripciones): es lo que cumple los plazos de retención de la Ley 1581.</td><td>Los datos personales no se borran solos al vencer.</td></tr>
+        <tr><td><strong>HTTPS y dominio propio</strong></td><td>El cronograma exige certificado SSL (semana 8). Casi todos los proveedores lo dan gratis con Let's Encrypt.</td><td>Incumple el cronograma y el navegador marca el sitio como inseguro.</td></tr>
+        <tr><td><strong>Compilar los estilos</strong> (Node) o subirlos compilados</td><td>El despliegue corre <code>npm run build</code>. En un hosting sin Node se sube la carpeta <code>public/build</code> ya compilada.</td><td>Un paso manual más en cada actualización.</td></tr>
+        <tr><td>Cola de trabajos</td><td><strong>No hace falta</strong>: todo es síncrono por decisión (runbook §6.2).</td><td>—</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="opciones">
+    <h2>Las opciones, una por una</h2>
+    <p class="sub">Ordenadas de menor a mayor carga de operación para el gremio. Los costos son por mes y en la moneda en que cobra cada proveedor.</p>
+
+    <div class="opcion">
+      <div class="cabecera"><span class="letra">A</span><h3>Laravel Cloud · la nube oficial de Laravel</h3><span class="chip ok">Preparada: runbook listo, validada en su base de datos</span></div>
+      <p class="resumen">Plataforma administrada por los creadores de Laravel: se conecta al repositorio de GitHub y despliega sola. Es la decisión tomada el 15 de agosto y la única para la que ya existe un procedimiento escrito y probado (<code>docs/ingenieria/runbook-despliegue.md</code>).</p>
+      <div class="datos">
+        <div class="dato"><div class="k">Costo</div><div class="v">US$5/mes + uso (incluye US$5 de uso). Primeros 30 días gratis. Estimado real: US$5–10/mes (≈ COP 15.000–30.000)</div></div>
+        <div class="dato"><div class="k">Se paga con</div><div class="v">Tarjeta de crédito/débito internacional, en dólares. Sin PSE.</div></div>
+        <div class="dato"><div class="k">Base de datos</div><div class="v">PostgreSQL «serverless» (Neon) o MySQL, facturados por uso; duermen cuando nadie consulta</div></div>
+        <div class="dato"><div class="k">Operación</div><div class="v">Casi nula: SSL, dominio, despliegues, tareas programadas y copias de seguridad los maneja la plataforma</div></div>
+      </div>
+      <div class="pc">
+        <div class="pros"><h4>A favor</h4><ul>
+          <li>Ya está todo listo: la aplicación corrió completa contra su PostgreSQL, el bucket de archivos (Cloudflare R2) está soportado y probado, y hay un runbook de 512 líneas. Poner el sitio en línea toma una tarde.</li>
+          <li>Límite de gasto configurable: al llegar al tope, la plataforma pausa en vez de cobrar de más. Se le puede presentar a la junta un techo de ~US$10/mes.</li>
+          <li>Todo lo que un gremio sin técnico necesita viene incluido: HTTPS, dominio propio, despliegue con un clic, tareas programadas, copias de la base de datos.</li>
+          <li>Con tráfico bajo la aplicación «duerme» y casi no consume: Laravel calcula que compute + Postgres activos 1 hora al día gastan los US$5 en unos 4 meses.</li>
+        </ul></div>
+        <div class="contras"><h4>En contra</h4><ul>
+          <li><strong>Exige tarjeta internacional en dólares.</strong> Es exactamente lo que el gremio no ha podido aportar (riesgo R-14).</li>
+          <li>No incluye correo saliente: hay que sumar un SMTP (gratis, ver «Dominio y correo»).</li>
+          <li>Servidores en Estados Unidos: legal para la Ley 1581 (nivel adecuado, Circular 005/2017 de la SIC), pero hay que dejar por escrito quién es el responsable del tratamiento.</li>
+          <li>La primera visita después de dormir tarda medio segundo más; el precio final depende del uso y no es un valor fijo.</li>
+          <li>Una sola empresa proveedora; migrar a otra parte cuesta unas horas, no hay atadura contractual.</li>
+        </ul></div>
+      </div>
+    </div>
+
+    <div class="opcion">
+      <div class="cabecera"><span class="letra">B</span><h3>Nube genérica · Railway, Render</h3><span class="chip warn">Falta contenedorizar la aplicación</span></div>
+      <p class="resumen">Plataformas de despliegue para cualquier lenguaje. Mismo modelo que A (se conecta al repositorio y despliega), pero sin las piezas específicas de Laravel: el proyecto tendría que llevar su propia receta de construcción (Dockerfile o similar), que hoy no existe.</p>
+      <div class="datos">
+        <div class="dato"><div class="k">Costo</div><div class="v">Railway: Hobby US$5/mes + uso. Render: servicio web US$7 + Postgres US$6 = US$13/mes</div></div>
+        <div class="dato"><div class="k">Se paga con</div><div class="v">Tarjeta internacional, en dólares</div></div>
+        <div class="dato"><div class="k">Base de datos</div><div class="v">Postgres como servicio (Railway ≈ US$0,25/GB-mes de disco + cómputo; Render Basic-256 MB US$6/mes)</div></div>
+        <div class="dato"><div class="k">Operación</div><div class="v">Baja, pero el equipo mantiene la receta del contenedor</div></div>
+      </div>
+      <div class="pc">
+        <div class="pros"><h4>A favor</h4><ul>
+          <li>Costo parecido al de A y sin depender del ecosistema Laravel.</li>
+          <li>Railway ofrece discos persistentes, así que el bucket sería opcional.</li>
+        </ul></div>
+        <div class="contras"><h4>En contra</h4><ul>
+          <li>Mismo problema de pago que A (tarjeta en dólares) y además <strong>trabajo nuevo</strong>: escribir y probar la receta del contenedor, el cron y el correo. Es reabrir un despliegue que en A ya está cerrado.</li>
+          <li>Los niveles gratuitos no sirven para producción: Render apaga el servicio tras 15 minutos sin visitas y su Postgres gratis caduca a los 30 días.</li>
+          <li>Sin soporte específico para Laravel ni herramientas del ecosistema.</li>
+        </ul></div>
+      </div>
+    </div>
+
+    <div class="opcion">
+      <div class="cabecera"><span class="letra">C</span><h3>Servidor virtual administrado · Laravel Forge + un VPS</h3><span class="chip neutro">Control total, con panel</span></div>
+      <p class="resumen">Se alquila un servidor virtual (DigitalOcean, Hetzner o el propio «Laravel VPS») y Forge lo instala, lo actualiza, despliega desde GitHub, renueva el SSL y programa el cron desde un panel web. Es lo que usan muchas empresas pequeñas con Laravel.</p>
+      <div class="datos">
+        <div class="dato"><div class="k">Costo</div><div class="v">Forge Hobby ≈ US$12/mes + servidor desde US$6 (Laravel VPS o DigitalOcean 1 GB) ≈ <strong>US$18/mes</strong> (≈ COP 55.000)</div></div>
+        <div class="dato"><div class="k">Se paga con</div><div class="v">Tarjeta internacional; Hetzner y DigitalOcean aceptan además PayPal</div></div>
+        <div class="dato"><div class="k">Base de datos</div><div class="v">PostgreSQL instalado en el mismo servidor, sin costo extra</div></div>
+        <div class="dato"><div class="k">Operación</div><div class="v">Media: Forge automatiza, pero alguien vigila copias, espacio y reinicios</div></div>
+      </div>
+      <div class="pc">
+        <div class="pros"><h4>A favor</h4><ul>
+          <li>Disco persistente: las fotos y los PDF viven en el servidor; no hace falta bucket.</li>
+          <li>PostgreSQL local, rápido y gratis; correo y cron bajo control propio.</li>
+          <li>Se puede elegir región (Hetzner tiene servidores en Estados Unidos; DigitalOcean en Nueva York/Atlanta) y cambiar de proveedor de VPS sin cambiar de panel.</li>
+        </ul></div>
+        <div class="contras"><h4>En contra</h4><ul>
+          <li>El más caro de la lista y sigue exigiendo tarjeta en dólares (dos cuentas: Forge y el proveedor del VPS).</li>
+          <li>Un servidor es responsabilidad de alguien: parches, copias de seguridad de la base, disco lleno, reinicios. El consejo del 15 de agosto lo estimó en 15–30 horas de arranque y 24–60 horas al año, que hoy nadie del gremio va a poner.</li>
+          <li>Un solo servidor: si se cae, se cae todo hasta que alguien lo atienda.</li>
+        </ul></div>
+      </div>
+    </div>
+
+    <div class="opcion">
+      <div class="cabecera"><span class="letra">D</span><h3>Servidor virtual en pesos · Hostinger KVM u otro VPS pagado desde Colombia</h3><span class="chip warn">Barato, pero sin nadie que lo opere</span></div>
+      <p class="resumen">Un VPS contratado en pesos colombianos, a nombre del gremio, sin capa administrada: el equipo instala PHP, PostgreSQL, nginx, SSL y cron a mano (o con una herramienta gratuita como Coolify). Es la opción que resuelve el problema del pago, a cambio de cargar toda la operación sobre una persona.</p>
+      <div class="datos">
+        <div class="dato"><div class="k">Costo</div><div class="v">Hostinger KVM 1 (1 vCPU, 4 GB, 50 GB): COP 19.900/mes en promoción con pago anticipado; renueva a COP 38.900/mes. Hetzner CX23: €3,99 + €0,50 IPv4</div></div>
+        <div class="dato"><div class="k">Se paga con</div><div class="v">Hostinger cobra en COP y permite hasta 12 cuotas; Hetzner por tarjeta o PayPal en euros</div></div>
+        <div class="dato"><div class="k">Base de datos</div><div class="v">PostgreSQL o SQLite en el mismo servidor</div></div>
+        <div class="dato"><div class="k">Operación</div><div class="v">Alta: todo es manual, incluidas las copias de seguridad</div></div>
+      </div>
+      <div class="pc">
+        <div class="pros"><h4>A favor</h4><ul>
+          <li>Factura en pesos, a nombre del gremio, sin tarjeta internacional. Hostinger incluye copias semanales, protección DDoS y un dominio gratis el primer año.</li>
+          <li>Control total y disco persistente; PostgreSQL gratis en el mismo servidor.</li>
+          <li>El precio de entrada es el más bajo entre los servidores.</li>
+        </ul></div>
+        <div class="contras"><h4>En contra</h4><ul>
+          <li><strong>Sin operador no funciona.</strong> Instalar y asegurar el servidor son 15–30 horas; después, alguien tiene que aplicar parches y revisar copias. Los proveedores colombianos que sí administran cobran aparte (HostingFácil, por ejemplo, desde COP 300.000/mes por administración).</li>
+          <li>La promoción obliga a pagar por adelantado; la renovación casi duplica el precio.</li>
+          <li>Ningún proveedor consultado ofrece servidores en Colombia con esta relación precio/servicio: Hostinger no tiene centro de datos en el país, y HostingFácil (Medellín) tenía sus VPS «no disponibles» el 25 de agosto.</li>
+          <li>La práctica termina el 22 de septiembre: habría que acordar por escrito quién sigue operando (DPV-13) o contratar la administración.</li>
+        </ul></div>
+      </div>
+    </div>
+
+    <div class="opcion">
+      <div class="cabecera"><span class="letra">E</span><h3>Hosting compartido en Colombia · cPanel/hPanel con MySQL</h3><span class="chip ok" id="chip-mysql">La aplicación pasa sobre MySQL (probado hoy)</span></div>
+      <p class="resumen">El hosting «de toda la vida» que venden Hostinger, Colombia Cloud, MI.COM.CO o Latinoamérica Hosting: se sube la aplicación a una carpeta, el proveedor pone PHP, MySQL, correo y SSL. Es lo más barato y lo más fácil de pagar desde Colombia, y lo que menos operación exige, pero casi ningún plan compartido trae PostgreSQL, así que la aplicación tendría que correr sobre MySQL/MariaDB.</p>
+      <div class="datos">
+        <div class="dato"><div class="k">Costo</div><div class="v">Hostinger Premium: COP 7.900/mes (48 meses), renueva a COP 29.900. Colombia Cloud cPanel: COP 89.900–259.900 el primer año, 139.900–339.900 al renovar</div></div>
+        <div class="dato"><div class="k">Se paga con</div><div class="v">COP: PSE, tarjetas, Nequi, Efecty o Baloto según el proveedor; factura colombiana</div></div>
+        <div class="dato"><div class="k">Base de datos</div><div class="v">MySQL/MariaDB (PostgreSQL casi nunca). SQLite también sirve si el plan lo permite</div></div>
+        <div class="dato"><div class="k">Operación</div><div class="v">Baja: el proveedor opera el servidor; el equipo solo sube versiones</div></div>
+      </div>
+      <div class="pc">
+        <div class="pros"><h4>A favor</h4><ul>
+          <li>Se paga en pesos, con PSE, a nombre del gremio y con soporte en español. Resuelve de raíz el bloqueo del medio de pago.</li>
+          <li>Trae correo institucional propio (que además sirve como SMTP para los códigos y los acuses), dominio el primer año y SSL.</li>
+          <li>Disco persistente, copias del proveedor, y casi nada que operar.</li>
+        </ul></div>
+        <div class="contras"><h4>En contra</h4><ul>
+          <li>Hay que confirmar en cada plan: PHP 8.3+ con <code>intl</code> y <code>gd</code>, acceso SSH y Composer, cron y que la carpeta pública pueda apuntar a <code>public/</code>. Los planes más baratos suelen fallar en uno de estos puntos.</li>
+          <li>Rendimiento compartido con otros clientes: la meta de 2,5 segundos se cumple hoy con margen (972 ms), pero habría que medirla allí.</li>
+          <li>Sin Node: cada actualización exige subir los estilos ya compilados; el despliegue deja de ser «un clic».</li>
+          <li>Las promociones exigen pagar 1 a 4 años por adelantado y renuevan a 3–4 veces el precio.</li>
+        </ul></div>
+      </div>
+    </div>
+
+    <div class="opcion">
+      <div class="cabecera"><span class="letra">F</span><h3>Alojamiento prestado · Asobares Nacional o la Cámara de Comercio</h3><span class="chip neutro">Por preguntar</span></div>
+      <p class="resumen">Pedirle a Asobares Nacional (dueña de <code>asobares.org</code>, el dominio del correo del capítulo) o a la Cámara de Comercio de Armenia, que aloja la oficina del gremio, espacio en su infraestructura o al menos un subdominio del tipo <code>quindio.asobares.org</code>. No es una opción técnica sino institucional, y por eso conviene preguntarla antes de gastar.</p>
+      <div class="datos">
+        <div class="dato"><div class="k">Costo</div><div class="v">Potencialmente cero para el capítulo</div></div>
+        <div class="dato"><div class="k">Se paga con</div><div class="v">Convenio, no tarjeta</div></div>
+        <div class="dato"><div class="k">Base de datos</div><div class="v">La que tenga la institución (probablemente MySQL de un hosting compartido)</div></div>
+        <div class="dato"><div class="k">Operación</div><div class="v">De la institución anfitriona</div></div>
+      </div>
+      <div class="pc">
+        <div class="pros"><h4>A favor</h4><ul>
+          <li>Continuidad institucional: el sitio queda bajo una organización que no se va el 22 de septiembre.</li>
+          <li>Un subdominio de <code>asobares.org</code> no cuesta nada y comunica la pertenencia al gremio nacional.</li>
+        </ul></div>
+        <div class="contras"><h4>En contra</h4><ul>
+          <li>Depende de decisiones de terceros y de su tecnología; puede tardar semanas que el cronograma no tiene.</li>
+          <li>Si la infraestructura es un hosting compartido, aplican todas las condiciones de la opción E.</li>
+          <li>El capítulo no controla el servidor ni los accesos.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="comparativa">
+    <h2>Comparativa</h2>
+    <p class="sub">Un vistazo para la reunión. «Horas de arranque» es el tiempo estimado hasta tener el sitio en línea con dominio y HTTPS; «operación» es lo que alguien tiene que dedicarle después.</p>
+    <div class="tabla"><table>
+      <thead><tr><th>Opción</th><th>Costo mensual</th><th>Moneda y pago</th><th>Base de datos</th><th>Archivos subidos</th><th>Correo</th><th>Arranque · operación</th><th>Estado hoy</th></tr></thead>
+      <tbody>
+        <tr><td><strong>A · Laravel Cloud</strong></td><td class="num">US$5–10</td><td>USD · tarjeta</td><td>Postgres serverless (validado)</td><td>Bucket R2 (soportado y probado)</td><td>SMTP aparte</td><td>Una tarde · casi cero</td><td><span class="chip ok">Runbook listo</span></td></tr>
+        <tr><td><strong>B · Railway / Render</strong></td><td class="num">US$5–13</td><td>USD · tarjeta</td><td>Postgres como servicio</td><td>Disco o bucket</td><td>SMTP aparte</td><td>1–2 días · baja</td><td><span class="chip warn">Falta el contenedor</span></td></tr>
+        <tr><td><strong>C · Forge + VPS</strong></td><td class="num">US$18</td><td>USD · tarjeta o PayPal</td><td>Postgres en el servidor</td><td>Disco del servidor</td><td>SMTP aparte</td><td>1–2 días · media</td><td><span class="chip neutro">Sin preparar</span></td></tr>
+        <tr><td><strong>D · VPS en pesos</strong></td><td class="num">COP 20.000–39.000</td><td>COP · cuotas o PSE según proveedor</td><td>Postgres o SQLite en el servidor</td><td>Disco del servidor</td><td>SMTP aparte</td><td>15–30 h · alta, manual</td><td><span class="chip bad">Nadie lo operaría</span></td></tr>
+        <tr><td><strong>E · Hosting compartido CO</strong></td><td class="num">COP 8.000–30.000</td><td>COP · PSE, Nequi, Efecty</td><td>MySQL/MariaDB (ver abajo) o SQLite</td><td>Disco del proveedor</td><td>Incluido</td><td>1–2 días si la base pasa · baja</td><td><span class="chip ok" id="estado-e">Suite en verde sobre MariaDB</span></td></tr>
+        <tr><td><strong>F · Prestado</strong></td><td class="num">COP 0</td><td>Convenio</td><td>La de la institución</td><td>Disco de la institución</td><td>Incluido</td><td>Semanas de gestión · ajena</td><td><span class="chip neutro">Por preguntar</span></td></tr>
+      </tbody>
+    </table></div>
+    <p>Referencia de cambio: US$5 ≈ COP 15.000 y US$18 ≈ COP 55.000 a la TRM del 25 de agosto. Ninguna opción cuesta más que una mensualidad de afiliado (COP 50.000); la diferencia real está en las horas de alguien.</p>
+  </section>
+
+  <section id="base">
+    <h2>La base de datos</h2>
+    <p class="sub">Dónde viven los asociados, la cartera, las inscripciones y los mensajes. La elección va atada a la del alojamiento, y conviene explicarla con la misma honestidad: qué está probado y qué no.</p>
+
+    <div id="bloque-mysql" class="aviso ok">
+      <p><strong>Prueba del 25 de agosto sobre MySQL/MariaDB: la aplicación pasa.</strong> La suite completa se corrió esta madrugada contra MariaDB 10.11 (el motor típico del hosting compartido) sobre el mismo clon limpio: <strong>820 casos · 809 pasan · 11 omitidas · 0 fallos · 2.904 aserciones · 277 s</strong>, idéntico al resultado sobre SQLite. Después se sembraron los datos de demostración y se levantó el sitio contra esa base: las rutas públicas, el acceso al panel y el portal responden, y el buscador del directorio encuentra los 10 establecimientos con «bar» y con «BAR».</p>
+      <p>Lo que esta prueba <em>no</em> cubre y habría que hacer antes de publicar sobre MySQL: el barrido manual de orden alfabético y acentos que se hizo para PostgreSQL (runbook §14), una prueba de humo con la base real, y confirmar la versión de MySQL/MariaDB del plan contratado.</p>
+    </div>
+
+    <div class="rejilla">
+      <div class="tarjeta">
+        <h4>PostgreSQL administrado (Laravel Cloud, Neon, Supabase, Render, Railway) <span class="chip ok">Validado</span></h4>
+        <p>El motor contra el que se verificó la aplicación el 15 de agosto: 35 migraciones y 20 sembradores en verde, dos incompatibilidades corregidas, buscador ajustado al motor.</p>
+        <ul>
+          <li><strong>A favor:</strong> nadie del gremio administra nada; copias automáticas y recuperación a un punto en el tiempo; crece sin cambiar de servidor; es el motor que prefieren los proveedores serios.</li>
+          <li><strong>En contra:</strong> se cobra en dólares y por uso; los niveles gratuitos tienen trampa (Supabase pausa el proyecto tras 7 días de poca actividad; Neon limita a 100 horas de cómputo y 0,5 GB); vive lejos del servidor si se contrata por separado.</li>
+        </ul>
+      </div>
+      <div class="tarjeta">
+        <h4>PostgreSQL en el mismo servidor (opciones C y D) <span class="chip ok">Validado</span></h4>
+        <p>Mismo motor, instalado junto a la aplicación en el VPS.</p>
+        <ul>
+          <li><strong>A favor:</strong> gratis, rapidísimo (misma máquina), sin límites de uso, y el motor ya está probado.</li>
+          <li><strong>En contra:</strong> las copias de seguridad las programa y revisa una persona (<code>pg_dump</code> diario a otro sitio); si el servidor muere, muere la base con él; hay que actualizarlo.</li>
+        </ul>
+      </div>
+      <div class="tarjeta">
+        <h4>MySQL / MariaDB (hosting compartido, Laravel MySQL) <span class="chip ok" id="chip-mysql-2">Suite en verde (25 ago)</span></h4>
+        <p>El motor universal del hosting compartido. La aplicación usa el generador de consultas de Laravel, que traduce a cada motor, pero cada motor tiene sus mañas: por eso se hizo un barrido para PostgreSQL y por eso se corrió hoy la suite completa sobre MariaDB 10.11.</p>
+        <ul>
+          <li><strong>A favor:</strong> está en todos los hostings baratos y en pesos; Laravel Cloud también lo ofrece con copias diarias (US$0,10 por GB-mes de almacenamiento en EE. UU.).</li>
+          <li><strong>En contra:</strong> orden alfabético y acentos se comportan distinto; cualquier diferencia hay que cazarla con la suite antes de publicar; la contadora y las herramientas externas se conectan con otro cliente.</li>
+        </ul>
+      </div>
+      <div class="tarjeta">
+        <h4>SQLite en producción (un solo servidor) <span class="chip ok">Es lo que corre hoy</span></h4>
+        <p>Un archivo en el disco, sin servidor de base de datos. Es lo que usa el desarrollo y sobre lo que corren las 820 pruebas; Laravel lo trae por defecto desde la versión 11.</p>
+        <ul>
+          <li><strong>A favor:</strong> cero administración, cero costo, copia de seguridad = copiar un archivo; para 60 asociados y decenas de visitas al día sobra; el radicado de PQR queda perfectamente serializado.</li>
+          <li><strong>En contra:</strong> solo sirve donde el disco es persistente (nunca en A ni en B sin disco); un solo servidor; sin acceso remoto para la oficina; las escrituras van de una en una (irrelevante a este volumen, un problema si el sitio creciera mucho).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tabla"><table>
+      <thead><tr><th>Motor</th><th>Estado de verificación</th><th>Dónde encaja</th><th>Copias de seguridad</th></tr></thead>
+      <tbody>
+        <tr><td>PostgreSQL 17</td><td><span class="chip ok">Suite completa en verde (15 ago) · 2 arreglos aplicados</span></td><td>A, B, C, D</td><td>Del proveedor (A, B) o <code>pg_dump</code> programado (C, D)</td></tr>
+        <tr><td>SQLite</td><td><span class="chip ok">820 casos en verde (25 ago)</span></td><td>C, D, E (si el plan lo permite)</td><td>Copiar el archivo <code>database.sqlite</code></td></tr>
+        <tr><td>MySQL / MariaDB 10.11</td><td><span class="chip ok" id="chip-mysql-3">820 casos en verde (25 ago) · falta el barrido manual de orden y acentos</span></td><td>E, F, Laravel MySQL en A</td><td>Del proveedor (cPanel/hPanel) o <code>mysqldump</code></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="dominio">
+    <h2>Dominio y correo</h2>
+    <div class="rejilla">
+      <div class="tarjeta">
+        <h4>El dominio</h4>
+        <ul>
+          <li><strong>Subdominio de Asobares Nacional</strong> (<code>quindio.asobares.org</code>): costo cero y la mejor señal institucional; requiere que la Nacional apunte el DNS. Preguntar primero.</li>
+          <li><strong>Dominio propio en pesos</strong>, comprado a nombre del gremio en un registrador colombiano (MI.COM.CO acepta PSE, Nequi, Efecty y Baloto): <code>.com.co</code> COP 114.990 el primer año y 149.990 al renovar; <code>.co</code> 149.990 / 229.990; <code>.org</code> 94.990; <code>.com</code> 59.990 / 99.990.</li>
+          <li>El dominio se puede comprar en pesos aunque el alojamiento sea A, B o C: solo hay que apuntar el DNS. Es la forma de que el nombre quede a nombre del gremio pase lo que pase con el proveedor.</li>
+        </ul>
+      </div>
+      <div class="tarjeta">
+        <h4>El correo saliente (SMTP)</h4>
+        <ul>
+          <li><strong>La cuenta institucional que ya existe</strong> (<code>asobaresquindio@asobares.org</code>): si está en Google Workspace o Microsoft 365, sirve como SMTP con una contraseña de aplicación y sin costo. Es lo primero que hay que averiguar.</li>
+          <li><strong>Brevo gratis:</strong> 300 correos al día, con la marca de Brevo en el pie (quitarla cuesta US$11/mes). Sobra para códigos y acuses.</li>
+          <li><strong>Resend gratis:</strong> 3.000 al mes con tope de 100 al día; exige verificar el dominio.</li>
+          <li>En la opción E el correo viene incluido con el hosting.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="gremio">
+    <h2>Lo que el gremio tiene que poner, sea cual sea la opción</h2>
+    <ul>
+      <li><strong>Un correo institucional</strong> como titular de todas las cuentas (proveedor de alojamiento, dominio, SMTP, GitHub). Ya existe; hay que usarlo para esto.</li>
+      <li><strong>Un medio de pago a nombre del gremio</strong>: tarjeta internacional para A, B o C; PSE o cuotas en pesos para D o E. Nunca la tarjeta de un practicante: cuando la práctica termine, las llaves se irían con él.</li>
+      <li><strong>Una persona responsable</strong> con acceso a esas cuentas y, si la opción es C o D, alguien que opere el servidor (por escrito, DPV-13).</li>
+      <li><strong>La decisión del dominio</strong> (subdominio de la Nacional o dominio propio) y el nombre exacto.</li>
+      <li><strong>Quién firma como responsable del tratamiento de datos</strong> (Ley 1581) cuando la base salga del computador del equipo.</li>
+    </ul>
+  </section>
+
+  <section id="recomendacion">
+    <h2>Recomendación</h2>
+    <div class="aviso">
+      <p><strong>Si el gremio puede aportar una tarjeta internacional: opción A (Laravel Cloud), tal como se decidió el 15 de agosto.</strong> Está preparada, probada y documentada; el sitio queda en línea en una tarde, con un techo de gasto de ~US$10/mes que la propia plataforma hace cumplir, y sin que nadie del gremio tenga que operar un servidor. Se complementa con el dominio comprado en pesos y con el SMTP del correo institucional.</p>
+    </div>
+    <div class="aviso warn">
+      <p><strong>Si la tarjeta internacional no es posible</strong>, la salida en pesos con menos carga es la <strong>opción E (hosting compartido colombiano)</strong>, ahora que la suite completa pasa sobre MySQL/MariaDB (prueba de hoy, arriba), a condición de que el plan traiga PHP 8.3 con <code>intl</code> y <code>gd</code>, SSH y cron, y de hacer antes el barrido manual de orden y acentos. Cuesta unos COP 10.000–30.000 al mes, se paga por PSE y el proveedor opera el servidor. Un VPS en pesos (opción D) es más potente pero exige un operador que hoy no existe.</p>
+    </div>
+    <p>En paralelo, y sin gastar nada, conviene <strong>preguntar a Asobares Nacional</strong> por el subdominio <code>quindio.asobares.org</code> y por si tienen alojamiento que prestar (opción F). Lo que no conviene es esperar: cada semana sin servidor deja sin ejecutar la semana 7 del cronograma (pruebas en dispositivos reales) y el certificado SSL de la semana 8.</p>
+  </section>
+
+  <section id="fuentes">
+    <h2>Fuentes consultadas el 25 de agosto de 2026</h2>
+    <ul class="fuentes">
+      <li>Laravel Cloud: <a href="https://laravel.com/cloud/pricing">planes y precios</a>, <a href="https://laravel.com/cloud/docs/free-trial">primeros 30 días y créditos</a>, <a href="https://laravel.com/cloud/docs/resources/databases/postgres">Serverless Postgres</a>, <a href="https://laravel.com/cloud/docs/resources/databases/laravel-mysql">Laravel MySQL</a>, <a href="https://laravel.com/cloud/docs/resources/object-storage">almacenamiento de objetos (R2)</a>; <a href="https://laravel-news.com/laravel-cloud-adds-scale-to-zero-and-spending-limits">Laravel News, 2 jun 2026</a>.</li>
+      <li>Laravel Forge: <a href="https://laracopilot.com/blog/laravel-forge-pricing-2026/">precios 2026 (LaraCopilot, 1 jul 2026)</a>; <a href="https://laravel.com/blog/everything-you-need-to-know-about-the-new-forge-laravel-vps">Laravel VPS desde US$6</a>.</li>
+      <li>Railway: <a href="https://costbench.com/software/developer-tools/railway/">planes y tarifas 2026 (CostBench, 9 jul 2026)</a>. Render: <a href="https://kuberns.com/blogs/render-pricing/">precios 2026 (Kuberns, act. 14 ago 2026)</a>.</li>
+      <li>DigitalOcean: <a href="https://www.digitalocean.com/pricing/droplets">precios de Droplets</a>. Hetzner: <a href="https://www.bitdoze.com/hetzner-cloud-cost-optimized-plans/">planes tras el alza de 2026 (Bitdoze, 12 jun 2026)</a>.</li>
+      <li>Hostinger Colombia: <a href="https://www.hostinger.com/co/vps">VPS KVM</a> y <a href="https://www.hostinger.com/co/hosting-web">hosting web</a> (precios en COP). Colombia Cloud: <a href="https://www.colombiacloud.co/cuanto-cuesta-hosting-colombia-2026/">precios de hosting en Colombia 2026</a>. HostingFácil: <a href="https://www.hostingfacil.co/servidores-vps-colombia">VPS y medios de pago</a>. Latinoamérica Hosting: <a href="https://www.latinoamericahosting.com.co/medios-de-pago/">medios de pago</a>.</li>
+      <li>Dominios: <a href="https://mi.com.co/precios">MI.COM.CO, precios y medios de pago</a>.</li>
+      <li>Correo: <a href="https://resend.com/docs/knowledge-base/account-quotas-and-limits">límites de Resend</a>; <a href="https://www.emailsoftwareinsights.com/reviews/brevo/pricing/free-plan/">plan gratuito de Brevo</a>.</li>
+      <li>Bases de datos administradas: <a href="https://www.bytebase.com/blog/postgres-hosting-options-pricing-comparison/">comparativa Bytebase (12 jul 2026)</a>; <a href="https://supabase.com/docs/guides/platform/free-project-pausing">pausa de proyectos gratuitos en Supabase</a>.</li>
+      <li>TRM: <a href="https://www.capitalcolombia.com/sec-trm_precio_dolar_en_colombia">Capital Colombia, 24–25 ago 2026</a>.</li>
+      <li>Del propio proyecto: <code>docs/ingenieria/runbook-despliegue.md</code>, <code>.env.staging.example</code>, <code>material/prompt-maestro-laravel-filament.md</code> §20 (decisión del 15 ago) y §26, <code>composer.json</code>, <code>routes/console.php</code>.</li>
+    </ul>
+  </section>
+
+  <footer>
+    Los precios promocionales de los proveedores colombianos exigen pagar varios años por adelantado y renuevan más caro; los precios en dólares son «más uso» y dependen del tráfico. Antes de contratar cualquier opción, confirmar el precio en la página del proveedor ese mismo día.
+  </footer>
+</div>
+</body></html>
