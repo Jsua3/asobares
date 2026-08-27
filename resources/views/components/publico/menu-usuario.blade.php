@@ -119,7 +119,9 @@
                         </svg>
                         Ir al panel del gremio
                     </a>
-                @else
+                @endif
+
+                @if ($usuario?->esAsociado())
                     <a href="{{ route('mi-cuenta.index') }}"
                        class="fila-pulsable flex items-center gap-2.5 rounded-lg px-3 py-3 text-sm text-suave hover:text-fuerte">
                         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.7"

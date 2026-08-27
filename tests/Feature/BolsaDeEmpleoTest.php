@@ -266,4 +266,68 @@ class BolsaDeEmpleoTest extends TestCase
         $this->assertSame(1, Aspirante::count());
         $this->assertSame('Duván Alexis Marín', Aspirante::firstOrFail()->nombre);
     }
+
+    public function test_sin_vacantes_el_muro_no_habla_de_filtros(): void
+    {
+        $this->get(route('empleo.index'))
+            ->assertSuccessful()
+            ->assertSee('Todavía no hay vacantes abiertas')
+            ->assertDontSee('No hay vacantes con ese filtro');
+    }
+
+    public function test_un_filtro_sin_resultados_lo_dice_con_claridad(): void
+    {
+        Vacante::factory()->publicado()->create([
+            'cargo' => 'Bartender de barra',
+            'categoria_cargo' => CargoDelSector::Barra,
+        ]);
+
+        $this->get(route('empleo.index', ['categoria' => CargoDelSector::Cocina->value]))
+            ->assertSuccessful()
+            ->assertSee('No hay vacantes con ese filtro')
+            ->assertDontSee('Bartender de barra');
+    }
+
+    public function test_el_error_del_perfil_devuelve_al_formulario(): void
+    {
+        $this->from(route('empleo.index'))
+            ->post(route('empleo.aspirante'), [
+                'nombre' => 'Sin correo',
+                'cargo_interes' => 'Bartender',
+                'categoria_cargo' => CargoDelSector::Barra->value,
+                'acepta_datos' => '1',
+            ])
+            ->assertRedirect(route('empleo.index').'#perfil')
+            ->assertSessionHasErrors('correo');
+    }
+
+    public function test_el_error_de_la_postulacion_devuelve_al_formulario(): void
+    {
+        $vacante = Vacante::factory()->publicado()->create();
+
+        $this->from(route('empleo.show', $vacante))
+            ->post(route('empleo.postular', $vacante), [
+                'nombre' => 'Sin correo',
+                'acepta_datos' => '1',
+            ])
+            ->assertRedirect(route('empleo.show', $vacante).'#postularme')
+            ->assertSessionHasErrors('correo');
+    }
+
+    public function test_el_muro_y_el_detalle_no_exponen_datos_de_quien_se_postulo(): void
+    {
+        $vacante = Vacante::factory()->publicado()->create();
+        Postulacion::factory()->for($vacante)->create([
+            'nombre' => 'Candidato Privado',
+            'correo' => 'candidato.privado@ejemplo.test',
+        ]);
+
+        $this->get(route('empleo.index'))
+            ->assertDontSee('candidato.privado@ejemplo.test')
+            ->assertDontSee('Candidato Privado');
+
+        $this->get(route('empleo.show', $vacante))
+            ->assertDontSee('candidato.privado@ejemplo.test')
+            ->assertDontSee('Candidato Privado');
+    }
 }

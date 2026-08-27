@@ -16,6 +16,11 @@ class GuardarAspiranteRequest extends FormRequest
         return true;
     }
 
+    protected function getRedirectUrl(): string
+    {
+        return route('empleo.index').'#perfil';
+    }
+
     /** @return array<string, mixed> */
     public function rules(): array
     {

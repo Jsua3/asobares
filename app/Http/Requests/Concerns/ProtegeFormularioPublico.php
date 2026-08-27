@@ -46,7 +46,9 @@ trait ProtegeFormularioPublico
             abort(422);
         }
 
-        throw new ValidationException($validator);
+        throw (new ValidationException($validator))
+            ->errorBag($this->errorBag)
+            ->redirectTo($this->getRedirectUrl());
     }
 
     /**

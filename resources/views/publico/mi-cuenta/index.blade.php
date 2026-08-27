@@ -140,33 +140,41 @@
                 El detalle de cada convenio es información privada de los afiliados. No aparece en el sitio público.
             </p>
 
-            <div class="mt-6 grid gap-5 sm:grid-cols-2">
-                @foreach ($aliados as $aliado)
-                    <div class="tarjeta p-6">
-                        <div class="flex items-start gap-4">
-                            @if ($aliado->logo)
-                                <img src="{{ Storage::disk('public')->url($aliado->logo) }}" alt=""
-                                     loading="lazy" width="64" height="48"
-                                     class="h-12 w-16 shrink-0 rounded-lg object-cover">
-                            @endif
-                            <div class="min-w-0">
-                                <h3 class="font-display text-base font-semibold">{{ $aliado->nombre }}</h3>
-                                <p class="mt-1 text-xs text-apagado">{{ $aliado->descripcion }}</p>
+            @if ($aliados->isEmpty())
+                <div class="tarjeta mt-6 p-12 text-center">
+                    <p class="font-display text-lg font-semibold">Todavía no hay convenios publicados</p>
+                    <p class="mt-2 text-sm text-tenue">
+                        Cuando el gremio publique un aliado con condiciones para afiliados, aparece aquí.
+                    </p>
+                </div>
+            @else
+                <div class="mt-6 grid gap-5 sm:grid-cols-2">
+                    @foreach ($aliados as $aliado)
+                        <div class="tarjeta p-6">
+                            <div class="flex items-start gap-4">
+                                @if ($aliado->logo)
+                                    <img src="{{ Storage::disk('public')->url($aliado->logo) }}" alt=""
+                                         loading="lazy" width="64" height="48"
+                                         class="h-12 w-16 shrink-0 rounded-lg object-cover">
+                                @endif
+                                <div class="min-w-0">
+                                    <h3 class="font-display text-base font-semibold">{{ $aliado->nombre }}</h3>
+                                    <p class="mt-1 text-xs text-apagado">{{ $aliado->descripcion }}</p>
+                                </div>
                             </div>
-                        </div>
 
-                        @if ($aliado->tieneConvenioPrivado())
-                            <div class="mt-4 rounded-xl border border-marca-500/25 bg-marca-panel p-4">
-                                <p class="text-[.65rem] font-semibold uppercase tracking-wider text-acento">
-                                    Condiciones del convenio
+                            @if ($aliado->tieneConvenioPrivado())
+                                <div class="mt-4 rounded-xl border border-marca-500/25 bg-marca-panel p-4">
+                                    <p class="text-[.65rem] font-semibold uppercase tracking-wider text-acento">
+                                        Condiciones del convenio
+                                    </p>
+                                    <p class="mt-2 text-sm leading-relaxed text-tinta">{{ $aliado->detalle_convenio }}</p>
+                                </div>
+                            @else
+                                <p class="mt-4 text-xs text-apagado">
+                                    Este aliado todavía no tiene condiciones comerciales publicadas.
                                 </p>
-                                <p class="mt-2 text-sm leading-relaxed text-tinta">{{ $aliado->detalle_convenio }}</p>
-                            </div>
-                        @else
-                            <p class="mt-4 text-xs text-apagado">
-                                Este aliado todavía no tiene condiciones comerciales publicadas.
-                            </p>
-                        @endif
+                            @endif
 
                         @if ($aliado->url)
                             <a href="{{ $aliado->url }}" target="_blank" rel="noopener"
@@ -177,6 +185,7 @@
                     </div>
                 @endforeach
             </div>
+            @endif
         </section>
     </div>
 </x-layouts.publico>

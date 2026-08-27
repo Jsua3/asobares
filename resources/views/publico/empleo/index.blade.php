@@ -14,10 +14,6 @@
 
     <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
 
-        @if (session('exito'))
-            <x-publico.alerta class="mb-8">{{ session('exito') }}</x-publico.alerta>
-        @endif
-
         {{-- Muro de vacantes --}}
         <section id="vacantes" aria-labelledby="titulo-vacantes">
             <div class="flex flex-wrap items-end justify-between gap-4">
@@ -25,7 +21,7 @@
                 <p class="text-xs text-apagado">{{ ajuste('empleo_aviso') }}</p>
             </div>
 
-            <form method="GET" action="{{ route('empleo.index') }}" class="tarjeta mt-6 grid gap-4 p-5 sm:grid-cols-3">
+            <form method="GET" action="{{ route('empleo.index') }}#vacantes" class="tarjeta mt-6 grid gap-4 p-5 sm:grid-cols-3">
                 <x-publico.campo nombre="categoria" etiqueta="Área" tipo="select"
                                  :valor="$filtros['categoria'] ?? null"
                                  :opciones="['' => 'Todas las áreas'] + collect($categorias)->mapWithKeys(fn ($c) => [$c->value => $c->getLabel()])->all()" />
@@ -45,10 +41,17 @@
 
             @if ($vacantes->isEmpty())
                 <div class="tarjeta mt-6 p-12 text-center">
-                    <p class="font-display text-lg font-semibold">No hay vacantes con ese filtro</p>
-                    <p class="mt-2 text-sm text-tenue">
-                        Deja tu perfil abajo y te avisamos cuando aparezca una que encaje.
-                    </p>
+                    @if (array_filter($filtros ?? []))
+                        <p class="font-display text-lg font-semibold">No hay vacantes con ese filtro</p>
+                        <p class="mt-2 text-sm text-tenue">
+                            Prueba otro municipio o área, o deja tu perfil abajo para que te avisemos.
+                        </p>
+                    @else
+                        <p class="font-display text-lg font-semibold">Todavía no hay vacantes abiertas</p>
+                        <p class="mt-2 text-sm text-tenue">
+                            Deja tu perfil abajo y te avisamos cuando aparezca una que encaje.
+                        </p>
+                    @endif
                 </div>
             @else
                 <ul class="mt-6 space-y-4">
@@ -114,6 +117,10 @@
             <p class="mt-2 text-sm text-tenue">
                 Cuando un establecimiento asociado busque tu cargo, te contactamos. No necesitas cuenta.
             </p>
+
+            @if (session('exito'))
+                <x-publico.alerta class="mt-6">{{ session('exito') }}</x-publico.alerta>
+            @endif
 
             <form method="POST" action="{{ route('empleo.aspirante') }}" class="mt-7 space-y-5">
                 @csrf
