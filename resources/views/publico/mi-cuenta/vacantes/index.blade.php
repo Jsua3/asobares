@@ -6,7 +6,7 @@
         <header class="flex flex-wrap items-end justify-between gap-4">
             <div>
                 <a href="{{ route('mi-cuenta.index') }}" class="enlace-accion text-sm text-acento hover:text-acento-fuerte">
-                    ← Mi cuenta
+                    <x-publico.flecha direccion="izquierda" />&nbsp;Mi cuenta
                 </a>
                 <p class="mt-3 text-sm text-apagado">{{ $asociado->nombre }}</p>
                 <h1 class="mt-1 font-display text-3xl font-bold tracking-tight">Mis vacantes</h1>
