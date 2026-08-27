@@ -6,6 +6,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\AuthenticateSession;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -21,6 +22,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Global, no sólo en `web`: también cubre las descargas y cualquier
         // respuesta que no pase por el grupo del sitio.
         $middleware->append(CabecerasDeSeguridad::class);
+
+        // Rotar la contraseña de un afiliado desde el panel tiene que cerrar la
+        // sesión que alguien tuviera abierta con la clave vieja. Lo fija
+        // `InvalidacionDeSesionTest`, que se comprobó en rojo sin esta línea.
+        $middleware->web(append: [AuthenticateSession::class]);
 
         // El hosting de producción todavía no está decidido. Cuando se elija,
         // TRUSTED_PROXIES debe listar las IPs del balanceador (o `*` si el
