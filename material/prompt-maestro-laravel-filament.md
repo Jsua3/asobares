@@ -1,5 +1,11 @@
 # PROMPT MAESTRO v4 — Plataforma Web ASOBARES Capítulo Quindío (Laravel 13 + Filament 4)
 
+> ## ⇢ EMPIEZA POR EL §0
+>
+> **El §0 «Punto de entrada» es lo primero que debe leer cualquier sesión nueva.** Dice en qué estado está el proyecto, qué se está exigiendo y con qué fecha, qué falta y qué problemas conocidos te van a morder. Las notas de versión de abajo son el registro histórico y se leen después, no antes.
+>
+> ⚠️ **Este prompt YA SE EJECUTÓ.** El párrafo que sigue es del encargo original de agosto y solo aplica si alguien quisiera reconstruir el proyecto desde cero en una carpeta vacía. No es lo que estás haciendo.
+>
 > Copia TODO el contenido desde "## 1. Tu misión" hasta el final y pégalo en Claude Code, dentro de una carpeta vacía. Requisitos previos en tu máquina: PHP ≥ 8.3 con Composer, Node ≥ 20 y Git. Si algo falta, Claude Code puede instalarlo primero.
 >
 > **v2 (1 ago 2026):** incorpora el alcance ampliado de la Reunión 2 con la directiva — bolsa de empleo, directorio de artistas, bolsa de proveedores, estado de cartera del asociado, preferencia PSE y guía normativa reforzada. Los módulos nuevos se construyen en versión mínima demostrable; el alcance definitivo lo fija el documento de requisitos v2 firmado.
@@ -29,7 +35,7 @@
 >
 > **v7 · la trampa que más costó, y que no es técnica:** de veintitantos fallos atrapados en estas dos fases, **cinco fueron pruebas en falso verde escritas por el propio autor del plan** — pruebas que pasaban con el bug reintroducido. Todas tenían la misma forma: `assertSee('alguna palabra')` o una aserción sobre el texto de un archivo, en vez de sobre el comportamiento. Ninguna se detectó leyendo; todas salieron cuando un revisor **mutó el código a propósito** y miró si la prueba se enteraba. Si se relanza cualquier parte de este trabajo: **escribir la prueba no basta, hay que romper el código y ver el rojo.**
 >
-> **v14 (30 ago 2026) — EMPIEZA POR AQUÍ. LA SUITE ESTABA EN ROJO Y NADIE LO SABÍA.** Al medir las cifras que el §27.9 pedía volver a medir antes de citarlas, la suite salió **roja**: `SemillaConFormaTest` fallaba porque a un asociado con cinco meses de mora se le sembraba un pago dentro de su propia ventana de mora. No era la semilla: era **aritmética de calendario**. `now()->subMonths(6)` un 30 de agosto **no da febrero, da el 2 de marzo** —PHP construye `2026-02-30` y lo deja correr al mes siguiente en vez de recortarlo—, así que con un `startOfMonth()` detrás dos cubos distintos aterrizan en el mismo mes y el que se saltaron no lo cubre nadie. **Solo ocurre los días 29, 30 y 31, y solo cuando la resta cruza febrero**: por eso las 820 pruebas del 25 de agosto se midieron un día que no desbordaba y la suite llevaba semanas pasando verde veintitantos días de cada mes. El mismo error estaba en **las tres purgas de retención** —que borraban datos personales hasta dos días **antes** del plazo publicado—, en las ventanas de 18 y 12 meses del observatorio y en el borde estricto de RF-60. Corregido en once archivos, con `VentanaDeMesesTest` fijando la fecha en cuatro días que desbordan para que la guardia valga los 365. Suite de 820 a **870 casos** (859 pasan, 11 omitidas, 0 fallos, 3.115 aserciones). Cerradas de paso dos deudas del §18.6: la vigilancia **por eje** de las ranuras del plugin de tema, que faltaba en los widgets del tablero, y el enum crudo de `RequisitoAperturaFactory`. ⚠️ **Y la lección de método, que es nueva y no la cubrían el v7 ni el v12:** aquí no hubo prueba en falso verde ni revisor que fallara — **la prueba era correcta y el defecto real**, pero el calendario decidía si se veía. Una suite que depende del día en que se ejecuta miente sin que nadie mienta. Ver la nueva **§28**.
+> **v14 (30 ago 2026) — EMPIEZA POR AQUÍ. LA SUITE ESTABA EN ROJO Y NADIE LO SABÍA.** Al medir las cifras que el §27.9 pedía volver a medir antes de citarlas, la suite salió **roja**: `SemillaConFormaTest` fallaba porque a un asociado con cinco meses de mora se le sembraba un pago dentro de su propia ventana de mora. No era la semilla: era **aritmética de calendario**. `now()->subMonths(6)` un 30 de agosto **no da febrero, da el 2 de marzo** —PHP construye `2026-02-30` y lo deja correr al mes siguiente en vez de recortarlo—, así que con un `startOfMonth()` detrás dos cubos distintos aterrizan en el mismo mes y el que se saltaron no lo cubre nadie. **Solo ocurre los días 29, 30 y 31, y solo cuando la resta cruza febrero**: por eso las 820 pruebas del 25 de agosto se midieron un día que no desbordaba y la suite llevaba semanas pasando verde veintitantos días de cada mes. El mismo error estaba en **las tres purgas de retención** —que borraban datos personales hasta dos días **antes** del plazo publicado—, en las ventanas de 18 y 12 meses del observatorio y en el borde estricto de RF-60. Corregido en once archivos, con `VentanaDeMesesTest` fijando la fecha en cuatro días que desbordan para que la guardia valga los 365. Suite de 820 a **870 casos** (859 pasan, 11 omitidas, 0 fallos, 3.115 aserciones) — y a **871** al cerrar el v14, con la prueba del acuse del §28.5; esa es la cifra vigente, re-medida el 30 de agosto por la tarde. Cerradas de paso dos deudas del §18.6: la vigilancia **por eje** de las ranuras del plugin de tema, que faltaba en los widgets del tablero, y el enum crudo de `RequisitoAperturaFactory`. ⚠️ **Y la lección de método, que es nueva y no la cubrían el v7 ni el v12:** aquí no hubo prueba en falso verde ni revisor que fallara — **la prueba era correcta y el defecto real**, pero el calendario decidía si se veía. Una suite que depende del día en que se ejecuta miente sin que nadie mienta. Ver la nueva **§28**.
 >
 > **v13 (28–30 ago 2026) — EL GREMIO VIO LA PLATAFORMA Y LO QUE FALLÓ FUE LO VISUAL.** El viernes 28 de agosto se demostró el sitio y el panel ante el directivo del capítulo, la dirección ejecutiva y la contadora. **Ninguna funcionalidad fue objetada**; toda la inconformidad es visual, de contenido y de encuadre — «lo visual es lo que tiene que ser, también muy impactante» — y el equipo reconoció en la mesa que «la parte visual la dejamos de último». El cierre fue un plazo del cliente: **una a dos semanas para levantar lo visual y volver a mostrarlo** (entre el 4 y el 11 de septiembre). La nueva **sección 27 manda sobre el orden de trabajo del producto** y es lo primero que debe leer una sesión nueva; el §26 sigue mandando sobre lo que no es código (cuenta institucional, despliegue, firmas) y su §26.4 sigue vigente entero. ⚠️ **Deja de ser cierto que «no queda trabajo de producto»** (§26): hay catorce señalamientos con archivo asignado en el §27.2 y cuatro ampliaciones que exigen acta en el §27.4. ⚠️ **Y tres cosas se demostraron como si existieran y no existen** (§27.3): que «toda la página es editable» —los títulos de la portada están cableados—, que el propietario sube y el gremio aprueba sus fotos —`/mi-cuenta` no tiene esa ruta— y el correo de confirmación al postulante, que nunca se envía. ⚠️ **Cambia un dato del expediente:** `p2-directorio` **ya está fusionada** a `main` (`fc028ad`).
 >
@@ -44,6 +50,104 @@
 > **v8 (15 ago 2026) — HOSTING DECIDIDO, DESPLIEGUE EN ESPERA DE UN TRÁMITE HUMANO:** un consejo de decisión multiagente (cinco asientos con encargos distintos, prueba de fuga del expediente y refutación cruzada) eligió **Laravel Cloud** para el hosting de pruebas y como candidato definitivo, con una condición que es la mitad del veredicto: **la cuenta nace institucional, no personal**. El despliegue quedó bloqueado únicamente por el paso que un agente no puede dar — el registro/OAuth y el medio de pago son del dueño. **Toda sesión nueva: lee la sección 20 antes de proponer o tocar hosting.** El CLI de Cloud, su skill de despliegue y los certificados ya quedaron listos en esta máquina.
 >
 > **v7 · tres suposiciones sobre la API de Filament que resultaron falsas.** Cuestan una ronda entera cada una, así que conviene leerlas antes de escribir: `Panel::getAssets()` **no existe** en 4.12 (los assets se leen con `registerAssets()` + `FilamentAsset::getScripts()`); una página con `$view` propio **no debe** invocar `{{ $this->footerWidgets }}` a mano, porque el envoltorio `<x-filament-panels::page>` ya lo hace y llamarlo duplica cada widget; y `ChartWidget` **sí** sabe no dibujar, con `isEmpty()` y `getEmptyState()` nativos, sin necesidad de un `Widget` con vista propia.
+
+---
+
+## 0. PUNTO DE ENTRADA — léelo antes que nada (30 ago 2026)
+
+**Este prompt ya se ejecutó. El proyecto existe, funciona y lleva 249 confirmaciones.** Todo lo que viene después del §1 se escribió para construirlo desde cero a principios de agosto; hoy sirve como **referencia del encargo, del modelo de datos y de las reglas editoriales**, no como plan de trabajo. Si abres una sesión aquí, no estás arrancando: estás continuando un producto que el cliente ya vio y sobre el que ya reclamó.
+
+⚠️ **Puede haber otra sesión trabajando en este mismo directorio.** Ya pasó el 18 de agosto (§18.8) y volvió a pasar el 30. Antes de escribir, `GIT_OPTIONAL_LOCKS=0 git log --oneline -5` y mira el final de este documento: si hay una sección más nueva que la que creías última, léela antes de tocar nada.
+
+### 0.1 Lo que hay que entender del proyecto en un minuto
+
+Plataforma web del gremio de la vida nocturna del Quindío, construida como **práctica empresarial** de dos estudiantes. Eso significa que tiene **dos clientes con dos calendarios distintos**, y confundirlos es el error más caro que se puede cometer aquí:
+
+- **El gremio (Asobares Quindío).** Le importa lo que se ve y lo que le sirve a sus afiliados. Su documento rector es el cronograma firmado, con **entrega dura el 22 de septiembre de 2026**. La dirección ejecutiva es la product owner; el directivo del capítulo manda sobre el producto.
+- **La universidad (CUE).** Le importa el documento de práctica, que es **individual por estudiante** y se califica por presentación tanto como por contenido. El docente asesor no revisa código.
+
+Un avance técnico impecable que llegue tarde al documento pierde el 60 % del corte. Un documento perfecto sobre un sitio que el gremio no aprueba pierde al cliente. Hay que servir a los dos.
+
+### 0.2 Qué se está exigiendo ahora mismo
+
+| Fecha | Qué | Quién lo exige |
+|---|---|---|
+| **Jue 3 – vie 4 sep, 11:59:59 pm** | 95 % del documento de práctica, en `.docx` con sus anexos | Docente asesor. Tarde = 0.0, sin excepción |
+| **Entre el 4 y el 11 de sep** | **Nueva demostración con la capa visual levantada.** Plazo que puso el cliente en la mesa del 28 de agosto | Directivo del capítulo |
+| **7 – 11 sep** | Pruebas en dispositivos reales y corrección de lo que salga | Cronograma firmado |
+| **14 – 18 sep** | Dominio, SSL, capacitación y Acta 02 firmada | Cronograma firmado |
+| **22 sep** | **Entrega dura al gremio** | Cronograma firmado |
+
+**El compromiso vivo es el segundo.** El 28 de agosto el gremio vio la plataforma por primera vez, **no objetó ninguna funcionalidad** y dejó catorce señalamientos, todos visuales o de contenido. El §27 los enumera con archivo y línea. Si vas a tocar producto, **empieza por el §27.7, bloque A**.
+
+### 0.3 Qué falta, en tres frentes que no se estorban
+
+1. **Producto — lo visual y lo de contenido.** Es lo único con fecha de cliente encima. Catorce señalamientos (§27.2) repartidos en cuatro bloques (§27.7): **A** son siete cambios de portada, tema, aliados, orden y fotografías, y es lo único que el directivo va a mirar; **B** son siete de contenido y reglas; **C** son cuatro ampliaciones que no se codifican sin acta; **D** son insumos que hay que reclamarle al gremio. De todo eso, lo único cerrado hasta hoy es **OBS3-09 en su mitad barata** (§28.5).
+2. **Infraestructura — bloqueada, y no por ingeniería.** Todo lo que falta aquí cuelga de **una cuenta institucional que el gremio no ha abierto** (riesgo R-14, §20 y §26.2). Sin ella no hay despliegue, ni SSL, ni correo saliente, ni validación de Bold con dinero real, ni medición contra dominio, ni pruebas en dispositivos físicos. Está todo escrito y probado: es ejecución, no diseño. **No se resuelve desplegando con cuenta personal** — el §20.6 y el §23.3 describen el modo de muerte.
+3. **Académico.** El documento del 4 de septiembre está redactado, paginado y confirmado en el repositorio. Lo que falta es que su autor lo lea y lo ajuste **en voz propia**: una entrega anterior fue rechazada por uso evidente de IA. Ver §23.2 para lo que el docente ha exigido, textual y con fecha.
+
+**Y una decisión que no es de código y bloquea el bloque C:** el `Acta 04 · Ampliación de alcance` ya está emitida en `docs/ingenieria/constancias/`, con una fila por petición (antes del 22 sep / Fase II / se descarta) y dos contrapropuestas del equipo. **Está sin firmar.** Mientras no vuelva firmada, OBS3-15 a OBS3-18 no se tocan — y dejar una fila sin marcar no las aplaza, las deja sin decidir.
+
+### 0.4 Los problemas que te van a morder
+
+Están todos documentados más abajo; esta es la lista corta para que los reconozcas antes de volver a pagarlos.
+
+**De método, y son los que más cuestan:**
+
+- **Falsos verdes.** En dos auditorías distintas aparecieron **once pruebas que pasaban sin ejercer lo que decían proteger**, y las escribió el propio autor del plan. Ninguna se detectó leyendo. La regla del proyecto es: **escribir la prueba no basta, hay que romper el código a propósito y ver el rojo.** Ver §7 de la cabecera y §24.6.
+- **«La suite está en verde» tiene fecha de caducidad.** Lección del §28, y es distinta de la anterior: allí la prueba era correcta y el defecto real, pero **el calendario decidía si la prueba miraba o no**. Una prueba que depende de `now()` sin fijarlo no prueba lo que dice ningún día en particular. Si vas a citar una cifra de la suite, mídela hoy.
+- **Ninguna cifra del expediente sale de una suma.** Casos de prueba, migraciones, rendimiento: se miden ejecutando, y sobre clon limpio si van a un documento.
+- **El alcance está congelado desde el 14 de agosto.** La ausencia de una funcionalidad no es incumplimiento mientras no esté en el cronograma firmado ni en la ERS. Toda ampliación se registra por escrito **antes** de escribirse.
+
+**De código, en orden de probabilidad de que te toquen:**
+
+- **Contraste al tocar el hero.** El bloque A pide meterle imagen o video de fondo. Hay mediciones de contraste en el expediente que una imagen puede tumbar en silencio, y el propio cliente advirtió «no sea que afecte la visibilidad de las letras».
+- **Chromium no reinicia una `transition` cuando lo que cambia es la custom property** que hay detrás. Con `transition-colors` repartido por el sitio, al cambiar de tema hay que apagar las transiciones y devolverlas (con respaldo de `setTimeout`, porque en pestaña de fondo no corre `requestAnimationFrame`). Cabecera, v5.
+- **Restar meses desborda los días 29, 30 y 31.** `now()->subMonths(6)` un 30 de agosto da el 2 de marzo, no el 28 de febrero, y con un `startOfMonth()` detrás dos cubos distintos aterrizan en el mismo mes. Regla: **`startOfMonth()` primero y la resta después**; donde el límite no sea un inicio de mes, `subMonthsNoOverflow()`. Estuvo en once archivos y hacía que las purgas borraran datos personales **antes** del plazo publicado. §28.
+- **`php artisan view:clear` antes de compilar para desplegar.** `app.css` escanea las vistas compiladas en caché, así que el tamaño del bundle depende de qué haya en `storage/framework/views/`.
+- **`Paginator::$defaultView` es estático.** Livewire lo reapunta al renderizar una tabla del panel y no siempre lo restaura: una prueba de `/admin` puede romper otra del sitio público.
+- **El observer de aprobación degrada *cualquier* guardado** de un registro publicado hecho por quien no puede publicar, mire el campo que mire. Si necesitas una excepción, hazla acotada y explícita; relajar la condición general reabre el agujero para los otros ocho modelos publicables (v6).
+- **Autorizar `/mi-cuenta` con la habilidad `view` es una fuga de datos.** El portal se autoriza **solo por propiedad** (`verEnPortal`); `view` queda para el panel. Importa más que nunca, porque el §27.4 propone exponerle al afiliado datos de terceros.
+- **Un plazo de retención en cero convierte la purga en «borra todo»**, y a cero se llega solo (variable vacía, `config:cache` viejo). El comando aborta si el plazo no es un entero ≥ 1.
+- **`git status` normal deja un `index.lock` huérfano** que las sesiones remotas no pueden borrar. Usa siempre `GIT_OPTIONAL_LOCKS=0 git status`. Hay cuatro huérfanos en `.git/` esperando que alguien los borre a mano.
+- **No muevas la escala tipográfica ni el reloj a `tokens.css`**: repinta 372 reglas de `/admin` en silencio. Hay una prueba que lo prohíbe.
+
+**De datos personales, que es donde un error no se arregla con un commit:**
+
+Las fichas de asociados **nacen en borrador** y no se publican sin autorización del titular. Las 19 fotografías del gremio tienen personas identificables y **no tienen autorización de imagen documentada**. `material/nuevomaterial/` está en `.gitignore` y ahí se queda. Y la mitad pendiente de OBS3-09 —que el afiliado consulte el banco de aspirantes— expone datos de terceros: **no se construye sin releer el §9**, y el §27.8 lo prohíbe expresamente.
+
+### 0.5 Deuda que está diferida a propósito
+
+No la «arregles de paso»: los chips de filtro repetidos y los 104 `leading-*`/`tracking-*` sueltos del §26.3 viven **en las mismas vistas que el bloque A va a rehacer**. Refactorizarlas antes de la demo es pagar el trabajo dos veces. Van después del 11 de septiembre.
+
+### 0.6 Cómo verificar antes de decir que algo está hecho
+
+1. `php artisan test --compact` con filtro sobre lo que tocaste; la suite entera antes de cerrar la sesión.
+2. `vendor/bin/pint --dirty --format agent` si tocaste PHP.
+3. `npm run build` si tocaste vistas o CSS, con `view:clear` antes.
+4. `GIT_OPTIONAL_LOCKS=0 git status --short` para ver qué quedó suelto.
+5. Y la que de verdad importa: **rompe a propósito lo que acabas de proteger y comprueba que la prueba se pone roja.**
+
+El repositorio trae dos habilidades propias en `.claude/skills/` —`laravel-best-practices` y `tailwindcss-development`—; la segunda es de lectura obligada para el bloque A.
+
+### 0.7 En qué orden leer el resto de este documento
+
+- **§27 y §28** — mandan sobre el trabajo de producto. El §27 son los catorce señalamientos del cliente, lo que se demostró y no existía, y el orden de trabajo hasta la próxima demo. El §28 es el defecto de calendario que salió al ejecutarlos y la lección que dejó. **El §28.6 sustituye al §27.9 como estado del árbol.**
+- **§26** — manda sobre lo que no es código: la cuenta, el despliegue, las firmas. Su §26.4 sigue vigente entero.
+- **§24** — el equipo son dos practicantes con fronteras de trabajo, y el §24.6 es la lección de los falsos verdes.
+- **§4 y §9** — obligatorias antes de tocar diseño o datos personales, respectivamente.
+- **§20** — obligatoria antes de proponer o tocar hosting.
+- **§23.2** — lo que el docente asesor ha exigido, textual y con fecha.
+- **§1 a §14** — el encargo original, ya corregido con lo aprendido. Referencia del modelo de datos, las rutas y las reglas editoriales. **No es un plan.**
+- **§15 a §25** — historia. Cuentan cómo se llegó hasta aquí y qué trampas se pagaron. Se leen cuando algo no cuadra, no de entrada.
+
+### 0.8 Estado medido del árbol (30 de agosto de 2026)
+
+`main` en `6b0a20d`, **249 confirmaciones**. Árbol limpio. `origin/p2-directorio` **ya está fusionada**. 64 archivos de prueba, 35 migraciones, 19 recursos de Filament, 64 vistas Blade. (`.claude/settings.local.json` existe pero no aparece en `git status`: lo atrapa el `gitignore` **global** de la máquina, no el del proyecto. En otra máquina saldría como no seguido.)
+
+**Suite re-medida el 30 de agosto por la tarde: 871 casos, 860 pasan, 11 omitidas, 0 fallos, 3.121 aserciones**, 274,7 s. Confirma el §28.6 y **resuelve una contradicción del propio documento**: el encabezado del v14 y el aviso del §27.9 decían 870 casos y 3.115 aserciones, que era la cifra antes de añadir la prueba del acuse del §28.5. La vigente es 871. Las cifras de 820 que aparecen en las secciones anteriores son del 25 de agosto y **están superadas**.
+
+⚠️ **Esta corrida vale más que una cualquiera:** el 30 es uno de los tres días en que el desbordamiento del §28 se manifestaba. Verde hoy significa que el arreglo se ejercitó en la condición que lo destapó, no que se midió un día tranquilo. Antes de citar cualquiera de estos números en un documento, vuelve a medirlos: es la lección del §28.4 y aquí es literal.
 
 ---
 
@@ -1240,9 +1344,11 @@ Los identificadores `OBS3-nn` son los del acta, para poder citarlos en las confi
 - **No cambiar el tema por defecto ni tocar `localStorage.theme` como efecto colateral de otro trabajo.**
 - **No construir la consulta del banco de aspirantes desde `/mi-cuenta` sin pasar por el §9.** Son datos personales de terceros y la autorización que hoy firma el aspirante puede no cubrir ese uso.
 
-### 27.9 Estado del árbol al escribir esto (30 ago 2026)
+### 27.9 SUPERADA — Estado del árbol al escribir esto (30 ago 2026, mañana)
 
-> ⚠️ **Superada el mismo 30 de agosto por la tarde. Ve al §28.** Se ejecutó la suite que esta sección pedía ejecutar, salió roja, y de ahí salió todo el v14. El árbol ya no está como se describe abajo: el acta, la transcripción y la entrega del 4 de septiembre están confirmadas, y la cifra vigente es **870 casos**, no 820. Se conserva porque su encargo —«hay que volver a medirlas antes de citarlas»— resultó ser el consejo más rentable del documento.
+> ⚠️ **Estas cifras quedaron viejas el mismo día.** El estado vigente es el **§28.6**: `main` en `6b0a20d`, 249 confirmaciones, árbol limpio y suite en 871 casos. El párrafo se conserva porque explica de dónde salían las cifras del expediente y porque su consejo —volver a medir antes de citar— fue justo lo que destapó el §28.
+
+> ⚠️ **Superada el mismo 30 de agosto por la tarde. Ve al §28.** Se ejecutó la suite que esta sección pedía ejecutar, salió roja, y de ahí salió todo el v14. El árbol ya no está como se describe abajo: el acta, la transcripción y la entrega del 4 de septiembre están confirmadas, y la cifra vigente es **871 casos**, no 820. Se conserva porque su encargo —«hay que volver a medirlas antes de citarlas»— resultó ser el consejo más rentable del documento.
 
 `main` en `543b0cb`, **241 confirmaciones**. ⚠️ **Cambia un dato del §24 y del expediente: `p2-directorio` ya está fusionada** (`fc028ad`, «Integra el trabajo de Ingrid en p2-directorio») — deja de ser cierto que su trabajo esté fuera de `main`. Sin confirmar: los archivos de `docs/ingenieria/entrega-2026-09-04/` (documento del 4 de septiembre, anexos E–H y `fuentes-anexos/`) y `.claude/settings.local.json`; tres PDF viejos marcados como borrados. **En esta sesión no se ejecutó la suite**: las cifras vigentes siguen siendo las del v12 (820 casos) y hay que volver a medirlas antes de citarlas.
 
