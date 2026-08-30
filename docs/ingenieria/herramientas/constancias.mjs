@@ -1,16 +1,22 @@
 /**
- * Genera los tres formatos de constancia del expediente:
+ * Genera los cuatro formatos de constancia del expediente:
  *
  *   1. Acta de aprobación del diseño de la interfaz  (hito de la Semana 2)
  *   2. Constancia de capacitación                    (Semana 8)
  *   3. Retroalimentación del empresario y registro de hallazgos (Semanas 7–8)
+ *   4. Ampliación de alcance                         (revisión del 28 ago 2026)
  *
  *     node docs/ingenieria/herramientas/constancias.mjs
  *
- * Los tres son FORMATOS PARA DILIGENCIAR, no actas de hechos ya ocurridos.
+ * Los cuatro son FORMATOS PARA DILIGENCIAR, no actas de hechos ya ocurridos.
  * Ninguno afirma que algo se aprobó, se dictó o se revisó: eso lo escribe y lo
  * firma quien corresponda el día que pase. Un documento que dé por cierto lo
  * que todavía no ha ocurrido no es evidencia, es un problema.
+ *
+ * El cuarto se numera **04** y no 03 a propósito: el 03 ya lo ocupa el formato
+ * de retroalimentación, y dos referencias con el mismo número en un expediente
+ * que se entrega a la universidad y al gremio es un problema de trazabilidad,
+ * no un detalle de nomenclatura.
  */
 
 import { join } from 'node:path';
@@ -334,6 +340,132 @@ ${PIE_LEGAL}
 `,
 });
 
+/* ===========================================================================
+ * 4. Ampliación de alcance
+ * ========================================================================= */
+
+const ampliacion = documento({
+    referencia: 'Acta 04 · Ampliación de alcance<br>Revisión del gremio del 28 de agosto de 2026<br>Fecha de emisión: 30 de agosto de 2026',
+    titulo: 'Acta de ampliación de alcance',
+    subtitulo: 'Decisión sobre lo pedido en la revisión del 28 de agosto · ASOBARES Capítulo Quindío',
+    // Las filas de este acta son largas —una peticion citada y su costo— y sin
+    // esto la tabla de decision parte un renglon por la mitad entre dos
+    // paginas, dejando las casillas de decision separadas de lo que se decide.
+    // En un documento que se firma, eso no es un detalle tipografico.
+    estiloExtra: 'tbody tr { page-break-inside: avoid; }',
+    cuerpo: `
+<dl class="ficha">
+  <dt>Fecha de la sesión</dt><dd>_______________________</dd>
+  <dt>Lugar</dt><dd>_______________________</dd>
+  <dt>Modalidad</dt><dd>_______________________</dd>
+  <dt>Quién decide</dt><dd>_______________________</dd>
+</dl>
+
+<h2>1. Objeto</h2>
+<p>Dejar constancia escrita de la decisión de la dirección ejecutiva sobre <strong>cuatro peticiones surgidas en la revisión del 28 de agosto de 2026</strong> que <strong>no forman parte del alcance contratado</strong>: no están en el cronograma firmado ni en la especificación de requisitos, y por tanto no se pueden construir sin una decisión expresa que las incorpore.</p>
+
+<div class="nota">
+<strong>Lo que este documento NO cubre.</strong> Los catorce señalamientos restantes de esa misma revisión son ajustes sobre módulos ya construidos —renombrar un título, ordenar un listado, retirar un dato de una ficha, corregir un texto— y <strong>se ejecutan sin acta</strong>, porque no amplían el alcance. Esta acta se limita a las cuatro peticiones de abajo, que sí lo amplían.
+</div>
+
+<h2>2. La regla que gobierna esta decisión</h2>
+<p>El alcance quedó congelado el <strong>14 de agosto de 2026</strong>. Desde entonces rige el mismo criterio: la ausencia de una funcionalidad no constituye incumplimiento mientras no figure en el cronograma firmado ni en la especificación, y <strong>toda ampliación se registra por escrito antes de codificarse</strong>.</p>
+<p>La fecha límite de la práctica es el <strong>22 de septiembre de 2026</strong>. El tiempo disponible es fijo y ya está comprometido con la capa visual que la propia revisión del 28 de agosto priorizó. <strong>Lo que entre aquí desplaza a otra cosa</strong>, y el punto 5 existe para dejar dicho a qué.</p>
+
+<div class="salto"></div>
+
+<h2>3. Lo que se somete a decisión</h2>
+<p><small>Una decisión por petición. Dejar una fila sin marcar no la aplaza: la deja sin decidir, que es como se llega a la fecha límite con todo a medias.</small></p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:6%">Ref.</th>
+      <th style="width:30%">Lo que se pidió</th>
+      <th style="width:34%">Qué implica construirlo</th>
+      <th style="width:10%">Antes del 22 sep</th>
+      <th style="width:10%">Fase II</th>
+      <th style="width:10%">Se descarta</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>OBS3-15</td>
+      <td><strong>Correo de alerta a la dirección</strong> cuando la secretaría o un pasante cambien algo, «para que sepa qué fue y no tenga que ir a abrir la página».</td>
+      <td>Barato <strong>solo si el correo saliente institucional ya existe</strong>, y hoy no existe. Depende del mismo trámite que bloquea el despliegue: la cuenta y el correo del gremio. Sin eso no se puede ni demostrar.</td>
+      <td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td>
+    </tr>
+    <tr>
+      <td>OBS3-16</td>
+      <td><strong>Reversión de cambios</strong> sobre la bitácora: ver todos los cambios «para que no haya excusa» y poder deshacerlos.</td>
+      <td>Es lo más caro de la lista y no es un ajuste, es un módulo. <strong>La mitad ya está hecha:</strong> la bitácora del panel registra hoy quién cambió qué, cuándo y qué campos. Lo que falta es solo deshacerlo, que es la parte cara.</td>
+      <td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td>
+    </tr>
+    <tr>
+      <td>OBS3-17</td>
+      <td><strong>Transparencia financiera</strong> en el portal del afiliado: estados financieros, gestión administrativa, actas e invitaciones.</td>
+      <td><strong>No se puede codificar mientras el gremio no defina qué documento se publica y quién lo sube.</strong> Si la respuesta es «un PDF que sube la dirección», es una lista y un recurso del panel, no un módulo financiero — y entonces sí cabe.</td>
+      <td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td>
+    </tr>
+    <tr>
+      <td>OBS3-18</td>
+      <td><strong>Destacados pagos</strong>: pauta en portada y laterales rotativos «pero con un costo».</td>
+      <td>La base técnica ya existe en el panel. Lo que falta no es código: es la <strong>regla comercial</strong> —qué se cobra, a quién, por cuánto tiempo— y cómo se cobra. Eso lo define el gremio.</td>
+      <td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>4. Contrapropuestas del equipo</h2>
+<p><small>Se ofrecen porque en dos casos hay una versión que cabe en el tiempo disponible y probablemente resuelve la necesidad real. Marcar solo si sustituyen a lo pedido.</small></p>
+
+<table>
+  <thead><tr><th style="width:8%">Acepta</th><th style="width:12%">En vez de</th><th>Propuesta</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><span class="casilla"></span></td>
+      <td>OBS3-16</td>
+      <td><strong>Enseñar la bitácora que ya existe</strong>, y limitar la reversión a los campos donde es barata —textos de configuración y de contenido—, nunca genérica. Deshacer cualquier cambio de cualquier tabla exige versionado completo y es trabajo de meses, no de semanas.</td>
+    </tr>
+    <tr>
+      <td><span class="casilla"></span></td>
+      <td>OBS3-17</td>
+      <td><strong>Una sección de documentos del gremio</strong> en el portal del afiliado: la dirección sube un PDF con su título y su fecha, y el afiliado con sesión iniciada lo descarga. Cubre estados financieros, actas e invitaciones sin construir un módulo financiero.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>5. Qué se desplaza</h2>
+<p><small>A diligenciar solo si alguna petición se aprueba para antes del 22 de septiembre. El tiempo no es elástico y esta casilla evita que el desplazamiento se descubra en la última semana.</small></p>
+${RENGLONES(4)}
+
+<h2>6. Observaciones de la dirección ejecutiva</h2>
+${RENGLONES(5)}
+
+<h2>7. Constancia</h2>
+<div class="nota">
+Lo marcado como <strong>Fase II</strong> queda fuera del alcance de esta práctica empresarial y no constituye incumplimiento de lo contratado. Lo marcado como <strong>antes del 22 de septiembre</strong> se incorpora al alcance y desplaza lo que se anote en el punto 5. Lo <strong>descartado</strong> no se vuelve a proponer sin una nueva acta.
+</div>
+
+<div class="firmas tres">
+  <div class="firma">
+    <div class="nombre">Natalia Gutiérrez</div>
+    <div class="cargo">Directora ejecutiva · ASOBARES Capítulo Quindío<br>Tutora empresarial · decide la ampliación</div>
+  </div>
+  <div class="firma">
+    <div class="nombre">Juan José Sua Gómez</div>
+    <div class="cargo">Practicante · Universidad Alexander von Humboldt<br>Presenta el alcance y su costo</div>
+  </div>
+  <div class="firma">
+    <div class="nombre">Ingrid Montoya Warski</div>
+    <div class="cargo">Practicante · Universidad Alexander von Humboldt<br>Presenta el alcance y su costo</div>
+  </div>
+</div>
+
+${PIE_LEGAL}
+`,
+});
+
 /* ------------------------------------------------------------------------- */
 
 const trabajos = [
@@ -351,6 +483,11 @@ const trabajos = [
         html: retroalimentacion,
         salida: join(INGENIERIA, 'constancias', 'Formato 03 - Retroalimentacion del empresario.pdf'),
         pie: pieConPaginacion('Formato 03 · Retroalimentaci&oacute;n del empresario · ASOBARES Quind&iacute;o'),
+    },
+    {
+        html: ampliacion,
+        salida: join(INGENIERIA, 'constancias', 'Acta 04 - Ampliacion de alcance.pdf'),
+        pie: pieConPaginacion('Acta 04 · Ampliaci&oacute;n de alcance · ASOBARES Quind&iacute;o'),
     },
 ];
 
