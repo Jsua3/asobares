@@ -36,6 +36,31 @@ class SettingSeeder extends Seeder
             $this->texto('cta_final_titulo', '¿Tu establecimiento todavía no es parte del gremio?', 'inicio', 'Título del cierre'),
             $this->largo('cta_final_texto', 'Afiliarte toma una conversación. Representación ante las instituciones, descuentos en derechos de autor, formación y orientación jurídica sin costo.', 'inicio', 'Texto del cierre'),
 
+            /*
+             * Los títulos de cada sección de la portada. Estaban cableados en
+             * `publico/inicio.blade.php` mientras el resto del contenido ya
+             * salía de aquí, así que la afirmación que se le hizo al gremio en
+             * la revisión del 28 de agosto —«toda la página es completamente
+             * editable», R22 02:53— era falsa justo en lo que estaban mirando.
+             *
+             * Van con prefijo `portada_` porque `guia_titulo` y `empleo_titulo`
+             * ya existen para las páginas de la guía y de la bolsa: son otros
+             * textos y no deben compartir clave con las tarjetas del inicio.
+             */
+            $this->texto('portada_cifras_titulo', 'La noche en cifras · Observatorio Económico', 'inicio', 'Portada · título de la franja de cifras'),
+            $this->texto('portada_guia_titulo', 'Abre tu negocio', 'inicio', 'Portada · título de la tarjeta de la guía'),
+            $this->texto('portada_empleo_titulo', 'Bolsa de empleo', 'inicio', 'Portada · título de la tarjeta de empleo'),
+            $this->texto('portada_destacados_titulo', 'La noche del Quindío', 'inicio', 'Portada · título de los establecimientos destacados'),
+            // OBS3-01: «Lo que gana tu establecimiento» le sonó al directivo
+            // «como si estuviéramos vendiendo una lotería» (R22 03:05).
+            $this->texto('portada_beneficios_titulo', 'Beneficios de pertenecer al gremio', 'inicio', 'Portada · título de beneficios'),
+            $this->texto('portada_beneficios_intro', 'Cinco beneficios concretos por estar afiliado al capítulo.', 'inicio', 'Portada · entradilla de beneficios'),
+            $this->largo('portada_guia_texto', 'Los requisitos reales para abrir un establecimiento, municipio por municipio, con checklist, costos y los formatos oficiales listos para descargar.', 'inicio', 'Portada · texto de la tarjeta de la guía'),
+            $this->largo('portada_empleo_texto', 'Bartenders, chefs, meseros y administradores para la vida nocturna del Quindío. Publican solo los establecimientos asociados.', 'inicio', 'Portada · texto de la tarjeta de empleo'),
+            $this->texto('portada_destacados_texto', 'Algunos de los establecimientos afiliados al gremio.', 'inicio', 'Portada · pie de los destacados'),
+            $this->texto('portada_eventos_titulo', 'Próximos eventos del gremio', 'inicio', 'Portada · título de eventos'),
+            $this->texto('portada_aliados_titulo', 'Aliados del capítulo', 'inicio', 'Portada · título de aliados'),
+
             // --- Manifiesto (discurso del TED gremial) ---
             $this->texto('manifiesto_apertura', 'Nos conocen por la rumba. Pero hoy venimos a hablarles del territorio.', 'manifiesto', 'Frase de apertura'),
             $this->texto('manifiesto_cierre_titulo', 'Asobares no representa bares. Representa el Quindío que se vive de noche.', 'manifiesto', 'Frase de cierre'),

@@ -41,7 +41,7 @@ class AjustesDelSitio extends Page implements HasSchemas
     /** Títulos legibles para cada grupo de ajustes. */
     private const array GRUPOS = [
         'identidad' => ['Identidad', 'Nombre, eslogan y descripción para buscadores.'],
-        'inicio' => ['Página de inicio', 'Textos del hero y del cierre de la portada.'],
+        'inicio' => ['Página de inicio', 'Hero, título de cada sección de la portada y cierre.'],
         'manifiesto' => ['Manifiesto del gremio', 'El discurso del capítulo: apertura, visión a 10 años, barreras del sector y cierre.'],
         'cifras' => ['Cifras del Observatorio', 'La franja de datos que se muestra en el inicio.'],
         'institucional' => ['Quiénes somos', 'Historia, misión, dirección y programas del capítulo.'],
