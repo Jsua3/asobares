@@ -84,8 +84,12 @@ class RequisitoApertura extends Model
             return true;
         }
 
+        // `subMonthsNoOverflow`, o el borde estricto de arriba deja de serlo:
+        // la resta corriente desborda los días 29, 30 y 31 y adelanta el
+        // corte hasta dos días, marcando como caducada una ficha que todavía
+        // está dentro del plazo. Ver `VentanaDeMesesTest`.
         return $this->verificado_el->copy()->startOfDay()->lt(
-            now()->subMonths(self::MESES_HASTA_REVISION)->startOfDay()
+            now()->subMonthsNoOverflow(self::MESES_HASTA_REVISION)->startOfDay()
         );
     }
 

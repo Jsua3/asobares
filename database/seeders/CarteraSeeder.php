@@ -46,8 +46,12 @@ class CarteraSeeder extends Seeder
                 [
                     'saldo_pendiente' => $mesesMora * self::MENSUALIDAD,
                     'meses_mora' => $mesesMora,
+                    // `startOfMonth()` antes de restar: al revés, los días 29,
+                    // 30 y 31 la resta desborda febrero y el «último pago»
+                    // salta un mes entero respecto a la ventana que usa el
+                    // historial de mensualidades. Ver `VentanaDeMesesTest`.
                     'ultimo_pago_at' => $mesesMora > 0
-                        ? now()->subMonths($mesesMora)->startOfMonth()->toDateString()
+                        ? now()->startOfMonth()->subMonths($mesesMora)->toDateString()
                         : now()->startOfMonth()->toDateString(),
                     'actualizado_at' => now(),
                 ]

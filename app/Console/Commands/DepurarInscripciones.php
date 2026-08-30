@@ -63,7 +63,9 @@ class DepurarInscripciones extends Command
      */
     private function inscripcionesCaducadas(int $meses): Builder
     {
-        $limite = now()->subMonths($meses);
+        // Mismo motivo que en `DepurarMensajes::caducados()`: el plazo se
+        // cumple entero o no se cumple. Ver `VentanaDeMesesTest`.
+        $limite = now()->subMonthsNoOverflow($meses);
 
         return Inscripcion::query()->whereHas('evento', function (Builder $evento) use ($limite): void {
             $evento

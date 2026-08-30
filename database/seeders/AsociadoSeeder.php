@@ -112,7 +112,11 @@ class AsociadoSeeder extends Seeder
 
         $minimoMeses = max(2, CarteraSeeder::mesesDeMora($slug) + 1);
 
-        return now()->subMonths(random_int($minimoMeses, 22))->toDateString();
+        // `NoOverflow`: el piso de arriba dice «afiliado al menos un mes antes
+        // de su primer mes de mora», y la resta que desborda lo acerca hasta
+        // dos días al presente justo en los meses cortos. Ver
+        // `VentanaDeMesesTest`.
+        return now()->subMonthsNoOverflow(random_int($minimoMeses, 22))->toDateString();
     }
 
     /**

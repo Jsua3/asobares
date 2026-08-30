@@ -121,12 +121,16 @@ class VigenciaDeLaGuiaTest extends TestCase
     {
         $meses = RequisitoApertura::MESES_HASTA_REVISION;
 
+        // `NoOverflow` como el modelo: con la resta corriente, los días 29, 30
+        // y 31 el borde que construye la prueba y el que aplica
+        // `necesitaRevision()` caen en días distintos y los tres casos dejan
+        // de medir lo que dicen. Ver `VentanaDeMesesTest`.
         $reciente = RequisitoApertura::factory()
-            ->verificado(now()->subMonths($meses)->addDay()->toDateString())->create();
+            ->verificado(now()->subMonthsNoOverflow($meses)->addDay()->toDateString())->create();
         $justoEnElBorde = RequisitoApertura::factory()
-            ->verificado(now()->subMonths($meses)->toDateString())->create();
+            ->verificado(now()->subMonthsNoOverflow($meses)->toDateString())->create();
         $pasado = RequisitoApertura::factory()
-            ->verificado(now()->subMonths($meses)->subDay()->toDateString())->create();
+            ->verificado(now()->subMonthsNoOverflow($meses)->subDay()->toDateString())->create();
 
         $this->assertFalse($reciente->necesitaRevision(), 'Once meses no es revisión pendiente.');
         $this->assertFalse($justoEnElBorde->necesitaRevision(), 'A los doce meses exactos todavía sirve.');

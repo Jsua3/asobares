@@ -90,7 +90,8 @@ class VigenciaEnElPanelTest extends TestCase
         $alDia = RequisitoApertura::factory()->publicado()->verificado()
             ->create(['municipio_id' => $municipio->id]);
         $rancio = RequisitoApertura::factory()->publicado()
-            ->verificado(now()->subMonths($meses)->subDay()->toDateString())
+            // `NoOverflow` como `necesitaRevision()`: ver `VentanaDeMesesTest`.
+            ->verificado(now()->subMonthsNoOverflow($meses)->subDay()->toDateString())
             ->create(['municipio_id' => $municipio->id]);
         $sinVerificar = RequisitoApertura::factory()->publicado()
             ->create(['municipio_id' => $municipio->id]);
@@ -170,7 +171,8 @@ class VigenciaEnElPanelTest extends TestCase
         $meses = RequisitoApertura::MESES_HASTA_REVISION;
 
         $justoEnElBorde = RequisitoApertura::factory()->publicado()
-            ->verificado(now()->subMonths($meses)->toDateString())
+            // `NoOverflow` como `necesitaRevision()`: ver `VentanaDeMesesTest`.
+            ->verificado(now()->subMonthsNoOverflow($meses)->toDateString())
             ->create(['municipio_id' => $municipio->id]);
 
         $this->assertFalse($justoEnElBorde->necesitaRevision());

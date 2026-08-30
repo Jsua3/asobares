@@ -151,7 +151,17 @@ class TransaccionSeeder extends Seeder
 
         // De 18 (el mes más antiguo) a 0 (el mes en curso, todavía abierto).
         foreach (range(18, 0) as $mesesAtras) {
-            $mes = now()->subMonths($mesesAtras)->startOfMonth();
+            // `startOfMonth()` PRIMERO y la resta después, y el orden es el
+            // arreglo de un defecto que solo se veía los días 29, 30 y 31.
+            // Al revés —`subMonths()->startOfMonth()`— un 30 de agosto la
+            // resta de seis meses construye `2026-02-30`, que PHP deja correr
+            // hasta el 2 de marzo en vez de recortarlo: los cubos de cinco y
+            // seis meses atrás caían en el MISMO mes, febrero se quedaba sin
+            // sembrar, y a quien debía cinco meses se le metía un pago dentro
+            // de su propia ventana de mora. Restarle meses a un día 1 no puede
+            // desbordar, porque el día 1 existe en los doce meses.
+            // `VentanaDeMesesTest` lo vigila con la fecha fijada.
+            $mes = now()->startOfMonth()->subMonths($mesesAtras);
             $esMesEnCurso = $mesesAtras === 0;
 
             // La base crece: hace 18 meses pagaban ~el 40 % de los de hoy.

@@ -59,9 +59,13 @@ class ConsultaGuiaSeeder extends Seeder
                 $cuantas = (int) round($base * $crecimiento);
 
                 foreach (range(1, $cuantas) as $i) {
+                    // `startOfMonth()` antes de restar: al revés, los días 29,
+                    // 30 y 31 dos cubos caen en el mismo mes y la serie de
+                    // dieciocho meses sale con un hueco. Ver
+                    // `VentanaDeMesesTest`.
                     $fecha = now()
-                        ->subMonths($mesesAtras)
                         ->startOfMonth()
+                        ->subMonths($mesesAtras)
                         ->addDays(random_int(0, 27))
                         ->addHours(random_int(8, 22));
 

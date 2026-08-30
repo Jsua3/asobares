@@ -82,7 +82,9 @@ class RequisitoAperturasTable
                         ->orWhere(
                             'verificado_el',
                             '<',
-                            now()->subMonths(RequisitoApertura::MESES_HASTA_REVISION)->toDateString()
+                            // `NoOverflow` igual que el modelo, o el filtro y
+                            // la ficha discrepan los días 29, 30 y 31.
+                            now()->subMonthsNoOverflow(RequisitoApertura::MESES_HASTA_REVISION)->toDateString()
                         ))),
 
                 Filter::make('caducados')

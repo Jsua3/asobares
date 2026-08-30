@@ -82,16 +82,16 @@ class SemillaConFormaTest extends TestCase
         $ultimoSemestre = 0;
 
         foreach (range(0, 8) as $mes) {
-            $inicio = now()->subMonths($mes)->startOfMonth();
-            $fin = now()->subMonths($mes)->endOfMonth();
+            $inicio = now()->startOfMonth()->subMonths($mes);
+            $fin = $inicio->copy()->endOfMonth();
             $ultimoSemestre += ConsultaGuia::where('municipio_id', $masPequeno->municipio_id)
                 ->whereBetween('created_at', [$inicio, $fin])
                 ->count();
         }
 
         foreach (range(9, 17) as $mes) {
-            $inicio = now()->subMonths($mes)->startOfMonth();
-            $fin = now()->subMonths($mes)->endOfMonth();
+            $inicio = now()->startOfMonth()->subMonths($mes);
+            $fin = $inicio->copy()->endOfMonth();
             $primerSemestre += ConsultaGuia::where('municipio_id', $masPequeno->municipio_id)
                 ->whereBetween('created_at', [$inicio, $fin])
                 ->count();
@@ -188,7 +188,7 @@ class SemillaConFormaTest extends TestCase
             $pagosEnVentana = Transaccion::query()
                 ->where('estado', EstadoTransaccion::Aprobada)
                 ->where('asociado_id', $cartera->asociado_id)
-                ->where('created_at', '>=', now()->subMonths($cartera->meses_mora)->startOfMonth())
+                ->where('created_at', '>=', now()->startOfMonth()->subMonths($cartera->meses_mora))
                 ->count();
 
             $this->assertSame(

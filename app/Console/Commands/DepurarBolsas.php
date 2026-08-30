@@ -74,8 +74,12 @@ class DepurarBolsas extends Command
      */
     private function postulacionesCaducadas(int $meses, int $mesesMaximo): Builder
     {
-        $limite = now()->subMonths($meses);
-        $limiteAbsoluto = now()->subMonths($mesesMaximo);
+        // `subMonthsNoOverflow`: un plazo es un contrato con el titular del
+        // dato. Con la resta que desborda, los días 29, 30 y 31 el límite se
+        // adelanta hasta dos días y el borrado se ejecuta ANTES de cumplirse
+        // el plazo que la política publica. Ver `VentanaDeMesesTest`.
+        $limite = now()->subMonthsNoOverflow($meses);
+        $limiteAbsoluto = now()->subMonthsNoOverflow($mesesMaximo);
 
         return Postulacion::query()->where(function (Builder $postulacion) use ($limite, $limiteAbsoluto): void {
             $postulacion
@@ -116,7 +120,8 @@ class DepurarBolsas extends Command
      */
     private function aspirantesCaducados(int $meses): Builder
     {
-        $limite = now()->subMonths($meses);
+        // Mismo motivo que en `postulacionesCaducadas()`.
+        $limite = now()->subMonthsNoOverflow($meses);
 
         return Aspirante::query()->where(function (Builder $aspirante) use ($limite): void {
             $aspirante

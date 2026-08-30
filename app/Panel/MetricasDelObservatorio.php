@@ -192,7 +192,10 @@ class MetricasDelObservatorio
      */
     private function calcularSaludFinanciera(): SerieDelObservatorio
     {
-        $desde = now()->subMonths(17)->startOfMonth();
+        // `startOfMonth()` antes de restar: al revés, los días 29, 30 y 31 la
+        // resta desborda febrero y la ventana pierde un mes sin avisar. Ver
+        // `VentanaDeMesesTest`.
+        $desde = now()->startOfMonth()->subMonths(17);
         $expresionMes = $this->expresionMes('created_at');
 
         $filasRecaudo = Transaccion::query()
@@ -299,7 +302,8 @@ class MetricasDelObservatorio
     /** Vacantes publicadas por mes y por área, doce meses, para una gráfica apilada. */
     private function calcularDemandaLaboralPorArea(): SerieDelObservatorio
     {
-        $desde = now()->subMonths(11)->startOfMonth();
+        // Mismo orden que en `calcularSaludFinanciera()`, y por lo mismo.
+        $desde = now()->startOfMonth()->subMonths(11);
         $expresionMes = $this->expresionMes('created_at');
 
         $filas = Vacante::query()

@@ -62,7 +62,10 @@ class DepurarMensajes extends Command
      */
     private function caducados(int $meses, bool $esPqr): Builder
     {
-        $limite = now()->subMonths($meses);
+        // `subMonthsNoOverflow`: la resta corriente desborda los días 29, 30 y
+        // 31 y adelanta el límite hasta dos días, borrando antes de que se
+        // cumpla el plazo publicado. Ver `VentanaDeMesesTest`.
+        $limite = now()->subMonthsNoOverflow($meses);
 
         $consulta = $esPqr
             ? Mensaje::query()->where('tipo', TipoMensaje::Pqr)
