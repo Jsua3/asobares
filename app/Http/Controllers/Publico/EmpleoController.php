@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Publico;
 use App\Enums\CargoDelSector;
 use App\Http\Requests\GuardarAspiranteRequest;
 use App\Http\Requests\GuardarPostulacionRequest;
+use App\Mail\AcuseDePostulacion;
 use App\Mail\NuevaPostulacion;
 use App\Models\Aspirante;
 use App\Models\Municipio;
@@ -108,6 +109,7 @@ class EmpleoController
                 );
 
                 $this->avisarAlEstablecimiento($postulacion);
+                $this->confirmarAlPostulante($postulacion);
             } catch (UniqueConstraintViolationException) {
                 // El «buscar → si no existe, crear» de arriba no es atómico:
                 // un doble clic o un reintento por red lenta puede mandar dos
@@ -144,6 +146,16 @@ class EmpleoController
         }
 
         Mail::to($correos)->send(new NuevaPostulacion($postulacion));
+    }
+
+    /**
+     * A diferencia del aviso al establecimiento, este correo no depende de
+     * que exista un destinatario configurado: el correo del candidato es
+     * obligatorio en el formulario, así que siempre hay a quién escribirle.
+     */
+    private function confirmarAlPostulante(Postulacion $postulacion): void
+    {
+        Mail::to($postulacion->correo)->send(new AcuseDePostulacion($postulacion));
     }
 
     public function registrarAspirante(GuardarAspiranteRequest $request): RedirectResponse

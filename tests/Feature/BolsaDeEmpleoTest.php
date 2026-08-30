@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\CargoDelSector;
+use App\Mail\AcuseDePostulacion;
 use App\Mail\NuevaPostulacion;
 use App\Models\Asociado;
 use App\Models\Aspirante;
@@ -115,6 +116,7 @@ class BolsaDeEmpleoTest extends TestCase
         $this->assertNotNull($postulacion->consentimiento_at);
 
         Mail::assertSent(NuevaPostulacion::class, 1);
+        Mail::assertSent(AcuseDePostulacion::class, fn (AcuseDePostulacion $correo): bool => $correo->hasTo('duvan@ejemplo.test'));
     }
 
     public function test_postularse_dos_veces_a_la_misma_vacante_no_duplica(): void
@@ -133,6 +135,9 @@ class BolsaDeEmpleoTest extends TestCase
 
         $this->assertSame(1, Postulacion::count());
         Mail::assertSent(NuevaPostulacion::class, 1);
+        // Reenviar el formulario actualiza los datos, no vuelve a molestar
+        // al candidato con un segundo acuse de la misma postulación.
+        Mail::assertSent(AcuseDePostulacion::class, 1);
     }
 
     public function test_la_postulacion_exige_la_autorizacion_de_datos(): void
@@ -248,7 +253,10 @@ class BolsaDeEmpleoTest extends TestCase
         ])->assertSessionHas('exito');
 
         $this->assertSame(1, Postulacion::count());
-        Mail::assertNothingSent();
+        // Que el gremio no pueda avisarle al bar no es motivo para dejar al
+        // candidato sin acuse de que su propio envío sí llegó.
+        Mail::assertNotSent(NuevaPostulacion::class);
+        Mail::assertSent(AcuseDePostulacion::class, 1);
     }
 
     public function test_dejar_el_perfil_dos_veces_actualiza_en_vez_de_duplicar(): void

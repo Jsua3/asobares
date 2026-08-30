@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Mail\AcuseDePostulacion;
 use App\Mail\NuevaPostulacion;
 use App\Mail\VacanteAprobada;
 use App\Mail\VacanteDevuelta;
@@ -48,6 +49,19 @@ class CorreosDeBolsaTest extends TestCase
 
         $correo->assertHasSubject('Nueva postulación: Bartender de fin de semana');
         $correo->assertSeeInHtml('Duván Marín');
+    }
+
+    public function test_el_acuse_de_postulacion_nombra_el_cargo_y_el_establecimiento(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create(['nombre' => 'La Terraza de Armenia']);
+        $vacante = Vacante::factory()->for($asociado)->publicado()->create(['cargo' => 'Bartender de fin de semana']);
+        $postulacion = Postulacion::factory()->for($vacante)->create(['nombre' => 'Duván Marín']);
+
+        $correo = new AcuseDePostulacion($postulacion);
+
+        $correo->assertHasSubject('Recibimos tu postulación: Bartender de fin de semana');
+        $correo->assertSeeInHtml('Duván Marín');
+        $correo->assertSeeInHtml('La Terraza de Armenia');
     }
 
     public function test_el_correo_de_devolucion_explica_el_motivo(): void
