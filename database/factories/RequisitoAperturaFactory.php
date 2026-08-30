@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\EstadoPublicacion;
 use App\Models\Municipio;
 use App\Models\RequisitoApertura;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,14 +23,14 @@ class RequisitoAperturaFactory extends Factory
             'adjunto_nombre' => null,
             'costo_aproximado' => fake()->randomFloat(2, 0, 500000),
             'orden' => 0,
-            'estado' => 'borrador',
+            'estado' => EstadoPublicacion::Borrador,
         ];
     }
 
     public function publicado(): self
     {
         return $this->state(fn (array $attributes) => [
-            'estado' => 'publicado',
+            'estado' => EstadoPublicacion::Publicado,
         ]);
     }
 
