@@ -1,0 +1,20 @@
+Anexos E, F y G: fuentes y forma de regenerarlos
+================================================
+
+Los tres anexos se redactan en Markdown (anexo_e.md, anexo_f.md, anexo_g.md) y de ahi
+se generan los .docx. El PDF de cada anexo se exporta desde el .docx (en Word:
+Archivo > Exportar > Crear PDF), asi el PDF y el Word son siempre el mismo documento.
+
+Pasos (necesitan Python 3 con Pillow, Node con el paquete "docx", y las capturas en
+docs/ingenieria/capturas):
+
+  python3 md_to_ast.py        # convierte cada anexo_X.md en anexo_X.json
+  node render_docx.js         # escribe anexo_e.docx, anexo_f.docx, anexo_g.docx
+
+Si solo cambia un anexo: python3 md_to_ast.py f && node render_docx.js f
+
+Si se edita el .docx directamente en Word (por ejemplo para atender un comentario del
+docente), conviene pasar el mismo cambio al .md para que la fuente no quede atrasada.
+
+build.py es la version anterior (Markdown -> HTML -> PDF con Chromium); se conserva
+solo como referencia y ya no hace falta.
