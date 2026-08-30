@@ -29,6 +29,10 @@
 >
 > **v7 · la trampa que más costó, y que no es técnica:** de veintitantos fallos atrapados en estas dos fases, **cinco fueron pruebas en falso verde escritas por el propio autor del plan** — pruebas que pasaban con el bug reintroducido. Todas tenían la misma forma: `assertSee('alguna palabra')` o una aserción sobre el texto de un archivo, en vez de sobre el comportamiento. Ninguna se detectó leyendo; todas salieron cuando un revisor **mutó el código a propósito** y miró si la prueba se enteraba. Si se relanza cualquier parte de este trabajo: **escribir la prueba no basta, hay que romper el código y ver el rojo.**
 >
+> **v14 (30 ago 2026) — EMPIEZA POR AQUÍ. LA SUITE ESTABA EN ROJO Y NADIE LO SABÍA.** Al medir las cifras que el §27.9 pedía volver a medir antes de citarlas, la suite salió **roja**: `SemillaConFormaTest` fallaba porque a un asociado con cinco meses de mora se le sembraba un pago dentro de su propia ventana de mora. No era la semilla: era **aritmética de calendario**. `now()->subMonths(6)` un 30 de agosto **no da febrero, da el 2 de marzo** —PHP construye `2026-02-30` y lo deja correr al mes siguiente en vez de recortarlo—, así que con un `startOfMonth()` detrás dos cubos distintos aterrizan en el mismo mes y el que se saltaron no lo cubre nadie. **Solo ocurre los días 29, 30 y 31, y solo cuando la resta cruza febrero**: por eso las 820 pruebas del 25 de agosto se midieron un día que no desbordaba y la suite llevaba semanas pasando verde veintitantos días de cada mes. El mismo error estaba en **las tres purgas de retención** —que borraban datos personales hasta dos días **antes** del plazo publicado—, en las ventanas de 18 y 12 meses del observatorio y en el borde estricto de RF-60. Corregido en once archivos, con `VentanaDeMesesTest` fijando la fecha en cuatro días que desbordan para que la guardia valga los 365. Suite de 820 a **870 casos** (859 pasan, 11 omitidas, 0 fallos, 3.115 aserciones). Cerradas de paso dos deudas del §18.6: la vigilancia **por eje** de las ranuras del plugin de tema, que faltaba en los widgets del tablero, y el enum crudo de `RequisitoAperturaFactory`. ⚠️ **Y la lección de método, que es nueva y no la cubrían el v7 ni el v12:** aquí no hubo prueba en falso verde ni revisor que fallara — **la prueba era correcta y el defecto real**, pero el calendario decidía si se veía. Una suite que depende del día en que se ejecuta miente sin que nadie mienta. Ver la nueva **§28**.
+>
+> **v13 (28–30 ago 2026) — EL GREMIO VIO LA PLATAFORMA Y LO QUE FALLÓ FUE LO VISUAL.** El viernes 28 de agosto se demostró el sitio y el panel ante el directivo del capítulo, la dirección ejecutiva y la contadora. **Ninguna funcionalidad fue objetada**; toda la inconformidad es visual, de contenido y de encuadre — «lo visual es lo que tiene que ser, también muy impactante» — y el equipo reconoció en la mesa que «la parte visual la dejamos de último». El cierre fue un plazo del cliente: **una a dos semanas para levantar lo visual y volver a mostrarlo** (entre el 4 y el 11 de septiembre). La nueva **sección 27 manda sobre el orden de trabajo del producto** y es lo primero que debe leer una sesión nueva; el §26 sigue mandando sobre lo que no es código (cuenta institucional, despliegue, firmas) y su §26.4 sigue vigente entero. ⚠️ **Deja de ser cierto que «no queda trabajo de producto»** (§26): hay catorce señalamientos con archivo asignado en el §27.2 y cuatro ampliaciones que exigen acta en el §27.4. ⚠️ **Y tres cosas se demostraron como si existieran y no existen** (§27.3): que «toda la página es editable» —los títulos de la portada están cableados—, que el propietario sube y el gremio aprueba sus fotos —`/mi-cuenta` no tiene esa ruta— y el correo de confirmación al postulante, que nunca se envía. ⚠️ **Cambia un dato del expediente:** `p2-directorio` **ya está fusionada** a `main` (`fc028ad`).
+>
 > **v12 (25 ago 2026) — EMPIEZA POR AQUÍ. RF-60 CERRADO Y LA COMPAÑERA YA COMMITEA.** Cerrado **RF-60** —normativa vigente y decretos transitorios—, que era uno de los dos únicos requisitos funcionales sin ninguna cobertura: la guía normativa guarda ahora `verificado_el`, `verificado_con` y `vigente_hasta`; una ficha sin fechar se publica igual pero lo dice en su cara, y lo caducado desaparece por **las cuatro puertas** por las que sale la guía —lista, selector, sitemap y **descarga del formato**, que era la única con consecuencia de seguridad—. Suite de 791 a **820 casos** (809 pasan, 11 omitidas, 0 fallos, 2.904 aserciones). `main` en `bad0143`, empujado. ⚠️ **Dato nuevo que cambia un riesgo del expediente:** existe `origin/p2-directorio` con **tres commits de Ingrid**, con pruebas propias. Deja de ser cierto que su trabajo no pasa por el repositorio — pero **no está fusionada y hoy no fusionaría limpio** (cuatro conflictos, todos contra `09e3e33`, el pase de foco y objetivos táctiles). Ver §11 del estado del proyecto. ⚠️ **Y la lección de método de esta sesión, que confirma la del v7:** ocho tareas con revisión independiente encontraron **seis pruebas que pasaban sin ejercer lo que decían proteger**, y **ninguna era un defecto de producción**. Las cuatro justificaciones falsas las había escrito el propio plan. Ver §24.6.
 >
 > **v11 (19 ago 2026, tarde) — EMPIEZA POR AQUÍ. PASE DE INTERFAZ CERRADO Y DESPLIEGUE A UN COMANDO.** Sesión larga que cierra **cinco de las seis brechas** que el §23.12 daba por vivas y **los siete hallazgos** del pase de interfaz que el §22 tenía en pausa. Suite de **599 a 747 casos** (736 pasan, 11 omitidas, 0 fallos, 2.719 aserciones), 7 commits ya en `origin/main`, `main` en `f61a236`. Lo que hay que leer, en este orden: **§25** (qué se hizo, las trampas nuevas y qué toca ahora), y solo después las §20 a §23, que están corregidas pero cuentan historia, no estado. ⚠️ **Lo único que sigue bloqueando el proyecto no es técnico**: la cuenta institucional del gremio (R-14). Todo lo demás está escrito y esperando.
@@ -480,9 +484,9 @@ Es un **arreglo de seguridad real y correcto**: el campo de galería sube por Sp
 De la revisión final de F1–F3, ninguna bloqueante, todas con su sitio:
 
 - **`<x-panel.kpi>` no tenía consumidor en producción** hasta que el observatorio estrenó su banda de KPIs. Si el observatorio se descarta, el componente vuelve a quedar huérfano.
-- **La convención de `ticks`/`grid` vacíos en los `ChartWidget` es load-bearing y frágil**: el plugin de tema solo escribe donde ya hay clave. Hay pruebas que lo vigilan **por eje** en los widgets del observatorio, pero no en los del tablero.
+- ~~**La convención de `ticks`/`grid` vacíos en los `ChartWidget` es load-bearing y frágil**: el plugin de tema solo escribe donde ya hay clave. Hay pruebas que lo vigilan **por eje** en los widgets del observatorio, pero no en los del tablero.~~ **CERRADO el 30 ago 2026** (v14): `RanurasDelPluginDeTemaTest` gana una segunda guardia que exige `ticks` y `grid` en **todo eje de todo `ChartWidget`**, barriendo el mismo directorio que su hermana, así que una gráfica nueva entra sola. Verificada por mutación. La convención sigue siendo frágil —el plugin no inventa claves, solo escribe donde las hay—, pero ya no depende de que alguien se acuerde.
 - **Duplicación entre los dos guardianes de tema** (`TemaClaroOscuroTest`, sitio y panel): ~28 líneas literales.
-- **`RequisitoAperturaFactory`** usa el string crudo `borrador` donde su hermana usa el caso del enum.
+- ~~**`RequisitoAperturaFactory`** usa el string crudo `borrador` donde su hermana usa el caso del enum.~~ **CERRADO el 30 ago 2026** (v14).
 - **El singleton de `ColaDePendientes` habilita staleness intra-petición** si el rol de un usuario cambiara entre `canView()` y el render. No explotable hoy; documentado en `AppServiceProvider`.
 - **`AsociadoSeeder`** lanzaría `ValueError` si algún día `CarteraSeeder::EN_MORA` ganara un slug con mora ≥ 22 meses.
 - **`Bitacora` y `AjustesDelSitio`** arrastran un `abort_unless` redundante con un comentario que dice que es el que cierra la puerta; el guardián real es el trait `CanAuthorizeAccess` de Filament.
@@ -1125,3 +1129,177 @@ Ninguna bloquea la entrega, y están en orden de lo que más se nota:
 - **No desplegar con cuenta personal.** El §20.6 y el §23.3 lo dicen y el modo de muerte está descrito: la demo sale bien, nadie migra lo que funciona, la práctica termina y las llaves se van.
 - **No mover la escala tipográfica ni el reloj a `tokens.css`.** Repinta 372 reglas de `/admin` en silencio. Hay una prueba que lo prohíbe; si la ves fallar, es esto.
 - **No dar por buena una medición hecha mientras se recompila el CSS.** Media hora de esta sesión se fue diagnosticando un desbordamiento que no existía.
+
+---
+
+## 27. LA REVISIÓN DEL GREMIO (28 ago 2026) — el producto pasó, lo visual no
+
+**Esta sección sustituye al §26 en su papel de orden de trabajo para el producto.** El §26 sigue mandando sobre lo que no es código —la cuenta institucional, el despliegue, las firmas— y su §26.4 sigue vigente entero. Lo que cambia es que **ya no es cierto que «no queda trabajo de producto»**: el 28 de agosto el gremio vio la plataforma por primera vez y dejó una lista.
+
+El viernes 28 de agosto, de noche, en el establecimiento del directivo, se demostró de punta a punta el sitio público y el panel ante **el directivo del capítulo** (presumiblemente Jorge Iván Botero Ángel, presidente — confirmar por escrito), **Natalia Gutiérrez**, la **contadora del gremio** y los dos practicantes. Cuatro audios, 66 minutos. Acta y transcripción completas están **en el repositorio**, en `docs/ingenieria/reuniones/2026-08-28-acta-reunion-3-revision-del-gremio.md` y `docs/ingenieria/reuniones/2026-08-28-transcripcion-reunion-3.md` (copia en el Project de Cowork, `claude/acta-reunion-3.md` y `claude/transcripcion-reunion-3.md`); las referencias `Rxx mm:ss` de abajo apuntan al audio y minuto exactos.
+
+### 27.1 El veredicto, y cómo hay que leerlo
+
+Ninguna funcionalidad fue objetada. El directivo no pidió módulos porque falten: pidió que lo que ya existe **se vea**.
+
+> «Lo que debe ser… es que sea muy amigable, que la gente pueda interactuar con ella. **Lo visual es lo que tiene que ser. También muy impactante.**» — `R21 01:03–01:16`
+
+Y el equipo se lo concedió en voz alta, que es lo que convierte el comentario en compromiso:
+
+> «Algo que nos falta ahí en la página es la parte visual, **que la dejamos de último** para organizar primero toda la parte estructural.» — `R21 01:16`
+
+El cierre fue un plazo suyo: **una a dos semanas para levantar la capa visual y volver a mostrarla** (`R24 04:52`). Entre el 4 y el 11 de septiembre.
+
+Dos advertencias de método para cualquier sesión que retome esto:
+
+1. **Él mismo relativizó su opinión** — «en el caso mío yo no tengo el conocimiento… uno siempre opina desde lo personal» (`R21 00:32`) — y aclaró que habla «desde el tema de junta, pensando en todos los sectores». Es un diagnóstico de percepción, no una especificación. Hay margen para proponerle una solución distinta a la que él imaginó; no lo hay para ignorar el diagnóstico.
+2. **La próxima demo se juzga por lo que se ve, no por la suite.** 820 casos en verde no compran nada en esa mesa. Esta es la primera vez en todo el proyecto en que el criterio de aceptación del cliente y el del expediente técnico no coinciden.
+
+### 27.2 Los catorce señalamientos, con el archivo que toca cada uno
+
+Verificado contra el árbol el 30 de agosto de 2026.
+
+| # | Señalamiento (con su cita) | Dónde está hoy | Qué hay que hacer |
+|---|---|---|---|
+| 1 | «Lo que gana» como título de los beneficios: «**suena horrible**… como si estuviéramos vendiendo una lotería» — `R22 02:35–03:10` | `resources/views/publico/inicio.blade.php:115`, cableado: `Lo que gana tu establecimiento` | Renombrar a «Beneficios de pertenecer al gremio» **y pasarlo a `ajuste()`** (ver §27.3, punto 2). Él pidió además subir «los 5 beneficios concretos» al bloque principal: hoy esa frase es el subtítulo de la línea 117 |
+| 2 | Tarifa del artista a la vista: «**la gente se sesga de una vez con el precio** y de pronto no lo contacto»; «yo no le pondría precio» — `R21 13:37–14:48`, ratificado en `R23 09:49` | `publico/artistas/index.blade.php:65`, `show.blade.php:52`, `inscripcion.blade.php:31` | Sacar `tarifa_desde` de la ficha pública y de la tarjeta. Se conserva en el modelo y en el panel. Si se quiere respetar el «o a decisión del artista», añadir `publicar_tarifa` (bool, por defecto falso) en vez de borrar el campo |
+| 3 | Bolsa de empleo «queda abierta para todo el mundo»; quiere que **ver** sea beneficio del afiliado y **postularse** siga abierto a cualquiera — `R23 08:01–09:39` | Ver §27.3, punto 4: hoy es al revés de lo que se temía | Vista nueva en `/mi-cuenta`. **Es ampliación, no ajuste** |
+| 4 | Tema: «¿lo ve mejor negro o lo pongo blanco?» → «**pues a mí me gusta negro**… lo hace ver moderno, más elegante; el blanco lo hace ver como un papel, **muy plano, muy insípido**»; «institucionalmente somos más negros» — `R23 02:33–03:31` | `components/layouts/publico.blade.php`, script de arranque: por defecto **`system`** | Decidir el arranque con Natalia y **dejarlo escrito**. Ver §27.3, punto 1 |
+| 5 | Falta un bloque de **aliado principal**: Asobares Colombia, Cámara de Comercio (mencionó su página *Experiencia*), Comité Intergremial, Gobernación del Quindío — `R21 02:19–03:26` | `inicio.blade.php:176`, tira única de logos; la tabla `aliados` no distingue tipo | Añadir `tipo` (`institucional`\|`comercial`) al modelo y pintar dos bandas distintas |
+| 6 | **Alcaldías: todas o ninguna** — «es para **no abrir susceptibilidades**… a todos o nada» — `R21 03:35–03:49` | Sin regla | Regla dura, en semillas y en el panel. Ver §27.5 |
+| 7 | Directorio: pidió orden alfabético o por ciudad, movimiento, destacados «pero con un costo» y un buscador — `R21 06:11–07:31` | `DirectorioController` **ya** ordena `destacado desc, nombre` y **ya** tiene buscador (`index.blade.php:35`) | El reclamo era sobre el bloque «La noche del Quindío» de la portada, que ordena por `latest('updated_at')` (`InicioController:20`) y parece azaroso. Ordenar y hacerlo visiblemente ordenado |
+| 8 | «Quiénes somos» copiado de la Nacional y desactualizado: «**ya eso toca cambiarlo**»; hay que pedirle a la directora nacional «corríjame sus datos» — `R22 05:00–07:03` | `publico/quienes-somos.blade.php` + `SettingSeeder` | Texto propio del capítulo. Bloqueado por Natalia |
+| 9 | Portal del afiliado sin contenido diferencial: «¿qué va a ver el afiliado que no va a ver el resto?» → **estados financieros y de gestión administrativa en tiempo real**; «las agremiaciones tienen que tener pública la información, **pero para los agremiados, no para todo el público**» — `R22 08:18–10:58` | `/mi-cuenta` tiene cartera, movimientos y convenios | **Ampliación** |
+| 10 | Enlaces de la guía que caen en la portada de la entidad: «que sea **puntual**… que me abra a donde tiene que ir»; «hay personas que no son tan amigables con la tecnología» — `R23 05:32–06:33` | `RequisitoAperturaSeeder`: `camaraarmenia.org.co`, `armenia.gov.co`, `sayco.org` — todos raíz | Enlaces profundos al trámite exacto. Insumo del gremio |
+| 11 | Fotos de establecimiento sin filtro: «lo tienen que aprobar ellos, no sea que pongan imágenes… **exóticas**» — `R23 00:45–01:05` | Ver §27.3, punto 5: **el dueño hoy no puede subir nada** | Se demostró algo que no existe. Decidir si se construye o se corrige el discurso |
+| 12 | Portada sin vida: «acá podría quedar ese **video**… el **banner** que va moviéndose, algo que le genere vida»; imágenes de fondo fundidas «no sea que afecte la visibilidad de las letras» — `R21 05:20–05:39` | `components/publico/hero.blade.php`: solo texto sobre `.resplandor-marca`, sin ranura de medio | Ranura de fondo en el componente, con la advertencia de contraste del §27.8 |
+| 13 | WhatsApp sin respuesta: «¿ese tiene respuesta? **Hay que automatizarlo**» — `R21 11:13–11:25` | `footer.blade.php:2`, enlace `wa.me` con mensaje prellenado | No es código de la plataforma: es WhatsApp Business del gremio. Decirlo así y no prometer nada |
+| 14 | Proveedores que ya no existen: «y que **sí respondan**, y que la información esté actualizada» — `R22 04:10–04:21` | `Proveedor` tiene `visible_hasta` y lo aplica, pero **no** fecha de verificación | Replicar el patrón de **RF-60** (`verificado_el`, `verificado_con`) que ya funciona en la guía normativa |
+
+### 27.3 Lo que la revisión destapó en el código, y el prompt no preveía
+
+Seis hallazgos que salieron al cruzar lo que se dijo en la mesa con lo que hay en el árbol. Los tres primeros son deuda que se demostró como si no existiera.
+
+1. **«Por defecto Sistema» equivale a «por defecto claro» en la mesa del cliente.** El script del `<head>` resuelve `system` con `prefers-color-scheme`, y los portátiles del gremio están en claro. La demo abrió blanca y por eso salió la discusión del negro. El v5 eligió `system` con buen criterio de accesibilidad; el dueño del producto prefiere el oscuro. **No cambiar el valor sin dejar la decisión escrita con fecha**, porque toca `localStorage.theme`, que se comparte con `/admin`, y porque hay pruebas que dependen del arranque.
+2. **Se le dijo al cliente «toda la página es completamente editable» (`R22 02:54`) y no lo es.** Los títulos de sección de la portada están cableados en `inicio.blade.php` — «Lo que gana tu establecimiento», «La noche del Quindío», «Próximos eventos del gremio», «Cinco beneficios concretos» —. El resto del contenido sí sale de `ajuste()`. O los títulos pasan a `ajustes`, o hay que corregir la afirmación en la próxima demo. La primera opción es media hora; la segunda cuesta credibilidad.
+3. **El postulante no recibe ningún correo.** `EmpleoController::avisarAlEstablecimiento()` avisa solo al bar. El gremio lo pidió textualmente: «que le llegue el correo con la confirmación» (`R23 09:23`). Falta un `Mailable` y su prueba; es lo más barato de toda la lista.
+4. **El banco de aspirantes no es público, y el gremio quiere justo lo contrario de lo que se temía.** Hoy `aspirantes` vive solo en `/admin`; el sitio expone las vacantes y el formulario de perfil, nada más. Lo que el directivo pidió es que **el afiliado sí pueda consultarlo desde su cuenta**, como beneficio. Eso es una vista nueva **con datos personales de terceros**: exige base legal en la autorización que firma el aspirante, y probablemente contacto revelado solo tras registrar el interés. No se construye sin revisar el §9.
+5. **El dueño no puede tocar su ficha.** `/mi-cuenta` solo tiene índice y vacantes: no hay ruta para editar el establecimiento ni para subir imágenes. En la demo se afirmó que el afiliado sube fotos y el gremio aprueba (`R23 00:48`). El flujo de aprobación **existe para el estado del registro**, no para una carga del propietario, porque el propietario no carga nada. Antes de prometer moderación hay que construir la carga.
+6. **La bitácora ya responde a la mitad del pedido.** `app/Filament/Pages/Bitacora.php` lista `activitylog` con quién, qué, cuándo y **qué campos cambiaron**. Lo que pidió el directivo —«todos los cambios, **para que no haya excusa**», y poder «reversar» (`R24 03:19–03:44`)— solo añade la reversión. Enseñar la bitácora que ya existe puede cerrar el punto sin escribir un módulo.
+
+### 27.4 Lo que pidieron y NO está en el alcance congelado
+
+La congelación del 14 de agosto sigue vigente y el §26.4 la reitera. Estas tres piden acta firmada antes de una línea de código:
+
+- **Correo de alerta al administrador** cuando la secretaría o un pasante cambien algo: «para que sepa qué fue y no tenga que ir a abrir la página» (`R23 04:03`). Barato **si el SMTP institucional ya existe**; hoy no existe (§26.2, punto 3), así que depende del mismo bloqueo de siempre.
+- **Reversión de cambios** sobre la bitácora (`R24 03:19`). Es lo más caro de la lista. Contrapropuesta razonable: la bitácora que ya está, más reversión solo donde sea barata (campos de texto de `ajustes` y de contenido), nunca genérica.
+- **Transparencia financiera en `/mi-cuenta`**: estados financieros, gestión administrativa, actas e invitaciones (`R22 08:54`). No se codifica hasta que el gremio defina **qué documento se publica y quién lo sube**; si la respuesta es «un PDF que sube la dirección», es un recurso de Filament y una lista, no un módulo financiero.
+- Añadido menor, ya modelado: **destacados pagos** en portada y laterales rotativos «pero con un costo» (`R21 06:38`). La base de pautas existe en el panel; falta la regla comercial y su cobro, que son del gremio.
+
+### 27.5 Reglas de contenido nuevas, de obligado cumplimiento
+
+Van aquí porque afectan semillas, textos y semántica del modelo, no solo diseño:
+
+- **Alcaldías: se nombran todas las de los municipios cubiertos o ninguna.** Es una instrucción política del directivo, no una preferencia estética.
+- **Aliados en dos niveles.** Institucionales (Asobares Colombia, Cámara de Comercio de Armenia y del Quindío, Comité Intergremial, Gobernación del Quindío) por encima de los comerciales, y con tratamiento visual distinto.
+- **La junta se muestra corta.** Solo directora ejecutiva y presidente, «como lo hace la página nacional»; el directivo dijo que no le gusta «mucha publicidad» personal (`R22 05:41`).
+- **«Quiénes somos» no se copia de la Nacional**, entre otras cosas porque la información del capítulo allí está desactualizada y el propio directivo la va a hacer corregir.
+- **La tarifa del artista no se publica.** Ver §27.2, punto 2.
+- **Cifras que se pueden usar de esta reunión:** ~**60 afiliados** hoy y **1.080 bares** en el universo del departamento (`R22 13:31`). La segunda no estaba en ningún documento anterior.
+
+### 27.6 Lo que la reunión dejó a medias (no inventar la respuesta)
+
+- **Formato de cartera:** la contadora comparte su Excel. El equipo pidió uno **aunque sea con datos ficticios** para probar el importador antes de los reales (`R23 15:18`). Sigue sin llegar.
+- **¿Drive vinculado o carga manual?** Se preguntó y no se respondió (`R24 00:48`). Hoy el importador es carga manual de CSV; asumir eso hasta que digan otra cosa.
+- **Periodicidad de la cartera:** semanal por ahora, «en algún momento diario» (`R24 01:13`).
+- **Dominio:** hay que comprarlo, cobro anual, sin nombre decidido (`R24 06:54`).
+- **Correo institucional de salida:** «lo importante sería confirmar el correo por donde sale» (`R24 06:41`). Es el mismo SMTP del §26.2.
+- **Pasarela:** se habló de cerrar la cuenta de BBVA y dejar **solo Bold** (`R23 13:56–14:47`), pero la conversación no cerró. **No tocar la configuración de pagos** sin confirmación escrita.
+- **Despliegue:** el plan de **US$5 mensuales** quedó confirmado en la mesa, con salto al de ~US$20 si la base crece (`R24 05:36`). El directivo desdramatizó el costo: «no es un costo tan alto… pues no se asusten» (`R22 12:12`). El bloqueo sigue siendo la cuenta, no el precio.
+
+### 27.7 Orden de trabajo hasta la próxima demo
+
+Los identificadores `OBS3-nn` son los del acta, para poder citarlos en las confirmaciones de git.
+
+**Bloque A — visual (es el compromiso de las dos semanas; es lo único que el directivo va a mirar).** OBS3-01 título de beneficios y su ascenso a bloque principal · OBS3-02 hero con medio · OBS3-03 decisión del tema inicial · OBS3-04 aliados institucionales · OBS3-05 regla de alcaldías · OBS3-06 orden visible en el bloque de destacados de la portada · OBS3-07 fotografías reales (las 19 del 26 de agosto, con sus autorizaciones).
+
+**Bloque B — contenido y reglas, cabe en el tiempo disponible.** OBS3-08 tarifa fuera de la vista pública · OBS3-09 correo de confirmación al postulante · OBS3-10 enlaces profundos en la guía · OBS3-11 «Quiénes somos» propio · OBS3-12 verificación de proveedores al estilo RF-60 · OBS3-13 carga de imágenes del propietario y su aprobación · OBS3-14 mensaje honesto sobre el WhatsApp.
+
+**Bloque C — no se toca sin acta.** OBS3-15 correo de alerta · OBS3-16 reversión · OBS3-17 transparencia financiera · OBS3-18 destacados pagos.
+
+**Bloque D — insumos que hay que reclamar.** Excel de cartera · decisión Drive/carga · corrección de los datos del capítulo en la Nacional · dominio y correo · confirmación «solo Bold».
+
+⚠️ **Colisión con lo académico.** La ventana de las dos semanas se superpone con el 95 % del documento de práctica del viernes 4 de septiembre. El Bloque A es en su mayor parte de la Persona 2; la Persona 1 debería proteger esa semana para el documento y entrar a lo visual después del 4.
+
+### 27.8 Lo que NO hay que hacer
+
+- **No dar por aceptado el Bloque C en silencio.** Aceptarlo tácitamente es el camino a llegar al 22 de septiembre con todo a medias. El §26.4 ya lo dice para el alcance general; esto es su caso concreto.
+- **No confundir la bitácora con la reversión.** Están a un mundo de distancia de esfuerzo y el cliente probablemente se dé por satisfecho con la primera.
+- **No meter una imagen de fondo en el hero sin comprobar el contraste en los dos temas.** El propio directivo lo advirtió («no sea que afecte la visibilidad de las letras») y el expediente tiene mediciones de contraste que una imagen de fondo puede tumbar en silencio. Ver la trampa del v5 sobre `transition` y custom properties antes de animar nada del fondo.
+- **No devolver la tarifa del artista a la ficha pública** aunque el campo siga en el modelo.
+- **No cambiar el tema por defecto ni tocar `localStorage.theme` como efecto colateral de otro trabajo.**
+- **No construir la consulta del banco de aspirantes desde `/mi-cuenta` sin pasar por el §9.** Son datos personales de terceros y la autorización que hoy firma el aspirante puede no cubrir ese uso.
+
+### 27.9 Estado del árbol al escribir esto (30 ago 2026)
+
+> ⚠️ **Superada el mismo 30 de agosto por la tarde. Ve al §28.** Se ejecutó la suite que esta sección pedía ejecutar, salió roja, y de ahí salió todo el v14. El árbol ya no está como se describe abajo: el acta, la transcripción y la entrega del 4 de septiembre están confirmadas, y la cifra vigente es **870 casos**, no 820. Se conserva porque su encargo —«hay que volver a medirlas antes de citarlas»— resultó ser el consejo más rentable del documento.
+
+`main` en `543b0cb`, **241 confirmaciones**. ⚠️ **Cambia un dato del §24 y del expediente: `p2-directorio` ya está fusionada** (`fc028ad`, «Integra el trabajo de Ingrid en p2-directorio») — deja de ser cierto que su trabajo esté fuera de `main`. Sin confirmar: los archivos de `docs/ingenieria/entrega-2026-09-04/` (documento del 4 de septiembre, anexos E–H y `fuentes-anexos/`) y `.claude/settings.local.json`; tres PDF viejos marcados como borrados. **En esta sesión no se ejecutó la suite**: las cifras vigentes siguen siendo las del v12 (820 casos) y hay que volver a medirlas antes de citarlas.
+
+---
+
+## 28. EL DEFECTO QUE SOLO EXISTÍA LOS DÍAS 29, 30 Y 31 (30 ago 2026)
+
+El §27.9 dejó un encargo de una línea: «hay que volver a medirlas antes de citarlas». Se ejecutó la suite y **salió roja**, con las 820 pruebas que el expediente daba por verdes desde el 25 de agosto.
+
+### 28.1 Qué era, y por qué nadie lo había visto
+
+`SemillaConFormaTest::test_ningun_asociado_en_mora_tiene_pagos_en_su_ventana_de_mora` fallaba: a `cafe-del-parque`, que debe cinco meses, se le sembraba un pago fechado dentro de su propia ventana de mora.
+
+No era la semilla. Era esto:
+
+```
+Hoy: 2026-08-30
+now()->subMonths(5)->startOfMonth()  →  2026-03-01
+now()->subMonths(6)->startOfMonth()  →  2026-03-01   ← el mismo mes
+```
+
+**`now()->subMonths(6)` un 30 de agosto no da el 28 de febrero: da el 2 de marzo.** PHP construye `2026-02-30`, que no existe, y en vez de recortarlo al último día del mes lo deja correr hasta el siguiente. Con un `startOfMonth()` detrás, dos cubos distintos del historial aterrizan en el mismo mes de calendario y **el mes que se saltaron no lo cubre nadie**.
+
+El filtro de la semilla excluye los meses `0..N` para quien debe `N`. Con el desbordamiento, el cubo `N+1` cae dentro de la ventana de `N` y el pago entra donde tenía prohibido entrar.
+
+**Solo ocurre los días 29, 30 y 31, y solo cuando la resta cruza febrero.** Por eso las 820 pruebas del 25 de agosto se midieron un día que no desbordaba, y por eso la suite llevaba semanas pasando verde veintitantos días de cada mes y poniéndose roja los últimos, sin que nadie coincidiera con el momento.
+
+### 28.2 El arreglo es de orden, no de método
+
+`startOfMonth()` **primero** y la resta después: restarle meses a un día 1 no puede desbordar, porque el día 1 existe en los doce meses. Donde el límite no es un inicio de mes —los plazos de retención—, `subMonthsNoOverflow()`.
+
+### 28.3 Lo que rompía fuera de la semilla, que es lo que importa
+
+El defecto estaba en once archivos, y la prueba solo delataba uno:
+
+| Dónde | Consecuencia real |
+|---|---|
+| `TransaccionSeeder`, `CarteraSeeder`, `ConsultaGuiaSeeder`, `AsociadoSeeder` | Cubos colapsados, un mes sin sembrar, y el portal del asociado diciendo «debes 5 meses» junto a un pago de ese periodo |
+| `DepurarBolsas`, `DepurarMensajes`, `DepurarInscripciones` | **Borraban datos personales hasta dos días antes del plazo publicado.** Un plazo de retención es un contrato con el titular del dato; incumplirlo por el lado que nadie reclama sigue siendo incumplirlo, y es justo lo que el §9 promete por escrito |
+| `MetricasDelObservatorio` | Las ventanas de 18 y 12 meses perdían un mes sin avisar |
+| `RequisitoApertura` y su filtro del panel | El borde estricto de RF-60 —«a los doce meses exactos todavía sirve»— se adelantaba dos días |
+
+### 28.4 La lección de método, que es nueva
+
+El v7 y el v12 enseñaron a desconfiar de las pruebas: cinco y seis falsos verdes escritos por el propio autor del plan, todos cazados mutando el código.
+
+**Esto es otra cosa, y por eso se anota aparte.** Aquí la prueba era correcta, el defecto era real y la mutación lo habría cazado cualquier día. Lo que falló es que **el calendario decidía si la prueba miraba o no**: la misma suite, el mismo código y el mismo comando dan verde el día 15 y rojo el día 30.
+
+Dos reglas que salen de aquí:
+
+- **Una prueba que depende de `now()` sin fijarlo no prueba lo que dice ningún día en particular.** `VentanaDeMesesTest` fija la fecha en cuatro días que desbordan —30 de agosto, 31 de marzo, 31 de mayo y el 29 de febrero bisiesto— precisamente para no volver a depender de cuándo se ejecute. Sin eso, el arreglo habría «pasado» mañana con el defecto dentro.
+- **«La suite está en verde» tiene fecha de caducidad.** El §27.9 lo intuyó al pedir que se volvieran a medir las cifras antes de citarlas. Resultó ser el consejo más rentable del documento: costó una tarde y evitó llevar a la universidad un número falso y a producción una purga que borra antes de tiempo.
+
+### 28.5 Estado del árbol al cerrar
+
+Suite: **870 casos, 859 pasan, 11 omitidas, 0 fallos, 3.115 aserciones.** Pint limpio.
+
+Confirmado en `main`: el arreglo del desbordamiento con su guardia, la vigilancia por eje de las ranuras del tema y el enum de la fábrica, el acta y la transcripción de la reunión 3 —que el §27 ya daba por estar en el repositorio y no estaban—, y la entrega del 4 de septiembre con sus versiones superadas archivadas en `superadas/` (los tres «borrados» son movimientos, verificados por hash y detectados por git como `R100`).
+
+**Lo que NO se tocó, y por qué:** los chips de filtro repetidos y los 104 `leading-*`/`tracking-*` sueltos del §26.3 viven en las mismas vistas que el Bloque A va a rehacer para la demo del 4–11 de septiembre. Refactorizarlas antes es pagar el trabajo dos veces. Van después. Y el `abort_unless` de `Bitacora` y `AjustesDelSitio` se queda: el comentario engañoso que el §26.3 le reprochaba ya no existe en ninguno de los dos, y lo que queda es defensa en profundidad — no se borra un 403 para satisfacer una nota de limpieza.
