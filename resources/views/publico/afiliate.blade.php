@@ -49,8 +49,12 @@
                     {{ session('exito') }}
                     @if ($whatsapp)
                         <x-publico.boton :href="$whatsapp" target="_blank" rel="noopener" class="mt-3">
-                            Escribirnos ya por WhatsApp
+                            Escribirnos por WhatsApp
                         </x-publico.boton>
+                {{-- OBS3-14: el aviso honesto. Al otro lado hay una persona,
+                     no un bot; prometer inmediatez con un «ya» es lo que hace
+                     que el silencio de una noche se lea como abandono. --}}
+                <p class="mt-2 text-2xs text-apagado">{{ ajuste('contacto_whatsapp_aviso') }}</p>
                     @endif
                 </x-publico.alerta>
             @endif
@@ -82,6 +86,7 @@
                         Escríbenos por WhatsApp al {{ ajuste('contacto_whatsapp_visible') }}
                     </a>
                 </p>
+                <p class="mt-1 text-2xs text-apagado">{{ ajuste('contacto_whatsapp_aviso') }}</p>
             @endif
         </section>
     </div>

@@ -134,6 +134,13 @@ class SettingSeeder extends Seeder
             // --- Contacto ---
             $this->texto('contacto_correo', 'asobaresquindio@asobares.org', 'contacto', 'Correo'),
             $this->texto('contacto_whatsapp', '573215549513', 'contacto', 'WhatsApp (formato internacional)'),
+            // OBS3-14. El directivo pregunto «¿ese tiene respuesta?» y pidio
+            // automatizarlo (R21 11:15-11:21). Automatizar WhatsApp no es
+            // codigo de esta plataforma --es WhatsApp Business, del gremio--,
+            // asi que lo que si esta en nuestra mano es no prometerlo. El
+            // texto es editable para que el gremio ponga su horario real el
+            // dia que lo tenga, o lo cambie entero si automatiza de verdad.
+            $this->texto('contacto_whatsapp_aviso', 'Te responde una persona del equipo, no un contestador automático.', 'contacto', 'Aviso bajo el WhatsApp'),
             $this->texto('contacto_whatsapp_visible', '321 5549513', 'contacto', 'WhatsApp para mostrar'),
             $this->texto('contacto_instagram', 'asobaresquindio', 'contacto', 'Usuario de Instagram'),
             $this->texto('contacto_direccion', 'Piso 3, Cámara de Comercio de Armenia y del Quindío', 'contacto', 'Dirección'),

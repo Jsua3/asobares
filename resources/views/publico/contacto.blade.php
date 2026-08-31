@@ -71,6 +71,8 @@
                                     WhatsApp {{ ajuste('contacto_whatsapp_visible') }}
                                 </a>
                             </p>
+                            {{-- OBS3-14. Ver el comentario de `afiliate.blade.php`. --}}
+                            <p class="text-2xs text-apagado">{{ ajuste('contacto_whatsapp_aviso') }}</p>
                         @endif
                         <p>
                             <a href="https://instagram.com/{{ ajuste('contacto_instagram') }}" target="_blank" rel="noopener"
