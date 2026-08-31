@@ -25,12 +25,33 @@ class InicioController
         $aliados = $reglaDeAlcaldias->filtrar(Aliado::visible()->with('municipio')->get());
 
         return view('publico.inicio', [
-            'destacados' => Asociado::publicado()
-                ->where('destacado', true)
-                ->with(['categoria', 'municipio'])
-                ->latest('updated_at')
-                ->take(6)
-                ->get(),
+            // OBS3-06. Ordenaba por `updated_at`, y desde fuera eso no se
+            // distingue del azar: el directivo se paro justo en esto --«por
+            // que esta colina primero, por que mirador... o simplemente un
+            // aleatorio» (R21 06:11-06:17)-- y pidio «que sea en orden
+            // alfabetico» (R21 06:24) o por ciudades.
+            //
+            // Alfabetico, que es ademas el mismo criterio que ya usa el
+            // directorio (`DirectorioController`, `destacado desc, nombre`):
+            // dos listas del mismo sitio ordenadas distinto vuelven a parecer
+            // arbitrarias aunque cada una tenga su logica.
+            //
+            // Efecto colateral querido: el orden deja de moverse solo. Antes,
+            // editar una ficha en el panel la subia al primer puesto de la
+            // portada sin que nadie lo hubiera pedido.
+            //
+            // El `orderBy` de la base elige CUALES son los seis, de forma
+            // estable; `ordenarEnEspanol` decide en que ORDEN se pintan,
+            // porque SQLite ordena por bytes y dejaria «Ambar» detras de
+            // «Zorba». Ver el comentario del ayudante.
+            'destacados' => ordenarEnEspanol(
+                Asociado::publicado()
+                    ->where('destacado', true)
+                    ->with(['categoria', 'municipio'])
+                    ->orderBy('nombre')
+                    ->take(6)
+                    ->get()
+            ),
             'beneficios' => Beneficio::orderBy('orden')->get(),
             'aliadosInstitucionales' => $aliados->where('tipo', TipoAliado::Institucional)->values(),
             'aliadosComerciales' => $aliados->where('tipo', TipoAliado::Comercial)->values(),
