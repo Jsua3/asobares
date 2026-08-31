@@ -161,6 +161,10 @@ class SettingSeeder extends Seeder
             // OBS3-08. El acta ofrecía dos redacciones --«a convenir» o
             // «según el evento»--, así que la decide el gremio desde el panel.
             $this->texto('artistas_tarifa_leyenda', 'A convenir', 'modulos', 'Artistas · leyenda en lugar de la tarifa'),
+            // OBS3-12. Los tres estados de la verificacion de un proveedor.
+            $this->texto('proveedores_verificado', 'Contacto verificado el', 'modulos', 'Proveedores · rótulo de verificado'),
+            $this->texto('proveedores_verificacion_vieja', 'Sin confirmar desde', 'modulos', 'Proveedores · rótulo de verificación vencida'),
+            $this->texto('proveedores_sin_verificar', 'El gremio no ha confirmado este contacto', 'modulos', 'Proveedores · rótulo de sin verificar'),
             $this->texto('proveedores_titulo', 'Bolsa de proveedores', 'modulos', 'Título de proveedores'),
             $this->largo('proveedores_intro', 'Hielo, licores, alimentos, aseo, seguridad y mantenimiento. ¿Quién te arregla la campana de extracción un sábado? Aquí.', 'modulos', 'Introducción de proveedores'),
 

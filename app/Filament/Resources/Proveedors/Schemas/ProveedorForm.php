@@ -65,6 +65,26 @@ class ProveedorForm
                             ->maxLength(255),
                     ]),
 
+                // OBS3-12. Seccion aparte de «Visibilidad» a proposito: que un
+                // proveedor haya pagado por aparecer no dice que su telefono
+                // siga sonando. Son dos preguntas distintas y confundirlas es
+                // lo que produjo la queja del 28 de agosto.
+                Section::make('Verificación del contacto')
+                    ->description('Cada cuánto se confirma que el proveedor sigue existiendo y respondiendo. Se muestra en su ficha pública.')
+                    ->columns(2)
+                    ->schema([
+                        DatePicker::make('verificado_el')
+                            ->label('Verificado el')
+                            ->native(false)
+                            ->maxDate(now())
+                            ->helperText('El día en que alguien confirmó que este contacto responde. Vacío significa «nadie lo ha comprobado», y así sale en el sitio.'),
+                        TextInput::make('verificado_con')
+                            ->label('Verificado con')
+                            ->maxLength(255)
+                            ->placeholder('Llamada a Marta, 3xx xxx xxxx')
+                            ->helperText('Con quién o por qué canal. Sirve para volver a preguntar sin empezar de cero.'),
+                    ]),
+
                 Section::make('Visibilidad')
                     ->columns(2)
                     ->schema([

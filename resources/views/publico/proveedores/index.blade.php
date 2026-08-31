@@ -53,6 +53,26 @@
 
                                 <p class="mt-3 flex-1 text-sm leading-relaxed text-tenue">{{ $proveedor->descripcion }}</p>
 
+                                {{-- OBS3-12: «y que si respondan, y que la informacion este
+                                     actualizada» (R22 04:13). Un contacto sin fecha no vale mas
+                                     que un contacto viejo: vale menos, porque el lector no sabe
+                                     cual de los dos tiene. Mismo patron que RF-60 en la guia. --}}
+                                <p class="mt-3 text-2xs">
+                                    @if (! $proveedor->estaVerificado())
+                                        <span class="text-aviso-suave">{{ ajuste('proveedores_sin_verificar') }}</span>
+                                    @elseif ($proveedor->necesitaRevision())
+                                        <span class="text-aviso-suave">
+                                            {{ ajuste('proveedores_verificacion_vieja') }}
+                                            {{ $proveedor->verificado_el->translatedFormat('F \d\e Y') }}
+                                        </span>
+                                    @else
+                                        <span class="text-apagado">
+                                            {{ ajuste('proveedores_verificado') }}
+                                            {{ $proveedor->verificado_el->translatedFormat('d \d\e F \d\e Y') }}
+                                        </span>
+                                    @endif
+                                </p>
+
                                 <div class="mt-5 space-y-2">
                                     @if ($enlace = enlaceWhatsapp($proveedor->whatsapp, "Hola, los vi en la bolsa de proveedores de ASOBARES Quindío."))
                                         <x-publico.boton :href="$enlace" target="_blank" rel="noopener nofollow" class="w-full">

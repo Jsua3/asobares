@@ -94,7 +94,7 @@ class ProveedorSeeder extends Seeder
             ],
         ];
 
-        foreach ($proveedores as $proveedor) {
+        foreach ($proveedores as $indice => $proveedor) {
             $slug = $proveedor['municipio'];
             unset($proveedor['municipio']);
 
@@ -102,6 +102,26 @@ class ProveedorSeeder extends Seeder
             $proveedor['municipio_id'] = $municipios[$slug];
             $proveedor['visible_hasta'] = now()->addMonths(random_int(4, 14))->toDateString();
             $proveedor['estado'] ??= EstadoPublicacion::Publicado;
+
+            /*
+             * OBS3-12. La demostración enseña los TRES estados de verificación
+             * a propósito, no todos verificados: la queja del gremio fue de
+             * datos muertos --«ya no existe, ya no contestan» (R22 04:19)-- y
+             * una bolsa donde todo aparece confirmado no enseña que el sitio
+             * sabe distinguir. Uno de cada tres queda sin verificar, y el
+             * segundo de cada tres con la verificación vencida.
+             */
+            $proveedor += match ($indice % 3) {
+                0 => [
+                    'verificado_el' => now()->subMonthsNoOverflow(random_int(0, 4))->toDateString(),
+                    'verificado_con' => 'Llamada de confirmación de la secretaría',
+                ],
+                1 => [
+                    'verificado_el' => now()->subMonthsNoOverflow(Proveedor::MESES_HASTA_REVISION)->subDays(random_int(1, 60))->toDateString(),
+                    'verificado_con' => 'Llamada de confirmación de la secretaría',
+                ],
+                default => ['verificado_el' => null, 'verificado_con' => null],
+            };
 
             Proveedor::updateOrCreate(['slug' => $proveedor['slug']], $proveedor);
         }

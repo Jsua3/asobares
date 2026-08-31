@@ -46,4 +46,28 @@ class ProveedorFactory extends Factory
     {
         return $this->state(['visible_hasta' => now()->subDay()->toDateString()]);
     }
+
+    /** Contacto confirmado hoy (OBS3-12). */
+    public function verificado(): static
+    {
+        return $this->state([
+            'verificado_el' => now()->toDateString(),
+            'verificado_con' => 'Llamada de confirmación',
+        ]);
+    }
+
+    /**
+     * Verificado, pero hace demasiado. Un día MÁS del plazo, no justo el
+     * borde: el borde exacto todavía sirve y tiene su propia prueba.
+     */
+    public function verificacionVencida(): static
+    {
+        return $this->state([
+            'verificado_el' => now()
+                ->subMonthsNoOverflow(Proveedor::MESES_HASTA_REVISION)
+                ->subDay()
+                ->toDateString(),
+            'verificado_con' => 'Llamada de confirmación',
+        ]);
+    }
 }
