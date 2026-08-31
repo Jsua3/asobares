@@ -125,6 +125,9 @@ class SettingSeeder extends Seeder
             $this->texto('contacto_correo_destino', 'asobaresquindio@asobares.org', 'contacto', 'Correo que recibe los formularios'),
 
             // --- Guía normativa ---
+            // OBS3-10. Dos rotulos porque el enlace no siempre cumple lo mismo.
+            $this->texto('guia_enlace_puntual', 'Ir al trámite', 'guia', 'Guía · enlace que abre el trámite exacto'),
+            $this->texto('guia_enlace_portada', 'Sitio de la entidad', 'guia', 'Guía · enlace que solo abre el portal'),
             $this->texto('guia_titulo', 'Abre tu negocio sin que te lo cierren', 'guia', 'Título de la guía'),
             $this->largo('guia_intro', 'La normatividad cambia de un municipio a otro. Escoge el tuyo y revisa, entidad por entidad, qué te van a pedir, cuánto cuesta y qué formato tienes que descargar y llevar diligenciado.', 'guia', 'Introducción de la guía'),
             $this->largo('guia_descargo', 'Esta guía es orientativa y se actualiza con la información que cada entidad entrega al gremio. Los requisitos, costos y formatos pueden cambiar sin aviso: verifica siempre directamente con la entidad competente antes de iniciar tu trámite.', 'guia', 'Texto de descargo'),

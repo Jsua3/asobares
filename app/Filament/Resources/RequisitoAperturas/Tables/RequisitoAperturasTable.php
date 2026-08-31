@@ -28,6 +28,26 @@ class RequisitoAperturasTable
                     ->searchable(),
                 TextColumn::make('enlace_externo')
                     ->searchable(),
+                // OBS3-10. La columna de arriba enseña la URL; esta dice si
+                // sirve para lo que el gremio pidió. Sin una señal a la vista,
+                // los enlaces a portada se quedan años: no fallan, solo no
+                // llevan a ninguna parte útil.
+                TextColumn::make('enlace_puntual')
+                    ->label('¿Puntual?')
+                    ->badge()
+                    ->state(fn (RequisitoApertura $requisito): string => match (true) {
+                        blank($requisito->enlace_externo) => 'Sin enlace',
+                        $requisito->enlaceEsPuntual() => 'Va al trámite',
+                        default => 'Solo la portada',
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'Va al trámite' => 'success',
+                        'Solo la portada' => 'warning',
+                        default => 'gray',
+                    })
+                    ->tooltip(fn (RequisitoApertura $requisito): ?string => $requisito->enlaceEsPuntual()
+                        ? null
+                        : 'El enlace abre la portada de la entidad. La revisión del 28 de agosto pidió que abra el trámite exacto.'),
                 TextColumn::make('adjunto')
                     ->searchable(),
                 TextColumn::make('adjunto_nombre')

@@ -55,6 +55,36 @@ class RequisitoApertura extends Model
         return $this->belongsTo(Municipio::class);
     }
 
+    /**
+     * ¿El enlace lleva al trámite, o solo a la puerta de la entidad?
+     *
+     * OBS3-10. El directivo lo pidió así: «que sea puntual... o sea que no me
+     * abra la página de la cámara solamente» (R23 05:39-05:44), «tiene que ir
+     * directamente el enlace» (R23 05:50), «hay que poner la completa» (R23
+     * 05:59). Su razón no era estética: «muchas veces llegar a ese registro es
+     * difícil» (R23 06:05) y «hay personas que no son tan amigables con la
+     * tecnología» (R23 06:27). Un enlace a la portada de una alcaldía deja al
+     * usuario donde estaba, con el trámite a cuatro clics de distancia.
+     *
+     * Puntual = tiene camino, consulta o ancla. `https://camaraarmenia.org.co`
+     * y `https://camaraarmenia.org.co/` no lo son; cualquier cosa por debajo
+     * sí. Es una heurística y no una garantía --una ruta puede seguir siendo
+     * una portada de sección-- pero separa exactamente el caso que se señaló
+     * en la mesa, que es el de los siete enlaces sembrados a dominio pelado.
+     */
+    public function enlaceEsPuntual(): bool
+    {
+        if (blank($this->enlace_externo)) {
+            return false;
+        }
+
+        $camino = trim((string) parse_url($this->enlace_externo, PHP_URL_PATH), '/');
+
+        return filled($camino)
+            || filled(parse_url($this->enlace_externo, PHP_URL_QUERY))
+            || filled(parse_url($this->enlace_externo, PHP_URL_FRAGMENT));
+    }
+
     public function tieneAdjunto(): bool
     {
         return filled($this->adjunto);

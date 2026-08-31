@@ -148,9 +148,16 @@
                                 @endif
 
                                 @if ($requisito->enlace_externo)
+                                    {{-- OBS3-10: la etiqueta no promete mas de lo que el enlace
+                                         cumple. Con enlace puntual invita al tramite; con un
+                                         dominio pelado dice lo que es, una puerta. Asi el dia que
+                                         el gremio entregue las URL exactas la mejora se nota sola,
+                                         sin tocar la vista. --}}
                                     <a href="{{ $requisito->enlace_externo }}" target="_blank" rel="noopener"
                                        class="pulsable inline-flex min-h-11 items-center rounded-xl border border-linea px-4 py-2.5 text-sm text-tinta hover:border-marca-500/50">
-                                        Sitio de la entidad&nbsp;<x-publico.flecha direccion="externa" />
+                                        {{ $requisito->enlaceEsPuntual()
+                                            ? ajuste('guia_enlace_puntual')
+                                            : ajuste('guia_enlace_portada') }}&nbsp;<x-publico.flecha direccion="externa" />
                                     </a>
                                 @endif
                             </div>

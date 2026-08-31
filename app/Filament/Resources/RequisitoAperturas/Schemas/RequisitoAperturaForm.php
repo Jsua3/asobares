@@ -82,7 +82,8 @@ class RequisitoAperturaForm
                             ->label('Enlace externo')
                             ->url()
                             ->maxLength(255)
-                            ->helperText('Página oficial de la entidad, si existe.')
+                            ->placeholder('https://camaraarmenia.org.co/tramites/matricula-mercantil')
+                            ->helperText('Pega el enlace del TRÁMITE, no la portada de la entidad: «que sea puntual… que no me abra la página de la cámara solamente» (revisión del 28 de agosto). Un dominio pelado deja al usuario donde estaba.')
                             ->columnSpanFull(),
                     ]),
 
