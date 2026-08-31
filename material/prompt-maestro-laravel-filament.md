@@ -1,5 +1,9 @@
 # PROMPT MAESTRO v4 — Plataforma Web ASOBARES Capítulo Quindío (Laravel 13 + Filament 4)
 
+> **v15 (30 ago 2026) — HAY DESPLIEGUE, Y LA URL ESTÁ EN 500.** Hay cuenta de Laravel Cloud y el sitio **ya está publicado** en `asobares-production-0jhdcz.laravel.cloud` (tres despliegues en verde), pero **responde `500`: construir en verde no es arrancar**. Se acabó el bloqueo de dos semanas —SSL, dispositivos físicos, respaldos, medición contra dominio y cinco vacíos declarados de la matriz dejan de estar bloqueados, y el §26.2 pasa de lista de espera a tarea—, pero aparecieron tres cosas nuevas. **Manda la §29, y dentro de ella el §29.7.** ⚠️ **El entorno se llama `production`, y `DatabaseSeeder` se niega a correr ahí**: si `APP_ENV` heredó ese nombre, la base se queda vacía y la demo sale sin un solo bar. ⚠️ **La organización de Cloud es `juan-sua`, personal**: el apartado 1.1 del runbook pide facturación del gremio, así que R-14 está sorteado, no cerrado, hasta que se compruebe. ⚠️ **No hay bucket y el sitio duerme por scale-to-zero**: no lo enseñes ni lo midas en frío. ⚠️ **El bloqueo se movió, no desapareció: ahora es el correo.** Laravel Cloud no incluye SMTP y no hay proveedor contratado; sin él los códigos MFA no salen del registro y `/admin` **no se puede demostrar delante del cliente**. Configura `LOG_STACK=stderr` desde el primer despliegue o ni siquiera funciona el camino de emergencia. ⚠️ **Antes de crear el bucket, lee el §8.3 del runbook**: la política evidente abre los formatos de la guía normativa por URL directa. ⚠️ Y **la demo del 4–11 de septiembre va sobre el subdominio de Cloud**; el dominio propio es de la semana 8.
+>
+> **v16 (31 ago 2026) — NUEVE SEÑALAMIENTOS CERRADOS, Y EL SITIO SIGUE EN 500.** Doce confirmaciones sobre el §27: `main` de `6b0a20d` a `b9e2428`, empujadas. Cerrados OBS3-01, 02, 04, 05, 06, 08, 12, 13 y 14; OBS3-10 y OBS3-11 hechos a medias con la mitad de contenido pendiente del gremio; OBS3-03 y OBS3-07 bloqueados en decisiones humanas. **El bloque A se agotó en lo que depende del equipo.** Suite de 871 a **946 casos** (935 pasan, 11 omitidas, 0 fallos, 3.502 aserciones). ⚠️ El sitio desplegado sigue devolviendo **500** y ahora está doce commits por detrás de `main`. ⚠️ Deuda nueva: el disco público transporta fotos sin moderar desde OBS3-13, hay seis migraciones sin verificar contra PostgreSQL real, y el reparto del §24.3 quedó suspendido de hecho. **Todo en la nueva §30**, que además explica cómo se auditó este documento y qué se decidió no tocar.
+>
 > ## ⇢ EMPIEZA POR EL §0
 >
 > **El §0 «Punto de entrada» es lo primero que debe leer cualquier sesión nueva.** Dice en qué estado está el proyecto, qué se está exigiendo y con qué fecha, qué falta y qué problemas conocidos te van a morder. Las notas de versión de abajo son el registro histórico y se leen después, no antes.
@@ -35,9 +39,9 @@
 >
 > **v7 · la trampa que más costó, y que no es técnica:** de veintitantos fallos atrapados en estas dos fases, **cinco fueron pruebas en falso verde escritas por el propio autor del plan** — pruebas que pasaban con el bug reintroducido. Todas tenían la misma forma: `assertSee('alguna palabra')` o una aserción sobre el texto de un archivo, en vez de sobre el comportamiento. Ninguna se detectó leyendo; todas salieron cuando un revisor **mutó el código a propósito** y miró si la prueba se enteraba. Si se relanza cualquier parte de este trabajo: **escribir la prueba no basta, hay que romper el código y ver el rojo.**
 >
-> **v14 (30 ago 2026) — EMPIEZA POR AQUÍ. LA SUITE ESTABA EN ROJO Y NADIE LO SABÍA.** Al medir las cifras que el §27.9 pedía volver a medir antes de citarlas, la suite salió **roja**: `SemillaConFormaTest` fallaba porque a un asociado con cinco meses de mora se le sembraba un pago dentro de su propia ventana de mora. No era la semilla: era **aritmética de calendario**. `now()->subMonths(6)` un 30 de agosto **no da febrero, da el 2 de marzo** —PHP construye `2026-02-30` y lo deja correr al mes siguiente en vez de recortarlo—, así que con un `startOfMonth()` detrás dos cubos distintos aterrizan en el mismo mes y el que se saltaron no lo cubre nadie. **Solo ocurre los días 29, 30 y 31, y solo cuando la resta cruza febrero**: por eso las 820 pruebas del 25 de agosto se midieron un día que no desbordaba y la suite llevaba semanas pasando verde veintitantos días de cada mes. El mismo error estaba en **las tres purgas de retención** —que borraban datos personales hasta dos días **antes** del plazo publicado—, en las ventanas de 18 y 12 meses del observatorio y en el borde estricto de RF-60. Corregido en once archivos, con `VentanaDeMesesTest` fijando la fecha en cuatro días que desbordan para que la guardia valga los 365. Suite de 820 a **870 casos** (859 pasan, 11 omitidas, 0 fallos, 3.115 aserciones) — y a **871** al cerrar el v14, con la prueba del acuse del §28.5; esa es la cifra vigente, re-medida el 30 de agosto por la tarde. Cerradas de paso dos deudas del §18.6: la vigilancia **por eje** de las ranuras del plugin de tema, que faltaba en los widgets del tablero, y el enum crudo de `RequisitoAperturaFactory`. ⚠️ **Y la lección de método, que es nueva y no la cubrían el v7 ni el v12:** aquí no hubo prueba en falso verde ni revisor que fallara — **la prueba era correcta y el defecto real**, pero el calendario decidía si se veía. Una suite que depende del día en que se ejecuta miente sin que nadie mienta. Ver la nueva **§28**.
+> **v14 (30 ago 2026) — EMPIEZA POR AQUÍ. LA SUITE ESTABA EN ROJO Y NADIE LO SABÍA.** Al medir las cifras que el §27.9 pedía volver a medir antes de citarlas, la suite salió **roja**: `SemillaConFormaTest` fallaba porque a un asociado con cinco meses de mora se le sembraba un pago dentro de su propia ventana de mora. No era la semilla: era **aritmética de calendario**. `now()->subMonths(6)` un 30 de agosto **no da febrero, da el 2 de marzo** —PHP construye `2026-02-30` y lo deja correr al mes siguiente en vez de recortarlo—, así que con un `startOfMonth()` detrás dos cubos distintos aterrizan en el mismo mes y el que se saltaron no lo cubre nadie. **Solo ocurre los días 29, 30 y 31, y solo cuando la resta cruza febrero**: por eso las 820 pruebas del 25 de agosto se midieron un día que no desbordaba y la suite llevaba semanas pasando verde veintitantos días de cada mes. El mismo error estaba en **las tres purgas de retención** —que borraban datos personales hasta dos días **antes** del plazo publicado—, en las ventanas de 18 y 12 meses del observatorio y en el borde estricto de RF-60. Corregido en once archivos, con `VentanaDeMesesTest` fijando la fecha en cuatro días que desbordan para que la guardia valga los 365. Suite de 820 a **870 casos** (859 pasan, 11 omitidas, 0 fallos, 3.115 aserciones) — y a **871** al cerrar el v14, con la prueba del acuse del §28.5. ⚠️ **Cifra superada:** el 31 de agosto la suite es de **946 casos** (935 pasan, 11 omitidas, 0 fallos, 3.502 aserciones) tras los once archivos de prueba del bloque OBS3. Ver §30. Cerradas de paso dos deudas del §18.6: la vigilancia **por eje** de las ranuras del plugin de tema, que faltaba en los widgets del tablero, y el enum crudo de `RequisitoAperturaFactory`. ⚠️ **Y la lección de método, que es nueva y no la cubrían el v7 ni el v12:** aquí no hubo prueba en falso verde ni revisor que fallara — **la prueba era correcta y el defecto real**, pero el calendario decidía si se veía. Una suite que depende del día en que se ejecuta miente sin que nadie mienta. Ver la nueva **§28**.
 >
-> **v13 (28–30 ago 2026) — EL GREMIO VIO LA PLATAFORMA Y LO QUE FALLÓ FUE LO VISUAL.** El viernes 28 de agosto se demostró el sitio y el panel ante el directivo del capítulo, la dirección ejecutiva y la contadora. **Ninguna funcionalidad fue objetada**; toda la inconformidad es visual, de contenido y de encuadre — «lo visual es lo que tiene que ser, también muy impactante» — y el equipo reconoció en la mesa que «la parte visual la dejamos de último». El cierre fue un plazo del cliente: **una a dos semanas para levantar lo visual y volver a mostrarlo** (entre el 4 y el 11 de septiembre). La nueva **sección 27 manda sobre el orden de trabajo del producto** y es lo primero que debe leer una sesión nueva; el §26 sigue mandando sobre lo que no es código (cuenta institucional, despliegue, firmas) y su §26.4 sigue vigente entero. ⚠️ **Deja de ser cierto que «no queda trabajo de producto»** (§26): hay catorce señalamientos con archivo asignado en el §27.2 y cuatro ampliaciones que exigen acta en el §27.4. ⚠️ **Y tres cosas se demostraron como si existieran y no existen** (§27.3): que «toda la página es editable» —los títulos de la portada están cableados—, que el propietario sube y el gremio aprueba sus fotos —`/mi-cuenta` no tiene esa ruta— y el correo de confirmación al postulante, que nunca se envía. ⚠️ **Cambia un dato del expediente:** `p2-directorio` **ya está fusionada** a `main` (`fc028ad`).
+> **v13 (28–30 ago 2026) — EL GREMIO VIO LA PLATAFORMA Y LO QUE FALLÓ FUE LO VISUAL.** El viernes 28 de agosto se demostró el sitio y el panel ante el directivo del capítulo, la dirección ejecutiva y la contadora. **Ninguna funcionalidad fue objetada**; toda la inconformidad es visual, de contenido y de encuadre — «lo visual es lo que tiene que ser, también muy impactante» — y el equipo reconoció en la mesa que «la parte visual la dejamos de último». El cierre fue un plazo del cliente: **una a dos semanas para levantar lo visual y volver a mostrarlo** (entre el 4 y el 11 de septiembre). La nueva **sección 27 manda sobre el orden de trabajo del producto** y es lo primero que debe leer una sesión nueva; el §26 sigue mandando sobre lo que no es código (cuenta institucional, despliegue, firmas) y su §26.4 sigue vigente entero. ⚠️ **Deja de ser cierto que «no queda trabajo de producto»** (§26): hay catorce señalamientos con archivo asignado en el §27.2 y cuatro ampliaciones que exigen acta en el §27.4. ⚠️ **Y tres cosas se demostraron como si existieran y no existen** (§27.3): que «toda la página es editable» —los títulos de la portada estaban cableados—, que el propietario sube y el gremio aprueba sus fotos —`/mi-cuenta` no tenía esa ruta— y el correo de confirmación al postulante, que no se enviaba. ✅ **Las tres existen desde el 31 de agosto de 2026**: `046895c` y `d79d1b8` (textos editables), `a803e3a` (carga y moderación de fotos) y `7eb0799` (acuse). Ver §30.2 — y ojo, que esta cabecera y el §27.3 no nombran el mismo trío. ⚠️ **Cambia un dato del expediente:** `p2-directorio` **ya está fusionada** a `main` (`fc028ad`).
 >
 > **v12 (25 ago 2026) — EMPIEZA POR AQUÍ. RF-60 CERRADO Y LA COMPAÑERA YA COMMITEA.** Cerrado **RF-60** —normativa vigente y decretos transitorios—, que era uno de los dos únicos requisitos funcionales sin ninguna cobertura: la guía normativa guarda ahora `verificado_el`, `verificado_con` y `vigente_hasta`; una ficha sin fechar se publica igual pero lo dice en su cara, y lo caducado desaparece por **las cuatro puertas** por las que sale la guía —lista, selector, sitemap y **descarga del formato**, que era la única con consecuencia de seguridad—. Suite de 791 a **820 casos** (809 pasan, 11 omitidas, 0 fallos, 2.904 aserciones). `main` en `bad0143`, empujado. ⚠️ **Dato nuevo que cambia un riesgo del expediente:** existe `origin/p2-directorio` con **tres commits de Ingrid**, con pruebas propias. Deja de ser cierto que su trabajo no pasa por el repositorio — pero **no está fusionada y hoy no fusionaría limpio** (cuatro conflictos, todos contra `09e3e33`, el pase de foco y objetivos táctiles). Ver §11 del estado del proyecto. ⚠️ **Y la lección de método de esta sesión, que confirma la del v7:** ocho tareas con revisión independiente encontraron **seis pruebas que pasaban sin ejercer lo que decían proteger**, y **ninguna era un defecto de producción**. Las cuatro justificaciones falsas las había escrito el propio plan. Ver §24.6.
 >
@@ -73,17 +77,17 @@ Un avance técnico impecable que llegue tarde al documento pierde el 60 % del co
 | Fecha | Qué | Quién lo exige |
 |---|---|---|
 | **Jue 3 – vie 4 sep, 11:59:59 pm** | 95 % del documento de práctica, en `.docx` con sus anexos | Docente asesor. Tarde = 0.0, sin excepción |
-| **Entre el 4 y el 11 de sep** | **Nueva demostración con la capa visual levantada.** Plazo que puso el cliente en la mesa del 28 de agosto | Directivo del capítulo |
+| **Entre el 4 y el 11 de sep** | **Nueva demostración con la capa visual levantada**, y sobre la URL pública si el despliegue ya está hecho (§29) | Directivo del capítulo |
 | **7 – 11 sep** | Pruebas en dispositivos reales y corrección de lo que salga | Cronograma firmado |
 | **14 – 18 sep** | Dominio, SSL, capacitación y Acta 02 firmada | Cronograma firmado |
 | **22 sep** | **Entrega dura al gremio** | Cronograma firmado |
 
-**El compromiso vivo es el segundo.** El 28 de agosto el gremio vio la plataforma por primera vez, **no objetó ninguna funcionalidad** y dejó catorce señalamientos, todos visuales o de contenido. El §27 los enumera con archivo y línea. Si vas a tocar producto, **empieza por el §27.7, bloque A**.
+**El compromiso vivo es el segundo.** El 28 de agosto el gremio vio la plataforma por primera vez, **no objetó ninguna funcionalidad** y dejó catorce señalamientos, todos visuales o de contenido. El §27 los enumera con archivo y línea. ⚠️ **Pero ya no empieces por el bloque A: se agotó el 31 de agosto** (§30). De los catorce quedan OBS3-03 y OBS3-07, bloqueados en decisiones humanas, y las mitades de contenido de OBS3-10 y OBS3-11, que son insumo del gremio. **Lo que hoy bloquea la demo no es producto: es que el sitio desplegado devuelve 500** (§29.7 y §30.4).
 
 ### 0.3 Qué falta, en tres frentes que no se estorban
 
-1. **Producto — lo visual y lo de contenido.** Es lo único con fecha de cliente encima. Catorce señalamientos (§27.2) repartidos en cuatro bloques (§27.7): **A** son siete cambios de portada, tema, aliados, orden y fotografías, y es lo único que el directivo va a mirar; **B** son siete de contenido y reglas; **C** son cuatro ampliaciones que no se codifican sin acta; **D** son insumos que hay que reclamarle al gremio. De todo eso, lo único cerrado hasta hoy es **OBS3-09 en su mitad barata** (§28.5).
-2. **Infraestructura — bloqueada, y no por ingeniería.** Todo lo que falta aquí cuelga de **una cuenta institucional que el gremio no ha abierto** (riesgo R-14, §20 y §26.2). Sin ella no hay despliegue, ni SSL, ni correo saliente, ni validación de Bold con dinero real, ni medición contra dominio, ni pruebas en dispositivos físicos. Está todo escrito y probado: es ejecución, no diseño. **No se resuelve desplegando con cuenta personal** — el §20.6 y el §23.3 describen el modo de muerte.
+1. **Producto — lo visual y lo de contenido.** Es lo único con fecha de cliente encima. Catorce señalamientos (§27.2) repartidos en cuatro bloques (§27.7): **A** son siete cambios de portada, tema, aliados, orden y fotografías, y es lo único que el directivo va a mirar; **B** son siete de contenido y reglas; **C** son cuatro ampliaciones que no se codifican sin acta; **D** son insumos que hay que reclamarle al gremio. ⚠️ **Superado el 31 de agosto** (§30.1): cerrados **OBS3-01, 02, 04, 05, 06, 08, 12, 13 y 14**; OBS3-10 y OBS3-11 con el código puesto y el contenido pendiente del gremio; OBS3-09 sigue cerrado solo en su mitad barata (§28.5) y su otra mitad la prohíbe el §27.8. Quedan bloqueados en decisión humana OBS3-03 y OBS3-07.
+2. **Infraestructura — desbloqueada el 30 de agosto, desplegada, y HOY ROTA.** ⚠️ El sitio existe en `asobares-production-0jhdcz.laravel.cloud` y **responde 500**; lee el §29.7 y el §30.4 antes que el resto de este punto. El gremio abrió la cuenta de Laravel Cloud **institucional y con su medio de pago**, que era la condición del §20.2: **R-14 está cerrado**. Todo lo que colgaba de él —despliegue, SSL, dispositivos físicos, respaldos, medición contra dominio, Bold con dinero real y cinco vacíos declarados de la matriz— pasa de bloqueado a pendiente de ejecutar. **Manda la §29.** ⚠️ Pero el bloqueo se movió: **no hay SMTP contratado**, y sin él los códigos del segundo factor no salen del registro y `/admin` no se puede demostrar delante del cliente. Es lo primero que hay que pedirle al gremio esta semana.
 3. **Académico.** El documento del 4 de septiembre está redactado, paginado y confirmado en el repositorio. Lo que falta es que su autor lo lea y lo ajuste **en voz propia**: una entrega anterior fue rechazada por uso evidente de IA. Ver §23.2 para lo que el docente ha exigido, textual y con fecha.
 
 **Y una decisión que no es de código y bloquea el bloque C:** el `Acta 04 · Ampliación de alcance` ya está emitida en `docs/ingenieria/constancias/`, con una fila por petición (antes del 22 sep / Fase II / se descarta) y dos contrapropuestas del equipo. **Está sin firmar.** Mientras no vuelva firmada, OBS3-15 a OBS3-18 no se tocan — y dejar una fila sin marcar no las aplaza, las deja sin decidir.
@@ -143,9 +147,11 @@ El repositorio trae dos habilidades propias en `.claude/skills/` —`laravel-bes
 
 ### 0.8 Estado medido del árbol (30 de agosto de 2026)
 
+⚠️ **Superado el 31 de agosto: `main` en `b9e2428`, 261 confirmaciones, 75 archivos de prueba, 39 migraciones, 66 vistas Blade. Ver §30.1.** Lo de abajo es del 30 de agosto.
+
 `main` en `6b0a20d`, **249 confirmaciones**. Árbol limpio. `origin/p2-directorio` **ya está fusionada**. 64 archivos de prueba, 35 migraciones, 19 recursos de Filament, 64 vistas Blade. (`.claude/settings.local.json` existe pero no aparece en `git status`: lo atrapa el `gitignore` **global** de la máquina, no el del proyecto. En otra máquina saldría como no seguido.)
 
-**Suite re-medida el 30 de agosto por la tarde: 871 casos, 860 pasan, 11 omitidas, 0 fallos, 3.121 aserciones**, 274,7 s. Confirma el §28.6 y **resuelve una contradicción del propio documento**: el encabezado del v14 y el aviso del §27.9 decían 870 casos y 3.115 aserciones, que era la cifra antes de añadir la prueba del acuse del §28.5. La vigente es 871. Las cifras de 820 que aparecen en las secciones anteriores son del 25 de agosto y **están superadas**.
+**Suite re-medida el 30 de agosto por la tarde: 871 casos, 860 pasan, 11 omitidas, 0 fallos, 3.121 aserciones**, 274,7 s. ⚠️ **Y superada el 31: 946 casos, 935 pasan, 11 omitidas, 0 fallos, 3.502 aserciones.** No cites la duración: dos corridas del mismo código el mismo día dieron 253 s y 593 s. Confirma el §28.6 y **resuelve una contradicción del propio documento**: el encabezado del v14 y el aviso del §27.9 decían 870 casos y 3.115 aserciones, que era la cifra antes de añadir la prueba del acuse del §28.5. La vigente es 871. Las cifras de 820 que aparecen en las secciones anteriores son del 25 de agosto y **están superadas**.
 
 ⚠️ **Esta corrida vale más que una cualquiera:** el 30 es uno de los tres días en que el desbordamiento del §28 se manifestaba. Verde hoy significa que el arreglo se ejercitó en la condición que lo destapó, no que se midió un día tranquilo. Antes de citar cualquiera de estos números en un documento, vuelve a medirlos: es la lección del §28.4 y aquí es literal.
 
@@ -1132,7 +1138,7 @@ Ninguno estaba en el §22.4 ni en el §23.12. Los tres primeros **solo se habrí
 
 1. **El buscador del directorio encontraba 4 de cada 10 establecimientos.** `LIKE` es insensible a mayúsculas en SQLite y **sensible** en PostgreSQL. Medido contra el motor real: `like '%bar%'` devuelve 4 filas; `ilike`, 10. La suite corre sobre SQLite, así que ninguna prueba lo veía. Arreglado con `whereLike(caseSensitive: false)`, que lo resuelve la gramática de Laravel sin un `match` por driver que mantener. **La prueba afirma la SQL emitida por cada gramática**, no el resultado: una prueba de comportamiento habría pasado en verde con el código roto.
 
-2. **La política obvia del bucket reabre un agujero ya cerrado.** Conceder `s3:GetObject` sobre `arn:...:<bucket>/*` deja los formatos oficiales de la guía normativa descargables por URL directa — medido: 200, sin pasar por `GuiaController`, que es donde se comprueba que el requisito esté publicado. Acotada al prefijo `publico/`: 403. Los dos prefijos son la frontera de seguridad, y `AlmacenamientoTest` afirma que siguen siendo distintos.
+2. **La política obvia del bucket reabre un agujero ya cerrado.** Conceder `s3:GetObject` sobre `arn:...:<bucket>/*` deja los formatos oficiales de la guía normativa descargables por URL directa — medido: 200, sin pasar por `GuiaController`, que es donde se comprueba que el requisito esté publicado. Acotada al prefijo `publico/`: 403. Los dos prefijos son la frontera de seguridad, y `AlmacenamientoTest` afirma que siguen siendo distintos. ⚠️ **Sigue siendo cierto, pero desde OBS3-13 ya no basta:** el prefijo público transporta ahora fotos del propietario **sin moderar y devueltas**, así que «no hay nada que proteger» dejó de valer para ese disco. Decisión pendiente en el §30.3.
 
 3. **La coraza de configuración protegía el entorno equivocado.** Estaba atada a `production`, y el despliegue usa `APP_ENV=staging`: el único entorno de verdad expuesto era justo el que no se endurecía. El criterio ya no es cómo se llama el entorno, es si está expuesto.
 
@@ -1154,7 +1160,7 @@ Y uno menor, anterior a esta jornada: a 320 px `/proveedores` desbordaba 45 px, 
 
 **Está en el §26, y a propósito no se repite aquí.** Este documento ya ha pagado dos veces el precio de tener la misma lista en dos sitios: la del §23.9 y la del §23.12 quedaron obsoletas mientras la otra decía lo contrario. Una sola lista de pendientes, y es la del §26.
 
-En una frase, para quien solo lea esta sección: **lo único que bloquea el proyecto es la cuenta institucional del gremio (R-14), y de ella cuelgan el bucket, el correo saliente, el SSL, la medición contra dominio y las pruebas en dispositivos de la tutora.** Lo demás son firmas.
+En una frase, para quien solo lea esta sección: **lo único que bloqueaba el proyecto era la cuenta institucional del gremio (R-14) — ⚠️ **superado: ver §29 y §30.4.** La cuenta existe, el sitio está desplegado y devuelve 500; R-14 está **sorteado, no cerrado**, porque la organización es personal, y de ella cuelgan el bucket, el correo saliente, el SSL, la medición contra dominio y las pruebas en dispositivos de la tutora.** Lo demás son firmas.
 
 Un residuo que sí conviene dejar dicho aquí porque es una **excepción declarada y no una deuda**: los seis enlaces de atribución de Leaflet miden 51 por 15 px. Los pinta la librería, la licencia de las teselas los exige y son la convención de todos los mapas de la web. Cerrarlos significa tocar una pieza de terceros para cumplir un listón que es más exigente que la norma; es decisión del dueño, no de accesibilidad.
 
@@ -1205,9 +1211,11 @@ El diagnóstico no cambió y ahora es más nítido: **no queda trabajo de produc
 ### 26.1 Antes del viernes 21, que cierra el corte 2
 
 1. **La reunión con Natalia**, que es la única ventana de la semana. Se lleva, en este orden: el **planeador FO-DO-100** para su firma (lo pidió César el 18 y es lo único suyo abierto); el **Acta 01** de aprobación del diseño, ya redactada y lista en `docs/ingenieria/constancias/`; el **Formato 03** de retroalimentación, que sirve a la vez para el corte y para abrir el registro de hallazgos de la S7; la **base de los asociados** con sus autorizaciones (P-06, el insumo más urgente y el que lleva pidiéndose desde principios de agosto); y **la cuenta institucional** del §20.2, planteada como decisión de la junta con su consecuencia dicha en voz alta.
-2. **El capítulo 5 del documento de práctica** se escribe con el repositorio en la mano, y ahora las cifras son otras: **747 casos de prueba**, 22 modelos, 33 migraciones, el calendario de eventos, y `docs/ingenieria/` como anexo. ⚠️ Recuerda el §24: el documento de la universidad es **individual**, uno por practicante, aunque ambos anexen los mismos artefactos técnicos.
+2. **El capítulo 5 del documento de práctica** se escribe con el repositorio en la mano, y las cifras cambian cada semana: el 31 de agosto son **946 casos de prueba** (935 pasan, 11 omitidas, 0 fallos, 3.502 aserciones), 21 modelos y 39 migraciones, medidos sobre `b9e2428`. **No las copies: vuelve a medirlas** (§28.4). Las de 747 que decía esta línea eran del 19 de agosto. ⚠️ Recuerda el §24: el documento de la universidad es **individual**, uno por practicante, aunque ambos anexen los mismos artefactos técnicos.
 
-### 26.2 En cuanto exista la cuenta
+### 26.2 SUPERADA — En cuanto exista la cuenta
+
+> ✅ **La cuenta existe desde el 30 de agosto de 2026, institucional y con medio de pago del gremio.** Lo de abajo sigue siendo la lista correcta de pasos; el orden, las trampas y lo que no puede quedar público están en la **§29**.
 
 Todo esto está escrito y probado; es ejecución, no diseño.
 
@@ -1261,34 +1269,36 @@ Dos advertencias de método para cualquier sesión que retome esto:
 
 ### 27.2 Los catorce señalamientos, con el archivo que toca cada uno
 
-Verificado contra el árbol el 30 de agosto de 2026.
+⚠️ **Re-verificado contra el árbol el 31 de agosto de 2026** (`main` en `b9e2428`). **CERRADAS: filas 1, 2, 5, 6, 7, 11 y 14.** A medias, con el código puesto y el contenido pendiente del gremio: **8 y 10**. A medias por bloqueo humano: **12** (ranura hecha, imagen bloqueada por OBS3-07). **Intactas: 3, 4, 9 y 13.** El detalle de cada una, en el §30.1. Lo que sigue es el texto del 30 de agosto, con la marca de lo hecho añadida fila a fila.
 
 | # | Señalamiento (con su cita) | Dónde está hoy | Qué hay que hacer |
 |---|---|---|---|
-| 1 | «Lo que gana» como título de los beneficios: «**suena horrible**… como si estuviéramos vendiendo una lotería» — `R22 02:35–03:10` | `resources/views/publico/inicio.blade.php:115`, cableado: `Lo que gana tu establecimiento` | Renombrar a «Beneficios de pertenecer al gremio» **y pasarlo a `ajuste()`** (ver §27.3, punto 2). Él pidió además subir «los 5 beneficios concretos» al bloque principal: hoy esa frase es el subtítulo de la línea 117 |
-| 2 | Tarifa del artista a la vista: «**la gente se sesga de una vez con el precio** y de pronto no lo contacto»; «yo no le pondría precio» — `R21 13:37–14:48`, ratificado en `R23 09:49` | `publico/artistas/index.blade.php:65`, `show.blade.php:52`, `inscripcion.blade.php:31` | Sacar `tarifa_desde` de la ficha pública y de la tarjeta. Se conserva en el modelo y en el panel. Si se quiere respetar el «o a decisión del artista», añadir `publicar_tarifa` (bool, por defecto falso) en vez de borrar el campo |
+| 1 | «Lo que gana» como título de los beneficios: «**suena horrible**… como si estuviéramos vendiendo una lotería» — `R22 02:35–03:10` | `resources/views/publico/inicio.blade.php:115`, cableado: `Lo que gana tu establecimiento` | ✅ **HECHO 31 ago (`046895c`).** Renombrado y pasado a `ajuste('portada_beneficios_titulo')`. El «ascenso a bloque principal» se resolvió subiendo el peso de la entradilla (`text-sm/text-tenue` → `text-base/text-suave`), no reordenando la portada; contraste medido: 11,91:1 en oscuro y 15,02:1 en claro |
+| 2 | Tarifa del artista a la vista: «**la gente se sesga de una vez con el precio** y de pronto no lo contacto»; «yo no le pondría precio» — `R21 13:37–14:48`, ratificado en `R23 09:49` | `publico/artistas/index.blade.php:65`, `show.blade.php:52`, `inscripcion.blade.php:31` | ✅ **HECHO 31 ago (`f7a5d9d`).** Salió de **seis** sitios públicos, no de los tres que listaba esta fila; se conserva en modelo y panel. ⚠️ `publicar_tarifa` quedó **descartada a propósito**: el directivo rechazó esa propuesta en la frase siguiente a plantearla (`R21 14:37`) y la ratificó en `R23 09:49` |
 | 3 | Bolsa de empleo «queda abierta para todo el mundo»; quiere que **ver** sea beneficio del afiliado y **postularse** siga abierto a cualquiera — `R23 08:01–09:39` | Ver §27.3, punto 4: hoy es al revés de lo que se temía | Vista nueva en `/mi-cuenta`. **Es ampliación, no ajuste** |
 | 4 | Tema: «¿lo ve mejor negro o lo pongo blanco?» → «**pues a mí me gusta negro**… lo hace ver moderno, más elegante; el blanco lo hace ver como un papel, **muy plano, muy insípido**»; «institucionalmente somos más negros» — `R23 02:33–03:31` | `components/layouts/publico.blade.php`, script de arranque: por defecto **`system`** | Decidir el arranque con Natalia y **dejarlo escrito**. Ver §27.3, punto 1 |
-| 5 | Falta un bloque de **aliado principal**: Asobares Colombia, Cámara de Comercio (mencionó su página *Experiencia*), Comité Intergremial, Gobernación del Quindío — `R21 02:19–03:26` | `inicio.blade.php:176`, tira única de logos; la tabla `aliados` no distingue tipo | Añadir `tipo` (`institucional`\|`comercial`) al modelo y pintar dos bandas distintas |
-| 6 | **Alcaldías: todas o ninguna** — «es para **no abrir susceptibilidades**… a todos o nada» — `R21 03:35–03:49` | Sin regla | Regla dura, en semillas y en el panel. Ver §27.5 |
-| 7 | Directorio: pidió orden alfabético o por ciudad, movimiento, destacados «pero con un costo» y un buscador — `R21 06:11–07:31` | `DirectorioController` **ya** ordena `destacado desc, nombre` y **ya** tiene buscador (`index.blade.php:35`) | El reclamo era sobre el bloque «La noche del Quindío» de la portada, que ordena por `latest('updated_at')` (`InicioController:20`) y parece azaroso. Ordenar y hacerlo visiblemente ordenado |
+| 5 | Falta un bloque de **aliado principal**: Asobares Colombia, Cámara de Comercio (mencionó su página *Experiencia*), Comité Intergremial, Gobernación del Quindío — `R21 02:19–03:26` | `inicio.blade.php:176`, tira única de logos; la tabla `aliados` no distingue tipo | ✅ **HECHO 31 ago (`18c13ed`).** Enum `TipoAliado`, columna `tipo` con índice, dos bandas (institucionales en rejilla con `object-contain`, comerciales en carrusel) y los cuatro institucionales sembrados. Falta insumo, no código: los logos reales en buena resolución |
+| 6 | **Alcaldías: todas o ninguna** — «es para **no abrir susceptibilidades**… a todos o nada» — `R21 03:35–03:49` | Sin regla | ✅ **HECHO 31 ago (`0fbcaa0`), con un matiz que NO es lo que pedía esta fila:** no es una regla de semillas sino de **pintado** (`App\Support\ReglaDeAlcaldias` + `aliados.municipio_id`). Sembrar una sola alcaldía las hace desaparecer todas del sitio; el panel avisa de cuáles faltan |
+| 7 | Directorio: pidió orden alfabético o por ciudad, movimiento, destacados «pero con un costo» y un buscador — `R21 06:11–07:31` | `DirectorioController` **ya** ordena `destacado desc, nombre` y **ya** tiene buscador (`index.blade.php:35`) | ✅ **HECHO 31 ago (`dee639f`).** `orderBy('nombre')` envuelto en `ordenarEnEspanol()` (Collator `es_CO`), porque SQLite ordena por bytes y dejaría «Ámbar» detrás de «Zorba». Efecto colateral querido: editar una ficha ya no la mete en la portada |
 | 8 | «Quiénes somos» copiado de la Nacional y desactualizado: «**ya eso toca cambiarlo**»; hay que pedirle a la directora nacional «corríjame sus datos» — `R22 05:00–07:03` | `publico/quienes-somos.blade.php` + `SettingSeeder` | Texto propio del capítulo. Bloqueado por Natalia |
 | 9 | Portal del afiliado sin contenido diferencial: «¿qué va a ver el afiliado que no va a ver el resto?» → **estados financieros y de gestión administrativa en tiempo real**; «las agremiaciones tienen que tener pública la información, **pero para los agremiados, no para todo el público**» — `R22 08:18–10:58` | `/mi-cuenta` tiene cartera, movimientos y convenios | **Ampliación** |
 | 10 | Enlaces de la guía que caen en la portada de la entidad: «que sea **puntual**… que me abra a donde tiene que ir»; «hay personas que no son tan amigables con la tecnología» — `R23 05:32–06:33` | `RequisitoAperturaSeeder`: `camaraarmenia.org.co`, `armenia.gov.co`, `sayco.org` — todos raíz | Enlaces profundos al trámite exacto. Insumo del gremio |
-| 11 | Fotos de establecimiento sin filtro: «lo tienen que aprobar ellos, no sea que pongan imágenes… **exóticas**» — `R23 00:45–01:05` | Ver §27.3, punto 5: **el dueño hoy no puede subir nada** | Se demostró algo que no existe. Decidir si se construye o se corrige el discurso |
-| 12 | Portada sin vida: «acá podría quedar ese **video**… el **banner** que va moviéndose, algo que le genere vida»; imágenes de fondo fundidas «no sea que afecte la visibilidad de las letras» — `R21 05:20–05:39` | `components/publico/hero.blade.php`: solo texto sobre `.resplandor-marca`, sin ranura de medio | Ranura de fondo en el componente, con la advertencia de contraste del §27.8 |
+| 11 | Fotos de establecimiento sin filtro: «lo tienen que aprobar ellos, no sea que pongan imágenes… **exóticas**» — `R23 00:45–01:05` | Ver §27.3, punto 5: **el dueño hoy no puede subir nada** | ✅ **HECHO 31 ago (`a803e3a`).** Se construyó: rutas `/mi-cuenta/fotos`, habilidad `gestionarFotosEnPortal` **solo por propiedad**, moderación foto a foto en la página `ModerarFotos` y ficha pública filtrada. ⚠️ Deuda nueva: las pendientes y rechazadas viven en el disco público (§30.3) |
+| 12 | Portada sin vida: «acá podría quedar ese **video**… el **banner** que va moviéndose, algo que le genere vida»; imágenes de fondo fundidas «no sea que afecte la visibilidad de las letras» — `R21 05:20–05:39` | `components/publico/hero.blade.php`: solo texto sobre `.resplandor-marca`, sin ranura de medio | ⚠️ **A MEDIAS 31 ago (`12cd692`).** La ranura existe con velo inseparable que garantiza AA sobre cualquier imagen (`--asb-velo-hero: 0.8`), y `VeloDelHeroTest` recalcula el peor caso desde el CSS. **La ranura está vacía**: ninguna vista le pasa medio, porque las imágenes son OBS3-07 |
 | 13 | WhatsApp sin respuesta: «¿ese tiene respuesta? **Hay que automatizarlo**» — `R21 11:13–11:25` | `footer.blade.php:2`, enlace `wa.me` con mensaje prellenado | No es código de la plataforma: es WhatsApp Business del gremio. Decirlo así y no prometer nada |
-| 14 | Proveedores que ya no existen: «y que **sí respondan**, y que la información esté actualizada» — `R22 04:10–04:21` | `Proveedor` tiene `visible_hasta` y lo aplica, pero **no** fecha de verificación | Replicar el patrón de **RF-60** (`verificado_el`, `verificado_con`) que ya funciona en la guía normativa |
+| 14 | Proveedores que ya no existen: «y que **sí respondan**, y que la información esté actualizada» — `R22 04:10–04:21` | `Proveedor` tiene `visible_hasta` y lo aplica, pero **no** fecha de verificación | ✅ **HECHO 31 ago (`468ee0c`).** `verificado_el` y `verificado_con`, con tres estados en la ficha pública. ⚠️ Divergencia **deliberada** con RF-60: seis meses en vez de doce, porque un proveedor caduca más rápido que un trámite |
 
 ### 27.3 Lo que la revisión destapó en el código, y el prompt no preveía
 
 Seis hallazgos que salieron al cruzar lo que se dijo en la mesa con lo que hay en el árbol. Los tres primeros son deuda que se demostró como si no existiera.
 
 1. **«Por defecto Sistema» equivale a «por defecto claro» en la mesa del cliente.** El script del `<head>` resuelve `system` con `prefers-color-scheme`, y los portátiles del gremio están en claro. La demo abrió blanca y por eso salió la discusión del negro. El v5 eligió `system` con buen criterio de accesibilidad; el dueño del producto prefiere el oscuro. **No cambiar el valor sin dejar la decisión escrita con fecha**, porque toca `localStorage.theme`, que se comparte con `/admin`, y porque hay pruebas que dependen del arranque.
-2. **Se le dijo al cliente «toda la página es completamente editable» (`R22 02:54`) y no lo es.** Los títulos de sección de la portada están cableados en `inicio.blade.php` — «Lo que gana tu establecimiento», «La noche del Quindío», «Próximos eventos del gremio», «Cinco beneficios concretos» —. El resto del contenido sí sale de `ajuste()`. O los títulos pasan a `ajustes`, o hay que corregir la afirmación en la próxima demo. La primera opción es media hora; la segunda cuesta credibilidad.
+2. ~~**Se le dijo al cliente «toda la página es completamente editable» (`R22 02:54`) y no lo es.**~~ ✅ **CERRADO el 31 ago 2026** (`046895c`): eran **diez** textos cableados en la portada, no los cuatro que este punto enumeraba —se le habían escapado «Abre tu negocio», «Bolsa de empleo», «Aliados del capítulo» y la franja de cifras—, y `d79d1b8` hizo lo mismo con **quince** de «Quiénes somos». Guardias estructurales en `PortadaEditableTest` y `QuienesSomosEditableTest`: ningún `<h2>` ni `<p>` puede volver a llevar texto literal. Lo que sigue es el diagnóstico original.
+
+   **Diagnóstico del 30 de agosto:** Los títulos de sección de la portada están cableados en `inicio.blade.php` — «Lo que gana tu establecimiento», «La noche del Quindío», «Próximos eventos del gremio», «Cinco beneficios concretos» —. El resto del contenido sí sale de `ajuste()`. O los títulos pasan a `ajustes`, o hay que corregir la afirmación en la próxima demo. La primera opción es media hora; la segunda cuesta credibilidad.
 3. ~~**El postulante no recibe ningún correo.**~~ **CERRADO el 30 ago 2026** (v14). `AcuseDePostulacion` se manda en la creación de la postulación, con el mismo criterio que ya regía el aviso al establecimiento: no se repite en el reenvío que actualiza. Cambia además un comportamiento que nadie había señalado: antes, si el establecimiento no tenía correo configurado, la postulación no generaba ningún correo; ahora el candidato recibe su acuse igual, porque su propio correo es obligatorio en el formulario y siempre hay a quién escribirle.
 4. **El banco de aspirantes no es público, y el gremio quiere justo lo contrario de lo que se temía.** Hoy `aspirantes` vive solo en `/admin`; el sitio expone las vacantes y el formulario de perfil, nada más. Lo que el directivo pidió es que **el afiliado sí pueda consultarlo desde su cuenta**, como beneficio. Eso es una vista nueva **con datos personales de terceros**: exige base legal en la autorización que firma el aspirante, y probablemente contacto revelado solo tras registrar el interés. No se construye sin revisar el §9.
-5. **El dueño no puede tocar su ficha.** `/mi-cuenta` solo tiene índice y vacantes: no hay ruta para editar el establecimiento ni para subir imágenes. En la demo se afirmó que el afiliado sube fotos y el gremio aprueba (`R23 00:48`). El flujo de aprobación **existe para el estado del registro**, no para una carga del propietario, porque el propietario no carga nada. Antes de prometer moderación hay que construir la carga.
+5. ⚠️ **CERRADO A MEDIAS el 31 ago 2026** (`a803e3a`): la **carga de fotos** existe (`/mi-cuenta/fotos`, con moderación por foto en `ModerarFotos`). Lo que **sigue sin existir** es editar la ficha del establecimiento desde `/mi-cuenta`: el grupo de rutas solo tiene índice, pagar, fotos, vacantes y postulaciones. Diagnóstico original: **El dueño no puede tocar su ficha.** `/mi-cuenta` solo tiene índice y vacantes: no hay ruta para editar el establecimiento ni para subir imágenes. En la demo se afirmó que el afiliado sube fotos y el gremio aprueba (`R23 00:48`). El flujo de aprobación **existe para el estado del registro**, no para una carga del propietario, porque el propietario no carga nada. Antes de prometer moderación hay que construir la carga.
 6. **La bitácora ya responde a la mitad del pedido.** `app/Filament/Pages/Bitacora.php` lista `activitylog` con quién, qué, cuándo y **qué campos cambiaron**. Lo que pidió el directivo —«todos los cambios, **para que no haya excusa**», y poder «reversar» (`R24 03:19–03:44`)— solo añade la reversión. Enseñar la bitácora que ya existe puede cerrar el punto sin escribir un módulo.
 
 ### 27.4 Lo que pidieron y NO está en el alcance congelado
@@ -1319,19 +1329,19 @@ Van aquí porque afectan semillas, textos y semántica del modelo, no solo dise�
 - **Dominio:** hay que comprarlo, cobro anual, sin nombre decidido (`R24 06:54`).
 - **Correo institucional de salida:** «lo importante sería confirmar el correo por donde sale» (`R24 06:41`). Es el mismo SMTP del §26.2.
 - **Pasarela:** se habló de cerrar la cuenta de BBVA y dejar **solo Bold** (`R23 13:56–14:47`), pero la conversación no cerró. **No tocar la configuración de pagos** sin confirmación escrita.
-- **Despliegue:** el plan de **US$5 mensuales** quedó confirmado en la mesa, con salto al de ~US$20 si la base crece (`R24 05:36`). El directivo desdramatizó el costo: «no es un costo tan alto… pues no se asusten» (`R22 12:12`). El bloqueo sigue siendo la cuenta, no el precio.
+- **Despliegue:** el plan de **US$5 mensuales** quedó confirmado en la mesa, con salto al de ~US$20 si la base crece (`R24 05:36`). El directivo desdramatizó el costo: «no es un costo tan alto… pues no se asusten» (`R22 12:12`). El bloqueo era la cuenta, no el precio — y **la cuenta llegó el 30 de agosto**: ver §29.
 
 ### 27.7 Orden de trabajo hasta la próxima demo
 
 Los identificadores `OBS3-nn` son los del acta, para poder citarlos en las confirmaciones de git.
 
-**Bloque A — visual (es el compromiso de las dos semanas; es lo único que el directivo va a mirar).** OBS3-01 título de beneficios y su ascenso a bloque principal · OBS3-02 hero con medio · OBS3-03 decisión del tema inicial · OBS3-04 aliados institucionales · OBS3-05 regla de alcaldías · OBS3-06 orden visible en el bloque de destacados de la portada · OBS3-07 fotografías reales (las 19 del 26 de agosto, con sus autorizaciones).
+**Bloque A — visual.** ✅ **AGOTADO el 31 de agosto en todo lo que depende del equipo** (§30.1). Hechos: ~~OBS3-01~~ (`046895c`) · ~~OBS3-02~~ (`12cd692`, ranura y velo puestos; **vacía** hasta que se desbloquee OBS3-07) · ~~OBS3-04~~ (`18c13ed`) · ~~OBS3-05~~ (`0fbcaa0`) · ~~OBS3-06~~ (`dee639f`). **Bloqueados en decisión humana: OBS3-03** (arranque del tema, lo decide Natalia y hay que dejarlo escrito) y **OBS3-07** (las 19 fotos siguen sin autorización de imagen documentada).
 
-**Bloque B — contenido y reglas, cabe en el tiempo disponible.** OBS3-08 tarifa fuera de la vista pública · ~~OBS3-09 correo de confirmación al postulante~~ **cerrado el 30 ago 2026, ver §28.5** · OBS3-10 enlaces profundos en la guía · OBS3-11 «Quiénes somos» propio · OBS3-12 verificación de proveedores al estilo RF-60 · OBS3-13 carga de imágenes del propietario y su aprobación · OBS3-14 mensaje honesto sobre el WhatsApp.
+**Bloque B — contenido y reglas.** ✅ **CERRADO el 31 de agosto en todo lo que no depende de un insumo** (§30.1). Cerrados: ~~OBS3-08~~ (`f7a5d9d`) · ~~OBS3-09~~ en su mitad barata (30 ago, §28.5; la otra mitad la prohíbe el §27.8) · ~~OBS3-12~~ (`468ee0c`) · ~~OBS3-13~~ (`a803e3a`) · ~~OBS3-14~~ (`b9e2428`). **A medias, con el código puesto y el contenido pendiente del gremio: OBS3-10** (faltan las siete URL de trámite; hay una prueba que se pondrá roja el día que lleguen) y **OBS3-11** (falta el texto propio del capítulo).
 
 **Bloque C — no se toca sin acta.** OBS3-15 correo de alerta · OBS3-16 reversión · OBS3-17 transparencia financiera · OBS3-18 destacados pagos.
 
-**Bloque D — insumos que hay que reclamar.** Excel de cartera · decisión Drive/carga · corrección de los datos del capítulo en la Nacional · dominio y correo · confirmación «solo Bold».
+**Bloque D — insumos que hay que reclamar.** Excel de cartera · decisión Drive/carga · corrección de los datos del capítulo en la Nacional · dominio y correo · confirmación «solo Bold». ⚠️ **Creció el 31 de agosto, y ahora es el frente principal del producto:** las **siete URL de trámite** de Armenia (OBS3-10), el **texto propio de «Quiénes somos»** (OBS3-11), los **logos institucionales** en buena resolución (OBS3-04), las **autorizaciones de imagen** de las 19 fotos (OBS3-07) y la **decisión del tema inicial** (OBS3-03).
 
 ⚠️ **Colisión con lo académico.** La ventana de las dos semanas se superpone con el 95 % del documento de práctica del viernes 4 de septiembre. El Bloque A es en su mayor parte de la Persona 2; la Persona 1 debería proteger esa semana para el documento y entrar a lo visual después del 4.
 
@@ -1346,9 +1356,9 @@ Los identificadores `OBS3-nn` son los del acta, para poder citarlos en las confi
 
 ### 27.9 SUPERADA — Estado del árbol al escribir esto (30 ago 2026, mañana)
 
-> ⚠️ **Estas cifras quedaron viejas el mismo día.** El estado vigente es el **§28.6**: `main` en `6b0a20d`, 249 confirmaciones, árbol limpio y suite en 871 casos. El párrafo se conserva porque explica de dónde salían las cifras del expediente y porque su consejo —volver a medir antes de citar— fue justo lo que destapó el §28.
+> ⚠️ **Estas cifras quedaron viejas el mismo día.** El estado vigente es el **§30.1**: `main` en `b9e2428`, 261 confirmaciones y suite en 946 casos. (El §28.6 lo dejó en `6b0a20d`, 249 confirmaciones y 871 casos, y también quedó atrás.) El párrafo se conserva porque explica de dónde salían las cifras del expediente y porque su consejo —volver a medir antes de citar— fue justo lo que destapó el §28.
 
-> ⚠️ **Superada el mismo 30 de agosto por la tarde. Ve al §28.** Se ejecutó la suite que esta sección pedía ejecutar, salió roja, y de ahí salió todo el v14. El árbol ya no está como se describe abajo: el acta, la transcripción y la entrega del 4 de septiembre están confirmadas, y la cifra vigente es **871 casos**, no 820. Se conserva porque su encargo —«hay que volver a medirlas antes de citarlas»— resultó ser el consejo más rentable del documento.
+> ⚠️ **Superada el mismo 30 de agosto por la tarde. Ve al §28.** Se ejecutó la suite que esta sección pedía ejecutar, salió roja, y de ahí salió todo el v14. El árbol ya no está como se describe abajo: el acta, la transcripción y la entrega del 4 de septiembre están confirmadas, y la cifra de entonces era **871 casos**, no 820 (hoy son 946: §30.1). Se conserva porque su encargo —«hay que volver a medirlas antes de citarlas»— resultó ser el consejo más rentable del documento.
 
 `main` en `543b0cb`, **241 confirmaciones**. ⚠️ **Cambia un dato del §24 y del expediente: `p2-directorio` ya está fusionada** (`fc028ad`, «Integra el trabajo de Ingrid en p2-directorio») — deja de ser cierto que su trabajo esté fuera de `main`. Sin confirmar: los archivos de `docs/ingenieria/entrega-2026-09-04/` (documento del 4 de septiembre, anexos E–H y `fuentes-anexos/`) y `.claude/settings.local.json`; tres PDF viejos marcados como borrados. **En esta sesión no se ejecutó la suite**: las cifras vigentes siguen siendo las del v12 (820 casos) y hay que volver a medirlas antes de citarlas.
 
@@ -1408,10 +1418,226 @@ Con la suite ya en verde, se cerró también **OBS3-09 en su mitad barata**: el 
 
 `AcuseDePostulacion` sigue el mismo patrón que `NuevaPostulacion` y `VacanteAprobada`, y se manda en el mismo sitio y con el mismo criterio: solo en la creación, no en el reenvío que actualiza. **La única decisión que cambia comportamiento observable:** el acuse al candidato no depende de que el establecimiento tenga correo configurado —el correo del candidato es obligatorio en el formulario y siempre hay a quién escribirle—, así que un asociado sin correo interno, que antes dejaba la postulación sin generar ningún correo, ahora sí genera el acuse. **La otra mitad de OBS3-09** —que el afiliado consulte el banco de aspirantes desde su cuenta— sigue sin tocarse: expone datos personales de terceros y el §27.8 la prohíbe expresamente sin pasar por el §9.
 
-### 28.6 Estado del árbol al cerrar
+### 28.6 Estado del árbol al cerrar el 30 de agosto
+
+> ⚠️ **Superado el 31 de agosto: `main` en `b9e2428`, 261 confirmaciones, suite de 946 casos. Ver §30.1.**
 
 Suite: **871 casos, 860 pasan, 11 omitidas, 0 fallos, 3.121 aserciones.** Pint limpio.
 
 Confirmado en `main`: el arreglo del desbordamiento con su guardia, la vigilancia por eje de las ranuras del tema y el enum de la fábrica, el acta y la transcripción de la reunión 3 —que el §27 ya daba por estar en el repositorio y no estaban—, la entrega del 4 de septiembre con sus versiones superadas archivadas en `superadas/` (los tres «borrados» son movimientos, verificados por hash y detectados por git como `R100`), el Acta 04 de ampliación de alcance que faltaba para decidir el Bloque C, y el acuse de postulación del §28.5.
 
 **Lo que NO se tocó, y por qué:** los chips de filtro repetidos y los 104 `leading-*`/`tracking-*` sueltos del §26.3 viven en las mismas vistas que el Bloque A va a rehacer para la demo del 4–11 de septiembre. Refactorizarlas antes es pagar el trabajo dos veces. Van después. Y el `abort_unless` de `Bitacora` y `AjustesDelSitio` se queda: el comentario engañoso que el §26.3 le reprochaba ya no existe en ninguno de los dos, y lo que queda es defensa en profundidad — no se borra un 403 para satisfacer una nota de limpieza.
+
+---
+
+## 29. EL DESPLIEGUE — hay cuenta, hay sitio publicado, y el sitio está en 500 (30 ago 2026)
+
+> ⚠️ **Lee el §29.7 antes que el resto de esta sección.** Los apartados 29.1 a 29.6 se escribieron con la información de que la cuenta acababa de llegar y el despliegue estaba pendiente. Al ver la consola de Cloud resultó que **ya está desplegado desde hace horas y la URL responde `500`**, que el entorno se llama `production` —lo que bloquea la semilla— y que la organización es personal. El §29.7 corrige los tres puntos y trae el orden real de trabajo. Lo demás de la sección (las trampas del bucket, la semilla, el gasto, el correo y lo que no puede quedar público) sigue siendo válido palabra por palabra.
+
+**El bloqueo que llevaba desde el 15 de agosto encima del proyecto se acabó:** hay cuenta de Laravel Cloud y el equipo tiene acceso. ⚠️ **Lo que NO se puede dar por cumplido es la otra mitad del veredicto del §20.2** —que la cuenta naciera institucional—: la consola muestra la organización `juan-sua`, que es personal. Ver §29.7. Mientras no se confirme a nombre de quién está la facturación, **R-14 está sorteado, no cerrado.**
+
+Lo que esto desbloquea de golpe: SSL, correo saliente, pruebas en dispositivos físicos, respaldos, medición contra dominio, validación de Bold con dinero real y **cinco de los vacíos declarados de la matriz de pruebas** que dependían de publicar. El §26.2 deja de ser una lista de espera y pasa a ser la tarea.
+
+⚠️ **Ojo con el dato:** en la reunión del 28 de agosto esto **no** se cerró. Se habló del costo (`R24 05:46`), de qué es un despliegue (`R22 12:30`) y de que había que comprar el dominio (`R24 06:54`), pero nunca se dijo que la cuenta existiera; por eso el acta de esa reunión lo dejó como pendiente del gremio. La cuenta llegó después. Si lees el §27.6 y el acta de la reunión 3, están desactualizados en este punto.
+
+### 29.1 El bloqueo se movió, no desapareció: ahora es el correo
+
+**Laravel Cloud no incluye correo saliente** (runbook §6.3) y **no hay proveedor SMTP contratado**. Eso importa más de lo que parece, porque el panel exige segundo factor obligatorio: **sin SMTP los códigos MFA no salen del registro y `/admin` no se puede demostrar delante del cliente.**
+
+- **Camino de emergencia (runbook §10.4):** leer el código con `cloud environment:logs -n`. Sirve para que el equipo entre, **no** para demostrarle el panel a nadie. Y solo funciona con **`LOG_STACK=stderr`**: con `single` el código se escribe en un fichero del disco efímero que ese comando no lee. Configúralo así desde el primer despliegue, no cuando falle.
+- **La solución de verdad es un trámite de minutos, no de días.** Resend, Postmark y Brevo publican endpoint SMTP y tienen plan gratuito suficiente para este volumen. Se contrata **con el correo del gremio** y se rellenan `MAIL_HOST`, `MAIL_USERNAME` y `MAIL_PASSWORD`. Es lo primero que hay que pedirle a Natalia esta semana.
+- Sin SMTP tampoco se puede demostrar el acuse al postulante que cerró OBS3-09 (§28.5), ni tendría sentido construir el correo de alerta del OBS3-15.
+
+### 29.2 La demo va sobre el subdominio de Cloud
+
+**Decidido el 30 de agosto:** la demostración del 4–11 de septiembre se hace sobre el subdominio que da Laravel Cloud, con su HTTPS incluido. **El dominio propio se compra para la semana 8**, que es cuando el cronograma firmado lo pide. Meter una compra de dominio y una propagación de DNS en la semana más apretada del proyecto no compra nada que el cliente vaya a mirar. DPV-08 sigue abierta y no bloquea.
+
+### 29.3 El orden, y las cuatro cosas donde se va a equivocar quien lo haga
+
+El runbook manda; esto es solo el orden y los puntos donde no se improvisa.
+
+1. **`cloud auth` en una terminal interactiva del dueño** (runbook §1.2). Abre el navegador y pide autorizar. **Un agente no registra la cuenta, no mete datos de pago y no se autentica por nadie.** A partir de ahí un agente puede continuar.
+2. **Fija el límite de gasto en ~US$10/mes ANTES de exponer la URL** (§7). Ese techo, y no el piso de US$5, es el número que se le presenta a la junta.
+3. **Lee el §8.3 del runbook ANTES de crear el bucket.** La política evidente —`GetObject` sobre `/*`— **abre los formatos oficiales de la guía normativa por URL directa**, saltándose el único sitio donde se comprueba que el requisito esté publicado. La correcta acota a `publico/*`. Y no la des por buena: compruébala con los dos `curl` del runbook, esperando `200` en lo público y `403` en lo privado.
+4. **`db:seed` una sola vez, sobre base vacía, en `staging`** (§9). El entorno se llama `staging` justamente para poder sembrar; el día que haya datos reales pasa a `production` y esa puerta se cierra sola. Volver a sembrar sobre datos del gremio corre el consecutivo oficial de PQR y mete pagos ficticios en estado aprobado que el widget de recaudo suma como ingresos.
+
+Y al terminar: humo de rutas (§10.3) y **repetir la medición de rendimiento contra la URL**. Los 972 ms del expediente son contra `localhost` y no incluyen latencia de red; citarlos como si fueran de producción es exactamente el tipo de cifra que el §28.4 prohíbe.
+
+### 29.4 Lo que NO puede quedar público el día que la URL exista
+
+Esto no está en el runbook y es lo que más puede doler, porque una URL pública con el nombre del gremio encima ya no es un entorno de pruebas.
+
+- **Las fichas de asociados no tienen autorización de publicación** (riesgo R-02). Nacen en borrador y ahí se quedan. Si se siembra la demostración, quedan **establecimientos inventados en un directorio con URL real y el logo del gremio**: decide antes si el directorio sale con datos de demostración declarados como tales o sale vacío, pero no lo descubras el día de la demo.
+- **Los costos de la guía normativa son de ejemplo.** En la propia demostración se dijo «todavía no estamos actualizados» (`R21 09:27`). Publicar cifras equivocadas de trámites legales en una URL pública es un riesgo del gremio, no del equipo. RF-60 ya sabe marcar «Sin verificar contra la fuente oficial»: asegúrate de que esas fichas salgan marcadas, o no salgan.
+- **Las 19 fotografías del gremio no tienen autorización de imagen documentada** y tienen personas identificables. No suben al bucket hasta que la autorización exista.
+- **Considera `noindex` hasta el lanzamiento oficial.** Que Google indexe datos de demostración asociados al nombre de Asobares Quindío es un daño que cuesta más quitar que evitar.
+
+### 29.5 Por qué conviene desplegar ANTES del 4 de septiembre, y no después
+
+Parece que compite con la semana del documento de práctica, y es al revés:
+
+- **El despliegue mejora el documento.** El §5.5, la Tabla 5 y el apartado 6.2 hoy describen el despliegue como pendiente. Desplegado, pasan a describir un resultado, y cinco vacíos declarados de la matriz dejan de estar declarados. Es de las pocas cosas que suben la nota del capítulo 5 sin escribir una línea más.
+- **Es trabajo de horas, no de días.** Está todo escrito, probado y vigilado por la suite (§15 del runbook). Es ejecución.
+- **Le cambia la cara a la demo del bloque A.** El directivo dijo que lo que falla es lo visual; enseñarle la página **en su propio teléfono, en una URL real**, es una demostración distinta a enseñársela en el portátil de alguien. Y una vez desplegado, cada cambio visual se vuelve a publicar solo.
+
+El reparto natural se mantiene: el despliegue es de la Persona 1 —es su bloque de infraestructura— y el bloque A es en su mayor parte de la Persona 2, así que las dos cosas pueden correr en paralelo esta semana.
+
+### 29.6 Lo que hay que pedirle al gremio esta semana
+
+Uno solo es bloqueante; los otros dos son de la semana 8 pero se piden ahora porque tienen espera.
+
+1. **SMTP con el correo del gremio** (Brevo, Resend o Postmark, plan gratuito). **Bloquea la demostración del panel.**
+2. Nombre del **dominio propio**, para comprarlo en la semana 8 (DPV-08).
+3. Los documentos de **Bold** para producción —RUT, cámara de comercio y cuenta bancaria—, más la confirmación escrita de «solo Bold» que la reunión del 28 dejó sin cerrar (§27.6).
+
+### 29.7 ⚠️ CORRECCIÓN DEL MISMO DÍA — ya está desplegado, y está devolviendo 500
+
+Lo escrito arriba se redactó antes de ver la consola de Laravel Cloud. **El despliegue no está pendiente: ya ocurrió.** Lo que hay que arreglar es otra cosa.
+
+Lo que muestra la consola el 30 de agosto de 2026:
+
+| Qué | Valor |
+|---|---|
+| Organización · aplicación · entorno | `juan-sua` / `asobares` / **`production`** |
+| Origen | `Jsua3/asobares:main` |
+| URL | `asobares-production-0jhdcz.laravel.cloud` |
+| Últimos despliegues | `6b0a20d` ✅ (8 h), `e6c45ca` ✅ (13 h), `0cc5dc4` ✅ (13 h), `543b0cb` ❌ fallido (2 días) |
+| Cómputo | Flex 512 MiB · 1 vCPU · autoescalado desactivado · **scale-to-zero, dormido 8 h** |
+| Red | DDoS, CDN y caché de borde activos · dominio de Cloud activo · sin dominio propio |
+| Región | US East (Ohio) |
+| Recursos | El diagrama del clúster solo muestra **Compute**. «Add resource: Database, cache, buckets, WebSockets» sigue sin usar |
+
+**Medido, no supuesto: `https://asobares-production-0jhdcz.laravel.cloud` responde `500`.** Un despliegue en verde solo dice que la construcción terminó; no dice que la aplicación arranque.
+
+> ⚠️ **Desfase, anotado el 31 de agosto.** La tabla de arriba es correcta para el 30, pero `main` es hoy **`b9e2428`**: doce commits, cuatro migraciones y 59 ficheros por delante de `6b0a20d`, que es lo desplegado. Quien diagnostique el 500 con esa tabla estará leyendo código que la rama ya no tiene. Y el 500 **sigue** el 31 a las 18:25 GMT, re-medido: el cuerpo es la página de error de Laravel con el middleware del proyecto ya ejecutado, lo que descarta la causa 4 y refuerza la 2. Ver §30.4.
+
+#### Las cuatro causas candidatas, en orden de probabilidad
+
+1. **No hay base de datos adjunta.** El diagrama del clúster no muestra ningún recurso de Postgres. Sin base, todo lo que toque `settings`, `asociados` o la sesión revienta, y como `SESSION_DRIVER=database` y `CACHE_STORE=database`, revienta **antes** de renderizar nada. Es la hipótesis principal y la primera que hay que descartar.
+2. **`DB_CONNECTION` sin definir.** El `.env.staging.example` lo avisa por escrito: Cloud inyecta las credenciales de Postgres **pero no inyecta `DB_CONNECTION`**, y el valor por defecto de la aplicación es SQLite. Si falta, la aplicación busca un fichero que no existe.
+3. **La base está vacía.** La portada resuelve casi todos sus textos con `ajuste('…')`; sin `settings` sembrados no hay nada que pintar. Ver el punto siguiente, porque aquí está la trampa buena.
+4. **`APP_KEY` sin generar**, o las variables del apartado 6 del runbook sin cargar.
+
+Diagnóstico en un comando: `cloud environment:logs -n`. Y para que ese comando sirva, **`LOG_STACK=stderr`** tiene que estar puesto (runbook §10.4); con `single` el registro se escribe en el disco efímero y no se lee desde fuera.
+
+#### ⚠️ El entorno se llama `production`, y eso bloquea la semilla
+
+`DatabaseSeeder::run()` **se niega en bloque cuando `app()->isProduction()`** (línea 25) y se limita a avisar «DatabaseSeeder omitido». No es un descuido: es la protección del runbook §9 contra sembrar establecimientos inventados y correr el consecutivo oficial de PQR sobre datos reales.
+
+El runbook lo dice sin rodeos: **«la razón de que el entorno se llame `staging` y no `production` es precisamente poder sembrar los datos de demostración»**, y el `.env.staging.example` fija `APP_ENV=staging`. Con el entorno llamado `production`, si `APP_ENV` heredó ese nombre, **la base se queda vacía haga lo que haga quien despliegue**, y la demostración del 4–11 de septiembre sale sin un solo bar en el directorio.
+
+Hay dos salidas y **conviene elegirla a conciencia, no por accidente**:
+
+- **Poner `APP_ENV=staging` en las variables del entorno**, aunque el entorno de Cloud se siga llamando `production`. Es lo que el runbook contempla, permite sembrar la demostración, y el día que entren datos reales del gremio se cambia a `production` y la puerta se cierra sola. **Es la recomendada para llegar a la demo.**
+- **Dejarlo en `production` y cargar el contenido a mano** desde el panel. Más fiel al nombre, pero es trabajo manual justo en la semana que no sobra, y sin bucket lo que se suba se pierde en el siguiente despliegue (§8).
+
+Ojo con el efecto colateral que el propio `.env.staging.example` anota: hay configuración —`config/session.php`, entre otras— que cambia de comportamiento según `APP_ENV`. Cambiarlo no es solo cosmético; hay que releer el apartado 6 del runbook antes de tocarlo.
+
+#### ⚠️ La organización es `juan-sua`, no del gremio
+
+La URL de la consola es `cloud.laravel.com/**juan-sua**/asobares/production`. Eso es una organización personal, y el apartado 1.1 del runbook pide correo de cuenta y de facturación del gremio, no del desarrollador. **Puede que el gremio esté pagando y la organización sea solo el contenedor** —hay que confirmarlo mirando la facturación, no el nombre—, pero mientras no se confirme, **R-14 no está cerrado como dice la nota v15: está sorteado.**
+
+El modo de muerte está descrito palabra por palabra en el runbook: la demostración sale bien → nadie migra lo que funciona → la práctica termina → las llaves se van con ella. Dos acciones, ninguna cuesta dinero:
+
+1. **Comprobar a nombre de quién está la facturación.** Si es personal, anotarlo en el apartado 12 del runbook **con fecha de traspaso**, que es justo para lo que existe ese apartado.
+2. **Añadir a la dirección del gremio como miembro de la organización de Cloud**, y de paso un segundo administrador al repositorio de GitHub, que sigue en cuenta personal. Son minutos.
+
+#### Lo demás que se ve, y que importa para la demo
+
+- **Scale-to-zero, dormido 8 horas.** La primera visita paga un arranque en frío. Antes de la reunión hay que **despertar el sitio** y no enseñarlo en frío; y sobre todo, **no medir el rendimiento en frío**: sería la cifra falsa perfecta.
+- **Región US East (Ohio).** Desde Armenia son ~80–120 ms de ida y vuelta que `localhost` no tenía. La medición contra la URL **va a dar peor que los 972 ms** del expediente, y está bien que así sea: esa es la cifra honesta. El techo contratado del RNF-02 son 2.500 ms, así que hay margen de sobra.
+- **Sin bucket.** El apartado 8 sigue vivo entero: lo que se suba desde el panel se pierde en el siguiente despliegue. Y cuando se cree, **la política acotada a `publico/*` del §8.3**, comprobada con los dos `curl`.
+- **Hay un despliegue fallido** (`543b0cb`, hace dos días). Conviene leer su registro antes de repetir el patrón que lo tumbó.
+- **Sin dominio propio**, que es lo decidido en el §29.2. Correcto.
+
+#### El orden para llegar vivo a la demo
+
+1. `cloud environment:logs -n` y leer el 500 de verdad, en vez de adivinarlo.
+2. Comprobar que hay **base de datos adjunta** y que `DB_CONNECTION=pgsql` está en las variables.
+3. Cargar las variables del apartado 6 del runbook, con **`LOG_STACK=stderr`** entre ellas.
+4. Decidir `APP_ENV` a conciencia; si es `staging`, **sembrar una sola vez** sobre base vacía.
+5. Fijar el **límite de gasto ~US$10** (§7) — el sitio ya es público, así que esto va con retraso.
+6. Humo de rutas (§10.3), y solo entonces medir el rendimiento, **en caliente**.
+7. Revisar el §29.4 antes de que nadie de fuera vea la URL: fichas sin autorización, costos de la guía sin verificar, fotos sin autorización de imagen, `noindex`.
+
+---
+
+## 30. NUEVE SEÑALAMIENTOS CERRADOS Y UN SITIO EN 500 (31 ago 2026)
+
+Sesión larga sobre el §27. **Doce confirmaciones, `main` de `6b0a20d` a `b9e2428`, empujadas a `origin`.** El bloque A queda agotado en todo lo que depende del equipo y el bloque B cerrado salvo lo que es insumo del gremio. En paralelo, el sitio que la otra sesión dejó desplegado **sigue devolviendo 500**, y ahora además está doce commits por detrás.
+
+### 30.1 Qué se cerró, con su confirmación
+
+| Ref. | Qué | Commit |
+|---|---|---|
+| OBS3-01 | Diez textos cableados de la portada pasan a `ajuste()`; beneficios renombrado | `046895c` |
+| OBS3-02 | Ranura de fondo en el hero con velo que garantiza AA — **la ranura queda vacía** | `12cd692` |
+| OBS3-04 | Aliados en dos bandas, cuatro institucionales sembrados | `18c13ed` |
+| OBS3-05 | `ReglaDeAlcaldias`: el juego parcial es irrepresentable | `0fbcaa0` |
+| OBS3-06 | Destacados en orden alfabético español y estable | `dee639f` |
+| OBS3-08 | La tarifa del artista sale de **seis** sitios públicos | `f7a5d9d` |
+| OBS3-10 | La guía deja de prometer el trámite que su enlace no abre — **a medias** | `1e81ce1` |
+| OBS3-11 | Quince textos de «Quiénes somos» a `ajuste()` — **a medias** | `d79d1b8` |
+| OBS3-12 | Verificación fechada de proveedores, patrón RF-60 a seis meses | `468ee0c` |
+| OBS3-13 | Carga de fotos del propietario y su moderación — **funcionalidad nueva** | `a803e3a` |
+| OBS3-14 | Aviso honesto bajo el WhatsApp institucional | `b9e2428` |
+
+Más `768136b`, que es el §0 de este documento.
+
+**Estado medido el 31 de agosto sobre `b9e2428`:** suite **946 casos, 935 pasan, 11 omitidas, 0 fallos, 3.502 aserciones**. 261 confirmaciones, 75 archivos de prueba, 39 migraciones, 19 recursos de Filament, 6 páginas. Pint limpio. La duración NO se cita: dos corridas del mismo código el mismo día dieron 253 s y 593 s.
+
+**Lo que sigue abierto del §27, y por qué:** OBS3-03 (arranque del tema — lo decide Natalia y hay que dejarlo escrito) y OBS3-07 (las 19 fotos, sin autorización de imagen). De OBS3-10 faltan las siete URL de trámite y de OBS3-11 el texto propio del capítulo: los dos son **insumo del gremio, no código**. El bloque C sigue congelado sin Acta 04 firmada.
+
+### 30.2 Las tres cosas que se demostraron sin existir ya existen las tres
+
+El §27.3 abrió con tres afirmaciones falsas hechas delante del cliente. A 31 de agosto: el acuse al postulante se manda desde `7eb0799`; los títulos de la portada salen de `ajustes` desde `046895c` —y los de «Quiénes somos» desde `d79d1b8`—; y la carga de fotos con moderación existe desde `a803e3a`.
+
+⚠️ **Ojo al citarlo:** la cabecera del v13 y el §27.3 **no nombran el mismo trío**. La discrepancia es anterior a esta sesión; no la propagues.
+
+### 30.3 Deuda NUEVA que abrió este trabajo
+
+Tres cosas que antes no existían y ahora sí. Ninguna es un fallo de la suite; las tres son decisiones.
+
+- ⚠️ **El disco público transporta material sin moderar.** La colección `galeria` usa `config('almacenamiento.publico')`, y hasta ayer eso era inofensivo porque solo contenía fotos que el gremio había cargado y aprobado. Desde OBS3-13 lleva también **cargas del propietario sin revisar y devueltas**: no salen en la ficha, pero el archivo queda servido por URL —`/storage/{id}/{ulid}.jpg`— y una foto rechazada por «exótica» no se borra al rechazarla. El nombre es un ULID y no es enumerable, así que es exposición por oscuridad, no un agujero abierto. **Hay que decidir por escrito**: o las pendientes y rechazadas van al disco privado servidas por un controlador, o se acepta el riesgo dejándolo dicho. El comentario de `config/almacenamiento.php` ya se corrigió, porque afirmaba que en ese disco «no hay nada que proteger».
+- **Seis migraciones sin verificar contra PostgreSQL real.** El §25.2 acredita 33 en PostgreSQL 17.11 el 19 de agosto. Hoy son 39: dos de finales de agosto y **cuatro de esta sesión**, ninguna probada contra el motor de producción. Van a correr en el próximo despliegue.
+- **El reparto del §24.3 quedó suspendido de hecho.** Decía que la Persona 1 «no rediseña ni amplía los módulos públicos» de la Persona 2, y esta sesión cerró catorce señalamientos que caen casi todos ahí, incluida funcionalidad nueva. O se declara la excepción por escrito, o se dice quién responde ahora por cada módulo.
+
+### 30.4 El despliegue: medido hoy, no supuesto
+
+`https://asobares-production-0jhdcz.laravel.cloud` responde **500** el 31 de agosto a las 18:25 GMT. Dos datos que acotan el diagnóstico del §29.7:
+
+- El cuerpo son 6.592 bytes de **la página de error de Laravel**, con `x-frame-options: DENY` y `nosniff` puestos por el middleware del proyecto. **El framework arranca y el middleware corre**: no es `APP_KEY` ausente ni configuración rota de raíz. Falla más adentro, con `SESSION_DRIVER` y `CACHE_STORE` en `database`.
+- Eso apunta a la **segunda** causa candidata del §29.7, no a la primera, y el propio repositorio la predice palabra por palabra en `.env.staging.example`: «Cloud inyecta `DB_HOST`… pero **NO inyecta `DB_CONNECTION`**… el defecto silencioso de `config/database.php` es `sqlite`… y **el sitio entero da 500** con las variables de Postgres correctamente puestas al lado».
+
+⚠️ **Y hay un desfase nuevo:** la tabla del §29.7 registra `6b0a20d` como último despliegue. `main` es hoy `b9e2428` — **doce commits, cuatro migraciones y 59 ficheros por delante**. Quien diagnostique el 500 con esa tabla estará leyendo código que ya no es el de la rama.
+
+**Sobre `APP_ENV`, que el §29.7 manda decidir a conciencia:** la recomendación de esta sesión es **`staging`**. Es lo que contempla el runbook, es lo único que permite sembrar, y sin sembrar la demostración del 4–11 de septiembre sale con el directorio vacío porque `DatabaseSeeder::run()` se niega en `production`. El día que entren datos reales del gremio se cambia a `production` y la puerta se cierra sola. La decisión sigue siendo del dueño; aquí queda la recomendación con su porqué.
+
+**El CLI de Cloud está instalado** (v0.5.0, `--version` responde) pero `environment:list` se cuelga esperando la autenticación interactiva. El §29.3 ya lo dice: ese paso es del dueño y un agente no lo da por nadie.
+
+### 30.5 Cómo se revisó este documento, y qué se decidió no tocar
+
+El §30 no se escribió de memoria. Se auditaron los siete tramos del documento en paralelo contra el árbol real y **cada hallazgo pasó por un verificador adversarial con instrucción de refutar por defecto**: 106 hallazgos en bruto → **82 confirmados y 24 refutados**, casi una cuarta parte caída por citas inexistentes, líneas equivocadas o cosas que el documento ya matizaba más abajo. Uno de los verificadores **volvió a ejecutar la suite entera** en vez de creerse la cifra: 946/935/3.502/11, idéntica.
+
+Se corrigieron los **treinta hallazgos graves** —los que harían que una sesión nueva decidiera mal— y se dejaron intactas las cifras históricas de las **§15 a §25**. No es descuido: el §0.7 dice que esas secciones «cuentan historia, no estado», y reescribir sus números borraría el registro de qué se midió y cuándo. Si lees ahí «599 pruebas» o «747 casos», es lo que era verdad ese día.
+
+La auditoría devolvió además **101 advertencias que siguen vigentes**. Las que más conviene no tocar: el `abort_unless` de `Bitacora` y `AjustesDelSitio` —que `ModerarFotos` heredó bien—, la prohibición de mover la escala tipográfica a `tokens.css`, las cuatro prohibiciones del §27.8 y las dos reglas de método del §28.4, que en esta sesión **se aplicaron solas**: `Proveedor::necesitaRevision()` usa `subMonthsNoOverflow` con el comentario «es el defecto del §28, y aquí se paga igual».
+
+### 30.6 La lección de método, que vuelve a ser la de siempre
+
+Veintiocho mutaciones deliberadas en el bloque B. **Dos pasaron en verde**, y las dos estaban en OBS3-13, que es lo más sensible que se escribió:
+
+- Abrir la política a «por permiso **o** por propiedad» —literalmente la fuga del v6— **no puso roja ninguna prueba**. El caso comprobaba el 404 de `destroy`, que lo produce otra comprobación del controlador: la política podía estar abierta de par en par. El docblock prometía lo que no probaba.
+- Poner `true` como valor por defecto de «aprobada» tampoco mordía, porque todas las fotos de la prueba entraban por el controlador, que siempre escribe la propiedad. **El defecto silencioso no se ejercía nunca** — y es exactamente el estado en que estaban las dieciocho fotos anteriores a la migración de relleno.
+
+Ninguna de las dos se ve leyendo. Las dos se vieron mutando. **Van doce falsos verdes en el proyecto**, y siguen apareciendo en el trabajo del propio autor del plan.
+
+De paso, tres defectos reales que solo salieron porque la prueba los tropezó: el límite de subida por minuto era **menor** que el máximo de fotos; el tope se contaba con `getMedia()`, que cachea en la instancia y se saltaba en silencio; y el ayudante de las pruebas daba por buena una subida que no ocurría, porque `assertRedirect()` pasa igual con un redirect de error.
+
+### 30.7 Aparte: ocho municipios inventados en la base de demostración
+
+La base local tenía **ocho municipios de fábrica** —«O Lorente», «Luevano Baja», «Casárez del Barco»…— creados el 24–25 de agosto con sufijo aleatorio en el slug, cada uno con un requisito en borrador. Los borradores no llegaban a la guía, pero **los municipios sí alimentaban el filtro público del directorio**, que ofrecía dieciséis opciones con ocho falsas.
+
+Borrados con autorización del dueño, tras comprobar las **seis** tablas que referencian municipios y que ninguno tenía asociados, artistas, proveedores ni consultas colgando. Quedan los ocho reales y veinte requisitos. Los sembradores estaban bien y el anexo de base de datos se exportó antes: **solo afectaba a la base local, que es la que se demuestra**. Es dato, no código, así que no lleva confirmación.
+
+⚠️ **La causa raíz sigue viva:** el filtro del directorio lista todos los municipios de la tabla, tengan contenido publicado o no. Si listara solo los que tienen, un municipio basura no habría llegado nunca a la vista pública.
