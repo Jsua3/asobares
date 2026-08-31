@@ -29,7 +29,7 @@
                 <x-publico.campo nombre="correo" etiqueta="Correo electrónico" tipo="email"
                                  ayuda="Te avisamos ahí cuando tu ficha esté publicada." />
                 <x-publico.campo nombre="tarifa_desde" etiqueta="Tarifa desde (COP)" tipo="number"
-                                 ayuda="Déjalo vacío si prefieres decir «a convenir»." />
+                                 ayuda="Solo la ve el gremio, para poder recomendarte. En tu ficha pública nunca aparece un precio." />
                 <x-publico.campo nombre="instagram_url" etiqueta="Instagram" tipo="url"
                                  placeholder="https://instagram.com/tu-cuenta" />
             </div>

@@ -136,7 +136,10 @@ class SettingSeeder extends Seeder
 
             // --- Artistas y proveedores ---
             $this->texto('artistas_titulo', 'Directorio de artistas', 'modulos', 'Título de artistas'),
-            $this->largo('artistas_intro', 'DJs, bandas y solistas de la región. Son las once de la noche, se te cayó el DJ y necesitas uno: aquí está su género, su tarifa desde, su contacto y un video para escucharlo antes de llamar.', 'modulos', 'Introducción de artistas'),
+            $this->largo('artistas_intro', 'DJs, bandas y solistas de la región. Son las once de la noche, se te cayó el DJ y necesitas uno: aquí está su género, su contacto y un video para escucharlo antes de llamar.', 'modulos', 'Introducción de artistas'),
+            // OBS3-08. El acta ofrecía dos redacciones --«a convenir» o
+            // «según el evento»--, así que la decide el gremio desde el panel.
+            $this->texto('artistas_tarifa_leyenda', 'A convenir', 'modulos', 'Artistas · leyenda en lugar de la tarifa'),
             $this->texto('proveedores_titulo', 'Bolsa de proveedores', 'modulos', 'Título de proveedores'),
             $this->largo('proveedores_intro', 'Hielo, licores, alimentos, aseo, seguridad y mantenimiento. ¿Quién te arregla la campana de extracción un sábado? Aquí.', 'modulos', 'Introducción de proveedores'),
 
