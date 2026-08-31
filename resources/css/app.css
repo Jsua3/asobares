@@ -435,6 +435,53 @@
     }
 
     /*
+     * Hero con imagen o video de fondo (OBS3-02). La ranura `medio` del
+     * componente pinta aqui detras, y el texto queda por encima con un velo
+     * en medio que garantiza el contraste.
+     *
+     * El apilado se aisla con `isolation` para que el z-index del contenido no
+     * compita con nada de fuera: la portada tiene secciones vecinas con
+     * `resplandor-marca` y `trama-puntos`.
+     */
+    .hero-con-medio {
+        position: relative;
+        isolation: isolate;
+    }
+
+    .hero-con-medio > :not(.hero-medio) {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-medio {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+    }
+
+    /* Cubre sin deformar, sea imagen, video o <picture>. */
+    .hero-medio > :is(img, picture, video) {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /*
+     * El velo. Es lo unico que separa un fondo bonito de un titular ilegible,
+     * y su opacidad es un minimo calculado --ver `--asb-velo-hero`--, no una
+     * preferencia. El color sale del fondo del tema, asi que el velo se
+     * invierte solo entre claro y oscuro sin una segunda regla.
+     */
+    .hero-medio::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-color: var(--asb-fondo);
+        opacity: var(--asb-velo-hero);
+    }
+
+    /*
      * Trama de puntos: el motivo grafico que la marca usa en sus piezas
      * (ver cronograma y TED gremial). Se aplica como textura de fondo.
      */
