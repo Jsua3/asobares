@@ -93,6 +93,12 @@ DB_USERNAME=asobares DB_PASSWORD=asobares php artisan migrate:fresh --seed --for
 
 Las 33 migraciones y los sembradores están verificados contra PostgreSQL 17.11.
 
+⚠️ **Desactualizado desde el 31 de agosto de 2026.** Hoy son **39 migraciones**: las seis
+posteriores —dos de finales de agosto y **cuatro del 31**— **no** se han verificado contra
+PostgreSQL real. Una de ellas hace un `UPDATE … LIKE '%Cámara de Comercio%'` con tilde y otra
+recorre `custom_properties` escribiendo JSON. Hasta que se repita la corrida del §14, esta
+frase vale para las 33 primeras y para ninguna más.
+
 ---
 
 ## 4. Crear la infraestructura
@@ -488,8 +494,20 @@ PostgreSQL 17.11 real con el esquema migrado y los datos de demostración sembra
   `strftime`) en `RecaudoMensual` y en `MetricasDelObservatorio::expresionMes`.
 - **`GROUP BY` por alias del `SELECT`.** PostgreSQL admite nombres de columna de salida en
   `GROUP BY`; medido con una y con dos claves de agrupación.
-- **JSON.** Las tres columnas `json` se usan sólo a través del cast `array` de Eloquent. No
-  hay `json_extract`, ni `whereJsonContains`, ni operadores `->` en SQL.
+- **JSON.** ⚠️ **Dejó de ser cierto el 31 de agosto de 2026, y costó un defecto.** Esta
+  entrada decía que las columnas `json` se usaban sólo por el cast `array` y que no había
+  `whereJsonContains` ni operadores `->` en SQL. OBS3-13 metió uno, y estaba **roto en
+  PostgreSQL**: `whereNot(whereJsonContains(…, true))` emite
+  `not (("custom_properties"->'aprobada')::jsonb @> ?)`, y sobre una fila **sin la clave** el
+  `->` da NULL, `NULL @> 'true'` da NULL, `not NULL` da NULL y el `WHERE` descarta la fila —
+  justo la foto que nadie había marcado, que es la que más falta hacía moderar. En SQLite no
+  se reproduce, así que la suite pasaba verde. Arreglado en `ModerarFotos::consultaBase()`
+  añadiendo la rama de la clave ausente, y vigilado por `ColaDeFotosTest`, que afirma sobre
+  la **SQL generada** por cada gramática siguiendo el §15.
+  **Alcance medido:** `ModerarFotos.php` es hoy el ÚNICO sitio del árbol con
+  `whereJsonContains` (grep sobre todo el repositorio salvo `vendor/`), así que no hace falta
+  volver a barrer entero — pero la afirmación de que «no hay JSON en SQL» ya no se puede
+  reutilizar sin comprobarla.
 - **Tipos de vuelta.** Medido: `count(*)` llega como `int`, los booleanos como `bool`, los
   `decimal` como cadena — igual que en SQLite tras los casts —, y `sum()` sobre conjunto
   vacío da 0 en ambos. Todos los consumidores castean explícitamente.
