@@ -34,12 +34,12 @@
     <div class="mx-auto max-w-4xl space-y-14 px-4 py-14 sm:px-6 lg:px-8">
 
         <section aria-labelledby="historia">
-            <h2 id="historia" class="font-display text-2xl font-bold">Cómo nació el capítulo</h2>
+            <h2 id="historia" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_historia') }}</h2>
             <p class="mt-4 text-base leading-relaxed text-suave text-pretty">{{ ajuste('quienes_historia') }}</p>
         </section>
 
         <section aria-labelledby="hacemos">
-            <h2 id="hacemos" class="font-display text-2xl font-bold">Qué hace el gremio</h2>
+            <h2 id="hacemos" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_que_hacemos') }}</h2>
             <p class="mt-4 text-base leading-relaxed text-suave text-pretty">{{ ajuste('quienes_que_hacemos') }}</p>
 
             <blockquote class="trama-puntos mt-7 rounded-2xl border border-marca-500/25 p-7">
@@ -51,7 +51,7 @@
 
         {{-- Visión a 10 años --}}
         <section aria-labelledby="vision">
-            <p class="antetitulo text-acento">Visión del sector en el Quindío</p>
+            <p class="antetitulo text-acento">{{ ajuste('quienes_rotulo_vision') }}</p>
             <h2 id="vision" class="mt-3 font-display text-2xl font-bold leading-tight text-balance sm:text-3xl">
                 {{ ajuste('vision_titulo') }}
             </h2>
@@ -67,9 +67,9 @@
         {{-- Lo que frena al sector --}}
         @if ($barreras->isNotEmpty())
             <section aria-labelledby="barreras">
-                <h2 id="barreras" class="font-display text-2xl font-bold">Lo que hoy nos frena</h2>
+                <h2 id="barreras" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_barreras') }}</h2>
                 <p class="mt-2 text-sm text-tenue">
-                    Son los dos cuellos de botella que el gremio lleva a cada mesa con las instituciones.
+                    {{ ajuste('quienes_barreras_pie') }}
                 </p>
 
                 <div class="mt-6 grid gap-5 sm:grid-cols-2">
@@ -128,16 +128,16 @@
                 </ol>
 
                 <p class="mt-5 text-xs text-apagado">
-                    Formulación › Escalando › En ejecución. El estado de cada iniciativa se actualiza desde el panel.
+                    {{ ajuste('quienes_iniciativas_pie') }}
                 </p>
             </section>
         @endif
 
         {{-- Las tres líneas del plan de acción --}}
         <section aria-labelledby="lineas">
-            <h2 id="lineas" class="font-display text-2xl font-bold">Nuestras líneas de trabajo</h2>
+            <h2 id="lineas" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_lineas') }}</h2>
             <p class="mt-2 text-sm text-tenue">
-                Todo lo que hace el capítulo se organiza alrededor de estos tres ejes.
+                {{ ajuste('quienes_lineas_intro') }}
             </p>
 
             <div class="mt-7 space-y-5">
@@ -154,7 +154,7 @@
                                 </p>
 
                                 @if ($linea['programas'])
-                                    <p class="antetitulo mt-5 text-apagado">Programas</p>
+                                    <p class="antetitulo mt-5 text-apagado">{{ ajuste('quienes_rotulo_programas') }}</p>
                                     <ul class="mt-3 flex flex-wrap gap-2">
                                         @foreach ($linea['programas'] as $programa)
                                             <li class="rounded-lg border border-linea px-3 py-1.5 text-xs text-tinta">
@@ -171,21 +171,21 @@
         </section>
 
         <section aria-labelledby="armenia">
-            <h2 id="armenia" class="font-display text-2xl font-bold">Armenia Nocturna</h2>
+            <h2 id="armenia" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_armenia') }}</h2>
             <p class="mt-4 text-base leading-relaxed text-suave text-pretty">
                 {{ ajuste('quienes_estrategia_armenia') }}
             </p>
         </section>
 
         <section aria-labelledby="direccion">
-            <h2 id="direccion" class="font-display text-2xl font-bold">La dirección</h2>
+            <h2 id="direccion" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_direccion') }}</h2>
             <div class="mt-6 grid gap-5 sm:grid-cols-2">
                 <div class="tarjeta p-6">
-                    <p class="antetitulo text-apagado">Presidente</p>
+                    <p class="antetitulo text-apagado">{{ ajuste('quienes_cargo_presidente') }}</p>
                     <p class="mt-2 font-display text-lg font-bold">{{ ajuste('quienes_presidente') }}</p>
                 </div>
                 <div class="tarjeta p-6">
-                    <p class="antetitulo text-apagado">Directora ejecutiva</p>
+                    <p class="antetitulo text-apagado">{{ ajuste('quienes_cargo_directora') }}</p>
                     <p class="mt-2 font-display text-lg font-bold">{{ ajuste('quienes_directora') }}</p>
                 </div>
             </div>
@@ -193,7 +193,7 @@
         </section>
 
         <section aria-labelledby="beneficios">
-            <h2 id="beneficios" class="font-display text-2xl font-bold">Beneficios del afiliado</h2>
+            <h2 id="beneficios" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_beneficios') }}</h2>
             <div class="mt-6 grid gap-4 sm:grid-cols-2">
                 @foreach ($beneficios as $beneficio)
                     <div class="tarjeta p-5">
@@ -214,7 +214,7 @@
         </section>
 
         <section class="tarjeta p-8 text-center">
-            <h2 class="font-display text-xl font-bold">Somos el capítulo regional de Asobares Colombia</h2>
+            <h2 class="font-display text-xl font-bold">{{ ajuste('quienes_titulo_nacional') }}</h2>
             <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-tenue">
                 Aterrizamos en el Quindío los programas nacionales del gremio:
                 {{ collect(array_filter(explode("\n", (string) ajuste('quienes_programas_nacionales'))))->map(fn ($p) => trim($p))->join(', ', ' y ') }}.

@@ -93,6 +93,24 @@ class SettingSeeder extends Seeder
             $this->texto('cifra_afiliados', '60', 'cifras', 'Establecimientos afiliados'),
 
             // --- Quiénes somos ---
+            // OBS3-11. Los quince textos de «Quiénes somos» que estaban
+            // cableados. Si Natalia va a entregar la redaccion propia del
+            // capitulo, la pagina tiene que aceptarla sin tocar codigo.
+            $this->texto('quienes_titulo_historia', 'Cómo nació el capítulo', 'institucional', 'Quiénes somos · título de la historia'),
+            $this->texto('quienes_titulo_que_hacemos', 'Qué hace el gremio', 'institucional', 'Quiénes somos · título de qué hace el gremio'),
+            $this->texto('quienes_titulo_barreras', 'Lo que hoy nos frena', 'institucional', 'Quiénes somos · título de las barreras'),
+            $this->texto('quienes_titulo_lineas', 'Nuestras líneas de trabajo', 'institucional', 'Quiénes somos · título de las líneas de trabajo'),
+            $this->texto('quienes_titulo_armenia', 'Armenia Nocturna', 'institucional', 'Quiénes somos · título de la estrategia de Armenia'),
+            $this->texto('quienes_titulo_direccion', 'La dirección', 'institucional', 'Quiénes somos · título de la dirección'),
+            $this->texto('quienes_titulo_beneficios', 'Beneficios del afiliado', 'institucional', 'Quiénes somos · título de beneficios'),
+            $this->texto('quienes_titulo_nacional', 'Somos el capítulo regional de Asobares Colombia', 'institucional', 'Quiénes somos · título del respaldo nacional'),
+            $this->texto('quienes_rotulo_vision', 'Visión del sector en el Quindío', 'institucional', 'Quiénes somos · rótulo de la visión'),
+            $this->largo('quienes_barreras_pie', 'Son los dos cuellos de botella que el gremio lleva a cada mesa con las instituciones.', 'institucional', 'Quiénes somos · pie de las barreras'),
+            $this->largo('quienes_iniciativas_pie', 'Formulación › Escalando › En ejecución. El estado de cada iniciativa se actualiza desde el panel.', 'institucional', 'Quiénes somos · pie de las iniciativas'),
+            $this->largo('quienes_lineas_intro', 'Todo lo que hace el capítulo se organiza alrededor de estos tres ejes.', 'institucional', 'Quiénes somos · entradilla de las líneas'),
+            $this->texto('quienes_rotulo_programas', 'Programas', 'institucional', 'Quiénes somos · rótulo de programas'),
+            $this->texto('quienes_cargo_presidente', 'Presidente', 'institucional', 'Quiénes somos · cargo del presidente'),
+            $this->texto('quienes_cargo_directora', 'Directora ejecutiva', 'institucional', 'Quiénes somos · cargo de la directora'),
             $this->largo('quienes_historia', 'Somos una organización gremial que nace en Bogotá y llega al Quindío con la necesidad de afianzar la relación TURISMO – NOCHE. El capítulo se fundó el 14 de agosto de 2024 en Armenia y reúne a bares, gastrobares, cafés y discotecas del departamento alrededor de una idea simple: la vida nocturna es una industria que genera empleo, paga impuestos y merece ser tratada como tal.', 'institucional', 'Historia'),
             $this->largo('quienes_mision', 'Representar al sector de la vida nocturna del Quindío ante las instituciones públicas y privadas, para proponer como gremio: participar en las decisiones sobre horarios, ruido, orden público y formalización antes de que se tomen, y no reclamar después.', 'institucional', 'Misión'),
             $this->largo('quienes_que_hacemos', 'Trabajamos por una vida nocturna más diversa y por la dignificación del sector, para consolidarnos como el corazón nocturno del Eje Cafetero. Gestionamos con las Secretarías de Salud, Gobierno y Planeación; negociamos tarifas de derechos de autor; formamos a los equipos de nuestros afiliados; y construimos la guía normativa por municipio que hoy no tiene ningún otro gremio del país.', 'institucional', 'Qué hacemos'),
