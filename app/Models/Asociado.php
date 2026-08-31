@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Collection;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Image\Enums\Fit;
@@ -129,11 +130,50 @@ class Asociado extends Model implements HasMedia
         return $this->hasMany(User::class);
     }
 
+    /**
+     * La propiedad que decide si una foto de la galería sale al sitio.
+     *
+     * OBS3-13. El directivo puso la condición al enterarse de que el
+     * propietario subiría fotos: «lo tienen que aprobar ellos, no sea que
+     * pongan imágenes... exóticas» (R23 00:45-01:05). Vive en las propiedades
+     * de medialibrary y no en una columna porque el sujeto de la aprobación
+     * es cada archivo, no la ficha.
+     */
+    public const string FOTO_APROBADA = 'aprobada';
+
+    /** Motivo escrito cuando la secretaría devuelve una foto. */
+    public const string FOTO_MOTIVO = 'motivo_rechazo';
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('galeria')
             ->useDisk(config('almacenamiento.publico'))
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+    }
+
+    /**
+     * Lo único que puede ver un visitante.
+     *
+     * El valor por defecto es `false` a propósito: una foto sin marcar es una
+     * foto sin aprobar. Si el defecto fuera `true`, cualquier ruta que
+     * olvidara sellar la propiedad publicaría material sin moderar, que es
+     * exactamente lo que la regla existe para impedir.
+     *
+     * @return Collection<int, Media>
+     */
+    public function fotosAprobadas(): Collection
+    {
+        return $this->getMedia('galeria')
+            ->filter(fn ($media): bool => (bool) $media->getCustomProperty(self::FOTO_APROBADA, false))
+            ->values();
+    }
+
+    /** Las que esperan a la secretaría. Solo las ve el dueño y el panel. */
+    public function fotosPendientes(): Collection
+    {
+        return $this->getMedia('galeria')
+            ->filter(fn ($media): bool => ! (bool) $media->getCustomProperty(self::FOTO_APROBADA, false))
+            ->values();
     }
 
     /**

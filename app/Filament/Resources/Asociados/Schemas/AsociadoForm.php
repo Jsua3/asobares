@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Asociados\Schemas;
 
 use App\Enums\EstadoPublicacion;
 use App\Filament\Forms\Components\SubidaSegura;
+use App\Models\Asociado;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -101,6 +102,12 @@ class AsociadoForm
                         SpatieMediaLibraryFileUpload::make('galeria')
                             ->label('Galería')
                             ->collection('galeria')
+                            // OBS3-13: lo que carga el gremio nace aprobado --es
+                            // el gremio quien aprueba--. Lo que sube el
+                            // propietario desde /mi-cuenta nace SIN aprobar, que
+                            // es el defecto del modelo. Sin esta linea, la
+                            // secretaria tendria que moderar sus propias fotos.
+                            ->customProperties([Asociado::FOTO_APROBADA => true])
                             ->multiple()
                             ->reorderable()
                             ->image()

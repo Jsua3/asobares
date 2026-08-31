@@ -65,6 +65,13 @@ class AsociadoSeeder extends Seeder
                     $ruta = $imagenes->generar("galeria-{$datos['nombre']}-{$numero}", 'galeria', 1200, 900);
                     $asociado->addMedia(storage_path("app/public/{$ruta}"))
                         ->preservingOriginal()
+                        // OBS3-13: las de la semilla nacen APROBADAS porque
+                        // representan lo que el gremio ya cargó y reviso. Las
+                        // que suba el propietario nacen sin aprobar, que es el
+                        // defecto del modelo. La tercera de cada establecimiento
+                        // se deja pendiente a proposito, para que la demo pueda
+                        // enseñar la cola de moderacion sin inventar datos.
+                        ->withCustomProperties([Asociado::FOTO_APROBADA => $numero < 3])
                         ->toMediaCollection('galeria');
                 }
             }

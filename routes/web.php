@@ -10,6 +10,7 @@ use App\Http\Controllers\Publico\EventoController;
 use App\Http\Controllers\Publico\GuiaController;
 use App\Http\Controllers\Publico\InicioController;
 use App\Http\Controllers\Publico\MiCuentaController;
+use App\Http\Controllers\Publico\MisFotosController;
 use App\Http\Controllers\Publico\MisVacantesController;
 use App\Http\Controllers\Publico\NoticiaController;
 use App\Http\Controllers\Publico\PaginaController;
@@ -153,6 +154,21 @@ Route::middleware(['auth', 'rol.asociado'])->group(function (): void {
     Route::post('/mi-cuenta/pagar', [MiCuentaController::class, 'pagarMensualidad'])
         ->middleware('throttle:5,1')
         ->name('mi-cuenta.pagar');
+
+    // Fotos del establecimiento: las sube el duenio, las aprueba el gremio
+    // (OBS3-13). El limite de subida es bajo a proposito: son doce fotos como
+    // maximo por ficha y cada una pasa por revision humana.
+    Route::get('/mi-cuenta/fotos', [MisFotosController::class, 'index'])->name('mi-cuenta.fotos.index');
+    Route::post('/mi-cuenta/fotos', [MisFotosController::class, 'store'])
+        // Por encima del maximo por establecimiento a proposito: con un
+        // limite menor, un afiliado que suba sus doce fotos de una sentada
+        // --que es lo natural el dia que estrena la funcion-- se choca contra
+        // un 429 a mitad de camino. Lo destapo la prueba del maximo.
+        ->middleware('throttle:30,1')
+        ->name('mi-cuenta.fotos.store');
+    Route::delete('/mi-cuenta/fotos/{media}', [MisFotosController::class, 'destroy'])
+        ->middleware('throttle:20,1')
+        ->name('mi-cuenta.fotos.destroy');
 
     // Bolsa de empleo: el establecimiento publica y corrige lo suyo.
     Route::get('/mi-cuenta/vacantes', [MisVacantesController::class, 'index'])->name('mi-cuenta.vacantes.index');

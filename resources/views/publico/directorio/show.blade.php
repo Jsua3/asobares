@@ -75,10 +75,10 @@
                 @endif
 
                 {{-- Galería --}}
-                @if ($asociado->getMedia('galeria')->isNotEmpty())
+                @if ($asociado->fotosAprobadas()->isNotEmpty())
                     <h2 class="mt-10 font-display text-lg font-semibold">Galería</h2>
                     <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                        @foreach ($asociado->getMedia('galeria') as $imagen)
+                        @foreach ($asociado->fotosAprobadas() as $imagen)
                             <img src="{{ $imagen->getUrl('thumb') }}" alt="{{ $asociado->nombre }}"
                                  loading="lazy" decoding="async" width="400" height="300"
                                  class="aspect-[4/3] w-full rounded-xl border border-linea object-cover">
