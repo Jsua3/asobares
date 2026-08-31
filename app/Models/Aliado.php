@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EstadoPublicacion;
+use App\Enums\TipoAliado;
 use App\Models\Concerns\EsPublicable;
 use Database\Factories\AliadoFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,6 +27,7 @@ class Aliado extends Model
     {
         return [
             'estado' => EstadoPublicacion::class,
+            'tipo' => TipoAliado::class,
             'activo' => 'boolean',
         ];
     }
@@ -34,6 +36,15 @@ class Aliado extends Model
     public function scopeVisible(Builder $query): Builder
     {
         return $query->publicado()->where('activo', true)->orderBy('orden');
+    }
+
+    /**
+     * Institucional: respalda al gremio. Comercial: le vende a sus afiliados.
+     * La portada los pinta en dos bandas distintas (OBS3-04).
+     */
+    public function esInstitucional(): bool
+    {
+        return $this->tipo === TipoAliado::Institucional;
     }
 
     /** El detalle del convenio es contenido privado de asociados. */
@@ -45,7 +56,7 @@ class Aliado extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['nombre', 'estado', 'activo', 'orden'])
+            ->logOnly(['nombre', 'tipo', 'estado', 'activo', 'orden'])
             ->logOnlyDirty()
             ->useLogName('aliado')
             ->setDescriptionForEvent(fn (string $evento): string => "Aliado {$this->nombre}: {$evento}");

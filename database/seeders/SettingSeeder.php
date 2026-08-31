@@ -60,6 +60,9 @@ class SettingSeeder extends Seeder
             $this->texto('portada_destacados_texto', 'Algunos de los establecimientos afiliados al gremio.', 'inicio', 'Portada · pie de los destacados'),
             $this->texto('portada_eventos_titulo', 'Próximos eventos del gremio', 'inicio', 'Portada · título de eventos'),
             $this->texto('portada_aliados_titulo', 'Aliados del capítulo', 'inicio', 'Portada · título de aliados'),
+            // OBS3-04: las dos bandas de aliados llevan rótulo propio.
+            $this->texto('portada_aliados_institucionales', 'Respaldo institucional', 'inicio', 'Portada · rótulo de aliados institucionales'),
+            $this->texto('portada_aliados_comerciales', 'Convenios para afiliados', 'inicio', 'Portada · rótulo de aliados comerciales'),
 
             // --- Manifiesto (discurso del TED gremial) ---
             $this->texto('manifiesto_apertura', 'Nos conocen por la rumba. Pero hoy venimos a hablarles del territorio.', 'manifiesto', 'Frase de apertura'),

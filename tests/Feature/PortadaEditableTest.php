@@ -22,7 +22,7 @@ class PortadaEditableTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** Las diez claves que gobiernan el texto propio de la portada. */
+    /** Las doce claves que gobiernan el texto propio de la portada. */
     private const array TITULOS = [
         'portada_cifras_titulo',
         'portada_guia_titulo',
@@ -31,6 +31,8 @@ class PortadaEditableTest extends TestCase
         'portada_beneficios_titulo',
         'portada_eventos_titulo',
         'portada_aliados_titulo',
+        'portada_aliados_institucionales',
+        'portada_aliados_comerciales',
         'portada_guia_texto',
         'portada_empleo_texto',
         'portada_destacados_texto',

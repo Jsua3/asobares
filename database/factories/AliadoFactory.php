@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\EstadoPublicacion;
+use App\Enums\TipoAliado;
 use App\Models\Aliado;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -34,6 +35,9 @@ class AliadoFactory extends Factory
     {
         return [
             'nombre' => fake()->unique()->company(),
+            // `Comercial` por defecto porque es el caso comun y el valor por
+            // defecto de la columna: institucional se declara, no se hereda.
+            'tipo' => TipoAliado::Comercial,
             'logo' => null,
             'url' => fake()->url(),
             'descripcion' => fake()->sentence(),
@@ -60,6 +64,12 @@ class AliadoFactory extends Factory
             'estado' => EstadoPublicacion::Publicado,
             'activo' => true,
         ]);
+    }
+
+    /** Aliado del nivel de arriba: agremiación, cámara o entidad pública. */
+    public function institucional(): static
+    {
+        return $this->state(['tipo' => TipoAliado::Institucional]);
     }
 
     /** El detalle del convenio sólo lo ven los asociados con sesión iniciada. */

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Aliados\Schemas;
 
 use App\Enums\EstadoPublicacion;
+use App\Enums\TipoAliado;
 use App\Filament\Forms\Components\SubidaSegura;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -25,6 +26,12 @@ class AliadoForm
                             ->label('Nombre')
                             ->required()
                             ->maxLength(255),
+                        Select::make('tipo')
+                            ->label('Nivel')
+                            ->options(TipoAliado::class)
+                            ->default(TipoAliado::Comercial)
+                            ->required()
+                            ->helperText('Institucional sale en la banda de arriba de la portada, aparte de las marcas con convenio.'),
                         TextInput::make('url')
                             ->label('Sitio web')
                             ->url()

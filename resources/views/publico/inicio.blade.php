@@ -172,26 +172,57 @@
         </section>
     @endif
 
-    {{-- Aliados --}}
-    @if ($aliados->isNotEmpty())
+    {{-- Aliados, en dos niveles (OBS3-04) --}}
+    @if ($aliadosInstitucionales->isNotEmpty() || $aliadosComerciales->isNotEmpty())
         <section class="border-t border-linea" aria-labelledby="aliados">
             <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
                 <h2 id="aliados" class="font-display text-xs font-semibold uppercase tracking-wider text-apagado">
                     {{ ajuste('portada_aliados_titulo') }}
                 </h2>
-                <div class="mt-6 flex snap-x gap-4 overflow-x-auto pb-3">
-                    @foreach ($aliados as $aliado)
-                        <div class="tarjeta flex w-56 shrink-0 snap-start flex-col p-4">
-                            @if ($aliado->logo)
-                                <img src="{{ Storage::disk('public')->url($aliado->logo) }}" alt="{{ $aliado->nombre }}"
-                                     loading="lazy" decoding="async" width="192" height="108"
-                                     class="h-20 w-full rounded-lg object-cover">
-                            @endif
-                            <p class="mt-3 text-sm font-medium">{{ $aliado->nombre }}</p>
-                            <p class="mt-1 line-clamp-2 text-xs text-apagado">{{ $aliado->descripcion }}</p>
-                        </div>
-                    @endforeach
-                </div>
+
+                {{--
+                    Banda de arriba: las instituciones que respaldan al gremio.
+                    El directivo las quiso aparte y por encima («R21 02:19»), y
+                    el §27.5 lo fija como regla de contenido, no como estética.
+
+                    El tratamiento distinto es de verdad distinto: rejilla en
+                    vez de carrusel --se ven las cuatro a la vez, no hay que
+                    arrastrar-- y logo contenido en vez de recortado, porque un
+                    escudo institucional no se recorta.
+                --}}
+                @if ($aliadosInstitucionales->isNotEmpty())
+                    <p class="antetitulo mt-5 text-acento">{{ ajuste('portada_aliados_institucionales') }}</p>
+                    <ul class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                        @foreach ($aliadosInstitucionales as $aliado)
+                            <li class="tarjeta flex flex-col items-center gap-3 p-5 text-center">
+                                @if ($aliado->logo)
+                                    <img src="{{ Storage::disk('public')->url($aliado->logo) }}" alt="{{ $aliado->nombre }}"
+                                         loading="lazy" decoding="async" width="192" height="108"
+                                         class="h-14 w-full object-contain">
+                                @endif
+                                <p class="text-sm font-semibold text-balance">{{ $aliado->nombre }}</p>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+
+                {{-- Banda de abajo: las marcas con convenio, como estaban. --}}
+                @if ($aliadosComerciales->isNotEmpty())
+                    <p class="antetitulo mt-9 text-tenue">{{ ajuste('portada_aliados_comerciales') }}</p>
+                    <div class="mt-4 flex snap-x gap-4 overflow-x-auto pb-3">
+                        @foreach ($aliadosComerciales as $aliado)
+                            <div class="tarjeta flex w-56 shrink-0 snap-start flex-col p-4">
+                                @if ($aliado->logo)
+                                    <img src="{{ Storage::disk('public')->url($aliado->logo) }}" alt="{{ $aliado->nombre }}"
+                                         loading="lazy" decoding="async" width="192" height="108"
+                                         class="h-20 w-full rounded-lg object-cover">
+                                @endif
+                                <p class="mt-3 text-sm font-medium">{{ $aliado->nombre }}</p>
+                                <p class="mt-1 line-clamp-2 text-xs text-apagado">{{ $aliado->descripcion }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
                 <p class="mt-4 text-xs text-apagado">
                     El detalle de cada convenio es información privada de los afiliados.
                     {{-- `whitespace-nowrap` porque el espacio duro NO basta: Chromium parte la línea
