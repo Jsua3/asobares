@@ -5,6 +5,9 @@ namespace App\Filament\Resources\Aliados\Schemas;
 use App\Enums\EstadoPublicacion;
 use App\Enums\TipoAliado;
 use App\Filament\Forms\Components\SubidaSegura;
+use App\Models\Aliado;
+use App\Models\Municipio;
+use App\Support\ReglaDeAlcaldias;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -31,7 +34,20 @@ class AliadoForm
                             ->options(TipoAliado::class)
                             ->default(TipoAliado::Comercial)
                             ->required()
+                            ->live()
                             ->helperText('Institucional sale en la banda de arriba de la portada, aparte de las marcas con convenio.'),
+
+                        // OBS3-05. Atar el aliado a un municipio es lo que lo
+                        // convierte en «la alcaldía de X», y lo que activa la
+                        // regla de «a todos o nada» (R21 03:47).
+                        Select::make('municipio_id')
+                            ->label('Alcaldía de')
+                            ->relationship('municipio', 'nombre')
+                            ->searchable()
+                            ->preload()
+                            ->visible(fn (callable $get): bool => $get('tipo') === TipoAliado::Institucional->value
+                                || $get('tipo') === TipoAliado::Institucional)
+                            ->helperText(fn (): string => static::avisoDeAlcaldias()),
                         TextInput::make('url')
                             ->label('Sitio web')
                             ->url()
@@ -85,5 +101,26 @@ class AliadoForm
                                 : 'Al guardar, quedará pendiente de aprobación de la dirección.'),
                     ]),
             ]);
+    }
+
+    /**
+     * Le dice a quien clasifica un aliado en qué estado está la regla dura de
+     * las alcaldías, porque la regla se aplica al pintar: si el juego está
+     * incompleto el sitio no muestra ninguna, y sin este aviso el síntoma
+     * --«cargué la alcaldía y no sale»-- parece un fallo.
+     */
+    private static function avisoDeAlcaldias(): string
+    {
+        $regla = app(ReglaDeAlcaldias::class);
+        $faltantes = $regla->faltantes(Aliado::visible()->with('municipio')->get());
+
+        if ($faltantes->isEmpty()) {
+            return 'Déjalo vacío salvo que este aliado sea una alcaldía. Ahora mismo están las '
+                .Municipio::query()->count().' alcaldías de los municipios cubiertos, así que la portada las muestra.';
+        }
+
+        return 'Déjalo vacío salvo que este aliado sea una alcaldía. Regla del gremio: se muestran todas o ninguna, '
+            .'para no abrir susceptibilidades. Faltan '.$faltantes->count().' ('
+            .$faltantes->pluck('nombre')->join(', ', ' y ').'), así que por ahora la portada no muestra ninguna.';
     }
 }
