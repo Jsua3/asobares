@@ -84,6 +84,45 @@ class CrearUsuarioDelPanelTest extends TestCase
     }
 
     /**
+     * El mensaje de error tiene que decir QUÉ falla, no solo que algo falla.
+     *
+     * Esto se paga en producción: la primera vez que corrió en Cloud, el
+     * comando devolvió exactamente «La contraseña» y exit 1. Parecía una clave
+     * débil; lo que pasaba era que llegaba vacía. La causa era que «La
+     * contraseña» se pasó como tercer argumento de `validator()` --que es
+     * `$messages`-- en vez de cuarto --que es `$attributes`--, así que
+     * sustituía el texto de todas las reglas.
+     */
+    public function test_el_error_dice_que_regla_se_incumplio(): void
+    {
+        $this->artisan('asobares:crear-usuario', ['email' => 'debil@asobaresquindio.test'])
+            ->expectsQuestion('Contraseña para la cuenta', 'corta1!')
+            ->expectsOutputToContain('al menos 12 caracteres')
+            ->assertFailed();
+    }
+
+    /**
+     * Sin terminal y sin variable de entorno no hay contraseña, y el comando
+     * tiene que decirlo con todas las letras en vez de arrastrar una cadena
+     * vacía hasta la validación.
+     *
+     * `isInteractive()` no sirve para detectarlo: en el ejecutor remoto de
+     * Laravel Cloud devuelve `true` sin que haya terminal, la pregunta sale
+     * vacía y el comando seguía adelante. Lo que decide es si al final hay
+     * contraseña.
+     */
+    public function test_sin_contrasena_avisa_de_la_variable_de_entorno(): void
+    {
+        $this->artisan('asobares:crear-usuario', ['email' => 'sinclave@asobaresquindio.test'])
+            ->expectsQuestion('Contraseña para la cuenta', '')
+            ->expectsOutputToContain('No se recibió ninguna contraseña.')
+            ->expectsOutputToContain('ASOBARES_CLAVE_INICIAL')
+            ->assertFailed();
+
+        $this->assertDatabaseMissing('users', ['email' => 'sinclave@asobaresquindio.test']);
+    }
+
+    /**
      * El fallo que dejaría la cuenta encerrada. Las direcciones del demo son
      * `.test` --dominio reservado que por definición no recibe correo-- y no
      * hay proveedor SMTP contratado (§29.1): con el segundo factor por correo

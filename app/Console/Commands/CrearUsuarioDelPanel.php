@@ -128,16 +128,31 @@ class CrearUsuarioDelPanel extends Command
             return $deEntorno;
         }
 
-        if (! $this->input->isInteractive()) {
-            $this->error(
-                'No hay terminal para preguntar la contraseña. Pásala en la variable de entorno '
-                .'ASOBARES_CLAVE_INICIAL y bórrala en cuanto el comando termine.'
-            );
+        $preguntada = $this->input->isInteractive()
+            ? preguntarClave('Contraseña para la cuenta')
+            : null;
 
-            return null;
+        if (is_string($preguntada) && $preguntada !== '') {
+            return $preguntada;
         }
 
-        return preguntarClave('Contraseña para la cuenta');
+        // ⚠️ No basta con mirar `isInteractive()`. En el ejecutor remoto de
+        // Laravel Cloud da `true` aunque no haya terminal de verdad, así que
+        // la pregunta devuelve cadena vacía y el comando seguía adelante hasta
+        // morir en la validación con un mensaje que no explicaba nada. Lo que
+        // decide es si al final hay contraseña, no si el proceso se cree
+        // interactivo.
+        $this->error('No se recibió ninguna contraseña.');
+        $this->line('  En una terminal, el comando la pregunta. Sin terminal --y el ejecutor de');
+        $this->line('  Laravel Cloud no la tiene, aunque diga que sí-- pásala en la variable de');
+        $this->line('  entorno ASOBARES_CLAVE_INICIAL.');
+        $this->line('');
+        $this->line('  ⚠️ En Laravel Cloud una variable recién creada NO llega al proceso hasta');
+        $this->line('  el siguiente despliegue. Comprobado: `printenv ASOBARES_CLAVE_INICIAL`');
+        $this->line('  devolvía vacío justo después de crearla. Crea la variable, despliega, y');
+        $this->line('  entonces corre esto.');
+
+        return null;
     }
 
     /** @throws ValidationException */
@@ -150,10 +165,29 @@ class CrearUsuarioDelPanel extends Command
             ]);
         }
 
+        // Los mensajes van escritos aquí, uno por regla, por dos razones que
+        // se descubrieron corriendo esto en producción:
+        //
+        // 1. «La contraseña» estaba de TERCER argumento de `validator()`, que
+        //    es `$messages` y no `$attributes`. Resultado: cualquier fallo se
+        //    imprimía como el literal «La contraseña». El comando devolvió eso
+        //    y exit 1, y parecía una clave débil cuando llegaba vacía.
+        // 2. La aplicación corre con `locale` y `fallback_locale` en `es` y no
+        //    hay carpeta `lang/`; el framework solo trae `en`. Así que sin
+        //    mensaje propio esto imprime `validation.min.string`, que tampoco
+        //    le sirve a nadie. (Los formularios públicos no tienen el problema:
+        //    sus `messages()` cubren `required` y `max` con claves generales.)
         validator(
             ['clave' => $clave],
             ['clave' => ['required', Password::min(12)->letters()->mixedCase()->numbers()->symbols()]],
-            ['clave' => 'La contraseña'],
+            [
+                'clave.required' => 'Hace falta una contraseña.',
+                'clave.min' => 'La contraseña necesita al menos 12 caracteres.',
+                'clave.mixed' => 'La contraseña necesita al menos una mayúscula y una minúscula.',
+                'clave.letters' => 'La contraseña necesita al menos una letra.',
+                'clave.numbers' => 'La contraseña necesita al menos un número.',
+                'clave.symbols' => 'La contraseña necesita al menos un símbolo.',
+            ],
         )->validate();
     }
 }
