@@ -4,6 +4,8 @@ Entregables de la **Fase 4** del cronograma firmado por la dirección ejecutiva.
 
 **Última actualización:** 19 de agosto de 2026 · repositorio en `1ff87d0` más el trabajo sin confirmar de esa fecha
 
+> **Estado vigente del proyecto:** no está en esta carpeta. Vive en `material/estado.md` (se reescribe al cerrar cada sesión), con `material/encargo.md` (lo que el producto es y sus reglas) y `material/bitacora.md` (la historia). El punto de entrada es `material/prompt-maestro-laravel-filament.md`. Las cifras de esta tabla son las del 19 de agosto.
+
 ---
 
 ## Contenido

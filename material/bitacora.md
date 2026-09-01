@@ -1591,3 +1591,40 @@ Y una de operación: `environment:variables --action=set --key=… --value=…` 
 3. **Decidir la indexación** antes de que el buscador decida por el gremio. Hoy el sitio invita a indexar con un sitemap de 14 URL.
 4. **El Acta 04.** Sin firma, cuatro peticiones del cliente siguen sin decidir, y llegar al 22 de septiembre con eso abierto es el modo de fallo que el §27.8 describe.
 5. **El bucket con la política del §8.3**, que arrastra además el disco público del §30.3.
+
+## 32. LA DIVISIÓN DEL PROMPT MAESTRO (1 sep 2026)
+
+**El prompt maestro dejó de ser un archivo de 1.800 líneas y 32 secciones para ser un punto de entrada de unas cien líneas que remite a tres archivos.** Sesión de Cowork con el dueño, sobre `main` en `ed9bec2`, en la rama `division-prompt-maestro`, cuatro commits en el orden acordado: primero la bitácora, luego el encargo, luego el estado y por último el prompt maestro reescrito, para que nada se borrara antes de existir en su sitio nuevo.
+
+### 32.1 Por qué
+
+Una lectura completa del documento el mismo 1 de septiembre dejó tres conclusiones. La primera: mezclaba cuatro cosas que envejecen a ritmos distintos —reglas y protocolo, estado semanal, referencia del producto e historia—, y el que cambia cada semana obligaba a tachar y anotar «superado» sobre los otros tres; de ahí las contradicciones que la auditoría del §30.5 tuvo que corregir (106 hallazgos, 30 graves) y las que quedaban (el §0.3 daba R-14 por cerrado mientras el §29.7 pedía comprobar la facturación; la cabecera v13 y el §27.3 no nombraban el mismo trío). La segunda: el §0.7 pedía leer ocho tramos —unas 770 líneas— antes de la primera línea de código, y el propio documento registraba dos veces (18 y 30 de agosto) otra sesión trabajando en el mismo directorio sin haber leído el final. La tercera: el encargo (§1–§14) decía estar «corregido con lo aprendido» y no lo estaba en cosas concretas: el §4 seguía prescribiendo Unbounded y Hanken Grotesk cuando el sitio usa Poppins por el manual de marca; el §5 no tenía las columnas de aliados, proveedores y requisitos añadidas después; el §8 nombraba `BoldGateway` y `FakeGateway` cuando las clases son `PasarelaBold` y `PasarelaSimulada`; el §10 pedía sembrar justo lo que el §31 acababa de retirar de producción.
+
+El diseño completo, con el mapa sección por sección y las cuatro decisiones del dueño (ubicación en `material/`, el estado del repositorio manda en lo técnico y el del Project de Cowork queda para lo académico, las trampas técnicas al encargo por área, ejecución desde Cowork en rama propia), está en `claude/diseno-division-prompt-maestro.md` del Project.
+
+### 32.2 Qué se hizo, con su confirmación
+
+| Commit | Qué |
+|---|---|
+| `972e510` | `material/bitacora.md`: cabecera v2–v16 (líneas 1–59), §0 (60–166) y §15–§31 (411–1800) **copiados sin cambiar una línea** y verificados con `diff` bloque a bloque; índice cronológico de las notas de versión; regla de solo anexar |
+| `2a9c864` | `material/encargo.md` (375 líneas): §1–§14 puestos al día. Los tramos vigentes (tabla del modelo, panel, sitio, reglas de pagos y seguridad, RNF, guion de la bolsa, §14, §26.4, §27.8, §27.5) **se trasladaron por número de línea** con sustituciones que fallan si el patrón no aparece exactamente una vez; lo demás se redactó de nuevo |
+| `ffd0946` | `material/estado.md` (163 líneas): exigencias, inventario por cinco frentes, **registro único de 21 decisiones pendientes** (D-01 a D-21) que antes vivían repartidas entre la ERS, el plan del material, el acta 3 y el §31.8, deuda diferida, cifras con su comando, lo siguiente |
+| (este) | Prompt maestro reescrito a ~90 líneas sin cifras ni pendientes; bloque del proyecto de `CLAUDE.md` y `AGENTS.md` sin estado (antes decía «el trabajo vivo es el §27 y el §28», ya viejo); puntero en `docs/ingenieria/README.md`; esta entrada |
+
+### 32.3 Lo que se midió y lo que no
+
+Medido sobre `main` en `ed9bec2`: 271 confirmaciones (267 de Sua, 4 de Ingrid, la última del 25 de agosto), 39 migraciones, 21 modelos, 21 sembradores, 78 archivos de prueba, 66 vistas Blade, 19 recursos, 6 páginas, 20 policies, 5 comandos, 16 enums. El sitio publicado respondía 200 y su portada tenía 6 `<img>` y 0 `<video>`, con las secciones de destacados y eventos sin pintar por falta de datos. `robots.txt` con `Allow: /` y sitemap de 14 URL.
+
+**La suite no se ejecutó** en esta sesión: la máquina enlazada a Cowork no expone PHP. El estado cita los 970 casos del §31.7 diciendo que no son una re-medición. Por la misma razón **no se escribió la prueba de guardia propuesta** (que el commit del encabezado del estado exista y que el prompt maestro no lleve cifras de la suite): una prueba que no se vio en rojo no cuenta (§24.6). Queda anotada en el estado como deuda.
+
+### 32.4 Lo que este trabajo cambia para la siguiente sesión
+
+La cadena de entrada es `CLAUDE.md` → prompt maestro → `estado.md` → las secciones de `encargo.md` que toquen. Una sesión lee unas 270 líneas para arrancar en vez de 770, y no tiene que cotejar cifras repetidas. El coste está en la disciplina: si una sesión cierra sin reescribir `estado.md`, el estado se convierte en lo que hoy era el §0. La lista de cierre (§5 del prompt maestro) tiene por eso dos pasos nuevos, y el protocolo de apertura obliga a comparar el commit del encabezado con `HEAD`.
+
+Lo que **no** cambia: los cinco señalamientos vivos del gremio siguen dependiendo de insumos y decisiones humanas, el SMTP sigue sin contratar y la semana es del documento de práctica. La división es infraestructura para las tres semanas que quedan y, sobre todo, para quien reciba el proyecto después del 22 de septiembre.
+
+### 32.5 Trampas de esta sesión
+
+- **Git desde la máquina enlazada a Cowork no puede borrar sus propios archivos temporales** (`Operation not permitted` sobre `.git/HEAD.lock`, `.git/objects/maintenance.lock` y los `tmp_obj_*` de cada commit). Un `HEAD.lock` huérfano bloquea el siguiente commit. Solución que funcionó: renombrarlos a `.git/huerfanos-cowork-2026-09-01/` después de cada commit; el dueño borra esa carpeta y los cuatro `index.lock.huerfano*` anteriores a mano.
+- **El sistema de archivos montado es lento para `grep -r`**: un recorrido sobre `docs/` con PDF e imágenes no termina en dos minutos. Acotar a carpetas concretas o a `*.md`.
+- **El repositorio no tiene identidad de git en la máquina enlazada**: los commits se hicieron con `-c user.name -c user.email` del dueño, con la coautoría de la sesión en el trailer.
