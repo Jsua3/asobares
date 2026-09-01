@@ -6,22 +6,29 @@ use App\Enums\TipoAliado;
 use App\Models\Aliado;
 use App\Models\Iniciativa;
 use App\Models\RequisitoApertura;
-use Database\Seeders\AliadoSeeder;
-use Database\Seeders\BeneficioSeeder;
-use Database\Seeders\CategoriaSeeder;
-use Database\Seeders\IniciativaSeeder;
-use Database\Seeders\MunicipioSeeder;
-use Database\Seeders\RequisitoAperturaSeeder;
+use Database\Seeders\ArtistaSeeder;
+use Database\Seeders\AsociadoSeeder;
+use Database\Seeders\CarteraSeeder;
+use Database\Seeders\ConsultaGuiaSeeder;
+use Database\Seeders\ContenidoOficialSeeder;
+use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\EventoSeeder;
+use Database\Seeders\MensajeSeeder;
+use Database\Seeders\NoticiaSeeder;
+use Database\Seeders\ProveedorSeeder;
+use Database\Seeders\TransaccionSeeder;
+use Database\Seeders\UsuarioSeeder;
+use Database\Seeders\VacanteSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
  * Lo que se siembra en producción sale de un documento, o no se siembra.
  *
- * Estos siete sembradores son los únicos que van a la base real: catálogos,
- * contenido institucional y la guía normativa. Los demás --asociados,
- * eventos, PQR, transacciones-- son la demostración y `DatabaseSeeder` ya se
- * niega a correrlos en producción.
+ * `ContenidoOficialSeeder` es lo único que corre sobre la base real:
+ * catálogos, contenido institucional, ajustes del sitio y la guía normativa.
+ * Los demás --asociados, eventos, PQR, transacciones-- son la demostración, y
+ * `DatabaseSeeder` ya se niega a correrlos en producción.
  *
  * ⚠️ **Esta prueba existe porque el esquema no marca la procedencia de una
  * fila.** No hay columna que distinga lo que sembró un seeder de lo que
@@ -48,12 +55,45 @@ class SemillaInstitucionalTest extends TestCase
     {
         parent::setUp();
 
-        $this->seed(MunicipioSeeder::class);
-        $this->seed(CategoriaSeeder::class);
-        $this->seed(BeneficioSeeder::class);
-        $this->seed(AliadoSeeder::class);
-        $this->seed(IniciativaSeeder::class);
-        $this->seed(RequisitoAperturaSeeder::class);
+        // Exactamente lo que corre en producción, y no una lista paralela que
+        // se desincronice: si alguien mete un sembrador de demostración en
+        // `ContenidoOficialSeeder`, sus datos entran aquí y las guardias lo ven.
+        $this->seed(ContenidoOficialSeeder::class);
+    }
+
+    /**
+     * Y la otra mitad de lo mismo: que ningún sembrador de la demostración se
+     * cuele en la lista. `AsociadoSeeder` publica establecimientos inventados
+     * en un directorio con URL real; `MensajeSeeder` consume el consecutivo
+     * anual de PQR de verdad; `TransaccionSeeder` mete pagos aprobados que el
+     * widget de recaudo suma como ingresos. Cualquiera de los tres en esta
+     * lista es un incidente, no un error de estilo.
+     */
+    public function test_la_lista_de_produccion_no_incluye_sembradores_del_demo(): void
+    {
+        $prohibidos = [
+            AsociadoSeeder::class,
+            CarteraSeeder::class,
+            ConsultaGuiaSeeder::class,
+            EventoSeeder::class,
+            VacanteSeeder::class,
+            ArtistaSeeder::class,
+            ProveedorSeeder::class,
+            NoticiaSeeder::class,
+            MensajeSeeder::class,
+            TransaccionSeeder::class,
+            UsuarioSeeder::class,
+            DatabaseSeeder::class,
+        ];
+
+        $colados = array_intersect($prohibidos, ContenidoOficialSeeder::SEMBRADORES);
+
+        $this->assertSame(
+            [],
+            array_values($colados),
+            'Estos sembradores son de la demostración y no pueden correr sobre la base del gremio: '
+            .implode(', ', array_map(class_basename(...), $colados))
+        );
     }
 
     /**
