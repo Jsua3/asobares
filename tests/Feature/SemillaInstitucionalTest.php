@@ -236,6 +236,25 @@ class SemillaInstitucionalTest extends TestCase
     }
 
     /**
+     * Un trámite sin costo conocido no se anuncia como gratis.
+     *
+     * La guía rotulaba cada trámite sin cifra con «Sin costo directo», que es
+     * una afirmación y no la ausencia de una: le dice al empresario que el
+     * trámite no le va a costar nada. `costo_aproximado` en `null` significa
+     * lo contrario --que nadie ha averiguado cuánto vale-- y es el estado de
+     * los ocho, porque el documento oficial del gremio no trae ni una cifra.
+     *
+     * Quien lee esto está haciendo cuentas para decidir si abre un bar.
+     */
+    public function test_la_guia_no_anuncia_como_gratis_lo_que_no_ha_costeado(): void
+    {
+        $this->get(route('guia.index'))
+            ->assertOk()
+            ->assertDontSee('Sin costo directo', escape: false)
+            ->assertSee('Costo por confirmar', escape: false);
+    }
+
+    /**
      * Las cinco iniciativas son las del TED gremial, con los estados que la
      * lámina les pone. Si alguien añade una sexta, que venga a justificarla.
      */

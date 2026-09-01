@@ -79,7 +79,16 @@
                                             {{ pesos($requisito->costo_aproximado) }}
                                         </span>
                                     @else
-                                        <span class="rounded-full border border-linea px-2.5 py-0.5 text-apagado">Sin costo directo</span>
+                                        {{-- Decía «Sin costo directo», que es una AFIRMACIÓN: le
+                                             dice al empresario que el trámite es gratis. Un
+                                             `costo_aproximado` nulo no significa eso, significa que
+                                             nadie ha averiguado cuánto vale --que es el estado de
+                                             los ocho trámites, porque el documento oficial del
+                                             gremio no trae ni una cifra--. Decirle «sin costo» a
+                                             quien está haciendo cuentas para abrir un bar es
+                                             exactamente el error que el §29.4 señala. La cabecera
+                                             de la tarjeta ya lo dice bien: «Por confirmar». --}}
+                                        <span class="rounded-full border border-linea px-2.5 py-0.5 text-apagado">Costo por confirmar</span>
                                     @endif
 
                                     @if ($requisito->checklist)
