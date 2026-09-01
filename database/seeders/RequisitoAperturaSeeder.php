@@ -21,28 +21,37 @@ use Illuminate\Database\Seeder;
  * en una URL con el nombre del gremio encima es un riesgo del gremio, no del
  * equipo.
  *
- * Ahora sale de dos documentos del gremio, palabra por palabra:
+ * Los siete trámites de Armenia son, **literalmente**, el bloque que ya estaba
+ * transcrito y listo para pegar en
+ * `docs/ingenieria/guia-normativa-armenia-fuente-oficial.md` (§3). Ese
+ * documento sale de `material/REQUISITOS APERTURA - ARMENIA.docx`, la jornada
+ * «BLINDEMOS TU NEGOCIO ARMENIA» hecha con la Alcaldía de Armenia, que el
+ * gremio entregó el **20 de agosto de 2026** — de ahí la fecha de
+ * verificación, que no es ni una invención ni una omisión.
  *
- * - `material/REQUISITOS APERTURA - ARMENIA.docx` — la jornada «BLINDEMOS TU
- *   NEGOCIO ARMENIA», hecha con la Alcaldía de Armenia. De ahí salen los
- *   siete trámites, en su orden, con lo que cada uno es y qué piden.
- * - `material/nuevomaterial/REQUERIMIENTOS BASICOS GENERALES - ESTABLECIMIENTO
- *   NOCTURNO.docx` — la lista de verificación que el gremio lleva a la visita,
- *   apoyada en la **ley 1801 de 2016** (Código Nacional de Policía) y el
- *   **decreto 119**. Es la octava ficha.
+ * La octava ficha no está en ese documento: es la lista de verificación de
+ * `material/nuevomaterial/REQUERIMIENTOS BASICOS GENERALES - ESTABLECIMIENTO
+ * NOCTURNO.docx`, apoyada en la **ley 1801 de 2016** y el **decreto 119**. Ese
+ * papel no lleva fecha, así que va sin `verificado_el` y la guía lo dice en su
+ * cara: «Sin verificar contra la fuente oficial».
  *
- * Dos consecuencias que no son descuido:
+ * Tres consecuencias que no son descuido:
  *
  * - **Ningún `costo_aproximado`.** El documento oficial no trae ni una cifra.
  *   Inventarlas otra vez sería repetir el mismo defecto con mejor letra.
  * - **Solo Armenia.** Para Salento y Filandia no hay documento. Una guía
- *   incompleta y cierta vale más que una completa e inventada, y el gremio
- *   añade los otros municipios desde el panel cuando tenga la fuente.
+ *   incompleta y cierta vale más que una completa e inventada; el §5 de aquel
+ *   documento ya cuenta los otros once municipios como pendiente del gremio.
+ * - **Sin `adjunto`.** Los PDF que se generaban decían «Formato de ejemplo» y
+ *   llevaban el nombre del gremio encima. Los formatos reales de las entidades
+ *   hay que pedirlos, y el gremio los sube desde el panel.
  *
- * `verificado_el` se queda en `null` a propósito: el documento no lleva fecha
- * y nadie ha vuelto a contrastar estos trámites con cada entidad. La guía
- * muestra entonces «Sin verificar contra la fuente oficial», que es la verdad.
- * `verificado_con` sí nombra de dónde salió, para que se pueda auditar.
+ * ⚠️ **Pendiente que este commit NO cierra:** el §5 de ese mismo documento
+ * pide que la dirección confirme por escrito que esta es la versión vigente
+ * antes de publicar, «porque es información que un empresario va a usar para
+ * decidir si abre o no». Aquí salen publicadas --con su fuente y su fecha a la
+ * vista, que es la salvaguarda que pedía el §29.4-- pero esa confirmación
+ * sigue debiéndose, y desde el panel se pasan a borrador en un clic.
  *
  * Nota para quien resiembre sobre una base ya poblada: `updateOrCreate` va por
  * `(municipio_id, entidad)` y **no borra nada**, así que las fichas viejas de
@@ -52,9 +61,12 @@ use Illuminate\Database\Seeder;
 class RequisitoAperturaSeeder extends Seeder
 {
     /** La fuente, tal cual, para que quede en la ficha y se pueda auditar. */
-    public const string FUENTE_ARMENIA = 'Jornada «Blindemos tu Negocio Armenia» — Alcaldía de Armenia y Asobares Capítulo Quindío';
+    public const string FUENTE_ARMENIA = 'Documento oficial de la Alcaldía de Armenia, campaña «Blindemos tu Negocio», entregado al gremio el 20 de agosto de 2026';
 
     public const string FUENTE_GENERAL = 'Requerimientos básicos generales — Asobares Capítulo Quindío (ley 1801 de 2016 y decreto 119)';
+
+    /** El día en que el gremio entregó el documento. Ver §3 del documento citado. */
+    public const string VERIFICADO_EL = '2026-08-20';
 
     public function run(): void
     {
@@ -70,7 +82,8 @@ class RequisitoAperturaSeeder extends Seeder
                         'estado' => EstadoPublicacion::Publicado,
                         // El documento no trae cifras. No se rellenan.
                         'costo_aproximado' => null,
-                        'verificado_el' => null,
+                        'verificado_el' => self::VERIFICADO_EL,
+                        'verificado_con' => self::FUENTE_ARMENIA,
                     ]
                 );
             }
@@ -83,75 +96,80 @@ class RequisitoAperturaSeeder extends Seeder
         return [
             'armenia' => [
                 [
-                    'entidad' => 'Alcaldía de Armenia — Uso de suelos',
-                    'descripcion' => 'Es el certificado que autoriza que en esa dirección puede funcionar un bar o una discoteca. Lo emiten Planeación Municipal (concepto) y la Curaduría Ciudadana (documento oficial). Consúltalo ANTES de firmar el arriendo.',
+                    'entidad' => 'Alcaldía de Armenia — Planeación municipal y Curaduría',
+                    'descripcion' => 'El certificado de uso de suelos autoriza que en esa dirección pueda funcionar un bar o una discoteca. Son dos puertas distintas: Planeación municipal emite el concepto y la Curaduría ciudadana el documento oficial. Consúltalo ANTES de firmar el arriendo.',
                     'checklist' => [
-                        'Concepto de uso de suelo de Planeación Municipal',
-                        'Documento oficial de la Curaduría Ciudadana',
-                        'Verificar que la actividad económica del RUT coincida con el concepto de uso de suelo emitido por la curaduría',
+                        'Concepto de uso de suelo emitido por Planeación municipal',
+                        'Documento oficial expedido por la Curaduría ciudadana',
+                        'Verificar que la actividad económica del RUT coincida con el concepto de uso de suelo',
                     ],
                     'enlace_externo' => 'https://armenia.gov.co',
-                    'verificado_con' => self::FUENTE_ARMENIA,
-                ],
-                [
-                    'entidad' => 'Secretaría de Salud de Armenia',
-                    'descripcion' => 'Concepto sanitario: la visita de los inspectores de salud. Vale el acta de visita con concepto favorable o, mientras llega, la solicitud de visita radicada. La visita se pide al correo servicioalcliente@armenia.gov.co con el asunto «VISITA SANITARIA», adjuntando nombre y dirección del establecimiento y el RUT.',
-                    'checklist' => [
-                        'Acta de visita con concepto favorable, o solicitud de visita radicada',
-                        'Control de plagas con certificado vigente',
-                        'Manipulación de alimentos, si aplica',
-                        'Condiciones locativas de los baños',
-                    ],
-                    'verificado_con' => self::FUENTE_ARMENIA,
-                ],
-                [
-                    'entidad' => 'Cuerpo de Bomberos de Armenia',
-                    'descripcion' => 'Seguridad humana y contra incendios: el certificado que emite el Cuerpo Oficial de Bomberos de Armenia.',
-                    'checklist' => [
-                        'Extintores vigentes',
-                        'Señalización de rutas de evacuación',
-                        'Luces de emergencia',
-                        'Botiquín de primeros auxilios',
-                    ],
-                    'verificado_con' => self::FUENTE_ARMENIA,
-                ],
-                [
-                    'entidad' => 'Sayco y Acinpro',
-                    'descripcion' => 'Derechos de autor: el comprobante de pago por la comunicación pública de música. Si eres afiliado a Asobares Quindío, el gremio puede revisar tu tarifa y darte descuentos con marcas aliadas.',
-                    'checklist' => [
-                        'Comprobante de pago por la comunicación pública de música',
-                    ],
-                    'verificado_con' => self::FUENTE_ARMENIA,
                 ],
                 [
                     'entidad' => 'Cámara de Comercio de Armenia y del Quindío',
-                    'descripcion' => 'La matrícula mercantil es el registro legal del establecimiento. Debe estar renovada a 31 de marzo de cada año.',
+                    'descripcion' => 'La matrícula mercantil es el registro legal del establecimiento. Debe estar renovada antes del 31 de marzo de cada año.',
                     'checklist' => [
-                        'Matrícula mercantil del establecimiento',
+                        'Formulario RUES diligenciado (persona natural o jurídica)',
+                        'Cédula del propietario o del representante legal',
+                        'RUT expedido por la DIAN',
+                        'Consulta previa de homonimia del nombre comercial',
                         'Renovación al día: vence el 31 de marzo de cada año',
                     ],
                     'enlace_externo' => 'https://camaraarmenia.org.co',
-                    'verificado_con' => self::FUENTE_ARMENIA,
                 ],
                 [
-                    'entidad' => 'CRQ — Corporación Autónoma Regional del Quindío',
-                    'descripcion' => 'Intensidad auditiva: el cumplimiento de los niveles de decibeles permitidos. La medición se le solicita a la entidad por correo electrónico.',
+                    'entidad' => 'Secretaría de Salud Municipal — Concepto sanitario',
+                    'descripcion' => 'Es la visita de los inspectores de salud. Se solicita por correo a servicioalcliente@armenia.gov.co con el asunto VISITA SANITARIA, adjuntando nombre del establecimiento, dirección y RUT. El requisito se cumple con el acta de visita con concepto favorable o, mientras llega, con la solicitud radicada.',
                     'checklist' => [
-                        'Solicitud de medición de intensidad auditiva a la CRQ',
-                        'Aislamiento acústico suficiente para no generar impacto negativo en la vecindad',
+                        'Solicitud enviada a servicioalcliente@armenia.gov.co — asunto: VISITA SANITARIA',
+                        'Adjuntar nombre del establecimiento, dirección y RUT',
+                        'Certificado vigente de control de plagas',
+                        'Certificados de manipulación de alimentos (si aplica)',
+                        'Condiciones locativas de los baños en regla',
+                        'Acta de visita con concepto favorable, o la solicitud de visita radicada',
                     ],
-                    'verificado_con' => self::FUENTE_ARMENIA,
+                ],
+                [
+                    'entidad' => 'Cuerpo Oficial de Bomberos de Armenia',
+                    'descripcion' => 'Certificado de seguridad humana y contra incendios emitido por el Cuerpo Oficial de Bomberos de Armenia.',
+                    'checklist' => [
+                        'Extintores vigentes y con recarga certificada',
+                        'Señalización de rutas de evacuación',
+                        'Luces de emergencia',
+                        'Botiquín de primeros auxilios dotado',
+                    ],
+                ],
+                [
+                    'entidad' => 'Corporación Autónoma Regional del Quindío (CRQ) — Intensidad auditiva',
+                    'descripcion' => 'Cumplimiento de los niveles de decibeles permitidos. La medición se solicita a la entidad por correo electrónico. Asegúrate de que el establecimiento tenga el aislamiento acústico necesario para no generar impacto sobre la vecindad.',
+                    'checklist' => [
+                        'Solicitud de medición de intensidad auditiva enviada a la CRQ',
+                        'Aislamiento acústico verificado',
+                        'Medición dentro de los niveles de decibeles permitidos',
+                    ],
+                    'enlace_externo' => 'https://crq.gov.co',
+                ],
+                [
+                    'entidad' => 'Sayco y Acinpro — Derechos de autor',
+                    'descripcion' => 'Comprobante de pago por la comunicación pública de música. Si eres afiliado a ASOBARES Quindío, el gremio puede revisar tu tarifa y darte acceso a descuentos con marcas aliadas.',
+                    'checklist' => [
+                        'Formulario de declaración del establecimiento',
+                        'Comprobante de pago por comunicación pública de música',
+                        'Consultar con ASOBARES la revisión de tarifa para afiliados',
+                    ],
                 ],
                 [
                     'entidad' => 'Policía Nacional — Notificación de apertura',
-                    'descripcion' => 'Solicitud escrita a la estación de policía correspondiente para notificar la apertura de un establecimiento de comercio en la zona. Solo aplica a los establecimientos abiertos después de 2019.',
+                    'descripcion' => 'Solicitud escrita a la estación de policía correspondiente notificando la apertura de un establecimiento de comercio en la zona. Solo aplica a establecimientos abiertos después del año 2019.',
                     'checklist' => [
-                        'Solicitud escrita radicada en la estación de policía correspondiente',
-                        'Aplica únicamente a establecimientos con apertura posterior a 2019',
+                        'Solicitud escrita dirigida a la estación de policía de la zona',
+                        'Aplica únicamente si el establecimiento abrió después de 2019',
                     ],
-                    'verificado_con' => self::FUENTE_ARMENIA,
                 ],
                 [
+                    // La octava no sale de la jornada con la Alcaldía sino de la
+                    // lista que el gremio lleva a la visita. Ese papel no está
+                    // fechado, así que va sin `verificado_el` y la guía lo dice.
                     'entidad' => 'Documentación general del establecimiento (ley 1801 de 2016)',
                     'descripcion' => 'La lista que el gremio revisa en la visita, según la ley 1801 (Código Nacional de Policía) y el decreto 119. Ten estos documentos vigentes y a la mano: es lo que piden en un operativo.',
                     'checklist' => [
@@ -175,6 +193,7 @@ class RequisitoAperturaSeeder extends Seeder
                         'Aviso «Usted está siendo grabado y monitoreado»',
                         'Acta de propinas',
                     ],
+                    'verificado_el' => null,
                     'verificado_con' => self::FUENTE_GENERAL,
                 ],
             ],
