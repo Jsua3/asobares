@@ -192,6 +192,50 @@ class SemillaInstitucionalTest extends TestCase
     }
 
     /**
+     * La portada y la guía no pueden prometer lo que la guía no da.
+     *
+     * Es el mismo defecto que el «ya» del WhatsApp (OBS3-14), en otro sitio.
+     * Las dos entradillas decían «con checklist, **costos** y los **formatos
+     * oficiales listos para descargar**», y ninguna de las dos cosas existe:
+     * los costos eran inventados y los formatos eran PDF rotulados «Formato de
+     * ejemplo». Quien llega desde la portada hace clic esperando una tabla de
+     * tarifas y un PDF, y encuentra ni lo uno ni lo otro.
+     *
+     * La guardia no prohíbe la palabra: comprueba que **si el texto la
+     * promete, la guía la tenga**. El día que el gremio cargue las tarifas
+     * verificadas o los formatos reales, la promesa vuelve a ser cierta y esta
+     * prueba sigue verde sin tocarla.
+     */
+    public function test_la_portada_no_promete_costos_ni_formatos_que_la_guia_no_tiene(): void
+    {
+        $hayCostos = RequisitoApertura::query()->whereNotNull('costo_aproximado')->exists();
+        $hayFormatos = RequisitoApertura::query()->whereNotNull('adjunto')->exists();
+
+        $textos = [
+            'portada_guia_texto' => ajuste('portada_guia_texto'),
+            'guia_intro' => ajuste('guia_intro'),
+        ];
+
+        foreach ($textos as $clave => $texto) {
+            if (! $hayCostos) {
+                $this->assertDoesNotMatchRegularExpression(
+                    '/\b(costos?|cu[áa]nto cuesta|tarifas?|precios?)\b/iu',
+                    (string) $texto,
+                    "«{$clave}» promete costos y ningún trámite de la guía tiene `costo_aproximado`."
+                );
+            }
+
+            if (! $hayFormatos) {
+                $this->assertDoesNotMatchRegularExpression(
+                    '/\b(descarga\w*|formatos? oficial\w*)\b/iu',
+                    (string) $texto,
+                    "«{$clave}» promete formatos descargables y ningún trámite de la guía tiene `adjunto`."
+                );
+            }
+        }
+    }
+
+    /**
      * Las cinco iniciativas son las del TED gremial, con los estados que la
      * lámina les pone. Si alguien añade una sexta, que venga a justificarla.
      */

@@ -13,10 +13,19 @@
     {{-- Hero --}}
     <x-publico.hero :titulo="ajuste('hero_titulo')" :subtitulo="ajuste('hero_subtitulo')">
         <x-slot:encima>
-            <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-marca-500/30 bg-marca-500/10 px-3 py-1 text-xs font-medium text-acento-fuerte">
-                <span class="h-1.5 w-1.5 rounded-full bg-marca-500"></span>
-                {{ $totalAsociados }} establecimientos afiliados en el Quindío
-            </p>
+            {{-- Con el directorio vacío la píldora decía «0 establecimientos
+                 afiliados en el Quindío» encima del lema, que es la primera
+                 línea que lee quien entra. Y no es un caso raro: el directorio
+                 nace vacío a propósito --las fichas de asociados no tienen
+                 autorización de publicación (R-02) y las inventadas se
+                 retiraron--, así que el estado inicial del sitio en producción
+                 es justo ese. Sin fichas publicadas no se presume nada. --}}
+            @if ($totalAsociados > 0)
+                <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-marca-500/30 bg-marca-500/10 px-3 py-1 text-xs font-medium text-acento-fuerte">
+                    <span class="h-1.5 w-1.5 rounded-full bg-marca-500"></span>
+                    {{ $totalAsociados }} establecimientos afiliados en el Quindío
+                </p>
+            @endif
             <p class="mb-5 max-w-2xl font-display text-base font-medium leading-snug text-suave text-balance sm:text-lg">
                 {{ ajuste('manifiesto_apertura') }}
             </p>
