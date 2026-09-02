@@ -28,11 +28,11 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 
 | | |
 |---|---|
-| Fecha | Martes 1 de septiembre de 2026, quinta sesión del día (Bogotá) |
-| `main` | `18bdeea` · 282 confirmaciones · este archivo entra en el commit siguiente por avance rápido y **`main` se sube a `origin` al cerrar la sesión** |
-| Rama de trabajo | Ninguna: la sesión cerró sobre `main` |
+| Fecha | Madrugada del miércoles 2 de septiembre de 2026 (Bogotá), cerrando la sexta sesión del martes 1 |
+| `main` | `a408afc` · 285 confirmaciones · este archivo entra en el commit siguiente; al cerrar, `cifras-del-gremio` se fusiona a `main` por avance rápido y **`main` se sube a `origin`** |
+| Rama de trabajo | Ninguna: la sesión cerró sobre `main` y borró `cifras-del-gremio` |
 | Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5.9). **La suite sí se ejecutó** (§5) |
-| Producción | `https://asobares-production-0jhdcz.laravel.cloud` responde **200** (petición `HEAD`, segunda sesión de hoy); contenido releído por última vez el 1 sep por la mañana (§31.7). **Nada de hoy está desplegado todavía**: con el `push` de esta sesión `origin` queda al día, y el siguiente despliegue de Cloud lleva D-23 y D-24 |
+| Producción | `https://asobares-production-0jhdcz.laravel.cloud` responde **200** (petición `HEAD`, 1 sep); contenido releído por última vez el 1 sep por la mañana (§31.7). Con el `push` de esta sesión `origin` queda al día: el siguiente despliegue lleva D-23, D-24 y la franja del gremio, que **no se verá hasta que la oficina teclee cifras** |
 
 ## 1. Qué se exige y cuándo
 
@@ -66,8 +66,9 @@ De catorce, diez cerrados y cuatro vivos (07, 09, 10, 11); **ninguno de los cuat
 
 | Qué | Estado | Qué falta, y de quién depende |
 |---|---|---|
-| Guía normativa | ⚠️ **1 municipio de 12** (Armenia: 7 trámites + lista de verificación Ley 1801/decreto 119, fechados 20 ago, sin costos) | Salento y Filandia perdieron su contenido inventado; el selector ofrece solo Armenia y la página no dice por qué. Los otros 11: orden y fuente (D-21). **Formatos oficiales por entidad: habilitados el 1 sep, pero no han llegado** (ningún PDF de Bomberos ni de otra entidad en el Drive, §35.3). ⚠️ Los dos PDF de `storage/app/private/formatos/` (`formato-solicitud-visita-bomberos.pdf`, `formato-registro-policia.pdf`, 2–3 KB, 3 ago) son los **formatos de ejemplo del prototipo** que generó `GeneradorPdf`, no los oficiales: dicen «Documento de ejemplo generado para el prototipo» y no van a producción (regla 5). Pedir los reales a la Alcaldía o al gremio. Cuando lleguen, se suben desde el panel al requisito («Formato oficial (PDF)», disco privado, hasta 5 MB), **después del bucket** (D-13), porque en Cloud lo subido desde el panel se pierde al redesplegar. Dueño del mantenimiento: sin nombrar |
-| Portada | ✅ Todo texto editable; promesas ajustadas a lo que existe | Medios: 6 imágenes y ningún video en la portada publicada; desde el 1 sep hay 19 fotos y el video autorizados y en local (OBS3-07). La franja «La noche en cifras» son cuatro ajustes editables con el estudio del Observatorio de la Nacional; que muestre cifras del gremio quincenales es D-25 |
+| **Franja «El gremio en cifras»** (D-25, Acta 05) | ✅ Código en `a408afc`: cuatro cifras editables en «Ajustes del sitio → El gremio en cifras», vacías de fábrica, la franja no se pinta sin ellas, fecha automática. **En producción no se verá hasta que la oficina teclee la primera** | **Firmar el Acta 05** (emitida 1 sep); **fijar las cuatro cifras y su fuente** con Natalia (punto 5 del acta); teclearlas. Leerlas del Excel de la contadora es Fase II, cuando exista el archivo |
+| Guía normativa | ⚠️ **1 municipio de 12** (Armenia: 7 trámites + lista de verificación Ley 1801/decreto 119, fechados 20 ago, sin costos) | Salento y Filandia perdieron su contenido inventado; el selector ofrece solo Armenia y la página no dice por qué. Los otros 11: orden y fuente (D-21). **Formatos oficiales por entidad: habilitados el 1 sep, pero no han llegado** (ningún PDF de Bomberos ni de otra entidad en el Drive, §35.3). ⚠️ Los dos PDF de `storage/app/private/formatos/` (`formato-solicitud-visita-bomberos.pdf`, `formato-registro-policia.pdf`, 2–3 KB, 3 ago) son los **formatos de ejemplo del prototipo** que generó `GeneradorPdf`, no los oficiales: dicen «Documento de ejemplo generado para el prototipo» y no van a producción (regla 5). **Sua los pide el 2 sep** a la Alcaldía o al gremio; cuando lleguen, se suben desde el panel al requisito, después del bucket (D-13). Dueño del mantenimiento: sin nombrar |
+| Portada | ✅ Todo texto editable; promesas ajustadas a lo que existe | Medios: 6 imágenes y ningún video en la portada publicada; desde el 1 sep hay 19 fotos y el video autorizados y en local (OBS3-07). La franja «La noche en cifras» son cuatro ajustes editables con el estudio del Observatorio de la Nacional |
 | Aliados | ✅ 23 sembrados del catálogo oficial (19 comerciales con condición real privada + 4 institucionales) | Logos en buena resolución (D-06); cuáles aplican al Quindío y convenios locales (D-18) |
 | Beneficios e iniciativas | ✅ 5 y 5, de documento oficial (`BENEFICIOS AFILIADOS PDF.pdf` está en `nuevomaterial/`) | — |
 | «Quiénes somos» | ⚠️ Editable entero; texto provisional | Texto propio, nombres y cargos, relación con el Eje Cafetero y la Nacional (D-05, D-18) |
@@ -112,16 +113,16 @@ De catorce, diez cerrados y cuatro vivos (07, 09, 10, 11); **ninguno de los cuat
 | Corte 1 | ✅ 5.0 |
 | Corte 2 | ✅ Entregado a tiempo el 21 ago (no revisado por César por uso evidente de IA) |
 | Corte 3 (60 %) | ⚠️ Documento completo enviado el 27 ago; **revisado el 31 ago con buena valoración** (`Semana 7 - Documento - Juan José Sua - Revisión CG.docx`, comentarios anclados). Falta abrir la revisión, aplicar cada comentario sin tocar lo no observado, releer los capítulos 5 y 6 en voz propia, actualizar 5.5, la Tabla 5 y 6.2 con el despliegue en pie y las cifras medidas ese día, y **enviar el jueves 3** |
-| Constancias | ✅ Acta 01 (diseño) y Formato 03 (retroalimentación) firmados el 25 ago; planeador firmado. ❌ Acta 02 (capacitación, S8) y **Acta 04 (ampliación de alcance, emitida 30 ago) sin firmar** |
+| Constancias | ✅ Acta 01 (diseño) y Formato 03 (retroalimentación) firmados el 25 ago; planeador firmado. ❌ Acta 02 (capacitación, S8), **Acta 04 (ampliación de alcance, emitida 30 ago) y Acta 05 (cifras del gremio, emitida 1 sep) sin firmar** |
 | Menores | Encuesta de Santiago (19 ago) sin confirmar; el documento de Ingrid es aparte e individual |
 
 ## 3. Registro único de decisiones pendientes
 
-Cada decisión con su dueño y la fecha en que se pidió. Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen» de `encargo.md` (el 1 sep salieron D-02, la autorización de D-03, D-23 y D-24). Consolida las DPV abiertas de la ERS v3 (5 ago), las doce confirmaciones del plan del material (26 ago), el bloque D del acta 3 (28 ago), el §31.8, el §33.3, el §34.3 y el §35.4. **Las D-01, D-04 a D-12 y D-20 caben en una sola reunión con Natalia con esta tabla impresa.**
+Cada decisión con su dueño y la fecha en que se pidió. Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen» de `encargo.md` (el 1 sep salieron D-02, la autorización de D-03, D-23, D-24 y D-25). Consolida las DPV abiertas de la ERS v3 (5 ago), las doce confirmaciones del plan del material (26 ago), el bloque D del acta 3 (28 ago), el §31.8, el §33.3, el §34.3 y el §35.4. **Las D-01, D-04 a D-12 y D-20 caben en una sola reunión con Natalia con esta tabla impresa, y en la misma se firma el Acta 05 y se fijan sus cuatro cifras.**
 
 | ID | Decisión | Dueño | Pedida | Respondida |
 |---|---|---|---|---|
-| D-01 | **Firma del Acta 04** (`docs/ingenieria/constancias/`): cada fila de OBS3-15 a 18 marcada antes del 22 / Fase II / se descarta, y las dos contrapropuestas del equipo (bitácora sin reversión genérica; sección de documentos del gremio en el portal en vez de módulo financiero) | Natalia + directivo | 30 ago | — |
+| D-01 | **Firma del Acta 04** (`docs/ingenieria/constancias/`): cada fila de OBS3-15 a 18 marcada antes del 22 / Fase II / se descarta, y las dos contrapropuestas del equipo (bitácora sin reversión genérica; sección de documentos del gremio en el portal en vez de módulo financiero). **Y del Acta 05**, con las cuatro cifras de su punto 5 | Natalia + directivo | 30 ago / 1 sep | — |
 | D-03 | **Pies de foto** de las 19 fotografías y del video (evento, fecha, lugar, quiénes). La autorización de uso ya está (1 sep, `encargo.md` §13) y el video ya está en local | Natalia | 26 ago | Autorización: 1 sep ✅ · video en local: 1 sep ✅ · pies: — |
 | D-04 | **Las 7 URL de trámite** de Armenia, o el contacto en la Alcaldía que las tenga (OBS3-10) | Natalia / Alcaldía | 28 ago | — |
 | D-05 | **Texto propio de «Quiénes somos»**; nombre completo y orden de apellidos del presidente; cargo con el que firma Natalia; corrección de los datos del capítulo en el sitio de la Nacional (OBS3-11, OBS3-21, DPV-09, P-11) | Natalia + Nacional | 5 ago / 28 ago | — |
@@ -130,11 +131,11 @@ Cada decisión con su dueño y la fecha en que se pidió. Cuando una se responde
 | D-08 | **Indexación antes del lanzamiento**: `noindex` hasta el lanzamiento oficial (recomendado) o dejar indexar | Natalia + equipo | 30 ago | — |
 | D-09 | **Dominio propio**: nombre, compra (cobro anual), titularidad y autorización de marca a la Nacional (DPV-08, OBS3-22) | Natalia | 5 ago / 28 ago | — |
 | D-10 | **Pasarela**: confirmación escrita de «solo Bold» y cierre de la cuenta de BBVA (OBS3-23); medio PSE o QR y cuenta receptora (DPV-04); documentos para producción de Bold (RUT, cámara de comercio, cuenta bancaria) | Natalia + contadora | 28 ago | — |
-| D-11 | **Cartera**: Excel con el formato real de la contadora, aunque sea con datos ficticios (OBS3-19) —**no vino con el Drive** (§35.3); hoy el importador lee CSV con `establecimiento`, `saldo_pendiente`, `meses_mora` y `ultimo_pago`—; Drive vinculado o carga manual (OBS3-20); periodicidad (semanal por ahora) | Luisa + Natalia | 28 ago | — |
+| D-11 | **Cartera**: Excel con el formato real de la contadora, aunque sea con datos ficticios (OBS3-19) —**no vino con el Drive** (§35.3); Sua lo pide el 2 sep; hoy el importador lee CSV con `establecimiento`, `saldo_pendiente`, `meses_mora` y `ultimo_pago`—; Drive vinculado o carga manual (OBS3-20); periodicidad (semanal por ahora) | Luisa + Natalia | 28 ago | — |
 | D-12 | **Titularidad de la infraestructura**: a nombre de quién está la facturación de Cloud; Natalia como miembro de la organización; segundo administrador en GitHub; fecha de traspaso en el runbook §12 | Sua + Natalia | 30 ago | — |
 | D-13 | **Bucket y fotos pendientes o rechazadas**: al disco privado servidas por controlador, o riesgo aceptado por escrito (§30.3). Desde el 1 sep el bucket condiciona también los formatos oficiales de la guía y el video del hero | Sua (técnica, se deja escrita) | 31 ago | — |
-| D-14 | **Marca de procedencia en el contenido sembrado** (`origen` sembrador/oficina, o no sobrescribir filas editadas): sin ella, resembrar pisa lo que la oficina corrigió (§31.4) | Sua | 1 sep | — |
-| D-15 | `GeneradorPdf`: borrar (cero consumidores) o conservar como molde para los formatos oficiales | Sua | 1 sep | — |
+| D-14 | **Marca de procedencia en el contenido sembrado** (`origen` sembrador/oficina, o no sobrescribir filas editadas): sin ella, resembrar pisa lo que la oficina corrigió (§31.4). Desde `a408afc` el grupo `gremio` de ajustes ya no se sobrescribe; el resto sí | Sua | 1 sep | — |
+| D-15 | `GeneradorPdf`: borrar (cero consumidores) o conservar como molde para los formatos oficiales; y borrar los dos PDF de ejemplo huérfanos de `storage/app/private/formatos/` | Sua | 1 sep | — |
 | D-16 | **Reparto Persona 1 / Persona 2**: reescribirlo como quedó de hecho o declarar su suspensión, antes del informe final y la Acta 02 (§30.3) | Sua + Ingrid | 31 ago | — |
 | D-17 | **ERS v3 sin firma** desde el 5 ago y sus DPV abiertas: DPV-01 fecha oficial de lanzamiento; **DPV-02 qué se ve con sesión y qué sin ella** (condiciona 8 RF ya codificados); DPV-03 bolsa de empleo en V1 (ratificación); DPV-05 RF-05; DPV-10 alcance de cartera; DPV-11 tarifa de proveedores; **DPV-13 soporte después del 22 de septiembre** | Natalia + directivo | 5 ago | — |
 | D-18 | **Las confirmaciones del plan del material (26 ago)** que siguen sin respuesta: base vigente y las 7 filas sin municipio; cifra de afiliados; relación con el capítulo Eje Cafetero; aliados que aplican al Quindío y convenios locales; programas nacionales que operan aquí; cuota y cuenta bancaria del formulario; qué norma es el «decreto 119»; revisión jurídica del boletín laboral; certificado desde el portal (ampliación; ya hay molde); formulario oficial descargable (ya hay `Registro Establecimiento.xlsx`) o en línea | Natalia | 26 ago | — |
@@ -142,7 +143,6 @@ Cada decisión con su dueño y la fecha en que se pidió. Cuando una se responde
 | D-20 | **Fecha de la segunda demostración** (entre el 4 y el 11; pedir jue 10 o vie 11) | Directivo + Natalia | 28 ago | — |
 | D-21 | **Municipios 2 a 12 de la guía**: orden (los seis con afiliados primero), fuente por alcaldía, y qué se declara Fase II | Natalia | 1 sep | — |
 | D-22 | **El video del hero**: el original dura 48 s y pesa 55,7 MB. Recortarlo a un bucle de 10–15 s sin audio, comprimirlo a 2–5 MB (720p/1080p), póster para el primer cuadro y `prefers-reduced-motion`; servirlo desde el bucket público (D-13); contraste bajo el velo en los dos temas. Sin `ffmpeg` en la máquina de Sua | Sua (técnica) + Ingrid (visual) | 1 sep | — |
-| D-25 | **Cifras del gremio en la portada desde un archivo quincenal de la contadora** (§35.4). Hoy la franja «La noche en cifras» son cuatro ajustes editables con el estudio del Observatorio de la Nacional, y el único archivo de la contadora que el sistema lee es el CSV de cartera. Es funcionalidad nueva y el alcance está congelado: **se escribe la constancia antes de codificar**. **Decidido el 1 sep (opción a): franja nueva del gremio junto a la del Observatorio, que se queda.** Falta el cómo —ajustes editables desde el panel, importar un archivo pequeño cada 15 días, o derivarlas de la cartera— y las cifras exactas; con eso se escribe la constancia (§36.2) | Natalia + Sua | 1 sep | Qué: a) ✅ 1 sep · cómo: — |
 
 ## 4. Deuda diferida a propósito
 
@@ -154,36 +154,37 @@ No se «arregla de paso»:
 - No existe `lang/`: las reglas sin mensaje propio salen en inglés; los siete formularios públicos están cubiertos por sus `messages()`. Pendiente `php artisan lang:publish` + `lang/es/validation.php`.
 - Salento y Filandia sin guía tras retirar lo inventado: regresión visible aceptada; se resuelve con D-21 y con decirlo en la página.
 - El filtro de municipios del **directorio** lista todos los de la tabla tengan o no fichas publicadas (causa raíz del §30.7); la guía ya filtra bien.
-- Cuatro `index.lock.huerfano*` y la carpeta `.git/huerfanos-cowork-2026-09-01/` siguen en `.git/` (no estorban: hoy se confirmó cinco veces sin problema): **los borra Sua a mano**. `hs_err_pid48556.log` en la raíz y los `~$*.docx` de `docs/ingenieria/` están ignorados por git; basura de IntelliJ y de Word, borrar cuando se quiera.
+- Cuatro `index.lock.huerfano*` y la carpeta `.git/huerfanos-cowork-2026-09-01/` siguen en `.git/` (no estorban): **los borra Sua a mano**. `hs_err_pid48556.log` en la raíz y los `~$*.docx` de `docs/ingenieria/` están ignorados por git; basura de IntelliJ y de Word, borrar cuando se quiera.
 
 ## 5. Cifras medidas del árbol
 
-Sobre `18bdeea`, 1 de septiembre de 2026, quinta sesión (desde `07a3033` solo hubo documentación: el árbol de código es el mismo). Cada cifra con el comando que la produjo; **vuelve a medirlas antes de citarlas** en un documento.
+Sobre `a408afc`, 2 de septiembre de 2026 (madrugada). Cada cifra con el comando que la produjo; **vuelve a medirlas antes de citarlas** en un documento.
 
 | Cifra | Valor | Comando |
 |---|---|---|
-| Confirmaciones | 282 (278 de Sua, 4 de Ingrid; la última de Ingrid el 25 ago) | `git rev-list --count HEAD` · `git shortlog -sn HEAD` |
+| Confirmaciones | 285 (281 de Sua, 4 de Ingrid; la última de Ingrid el 25 ago) | `git rev-list --count HEAD` · `git shortlog -sn HEAD` |
 | Migraciones | 39 (todas verificadas contra PostgreSQL 17.11) | `ls database/migrations \| wc -l` |
 | Modelos | 21 | `ls app/Models/*.php \| wc -l` |
 | Sembradores | 21 (+ `Support/`) | `ls database/seeders/*.php \| wc -l` |
-| Archivos de prueba | 80 | `find tests -name '*Test.php' \| wc -l` |
+| Archivos de prueba | 81 | `find tests -name '*Test.php' \| wc -l` |
 | Vistas Blade | 66 | `find resources/views -name '*.blade.php' \| wc -l` |
 | Panel | 19 recursos · 6 páginas · 20 policies | `ls app/Filament/Resources app/Filament/Pages app/Policies` |
 | Comandos de Artisan propios | 5 (`asobares:crear-usuario`, `asociados:importar`, `bolsas:depurar`, `mensajes:depurar`, `inscripciones:depurar`) | `ls app/Console/Commands` |
 | Enums | 16 | `ls app/Enums` |
 | Rutas GET | 86 propias · 96 con las de vendor | `php artisan route:list --method=GET --except-vendor --json` · sin `--except-vendor` |
-| **Suite** | **980 casos · 968 pasan · 11 omitidas · 1 fallo · 3.619 aserciones** (medida en esta sesión sobre `07a3033`; cuatro casos más que el §34: la sección del panel de `CorreoSalienteCaidoTest`). **El fallo es ajeno al código**: `DatosInternosDelAsociadoTest::test_la_base_de_datos_del_gremio_no_vive_en_el_repositorio` detecta los dos `.xlsx` de la base del gremio en `material/nuevomaterial/` (§2.4). Vuelve a verde al sacarlos del árbol. La duración no se cita | `php artisan test --compact` |
-| Producción (1 sep, mañana) | 23 aliados · 8 requisitos · 100 ajustes · 8 municipios · 6 categorías · 5 beneficios · 5 iniciativas · 3 roles · 80 permisos · 3 usuarios · **0** asociados, PQR, transacciones, noticias, eventos, vacantes y artistas (correcto) | consola de Cloud / `tinker` (§31.7); hoy solo se comprobó el `200` |
+| Ajustes sembrados | 109: los 100 de producción más los 9 de la franja del gremio (`portada_gremio_titulo` y ocho `gremio_cifra_*`), que entran con el siguiente `ContenidoOficialSeeder` | `SettingSeeder` |
+| **Suite** | **986 casos · 974 pasan · 11 omitidas · 1 fallo · 3.650 aserciones** (medida en esta sesión sobre `a408afc`; seis casos más que el §35: `CifrasDelGremioTest`). **El fallo es ajeno al código**: `DatosInternosDelAsociadoTest::test_la_base_de_datos_del_gremio_no_vive_en_el_repositorio` detecta los dos `.xlsx` de la base del gremio en `material/nuevomaterial/` (§2.4). Vuelve a verde al sacarlos del árbol. La duración no se cita | `php artisan test --compact` |
+| Producción (1 sep, mañana) | 23 aliados · 8 requisitos · 100 ajustes · 8 municipios · 6 categorías · 5 beneficios · 5 iniciativas · 3 roles · 80 permisos · 3 usuarios · **0** asociados, PQR, transacciones, noticias, eventos, vacantes y artistas (correcto) | consola de Cloud / `tinker` (§31.7) |
 | Portada publicada (1 sep, mañana) | 6 `<img>`, 0 `<video>`; destacados y eventos no se pintan (sin datos) | `curl` + conteo de etiquetas (§32.3) |
 
 ## 6. Lo siguiente, en orden
 
 1. **Documento de práctica** (Sua, mar–jue): revisión CG del 31 ago comentario a comentario; 5.5, Tabla 5 y 6.2 con el despliegue en pie; cifras medidas ese día; enviar el jueves 3.
 2. **Sacar del árbol los dos `.xlsx` de la base del gremio** (Sua, un minuto): a una carpeta fuera de `D:\Sua_Files\IdeaProjects\Asobares3`. La suite vuelve a verde y `asociados:importar` los lee desde donde estén.
-3. **Desplegar** (Sua): con el `push` de esta sesión `origin` está al día; comprobar en la consola de Cloud que el despliegue arrancó (o lanzarlo) y, en la URL pública, que una PQR de prueba devuelve el aviso «No pudimos enviarte el acuse» en vez de la página de error.
-4. **D-25 por escrito antes de tocar código**: elegido el qué (franja nueva del gremio); falta elegir el cómo entre las tres vías del §36.2 de la bitácora, fijar las cifras y dejar la constancia en `docs/ingenieria/constancias/` (Acta 04 sigue sin firmar: se le añade la fila, o se emite Acta 05).
-5. **Una sola reunión con Natalia** con la tabla del §3 impresa: D-01, D-04 a D-12 y D-20. Si en la reunión está la cuenta de Google del gremio, se hace ahí mismo el bloque «Arreglo pendiente» de arriba (D-07).
+3. **Desplegar y sembrar** (Sua): con el `push` de esta sesión `origin` está al día; comprobar en la consola de Cloud que el despliegue arrancó (o lanzarlo); **correr `ContenidoOficialSeeder` una vez** para que existan las nueve claves de la franja (no pisa nada del grupo `gremio`; el resto de ajustes sí, D-14: hacerlo antes de que la oficina edite textos, o aceptar que se resetean); comprobar en la URL pública que una PQR de prueba devuelve el aviso «No pudimos enviarte el acuse» en vez de la página de error.
+4. **Miércoles 2** (Sua): pedir los **formatos oficiales de Bomberos y Policía** y el **Excel de la contadora** (D-11); a `material/nuevomaterial/`, nunca al repositorio.
+5. **Una sola reunión con Natalia** con la tabla del §3 impresa: D-01 (Actas 04 y 05, con las cuatro cifras), D-04 a D-12 y D-20. Si en la reunión está la cuenta de Google del gremio, se hace ahí mismo el bloque «Arreglo pendiente» de arriba (D-07). Con las cifras fijadas, la oficina las teclea en «Ajustes del sitio → El gremio en cifras» y la franja aparece sola.
 6. **Franja visual, ya con insumo real** (Ingrid, en su worktree): recortar y comprimir el video (D-22), elegir el medio del hero entre las 19 fotos y el video, medir contraste en los dos temas (`VeloDelHeroTest`), pies de foto, estados vacíos, iconos de beneficios, chips para aliados sin logo, dirección de arte escrita.
 7. **Fijar la demo 2** (D-20) para el jueves 10 o viernes 11; guion de siete pantallas en este archivo; sitio despierto media hora antes.
 8. **Backend tras el SMTP**: bucket con política `publico/*` y prefijo privado (D-13) → subir los formatos oficiales cuando lleguen; disco privado para fotos pendientes; procedencia de semillas (D-14); `noindex` por variable (D-08); filtro de municipios del directorio; `lang/es`; medición de rendimiento contra la URL en caliente; importar la base de 48 filas desde fuera del árbol y depurarla.
-9. Semana 8: dominio y SSL, manual actualizado (crear usuario, moderar fotos, cargar aliados, publicar ficha con autorización, importar cartera, subir un formato oficial) y en PDF, capacitación y Acta 02, traspaso de cuentas (D-12), acuerdo de soporte (DPV-13).
+9. Semana 8: dominio y SSL, manual actualizado (crear usuario, moderar fotos, cargar aliados, publicar ficha con autorización, importar cartera, subir un formato oficial, **teclear las cifras del gremio**) y en PDF, capacitación y Acta 02, traspaso de cuentas (D-12), acuerdo de soporte (DPV-13).

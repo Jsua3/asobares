@@ -1759,3 +1759,43 @@ Con la vía elegida se escribe la constancia (Acta 04 sigue sin firmar: se le a�
 ### 36.3 Trampa
 
 - **Un PDF de 2 KB con fecha del primer día del proyecto no es un documento oficial.** Antes de dar por recibido un insumo, abrirlo: el pie de página lo dice.
+
+## 37. LA FRANJA «EL GREMIO EN CIFRAS» (1–2 sep 2026)
+
+**Sexta sesión del día 1, cerrada ya el 2 de madrugada, sobre `main` en `f052501`, en la rama `cifras-del-gremio`.** Sua eligió la vía 1 de D-25 —ajustes editables desde el panel— y pidió hacerla; dijo que le gustaría que algún día se actualizara sola desde el Excel de la contadora, y que el 2 de septiembre pedirá los formatos oficiales de Bomberos y Policía y ese Excel.
+
+### 37.1 Primero el escrito: Acta 05
+
+La regla 1 exige registrar la ampliación por escrito antes de codificarla. `5447bbe` emite el **Acta 05 – Ampliación de alcance: cifras del gremio en la portada** con la herramienta del expediente (`constancias.mjs`), como formato para diligenciar y firmar: objeto, regla, la fila D-25 con sus tres casillas, lo que queda fuera —la lectura automática del archivo, Fase II— y un cuadro para que la dirección escriba las cuatro cifras y su fuente. `constancias.mjs` acepta ahora un argumento (`node … constancias.mjs "Acta 05"`) para imprimir un solo PDF sin regenerar los otros cuatro, que cambian de bytes aunque no cambien de contenido.
+
+### 37.2 Qué se hizo, con su confirmación
+
+| Commit | Qué |
+|---|---|
+| `5447bbe` | Acta 05 y el filtro de `constancias.mjs` |
+| `a408afc` | `App\Support\CifrasDelGremio` (cuatro ranuras, `vigentes()`, `actualizadasEl()`); nueve ajustes nuevos en `SettingSeeder` (`portada_gremio_titulo` en `inicio`; ocho `gremio_cifra_N` / `_detalle` en el grupo `gremio`, vacíos); el grupo «El gremio en cifras» en `AjustesDelSitio`; la sección en `inicio.blade.php` tras la del Observatorio, que solo se pinta con cifras; `InicioController` le pasa las cifras y la fecha. `CifrasDelGremioTest`, seis pruebas |
+| (este) | `estado.md`, `encargo.md` §7 y §13, esta entrada. Luego `main` avanza con `--ff-only`, la rama se borra y `main` se sube a `origin` |
+
+**Dos arreglos que la franja obligó.** (1) `AjustesDelSitio::guardar()` hacía `update()` masivo de todas las claves en cada guardado, y una actualización masiva sella `updated_at` aunque el valor no cambie: «Actualizado el» habría dicho la fecha del último guardado de cualquier cosa. Ahora escribe solo lo que cambió, por el modelo. (2) `SettingSeeder` hacía `updateOrCreate` de todo: resembrar para añadir un texto devolvía las cifras a vacío y la franja desaparecía sin aviso. El grupo `gremio` se crea si falta y no se vuelve a pisar; D-14 sigue abierta para el resto.
+
+**Rojos vistos.** Primera corrida, sin implementar: «El título de la franja del gremio no está sembrado», el panel no guardaba la clave (`''` en vez de `'4.831'`), la fecha no aparecía, y tres pruebas reventaban antes de su aserción porque las claves no existían. Esas tres se vieron rojas aparte con el código saboteado: `updateOrCreate` en el grupo («resembrar» falló con `''`), sin el filtro de ranuras («sin cifras» y «ranura sin número» fallaron), y con el `update()` masivo de vuelta («la fecha es la de la cifra» falló). Restaurado, verde: 6 pruebas y 31 aserciones; 72 y 206 junto con `PortadaEditable`, `AccionesDelPanel` y `ConfiguracionDeDespliegue`.
+
+**Mirado en el navegador.** `php artisan serve` en 8123 con las nueve claves creadas en la base local sin pisar nada y cuatro cifras de muestra, borradas después: la sección mide 1265×228, cuatro columnas, cifras a 30 px Poppins 700 en el color de acento, título y «Actualizado el 01 de septiembre de 2026», fondo alternado con la franja del Observatorio, sin errores de consola. Medido por JS, porque las capturas del panel del navegador salen negras (no compone fotogramas). `php artisan view:clear && npm run build` corridos; ninguna clase nueva de Tailwind.
+
+### 37.3 Lo que se midió
+
+Sobre `a408afc`: 285 confirmaciones, **81 archivos de prueba**. **Suite completa: 986 casos · 974 pasan · 11 omitidas · 1 fallo · 3.650 aserciones.** El único fallo sigue siendo la guardia de `DatosInternosDelAsociadoTest` por los dos `.xlsx` de la base del gremio dentro del árbol (§34.4); las 985 restantes, con las seis nuevas, en verde.
+
+### 37.4 Lo que entró y salió del estado
+
+- **D-25 cerrada** (sale): la decisión entra en `encargo.md` §13 y el producto en §7. Lo que queda no es código: **firmar el Acta 05**, **fijar las cuatro cifras** con Natalia y **teclearlas** en «Ajustes del sitio → El gremio en cifras». Hasta entonces la franja no existe para quien visita el sitio.
+- **Entra la Fase II** en el §13 del encargo: lectura automática del archivo de la contadora cuando exista con formato acordado.
+- **D-14 con un matiz**: el grupo `gremio` ya no se sobrescribe al resembrar; el resto sí.
+- **Entra en «lo siguiente»**: el 2 de septiembre Sua pide los formatos oficiales de Bomberos y Policía y el Excel de la contadora.
+
+### 37.5 Trampas de esta sesión
+
+- **Un mensaje de commit inline con «a:» dentro bloquea la herramienta de PowerShell** («Remove-Item on system path 'a:' is blocked»): el envoltorio lo lee como una ruta de unidad y no ejecuta nada. Todos los mensajes de commit por archivo, con `-F`.
+- **`ajuste()` devuelve `''` para una clave inexistente**, así que `assertDontSee(ajuste('…'))` sobre una clave sin sembrar «falla» por la razón equivocada: la cadena vacía está en todo. Afirmar primero que el ajuste está sembrado y no vacío.
+- **Una prueba que revienta antes de su aserción no ha visto roja esa aserción.** Las tres que fallaban en `teclear()` por la clave inexistente se sabotearon aparte, cada una con su rotura, antes de darlas por buenas.
+- **El panel del navegador sigue sin componer**: capturas negras en claro y en oscuro. La inspección por JS (`getBoundingClientRect`, `getComputedStyle`) es la prueba visual que sí sirve.
