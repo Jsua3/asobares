@@ -2,15 +2,37 @@
 
 _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que cambie algo: sin tachones, sin «superado», sin «esta línea decía». Lo que se cierra sale de aquí y queda contado en `bitacora.md`; lo que se decide sale de aquí y entra en «Decisiones que rigen» de `encargo.md`. Si el commit del encabezado está atrás de `main`, lee las entradas de bitácora posteriores a él y actualiza esto **antes** de tocar nada. `tests/Feature/GuardiaDelEstadoTest.php` comprueba que el commit del encabezado exista de verdad._
 
+---
+
+## ⚠️ ARREGLO PENDIENTE — CORREO SALIENTE (SMTP). SE HACE EL DÍA QUE SE TENGA DELANTE LA CUENTA DE GOOGLE DEL GREMIO
+
+> **Qué está roto hoy.** La aplicación no tiene por dónde mandar correo: nunca se contrató el SMTP (D-07). No sale el código del segundo factor por correo (al panel se entra con la app TOTP), ni los acuses de PQR y de postulación, ni el aviso al establecimiento, ni los correos de vacante aprobada, vacante devuelta y ficha publicada. Desde `707e21e` los formularios públicos **ya no se rompen** por eso: guardan, avisan que el acuse no salió y reportan el fallo al registro.
+>
+> **Por qué no sirve lo que decía el expediente (Resend).** El DNS de `asobares.org`, medido el 1 sep 2026, tiene el correo en **Google Workspace**, SPF solo para Google y Mailgun, DKIM de Google y de Brevo, y **DMARC `p=reject`**. Un remitente `@asobares.org` que salga por Resend, Postmark o una cuenta nueva de Brevo **lo rechazan los receptores** —no va a spam, no llega— mientras la Nacional, que administra ese DNS, no añada los registros del proveedor. El capítulo no administra ese DNS. `.env.staging.example` todavía trae `smtp.resend.com`: no copiarlo.
+>
+> **Qué se hace, con la cuenta `asobaresquindio@asobares.org` abierta (Natalia + Sua, media hora):**
+>
+> 1. En la cuenta de Google: activar la **verificación en dos pasos** y crear una **contraseña de aplicación** (Seguridad → Verificación en dos pasos → Contraseñas de aplicaciones). Si la opción no aparece, el administrador del Workspace —la Nacional— la tiene bloqueada: pasar a la opción B.
+> 2. En Laravel Cloud, variables del entorno: `MAIL_MAILER=smtp` (ya está), `MAIL_SCHEME=smtp`, `MAIL_HOST=smtp.gmail.com`, `MAIL_PORT=587`, `MAIL_USERNAME=asobaresquindio@asobares.org`, `MAIL_PASSWORD=<la contraseña de aplicación, sin espacios>`, `MAIL_FROM_ADDRESS=asobaresquindio@asobares.org`, `MAIL_FROM_NAME` con el nombre del gremio. El remitente tiene que ser el mismo buzón que autentica: Google reescribe cualquier otro.
+> 3. **Redesplegar.** Una variable nueva no llega al proceso vivo hasta el siguiente despliegue.
+> 4. Probar, en este orden: radicar una PQR de prueba y comprobar que el aviso dice «Te enviamos el acuse» y que el acuse llega; entrar al panel con el código por correo; postularse a una vacante de prueba y ver los dos correos. Mirar `cloud environment:logs` buscando `TransportException`.
+> 5. Actualizar `.env.staging.example` y el runbook §6.3; pasar D-07 a «Decisiones que rigen» del encargo; **borrar este bloque** del estado.
+>
+> **Opción B**, si Google no deja crear contraseñas de aplicación: credenciales SMTP de la cuenta de Brevo o de Mailgun de la Nacional, que ya firman o están en el SPF del dominio. **Opción C**: la Nacional añade los registros de Resend. Las dos dependen de la Nacional; la A no.
+>
+> El límite de Workspace por SMTP es del orden de 2.000 correos al día por buzón; el sitio manda un puñado.
+
+---
+
 ## 0. Medición
 
 | | |
 |---|---|
-| Fecha | Martes 1 de septiembre de 2026, segunda sesión del día (Bogotá) |
-| `main` | `54ddcbb` · 276 confirmaciones · al cerrar esta sesión `division-prompt-maestro` se fusionó a `main` por avance rápido, con este archivo en el commit siguiente · **`origin/main` quedó atrás: no se hizo `push`** |
-| Rama de trabajo | Ninguna: la sesión cerró sobre `main` y borró `division-prompt-maestro` |
-| Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5.9). **La suite sí se ejecutó** (§5) |
-| Producción | `https://asobares-production-0jhdcz.laravel.cloud` responde **200** a una petición `HEAD` (esta sesión); contenido releído por última vez el 1 sep por la mañana (§31.7) |
+| Fecha | Martes 1 de septiembre de 2026, tercera sesión del día (Bogotá) |
+| `main` | `707e21e` · 278 confirmaciones · al cerrar esta sesión `arregla-d23` se fusiona a `main` por avance rápido, con este archivo en el commit siguiente, y **`main` se sube a `origin`** |
+| Rama de trabajo | Ninguna: la sesión cerró sobre `main` y borró `arregla-d23` |
+| Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5.9). **La suite sí se ejecutó**: un fallo, ajeno al cambio, por dos `.xlsx` locales (§5) |
+| Producción | `https://asobares-production-0jhdcz.laravel.cloud` responde **200** (petición `HEAD`, segunda sesión de hoy); contenido releído por última vez el 1 sep por la mañana (§31.7) |
 
 ## 1. Qué se exige y cuándo
 
@@ -61,14 +83,14 @@ De catorce, diez cerrados y cuatro vivos (07, 09, 10, 11); **ninguno de los cuat
 |---|---|
 | Sitio | ✅ **200** sobre PostgreSQL 17.11 (`bold-leaf-62673759`, esquema `production`), 39 migraciones aplicadas, base con contenido oficial (1 sep) |
 | Cuenta de Laravel Cloud | ✅ Existe, con medio de pago del gremio (30 ago). ⚠️ La organización se llama `juan-sua`: **comprobar a nombre de quién está la facturación**, añadir a Natalia como miembro y anotar el traspaso en el runbook §12 (D-12) |
-| Correo saliente (SMTP) | ❌ **Sin contratar.** Lo que cuesta hoy, por lectura del código (la suite corre con `MAIL_MAILER=array` y no lo ve): el código del segundo factor **por correo** no sale —quien tenga la app TOTP configurada entra; nadie puede dar de alta el factor por correo—, y **PQR y postulación quedan guardadas pero el ciudadano ve la página de error**, porque `ContactoController:39` y `EmpleoController:148,158` llaman a `Mail::send()` sin `try/catch` (D-23). **El DNS de `asobares.org`, medido el 1 sep, descarta el Resend de `.env.staging.example`**: correo en Google Workspace, SPF solo para Google y Mailgun, DKIM de Google y de Brevo, DMARC `p=reject`. Vía sin tocar DNS: contraseña de aplicación de Google del buzón del gremio (D-07, replanteada; bitácora §33.4) |
+| Correo saliente (SMTP) | ❌ **Sin contratar: ver el bloque «Arreglo pendiente» de arriba.** Desde `707e21e` los formularios públicos ya no se rompen por el transporte caído: guardan, avisan que el acuse no salió y reportan el fallo (D-23 cerrada, `CorreoSalienteCaidoTest`). Siguen sin esa red las tres acciones del panel que envían correo (D-24) |
 | Bucket | ❌ Sin crear. Política acotada a `publico/*` (runbook §8.3) **antes** de crearlo. Arrastra el disco público con fotos sin moderar (D-13), y desde el 1 sep condiciona también los **formatos oficiales** de la guía y el **video del hero** si se sirve desde el sitio (D-22) |
 | Dominio propio | ❌ Semana 8; sin nombre (D-09) |
 | Indexación | ⚠️ Hoy `robots.txt` responde `Allow: /` con sitemap de 14 URL, sin `X-Robots-Tag` ni `<meta name="robots">`: el sitio invita a indexar un directorio y una bolsa vacíos bajo el nombre del gremio. Decidir `noindex` hasta el lanzamiento (D-08) |
 | Rendimiento contra la URL | ❌ Sin medir. Los 972 ms del expediente son contra `localhost`; medir en caliente (scale-to-zero) |
 | Dispositivos reales (RNF-01, RNF-07) | ❌ Sin hacer (S7) |
 | Límite de gasto de Cloud (~US$10) y `LOG_STACK=stderr` | ⚠️ Confirmar en la consola |
-| Repositorio | ⚠️ `Jsua3/asobares`, público, en cuenta personal; sin segundo administrador (D-12). `origin/main` atrás de `main` desde esta sesión |
+| Repositorio | ⚠️ `Jsua3/asobares`, público, en cuenta personal; sin segundo administrador (D-12). `origin/main` al día al cerrar esta sesión |
 
 ### 2.4 Datos personales
 
@@ -79,6 +101,7 @@ De catorce, diez cerrados y cuatro vivos (07, 09, 10, 11); **ninguno de los cuat
 | 19 fotografías del gremio y el video del Drive | ✅ **Uso autorizado por el gremio el 1 sep** (`encargo.md` §13). Viven en `material/nuevomaterial/`, que no se versiona; el video aún hay que bajarlo. Pies de foto pendientes (D-03). La regla del §9 sigue en pie para cualquier foto nueva |
 | Política de tratamiento de datos | ❌ Texto legal definitivo (P-15), encargados que la política no nombra, canal de supresión y revisión legal (G12) (D-19) |
 | `material/nuevomaterial/` | ✅ En `.gitignore`; no se versiona |
+| Base de establecimientos del gremio (`.xlsx`) | ⚠️ **Dos copias dentro del árbol** desde el 1 sep, 11:00 p. m. (`Asobares Quindio - Base de datos.xlsx` y `Base de datos Cap. Quindio.xlsx` en `material/nuevomaterial/`): ignoradas por git y sin rastrear, pero `DatosInternosDelAsociadoTest` las detecta por nombre y **la suite está en rojo hasta que salgan del árbol**. La guardia mira el disco a propósito: la base se guarda fuera del repositorio y se carga con `asociados:importar` |
 | Retención automática | ✅ Tres purgas diarias con `subMonthsNoOverflow()` (§28) |
 
 ### 2.5 Académico
@@ -93,7 +116,7 @@ De catorce, diez cerrados y cuatro vivos (07, 09, 10, 11); **ninguno de los cuat
 
 ## 3. Registro único de decisiones pendientes
 
-Cada decisión con su dueño y la fecha en que se pidió. Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen» de `encargo.md` (el 1 sep salieron D-02 y la autorización de D-03). Consolida las DPV abiertas de la ERS v3 (5 ago), las doce confirmaciones del plan del material (26 ago), el bloque D del acta 3 (28 ago), el §31.8 y el §33.3. **Las D-01, D-04 a D-12 y D-20 caben en una sola reunión con Natalia con esta tabla impresa.**
+Cada decisión con su dueño y la fecha en que se pidió. Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen» de `encargo.md` (el 1 sep salieron D-02, la autorización de D-03 y D-23). Consolida las DPV abiertas de la ERS v3 (5 ago), las doce confirmaciones del plan del material (26 ago), el bloque D del acta 3 (28 ago), el §31.8, el §33.3 y el §34.3. **Las D-01, D-04 a D-12 y D-20 caben en una sola reunión con Natalia con esta tabla impresa.**
 
 | ID | Decisión | Dueño | Pedida | Respondida |
 |---|---|---|---|---|
@@ -102,7 +125,7 @@ Cada decisión con su dueño y la fecha en que se pidió. Cuando una se responde
 | D-04 | **Las 7 URL de trámite** de Armenia, o el contacto en la Alcaldía que las tenga (OBS3-10) | Natalia / Alcaldía | 28 ago | — |
 | D-05 | **Texto propio de «Quiénes somos»**; nombre completo y orden de apellidos del presidente; cargo con el que firma Natalia; corrección de los datos del capítulo en el sitio de la Nacional (OBS3-11, OBS3-21, DPV-09, P-11) | Natalia + Nacional | 5 ago / 28 ago | — |
 | D-06 | **Logos institucionales** en buena resolución (Asobares Colombia, Cámara, Comité Intergremial, Gobernación) y de los aliados comerciales (OBS3-04) | Natalia | 31 ago | — |
-| D-07 | **SMTP con el correo del gremio — replanteada por el DNS** (bitácora §33.4). `asobares.org` tiene el correo en Google Workspace y DMARC `p=reject`: Resend, Postmark o una cuenta nueva de Brevo rebotan sin registros DNS que solo la Nacional puede añadir. **Opción A (sin DNS, recomendada):** verificación en dos pasos en `asobaresquindio@asobares.org` y una **contraseña de aplicación** de Google → `MAIL_HOST=smtp.gmail.com`, `MAIL_PORT=587`, `MAIL_USERNAME=asobaresquindio@asobares.org`, `MAIL_PASSWORD=<la contraseña de aplicación>`; requiere que el administrador del Workspace no las tenga bloqueadas. **Opción B:** credenciales SMTP de la cuenta de Brevo o de Mailgun de la Nacional, que ya firman o están en el SPF. **Opción C:** la Nacional añade los registros de Resend. Se crea en la reunión; luego variables → despliegue → probar segundo factor y acuse | Natalia + Sua (A) · Nacional (B, C) | 15 ago / 30 ago / 1 sep | — |
+| D-07 | **SMTP con el correo del gremio.** Los pasos exactos están en el bloque «Arreglo pendiente» de arriba: opción A, contraseña de aplicación de Google del buzón del gremio (no toca DNS); B, credenciales de Brevo o Mailgun de la Nacional; C, la Nacional añade los registros de Resend. Se hace con la cuenta de Google del gremio delante; luego variables → despliegue → probar segundo factor, acuse de PQR y correos de postulación | Natalia + Sua (A) · Nacional (B, C) | 15 ago / 30 ago / 1 sep | — |
 | D-08 | **Indexación antes del lanzamiento**: `noindex` hasta el lanzamiento oficial (recomendado) o dejar indexar | Natalia + equipo | 30 ago | — |
 | D-09 | **Dominio propio**: nombre, compra (cobro anual), titularidad y autorización de marca a la Nacional (DPV-08, OBS3-22) | Natalia | 5 ago / 28 ago | — |
 | D-10 | **Pasarela**: confirmación escrita de «solo Bold» y cierre de la cuenta de BBVA (OBS3-23); medio PSE o QR y cuenta receptora (DPV-04); documentos para producción de Bold (RUT, cámara de comercio, cuenta bancaria) | Natalia + contadora | 28 ago | — |
@@ -118,7 +141,7 @@ Cada decisión con su dueño y la fecha en que se pidió. Cuando una se responde
 | D-20 | **Fecha de la segunda demostración** (entre el 4 y el 11; pedir jue 10 o vie 11) | Directivo + Natalia | 28 ago | — |
 | D-21 | **Municipios 2 a 12 de la guía**: orden (los seis con afiliados primero), fuente por alcaldía, y qué se declara Fase II | Natalia | 1 sep | — |
 | D-22 | **Cómo se sirve el video del hero**: peso y formato (MP4 corto, silencioso, con póster), desde el bucket público (D-13) o embebido; respeto de `prefers-reduced-motion` y contraste bajo el velo en los dos temas | Sua (técnica) + Ingrid (visual) | 1 sep | — |
-| D-23 | **Qué ve el ciudadano cuando el acuse no sale**: capturar el fallo del transporte en PQR y postulación (registro guardado, mensaje sin acuse, fallo registrado) o dejar que falle. Hoy ve la página de error después de guardar (bitácora §33.4). Se corrige con su prueba en rojo | Sua | 1 sep | — |
+| D-24 | **La misma red para las tres acciones del panel que envían correo** (`AccionesDeAprobacion`: vacante aprobada, vacante devuelta, ficha publicada). Hoy, con el transporte caído, el administrador ve el error de Livewire con el estado ya cambiado: no se pierde nada, pero el correo no sale y desconcierta. `rescue()` y prueba en rojo contra el puerto cerrado, como `CorreoSalienteCaidoTest` (§34.3) | Sua | 1 sep | — |
 
 ## 4. Deuda diferida a propósito
 
@@ -130,35 +153,34 @@ No se «arregla de paso»:
 - No existe `lang/`: las reglas sin mensaje propio salen en inglés; los siete formularios públicos están cubiertos por sus `messages()`. Pendiente `php artisan lang:publish` + `lang/es/validation.php`.
 - Salento y Filandia sin guía tras retirar lo inventado: regresión visible aceptada; se resuelve con D-21 y con decirlo en la página.
 - El filtro de municipios del **directorio** lista todos los de la tabla tengan o no fichas publicadas (causa raíz del §30.7); la guía ya filtra bien.
-- Los envíos de correo de PQR y postulación sin `try/catch` (D-23): no se tocan hasta decidirlo, y se corrigen con su prueba en rojo.
-- Cuatro `index.lock.huerfano*` y la carpeta `.git/huerfanos-cowork-2026-09-01/` siguen en `.git/` (comprobado en esta sesión; no estorban: aquí se confirmó sin problema): **los borra Sua a mano**. `hs_err_pid48556.log` en la raíz y los `~$*.docx` de `docs/ingenieria/` están ignorados por git; basura de IntelliJ y de Word, borrar cuando se quiera.
+- Cuatro `index.lock.huerfano*` y la carpeta `.git/huerfanos-cowork-2026-09-01/` siguen en `.git/` (no estorban: hoy se confirmó tres veces sin problema): **los borra Sua a mano**. `hs_err_pid48556.log` en la raíz y los `~$*.docx` de `docs/ingenieria/` están ignorados por git; basura de IntelliJ y de Word, borrar cuando se quiera.
 
 ## 5. Cifras medidas del árbol
 
-Sobre `54ddcbb`, 1 de septiembre de 2026, segunda sesión. Cada cifra con el comando que la produjo; **vuelve a medirlas antes de citarlas** en un documento.
+Sobre `707e21e`, 1 de septiembre de 2026, tercera sesión. Cada cifra con el comando que la produjo; **vuelve a medirlas antes de citarlas** en un documento.
 
 | Cifra | Valor | Comando |
 |---|---|---|
-| Confirmaciones | 276 (272 de Sua, 4 de Ingrid; la última de Ingrid el 25 ago) | `git rev-list --count HEAD` · `git shortlog -sn HEAD` |
+| Confirmaciones | 278 (274 de Sua, 4 de Ingrid; la última de Ingrid el 25 ago) | `git rev-list --count HEAD` · `git shortlog -sn HEAD` |
 | Migraciones | 39 (todas verificadas contra PostgreSQL 17.11) | `ls database/migrations \| wc -l` |
 | Modelos | 21 | `ls app/Models/*.php \| wc -l` |
 | Sembradores | 21 (+ `Support/`) | `ls database/seeders/*.php \| wc -l` |
-| Archivos de prueba | 79 | `find tests -name '*Test.php' \| wc -l` |
+| Archivos de prueba | 80 | `find tests -name '*Test.php' \| wc -l` |
 | Vistas Blade | 66 | `find resources/views -name '*.blade.php' \| wc -l` |
 | Panel | 19 recursos · 6 páginas · 20 policies | `ls app/Filament/Resources app/Filament/Pages app/Policies` |
 | Comandos de Artisan propios | 5 (`asobares:crear-usuario`, `asociados:importar`, `bolsas:depurar`, `mensajes:depurar`, `inscripciones:depurar`) | `ls app/Console/Commands` |
 | Enums | 16 | `ls app/Enums` |
 | Rutas GET | 86 propias · 96 con las de vendor | `php artisan route:list --method=GET --except-vendor --json` · sin `--except-vendor` |
-| **Suite** | **973 casos · 962 pasan · 11 omitidas · 0 fallos · 3.568 aserciones** (medida en esta sesión sobre `54ddcbb`; tres casos más que el §31.7: los de la guardia). La duración no se cita | `php artisan test --compact` |
-| Producción (1 sep, mañana) | 23 aliados · 8 requisitos · 100 ajustes · 8 municipios · 6 categorías · 5 beneficios · 5 iniciativas · 3 roles · 80 permisos · 3 usuarios · **0** asociados, PQR, transacciones, noticias, eventos, vacantes y artistas (correcto) | consola de Cloud / `tinker` (§31.7); esta sesión solo comprobó el `200` |
+| **Suite** | **976 casos · 964 pasan · 11 omitidas · 1 fallo · 3.584 aserciones** (medida en esta sesión sobre `707e21e`; tres casos más que el §33: los de `CorreoSalienteCaidoTest`). **El fallo es ajeno al código**: `DatosInternosDelAsociadoTest::test_la_base_de_datos_del_gremio_no_vive_en_el_repositorio` detecta dos `.xlsx` de la base del gremio copiados a `material/nuevomaterial/` a las 11:00 p. m. (ignorados por git, sin rastrear; la guardia mira el disco a propósito). Vuelve a verde al sacarlos del árbol. La duración no se cita | `php artisan test --compact` |
+| Producción (1 sep, mañana) | 23 aliados · 8 requisitos · 100 ajustes · 8 municipios · 6 categorías · 5 beneficios · 5 iniciativas · 3 roles · 80 permisos · 3 usuarios · **0** asociados, PQR, transacciones, noticias, eventos, vacantes y artistas (correcto) | consola de Cloud / `tinker` (§31.7); hoy solo se comprobó el `200` |
 | Portada publicada (1 sep, mañana) | 6 `<img>`, 0 `<video>`; destacados y eventos no se pintan (sin datos) | `curl` + conteo de etiquetas (§32.3) |
 
 ## 6. Lo siguiente, en orden
 
 1. **Documento de práctica** (Sua, mar–jue): revisión CG del 31 ago comentario a comentario; 5.5, Tabla 5 y 6.2 con el despliegue en pie; cifras medidas ese día; enviar el jueves 3.
-2. **Una sola reunión con Natalia** con la tabla del §3 impresa: D-01, D-04 a D-12 y D-20. El SMTP (D-07) se resuelve en la misma reunión por la opción A —verificación en dos pasos y contraseña de aplicación del buzón del gremio—; después variables en Cloud → despliegue → probar el segundo factor por correo y el acuse de una PQR de prueba.
+2. **Sacar del árbol los dos `.xlsx` de la base del gremio** (Sua, un minuto): a una carpeta fuera de `D:\Sua_Files\IdeaProjects\Asobares3`. La suite vuelve a verde y `asociados:importar` los lee desde donde estén.
+3. **Una sola reunión con Natalia** con la tabla del §3 impresa: D-01, D-04 a D-12 y D-20. Si en la reunión está la cuenta de Google del gremio, se hace ahí mismo el bloque «Arreglo pendiente» de arriba (D-07).
 3. **Franja visual, ya con insumo real** (Ingrid, en su worktree): bajar el video del Drive, elegir el medio del hero entre las 19 fotos y el video, medir contraste en los dos temas (`VeloDelHeroTest`), pies de foto, estados vacíos, iconos de beneficios, chips para aliados sin logo, dirección de arte escrita.
 4. **Fijar la demo 2** (D-20) para el jueves 10 o viernes 11; guion de siete pantallas en este archivo; sitio despierto media hora antes.
-5. **`git push origin main`** (Sua): esta sesión fusionó y no subió.
-6. **Backend tras el SMTP**: bucket con política `publico/*` y prefijo privado (D-13) → **subir el formato de Bomberos y los demás PDF oficiales** desde el panel; disco privado para fotos pendientes; procedencia de semillas (D-14); `noindex` por variable (D-08); D-23; filtro de municipios del directorio; `lang/es`; medición de rendimiento contra la URL en caliente.
-7. Semana 8: dominio y SSL, manual actualizado (crear usuario, moderar fotos, cargar aliados, publicar ficha con autorización, importar cartera, subir un formato oficial) y en PDF, capacitación y Acta 02, traspaso de cuentas (D-12), acuerdo de soporte (DPV-13).
+5. **Backend tras el SMTP**: bucket con política `publico/*` y prefijo privado (D-13) → **subir el formato de Bomberos y los demás PDF oficiales** desde el panel; disco privado para fotos pendientes; la red de correo en las acciones del panel (D-24); procedencia de semillas (D-14); `noindex` por variable (D-08); filtro de municipios del directorio; `lang/es`; medición de rendimiento contra la URL en caliente.
+6. Semana 8: dominio y SSL, manual actualizado (crear usuario, moderar fotos, cargar aliados, publicar ficha con autorización, importar cartera, subir un formato oficial) y en PDF, capacitación y Acta 02, traspaso de cuentas (D-12), acuerdo de soporte (DPV-13).

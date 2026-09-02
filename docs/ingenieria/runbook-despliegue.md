@@ -206,6 +206,19 @@ la cuenta del gremio y se rellenan `MAIL_HOST`, `MAIL_USERNAME` y `MAIL_PASSWORD
 correo real configurado, los códigos MFA llegan de verdad y no hace falta el camino de
 emergencia del apartado 10.
 
+> ⚠️ **1 sep 2026 — leído el DNS de `asobares.org`, el párrafo anterior no aplica a este
+> dominio.** El correo del gremio está en Google Workspace, el SPF autoriza solo a Google y
+> a Mailgun, hay DKIM de Google y de Brevo, y DMARC es `p=reject`: un remitente
+> `@asobares.org` que salga por Resend, Postmark o una cuenta nueva de Brevo **lo rechazan
+> los receptores** —no va a spam, no llega— mientras la Nacional, que administra ese DNS,
+> no añada los registros del proveedor. La vía que no toca DNS es el SMTP de Google
+> Workspace con una **contraseña de aplicación** del buzón del gremio (`smtp.gmail.com`,
+> puerto 587). Los pasos exactos están en `material/estado.md`, bloque «Arreglo pendiente:
+> correo saliente». Cuando se haga, actualizar este apartado y `.env.staging.example`, que
+> todavía trae `smtp.resend.com`. Mientras tanto, los envíos desde los formularios públicos
+> ya no tumban la petición si el transporte falla (`rescue()` en `ContactoController` y
+> `EmpleoController`, `CorreoSalienteCaidoTest`): el fallo se reporta al registro.
+
 ### 6.4 Los pagos no se demuestran, y es a propósito
 
 Se despliega con `PAYMENT_DRIVER=bold` y sin llaves de Bold, así que el enlace de pago

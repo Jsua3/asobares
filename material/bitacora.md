@@ -1673,3 +1673,34 @@ Se pidió explicar el SMTP, y la explicación destapó dos cosas que el expedien
 - **El Bash de Claude Code en esta máquina no tiene coreutils** (`cat`, `ls`: «command not found»). Se trabajó con PowerShell y con las herramientas nativas; PowerShell sí tiene `php`, `git` y `Resolve-DnsName`.
 - **Los mensajes de commit largos van por archivo (`git commit -F`)**, escrito con la herramienta de edición y no con `Out-File`, para que no entre un BOM ni se pierdan los acentos por el código de página de la consola. Los asuntos siguen sin tildes, como todos los anteriores.
 - **`storage/media-library/` aparece suelto en `git status` mientras corre la suite** y queda vacío al terminar (0 archivos; git no muestra carpetas vacías). No es basura que limpiar ni algo que ignorar: son los temporales de medialibrary.
+
+## 34. D-23 CERRADA: EL CORREO CAÍDO YA NO TUMBA LA PQR NI LA POSTULACIÓN (1 sep 2026)
+
+**Tercera sesión del día, sobre `main` en `a475211`, en la rama `arregla-d23`.** Sua pidió tres cosas: arreglar D-23 ahora, subir `main`, y dejar anotado «bien grande» el arreglo del correo saliente para cuando se tenga delante la cuenta de Google del gremio. Lo primero está en `707e21e`; lo segundo cierra esta entrada; lo tercero es el bloque que ahora encabeza el estado.
+
+### 34.1 Qué se hizo, con su confirmación
+
+| Commit | Qué |
+|---|---|
+| `707e21e` | `ContactoController::store` y `EmpleoController` (`avisarAlEstablecimiento`, `confirmarAlPostulante`): los tres envíos van en `rescue()`. La PQR queda radicada y su aviso dice «No pudimos enviarte el acuse por correo: guarda este número para hacer seguimiento» cuando el acuse no salió; la postulación queda guardada con su aviso de siempre, que nunca prometió el acuse. El fallo se reporta al registro. `tests/Feature/CorreoSalienteCaidoTest.php`, tres pruebas |
+| (este) | `estado.md` reescrito con el bloque grande del correo saliente arriba; `encargo.md` §9 y §13 con la regla «ningún correo tumba la petición»; runbook §6.3 con la advertencia del DNS; esta entrada. Luego `main` avanza con `--ff-only`, la rama se borra y **`main` se sube a `origin`** |
+
+**Cómo se probó sin simular nada.** La suite corre con `MAIL_MAILER=array`, que nunca falla. La prueba apunta el transporte SMTP de verdad a `127.0.0.1:1` —puerto reservado en el que nadie escucha— y Symfony Mailer lanza `TransportException` igual que en Cloud sin proveedor. **Rojo primero**: sin el arreglo, las dos peticiones devolvieron 500. **Y el reporte se vio rojo aparte**: con `report: false` puesto a propósito en los dos controladores, la PQR falló con «TransportException no reportada» y la postulación con «1 en vez de 2». Restaurado, verde: 3 pruebas, 16 aserciones; las vecinas (`FormulariosPublicos`, `BolsaDeEmpleo`, `CorreosDeBolsa`) sin regresión, 59 pruebas y 157 aserciones en total.
+
+### 34.2 Lo que se midió
+
+Sobre `707e21e`: 278 confirmaciones (274 de Sua, 4 de Ingrid), **80 archivos de prueba**. Lo demás del árbol igual que en el §33.2. **Suite completa sobre `707e21e`: 976 casos · 964 pasan · 11 omitidas · 1 fallo · 3.584 aserciones.** El fallo es ajeno al cambio: `DatosInternosDelAsociadoTest::test_la_base_de_datos_del_gremio_no_vive_en_el_repositorio` encontró `Asobares Quindio - Base de datos.xlsx` y `Base de datos Cap. Quindio.xlsx` en `material/nuevomaterial/`, copiados a las 11:00 p. m. mientras corría la sesión: no estaban en el listado de la primera sesión del día, y la suite de la segunda pasó entera. Están ignorados por git y ningún `.xlsx` está rastreado, así que el `push` no los lleva; pero la guardia mira el disco a propósito y pide sacarlos del árbol. Las otras 975 pruebas, incluidas las tres nuevas, pasaron.
+
+### 34.3 Lo que entró y salió del estado
+
+- **D-23 respondida y cerrada** (sale): el correo caído no tumba la petición; la regla queda en `encargo.md` §9 y §13 para todo envío nuevo desde una petición de usuario.
+- **Entra D-24**: la misma red para las tres acciones del panel que envían correo tras aprobar o devolver (`AccionesDeAprobacion`, líneas 134, 169 y 221). Hoy, con el transporte caído, el administrador ve el error de Livewire con el estado ya cambiado: no se pierde nada, pero desconcierta y el correo no sale. Se hace con `rescue()` y con su prueba en rojo contra el puerto cerrado, como aquí. No entró en esta ronda para no ampliar en silencio lo que se pidió.
+- **Entra el bloque «Arreglo pendiente: correo saliente»** arriba del estado, con los pasos exactos para el día que se tenga la cuenta de Google del gremio, y la advertencia equivalente en el runbook §6.3, que hasta hoy prescribía Resend sin más.
+- **Sale del «lo siguiente»** subir `main` a `origin`: se hace al cerrar esta entrada.
+
+### 34.4 Trampas de esta sesión
+
+- **`Exceptions::assertReported()` compara la clase exacta, en las dos formas.** Con una cadena hace `assertContains` sobre `get_class` de lo reportado; con un cierre exige además que el tipo del primer parámetro sea `===` a `get_class` **antes** de llamar al cierre. Ni una interfaz (`TransportExceptionInterface`) ni `Throwable` sirven jamás, y un `dump` dentro del cierre no se ejecuta, porque el `&&` corta antes. Para saber qué clase se reportó, `assertNothingReported()` falla listándolas: `Symfony\Component\Mailer\Exception\TransportException`.
+- **`rescue()` es la red del framework para esto**: reporta con `report()` y devuelve el valor de rescate. No hacía falta un ayudante propio; el proyecto no lo usaba en ninguna parte y ahora lo usa en tres.
+- **La salida de la suite en modo agente se traga `STDERR`**: una sonda con `fwrite(STDERR, …)` no aparece. Escribir a un archivo del scratchpad, o usar el mensaje de una aserción, como arriba.
+- **La base del gremio dentro del árbol pone la suite en rojo aunque esté ignorada.** `DatosInternosDelAsociadoTest` busca por nombre (`/base.?de.?datos.*\.xls[xm]?$/i`) en todo el árbol menos `vendor`, `node_modules`, `.git` y `storage`, sin mirar el `.gitignore`. `material/nuevomaterial/` sirve para las fotos y los documentos del gremio, no para esa base: esa se guarda fuera del repositorio y se carga con `asociados:importar`.
