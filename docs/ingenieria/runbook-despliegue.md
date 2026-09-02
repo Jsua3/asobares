@@ -215,9 +215,11 @@ emergencia del apartado 10.
 > Workspace con una **contraseña de aplicación** del buzón del gremio (`smtp.gmail.com`,
 > puerto 587). Los pasos exactos están en `material/estado.md`, bloque «Arreglo pendiente:
 > correo saliente». Cuando se haga, actualizar este apartado y `.env.staging.example`, que
-> todavía trae `smtp.resend.com`. Mientras tanto, los envíos desde los formularios públicos
-> ya no tumban la petición si el transporte falla (`rescue()` en `ContactoController` y
-> `EmpleoController`, `CorreoSalienteCaidoTest`): el fallo se reporta al registro.
+> todavía trae `smtp.resend.com`. Mientras tanto, ni los formularios públicos ni las acciones
+> del panel se rompen si el transporte falla (`rescue()` en `ContactoController`,
+> `EmpleoController` y `AccionesDeAprobacion`; `CorreoSalienteCaidoTest`): el registro se
+> guarda, el fallo se reporta al registro de la aplicación y el panel avisa en amarillo que
+> el correo no salió.
 
 ### 6.4 Los pagos no se demuestran, y es a propósito
 

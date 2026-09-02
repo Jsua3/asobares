@@ -1704,3 +1704,36 @@ Sobre `707e21e`: 278 confirmaciones (274 de Sua, 4 de Ingrid), **80 archivos de 
 - **`rescue()` es la red del framework para esto**: reporta con `report()` y devuelve el valor de rescate. No hacía falta un ayudante propio; el proyecto no lo usaba en ninguna parte y ahora lo usa en tres.
 - **La salida de la suite en modo agente se traga `STDERR`**: una sonda con `fwrite(STDERR, …)` no aparece. Escribir a un archivo del scratchpad, o usar el mensaje de una aserción, como arriba.
 - **La base del gremio dentro del árbol pone la suite en rojo aunque esté ignorada.** `DatosInternosDelAsociadoTest` busca por nombre (`/base.?de.?datos.*\.xls[xm]?$/i`) en todo el árbol menos `vendor`, `node_modules`, `.git` y `storage`, sin mirar el `.gitignore`. `material/nuevomaterial/` sirve para las fotos y los documentos del gremio, no para esa base: esa se guarda fuera del repositorio y se carga con `asociados:importar`.
+
+## 35. D-24 CERRADA, Y LO QUE LLEGÓ DEL DRIVE (1 sep 2026)
+
+**Cuarta sesión del día, sobre `main` en `0b5c2c2`, en la rama `arregla-d24`.** Sua confirmó que lo que apareció en `material/nuevomaterial/` a las 11:00 p. m. es el contenido del Drive del gremio, pidió revisarlo para ver qué se integra, planteó que cifras como las de la franja de la portada dependan del Excel de la contadora con actualización quincenal, y pidió arreglar D-24.
+
+### 35.1 Qué se hizo, con su confirmación
+
+| Commit | Qué |
+|---|---|
+| `07a3033` | `AccionesDeAprobacion`: dos ayudantes, `enviar()` —el envío en `rescue()`, devuelve si salió, reporta el fallo— y `avisarResultado()` —el aviso del panel en amarillo y persistente, «…, pero el correo no salió», en vez de fingir el éxito—. `publicarVacante`, `devolverConMotivo` y `publicarFicha` devuelven si el correo salió; `enLote` mapea los efectos y cuenta los `false`: «2 registros publicados, pero 2 correos no salieron». `CorreoSalienteCaidoTest` recibe la sección del panel: aprobar vacante, devolver con motivo, aprobar ficha de artista y el lote de vacantes |
+| (este) | `estado.md` reescrito; `encargo.md` §9 y §13 sin la excepción del panel; runbook §6.3; esta entrada. Luego `main` avanza con `--ff-only` y la rama se borra |
+
+**Rojos vistos.** Sin el arreglo, las cuatro acciones escapaban con la `TransportException` del puerto cerrado, el mismo error que vería la secretaría con la vacante ya publicada por debajo. Con el reporte apagado en `enviar()` y `$correoSalio` forzado a `true` en `avisarResultado()`: tres «A notification was not sent» y «0 instead of 2» en el lote. Restaurado, verde: 7 pruebas y 51 aserciones en el archivo; 28 y 145 junto con `ModeracionDeBolsasTest`.
+
+### 35.2 Lo que se midió
+
+Sobre `07a3033`: 280 confirmaciones, 80 archivos de prueba (la sección del panel vive en el archivo de D-23). **Suite completa sobre `07a3033`: 980 casos · 968 pasan · 11 omitidas · 1 fallo · 3.619 aserciones.** El único fallo sigue siendo la guardia de `DatosInternosDelAsociadoTest` por los dos `.xlsx` de la base del gremio dentro del árbol (§34.4): ajeno al cambio, y las 979 restantes —las cuatro nuevas incluidas— en verde.
+
+### 35.3 Lo que llegó del Drive, mirado pieza por pieza
+
+Todo con fecha 1 sep, 11:00 p. m., en `material/nuevomaterial/` (ignorado por git). Se miraron estructuras, no datos: de los Excel solo hojas, encabezados y conteos.
+
+- **Video**: `Asobares Quidío VIDEO ANATO .mp4`, 48 s, 55,7 MB. Sirve para el hero, pero no así: hay que recortarlo a un bucle de 10–15 s sin audio, recomprimirlo a 2–5 MB en 720p o 1080p y sacarle un póster, y servirlo desde el bucket (D-22). No hay `ffmpeg` en esta máquina. Uso autorizado desde D-03; ya está en local.
+- **Fotos**: las mismas 19 de `Apoyos visuales/`, autorizadas. Sin pies de foto (D-03).
+- **`Asobares Quindio - Base de datos.xlsx`** (hoja «Base de Datos 2025», 48 filas) y **`Base de datos Cap. Quindio.xlsx`** (41 filas): la **base de afiliados** —establecimiento, dueño, descripción, NIT, dirección, municipio, teléfono, correo, horario, género musical, servicios, Instagram, menciones—, es decir, las versiones del 26 y del 23 de agosto que el estado ya conocía. Las lee `asociados:importar`. **No son el Excel de la contadora.** Deben salir del árbol (§34.4): la suite sigue en rojo por ellas.
+- **`Registro Establecimiento.xlsx`**: el **formulario oficial de registro** maquetado en Excel (83 filas, 26 columnas; casillas «Formulario N°», «Afiliación / Actualización», «Fecha»), no una tabla. Es el insumo de la opción A de D-18: formulario descargable en `/afiliate`.
+- **PDF**: `BENEFICIOS AFILIADOS PDF.pdf` (fuente de los cinco beneficios ya sembrados), `Ley laboral.pdf` (fuente del boletín laboral pendiente) y el manual de marca. **No hay ningún formato oficial de trámite**, ni el de Bomberos: los PDF que se habilitaron el 1 sep siguen sin llegar.
+- **DOCX**: `REQUISITOS APERTURA - ARMENIA.docx` (ya sembrado), `REQUERIMIENTOS BASICOS GENERALES - ESTABLECIMIENTO NOCTURNO.docx` y `Certificado de afiliacion SALSABOR.docx` (el molde del certificado; D-18 lo tiene como ampliación).
+- **Lo que no llegó**: el Excel de cartera de la contadora (D-11) y los formatos oficiales por entidad.
+
+### 35.4 Las cifras quincenales son una decisión de producto, no un arreglo
+
+Sua planteó que cifras como las de la franja «La noche en cifras» cambien según el Excel de la contadora, actualizado cada 15 días. Hoy esa franja son cuatro ajustes editables desde el panel —`cifra_empleo`, `cifra_ingreso`, `cifra_informalidad`, `cifra_jovenes`, cada uno con su detalle— sembrados con el estudio del Observatorio Económico de la Nacional (marzo 2026): son cifras del sector en Armenia, no del gremio, y no salen de ningún archivo. Lo que sí sale de un archivo de la contadora es la cartera (`ImportadorDeCartera`: CSV con `establecimiento`, `saldo_pendiente`, `meses_mora` y `ultimo_pago` opcional), que alimenta `/mi-cuenta` y las gráficas del Observatorio interno del panel. Que la portada muestre cifras del gremio derivadas de un archivo quincenal es funcionalidad nueva —qué cifras, de qué archivo y con qué formato, quién lo sube, cada cuánto, y si sustituye o acompaña a la franja del Observatorio— y el alcance está congelado: primero se escribe (constancia), se decide, y después se codifica. Queda como D-25 en el estado, con las preguntas abiertas.
