@@ -59,6 +59,41 @@ class AccionesDeAprobacion
     }
 
     /**
+     * Un correo del panel no puede tumbar la acción que lo dispara: cuando
+     * el transporte falla, el estado ya cambió y la secretaría necesita
+     * terminar y enterarse, no ver el error de Livewire (D-24, bitácora
+     * §33.4). El fallo se reporta al registro. Devuelve si el correo salió.
+     */
+    private static function enviar(Closure $envio): bool
+    {
+        return rescue(function () use ($envio): bool {
+            $envio();
+
+            return true;
+        }, false);
+    }
+
+    /**
+     * El aviso del panel dice la verdad: si el correo no salió, lo dice en
+     * amarillo y se queda hasta que lo cierren, en vez de fingir el éxito.
+     */
+    private static function avisarResultado(string $titulo, bool $correoSalio, string $siNoSalio, string $estado = 'success'): void
+    {
+        if ($correoSalio) {
+            Notification::make()->title($titulo)->status($estado)->send();
+
+            return;
+        }
+
+        Notification::make()
+            ->title("{$titulo}, pero el correo no salió")
+            ->body($siNoSalio)
+            ->warning()
+            ->persistent()
+            ->send();
+    }
+
+    /**
      * Aprobación en lote genérica, para el contenido que solo necesita
      * cambiar de estado (asociados, eventos, iniciativas): mismo efecto que
      * `aprobar()` fila por fila.
@@ -109,9 +144,11 @@ class AccionesDeAprobacion
             ->visible(fn (Vacante $registro): bool => $registro->estado !== EstadoPublicacion::Publicado
                 && auth()->user()?->can('publicar', $registro) === true)
             ->action(function (Vacante $registro): void {
-                self::publicarVacante($registro);
-
-                Notification::make()->title('Vacante publicada')->success()->send();
+                self::avisarResultado(
+                    'Vacante publicada',
+                    self::publicarVacante($registro),
+                    'El establecimiento no recibió el aviso por correo. El fallo quedó en el registro; avísale por otro medio.'
+                );
             });
     }
 
@@ -121,7 +158,7 @@ class AccionesDeAprobacion
      * queda, la tarjeta del asociado dice «Publicada» y «pidieron un
      * ajuste» al mismo tiempo— y avisar al establecimiento.
      */
-    private static function publicarVacante(Vacante $registro): void
+    private static function publicarVacante(Vacante $registro): bool
     {
         $registro->update([
             'estado' => EstadoPublicacion::Publicado,
@@ -130,9 +167,11 @@ class AccionesDeAprobacion
 
         $correos = DestinatariosDelAsociado::correos($registro->asociado);
 
-        if ($correos !== []) {
-            Mail::to($correos)->send(new VacanteAprobada($registro));
+        if ($correos === []) {
+            return true;
         }
+
+        return self::enviar(fn () => Mail::to($correos)->send(new VacanteAprobada($registro)));
     }
 
     /**
@@ -165,11 +204,15 @@ class AccionesDeAprobacion
 
                 $correos = DestinatariosDelAsociado::correos($registro->asociado);
 
-                if ($correos !== []) {
-                    Mail::to($correos)->send(new VacanteDevuelta($registro));
-                }
+                $correoSalio = $correos === []
+                    || self::enviar(fn () => Mail::to($correos)->send(new VacanteDevuelta($registro)));
 
-                Notification::make()->title('Vacante devuelta al asociado')->warning()->send();
+                self::avisarResultado(
+                    'Vacante devuelta al asociado',
+                    $correoSalio,
+                    'El asociado ve el motivo en su cuenta, pero no recibió el correo. El fallo quedó en el registro.',
+                    estado: 'warning'
+                );
             });
     }
 
@@ -201,9 +244,11 @@ class AccionesDeAprobacion
             ->visible(fn (Model $registro): bool => $registro->estado !== EstadoPublicacion::Publicado
                 && auth()->user()?->can('publicar', $registro) === true)
             ->action(function (Model $registro) use ($urlPublica): void {
-                self::publicarFicha($registro, $urlPublica);
-
-                Notification::make()->title('Ficha publicada')->success()->send();
+                self::avisarResultado(
+                    'Ficha publicada',
+                    self::publicarFicha($registro, $urlPublica),
+                    'El solicitante no recibió el aviso por correo. El fallo quedó en el registro; avísale por otro medio.'
+                );
             });
     }
 
@@ -213,15 +258,17 @@ class AccionesDeAprobacion
      *
      * @param  Closure(Model): string  $urlPublica
      */
-    private static function publicarFicha(Model $registro, Closure $urlPublica): void
+    private static function publicarFicha(Model $registro, Closure $urlPublica): bool
     {
         $registro->update(['estado' => EstadoPublicacion::Publicado]);
 
-        if (filled($registro->correo)) {
-            Mail::to($registro->correo)->send(
-                new FichaDeBolsaPublicada($registro->nombre, $urlPublica($registro))
-            );
+        if (blank($registro->correo)) {
+            return true;
         }
+
+        return self::enviar(fn () => Mail::to($registro->correo)->send(
+            new FichaDeBolsaPublicada($registro->nombre, $urlPublica($registro))
+        ));
     }
 
     /**
@@ -273,11 +320,26 @@ class AccionesDeAprobacion
                         && auth()->user()?->can('publicar', $registro) === true
                 );
 
-                $publicados->each($efecto);
+                // `false` solo lo devuelve un efecto que intentó un correo y
+                // no pudo: el lote publica igual, y lo cuenta.
+                $sinCorreo = $publicados
+                    ->map($efecto)
+                    ->filter(fn (mixed $resultado): bool => $resultado === false)
+                    ->count();
+
+                $titulo = "{$publicados->count()} registros publicados";
+
+                if ($sinCorreo === 0) {
+                    Notification::make()->title($titulo)->success()->send();
+
+                    return;
+                }
 
                 Notification::make()
-                    ->title("{$publicados->count()} registros publicados")
-                    ->success()
+                    ->title($titulo.', pero '.($sinCorreo === 1 ? '1 correo no salió' : "{$sinCorreo} correos no salieron"))
+                    ->body('Los registros quedaron publicados; los avisos por correo fallaron y el fallo quedó en el registro.')
+                    ->warning()
+                    ->persistent()
                     ->send();
             });
     }
