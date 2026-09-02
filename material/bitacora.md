@@ -1737,3 +1737,25 @@ Todo con fecha 1 sep, 11:00 p. m., en `material/nuevomaterial/` (ignorado por gi
 ### 35.4 Las cifras quincenales son una decisión de producto, no un arreglo
 
 Sua planteó que cifras como las de la franja «La noche en cifras» cambien según el Excel de la contadora, actualizado cada 15 días. Hoy esa franja son cuatro ajustes editables desde el panel —`cifra_empleo`, `cifra_ingreso`, `cifra_informalidad`, `cifra_jovenes`, cada uno con su detalle— sembrados con el estudio del Observatorio Económico de la Nacional (marzo 2026): son cifras del sector en Armenia, no del gremio, y no salen de ningún archivo. Lo que sí sale de un archivo de la contadora es la cartera (`ImportadorDeCartera`: CSV con `establecimiento`, `saldo_pendiente`, `meses_mora` y `ultimo_pago` opcional), que alimenta `/mi-cuenta` y las gráficas del Observatorio interno del panel. Que la portada muestre cifras del gremio derivadas de un archivo quincenal es funcionalidad nueva —qué cifras, de qué archivo y con qué formato, quién lo sube, cada cuánto, y si sustituye o acompaña a la franja del Observatorio— y el alcance está congelado: primero se escribe (constancia), se decide, y después se codifica. Queda como D-25 en el estado, con las preguntas abiertas.
+
+## 36. LOS «FORMATOS» QUE NO ERAN, Y EL CÓMO DE D-25 (1 sep 2026)
+
+**Quinta sesión del día, sobre `main` en `18bdeea`.** Sua eligió la opción a de D-25 (franja nueva del gremio, la del Observatorio se queda), pidió subir `main` al terminar, y señaló que «los formatos de Bomberos y Policía están en `storage/app/private/formatos/`». No se escribió código: el cómo de D-25 sigue sin decidir y el alcance está congelado.
+
+### 36.1 Los formatos que no eran
+
+`storage/app/private/formatos/` tiene `formato-solicitud-visita-bomberos.pdf` (2,6 KB) y `formato-registro-policia.pdf` (2,2 KB), fechados el 3 de agosto. Leídos: «Formato de ejemplo · ASOBARES Capítulo Quindío … Documento de ejemplo generado para el prototipo. Verifique siempre con la entidad competente». Son los PDF que `GeneradorPdf` fabricaba para la demostración y que `RequisitoAperturaSeeder` dejó de enlazar («Sin `adjunto`. Los PDF que se generaban decían “Formato de ejemplo”»); quedaron huérfanos en el disco privado. **No son los formatos oficiales** y no entran en producción (regla 5). Los reales siguen sin llegar: ni en el Drive (§35.3) ni aquí. D-15 (`GeneradorPdf`: borrar o conservar) sigue abierta; borrar también estos dos archivos huérfanos cuando se decida.
+
+### 36.2 El cómo de D-25: tres vías, y por qué se recomienda la primera
+
+Hoy la franja «La noche en cifras» son ocho ajustes del grupo `cifras` (`cifra_*` y `cifra_*_detalle`, más `cifra_afiliados`) que `AjustesDelSitio` agrupa solo y `inicio.blade.php` pinta. La franja nueva del gremio puede alimentarse de tres maneras:
+
+1. **Ajustes editables desde el panel** (recomendada para llegar al 22 de septiembre). Un grupo nuevo de ajustes —título de la franja y cuatro pares valor/detalle—, una sección más en la portada que no se pinta mientras esté vacía, y «Actualizado el …» sacado del `updated_at` del grupo, sin campo nuevo. El Excel de la contadora es la fuente de la que la oficina copia cuatro números cada quince días; el sistema no lo lee. Coste: una sesión, sin formato que acordar, sin dependencia nueva, cero riesgo de archivo mal formado. Y las cifras cambian sin tocar código, como todo lo demás de la portada.
+2. **Importar un archivo pequeño cada quince días**: un CSV de tres columnas (`cifra`, `valor`, `detalle`) subido desde el panel, con historial y fecha. Es lo que Sua imagina («que la página se acople al formato»), pero el formato de la contadora no existe todavía —no llegó ningún Excel de cartera (D-11)— y para cuatro números por quincena la carga cuesta más que teclearlos: un importador, sus errores por fila, su prueba, y otra cosa que enseñar en la capacitación. Tiene sentido si las cifras pasan de cuatro a cuarenta, o si la contadora no va a entrar al panel.
+3. **Derivarlas de la cartera** que ya se importa: afiliados al día, en mora, cartera pendiente. No pide archivo nuevo, pero publica la salud financiera del gremio en la portada —una decisión de la dirección, no técnica— y depende de que la cartera se cargue de verdad, cosa que todavía no ha pasado ni una vez en producción.
+
+Con la vía elegida se escribe la constancia (Acta 04 sigue sin firmar: se le añade la fila, o se emite un Acta 05 con `constancias.mjs`) y se fijan las cuatro cifras con Natalia. Mientras tanto la franja no se toca.
+
+### 36.3 Trampa
+
+- **Un PDF de 2 KB con fecha del primer día del proyecto no es un documento oficial.** Antes de dar por recibido un insumo, abrirlo: el pie de página lo dice.

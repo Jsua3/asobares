@@ -28,11 +28,11 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 
 | | |
 |---|---|
-| Fecha | Martes 1 de septiembre de 2026, cuarta sesión del día (Bogotá) |
-| `main` | `07a3033` · 280 confirmaciones · al cerrar esta sesión `arregla-d24` se fusiona a `main` por avance rápido, con este archivo en el commit siguiente · **`origin/main` queda atrás: el `push` de esta ronda no se pidió** |
-| Rama de trabajo | Ninguna: la sesión cerró sobre `main` y borró `arregla-d24` |
+| Fecha | Martes 1 de septiembre de 2026, quinta sesión del día (Bogotá) |
+| `main` | `18bdeea` · 282 confirmaciones · este archivo entra en el commit siguiente por avance rápido y **`main` se sube a `origin` al cerrar la sesión** |
+| Rama de trabajo | Ninguna: la sesión cerró sobre `main` |
 | Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5.9). **La suite sí se ejecutó** (§5) |
-| Producción | `https://asobares-production-0jhdcz.laravel.cloud` responde **200** (petición `HEAD`, segunda sesión de hoy); contenido releído por última vez el 1 sep por la mañana (§31.7). **Nada de hoy está desplegado**: `origin/main` está atrás y Cloud despliega desde `origin` |
+| Producción | `https://asobares-production-0jhdcz.laravel.cloud` responde **200** (petición `HEAD`, segunda sesión de hoy); contenido releído por última vez el 1 sep por la mañana (§31.7). **Nada de hoy está desplegado todavía**: con el `push` de esta sesión `origin` queda al día, y el siguiente despliegue de Cloud lleva D-23 y D-24 |
 
 ## 1. Qué se exige y cuándo
 
@@ -66,7 +66,7 @@ De catorce, diez cerrados y cuatro vivos (07, 09, 10, 11); **ninguno de los cuat
 
 | Qué | Estado | Qué falta, y de quién depende |
 |---|---|---|
-| Guía normativa | ⚠️ **1 municipio de 12** (Armenia: 7 trámites + lista de verificación Ley 1801/decreto 119, fechados 20 ago, sin costos) | Salento y Filandia perdieron su contenido inventado; el selector ofrece solo Armenia y la página no dice por qué. Los otros 11: orden y fuente (D-21). **Formatos oficiales por entidad: habilitados el 1 sep, pero no llegaron con el Drive** (ningún PDF de Bomberos ni de otra entidad, §35.3): pedirlos. Cuando lleguen, se suben desde el panel al requisito («Formato oficial (PDF)», disco privado, hasta 5 MB), **después del bucket** (D-13), porque en Cloud lo subido desde el panel se pierde al redesplegar. Dueño del mantenimiento: sin nombrar |
+| Guía normativa | ⚠️ **1 municipio de 12** (Armenia: 7 trámites + lista de verificación Ley 1801/decreto 119, fechados 20 ago, sin costos) | Salento y Filandia perdieron su contenido inventado; el selector ofrece solo Armenia y la página no dice por qué. Los otros 11: orden y fuente (D-21). **Formatos oficiales por entidad: habilitados el 1 sep, pero no han llegado** (ningún PDF de Bomberos ni de otra entidad en el Drive, §35.3). ⚠️ Los dos PDF de `storage/app/private/formatos/` (`formato-solicitud-visita-bomberos.pdf`, `formato-registro-policia.pdf`, 2–3 KB, 3 ago) son los **formatos de ejemplo del prototipo** que generó `GeneradorPdf`, no los oficiales: dicen «Documento de ejemplo generado para el prototipo» y no van a producción (regla 5). Pedir los reales a la Alcaldía o al gremio. Cuando lleguen, se suben desde el panel al requisito («Formato oficial (PDF)», disco privado, hasta 5 MB), **después del bucket** (D-13), porque en Cloud lo subido desde el panel se pierde al redesplegar. Dueño del mantenimiento: sin nombrar |
 | Portada | ✅ Todo texto editable; promesas ajustadas a lo que existe | Medios: 6 imágenes y ningún video en la portada publicada; desde el 1 sep hay 19 fotos y el video autorizados y en local (OBS3-07). La franja «La noche en cifras» son cuatro ajustes editables con el estudio del Observatorio de la Nacional; que muestre cifras del gremio quincenales es D-25 |
 | Aliados | ✅ 23 sembrados del catálogo oficial (19 comerciales con condición real privada + 4 institucionales) | Logos en buena resolución (D-06); cuáles aplican al Quindío y convenios locales (D-18) |
 | Beneficios e iniciativas | ✅ 5 y 5, de documento oficial (`BENEFICIOS AFILIADOS PDF.pdf` está en `nuevomaterial/`) | — |
@@ -91,7 +91,7 @@ De catorce, diez cerrados y cuatro vivos (07, 09, 10, 11); **ninguno de los cuat
 | Rendimiento contra la URL | ❌ Sin medir. Los 972 ms del expediente son contra `localhost`; medir en caliente (scale-to-zero) |
 | Dispositivos reales (RNF-01, RNF-07) | ❌ Sin hacer (S7) |
 | Límite de gasto de Cloud (~US$10) y `LOG_STACK=stderr` | ⚠️ Confirmar en la consola |
-| Repositorio | ⚠️ `Jsua3/asobares`, público, en cuenta personal; sin segundo administrador (D-12). `origin/main` atrás de `main` desde esta sesión |
+| Repositorio | ⚠️ `Jsua3/asobares`, público, en cuenta personal; sin segundo administrador (D-12). `origin/main` al día al cerrar esta sesión |
 
 ### 2.4 Datos personales
 
@@ -142,7 +142,7 @@ Cada decisión con su dueño y la fecha en que se pidió. Cuando una se responde
 | D-20 | **Fecha de la segunda demostración** (entre el 4 y el 11; pedir jue 10 o vie 11) | Directivo + Natalia | 28 ago | — |
 | D-21 | **Municipios 2 a 12 de la guía**: orden (los seis con afiliados primero), fuente por alcaldía, y qué se declara Fase II | Natalia | 1 sep | — |
 | D-22 | **El video del hero**: el original dura 48 s y pesa 55,7 MB. Recortarlo a un bucle de 10–15 s sin audio, comprimirlo a 2–5 MB (720p/1080p), póster para el primer cuadro y `prefers-reduced-motion`; servirlo desde el bucket público (D-13); contraste bajo el velo en los dos temas. Sin `ffmpeg` en la máquina de Sua | Sua (técnica) + Ingrid (visual) | 1 sep | — |
-| D-25 | **Cifras del gremio en la portada desde un archivo quincenal de la contadora** (§35.4). Hoy la franja «La noche en cifras» son cuatro ajustes editables con el estudio del Observatorio de la Nacional, y el único archivo de la contadora que el sistema lee es el CSV de cartera. Es funcionalidad nueva y el alcance está congelado: **se escribe la constancia antes de codificar**. Preguntas abiertas: qué cifras (afiliados activos, recaudo, mora, altas del mes…); de qué archivo y con qué columnas; si se sube por el panel (ya existe la carga de cartera) o se lee de un Drive; cada cuánto (15 días); si sustituye o acompaña a las cifras del Observatorio | Natalia + Sua | 1 sep | — |
+| D-25 | **Cifras del gremio en la portada desde un archivo quincenal de la contadora** (§35.4). Hoy la franja «La noche en cifras» son cuatro ajustes editables con el estudio del Observatorio de la Nacional, y el único archivo de la contadora que el sistema lee es el CSV de cartera. Es funcionalidad nueva y el alcance está congelado: **se escribe la constancia antes de codificar**. **Decidido el 1 sep (opción a): franja nueva del gremio junto a la del Observatorio, que se queda.** Falta el cómo —ajustes editables desde el panel, importar un archivo pequeño cada 15 días, o derivarlas de la cartera— y las cifras exactas; con eso se escribe la constancia (§36.2) | Natalia + Sua | 1 sep | Qué: a) ✅ 1 sep · cómo: — |
 
 ## 4. Deuda diferida a propósito
 
@@ -158,11 +158,11 @@ No se «arregla de paso»:
 
 ## 5. Cifras medidas del árbol
 
-Sobre `07a3033`, 1 de septiembre de 2026, cuarta sesión. Cada cifra con el comando que la produjo; **vuelve a medirlas antes de citarlas** en un documento.
+Sobre `18bdeea`, 1 de septiembre de 2026, quinta sesión (desde `07a3033` solo hubo documentación: el árbol de código es el mismo). Cada cifra con el comando que la produjo; **vuelve a medirlas antes de citarlas** en un documento.
 
 | Cifra | Valor | Comando |
 |---|---|---|
-| Confirmaciones | 280 (276 de Sua, 4 de Ingrid; la última de Ingrid el 25 ago) | `git rev-list --count HEAD` · `git shortlog -sn HEAD` |
+| Confirmaciones | 282 (278 de Sua, 4 de Ingrid; la última de Ingrid el 25 ago) | `git rev-list --count HEAD` · `git shortlog -sn HEAD` |
 | Migraciones | 39 (todas verificadas contra PostgreSQL 17.11) | `ls database/migrations \| wc -l` |
 | Modelos | 21 | `ls app/Models/*.php \| wc -l` |
 | Sembradores | 21 (+ `Support/`) | `ls database/seeders/*.php \| wc -l` |
@@ -180,8 +180,8 @@ Sobre `07a3033`, 1 de septiembre de 2026, cuarta sesión. Cada cifra con el coma
 
 1. **Documento de práctica** (Sua, mar–jue): revisión CG del 31 ago comentario a comentario; 5.5, Tabla 5 y 6.2 con el despliegue en pie; cifras medidas ese día; enviar el jueves 3.
 2. **Sacar del árbol los dos `.xlsx` de la base del gremio** (Sua, un minuto): a una carpeta fuera de `D:\Sua_Files\IdeaProjects\Asobares3`. La suite vuelve a verde y `asociados:importar` los lee desde donde estén.
-3. **`git push origin main`** (Sua): esta ronda dejó `main` dos commits por delante de `origin` (`07a3033` y el cierre de la sesión) y Cloud despliega desde `origin`.
-4. **D-25 por escrito antes de tocar código**: responder las preguntas de la tabla y dejar la constancia en `docs/ingenieria/constancias/`.
+3. **Desplegar** (Sua): con el `push` de esta sesión `origin` está al día; comprobar en la consola de Cloud que el despliegue arrancó (o lanzarlo) y, en la URL pública, que una PQR de prueba devuelve el aviso «No pudimos enviarte el acuse» en vez de la página de error.
+4. **D-25 por escrito antes de tocar código**: elegido el qué (franja nueva del gremio); falta elegir el cómo entre las tres vías del §36.2 de la bitácora, fijar las cifras y dejar la constancia en `docs/ingenieria/constancias/` (Acta 04 sigue sin firmar: se le añade la fila, o se emite Acta 05).
 5. **Una sola reunión con Natalia** con la tabla del §3 impresa: D-01, D-04 a D-12 y D-20. Si en la reunión está la cuenta de Google del gremio, se hace ahí mismo el bloque «Arreglo pendiente» de arriba (D-07).
 6. **Franja visual, ya con insumo real** (Ingrid, en su worktree): recortar y comprimir el video (D-22), elegir el medio del hero entre las 19 fotos y el video, medir contraste en los dos temas (`VeloDelHeroTest`), pies de foto, estados vacíos, iconos de beneficios, chips para aliados sin logo, dirección de arte escrita.
 7. **Fijar la demo 2** (D-20) para el jueves 10 o viernes 11; guion de siete pantallas en este archivo; sitio despierto media hora antes.
