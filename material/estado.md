@@ -180,7 +180,7 @@ Sobre `07a3033`, 1 de septiembre de 2026, cuarta sesión. Cada cifra con el coma
 
 1. **Documento de práctica** (Sua, mar–jue): revisión CG del 31 ago comentario a comentario; 5.5, Tabla 5 y 6.2 con el despliegue en pie; cifras medidas ese día; enviar el jueves 3.
 2. **Sacar del árbol los dos `.xlsx` de la base del gremio** (Sua, un minuto): a una carpeta fuera de `D:\Sua_Files\IdeaProjects\Asobares3`. La suite vuelve a verde y `asociados:importar` los lee desde donde estén.
-3. **`git push origin main`** (Sua): esta ronda dejó `main` cuatro commits por delante de `origin` y Cloud despliega desde `origin`.
+3. **`git push origin main`** (Sua): esta ronda dejó `main` dos commits por delante de `origin` (`07a3033` y el cierre de la sesión) y Cloud despliega desde `origin`.
 4. **D-25 por escrito antes de tocar código**: responder las preguntas de la tabla y dejar la constancia en `docs/ingenieria/constancias/`.
 5. **Una sola reunión con Natalia** con la tabla del §3 impresa: D-01, D-04 a D-12 y D-20. Si en la reunión está la cuenta de Google del gremio, se hace ahí mismo el bloque «Arreglo pendiente» de arriba (D-07).
 6. **Franja visual, ya con insumo real** (Ingrid, en su worktree): recortar y comprimir el video (D-22), elegir el medio del hero entre las 19 fotos y el video, medir contraste en los dos temas (`VeloDelHeroTest`), pies de foto, estados vacíos, iconos de beneficios, chips para aliados sin logo, dirección de arte escrita.
