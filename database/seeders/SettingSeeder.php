@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Setting;
+use App\Support\CifrasDelGremio;
 use Illuminate\Database\Seeder;
 
 /**
@@ -14,6 +15,17 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         foreach ($this->ajustes() as $ajuste) {
+            // Las cifras del gremio las escribe la oficina, no este archivo:
+            // se crean si faltan y no se vuelven a tocar. Con `updateOrCreate`
+            // un resembrado —para añadir un texto nuevo, por ejemplo— las
+            // devolvía a vacío y la franja desaparecía sin aviso. D-14 sigue
+            // abierta para el resto, que sí se sobrescribe a propósito.
+            if ($ajuste['grupo'] === CifrasDelGremio::GRUPO) {
+                Setting::firstOrCreate(['clave' => $ajuste['clave']], $ajuste);
+
+                continue;
+            }
+
             Setting::updateOrCreate(['clave' => $ajuste['clave']], $ajuste);
         }
     }
@@ -97,6 +109,10 @@ class SettingSeeder extends Seeder
             $this->texto('cifra_jovenes', '35,28 %', 'cifras', 'Trabajadores de 28 años o menos'),
             $this->texto('cifra_jovenes_detalle', 'de los trabajadores tiene 28 años o menos', 'cifras', 'Detalle de juventud'),
             $this->texto('cifra_afiliados', '60', 'cifras', 'Establecimientos afiliados'),
+
+            // --- El gremio en cifras (D-25, Acta 05): las teclea la oficina ---
+            $this->texto(CifrasDelGremio::CLAVE_TITULO, 'El gremio en cifras', 'inicio', 'Portada · título de la franja de cifras del gremio'),
+            ...$this->cifrasDelGremio(),
 
             // --- Quiénes somos ---
             // OBS3-11. Los quince textos de «Quiénes somos» que estaban
@@ -198,6 +214,25 @@ class SettingSeeder extends Seeder
             $this->texto('politica_responsable', 'Asociación de Bares de Colombia — Capítulo Quindío', 'legal', 'Responsable del tratamiento'),
             $this->texto('politica_actualizacion', '1 de agosto de 2026', 'legal', 'Fecha de última actualización'),
         ];
+    }
+
+    /**
+     * Las cuatro ranuras nacen vacías a propósito: la franja no se pinta
+     * hasta que la oficina teclee la primera cifra, y lo que teclee no lo
+     * pisa un resembrado (ver `run()`).
+     *
+     * @return list<array{clave: string, valor: string, tipo: string, grupo: string, etiqueta: string}>
+     */
+    private function cifrasDelGremio(): array
+    {
+        $ajustes = [];
+
+        foreach (range(1, CifrasDelGremio::RANURAS) as $ranura) {
+            $ajustes[] = $this->texto(CifrasDelGremio::clave($ranura), '', CifrasDelGremio::GRUPO, "Cifra {$ranura} · el número (p. ej. 48 o 92,4 %)");
+            $ajustes[] = $this->texto(CifrasDelGremio::claveDetalle($ranura), '', CifrasDelGremio::GRUPO, "Cifra {$ranura} · qué es (p. ej. establecimientos afiliados al día)");
+        }
+
+        return $ajustes;
     }
 
     /** @return array{clave: string, valor: string, tipo: string, grupo: string, etiqueta: string} */

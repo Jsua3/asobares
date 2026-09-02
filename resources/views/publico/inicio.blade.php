@@ -58,6 +58,34 @@
         </div>
     </section>
 
+    {{-- El gremio en cifras (D-25, Acta 05): la oficina las teclea en el
+         panel cada quince días. Sin cifras no se pinta nada, igual que los
+         destacados y los eventos: el sitio no presume lo que no tiene. --}}
+    @if ($cifrasDelGremio->isNotEmpty())
+        <section class="border-b border-linea" aria-labelledby="cifras-gremio">
+            <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+                <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+                    <h2 id="cifras-gremio" class="font-display text-xs font-semibold uppercase tracking-wider text-apagado">
+                        {{ ajuste('portada_gremio_titulo') }}
+                    </h2>
+                    @if ($cifrasDelGremioActualizadas !== null)
+                        <p class="text-xs text-apagado">
+                            Actualizado el {{ $cifrasDelGremioActualizadas->translatedFormat('d \d\e F \d\e Y') }}
+                        </p>
+                    @endif
+                </div>
+                <dl class="mt-6 grid grid-cols-2 gap-6 lg:grid-cols-4">
+                    @foreach ($cifrasDelGremio as $cifra)
+                        <div>
+                            <dt class="font-display text-2xl font-bold text-acento sm:text-3xl">{{ $cifra['valor'] }}</dt>
+                            <dd class="mt-1.5 text-xs leading-relaxed text-tenue sm:text-sm">{{ $cifra['texto'] }}</dd>
+                        </div>
+                    @endforeach
+                </dl>
+            </div>
+        </section>
+    @endif
+
     {{-- Accesos directos a lo que la directiva priorizó --}}
     <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="grid gap-5 md:grid-cols-2">
