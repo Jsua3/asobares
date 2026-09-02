@@ -1,14 +1,16 @@
 /**
- * Genera los cuatro formatos de constancia del expediente:
+ * Genera los cinco formatos de constancia del expediente:
  *
  *   1. Acta de aprobación del diseño de la interfaz  (hito de la Semana 2)
  *   2. Constancia de capacitación                    (Semana 8)
  *   3. Retroalimentación del empresario y registro de hallazgos (Semanas 7–8)
  *   4. Ampliación de alcance                         (revisión del 28 ago 2026)
+ *   5. Ampliación de alcance: cifras del gremio en la portada (petición del 1 sep 2026)
  *
- *     node docs/ingenieria/herramientas/constancias.mjs
+ *     node docs/ingenieria/herramientas/constancias.mjs            # los cinco
+ *     node docs/ingenieria/herramientas/constancias.mjs "Acta 05"  # solo el que contenga ese texto
  *
- * Los cuatro son FORMATOS PARA DILIGENCIAR, no actas de hechos ya ocurridos.
+ * Los cinco son FORMATOS PARA DILIGENCIAR, no actas de hechos ya ocurridos.
  * Ninguno afirma que algo se aprobó, se dictó o se revisó: eso lo escribe y lo
  * firma quien corresponda el día que pase. Un documento que dé por cierto lo
  * que todavía no ha ocurrido no es evidencia, es un problema.
@@ -466,6 +468,85 @@ ${PIE_LEGAL}
 `,
 });
 
+/* ===========================================================================
+ * 5. Ampliación de alcance: la franja «El gremio en cifras» de la portada
+ * ========================================================================= */
+
+const cifrasDelGremio = documento({
+    referencia: 'Acta 05 · Ampliación de alcance<br>Petición de la dirección del 1 de septiembre de 2026<br>Fecha de emisión: 1 de septiembre de 2026',
+    titulo: 'Acta de ampliación de alcance: cifras del gremio en la portada',
+    subtitulo: 'Decisión sobre la franja «El gremio en cifras» · ASOBARES Capítulo Quindío',
+    estiloExtra: 'tbody tr { page-break-inside: avoid; }',
+    cuerpo: `
+<dl class="ficha">
+  <dt>Fecha de la sesión</dt><dd>_______________________</dd>
+  <dt>Lugar</dt><dd>_______________________</dd>
+  <dt>Modalidad</dt><dd>_______________________</dd>
+  <dt>Quién decide</dt><dd>_______________________</dd>
+</dl>
+
+<h2>1. Objeto</h2>
+<p>Dejar constancia escrita de la decisión de la dirección ejecutiva sobre <strong>una petición del 1 de septiembre de 2026</strong> que <strong>no forma parte del alcance contratado</strong>: que la portada muestre <strong>cifras propias del capítulo</strong> —distintas de las del Observatorio Económico de la Nacional, que ya tienen su franja— tomadas del archivo que la contaduría actualiza cada quince días.</p>
+
+<h2>2. La regla que gobierna esta decisión</h2>
+<p>El alcance quedó congelado el <strong>14 de agosto de 2026</strong> y desde entonces <strong>toda ampliación se registra por escrito antes de codificarse</strong>. Esta acta se emite antes de la primera línea de código de la franja. Mientras no se firme y no se tecleen las cifras, la franja no existe para quien visita el sitio: nace vacía y vacía no se muestra.</p>
+
+<h2>3. Lo que se somete a decisión</h2>
+<table>
+  <thead>
+    <tr>
+      <th style="width:6%">Ref.</th>
+      <th style="width:30%">Lo que se pidió</th>
+      <th style="width:34%">Qué implica construirlo</th>
+      <th style="width:10%">Antes del 22 sep</th>
+      <th style="width:10%">Fase II</th>
+      <th style="width:10%">Se descarta</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="white-space:nowrap">D-25</td>
+      <td><strong>Una franja «El gremio en cifras»</strong> en la portada, junto a la del Observatorio, con cifras del capítulo que cambian cada quince días según el archivo de la contadora.</td>
+      <td>Se construye como <strong>cuatro cifras editables desde el panel</strong> —el número y qué significa cada una— en el mismo formulario de «Ajustes del sitio» que ya usa la oficina: se teclean en un minuto, la franja no aparece mientras estén vacías, y muestra sola la fecha de la última cifra que cambió. <strong>El sistema no lee el archivo de la contadora</strong>: es la fuente de la que la oficina copia los números. Cabe en una sesión y no desplaza nada de lo comprometido.</td>
+      <td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>4. Lo que queda fuera, y por qué</h2>
+<p>Que la franja se actualice sola leyendo el archivo de la contadora es la evolución natural de esto y <strong>no entra ahora</strong>: el archivo todavía no existe con un formato acordado, y para cuatro números por quincena un importador —con sus errores por fila, sus pruebas y una cosa más que enseñar en la capacitación— cuesta más que teclearlos. Queda propuesto como <strong>Fase II</strong>, condicionado a recibir el archivo real y a que la contaduría prefiera cargarlo a escribirlo.</p>
+
+<h2>5. Las cuatro cifras</h2>
+<p><small>A diligenciar por la dirección: qué cuatro cifras se publican y de dónde sale cada una. Sin esto la franja queda vacía y no se muestra.</small></p>
+${RENGLONES(4)}
+
+<h2>6. Observaciones de la dirección ejecutiva</h2>
+${RENGLONES(4)}
+
+<h2>7. Constancia</h2>
+<div class="nota">
+Lo marcado como <strong>antes del 22 de septiembre</strong> se incorpora al alcance. Lo marcado como <strong>Fase II</strong> queda fuera de esta práctica empresarial y no constituye incumplimiento de lo contratado. Lo <strong>descartado</strong> no se vuelve a proponer sin una nueva acta. Las cifras publicadas son responsabilidad de quien las teclea: el sistema las muestra tal como se escriben.
+</div>
+
+<div class="firmas tres">
+  <div class="firma">
+    <div class="nombre">Natalia Gutiérrez</div>
+    <div class="cargo">Directora ejecutiva · ASOBARES Capítulo Quindío<br>Tutora empresarial · decide la ampliación</div>
+  </div>
+  <div class="firma">
+    <div class="nombre">Juan José Sua Gómez</div>
+    <div class="cargo">Practicante · Universidad Alexander von Humboldt<br>Presenta el alcance y su costo</div>
+  </div>
+  <div class="firma">
+    <div class="nombre">Ingrid Montoya Warski</div>
+    <div class="cargo">Practicante · Universidad Alexander von Humboldt<br>Presenta el alcance y su costo</div>
+  </div>
+</div>
+
+${PIE_LEGAL}
+`,
+});
+
 /* ------------------------------------------------------------------------- */
 
 const trabajos = [
@@ -489,12 +570,27 @@ const trabajos = [
         salida: join(INGENIERIA, 'constancias', 'Acta 04 - Ampliacion de alcance.pdf'),
         pie: pieConPaginacion('Acta 04 · Ampliaci&oacute;n de alcance · ASOBARES Quind&iacute;o'),
     },
+    {
+        html: cifrasDelGremio,
+        salida: join(INGENIERIA, 'constancias', 'Acta 05 - Ampliacion de alcance - cifras del gremio.pdf'),
+        pie: pieConPaginacion('Acta 05 · Cifras del gremio en la portada · ASOBARES Quind&iacute;o'),
+    },
 ];
 
 const { mkdirSync } = await import('node:fs');
 mkdirSync(join(INGENIERIA, 'constancias'), { recursive: true });
 
-const escritos = await imprimir(trabajos);
+// Con un argumento se imprimen solo los trabajos cuyo archivo de salida lo
+// contenga; sin él, los cinco. Regenerar un PDF que no cambió lo cambia
+// igual —metadatos y fecha— y ensucia el historial de git con binarios.
+const filtro = process.argv[2];
+const seleccionados = filtro ? trabajos.filter((t) => t.salida.includes(filtro)) : trabajos;
+
+if (seleccionados.length === 0) {
+    throw new Error(`Ningún trabajo coincide con «${filtro}».`);
+}
+
+const escritos = await imprimir(seleccionados);
 for (const ruta of escritos) {
     console.log('PDF escrito:', ruta);
 }
