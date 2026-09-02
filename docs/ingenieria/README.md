@@ -66,5 +66,5 @@ Ninguno de estos es deuda técnica del equipo de desarrollo: dependen del **ries
 ## Documentos relacionados fuera de esta carpeta
 
 - `../../README.md` — documentación técnica: cómo correr el proyecto, credenciales de demostración y cinco guiones de demostración de punta a punta.
-- `../../material/prompt-maestro-laravel-filament.md` — historial de decisiones de arquitectura y estado del proyecto (§15 a §23).
+- `../../material/prompt-maestro-laravel-filament.md` — punto de entrada de toda sesión; el historial de decisiones (§15 a §31) está en `../../material/bitacora.md` y el estado vigente en `../../material/estado.md`.
 - `../superpowers/` — especificaciones y planes de trabajo de agentes. **No es documentación de entrega**; no lo referencie desde los anexos del documento de práctica.
