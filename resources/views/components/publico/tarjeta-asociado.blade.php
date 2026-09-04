@@ -1,27 +1,58 @@
-@props(['asociado'])
+@props(['asociado', 'variante' => 'ficha'])
 
-<article class="tarjeta tarjeta-hover group overflow-hidden">
+@php
+    $esEditorial = $variante === 'editorial';
+    $esHorizontal = $variante === 'horizontal';
+@endphp
+
+<article @class([
+    'tarjeta tarjeta-hover group overflow-hidden',
+    'tarjeta-escena' => $esEditorial,
+    'sm:flex' => $esHorizontal,
+])
+         @if ($esEditorial)
+             x-data="escena"
+             x-on:pointermove="seguir($event)"
+             x-on:pointerleave="salir()"
+             x-bind:style="`--puntero-x: ${px}; --puntero-y: ${py}`"
+         @endif>
     {{-- El portador va en este <a> y NO en el <article>: `:active` casa
          también con los ancestros, así que arriba haría que pulsar «Ver ficha»
          encogiera la tarjeta entera y atenuara el enlace a la vez. --}}
-    <a href="{{ route('directorio.show', $asociado) }}" class="tarjeta-pulsable block">
-        <div class="relative aspect-[4/3] overflow-hidden bg-superficie-alta">
+    <a href="{{ route('directorio.show', $asociado) }}" @class([
+        'tarjeta-pulsable block',
+        'sm:w-[42%] sm:shrink-0' => $esHorizontal,
+    ])>
+        <div @class([
+            'relative overflow-hidden bg-superficie-alta',
+            'aspect-[4/3]' => ! $esEditorial && ! $esHorizontal,
+            'aspect-[5/4] sm:aspect-[4/3] lg:aspect-[5/4]' => $esEditorial,
+            'aspect-[4/3] sm:aspect-auto sm:h-full sm:min-h-40' => $esHorizontal,
+        ])>
             @if ($asociado->foto_portada)
                 <img src="{{ Storage::disk('public')->url($asociado->foto_portada) }}"
                      alt="Portada de {{ $asociado->nombre }}"
-                     loading="lazy" decoding="async" width="400" height="300"
+                     loading="lazy" decoding="async"
+                     width="{{ $esEditorial ? 800 : 400 }}" height="{{ $esEditorial ? 640 : 300 }}"
                      style="view-transition-name: portada-asociado-{{ $asociado->id }}"
-                     class="h-full w-full object-cover transition-transform duration-(--duracion-boton) ease-out motion-safe:group-hover:scale-105">
+                     class="imagen-viva h-full w-full object-cover">
             @endif
 
             @if ($asociado->destacado)
-                <span class="absolute left-3 top-3 rounded-full bg-marca-500 px-2.5 py-1 text-[.65rem] font-semibold uppercase tracking-wide text-white">
+                <span class="absolute left-3 top-3 rounded-full bg-marca-500 px-2.5 py-1 text-2xs font-semibold uppercase tracking-wide text-white">
                     Destacado
                 </span>
             @endif
 
-            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-fondo via-fondo/80 to-transparent p-4 pt-10">
-                <h3 class="font-display text-base font-semibold leading-tight text-fuerte">{{ $asociado->nombre }}</h3>
+            <div @class([
+                'absolute inset-x-0 bottom-0 bg-gradient-to-t from-fondo via-fondo/80 to-transparent p-4 pt-10',
+                'sm:p-6' => $esEditorial,
+            ])>
+                <h3 @class([
+                    'font-display font-semibold text-fuerte',
+                    'text-base leading-tight' => ! $esEditorial,
+                    'text-xl sm:text-2xl' => $esEditorial,
+                ])>{{ $asociado->nombre }}</h3>
                 <p class="mt-1 text-xs text-tenue">
                     {{ $asociado->categoria->nombre }} · {{ $asociado->municipio->nombre }}
                 </p>
@@ -29,9 +60,16 @@
         </div>
     </a>
 
-    <div class="p-4">
-        <p class="line-clamp-2 text-sm leading-relaxed text-tenue">
-            {{ Str::limit($asociado->descripcion, 120) }}
+    <div @class([
+        'p-4' => ! $esEditorial,
+        'p-5 sm:p-6' => $esEditorial,
+        'sm:flex sm:flex-1 sm:flex-col sm:justify-between sm:p-5' => $esHorizontal,
+    ])>
+        <p @class([
+            'line-clamp-2 text-sm text-tenue',
+            'sm:line-clamp-3' => $esHorizontal || $esEditorial,
+        ])>
+            {{ Str::limit($asociado->descripcion, $esEditorial ? 180 : 120) }}
         </p>
 
         <div class="mt-4 flex items-center justify-between gap-3">

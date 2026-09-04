@@ -12,8 +12,8 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * El sitio público se puede ver en claro o en oscuro, y el control vive en el
- * desplegable de configuración de la navbar.
+ * El sitio público se puede ver en claro o en oscuro, y el control vive en una
+ * barra lateral fija que acompaña el scroll.
  */
 class TemaClaroOscuroTest extends TestCase
 {
@@ -81,7 +81,7 @@ class TemaClaroOscuroTest extends TestCase
             ->assertSee('requestAnimationFrame', false);
     }
 
-    public function test_el_selector_ofrece_claro_oscuro_y_sistema(): void
+    public function test_el_selector_ofrece_solo_claro_y_oscuro(): void
     {
         $respuesta = $this->get('/contacto');
 
@@ -89,21 +89,31 @@ class TemaClaroOscuroTest extends TestCase
             ->assertSee('Apariencia del sitio', false)
             ->assertSee('>Claro<', false)
             ->assertSee('>Oscuro<', false)
-            ->assertSee('>Sistema<', false)
             ->assertSee("\$store.tema.elegir('light')", false)
             ->assertSee("\$store.tema.elegir('dark')", false)
-            ->assertSee("\$store.tema.elegir('system')", false);
+            ->assertDontSee('>Sistema<', false)
+            ->assertDontSee("\$store.tema.elegir('system')", false);
     }
 
-    // --- Quién ve qué en el desplegable ---
-
-    public function test_el_visitante_anonimo_ve_la_apariencia_pero_ninguna_accion_de_sesion(): void
+    public function test_el_control_de_tema_vive_en_una_barra_lateral_fija(): void
     {
         $respuesta = $this->get('/contacto');
 
         $respuesta->assertOk()
-            ->assertSee('Configuración del sitio', false)
+            ->assertSee('tema-lateral fixed', false)
+            ->assertSee('sm:top-1/2', false);
+    }
+
+    // --- Quién ve qué en el desplegable de cuenta ---
+
+    public function test_el_visitante_anonimo_no_ve_desplegable_de_configuracion_en_la_navbar(): void
+    {
+        $respuesta = $this->get('/contacto');
+
+        $respuesta->assertOk()
             ->assertSee('Apariencia del sitio', false)
+            ->assertDontSee('Configuración del sitio', false)
+            ->assertDontSee('menu-cuenta', false)
             ->assertDontSee('Cerrar sesión')
             ->assertDontSee('Ir al panel del gremio');
     }
@@ -118,7 +128,6 @@ class TemaClaroOscuroTest extends TestCase
         $respuesta->assertOk()
             ->assertSee($usuario->name)
             ->assertSee($asociado->nombre)
-            ->assertSee('Apariencia del sitio', false)
             ->assertSee('Cerrar sesión')
             // El dueño de establecimiento no entra al panel.
             ->assertDontSee('Ir al panel del gremio');
@@ -133,7 +142,6 @@ class TemaClaroOscuroTest extends TestCase
         $respuesta->assertOk()
             ->assertSee($usuario->name)
             ->assertSee('Secretaría del gremio')
-            ->assertSee('Apariencia del sitio', false)
             ->assertSee('Ir al panel del gremio')
             ->assertSee('Cerrar sesión')
             ->assertDontSee('Mis vacantes');

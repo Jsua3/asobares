@@ -27,7 +27,7 @@
         <x-publico.json-ld :datos="$jsonLd" />
     @endpush
 
-    <article class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <article class="revelar mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8" data-revelar>
         <a href="{{ route('eventos.index') }}" class="enlace-accion relative inline-block text-sm text-apagado after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento"><x-publico.flecha direccion="izquierda" />&nbsp;Todos los eventos</a>
 
         <div class="mt-5 flex flex-wrap items-center gap-2 text-xs">
@@ -43,10 +43,16 @@
         <h1 class="mt-4 font-display text-3xl font-bold tracking-tight text-balance sm:text-4xl">{{ $evento->titulo }}</h1>
 
         @if ($evento->imagen)
-            <img src="{{ Storage::disk('public')->url($evento->imagen) }}" alt=""
-                 width="1200" height="675" decoding="async"
-                 style="view-transition-name: portada-evento-{{ $evento->id }}"
-                 class="mt-7 aspect-video w-full rounded-2xl border border-linea object-cover">
+            <div class="tarjeta-escena group mt-7 overflow-hidden rounded-[1.75rem] border border-linea bg-superficie-alta"
+                 x-data="escena"
+                 x-on:pointermove="seguir($event)"
+                 x-on:pointerleave="salir()"
+                 x-bind:style="`--puntero-x: ${px}; --puntero-y: ${py}`">
+                <img src="{{ Storage::disk('public')->url($evento->imagen) }}" alt=""
+                     width="1200" height="675" decoding="async"
+                     style="view-transition-name: portada-evento-{{ $evento->id }}"
+                     class="imagen-viva imagen-inclinable aspect-video w-full object-cover">
+            </div>
         @endif
 
         <div class="mt-10 grid gap-10 lg:grid-cols-3">
@@ -59,7 +65,7 @@
             </div>
 
             <aside class="space-y-5">
-                <div class="tarjeta p-6">
+                <div class="vidrio rounded-[1.5rem] p-6">
                     <dl class="space-y-3.5 text-sm">
                         <div>
                             <dt class="text-xs uppercase tracking-wide text-apagado">Cuándo</dt>

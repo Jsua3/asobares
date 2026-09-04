@@ -11,16 +11,16 @@
         @endpush
     @endif
 
-    <x-publico.hero :titulo="ajuste('guia_titulo')" :subtitulo="ajuste('guia_intro')" />
+    <x-publico.hero :titulo="ajuste('guia_titulo')" :subtitulo="ajuste('guia_intro')" atmosfera />
 
-    <div class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
 
         {{-- Selector de municipio --}}
-        <section aria-labelledby="selector">
+        <section class="revelar" data-revelar aria-labelledby="selector">
             <h2 id="selector" class="font-display text-xs font-semibold uppercase tracking-wider text-apagado">
                 Escoge tu municipio
             </h2>
-            <div class="mt-4 flex flex-wrap gap-2">
+            <div class="mt-5 flex flex-wrap gap-2">
                 @foreach ($municipios as $municipio)
                     <a href="{{ route('guia.index', ['municipio' => $municipio->slug]) }}"
                        @class([
@@ -42,7 +42,7 @@
 
         @if ($seleccionado && $requisitos->isNotEmpty())
             {{-- Resumen --}}
-            <div class="tarjeta mt-10 grid gap-6 p-6 sm:grid-cols-3">
+            <div class="revelar vidrio mt-10 grid gap-6 rounded-[1.5rem] p-6 sm:grid-cols-3" data-revelar>
                 <div>
                     <p class="text-xs uppercase tracking-wide text-apagado">Municipio</p>
                     <p class="mt-1 font-display text-lg font-semibold">{{ $seleccionado->nombre }}</p>
@@ -60,9 +60,12 @@
             </div>
 
             {{-- Requisitos por entidad --}}
-            <div class="mt-8 space-y-4">
+            <div class="revelar mt-8 space-y-4" data-revelar>
                 @foreach ($requisitos as $indice => $requisito)
-                    <details class="tarjeta group overflow-hidden" @if ($indice === 0) open @endif>
+                    <details @class([
+                        'tarjeta tarjeta-hover group overflow-hidden',
+                        'vidrio' => $indice === 0,
+                    ]) @if ($indice === 0) open @endif>
                         {{-- `fila-pulsable` y no `pulsable`: encoger el <summary> movería la
                              flecha de `group-open:rotate-180` y se leerían dos movimientos
                              peleados sobre el mismo gesto. --}}
@@ -172,7 +175,7 @@
             </x-publico.alerta>
 
             {{-- CTA --}}
-            <div class="tarjeta mt-8 p-8 text-center">
+            <div class="revelar tarjeta-escena vidrio mt-8 rounded-[1.75rem] p-8 text-center" data-revelar>
                 <h2 class="font-display text-xl font-semibold">¿Dudas con algún trámite?</h2>
                 <p class="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-tenue">
                     La orientación jurídica es gratuita para los afiliados, pero si estás empezando y todavía no
@@ -188,7 +191,7 @@
                 </div>
             </div>
         @else
-            <div class="tarjeta mt-10 p-12 text-center">
+            <div class="revelar tarjeta mt-10 p-12 text-center" data-revelar>
                 <p class="font-display text-lg font-semibold">Todavía no hay guía publicada</p>
                 <p class="mt-2 text-sm text-tenue">Estamos recopilando la información con las entidades.</p>
             </div>

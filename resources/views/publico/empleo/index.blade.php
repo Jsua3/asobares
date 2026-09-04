@@ -1,7 +1,7 @@
 <x-layouts.publico :titulo="ajuste('empleo_titulo').' — ASOBARES Quindío'"
                    descripcion="Vacantes de bartender, chef, mesero y administrador en bares y gastrobares del Quindío. Publican solo los establecimientos asociados.">
 
-    <x-publico.hero :titulo="ajuste('empleo_titulo')" :subtitulo="ajuste('empleo_intro')" compacto>
+    <x-publico.hero :titulo="ajuste('empleo_titulo')" :subtitulo="ajuste('empleo_intro')" compacto atmosfera>
         <div class="mt-7 flex flex-col gap-3 sm:flex-row">
             <x-publico.boton href="#perfil">
                 Déjanos tu perfil
@@ -56,7 +56,11 @@
             @else
                 <ul class="mt-6 space-y-4">
                     @foreach ($vacantes as $vacante)
-                        <li class="tarjeta tarjeta-hover p-6">
+                        <li @class([
+                            'tarjeta tarjeta-hover',
+                            'p-6' => ! $loop->first,
+                            'vidrio p-8 sm:p-9' => $loop->first,
+                        ])>
                             <div class="flex flex-wrap items-start justify-between gap-4">
                                 <div class="min-w-0 flex-1">
                                     <div class="flex flex-wrap items-center gap-2 text-xs">

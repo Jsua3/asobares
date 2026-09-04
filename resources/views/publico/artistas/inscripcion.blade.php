@@ -1,21 +1,25 @@
 <x-layouts.publico titulo="Inscríbete en la bolsa de artistas — ASOBARES Quindío"
                    descripcion="DJ, banda o solista: inscríbete gratis en el directorio de artistas de ASOBARES Capítulo Quindío.">
 
-    <div class="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="luz-ambiente border-b border-linea">
+        <div class="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+            <a href="{{ route('artistas.index') }}" class="enlace-accion relative inline-block text-sm text-acento after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento-fuerte"><x-publico.flecha direccion="izquierda" />&nbsp;Ver el directorio</a>
 
-        <a href="{{ route('artistas.index') }}" class="enlace-accion relative inline-block text-sm text-acento after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento-fuerte"><x-publico.flecha direccion="izquierda" />&nbsp;Ver el directorio</a>
+            <h1 class="mt-4 font-display text-3xl font-bold tracking-tight">Inscríbete en la bolsa de artistas</h1>
+            <p class="mt-2 text-sm text-tenue">
+                Cuando un bar necesite música a las doce de la noche, va a buscar aquí. La secretaría revisa cada
+                inscripción antes de publicarla.
+            </p>
+        </div>
+    </div>
 
-        <h1 class="mt-4 font-display text-3xl font-bold tracking-tight">Inscríbete en la bolsa de artistas</h1>
-        <p class="mt-2 text-sm text-tenue">
-            Cuando un bar necesite música a las doce de la noche, va a buscar aquí. La secretaría revisa cada
-            inscripción antes de publicarla.
-        </p>
+    <div class="revelar mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8" data-revelar>
 
         @if (session('exito'))
             <x-publico.alerta class="mt-8">{{ session('exito') }}</x-publico.alerta>
         @endif
 
-        <form method="POST" action="{{ route('artistas.inscripcion.store') }}" enctype="multipart/form-data" class="mt-8 space-y-5">
+        <form method="POST" action="{{ route('artistas.inscripcion.store') }}" enctype="multipart/form-data" class="vidrio rounded-[1.75rem] p-7 sm:p-9 mt-8 space-y-5">
             @csrf
 
             <div class="grid gap-5 sm:grid-cols-2">

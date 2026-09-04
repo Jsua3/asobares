@@ -2,7 +2,7 @@
     $whatsapp = enlaceWhatsapp(ajuste('contacto_whatsapp'), 'Hola, escribo desde la página de ASOBARES Quindío.');
 @endphp
 
-<footer class="mt-24 border-t border-linea bg-superficie">
+<footer class="luz-ambiente mt-24 border-t border-linea bg-superficie">
     <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
 

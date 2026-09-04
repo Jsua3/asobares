@@ -1,7 +1,7 @@
 <x-layouts.publico titulo="Eventos y capacitaciones — ASOBARES Quindío"
                    descripcion="ExpoBar, foros, congresos y capacitaciones del gremio de la vida nocturna del Quindío.">
 
-    <x-publico.hero titulo="Eventos y capacitaciones" compacto
+    <x-publico.hero titulo="Eventos y capacitaciones" compacto atmosfera
                     subtitulo="Solo eventos del gremio: ferias, foros y formación para los establecimientos del Quindío." />
 
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -20,13 +20,23 @@
         @else
             <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($eventos as $evento)
-                    <article class="tarjeta tarjeta-hover tarjeta-pulsable flex flex-col overflow-hidden">
-                        <a href="{{ route('eventos.show', $evento) }}" class="flex flex-1 flex-col">
+                    <article @class([
+                        'tarjeta tarjeta-hover tarjeta-pulsable group flex flex-col overflow-hidden',
+                        'sm:col-span-2 sm:flex-row' => $loop->first,
+                    ])>
+                        <a href="{{ route('eventos.show', $evento) }}" @class([
+                            'flex flex-1 flex-col',
+                            'sm:flex-row' => $loop->first,
+                        ])>
                             @if ($evento->imagen)
                                 <img src="{{ Storage::disk('public')->url($evento->imagen) }}" alt=""
                                      loading="lazy" decoding="async" width="400" height="225"
                                      style="view-transition-name: portada-evento-{{ $evento->id }}"
-                                     class="aspect-video w-full object-cover">
+                                     @class([
+                                         'imagen-viva w-full object-cover',
+                                         'aspect-video' => ! $loop->first,
+                                         'aspect-[16/10] sm:aspect-auto sm:w-[42%] sm:shrink-0' => $loop->first,
+                                     ])>
                             @endif
 
                             <div class="flex flex-1 flex-col p-5">

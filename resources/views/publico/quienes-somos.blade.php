@@ -25,24 +25,24 @@
 <x-layouts.publico titulo="Quiénes somos — ASOBARES Capítulo Quindío"
                    descripcion="El gremio que representa, fortalece y dinamiza el sector nocturno, gastronómico y de entretenimiento del Quindío.">
 
-    <x-publico.hero :titulo="ajuste('manifiesto_apertura')" :subtitulo="ajuste('quienes_mision')">
+    <x-publico.hero :titulo="ajuste('manifiesto_apertura')" :subtitulo="ajuste('quienes_mision')" atmosfera>
         <x-slot:encima>
             <p class="antetitulo mb-4 text-acento">{{ ajuste('sitio_eslogan') }}</p>
         </x-slot:encima>
     </x-publico.hero>
 
-    <div class="mx-auto max-w-4xl space-y-14 px-4 py-14 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-4xl space-y-16 px-4 py-16 sm:px-6 lg:px-8">
 
-        <section aria-labelledby="historia">
+        <section class="revelar" data-revelar aria-labelledby="historia">
             <h2 id="historia" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_historia') }}</h2>
             <p class="mt-4 text-base leading-relaxed text-suave text-pretty">{{ ajuste('quienes_historia') }}</p>
         </section>
 
-        <section aria-labelledby="hacemos">
+        <section class="revelar" data-revelar aria-labelledby="hacemos">
             <h2 id="hacemos" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_que_hacemos') }}</h2>
             <p class="mt-4 text-base leading-relaxed text-suave text-pretty">{{ ajuste('quienes_que_hacemos') }}</p>
 
-            <blockquote class="trama-puntos mt-7 rounded-2xl border border-marca-500/25 p-7">
+            <blockquote class="vidrio trama-puntos mt-7 rounded-[1.5rem] p-7">
                 <p class="font-display text-lg font-bold leading-snug text-balance sm:text-xl">
                     «{{ ajuste('quienes_vision') }}»
                 </p>
@@ -50,7 +50,7 @@
         </section>
 
         {{-- Visión a 10 años --}}
-        <section aria-labelledby="vision">
+        <section class="revelar" data-revelar aria-labelledby="vision">
             <p class="antetitulo text-acento">{{ ajuste('quienes_rotulo_vision') }}</p>
             <h2 id="vision" class="mt-3 font-display text-2xl font-bold leading-tight text-balance sm:text-3xl">
                 {{ ajuste('vision_titulo') }}
@@ -66,7 +66,7 @@
 
         {{-- Lo que frena al sector --}}
         @if ($barreras->isNotEmpty())
-            <section aria-labelledby="barreras">
+            <section class="revelar" data-revelar aria-labelledby="barreras">
                 <h2 id="barreras" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_barreras') }}</h2>
                 <p class="mt-2 text-sm text-tenue">
                     {{ ajuste('quienes_barreras_pie') }}
@@ -74,7 +74,7 @@
 
                 <div class="mt-6 grid gap-5 sm:grid-cols-2">
                     @foreach ($barreras as $indice => $barrera)
-                        <article class="tarjeta p-6">
+                        <article class="vidrio rounded-[1.5rem] p-6">
                             <span class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-marca-500 font-display text-sm font-bold">
                                 {{ str_pad((string) ($indice + 1), 2, '0', STR_PAD_LEFT) }}
                             </span>
@@ -88,13 +88,16 @@
 
         {{-- Portafolio de iniciativas --}}
         @if ($iniciativas->isNotEmpty())
-            <section aria-labelledby="iniciativas">
+            <section class="revelar" data-revelar aria-labelledby="iniciativas">
                 <h2 id="iniciativas" class="font-display text-2xl font-bold">{{ ajuste('iniciativas_titulo') }}</h2>
                 <p class="mt-2 text-sm text-tenue">{{ ajuste('iniciativas_intro') }}</p>
 
                 <ol class="mt-7 space-y-4">
                     @foreach ($iniciativas as $iniciativa)
-                        <li class="tarjeta tarjeta-hover p-6">
+                        <li @class([
+                            'tarjeta tarjeta-hover p-6',
+                            'vidrio p-7' => $loop->first,
+                        ])>
                             <div class="flex flex-wrap items-start justify-between gap-4">
                                 <div class="min-w-0 flex-1">
                                     <div class="flex flex-wrap items-center gap-2">
@@ -134,7 +137,7 @@
         @endif
 
         {{-- Las tres líneas del plan de acción --}}
-        <section aria-labelledby="lineas">
+        <section class="revelar" data-revelar aria-labelledby="lineas">
             <h2 id="lineas" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_lineas') }}</h2>
             <p class="mt-2 text-sm text-tenue">
                 {{ ajuste('quienes_lineas_intro') }}
@@ -142,7 +145,7 @@
 
             <div class="mt-7 space-y-5">
                 @foreach ($lineas as $indice => $linea)
-                    <article class="tarjeta p-7">
+                    <article class="tarjeta-escena vidrio rounded-[1.5rem] p-7">
                         <div class="flex items-start gap-4">
                             <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-marca-500/15 font-display text-sm font-bold text-acento">
                                 {{ str_pad((string) ($indice + 1), 2, '0', STR_PAD_LEFT) }}
@@ -170,21 +173,21 @@
             </div>
         </section>
 
-        <section aria-labelledby="armenia">
+        <section class="revelar" data-revelar aria-labelledby="armenia">
             <h2 id="armenia" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_armenia') }}</h2>
             <p class="mt-4 text-base leading-relaxed text-suave text-pretty">
                 {{ ajuste('quienes_estrategia_armenia') }}
             </p>
         </section>
 
-        <section aria-labelledby="direccion">
+        <section class="revelar" data-revelar aria-labelledby="direccion">
             <h2 id="direccion" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_direccion') }}</h2>
             <div class="mt-6 grid gap-5 sm:grid-cols-2">
-                <div class="tarjeta p-6">
+                <div class="vidrio rounded-[1.5rem] p-6">
                     <p class="antetitulo text-apagado">{{ ajuste('quienes_cargo_presidente') }}</p>
                     <p class="mt-2 font-display text-lg font-bold">{{ ajuste('quienes_presidente') }}</p>
                 </div>
-                <div class="tarjeta p-6">
+                <div class="vidrio rounded-[1.5rem] p-6">
                     <p class="antetitulo text-apagado">{{ ajuste('quienes_cargo_directora') }}</p>
                     <p class="mt-2 font-display text-lg font-bold">{{ ajuste('quienes_directora') }}</p>
                 </div>
@@ -192,11 +195,11 @@
             <p class="mt-4 text-sm text-apagado">Capítulo fundado el {{ ajuste('quienes_fundacion') }} en Armenia.</p>
         </section>
 
-        <section aria-labelledby="beneficios">
+        <section class="revelar" data-revelar aria-labelledby="beneficios">
             <h2 id="beneficios" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_beneficios') }}</h2>
             <div class="mt-6 grid gap-4 sm:grid-cols-2">
                 @foreach ($beneficios as $beneficio)
-                    <div class="tarjeta p-5">
+                    <div class="tarjeta tarjeta-hover p-5">
                         <h3 class="font-display text-base font-bold">{{ $beneficio->titulo }}</h3>
                         <p class="mt-2 text-sm leading-relaxed text-tenue">{{ $beneficio->descripcion }}</p>
                     </div>
@@ -205,7 +208,8 @@
         </section>
 
         {{-- Cierre del manifiesto --}}
-        <section class="trama-puntos rounded-2xl border border-marca-500/25 p-9 text-center sm:p-12"
+        <section class="revelar vidrio trama-puntos rounded-[1.75rem] p-9 text-center sm:p-12"
+                 data-revelar
                  aria-labelledby="cierre">
             <h2 id="cierre" class="font-display text-2xl font-bold leading-tight text-balance sm:text-3xl">
                 {{ ajuste('manifiesto_cierre_titulo') }}
@@ -213,7 +217,7 @@
             <p class="antetitulo mt-6 text-acento">{{ ajuste('manifiesto_cierre_firma') }}</p>
         </section>
 
-        <section class="tarjeta p-8 text-center">
+        <section class="revelar tarjeta p-8 text-center" data-revelar>
             <h2 class="font-display text-xl font-bold">{{ ajuste('quienes_titulo_nacional') }}</h2>
             <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-tenue">
                 Aterrizamos en el Quindío los programas nacionales del gremio:

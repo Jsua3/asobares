@@ -31,6 +31,11 @@ class SettingSeeder extends Seeder
             // --- Inicio ---
             $this->texto('hero_titulo', 'La noche construye territorio', 'inicio', 'Título del hero'),
             $this->largo('hero_subtitulo', 'Somos el gremio que se sienta en la mesa con las instituciones y el que te explica, paso a paso, cómo abrir tu establecimiento sin que te lo cierren. Trabajamos por la dignificación de la vida nocturna del Quindío.', 'inicio', 'Subtítulo del hero'),
+            $this->texto('hero_frase_corta', 'Gremio, ciudad y noche en una sola voz.', 'inicio', 'Frase corta del hero'),
+            $this->texto('hero_resumen_corto', 'Representamos la vida nocturna del Quindío con criterio, cultura y territorio.', 'inicio', 'Resumen corto del hero'),
+            $this->texto('hero_video_rotulo', 'Video institucional', 'inicio', 'Rótulo del video del hero'),
+            $this->texto('hero_video_titulo', 'ASOBARES Capítulo Quindío', 'inicio', 'Título del video del hero'),
+            $this->texto('hero_video_detalle', 'Una mirada breve al gremio que mueve la noche, la cultura y el territorio.', 'inicio', 'Detalle del video del hero'),
             $this->texto('hero_cta_directorio', 'Explora la noche', 'inicio', 'Botón hacia el directorio'),
             $this->texto('hero_cta_afiliate', 'Afíliate', 'inicio', 'Botón hacia afiliación'),
             $this->texto('cta_final_titulo', '¿Tu establecimiento todavía no es parte del gremio?', 'inicio', 'Título del cierre'),
@@ -63,6 +68,18 @@ class SettingSeeder extends Seeder
             // OBS3-04: las dos bandas de aliados llevan rótulo propio.
             $this->texto('portada_aliados_institucionales', 'Respaldo institucional', 'inicio', 'Portada · rótulo de aliados institucionales'),
             $this->texto('portada_aliados_comerciales', 'Convenios para afiliados', 'inicio', 'Portada · rótulo de aliados comerciales'),
+            $this->texto('portada_videos_rotulo', 'ASOBARES en movimiento', 'inicio', 'Portada · rótulo de videos'),
+            $this->texto('portada_videos_titulo', 'Historias cortas para sentir el gremio.', 'inicio', 'Portada · título de videos'),
+            $this->largo('portada_videos_intro', 'Una banda audiovisual para mostrar recorridos, eventos, testimonios y momentos de la noche quindiana con un tono sobrio, local y cercano.', 'inicio', 'Portada · introducción de videos'),
+            $this->texto('portada_videos_cta', 'Ver agenda del gremio', 'inicio', 'Portada · enlace de videos'),
+            $this->texto('portada_video_1_titulo', 'La noche se mueve', 'inicio', 'Portada · video principal'),
+            $this->texto('portada_video_1_detalle', 'Recorridos, eventos y voces del sector', 'inicio', 'Portada · detalle del video principal'),
+            $this->texto('portada_video_2_titulo', 'Rutas del gremio', 'inicio', 'Portada · video secundario 1'),
+            $this->texto('portada_video_2_detalle', 'Establecimientos, cocina, barra y cultura local', 'inicio', 'Portada · detalle del video secundario 1'),
+            $this->texto('portada_video_3_titulo', 'Agenda viva', 'inicio', 'Portada · video secundario 2'),
+            $this->texto('portada_video_3_detalle', 'Encuentros, formación y noches memorables', 'inicio', 'Portada · detalle del video secundario 2'),
+            $this->texto('portada_videos_proxima_rotulo', 'Próxima pieza', 'inicio', 'Portada · rótulo de próxima pieza'),
+            $this->largo('portada_videos_proxima_texto', 'Clips de afiliados, activaciones y memoria del capítulo.', 'inicio', 'Portada · texto de próxima pieza'),
 
             // --- Manifiesto (discurso del TED gremial) ---
             $this->texto('manifiesto_apertura', 'Nos conocen por la rumba. Pero hoy venimos a hablarles del territorio.', 'manifiesto', 'Frase de apertura'),

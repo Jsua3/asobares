@@ -52,15 +52,51 @@
      apoya —sombra en claro, filo de luz en oscuro— cuando hay algo pasando por
      debajo. El umbral de 8 px evita que el rebote elástico del scroll en iOS
      la encienda y apague sola en el tope. --}}
-<header x-data="{ menuMovil: false, desplazado: false }"
-        x-init="desplazado = window.scrollY > 8"
-        x-on:scroll.window.passive="desplazado = window.scrollY > 8"
+<header x-data="{
+            menuMovil: false,
+            desplazado: false,
+            cromoExpandido: false,
+            cierreCromo: null,
+            sincronizar() {
+                const actual = Math.max(window.scrollY, 0);
+
+                this.desplazado = actual > 8;
+            },
+            punteroFino() {
+                return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+            },
+            abrirCromo() {
+                if (! this.punteroFino()) {
+                    return;
+                }
+
+                clearTimeout(this.cierreCromo);
+                this.cromoExpandido = true;
+            },
+            cerrarCromoConPausa() {
+                if (! this.punteroFino()) {
+                    return;
+                }
+
+                clearTimeout(this.cierreCromo);
+                this.cierreCromo = setTimeout(() => {
+                    this.cromoExpandido = false;
+                }, 280);
+            },
+        }"
+        x-init="sincronizar()"
+        x-on:mouseenter="abrirCromo()"
+        x-on:mouseleave="cerrarCromoConPausa()"
+        x-on:scroll.window.passive="sincronizar()"
         x-on:keydown.escape.window="menuMovil = false"
         x-on:click.outside="menuMovil = false"
         x-on:resize.window="if (window.innerWidth >= 1024) menuMovil = false"
-        x-bind:class="(desplazado || menuMovil) ? 'cromo-apoyado' : ''"
-        class="cromo sticky top-0 z-40">
-    <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8"
+        x-bind:class="{
+            'cromo-apoyado': desplazado || menuMovil,
+            'cromo-expandido': cromoExpandido || menuMovil,
+        }"
+        class="cromo cromo-compacto sticky top-0 z-40">
+    <nav class="cromo-bandeja mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 sm:px-6 lg:px-8"
          aria-label="Navegación principal">
 
         {{-- `-my-1.5 py-1.5` es padding negativo óptico: el logo mide 32 px de
@@ -68,17 +104,17 @@
              negativo devuelve al flujo esos mismos 32. La barra no cambia de
              alto y el logo no se mueve un píxel. --}}
         <a href="{{ route('inicio') }}" class="pulsable -my-1.5 flex shrink-0 items-center py-1.5" aria-label="Inicio — ASOBARES Capítulo Quindío">
-            <x-publico.logo alto="h-8 sm:h-9" />
+            <x-publico.logo alto="h-7 sm:h-8" />
         </a>
 
         {{-- Escritorio --}}
-        <div class="hidden items-center gap-1 lg:flex">
+        <div class="cromo-desplegable hidden items-center gap-1 lg:flex">
             @foreach ($enlacesDirectos as $enlace)
                 @php($actual = request()->routeIs($patron($enlace['ruta'])))
                 <a href="{{ route($enlace['ruta']) }}"
                    @if ($actual) aria-current="page" @endif
                    @class([
-                       'enlace-accion -my-1 rounded-lg px-3 py-3 text-sm',
+                       'nav-enlace enlace-accion -my-1 rounded-lg px-3 py-3 text-sm',
                        'text-acento' => $actual,
                        'text-suave hover:text-fuerte' => ! $actual,
                    ])>
@@ -91,12 +127,12 @@
             @endforeach
         </div>
 
-        <div class="hidden items-center gap-2 lg:flex">
+        <div class="cromo-desplegable hidden items-center gap-2 lg:flex">
             {{-- Con sesión abierta el atajo vive dentro del desplegable, para no
                  repetir el mismo enlace dos veces en la misma barra. --}}
             @guest
                 <a href="{{ route('mi-cuenta.index') }}"
-                   class="enlace-accion -my-1 rounded-lg px-3 py-3 text-sm text-tenue hover:text-fuerte">
+                   class="nav-enlace enlace-accion -my-1 rounded-lg px-3 py-3 text-sm text-tenue hover:text-fuerte">
                     Mi cuenta
                 </a>
             @endguest
@@ -114,10 +150,12 @@
                     portador y con ella moría la duración cero de su `:active`.
                     Se nombra y no se pega porque la guardia lee este archivo
                     crudo, comentarios incluidos. --}}
-               class="pulsable relative rounded-lg bg-marca-500 px-4 py-2 text-sm font-semibold text-white after:absolute after:inset-x-0 after:-inset-y-1 after:content-[''] hover:bg-marca-600">
+               class="pulsable cta-vivo relative rounded-lg bg-marca-500 px-4 py-1.5 text-sm font-semibold text-white after:absolute after:inset-x-0 after:-inset-y-1 after:content-[''] hover:bg-marca-600">
                 Afíliate
             </a>
-            <x-publico.menu-usuario />
+            @auth
+                <x-publico.menu-usuario />
+            @endauth
         </div>
 
         {{-- Móvil --}}
@@ -176,8 +214,7 @@
              horizontal, que es justo lo que falta ahí; aquí sobra vertical y lo
              escaso es el número de toques: anidar cobraría un toque más por
              cada destino y metería una animación dentro de un panel que ya se
-             está animando. Es además el patrón que este mismo panel ya usaba
-             para «Apariencia»: un antetítulo y debajo lo suyo.
+             está animando.
 
              `fila-pulsable` y no `pulsable`: una fila a lo ancho del panel
              encogida un 3 % se lee como si el panel se arrugara. Tiñe el fondo,
@@ -236,13 +273,6 @@
                     Afíliate
                 </a>
             </div>
-        </div>
-
-        {{-- Apariencia y sesión: lo mismo que ofrece el desplegable de
-             escritorio, desplegado porque en móvil no hay sitio para anidar. --}}
-        <div class="border-t border-linea px-4 py-4">
-            <h2 class="antetitulo text-apagado">Apariencia</h2>
-            <x-publico.selector-tema class="mt-2" />
         </div>
 
         @auth

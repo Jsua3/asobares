@@ -1,7 +1,7 @@
 <x-layouts.publico :titulo="ajuste('boletin_titulo').' — ASOBARES Quindío'"
                    :descripcion="ajuste('boletin_intro')">
 
-    <x-publico.hero :titulo="ajuste('boletin_titulo')" :subtitulo="ajuste('boletin_intro')" compacto />
+    <x-publico.hero :titulo="ajuste('boletin_titulo')" :subtitulo="ajuste('boletin_intro')" compacto atmosfera />
 
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
@@ -33,12 +33,22 @@
         @else
             <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($noticias as $noticia)
-                    <article class="tarjeta tarjeta-hover tarjeta-pulsable flex flex-col overflow-hidden">
-                        <a href="{{ route('boletin.show', $noticia) }}" class="flex flex-1 flex-col">
+                    <article @class([
+                        'tarjeta tarjeta-hover tarjeta-pulsable group flex flex-col overflow-hidden',
+                        'sm:col-span-2 sm:flex-row' => $loop->first,
+                    ])>
+                        <a href="{{ route('boletin.show', $noticia) }}" @class([
+                            'flex flex-1 flex-col',
+                            'sm:flex-row' => $loop->first,
+                        ])>
                             @if ($noticia->imagen)
                                 <img src="{{ Storage::disk('public')->url($noticia->imagen) }}" alt=""
                                      loading="lazy" decoding="async" width="400" height="225"
-                                     class="aspect-video w-full object-cover">
+                                     @class([
+                                         'imagen-viva w-full object-cover',
+                                         'aspect-video' => ! $loop->first,
+                                         'aspect-[16/10] sm:aspect-auto sm:w-[42%] sm:shrink-0' => $loop->first,
+                                     ])>
                             @endif
                             <div class="flex flex-1 flex-col p-5">
                                 <div class="flex items-center gap-2 text-xs">

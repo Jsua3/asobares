@@ -5,15 +5,15 @@
 <x-layouts.publico titulo="Contacto y PQR — ASOBARES Quindío"
                    descripcion="Escríbenos: contacto general, peticiones, quejas y reclamos, propuestas de alianza o solicitud para entrar a la bolsa de proveedores.">
 
-    <x-publico.hero titulo="Hablemos" compacto
+    <x-publico.hero titulo="Hablemos" compacto atmosfera
                     subtitulo="Contacto general, PQR, propuestas de alianza o solicitud para entrar a la bolsa de proveedores." />
 
     <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-        <div class="grid gap-10 lg:grid-cols-5">
+        <div class="revelar grid gap-10 lg:grid-cols-5" data-revelar>
 
             {{-- Formulario --}}
             <section id="formulario" class="lg:col-span-3" aria-labelledby="titulo-formulario">
-                <div class="tarjeta p-7 sm:p-8">
+                <div class="vidrio rounded-[1.75rem] p-7 sm:p-8">
                     <h2 id="titulo-formulario" class="font-display text-xl font-semibold">Escríbenos</h2>
 
                     @if (session('radicado'))
@@ -55,8 +55,8 @@
             </section>
 
             {{-- Datos de la oficina --}}
-            <aside class="space-y-5 lg:col-span-2">
-                <div class="tarjeta p-6">
+            <aside class="space-y-5 lg:col-span-2 lg:sticky lg:top-24 lg:self-start">
+                <div class="tarjeta-escena vidrio rounded-[1.5rem] p-6">
                     <h2 class="font-display text-base font-semibold">La oficina</h2>
                     <address class="mt-4 space-y-3 text-sm not-italic text-suave">
                         <p>{{ ajuste('contacto_direccion') }}<br>{{ ajuste('contacto_ciudad') }}</p>
@@ -83,16 +83,18 @@
                     </address>
                 </div>
 
-                <x-publico.mapa
-                    :lat="(float) ajuste('contacto_lat', 4.5378)"
-                    :lng="(float) ajuste('contacto_lng', -75.6757)"
-                    :zoom="16" alto="h-72"
-                    :puntos="[[
-                        'lat' => (float) ajuste('contacto_lat', 4.5378),
-                        'lng' => (float) ajuste('contacto_lng', -75.6757),
-                        'nombre' => ajuste('sitio_nombre'),
-                        'html' => '<strong>'.e(ajuste('sitio_nombre')).'</strong><br>'.e(ajuste('contacto_direccion')),
-                    ]]" />
+                <div class="overflow-hidden rounded-[1.5rem]">
+                    <x-publico.mapa
+                        :lat="(float) ajuste('contacto_lat', 4.5378)"
+                        :lng="(float) ajuste('contacto_lng', -75.6757)"
+                        :zoom="16" alto="h-72"
+                        :puntos="[[
+                            'lat' => (float) ajuste('contacto_lat', 4.5378),
+                            'lng' => (float) ajuste('contacto_lng', -75.6757),
+                            'nombre' => ajuste('sitio_nombre'),
+                            'html' => '<strong>'.e(ajuste('sitio_nombre')).'</strong><br>'.e(ajuste('contacto_direccion')),
+                        ]]" />
+                </div>
             </aside>
         </div>
     </div>

@@ -193,6 +193,7 @@
     --duracion-salida: 160ms; /* leave de desplegables */
     --duracion-entrada: 200ms; /* enter de desplegables, alertas */
     --duracion-panel: 240ms; /* menú móvil */
+    --duracion-cromo: 520ms; /* apertura de la barra pública */
 
     /*
      * Desplazamientos. Son tokens y no literales porque bajo
@@ -223,6 +224,28 @@
        98,5 %— porque son cajas de 44 px y no de 380: el mismo porcentaje sobre
        una caja pequeña casi no se ve. También es geometría. */
     --asb-encogimiento-control: 0.94;
+
+    /*
+     * Material y escena del frontal público. Viven aquí —no en `app.css`—
+     * porque el vidrio y la luz cambian con el tema, igual que el cromo.
+     * Ninguno toca un namespace de Tailwind.
+     */
+    --asb-vidrio-velo: color-mix(in oklab, var(--asb-superficie) 78%, transparent);
+    --asb-vidrio-desenfoque: blur(16px) saturate(140%);
+    --asb-luz-ambiente: rgb(238 65 55 / 0.09);
+
+    /*
+     * Radio del sistema público: una misma familia de recuadros para que la
+     * portada no alterne piezas cuadradas con piezas suaves. Las vistas pueden
+     * subirlo solo en piezas editoriales grandes.
+     */
+    --asb-radio-tarjeta: 1.5rem;
+
+    /* Geometría de la escena: el interruptor de movimiento reducido los anula. */
+    --asb-zoom-imagen: 1.03;
+    --asb-revelar-desplazamiento: 10px;
+    --asb-inclinacion: 3;
+    --asb-avance-flecha: 3px;
 }
 
 .dark {
@@ -300,6 +323,9 @@
        misma receta doble del vidrio y de la sombra de tarjeta. Los otros dos
        acuses no se repiten aquí porque no dependen del tema. */
     --asb-fila-pulsada: rgb(255 255 255 / 0.11);
+
+    --asb-vidrio-velo: color-mix(in oklab, var(--asb-superficie) 55%, transparent);
+    --asb-luz-ambiente: rgb(238 65 55 / 0.18);
 }
 
 /*
@@ -317,6 +343,8 @@
            la sombra de apoyo sigue separando el cromo del contenido. */
         --asb-cromo-velo: var(--asb-fondo);
         --asb-cromo-desenfoque: none;
+        --asb-vidrio-velo: var(--asb-superficie);
+        --asb-vidrio-desenfoque: none;
     }
 }
 
@@ -391,5 +419,10 @@
            justo lo que la regla manda conservar. */
         --asb-encogimiento-tarjeta: 1;
         --asb-encogimiento-control: 1;
+
+        --asb-zoom-imagen: 1;
+        --asb-revelar-desplazamiento: 0px;
+        --asb-inclinacion: 0;
+        --asb-avance-flecha: 0px;
     }
 }

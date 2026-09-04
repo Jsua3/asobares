@@ -1,12 +1,12 @@
 <x-layouts.publico :titulo="ajuste('proveedores_titulo').' — ASOBARES Quindío'"
                    descripcion="Hielo, licores, alimentos, aseo, seguridad y mantenimiento para bares y gastrobares del Quindío.">
 
-    <x-publico.hero :titulo="ajuste('proveedores_titulo')" :subtitulo="ajuste('proveedores_intro')" compacto />
+    <x-publico.hero :titulo="ajuste('proveedores_titulo')" :subtitulo="ajuste('proveedores_intro')" compacto atmosfera />
 
     <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
 
         {{-- Filtro por categoría --}}
-        <div class="flex flex-wrap gap-2">
+        <div class="revelar flex flex-wrap gap-2" data-revelar>
             <a href="{{ route('proveedores.index') }}"
                @class([
                    'pulsable inline-flex min-h-11 items-center rounded-xl border px-4 text-sm',
@@ -27,7 +27,7 @@
         </div>
 
         @if ($proveedores->isEmpty())
-            <div class="tarjeta mt-8 p-12 text-center">
+            <div class="revelar tarjeta mt-8 p-12 text-center" data-revelar>
                 <p class="font-display text-lg font-semibold">No hay proveedores en esta categoría</p>
                 <p class="mt-2 text-sm text-tenue">Estamos ampliando la base.</p>
             </div>
@@ -35,16 +35,20 @@
             @foreach ($grupos as $clave => $grupo)
                 @php $categoria = \App\Enums\CategoriaProveedor::from($clave); @endphp
 
-                <section class="mt-12" aria-labelledby="cat-{{ $clave }}">
+                <section class="revelar mt-12" data-revelar aria-labelledby="cat-{{ $clave }}">
                     <h2 id="cat-{{ $clave }}" class="flex items-center gap-3 font-display text-xl font-bold">
                         <x-dynamic-component :component="$categoria->icono()" class="h-5 w-5 text-acento" />
                         {{ $categoria->getLabel() }}
                         <span class="text-sm font-normal text-apagado">({{ $grupo->count() }})</span>
                     </h2>
 
-                    <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                         @foreach ($grupo as $proveedor)
-                            <article class="tarjeta flex flex-col p-6">
+                            <article @class([
+                                'flex flex-col p-6',
+                                'vidrio rounded-[1.5rem]' => $loop->first,
+                                'tarjeta tarjeta-hover' => ! $loop->first,
+                            ])>
                                 <h3 class="font-display text-base font-semibold">{{ $proveedor->nombre }}</h3>
 
                                 @if ($proveedor->municipio)
@@ -106,7 +110,7 @@
         @endif
 
         {{-- CTA para entrar a la base --}}
-        <section class="tarjeta mt-16 p-8 text-center">
+        <section class="revelar tarjeta-escena vidrio mt-16 rounded-[1.75rem] p-8 text-center" data-revelar>
             <h2 class="font-display text-xl font-semibold">¿Quieres aparecer aquí?</h2>
             <p class="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-tenue">
                 Si le vendes al sector nocturno del Quindío, escríbenos y te contamos cómo entrar a la

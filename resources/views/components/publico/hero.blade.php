@@ -1,4 +1,4 @@
-@props(['titulo', 'subtitulo' => null, 'compacto' => false])
+@props(['titulo', 'subtitulo' => null, 'compacto' => false, 'atmosfera' => false, 'audiovisual' => false])
 
 {{--
     Ranura `medio` (OBS3-02): imagen o video de fondo para darle vida al hero.
@@ -9,6 +9,10 @@
     Ese límite lo garantiza `.hero-medio::after`, el velo, cuya opacidad es un
     mínimo calculado en `--asb-velo-hero`. No se pinta medio sin velo: van en
     la misma clase a propósito, para que no se puedan separar por descuido.
+
+    Ranura `escena`: fotografía al lado del texto, no debajo. El velo no la
+    cubre porque el titular no se superpone. Es la composición editorial:
+    aire a un lado, establecimiento real al otro.
 
     Sin la ranura, esto rinde exactamente lo de siempre --las otras doce
     páginas que usan el hero no cambian ni un atributo--.
@@ -21,6 +25,8 @@
 <section @class([
     'resplandor-marca border-b border-linea',
     'hero-con-medio' => isset($medio),
+    'hero-editorial' => isset($escena),
+    'luz-ambiente' => $atmosfera,
 ])>
     @isset($medio)
         {{-- Decoración: no aporta contenido y no debe leerlo un lector de pantalla. --}}
@@ -31,22 +37,41 @@
 
     <div @class([
         'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8',
-        'py-14 sm:py-20' => ! $compacto,
+        'py-16 sm:py-24 lg:py-28' => ! $compacto && isset($escena),
+        'py-14 sm:py-20' => ! $compacto && ! isset($escena),
         'py-10 sm:py-14' => $compacto,
     ])>
-        <div class="max-w-3xl">
-            {{ $encima ?? '' }}
-            <h1 @class([
-                'font-display font-bold tracking-tight text-balance',
-                'text-3xl sm:text-5xl lg:text-6xl' => ! $compacto,
-                'text-2xl sm:text-4xl' => $compacto,
-            ])>{{ $titulo }}</h1>
+        <div @class([
+            'grid items-center gap-10 lg:grid-cols-12 lg:gap-14' => isset($escena) && ! $audiovisual,
+            'grid items-center gap-10 lg:grid-cols-12 lg:gap-10' => isset($escena) && $audiovisual,
+        ])>
+            <div @class([
+                'max-w-3xl' => ! isset($escena),
+                'lg:col-span-6 xl:col-span-5' => isset($escena) && ! $audiovisual,
+                'lg:col-span-4' => isset($escena) && $audiovisual,
+            ])>
+                {{ $encima ?? '' }}
+                <h1 @class([
+                    'font-display font-bold tracking-tight text-balance',
+                    'text-3xl sm:text-5xl lg:text-6xl' => ! $compacto,
+                    'text-2xl sm:text-4xl' => $compacto,
+                ])>{{ $titulo }}</h1>
 
-            @if ($subtitulo)
-                <p class="mt-5 text-base leading-relaxed text-suave sm:text-lg text-pretty">{{ $subtitulo }}</p>
-            @endif
+                @if ($subtitulo)
+                    <p class="mt-5 text-base leading-relaxed text-suave sm:text-lg text-pretty">{{ $subtitulo }}</p>
+                @endif
 
-            {{ $slot }}
+                {{ $slot }}
+            </div>
+
+            @isset($escena)
+                <div @class([
+                    'lg:col-span-6 xl:col-span-7' => ! $audiovisual,
+                    'lg:col-span-8' => $audiovisual,
+                ])>
+                    {{ $escena }}
+                </div>
+            @endisset
         </div>
     </div>
 </section>

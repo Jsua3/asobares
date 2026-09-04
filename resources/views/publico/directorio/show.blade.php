@@ -43,17 +43,23 @@
         </ol>
     </nav>
 
-    <article class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <article class="revelar mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" data-revelar>
         <div class="grid gap-10 lg:grid-cols-3">
 
             {{-- Columna principal --}}
             <div class="lg:col-span-2">
                 @if ($asociado->foto_portada)
-                    <img src="{{ Storage::disk('public')->url($asociado->foto_portada) }}"
-                         alt="Portada de {{ $asociado->nombre }}"
-                         width="800" height="600" decoding="async"
-                         style="view-transition-name: portada-asociado-{{ $asociado->id }}"
-                         class="aspect-[4/3] w-full rounded-2xl border border-linea object-cover">
+                    <div class="tarjeta-escena group overflow-hidden rounded-[1.75rem] border border-linea bg-superficie-alta"
+                         x-data="escena"
+                         x-on:pointermove="seguir($event)"
+                         x-on:pointerleave="salir()"
+                         x-bind:style="`--puntero-x: ${px}; --puntero-y: ${py}`">
+                        <img src="{{ Storage::disk('public')->url($asociado->foto_portada) }}"
+                             alt="Portada de {{ $asociado->nombre }}"
+                             width="1000" height="750" decoding="async"
+                             style="view-transition-name: portada-asociado-{{ $asociado->id }}"
+                             class="imagen-viva imagen-inclinable aspect-[4/3] w-full object-cover">
+                    </div>
                 @endif
 
                 <div class="mt-7 flex flex-wrap items-center gap-2">
@@ -109,8 +115,8 @@
             </div>
 
             {{-- Barra lateral: solo campos públicos --}}
-            <aside class="space-y-5">
-                <div class="tarjeta p-6">
+            <aside class="space-y-5 lg:sticky lg:top-24 lg:self-start">
+                <div class="vidrio rounded-[1.5rem] p-6">
                     <h2 class="font-display text-base font-semibold">Cómo llegar y contactar</h2>
 
                     <dl class="mt-4 space-y-3.5 text-sm">
@@ -128,7 +134,7 @@
                         @endif
                     </dl>
 
-                    <div class="mt-5 space-y-2.5">
+                    <div class="mt-6 space-y-2.5">
                         @if ($enlace = enlaceWhatsapp($asociado->whatsapp, "Hola {$asociado->nombre}, los vi en la página de ASOBARES Quindío."))
                             <x-publico.boton :href="$enlace" target="_blank" rel="noopener nofollow" class="w-full">
                                 Escribir por WhatsApp
@@ -152,15 +158,17 @@
                 </div>
 
                 @if ($asociado->tieneUbicacion())
-                    <x-publico.mapa
-                        :lat="$asociado->lat" :lng="$asociado->lng" :zoom="15"
-                        alto="h-64"
-                        :puntos="[[
-                            'lat' => $asociado->lat,
-                            'lng' => $asociado->lng,
-                            'nombre' => $asociado->nombre,
-                            'html' => '<strong>'.e($asociado->nombre).'</strong>',
-                        ]]" />
+                    <div class="overflow-hidden rounded-[1.5rem]">
+                        <x-publico.mapa
+                            :lat="$asociado->lat" :lng="$asociado->lng" :zoom="15"
+                            alto="h-64"
+                            :puntos="[[
+                                'lat' => $asociado->lat,
+                                'lng' => $asociado->lng,
+                                'nombre' => $asociado->nombre,
+                                'html' => '<strong>'.e($asociado->nombre).'</strong>',
+                            ]]" />
+                    </div>
                 @endif
             </aside>
         </div>

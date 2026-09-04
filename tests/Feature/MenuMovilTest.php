@@ -82,15 +82,17 @@ class MenuMovilTest extends TestCase
             'El panel móvil anidó un desplegable: aquí sobra vertical y lo escaso son los toques.'
         );
 
-        // Los dos encabezados de grupo, y el de «Apariencia» que ya existía:
-        // los tres del mismo rango, para que el panel tenga un solo esquema.
-        foreach (['Bolsas', 'El gremio', 'Apariencia'] as $titulo) {
+        // Los dos encabezados de grupo siguen en el mismo rango para que el
+        // panel tenga un solo esquema. La apariencia vive en la barra lateral.
+        foreach (['Bolsas', 'El gremio'] as $titulo) {
             $this->assertMatchesRegularExpression(
                 '/<h2 class="antetitulo[^"]*">\s*'.preg_quote($titulo, '/').'\s*<\/h2>/u',
                 $panel,
                 "«{$titulo}» dejó de ser un encabezado: un lector de pantalla recorre esta lista saltando por encabezados."
             );
         }
+
+        $this->assertStringNotContainsString('Apariencia', $panel);
 
         // Y los seis destinos plegados en escritorio siguen a un solo toque.
         foreach (['empleo.index', 'artistas.index', 'proveedores.index', 'quienes-somos', 'boletin.index', 'contacto'] as $ruta) {

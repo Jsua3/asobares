@@ -17,13 +17,31 @@
                 .'<a href="'.route('directorio.show', $a).'" style="display:inline-flex;min-height:44px;align-items:center">Ver ficha</a>',
         ])->values()->all()
         : [];
+
+    $coleccionHero = $asociados instanceof \Illuminate\Pagination\AbstractPaginator
+        ? $asociados->getCollection()
+        : collect($asociados);
+
+    $fotoHeroDirectorio = $coleccionHero
+        ->first(fn ($asociado) => filled($asociado->foto_portada))
+        ?->foto_portada;
 @endphp
 
 <x-layouts.publico titulo="Directorio de establecimientos — ASOBARES Quindío"
                    descripcion="Bares, gastrobares, cafés y discotecas afiliados al gremio en Armenia, Salento, Filandia y todo el Quindío.">
 
-    <x-publico.hero titulo="Directorio de establecimientos" compacto
-                    subtitulo="Los bares, gastrobares, cafés y discotecas que hacen parte del gremio en el Quindío." />
+    <x-publico.hero titulo="Directorio de establecimientos" compacto atmosfera
+                    subtitulo="Bares, gastrobares, cafés y discotecas afiliados en el Quindío.">
+        @if ($fotoHeroDirectorio)
+            <x-slot:medio>
+                <img src="{{ Storage::disk('public')->url($fotoHeroDirectorio) }}"
+                     alt=""
+                     width="1600"
+                     height="720"
+                     class="opacity-55 saturate-125">
+            </x-slot:medio>
+        @endif
+    </x-publico.hero>
 
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
@@ -109,7 +127,11 @@
             @else
                 <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach ($asociados as $asociado)
-                        <x-publico.tarjeta-asociado :asociado="$asociado" />
+                        <div @class(['sm:col-span-2 lg:col-span-2' => $loop->first])>
+                            <x-publico.tarjeta-asociado
+                                :asociado="$asociado"
+                                :variante="$loop->first ? 'editorial' : 'ficha'" />
+                        </div>
                     @endforeach
                 </div>
 

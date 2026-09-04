@@ -49,3 +49,7 @@ base-de-datos-cap*.xls*
 # Material del gremio recibido el 26 ago 2026: bases con datos personales, certificado de un afiliado,
 # fotos de personas identificables y un PDF de 47 MB. Nunca se versiona; entra por importador/sembradores/medios.
 /material/nuevomaterial/
+
+# Video institucional de la portada: 58 MB que no tienen por que vivir
+# en la historia de git. `inicio` lo sirve solo si el archivo existe.
+/public/videos/

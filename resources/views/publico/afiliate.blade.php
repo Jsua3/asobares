@@ -5,16 +5,20 @@
 <x-layouts.publico :titulo="ajuste('afiliate_titulo').' — ASOBARES Quindío'"
                    :descripcion="ajuste('afiliate_intro')">
 
-    <x-publico.hero :titulo="ajuste('afiliate_titulo')" :subtitulo="ajuste('afiliate_intro')" />
+    <x-publico.hero :titulo="ajuste('afiliate_titulo')" :subtitulo="ajuste('afiliate_intro')" atmosfera />
 
-    <div class="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
 
         {{-- Beneficios en grande --}}
-        <section aria-labelledby="beneficios">
+        <section class="revelar" data-revelar aria-labelledby="beneficios">
             <h2 id="beneficios" class="font-display text-2xl font-bold">Lo que incluye la afiliación</h2>
-            <div class="mt-7 grid gap-5 sm:grid-cols-2">
+            <div class="mt-8 grid gap-5 sm:grid-cols-2">
                 @foreach ($beneficios as $indice => $beneficio)
-                    <div class="tarjeta p-6">
+                    <div @class([
+                        'p-6',
+                        'vidrio rounded-[1.5rem]' => $indice === 0,
+                        'tarjeta tarjeta-hover' => $indice !== 0,
+                    ])>
                         {{-- Marca de agua: numera visualmente, no aporta nada al lector de pantalla. --}}
                         <span aria-hidden="true" class="font-display text-3xl font-bold text-marca-500/30">0{{ $indice + 1 }}</span>
                         <h3 class="mt-2 font-display text-lg font-semibold">{{ $beneficio->titulo }}</h3>
@@ -25,11 +29,11 @@
         </section>
 
         {{-- Cómo funciona --}}
-        <section class="mt-14" aria-labelledby="como">
+        <section class="revelar mt-16" data-revelar aria-labelledby="como">
             <h2 id="como" class="font-display text-2xl font-bold">Cómo funciona</h2>
             <ol class="mt-7 space-y-4">
                 @foreach (array_filter(explode("\n", (string) ajuste('afiliate_como_funciona'))) as $indice => $paso)
-                    <li class="tarjeta flex items-start gap-4 p-5">
+                    <li class="tarjeta tarjeta-hover flex items-start gap-4 p-5">
                         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-marca-500/15 font-display text-sm font-bold text-acento">
                             {{ $indice + 1 }}
                         </span>
@@ -40,7 +44,7 @@
         </section>
 
         {{-- Formulario --}}
-        <section id="formulario" class="tarjeta mt-14 p-7 sm:p-9" aria-labelledby="titulo-formulario">
+        <section id="formulario" class="revelar vidrio mt-16 rounded-[1.75rem] p-7 sm:p-9" data-revelar aria-labelledby="titulo-formulario">
             <h2 id="titulo-formulario" class="font-display text-2xl font-bold">Déjanos tus datos</h2>
             <p class="mt-2 text-sm text-tenue">Te contactamos para agendar la visita a tu establecimiento.</p>
 

@@ -141,6 +141,12 @@
 
             aplicarTema();
 
+            document.documentElement.classList.add('con-script');
+
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.documentElement.classList.add('sin-desplazamiento');
+            }
+
             // En modo «sistema», seguir al sistema operativo sin recargar.
             consultaSistema.addEventListener('change', aplicarTema);
 
@@ -184,6 +190,7 @@
     </a>
 
     <x-publico.navbar />
+    <x-publico.barra-tema />
 
     <main id="contenido">
         {{ $slot }}

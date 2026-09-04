@@ -29,7 +29,7 @@
         <x-publico.json-ld :datos="$jsonLd" />
     @endpush
 
-    <article class="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+    <article class="revelar mx-auto max-w-3xl px-4 py-10 sm:px-6" data-revelar>
         <a href="{{ route('boletin.index') }}" class="enlace-accion relative inline-block text-sm text-apagado after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento"><x-publico.flecha direccion="izquierda" />&nbsp;Volver al boletín</a>
 
         <div class="mt-5 flex items-center gap-2 text-xs">
@@ -50,9 +50,15 @@
         @endif
 
         @if ($noticia->imagen)
-            <img src="{{ Storage::disk('public')->url($noticia->imagen) }}" alt=""
-                 width="1200" height="675" decoding="async"
-                 class="mt-8 aspect-video w-full rounded-2xl border border-linea object-cover">
+            <div class="tarjeta-escena group mt-8 overflow-hidden rounded-[1.75rem] border border-linea bg-superficie-alta"
+                 x-data="escena"
+                 x-on:pointermove="seguir($event)"
+                 x-on:pointerleave="salir()"
+                 x-bind:style="`--puntero-x: ${px}; --puntero-y: ${py}`">
+                <img src="{{ Storage::disk('public')->url($noticia->imagen) }}" alt=""
+                     width="1200" height="675" decoding="async"
+                     class="imagen-viva imagen-inclinable aspect-video w-full object-cover">
+            </div>
         @endif
 
         <div class="prose-asobares mt-8 space-y-5 text-base leading-relaxed text-suave
@@ -68,7 +74,7 @@
                     @foreach ($relacionadas as $relacionada)
                         <li>
                             <a href="{{ route('boletin.show', $relacionada) }}"
-                               class="tarjeta tarjeta-hover tarjeta-pulsable block p-5">
+                               class="vidrio tarjeta-hover tarjeta-pulsable block rounded-[1.25rem] p-5">
                                 <span class="text-xs text-apagado">
                                     {{ $relacionada->categoria->getLabel() }} ·
                                     {{ $relacionada->publicado_at->translatedFormat('d M Y') }}

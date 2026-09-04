@@ -26,7 +26,7 @@
 
     $estilos = match ($variante) {
         'contorno' => 'border border-linea-fuerte text-tinta hover:border-marca-500/50 hover:bg-superficie-alta',
-        default => 'bg-marca-500 text-white hover:bg-marca-600',
+        default => 'cta-vivo bg-marca-500 text-white hover:bg-marca-600',
     };
 @endphp
 

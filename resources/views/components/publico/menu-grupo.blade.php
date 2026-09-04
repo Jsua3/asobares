@@ -64,7 +64,7 @@
             x-bind:aria-expanded="abierto ? 'true' : 'false'"
             aria-controls="{{ $panel }}"
             @class([
-                'enlace-accion -my-1 inline-flex items-center gap-1 rounded-lg px-3 py-3 text-sm',
+                'nav-enlace enlace-accion -my-1 inline-flex items-center gap-1 rounded-lg px-3 py-3 text-sm',
                 'text-acento' => $grupoActivo,
                 'text-suave hover:text-fuerte' => ! $grupoActivo,
             ])>

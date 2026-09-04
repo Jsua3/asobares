@@ -30,7 +30,7 @@
         <x-publico.json-ld :datos="$jsonLd" />
     @endpush
 
-    <div class="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="revelar mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8" data-revelar>
 
         <a href="{{ route('empleo.index') }}" class="enlace-accion relative inline-block text-sm text-acento after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento-fuerte"><x-publico.flecha direccion="izquierda" />&nbsp;Todas las vacantes</a>
 
@@ -61,20 +61,20 @@
         </header>
 
         @if ($vacante->descripcion)
-            <div class="tarjeta mt-8 p-6">
+            <div class="vidrio mt-8 rounded-[1.5rem] p-6">
                 <p class="text-sm leading-relaxed text-suave">{{ $vacante->descripcion }}</p>
             </div>
         @endif
 
         <dl class="mt-6 grid gap-4 sm:grid-cols-2">
             @if ($vacante->franja_horaria)
-                <div class="tarjeta p-5">
+                <div class="tarjeta-escena vidrio rounded-[1.25rem] p-5">
                     <dt class="text-[.65rem] font-semibold uppercase tracking-wider text-acento">Horario</dt>
                     <dd class="mt-1.5 text-sm">{{ $vacante->franja_horaria }}</dd>
                 </div>
             @endif
             @if ($vacante->fecha_limite)
-                <div class="tarjeta p-5">
+                <div class="tarjeta-escena vidrio rounded-[1.25rem] p-5">
                     <dt class="text-[.65rem] font-semibold uppercase tracking-wider text-acento">Se cierra el</dt>
                     <dd class="mt-1.5 text-sm">{{ $vacante->fecha_limite->translatedFormat('d \d\e F \d\e Y') }}</dd>
                 </div>
