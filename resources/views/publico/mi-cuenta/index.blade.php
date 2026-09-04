@@ -25,6 +25,15 @@
             <x-publico.boton variante="contorno" :href="route('mi-cuenta.fotos.index')">
                 Mis fotos
             </x-publico.boton>
+            {{-- Los dos beneficios que dejaron de ser publicos: el directorio de
+                 proveedores y el banco de talento. Si no se entra por aqui, no
+                 se entra por ningun lado. --}}
+            <x-publico.boton variante="contorno" :href="route('mi-cuenta.proveedores.index')">
+                Proveedores
+            </x-publico.boton>
+            <x-publico.boton variante="contorno" :href="route('mi-cuenta.aspirantes.index')">
+                Banco de talento
+            </x-publico.boton>
         </nav>
 
         @if (session('exito'))

@@ -6,17 +6,37 @@ use App\Enums\CategoriaProveedor;
 use App\Enums\EstadoPublicacion;
 use App\Enums\TipoArtista;
 use App\Models\Artista;
+use App\Models\Asociado;
 use App\Models\Municipio;
 use App\Models\Proveedor;
+use App\Models\User;
 use App\Support\Formulario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class SolicitudesDeBolsaTest extends TestCase
 {
     use RefreshDatabase;
+
+    /**
+     * El directorio con las fichas dejo de ser publico: lo lee el afiliado
+     * desde su cuenta. De la puerta se encarga AccesoDeAsociadosTest; aqui se
+     * necesita a alguien que la cruce.
+     */
+    private function afiliado(): User
+    {
+        Role::findOrCreate(User::ROL_ASOCIADO, 'web');
+
+        $usuario = User::factory()->create([
+            'asociado_id' => Asociado::factory()->publicado()->create()->id,
+        ]);
+        $usuario->syncRoles([User::ROL_ASOCIADO]);
+
+        return $usuario->fresh();
+    }
 
     public function test_la_inscripcion_de_artista_crea_una_ficha_pendiente(): void
     {
@@ -157,7 +177,7 @@ class SolicitudesDeBolsaTest extends TestCase
         $this->assertNotNull($proveedor->slug);
     }
 
-    public function test_el_proveedor_pendiente_no_sale_en_el_listado_publico(): void
+    public function test_el_proveedor_pendiente_no_sale_en_el_directorio(): void
     {
         $this->post(route('proveedores.inscripcion.store'), [
             'nombre' => 'Proveedor Sin Aprobar',
@@ -166,7 +186,9 @@ class SolicitudesDeBolsaTest extends TestCase
             'acepta_datos' => '1',
         ]);
 
-        $this->get(route('proveedores.index'))->assertDontSee('Proveedor Sin Aprobar');
+        $this->actingAs($this->afiliado())
+            ->get(route('mi-cuenta.proveedores.index'))
+            ->assertDontSee('Proveedor Sin Aprobar');
     }
 
     public function test_un_proveedor_vencido_tampoco_sale_aunque_este_publicado(): void
@@ -174,7 +196,7 @@ class SolicitudesDeBolsaTest extends TestCase
         Proveedor::factory()->publicado()->vencido()->create(['nombre' => 'Proveedor Vencido']);
         Proveedor::factory()->publicado()->create(['nombre' => 'Proveedor Vigente']);
 
-        $respuesta = $this->get(route('proveedores.index'));
+        $respuesta = $this->actingAs($this->afiliado())->get(route('mi-cuenta.proveedores.index'));
 
         $respuesta->assertSee('Proveedor Vigente');
         $respuesta->assertDontSee('Proveedor Vencido');

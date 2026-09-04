@@ -2,11 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\Asociado;
 use App\Models\Proveedor;
+use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
@@ -28,6 +31,23 @@ use Tests\TestCase;
 class VerificacionDeProveedoresTest extends TestCase
 {
     use RefreshDatabase;
+
+    /**
+     * El directorio con las fichas dejo de ser publico: lo lee el afiliado
+     * desde su cuenta. De la puerta se encarga AccesoDeAsociadosTest; aqui se
+     * necesita a alguien que la cruce.
+     */
+    private function afiliado(): User
+    {
+        Role::findOrCreate(User::ROL_ASOCIADO, 'web');
+
+        $usuario = User::factory()->create([
+            'asociado_id' => Asociado::factory()->publicado()->create()->id,
+        ]);
+        $usuario->syncRoles([User::ROL_ASOCIADO]);
+
+        return $usuario->fresh();
+    }
 
     public function test_un_proveedor_nuevo_nace_sin_verificar(): void
     {
@@ -104,14 +124,16 @@ class VerificacionDeProveedoresTest extends TestCase
      * estados se distinguen en la ficha: un contacto sin fecha no vale más que
      * uno viejo --vale menos, porque el lector no sabe cuál de los dos tiene--.
      */
-    public function test_la_ficha_publica_distingue_los_tres_estados(): void
+    public function test_la_ficha_del_directorio_distingue_los_tres_estados(): void
     {
         $this->seed(DatabaseSeeder::class);
         Proveedor::query()->delete();
 
+        $this->actingAs($this->afiliado());
+
         Proveedor::factory()->publicado()->verificado()->create(['nombre' => 'Hielo Al Dia', 'slug' => 'hielo-al-dia']);
 
-        $this->get(route('proveedores.index'))
+        $this->get(route('mi-cuenta.proveedores.index'))
             ->assertOk()
             ->assertSee(ajuste('proveedores_verificado'), escape: false)
             ->assertDontSee(ajuste('proveedores_sin_verificar'), escape: false);
@@ -119,7 +141,7 @@ class VerificacionDeProveedoresTest extends TestCase
         Proveedor::query()->delete();
         Proveedor::factory()->publicado()->create(['nombre' => 'Hielo Sin Comprobar', 'slug' => 'hielo-sin-comprobar', 'verificado_el' => null]);
 
-        $this->get(route('proveedores.index'))
+        $this->get(route('mi-cuenta.proveedores.index'))
             ->assertOk()
             ->assertSee(ajuste('proveedores_sin_verificar'), escape: false)
             ->assertDontSee(ajuste('proveedores_verificado'), escape: false);
@@ -127,7 +149,7 @@ class VerificacionDeProveedoresTest extends TestCase
         Proveedor::query()->delete();
         Proveedor::factory()->publicado()->verificacionVencida()->create(['nombre' => 'Hielo Viejo', 'slug' => 'hielo-viejo']);
 
-        $this->get(route('proveedores.index'))
+        $this->get(route('mi-cuenta.proveedores.index'))
             ->assertOk()
             ->assertSee(ajuste('proveedores_verificacion_vieja'), escape: false);
     }

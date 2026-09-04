@@ -143,6 +143,14 @@
                                  placeholder="Cuéntanos en pocas líneas dónde has trabajado y qué sabes hacer."
                                  ayuda="Con dos o tres frases es suficiente." />
 
+                {{-- Ley 1581: el perfil deja de ser solo para la secretaria y pasa a
+                     verlo cualquier establecimiento afiliado. Eso se dice aqui, junto a
+                     la casilla, y no solo en la politica. --}}
+                <p class="text-xs leading-relaxed text-apagado">
+                    Tu perfil quedará visible para los establecimientos afiliados a ASOBARES Capítulo
+                    Quindío, que podrán contactarte directamente para ofrecerte trabajo.
+                </p>
+
                 <x-publico.habeas-data />
 
                 <x-publico.boton class="w-full sm:w-auto">
