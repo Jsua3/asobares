@@ -135,6 +135,14 @@ class EmpleoController
             ->withFragment('postularme');
     }
 
+    /**
+     * Ninguno de los dos correos puede tumbar la petición: la postulación ya
+     * quedó guardada y el establecimiento la ve en su cuenta aunque el aviso
+     * no llegue. Con el correo saliente caído —como estuvo producción desde
+     * el primer despliegue, D-07— el candidato veía la página de error con su
+     * postulación ya en la base (bitácora §33.4). El fallo se reporta, no se
+     * calla.
+     */
     private function avisarAlEstablecimiento(Postulacion $postulacion): void
     {
         $correos = DestinatariosDelAsociado::correos($postulacion->vacante->asociado);
@@ -145,7 +153,7 @@ class EmpleoController
             return;
         }
 
-        Mail::to($correos)->send(new NuevaPostulacion($postulacion));
+        rescue(fn () => Mail::to($correos)->send(new NuevaPostulacion($postulacion)));
     }
 
     /**
@@ -155,7 +163,7 @@ class EmpleoController
      */
     private function confirmarAlPostulante(Postulacion $postulacion): void
     {
-        Mail::to($postulacion->correo)->send(new AcuseDePostulacion($postulacion));
+        rescue(fn () => Mail::to($postulacion->correo)->send(new AcuseDePostulacion($postulacion)));
     }
 
     public function registrarAspirante(GuardarAspiranteRequest $request): RedirectResponse

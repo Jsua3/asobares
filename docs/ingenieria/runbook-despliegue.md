@@ -93,6 +93,12 @@ DB_USERNAME=asobares DB_PASSWORD=asobares php artisan migrate:fresh --seed --for
 
 Las 33 migraciones y los sembradores están verificados contra PostgreSQL 17.11.
 
+⚠️ **Desactualizado desde el 31 de agosto de 2026.** Hoy son **39 migraciones**: las seis
+posteriores —dos de finales de agosto y **cuatro del 31**— **no** se han verificado contra
+PostgreSQL real. Una de ellas hace un `UPDATE … LIKE '%Cámara de Comercio%'` con tilde y otra
+recorre `custom_properties` escribiendo JSON. Hasta que se repita la corrida del §14, esta
+frase vale para las 33 primeras y para ninguna más.
+
 ---
 
 ## 4. Crear la infraestructura
@@ -199,6 +205,21 @@ Resend, Postmark y Brevo publican todos endpoint SMTP, así que se contrata cual
 la cuenta del gremio y se rellenan `MAIL_HOST`, `MAIL_USERNAME` y `MAIL_PASSWORD`. Con
 correo real configurado, los códigos MFA llegan de verdad y no hace falta el camino de
 emergencia del apartado 10.
+
+> ⚠️ **1 sep 2026 — leído el DNS de `asobares.org`, el párrafo anterior no aplica a este
+> dominio.** El correo del gremio está en Google Workspace, el SPF autoriza solo a Google y
+> a Mailgun, hay DKIM de Google y de Brevo, y DMARC es `p=reject`: un remitente
+> `@asobares.org` que salga por Resend, Postmark o una cuenta nueva de Brevo **lo rechazan
+> los receptores** —no va a spam, no llega— mientras la Nacional, que administra ese DNS,
+> no añada los registros del proveedor. La vía que no toca DNS es el SMTP de Google
+> Workspace con una **contraseña de aplicación** del buzón del gremio (`smtp.gmail.com`,
+> puerto 587). Los pasos exactos están en `material/estado.md`, bloque «Arreglo pendiente:
+> correo saliente». Cuando se haga, actualizar este apartado y `.env.staging.example`, que
+> todavía trae `smtp.resend.com`. Mientras tanto, ni los formularios públicos ni las acciones
+> del panel se rompen si el transporte falla (`rescue()` en `ContactoController`,
+> `EmpleoController` y `AccionesDeAprobacion`; `CorreoSalienteCaidoTest`): el registro se
+> guarda, el fallo se reporta al registro de la aplicación y el panel avisa en amarillo que
+> el correo no salió.
 
 ### 6.4 Los pagos no se demuestran, y es a propósito
 
@@ -488,8 +509,20 @@ PostgreSQL 17.11 real con el esquema migrado y los datos de demostración sembra
   `strftime`) en `RecaudoMensual` y en `MetricasDelObservatorio::expresionMes`.
 - **`GROUP BY` por alias del `SELECT`.** PostgreSQL admite nombres de columna de salida en
   `GROUP BY`; medido con una y con dos claves de agrupación.
-- **JSON.** Las tres columnas `json` se usan sólo a través del cast `array` de Eloquent. No
-  hay `json_extract`, ni `whereJsonContains`, ni operadores `->` en SQL.
+- **JSON.** ⚠️ **Dejó de ser cierto el 31 de agosto de 2026, y costó un defecto.** Esta
+  entrada decía que las columnas `json` se usaban sólo por el cast `array` y que no había
+  `whereJsonContains` ni operadores `->` en SQL. OBS3-13 metió uno, y estaba **roto en
+  PostgreSQL**: `whereNot(whereJsonContains(…, true))` emite
+  `not (("custom_properties"->'aprobada')::jsonb @> ?)`, y sobre una fila **sin la clave** el
+  `->` da NULL, `NULL @> 'true'` da NULL, `not NULL` da NULL y el `WHERE` descarta la fila —
+  justo la foto que nadie había marcado, que es la que más falta hacía moderar. En SQLite no
+  se reproduce, así que la suite pasaba verde. Arreglado en `ModerarFotos::consultaBase()`
+  añadiendo la rama de la clave ausente, y vigilado por `ColaDeFotosTest`, que afirma sobre
+  la **SQL generada** por cada gramática siguiendo el §15.
+  **Alcance medido:** `ModerarFotos.php` es hoy el ÚNICO sitio del árbol con
+  `whereJsonContains` (grep sobre todo el repositorio salvo `vendor/`), así que no hace falta
+  volver a barrer entero — pero la afirmación de que «no hay JSON en SQL» ya no se puede
+  reutilizar sin comprobarla.
 - **Tipos de vuelta.** Medido: `count(*)` llega como `int`, los booleanos como `bool`, los
   `decimal` como cadena — igual que en SQLite tras los casts —, y `sum()` sobre conjunto
   vacío da 0 en ambos. Todos los consumidores castean explícitamente.

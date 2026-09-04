@@ -91,12 +91,21 @@
         </x-slot:escena>
 
         <x-slot:encima>
-            <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-marca-500/30 bg-marca-500/10 px-3 py-1 text-xs font-medium text-acento-fuerte">
-                <span class="h-1.5 w-1.5 rounded-full bg-marca-500"></span>
-                {{ $totalAsociados }} establecimientos afiliados en el Quindío
-            </p>
-            <p class="mb-5 max-w-xl font-display text-base font-medium text-suave text-balance sm:text-lg">
-                {{ ajuste('hero_frase_corta', 'Gremio, ciudad y noche en una sola voz.') }}
+            {{-- Con el directorio vacío la píldora decía «0 establecimientos
+                 afiliados en el Quindío» encima del lema, que es la primera
+                 línea que lee quien entra. Y no es un caso raro: el directorio
+                 nace vacío a propósito --las fichas de asociados no tienen
+                 autorización de publicación (R-02) y las inventadas se
+                 retiraron--, así que el estado inicial del sitio en producción
+                 es justo ese. Sin fichas publicadas no se presume nada. --}}
+            @if ($totalAsociados > 0)
+                <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-marca-500/30 bg-marca-500/10 px-3 py-1 text-xs font-medium text-acento-fuerte">
+                    <span class="h-1.5 w-1.5 rounded-full bg-marca-500"></span>
+                    {{ $totalAsociados }} establecimientos afiliados en el Quindío
+                </p>
+            @endif
+            <p class="mb-5 max-w-2xl font-display text-base font-medium leading-snug text-suave text-balance sm:text-lg">
+                {{ ajuste('manifiesto_apertura') }}
             </p>
         </x-slot:encima>
 
@@ -130,6 +139,34 @@
             </dl>
         </div>
     </section>
+
+    {{-- El gremio en cifras (D-25, Acta 05): la oficina las teclea en el
+         panel cada quince días. Sin cifras no se pinta nada, igual que los
+         destacados y los eventos: el sitio no presume lo que no tiene. --}}
+    @if ($cifrasDelGremio->isNotEmpty())
+        <section class="border-b border-linea" aria-labelledby="cifras-gremio">
+            <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+                <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+                    <h2 id="cifras-gremio" class="font-display text-xs font-semibold uppercase tracking-wider text-apagado">
+                        {{ ajuste('portada_gremio_titulo') }}
+                    </h2>
+                    @if ($cifrasDelGremioActualizadas !== null)
+                        <p class="text-xs text-apagado">
+                            Actualizado el {{ $cifrasDelGremioActualizadas->translatedFormat('d \d\e F \d\e Y') }}
+                        </p>
+                    @endif
+                </div>
+                <dl class="mt-6 grid grid-cols-2 gap-6 lg:grid-cols-4">
+                    @foreach ($cifrasDelGremio as $cifra)
+                        <div>
+                            <dt class="font-display text-2xl font-bold text-acento sm:text-3xl">{{ $cifra['valor'] }}</dt>
+                            <dd class="mt-1.5 text-xs leading-relaxed text-tenue sm:text-sm">{{ $cifra['texto'] }}</dd>
+                        </div>
+                    @endforeach
+                </dl>
+            </div>
+        </section>
+    @endif
 
     {{-- Accesos directos a lo que la directiva priorizó --}}
     <section class="revelar mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8" data-revelar>

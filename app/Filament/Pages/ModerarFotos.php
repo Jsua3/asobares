@@ -143,10 +143,24 @@ class ModerarFotos extends Page implements HasTable
     /**
      * Las fotos de galería que ningún moderador ha aprobado todavía.
      *
-     * `whereNot ... 'true'` sobre el JSON en vez de `where ... false`: una foto
-     * cuya propiedad NUNCA se escribió también está sin aprobar, y con una
-     * comparación estricta a `false` se quedaría fuera de la cola y no la
-     * vería nadie. Sin aprobar es el defecto, incluido el defecto silencioso.
+     * Aprobada es la EXCEPCIÓN y tiene que ser explícita: entra en la cola todo
+     * lo que no sea literalmente `true`, incluida la foto cuya propiedad nunca
+     * se escribió. Sin aprobar es el defecto, incluido el defecto silencioso.
+     *
+     * ⚠️ La primera versión de esto era `whereNot(whereJsonContains(…, true))`
+     * y ESTABA ROTA EN POSTGRESQL, que es donde va a correr. Medido con las dos
+     * gramáticas: emitía `not (("custom_properties"->'aprobada')::jsonb @> ?)`,
+     * y sobre una fila sin la clave el `->` da NULL, `NULL @> 'true'` da NULL,
+     * `not NULL` da NULL y el `WHERE` descarta la fila. O sea que la foto que
+     * más falta hacía moderar —la que nadie marcó— era justo la que no salía.
+     * En SQLite no se reproduce: el `exists` da false y `not false` la incluye,
+     * así que la suite pasaba en verde con el defecto dentro.
+     *
+     * La condición de ahora añade la rama de la clave ausente, que en
+     * PostgreSQL compila con el `coalesce` que salva la lógica trivaluada.
+     * `ColaDeFotosTest` lo afirma sobre la SQL GENERADA por cada gramática y
+     * no sobre el resultado, siguiendo el §15 del runbook: sobre SQLite una
+     * prueba de comportamiento saldría verde con el código roto.
      *
      * @return Builder<Media>
      */
@@ -155,6 +169,8 @@ class ModerarFotos extends Page implements HasTable
         return Media::query()
             ->where('model_type', Asociado::class)
             ->where('collection_name', 'galeria')
-            ->whereNot(fn (Builder $q) => $q->whereJsonContains('custom_properties->'.Asociado::FOTO_APROBADA, true));
+            ->where(fn (Builder $q) => $q
+                ->whereJsonDoesntContain('custom_properties->'.Asociado::FOTO_APROBADA, true)
+                ->orWhereJsonDoesntContainKey('custom_properties->'.Asociado::FOTO_APROBADA));
     }
 }

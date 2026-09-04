@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Setting;
+use App\Support\CifrasDelGremio;
 use Illuminate\Database\Seeder;
 
 /**
@@ -14,6 +15,17 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         foreach ($this->ajustes() as $ajuste) {
+            // Las cifras del gremio las escribe la oficina, no este archivo:
+            // se crean si faltan y no se vuelven a tocar. Con `updateOrCreate`
+            // un resembrado —para añadir un texto nuevo, por ejemplo— las
+            // devolvía a vacío y la franja desaparecía sin aviso. D-14 sigue
+            // abierta para el resto, que sí se sobrescribe a propósito.
+            if ($ajuste['grupo'] === CifrasDelGremio::GRUPO) {
+                Setting::firstOrCreate(['clave' => $ajuste['clave']], $ajuste);
+
+                continue;
+            }
+
             Setting::updateOrCreate(['clave' => $ajuste['clave']], $ajuste);
         }
     }
@@ -60,7 +72,13 @@ class SettingSeeder extends Seeder
             // «como si estuviéramos vendiendo una lotería» (R22 03:05).
             $this->texto('portada_beneficios_titulo', 'Beneficios de pertenecer al gremio', 'inicio', 'Portada · título de beneficios'),
             $this->texto('portada_beneficios_intro', 'Cinco beneficios concretos por estar afiliado al capítulo.', 'inicio', 'Portada · entradilla de beneficios'),
-            $this->largo('portada_guia_texto', 'Los requisitos reales para abrir un establecimiento, municipio por municipio, con checklist, costos y los formatos oficiales listos para descargar.', 'inicio', 'Portada · texto de la tarjeta de la guía'),
+            // ⚠️ Prometía «costos y los formatos oficiales listos para
+            // descargar», y la guía ya no tiene ni lo uno ni lo otro: los
+            // costos eran inventados y los formatos eran PDF rotulados
+            // «Formato de ejemplo», y ambos se retiraron. Una tarjeta de
+            // portada que promete lo que la página siguiente no da es la misma
+            // clase de defecto que el «ya» del WhatsApp (OBS3-14).
+            $this->largo('portada_guia_texto', 'Los requisitos reales para abrir un establecimiento, con la lista de lo que pide cada entidad, a quién se le pide y qué documento sale de ahí.', 'inicio', 'Portada · texto de la tarjeta de la guía'),
             $this->largo('portada_empleo_texto', 'Bartenders, chefs, meseros y administradores para la vida nocturna del Quindío. Publican solo los establecimientos asociados.', 'inicio', 'Portada · texto de la tarjeta de empleo'),
             $this->texto('portada_destacados_texto', 'Algunos de los establecimientos afiliados al gremio.', 'inicio', 'Portada · pie de los destacados'),
             $this->texto('portada_eventos_titulo', 'Próximos eventos del gremio', 'inicio', 'Portada · título de eventos'),
@@ -108,6 +126,10 @@ class SettingSeeder extends Seeder
             $this->texto('cifra_jovenes', '35,28 %', 'cifras', 'Trabajadores de 28 años o menos'),
             $this->texto('cifra_jovenes_detalle', 'de los trabajadores tiene 28 años o menos', 'cifras', 'Detalle de juventud'),
             $this->texto('cifra_afiliados', '60', 'cifras', 'Establecimientos afiliados'),
+
+            // --- El gremio en cifras (D-25, Acta 05): las teclea la oficina ---
+            $this->texto(CifrasDelGremio::CLAVE_TITULO, 'El gremio en cifras', 'inicio', 'Portada · título de la franja de cifras del gremio'),
+            ...$this->cifrasDelGremio(),
 
             // --- Quiénes somos ---
             // OBS3-11. Los quince textos de «Quiénes somos» que estaban
@@ -171,7 +193,11 @@ class SettingSeeder extends Seeder
             $this->texto('guia_enlace_puntual', 'Ir al trámite', 'guia', 'Guía · enlace que abre el trámite exacto'),
             $this->texto('guia_enlace_portada', 'Sitio de la entidad', 'guia', 'Guía · enlace que solo abre el portal'),
             $this->texto('guia_titulo', 'Abre tu negocio sin que te lo cierren', 'guia', 'Título de la guía'),
-            $this->largo('guia_intro', 'La normatividad cambia de un municipio a otro. Escoge el tuyo y revisa, entidad por entidad, qué te van a pedir, cuánto cuesta y qué formato tienes que descargar y llevar diligenciado.', 'guia', 'Introducción de la guía'),
+            // Misma corrección que en `portada_guia_texto`: prometía «cuánto
+            // cuesta y qué formato tienes que descargar», y la guía no tiene
+            // costos ni formatos. Los tendrá cuando el gremio los cargue; ese
+            // día se edita esta línea desde el panel, que es donde vive.
+            $this->largo('guia_intro', 'La normatividad cambia de un municipio a otro. Escoge el tuyo y revisa, entidad por entidad, qué te van a pedir y ante quién se tramita.', 'guia', 'Introducción de la guía'),
             $this->largo('guia_descargo', 'Esta guía es orientativa y se actualiza con la información que cada entidad entrega al gremio. Los requisitos, costos y formatos pueden cambiar sin aviso: verifica siempre directamente con la entidad competente antes de iniciar tu trámite.', 'guia', 'Texto de descargo'),
 
             // --- Bolsa de empleo ---
@@ -205,6 +231,25 @@ class SettingSeeder extends Seeder
             $this->texto('politica_responsable', 'Asociación de Bares de Colombia — Capítulo Quindío', 'legal', 'Responsable del tratamiento'),
             $this->texto('politica_actualizacion', '1 de agosto de 2026', 'legal', 'Fecha de última actualización'),
         ];
+    }
+
+    /**
+     * Las cuatro ranuras nacen vacías a propósito: la franja no se pinta
+     * hasta que la oficina teclee la primera cifra, y lo que teclee no lo
+     * pisa un resembrado (ver `run()`).
+     *
+     * @return list<array{clave: string, valor: string, tipo: string, grupo: string, etiqueta: string}>
+     */
+    private function cifrasDelGremio(): array
+    {
+        $ajustes = [];
+
+        foreach (range(1, CifrasDelGremio::RANURAS) as $ranura) {
+            $ajustes[] = $this->texto(CifrasDelGremio::clave($ranura), '', CifrasDelGremio::GRUPO, "Cifra {$ranura} · el número (p. ej. 48 o 92,4 %)");
+            $ajustes[] = $this->texto(CifrasDelGremio::claveDetalle($ranura), '', CifrasDelGremio::GRUPO, "Cifra {$ranura} · qué es (p. ej. establecimientos afiliados al día)");
+        }
+
+        return $ajustes;
     }
 
     /** @return array{clave: string, valor: string, tipo: string, grupo: string, etiqueta: string} */

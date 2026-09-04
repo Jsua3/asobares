@@ -1,0 +1,381 @@
+# Encargo — qué es la Plataforma Web ASOBARES Capítulo Quindío y con qué reglas se construye
+
+_Referencia del producto: modelo de datos, panel, sitio público, pagos, seguridad, semillas, reglas de contenido, decisiones que rigen, lo que no se hace y las trampas conocidas por área. Nace el 1 de septiembre de 2026 de los §1–§14 del prompt maestro (escritos el 1 de agosto y corregidos en las versiones v3–v7), puestos al día con lo construido hasta `main` en `ed9bec2`. **Se edita en su sitio** cuando una decisión cambia el producto, y cada cambio lleva entre paréntesis la fecha, el motivo en pocas palabras y el commit. No lleva estado ni pendientes (eso es `estado.md`) ni historia (eso es `bitacora.md`). Cuando una regla de aquí necesite su porqué, el enlace «§n» apunta a la bitácora._
+
+---
+
+## 1. Qué es la plataforma y para quién
+
+La **plataforma web oficial de ASOBARES Capítulo Quindío**: un monolito **Laravel 13 + Filament 4** con sitio público en Blade + Tailwind, panel de administración a la medida en `/admin` y portal del asociado en `/mi-cuenta`. Está construida, probada y desplegada en `https://asobares-production-0jhdcz.laravel.cloud` sobre PostgreSQL 17, con contenido oficial del gremio sembrado (1 sep 2026). Se ejecuta en local con `php artisan serve` sobre SQLite y datos de demostración.
+
+Sirve a tres usuarios: el **visitante** (quien busca un establecimiento, quiere abrir uno, busca empleo o quiere aparecer como artista o proveedor), el **asociado** (dueño de establecimiento afiliado, con sesión en `/mi-cuenta`: cartera, convenios, sus vacantes, sus fotos) y el **gremio** (dirección y secretaría, en `/admin`: modera, publica, importa cartera, ve transacciones y bitácora).
+
+El encargo original de agosto pedía construirlo desde cero por fases y ya se ejecutó; la receta de relanzamiento (setup con `laravel new --no-authentication --boost`, sin starter kit porque Filament 4 exige Livewire 3) está en la bitácora (§12 original, v3). Este archivo describe **lo que hay**.
+
+## 2. El cliente (datos que se usan en textos y contenido)
+
+- **ASOBARES Capítulo Quindío** es el gremio de la vida nocturna del Quindío (bares, gastrobares, cafés, discotecas). Fundado el **14 de agosto de 2024** en Armenia, con acompañamiento de la Cámara de Comercio de Armenia y del Quindío. Es el capítulo regional de Asobares Colombia.
+- **Presidente:** Jorge Iván Botero Ángel (⚠️ el portafolio nacional lo llama «Jorge Iván Ángel» y la base del gremio «Jorge Iván Ángel Botero»: **confirmar el orden de los apellidos por escrito** antes de publicarlo). **Directora ejecutiva:** Natalia Gutiérrez (⚠️ en el certificado de afiliación firma como «Presidente Capítulo Quindío»: **confirmar el cargo**). Es la tutora empresarial y la product owner; el directivo del capítulo manda sobre el producto.
+- **Oficina:** Piso 3, Cámara de Comercio de Armenia y del Quindío, Armenia.
+- **Contacto real:** asobaresquindio@asobares.org · WhatsApp 321 5549513 · Instagram @asobaresquindio.
+- **Tamaño:** el sitio dice ~**60 establecimientos afiliados**; la base del gremio del 26 de agosto trae 48 filas; el universo del departamento son **1.080 bares** (dicho por el directivo el 28 ago, `R22 13:31`). La cifra pública la fija Natalia.
+- **Cuota** según el formulario oficial de registro: $30.000 los dos primeros meses y $50.000 desde el tercero, renovación anual (pendiente de confirmar).
+- **Propósitos del sitio**: (1) **visibilizar los establecimientos** del sector; (2) **guiar a quien quiera abrir un establecimiento**. Re-ponderación de la Reunión 2 (31 jul): el sitio NO es una plataforma de mercadeo de bares; su valor es la **representatividad gremial** y, como producto insignia, la **guía normativa por municipio** («ningún gremio la tiene; es donde caen los negocios y los cierran»). Usuario objetivo de la guía: el dueño pequeño que «es el mismo dueño, el bartender y el que hace todo».
+- **Prioridades top 3 dictadas por la directiva** si el tiempo aprieta: (1) bolsa de empleo, (2) guía de requisitos con formatos descargables, (3) directorio de asociados.
+- **Reglas editoriales acordadas:** los eventos publicados son **solo del gremio** (ExpoBar, Congreso Nacional, capacitaciones propias), nunca de bares individuales; lo no-local se enlaza al registro de la Nacional. El **propietario del establecimiento decide** qué información suya se publica. El boletín/noticias es de **baja frecuencia** (~mensual, con datos que envía la Nacional).
+- **Beneficios institucionales del afiliado** (textuales): 1. Representación gremial · 2. Descuentos en SAYCO y OSA · 3. Beneficios con aliados estratégicos · 4. Formación empresarial · 5. Orientación jurídica gratuita. El **detalle de convenios por aliado es privado**: visible solo para asociados con sesión iniciada.
+- **Cifras del Observatorio Económico** (marzo 2026, «Panorama de la economía nocturna: Armenia»; citar «Observatorio Económico de Asobares»): la economía nocturna genera el **12,65 %** del empleo de Armenia; ingreso medio mensual del sector **$2.104.124**; informalidad **72,82 %**; **35,28 %** de los trabajadores tienen 28 años o menos; brecha salarial de género **−26,55 %** para las mujeres.
+- Palabras clave SEO: «Asobares Quindío», «bares en Armenia», «vida nocturna Quindío», «Quindío nocturno», «abrir un bar en Armenia», «empleo en bares Armenia», «DJs en Armenia».
+- ⚠️ Los datos institucionales de arriba son reales. En **producción solo entra contenido que salga de un documento oficial del gremio** (ver §10); los asociados, artistas, proveedores y vacantes de **demostración** son ficticios y solo existen en local.
+
+## 3. Stack
+
+- **Laravel 13.23 · Filament 4.12 · Livewire 3.8 · Alpine.js 3 · Tailwind CSS 4 · Vite**, sobre **PHP 8.5.9** (el equipo debe unificar intérprete; `composer.json` exige `intl`, `gd`, `exif`, `fileinfo` y `mbstring` desde el 20 ago — sin `intl` ni `gd` la suite revienta con cientos de errores que no son defectos, §24.4). **PHPUnit 12.** Laravel Boost instalado; sus guías viven en `CLAUDE.md`/`AGENTS.md`.
+- Sin starter kit: el de Livewire trae Livewire 4 y Filament 4 exige `livewire/livewire ^3.5`, así que el login de `/mi-cuenta` está escrito a mano. Filament 5 se descartó por demasiado nuevo para la entrega del 22 de septiembre (3 ago). Nada de React ni Vue.
+- **Base de datos:** SQLite en desarrollo; **PostgreSQL 17** en producción (Laravel Cloud, `bold-leaf-62673759`, esquema `production`). Las 39 migraciones están verificadas contra PostgreSQL real (1 sep). Migraciones portables: nada específico del motor; ojo con `LIKE` (en PostgreSQL es sensible a mayúsculas: el buscador usa `ilike`) y con reconstruir tablas en SQLite (nombrar los índices).
+- **Paquetes:** `spatie/laravel-permission` (roles), `spatie/laravel-activitylog` (bitácora), `spatie/laravel-medialibrary` (imágenes con conversión a webp y miniaturas), `spatie/laravel-sitemap`, `league/csv` (importación de cartera). No se cambian las dependencias sin aprobación.
+- **Mapas:** Leaflet + OpenStreetMap por CDN, encapsulado en un componente Blade.
+- **Hosting:** Laravel Cloud, cuenta y medio de pago del gremio. Runbook completo y plantilla de variables en `docs/ingenieria/runbook-despliegue.md` y `.env.staging.example`, con una prueba que impide que se desactualicen.
+- Si la API exacta de Filament 4 difiere de lo que recuerdas, consulta la documentación oficial antes de inventar (ver también «Antes de tocar · Filament», §15).
+
+## 4. Identidad visual
+
+- **Nocturna, elegante, institucional.** Modo oscuro como identidad de diseño (se diseña primero) sobre los colores del **manual de marca de Asobares Colombia**: Pub Black `#0B090A`, Pub Red `#EE4137`, Ambient White `#F5F3F4`; secundarios Pub Grey `#282628`, Wine `#A4161A`, Ambient Rose `#EA698B`, Ambient Purple `#C05299`. El rojo es el **único acento**. (El encargo original traía `#0C0A0B`/`#EE4036`/`#F4EFEC` del membrete del capítulo; se unificó contra el manual — DPV-12 cerrada.)
+- **Tipografía: Poppins**, en seis pesos estáticos servidos localmente (`vite.config.js`, `tokens.css:21-22`). Titulares en Poppins Bold/Black. (Corregido el 1 sep 2026: el encargo original decía Unbounded y Hanken Grotesk, que nunca se usaron en el sitio construido.) Rage Italic y Patrick Hand del manual son solo para activaciones, no para el sitio.
+- **El sitio es bicromático (v5, 4 ago):** `:root` es el tema claro y `.dark` el oscuro, con `@custom-variant dark` y `@theme inline` de Tailwind 4. **No se escriben colores en las vistas:** se usan los tokens semánticos de `resources/css/tokens.css` y `app.css` (`bg-fondo`, `bg-superficie`, `bg-superficie-alta`, `text-fuerte`, `text-tinta`, `text-suave`, `text-tenue`, `text-apagado`, `border-linea`, `border-linea-fuerte`, `text-acento`, `acento-fuerte`, `marca-panel`, `exito*`, `aviso*`). El acento vale `#F27166` en oscuro y `#B71F18` en claro porque el Pub Red puro no alcanza AA como texto sobre fondo claro. Las rampas de estado están invertidas por tema. Una prueba de guardia recorre las vistas —incluidas las de `resources/views/vendor/`— y falla si reaparece una clase de color cableada.
+- **Arranque del tema:** por defecto `system` (resuelto con `prefers-color-scheme` por un script síncrono en el `<head>`), guardado en `localStorage.theme`, **clave compartida con Filament** para que panel y sitio queden en el mismo tema. **Decidido el 1 sep 2026 (§13): arranca en el predeterminado del dispositivo, es decir `system`, como estaba; OBS3-03 cerrado sin tocar código.** El valor no se cambia sin una decisión nueva con fecha, porque toca la clave compartida y hay pruebas que dependen del arranque.
+- **Mobile-first real:** se diseña primero a 390 px; más del 80 % de los usuarios entra por celular. Objetivos táctiles de al menos 44×44 px y foco visible (`FocoVisibleTest`, `ObjetivoTactilTest`).
+- Detalles: bordes redondeados suaves, tarjetas con borde `rgba(255,255,255,.09)` en oscuro, hover sutiles, resplandor rojo discreto en heros (`.resplandor-marca`). Nada de gradientes morados ni estética genérica. El **hero** tiene una ranura `medio` para imagen o video de fondo con un **velo inseparable** que garantiza AA sobre cualquier imagen (`--asb-velo-hero`, `VeloDelHeroTest`); la ranura está vacía; desde el 1 sep 2026 hay 19 fotografías y un video con uso autorizado (§13) y llenarla es trabajo de la franja visual: contraste medido en los dos temas y `VeloDelHeroTest` en verde.
+- El panel usa un **tema propio de Filament** que comparte `tokens.css` con el sitio (color primario el rojo de marca, logo y nombre «ASOBARES Quindío»). **No mover la escala tipográfica ni el reloj a `tokens.css`**: repinta 372 reglas de `/admin`; hay una prueba que lo prohíbe.
+- Portadas de relleno de la demostración: fondo transparente, diagonales en gris neutro y el monograma, para que una sola imagen sirva en los dos temas.
+
+## 5. Modelo de datos
+
+21 modelos en `app/Models`, 39 migraciones, 37 tablas desplegadas (incluye las de paquetes). El diagrama entidad-relación verificado contra las migraciones está en `docs/ingenieria/diagramas/`. La tabla siguiente es la del encargo con las columnas que se añadieron después (marcadas «(+)»).
+
+| Entidad | Campos clave | Notas |
+|---|---|---|
+| `municipios` | nombre, slug | Seed: Armenia, Salento, Filandia, Circasia, Calarcá, Montenegro, Quimbaya, La Tebaida |
+| `categorias` | nombre, slug | Seed: Bar, Gastrobar, Café, Discoteca, Restaurante bar, Rooftop |
+| `asociados` | nombre, slug, categoria_id, municipio_id, descripcion, direccion, whatsapp, instagram_url, sitio_web, **google_maps_url, tripadvisor_url** (nullable), horario (texto), lat, lng, foto_portada, galería (medialibrary, colección `galeria`, con propiedad `aprobada` por foto), destacado (bool), estado; (+) **genero_musical, servicios** (texto, ficha comercial) | **Campos internos NO públicos:** representante, (+) documento, correo_interno, telefono_interno, fecha_afiliacion, notas_internas; (+) **autorizacion_datos_at, autorizacion_datos_origen** (soporte de la autorización de publicación). `estado`: borrador → pendiente_aprobacion → publicado. El propietario decide qué se publica; las fichas **nacen en borrador** y el importador `asociados:importar` nunca publica ni otorga autorización. La frontera datos internos / ficha pública tiene pruebas propias |
+| `aliados` | nombre, logo, url, descripcion, orden, activo; (+) **tipo** (enum `TipoAliado`: institucional / comercial), (+) **municipio_id** (nullable; lo llevan las alcaldías) | El **detalle del convenio** (`detalle_convenio`) solo se muestra a asociados con sesión. Dos bandas en el sitio: institucionales (Asobares Colombia, Cámara de Comercio, Comité Intergremial, Gobernación) en rejilla y comerciales en carrusel. **Alcaldías: todas o ninguna** — `App\Support\ReglaDeAlcaldias` hace irrepresentable el juego parcial: sembrar una sola alcaldía las hace desaparecer todas del sitio y el panel avisa cuáles faltan (28–31 ago, OBS3-04/05) |
+| `beneficios` | titulo, descripcion, icono, orden | Los 5 institucionales del punto 2 |
+| `eventos` | titulo, slug, tipo (`evento`\|`capacitacion`), descripcion, lugar, fecha_inicio, fecha_fin, imagen, cupos, precio (0 = gratis), permite_inscripcion, enlace_externo (nullable, para registro de la Nacional), estado | Solo eventos del gremio. Mismo flujo de estados que asociados |
+| `inscripciones` | evento_id, nombre, correo, telefono, establecimiento, acepta_datos (bool), consentimiento_at, estado (`registrada`\|`confirmada`), transaccion_id | Habeas data obligatorio |
+| `requisitos_apertura` | municipio_id, entidad, descripcion, **checklist (json de ítems)**, enlace_externo, **adjunto descargable (formato oficial)** + adjunto_nombre, **costo_aproximado (nullable)**, orden, estado; (+) **verificado_el, verificado_con, vigente_hasta** (RF-60) | La normatividad **difiere por municipio**. Cada ficha guarda **con qué documento y cuándo se verificó** y hasta cuándo vale; una ficha sin fechar se publica pero lo dice en su cara («Sin verificar contra la fuente oficial»), y lo caducado desaparece por las cuatro puertas: lista, selector, sitemap y descarga del formato. **`costo_aproximado` en `null` significa «nadie lo ha averiguado», no «gratis»**: la vista no puede decir «sin costo» (1 sep, `493790d`). En producción solo hay contenido de documento oficial: los 7 trámites de Armenia («Blindemos tu Negocio», Alcaldía, fechados 20 ago) y la lista de verificación de la Ley 1801 de 2016 y el decreto 119 |
+| `vacantes` | asociado_id, cargo, **categoria_cargo** (enum `CargoDelSector`), tipo (`tiempo_completo`\|`por_turnos`\|**`momentaneo`**), descripcion, franja_horaria, **fecha_limite** (date, nullable), **cerrada_at** (timestamp, nullable), **motivo_devolucion** (text, nullable), whatsapp_contacto, estado | **Bolsa de empleo del sector** ("muro"). **La publica y la corrige el propio asociado** desde `/mi-cuenta/vacantes`; el panel solo modera. `categoria_cargo` (administración, cocina, barra, servicio, seguridad, aseo, otros) es lo que permite filtrar: `cargo` es texto libre y no se puede agrupar. `fecha_limite` es **obligatoria para `momentaneo`** (turno de una o dos noches) y opcional para el resto; al pasar, la vacante sale sola del muro. `cerrada_at` es el «ya contraté» y **no pasa por aprobación**. `motivo_devolucion` lo escribe la secretaría al devolver y lo lee el asociado en su cuenta |
+| `postulaciones` | vacante_id, nombre, correo, telefono, experiencia, **estado** (enum `EstadoDeGestion`), acepta_datos, consentimiento_at | **Quien se postula a una vacante concreta**, sin necesidad de cuenta. Índice **único por `(vacante_id, correo)`**: reenviar el formulario actualiza, no duplica ni vuelve a molestar al establecimiento. `estado`: nuevo → contactado → descartado, lo gestiona el asociado dueño |
+| `aspirantes` | nombre, **correo (único)**, telefono, cargo_interes, **categoria_cargo**, experiencia (texto corto), **estado** (`EstadoDeGestion`), acepta_datos, consentimiento_at | **Banco de talento del gremio**, distinto de una postulación: aquí la persona deja su perfil sin apuntar a ninguna vacante, para los cargos escasos que el gremio conecta a mano. **Sin `vacante_id`** — esa relación vive en `postulaciones`. Una persona, un registro |
+| `artistas` | nombre, slug, **user_id (nullable)**, tipo (`dj`\|`banda`\|`solista`\|`otro`), genero_musical, descripcion, tarifa_desde (nullable), video_url (nullable, YouTube), whatsapp, **correo**, instagram_url, foto, municipio_id, estado, **acepta_datos, consentimiento_at** | Categoría separada del empleo («el DJ es artista, el mesero es empleo»). **Se inscribe desde el sitio** y la secretaría aprueba; el `correo` es donde se le avisa que su ficha quedó publicada. `user_id` queda preparado —y sin usar— para cuando esta bolsa tenga cuenta propia |
+| `proveedores` | nombre, slug, **user_id (nullable)**, categoria_proveedor (`hielo`\|`licores`\|`alimentos`\|`aseo`\|`seguridad`\|`mantenimiento`\|`otros`), descripcion, whatsapp, correo, municipio_id, visible_hasta (date, nullable), estado, **acepta_datos, consentimiento_at**; (+) **verificado_el, verificado_con** | Bolsa de proveedores, por inscripción pública moderada. La **monetización futura** se modela con `visible_hasta`: solo se listan los vigentes. La **verificación de contacto** sigue el patrón RF-60 pero a **seis meses** (un proveedor caduca más rápido que un trámite), con tres estados en la ficha pública (31 ago, OBS3-12) |
+| `carteras` | asociado_id (único), saldo_pendiente, meses_mora, ultimo_pago_at, actualizado_at | **Estado de cuenta del afiliado**. Se **importa por CSV** desde el panel (archivo de la contadora); el asociado lo ve en `/mi-cuenta`, solo lectura |
+| `noticias` | titulo, slug, extracto, contenido (rich text), imagen, categoria (`noticia`\|`observatorio`\|`proyecto`), publicado_at, estado | Boletín de **baja frecuencia** (~mensual); categoría observatorio para cifras de la Nacional |
+| `mensajes` | tipo (`contacto`\|`afiliacion`\|`pqr`\|`aliado`\|`proveedor`), nombre, correo, telefono, mensaje, acepta_datos, consentimiento_at, radicado, estado (`nuevo`\|`en_tramite`\|`respondido`) | `radicado` consecutivo tipo `PQR-2026-0001` solo para PQR (bajo concurrencia en PostgreSQL falla **cerrado** por índice único: el segundo envío simultáneo recibe error, no un radicado duplicado). El tipo `proveedor` es redundante con `/proveedores/inscripcion`; sigue como puerta alterna hasta que se decida retirarlo |
+| `transacciones` | referencia única, concepto (`afiliacion`\|`evento`\|`mensualidad`), inscripcion_id (nullable), asociado_id (nullable), monto, moneda (COP), estado (`pendiente`\|`aprobada`\|`rechazada`), metodo (`pse`\|`tarjeta`\|`otro`), payload (json) | Consultable en el panel, solo lectura |
+| `settings` | par clave/valor; se lee con el ayudante `ajuste('clave')` | Textos institucionales, misión, contactos, redes, WhatsApp, correo destino, cifras del home, **todos los títulos y párrafos de la portada y de «Quiénes somos»** (`PortadaEditableTest` y `QuienesSomosEditableTest`: ningún `<h2>` ni `<p>` de esas vistas puede llevar texto literal). En producción hay 100 ajustes sembrados por `SettingSeeder`. **Nada de contenido quemado en las vistas** |
+| `users` | + rol (spatie), + segundo factor por correo (email authentication de Filament), + `asociado_id` (nullable) | Roles en §6; el rol `asociado` enlaza a su establecimiento para `/mi-cuenta`. Las cuentas del panel se dan de alta con **`php artisan asobares:crear-usuario`** (lee la contraseña de variable de entorno cuando no hay terminal, §31.5); el sembrador de cuentas de demostración se niega en producción. `User` declara `#[Fillable]`: un atributo fuera de la lista se descarta en silencio en `updateOrCreate` |
+| (+) `iniciativas` | nombre, slug, resumen, descripcion, estado_iniciativa (enum `EstadoIniciativa`), linea, lugar, orden, estado | Las iniciativas del gremio (Vibrarte, Bares Verdes, Blindando tu Negocio, Noche Segura y Competitiva, Diplomado en Gerencia de Bares), confirmadas una a una contra el TED gremial. Se muestran en la portada |
+| (+) `consultas_guia` | municipio_id, requisito_apertura_id (nullable), timestamps | Registro **anónimo** de qué municipios consulta la gente en la guía y qué formatos descarga; alimenta el observatorio. Sin datos personales |
+| (+) evidencia del consentimiento | consentimiento_agente, consentimiento_ip, consentimiento_politica | Columnas añadidas a las tablas que reciben formularios públicos: cada consentimiento guarda fecha, hora, IP, agente y **la versión del texto** de la política que se aceptó |
+| `media` (spatie) | tabla estándar de medialibrary | Fotos de asociados (colección `galeria`), imágenes de eventos, noticias y artistas. Propiedad `aprobada` en las fotos que sube el propietario; las pendientes y rechazadas no salen en la ficha pública |
+
+Relaciones obvias con claves foráneas e índices (slug únicos, filtros por municipio/categoría/estado).
+
+Enums en `app/Enums`: `CargoDelSector`, `CategoriaNoticia`, `CategoriaProveedor`, `ConceptoTransaccion`, `EstadoDeGestion`, `EstadoIniciativa`, `EstadoInscripcion`, `EstadoMensaje`, `EstadoPublicacion`, `EstadoTransaccion`, `MetodoPago`, `TipoAliado`, `TipoArtista`, `TipoEvento`, `TipoMensaje`, `TipoVacante`. Ayudantes en `app/Support`: `ReglaDeAlcaldias`, `DestinatariosDelAsociado`, `Formulario`, `VideoDeYoutube`, `helpers.php` (`ajuste()`).
+
+## 6. Panel Filament `/admin`
+
+**Recursos:** Asociados, Eventos, Noticias, Requisitos de apertura, **Vacantes (solo moderación: sin crear ni editar)**, **Postulaciones** (bandeja), **Aspirantes** (bandeja), **Artistas**, **Proveedores**, Aliados, Beneficios, Municipios, Categorías, Mensajes (bandeja), Inscripciones, Transacciones (solo lectura), **Cartera** (listado + **importador CSV** con validación y resumen de filas), Usuarios, Ajustes del sitio (página de settings), Bitácora (página que lista activitylog con filtros por usuario/modelo/fecha).
+
+**⚠️ El recurso de Vacantes no tiene formulario.** Registra solo la página de listado: nadie crea ni edita una vacante desde el panel, porque es contenido de un tercero. Las acciones de fila son aprobar, devolver con motivo y saltar a las postulaciones de esa vacante (filtradas en su propia bandeja, que es donde viven los datos personales de los candidatos).
+
+**Todo el panel en español**, con el vocabulario del gremio (nunca "posts" ni "records": "Asociados", "Eventos y capacitaciones", "Bolsa de empleo", "Boletín"...).
+
+**Roles (spatie/laravel-permission):**
+- `super_admin` (la directora): acceso total; publica todo el contenido, gestiona usuarios, ajustes, cartera y ve transacciones. Es el único que **elimina**.
+- `subadmin` (secretaria/pasantes): crea y edita Asociados, Eventos, Noticias, Requisitos y Aliados, y gestiona las bandejas de Mensajes, Postulaciones, Aspirantes e Inscripciones. **No puede publicar lo que ella misma redacta** —al guardar queda en `pendiente_aprobacion`—, **pero sí aprueba las tres bolsas** (`publicar_vacante`, `publicar_artista`, `publicar_proveedor`) y ningún otro `publicar_*`.
+- `asociado` (dueño de establecimiento): **no entra al panel**; su sesión sirve para `/mi-cuenta` — cartera, beneficios con detalle y **sus vacantes**. Es el único que crea, edita y cierra vacantes de su establecimiento.
+
+**El principio que ordena los permisos:** *nadie aprueba lo que él mismo redactó*. Las bolsas las escriben terceros —el asociado su vacante, el artista y el proveedor su ficha—, así que aprobarlas es trabajo de secretaría. El contenido que redacta la propia secretaría lo sigue aprobando la dirección.
+
+**El otro principio, el que más código toca:** *quien publica es dueño de su contenido y es el único que lo edita*. `VacantePolicy` **no hereda** del mapeo por permisos que usan los demás recursos: gobierna por propiedad. Crear exige rol asociado con establecimiento vinculado; editar y cerrar exigen ser del establecimiento dueño; el gremio modera y lee, pero no reescribe lo ajeno. (Artistas y proveedores son la excepción documentada: mientras no tengan cuenta propia, la secretaría sí edita sus fichas.)
+
+**Flujo de aprobación (requisito crítico RF-37):** cuando alguien guarda contenido que no puede publicar, el estado pasa a `pendiente_aprobacion` y llega una **notificación de base de datos** en el panel. **El aviso va a quien pueda publicar ESE modelo**, no a un rol fijo: se pregunta por la policy, no por el rol. Así las bolsas avisan a secretaría y dirección, el resto del contenido sigue avisando solo a dirección, y quien lo envió no se avisa a sí mismo — todo sin una sola línea de lógica por recurso. Impleméntalo con policies + acciones de Filament, y pruébalo: **la regla vive en el modelo (un observer), no en el formulario**, así que no se puede burlar mandando el estado a mano.
+
+**Devolver exige motivo.** La acción de devolver una vacante abre un modal con un campo obligatorio; el motivo se guarda en la vacante, se le manda por correo al asociado y lo ve en su cuenta. Devolver sin decir por qué obliga al asociado a llamar a la oficina, que es justo lo que la plataforma viene a evitar.
+
+**⚠️ La aprobación en lote tiene que producir exactamente los mismos efectos que la de fila** —limpiar el motivo, mandar el correo, saltarse los ya publicados—, y hay que probarla aparte. Es el camino que usa la secretaría cuando hay volumen, o sea cuando más importa que el aviso salga; y si reimplementa el `update` por su cuenta, se desincroniza en silencio.
+
+**Bitácora (RF-39):** `spatie/laravel-activitylog` en todos los modelos de contenido y en login/logout; página "Bitácora" legible: "Natalia aprobó el asociado X — hace 2 horas".
+
+**Autenticación reforzada (RF-40):** activa la **MFA del núcleo de Filament 4** (app de autenticación y/o código por correo) al menos para `super_admin`; política de contraseñas fuertes; throttle de intentos de login.
+
+**Dashboard:** widgets de resumen — asociados publicados (y por municipio), **asociados en mora y saldo total de cartera**, mensajes nuevos, aspirantes de la semana, inscripciones de la semana, total recaudado del mes (transacciones aprobadas), últimas 5 transacciones, gráfico de inscripciones últimos 30 días.
+
+**Bandejas:** Mensajes con filtros por tipo y estado (al abrir un PQR se ve el radicado; acción "Marcar respondido" con nota). **Postulaciones** filtrables por vacante y por estado de gestión — el gremio **no recibe aviso por cada postulación** (sería ruido), pero conserva la vista para medir si la bolsa está sirviendo y para responder por los datos que custodia. Aspirantes filtrables por área y estado. Las inscripciones muestran su evento y estado de pago. Ninguna bandeja permite crear registros a mano: todas entran por formularios públicos.
+
+**Lo que hay hoy en el panel** (1 sep 2026): 19 recursos —Aliados, Artistas, Asociados, Aspirantes, Beneficios, Carteras, Categorías, Eventos, **Iniciativas**, Inscripciones, Mensajes, Municipios, Noticias, Postulaciones, Proveedores, Requisitos de apertura, Transacciones (solo lectura, **sin `CreateAction`**: uno huérfano permitía fabricar un cobro que la pasarela nunca procesó, cerrado el 20 ago), Usuarios y Vacantes (solo moderación)— y 6 páginas: **Dashboard** (tres bandas: lo pendiente de aprobar preguntando a las policies, cuatro KPI distintos por rol y recaudo mensual agregado en SQL), **Ajustes del sitio**, **Bitácora** (activitylog con quién, qué, cuándo y qué campos cambiaron; el «reversar» que pidió el directivo NO existe y es ampliación, OBS3-16), **Observatorio** e **Informe del observatorio** (ventanas de 18 y 12 meses, gráficas que siguen el tema), y **Moderar fotos** (aprobación foto a foto de lo que sube el propietario, OBS3-13). 20 policies en `app/Policies`. El panel usa un tema propio que comparte `tokens.css` con el sitio.
+
+**Segundo factor obligatorio** por correo para todo usuario del panel, política de contraseñas fuertes y límite de intentos. Sin correo saliente configurado los códigos no salen del registro (`LOG_STACK=stderr` en Cloud para poder leerlos en emergencia) y **el panel no se puede demostrar**.
+
+**Alta de usuarios:** `php artisan asobares:crear-usuario`, con rol y contraseña; en Cloud (`command:run`, sin terminal aunque `isInteractive()` diga que sí) la contraseña se lee de variable de entorno y el comando falla nombrando la variable. La contraseña de demostración publicada en el README solo existe en local.
+
+**Importador de la base del gremio:** `php artisan asociados:importar <xlsx> [--categoria=] [--autorizacion=AAAA-MM-DD --origen=...]`: crea en borrador, actualiza por *slug* del nombre, **nunca publica ni otorga autorización** salvo con las dos opciones explícitas, y no borra.
+
+## 7. Sitio público y portal del asociado (Blade + Tailwind, server-rendered)
+
+Rutas y páginas (todas leen de la BD/settings, **cero texto quemado**):
+
+1. **`/` Inicio** — hero con la promesa del gremio (ranura `medio` con velo, §4) + botones «Explora la noche» (directorio) y «Afíliate»; franja de cifras del Observatorio (desde ajustes); **franja «El gremio en cifras»** (D-25, Acta 05): cuatro cifras del capítulo que la oficina teclea en «Ajustes del sitio» (grupo `gremio`, `App\Support\CifrasDelGremio`) cada quince días con el archivo de la contadora; se pintan solo las ranuras con número y sin ninguna la franja no aparece; «Actualizado el» es la fecha de la última cifra que cambió, y por eso «Ajustes del sitio» escribe solo lo que cambia; accesos a **Abre tu negocio** y **Bolsa de empleo**; asociados destacados en **orden alfabético español estable** (Collator `es_CO`, porque SQLite ordena por bytes) — la sección **no se pinta si no hay publicados**; los 5 beneficios (título editable, ya no «Lo que gana»); próximos eventos (3) — tampoco se pinta si no hay; **aliados en dos bandas** (institucionales en rejilla, comerciales en carrusel; el detalle del convenio pide sesión); iniciativas; manifiesto; CTA final de afiliación. **Todo texto sale de `ajuste()`.**
+2. **`/quienes-somos`** — historia (fundación 2024), misión con énfasis en **representatividad gremial ante instituciones**, qué hace el gremio, junta/dirección, programas (Armenia 24 Horas, Foro Quindío Nocturno), enlace a Asobares Nacional.
+3. **`/directorio`** — buscador por nombre + filtros por municipio y categoría (GET server-side, URLs compartibles tipo `/directorio?municipio=salento&categoria=cafe`); grid de tarjetas; **vista mapa** (Leaflet) con pins de los publicados. **`/directorio/{slug}`** — ficha del asociado: galería, "reseñita" (descripción), horario, dirección con mini-mapa, botones WhatsApp e Instagram y **enlaces a Google Maps/Business y TripAdvisor si existen**; **solo campos públicos** (el propietario decide qué se muestra); `schema.org` de negocio local en JSON-LD.
+4. **`/abre-tu-negocio`** — la **página insignia**. Selector de municipio → requisitos por entidad con **checklist visible**, descripción, **costo aproximado si aplica**, enlaces y **formatos oficiales descargables** (botón "Descargar formato"); acabado formal e institucional (nada que parezca un Google Docs enlazado); texto de descargo ("verifica siempre con la entidad"); CTA "¿Dudas? Escríbenos".
+5. **`/empleo`** — **bolsa de empleo del sector**: muro de vacantes **publicadas y vigentes** (ni cerradas ni pasadas de fecha), con filtro por **área del establecimiento** y municipio, y aviso visible «solo los establecimientos asociados publican vacantes»; más el formulario público «Déjanos tu perfil» para el banco de talento (nombre, contacto, cargo e **área** de interés, experiencia breve, habeas data), que **actualiza el perfil si el correo ya existe** en vez de duplicarlo. **`/empleo/{vacante}`** — página de detalle con el formulario de postulación, `JobPosting` en JSON-LD y otras vacantes del área. El WhatsApp del establecimiento queda como canal secundario, no como única vía.
+6. **`/artistas`** — directorio de artistas (DJs, bandas, solistas) con filtro por tipo y **género musical**; tarjeta/ficha con foto, género, tarifa desde, WhatsApp y **video de YouTube embebido** (`iframe` con `loading="lazy"`) cuando exista. **`/artistas/inscripcion`** — formulario público para inscribirse en la bolsa (incluida foto), que crea la ficha en `pendiente_aprobacion`. ⚠️ **Regístrala antes que `/artistas/{artista:slug}`** o el slug se come la palabra «inscripcion».
+7. **`/proveedores`** — bolsa de proveedores por categoría (hielo, licores, alimentos, aseo, seguridad, mantenimiento), **paginada**; tarjetas con contacto directo; CTA "¿Quieres aparecer aquí?" → **`/proveedores/inscripcion`**, formulario propio que crea la ficha en `pendiente_aprobacion`. Se acabó el «quiero ser proveedor» como mensaje de texto libre que la secretaría tenía que transcribir a mano. (La vigencia pagada `visible_hasta` sigue filtrando el listado.)
+8. **`/eventos`** — próximos y pasados (tabs), tipo evento/capacitación, **solo eventos del gremio**; **`/eventos/calendario`** y **`/eventos/calendario/{anio}/{mes}`** (vista de calendario mensual, registradas antes que el slug o nunca se alcanzan); si el evento tiene `enlace_externo` (registro de la Nacional) el botón lleva allá. **`/eventos/{slug}`** — ficha con fecha, lugar, cupos y **formulario de inscripción** (nombre, correo, teléfono, establecimiento opcional, checkbox habeas data obligatorio). Si el evento tiene precio > 0, tras inscribirse redirige al **flujo de pago** (sección 8) y muestra el estado.
+9. **`/mi-cuenta`** — login propio del rol `asociado` (`/mi-cuenta/entrar`, con límite de intentos, sin enumeración por tiempo ni redirección abierta): saludo con su establecimiento, **estado de cartera** ("Estás al día" ✅ o "Debes N meses · $X" con botón **"Pagar ahora"** → flujo de pago concepto `mensualidad`), y los **beneficios con el detalle de convenios** (contenido privado). Al aprobarse el pago simulado, la cartera del demo queda al día.
+    - **`/mi-cuenta/vacantes` — «Mis vacantes», el portal donde el asociado gestiona su bolsa.** Listado de las suyas con estado, motivo de devolución si lo hay y conteo de postulaciones; crear, editar, cerrar («ya contraté») y reabrir; y **`/mi-cuenta/vacantes/{vacante}`** con las postulaciones recibidas y su estado de gestión. Se construye en **Blade propio con la estética del sitio**, no como un segundo panel de Filament: el asociado nunca entra a `/admin` y esa frontera se mantiene dura.
+    - **Editar una vacante publicada la devuelve a revisión** y la saca del muro hasta que la secretaría apruebe el cambio: lo que está publicado es siempre algo que alguien aprobó. **Cerrar y reabrir no pasan por aprobación** — no cambian el contenido.
+    - El establecimiento se toma **de la sesión, nunca del formulario**, y el estado lo fija el servidor: mandar `estado` o `asociado_id` a mano no sirve de nada.
+    - **`/mi-cuenta/fotos` — las fotos del establecimiento las sube el dueño y las aprueba el gremio** (OBS3-13, 31 ago): máximo doce por ficha, habilidad `gestionarFotosEnPortal` **solo por propiedad**, moderación foto a foto en la página «Moderar fotos» del panel; solo las aprobadas salen en la ficha pública. ⚠️ Las pendientes y rechazadas viven hoy en el disco público, servidas por URL no enumerable (ULID): decisión pendiente en `estado.md`.
+    - **Lo que el asociado NO puede hacer todavía desde `/mi-cuenta`:** editar los datos de su ficha (solo la oficina), ni consultar el banco de aspirantes (OBS3-09, prohibido sin pasar por §9: son datos de terceros).
+10. **`/boletin`** — listado con categorías (noticias, observatorio, próximos proyectos); **`/boletin/{slug}`** — detalle; las de observatorio con tarjetas de cifras destacadas. Sección deliberadamente sobria: frecuencia ~mensual.
+11. **`/afiliate`** — los beneficios en grande, cómo funciona, formulario de afiliación (habeas data) que al enviarse: guarda el mensaje, muestra confirmación y ofrece botón directo a WhatsApp del gremio con mensaje precargado.
+12. **`/contacto`** — formulario con tipo (contacto/PQR/quiero ser aliado/quiero ser proveedor); si es PQR genera y muestra **radicado** en pantalla y (mailer `log` en demo) por correo; datos de la oficina con mapa; redes.
+13. **`/politica-de-datos`** — política de tratamiento de datos personales (plantilla seria conforme Ley 1581 de 2012, con los datos del gremio como responsable).
+14. **Extras técnicos:** layout con navbar sticky + footer completo; página 404 con la marca; `sitemap.xml` (spatie), `robots.txt`, metas y Open Graph por página, favicon con el monograma.
+15. **Selector de tema (v5):** desplegable de configuración en la navbar con Claro / Oscuro / Sistema. Lo ve cualquier visitante; con sesión abierta muestra además nombre, rol y las acciones que correspondan —*Mi cuenta* al asociado, *Ir al panel* a la secretaría y a la dirección, y *Cerrar sesión*—. En móvil el mismo bloque va desplegado dentro del menú hamburguesa. La preferencia se guarda en `localStorage.theme`, **la misma clave que usa Filament**, así que el panel y el sitio quedan siempre en el mismo tema. La clase `.dark` se pone en `<html>` desde un **script síncrono en el `<head>`, antes de las hojas de estilo**: si se deja para Alpine, quien tenga el sitio en claro ve un fogonazo negro en cada navegación. Ese mismo script mantiene el `<meta name="theme-color">` y escucha `matchMedia`, `storage` (otras pestañas) y `pageshow` (bfcache). Cerrar sesión no puede depender de Alpine: hace falta un respaldo en `<noscript>`.
+16. **Portadas de relleno (v5):** las imágenes de ejemplo del sembrador se generan con **fondo transparente** —lo que se ve por detrás es la superficie de la tarjeta, así que la misma imagen vale en los dos temas—, diagonales en un gris neutro equidistante de ambas superficies y el monograma de marca centrado. Nada de fondos sólidos ni viñetas oscuras quemadas en el PNG: el degradado que hace legible el nombre del establecimiento ya lo pone la tarjeta en HTML y sí es consciente del tema.
+
+**Rendimiento (RNF-02):** imágenes servidas en webp con thumbnails, `loading="lazy"`, sin librerías JS pesadas, CSS de Vite build. Objetivo: home < 2,5 s en móvil 4G.
+
+**Rutas completas** en `routes/web.php` (86 rutas GET a 1 sep 2026). Todas las escrituras públicas llevan `throttle` (6 por minuto los formularios; 30 la guía porque cada consulta escribe en `consultas_guia`; 10 la descarga de formatos). `robots.txt` se sirve por ruta, no como archivo, para que la URL del sitemap sea absoluta en cualquier dominio; hoy dice `Allow: /` con `Disallow` de `/admin`, `/mi-cuenta`, `/pago-simulado`, `/pago/` y `/webhooks/`, y anuncia el sitemap (14 URL). La decisión de indexar antes del lanzamiento está pendiente (`estado.md`).
+
+## 8. Pagos (Bold, demostrable sin credenciales)
+
+- Interfaz `App\Pagos\PasarelaDePago` con dos implementaciones en `app/Pagos/` (y `RegistroDePagos` en `app/Services/` aplicando los efectos):
+  - `PasarelaBold`: estructura real — crea un **link de pago por API** (endpoint y llaves desde `.env`: `BOLD_API_URL`, `BOLD_API_KEY`, `BOLD_SECRET`, `BOLD_SANDBOX`) y recibe confirmación en `POST /webhooks/bold` **verificando la firma**. Implementada según la documentación pública de developers.bold.co; **sin credenciales del gremio todavía** (falta validarla con dinero real).
+  - `PasarelaSimulada` (`PAYMENT_DRIVER=fake`, solo en `local`/`testing`): genera una página interna `/pago-simulado/{transaccion}` con la marca, selector decorativo de método (**PSE / Tarjeta** — el gremio prefiere PSE; la cuenta real es Itaú) y botones "Pagar" y "Rechazar" que disparan el mismo flujo del webhook. Así los flujos completos **inscripción → pago → confirmación** y **mi-cuenta → pagar mensualidad → cartera al día** se pueden demostrar en vivo.
+- Toda transacción queda registrada (referencia, concepto, monto, método, estado, payload) y visible en el panel (RF-34). Nunca marques una inscripción como confirmada ni una cartera como saldada sin transacción aprobada.
+
+**Reglas duras de la pasarela (v4 — cada una nació de un fallo real, no las deduzcas de nuevo):**
+
+1. **La firma de Bold no es el HMAC habitual.** El orden es: codificar el cuerpo **crudo en Base64**, aplicarle **HMAC-SHA256** con la llave de identidad, y comparar el resultado en **hexadecimal** (64 caracteres). No es `base64(hmac(cuerpo))`. Equivocarse rechaza con 401 *todas* las notificaciones legítimas: el asociado paga, Bold cobra, y ni la inscripción se confirma ni la cartera se salda.
+2. **La prueba de la firma se congela a mano.** Si el test recalcula la firma esperada con la misma fórmula que la implementación, valida el error contra sí mismo. Usa un cuerpo y una firma literales, más una aserción sobre el **formato** (64 caracteres hexadecimales).
+3. **En el sandbox de Bold la firma se calcula con llave vacía.** Es el único caso en que se acepta una llave vacía, así que `BOLD_SANDBOX` debe valer `false` por omisión: si valiera `true`, a un despliegue le bastaría con olvidar la variable para firmar en blanco.
+4. **`PAYMENT_DRIVER` no lleva valor por defecto** y el contenedor se niega a devolver la pasarela simulada fuera de `local`/`testing`. Un despliegue sin la variable tiene que romper en el arranque, no degradarse a la pasarela que aprueba cualquier pago.
+5. **Las rutas `/pago-simulado/*` solo se registran en `local`/`testing`**, y el webhook responde 404 si la pasarela activa no es Bold. `PasarelaSimulada::firmaValida()` devuelve `false` siempre: nadie externo debe confirmar por ahí.
+6. **La referencia no es una credencial ni un identificador adivinable**: 8 bytes aleatorios, no 3. La página de estado del pago va **firmada y con caducidad**, y no muestra datos personales de nadie.
+7. **La URL de retorno que se le entrega a la pasarela es un salto aparte** (`/pago/{ref}/retorno`), porque la pasarela puede añadir sus propios parámetros y eso invalidaría una firma justo después de pagar.
+8. **Concilia el dinero antes de aplicar efectos.** Compara monto y moneda notificados contra la transacción local; si no cuadran, deja la transacción pendiente y regístralo. Y un pago **abona** sobre el saldo, no lo salda entero: si no, un abono de $50.000 borra una deuda de $500.000.
+
+Configuración en `config/pagos.php` (`PAYMENT_DRIVER`, `BOLD_*`, `VALOR_MENSUALIDAD`, `VALOR_AFILIACION`). Rutas: `/pago/{ref}/retorno` (salto aparte, sin firma) y `/pago/{ref}/estado` (firmada y con caducidad); `/pago-simulado/*` solo se registran en `local`/`testing`; `POST /webhooks/bold` sin CSRF y con firma verificada. **Decisiones pendientes que no se tocan sin confirmación escrita del gremio:** «solo Bold» y cierre de la cuenta de BBVA (28 ago, sin cerrar); medio (PSE o QR) y cuenta receptora (DPV-04); los documentos que Bold exige para producción (RUT, cámara de comercio, cuenta bancaria).
+
+## 9. Seguridad y datos personales (no negociable)
+
+- Validación estricta del lado servidor en TODOS los formularios públicos + rate limiting por IP + honeypot antispam simple (sin captcha de terceros en el demo).
+- Checkbox de **autorización de tratamiento de datos obligatorio** en cada formulario que capture datos (inscripciones, postulaciones, banco de talento, inscripción de artistas y de proveedores, afiliación, contacto), con enlace a `/politica-de-datos` y `consentimiento_at` guardado con timestamp (Ley 1581 de 2012).
+- **Retención (v6): los datos personales de la bolsa se borran solos.** Un comando `bolsas:depurar` programado a diario elimina las postulaciones cuya vacante cerró o venció hace más del plazo, y los perfiles del banco de talento cuyo consentimiento tiene más del plazo. Los plazos viven en `config/bolsas.php` (6 y 12 meses por defecto), nunca cableados. **El reloj cuelga de `consentimiento_at`, no de `updated_at`**: si colgara de la última edición, un simple cambio de estado de gestión desde el panel regalaría doce meses más sin que la persona haya renovado nada. Los registros sin sello caducan por `created_at`, o serían inmortales.
+- **La política publicada tiene que describir lo que el sistema hace de verdad.** Si al postularse los datos del candidato se entregan al establecimiento —otro responsable de tratamiento—, eso es una **transferencia a un tercero** y va escrita en la política y en la casilla; un consentimiento «para atender esta solicitud» no la cubre. La lista de datos recolectados incluye la foto del artista y los contactos de artistas y proveedores. Y los plazos que anuncia la política se leen de la configuración, para que no se separen del comportamiento real.
+- Contraseñas hasheadas (por defecto de Laravel), MFA en el panel, sesiones seguras, CSRF en todo, escape de salida (nada de `{!! !!}` sobre input de usuarios; el rich text de noticias se sanea). El `video_url` de artistas se valida como URL de YouTube y se embebe solo con el ID extraído.
+- Archivos subidos: validar tipo/tamaño; imágenes reprocesadas (nunca servir el binario original de un upload). Los adjuntos de requisitos (formatos oficiales) se sirven con nombre limpio.
+- La importación CSV de cartera valida columnas, tipos y asociado existente; muestra errores por fila sin abortar todo.
+- `.env.example` completo y documentado; ningún secreto en el código ni en el repo.
+
+**Lo anterior es la intención; esto es lo que hace falta para cumplirla de verdad (v4):**
+
+- **JSON-LD dentro de `<script>`: nunca `JSON_UNESCAPED_SLASHES`.** Esa bandera desactiva el escape de la barra, que es justo lo que impide que un valor de la base cierre la etiqueta con `</script>`. Cualquier campo editable desde el panel —el nombre de un asociado, el título de una noticia— se convierte en XSS almacenado. Usa `JSON_HEX_TAG` y **un solo componente Blade** para los tres bloques: repetir la decisión de codificación en cada vista garantiza que la cuarta la copie mal.
+- **La extensión de un archivo subido la decide el servidor, no quien sube.** Filament aleatoriza el nombre pero conserva la extensión: un JPEG legítimo llamado `payload.html` pasa la validación de tipo —su MIME es `image/jpeg`— y queda servido como HTML desde `/storage`. Deriva la extensión del MIME validado con `getUploadedFileNameForStorageUsing`.
+- **Lo que se sirve tras un control de acceso no puede vivir en el disco público.** Los formatos de la guía van al disco privado; si están en `/storage`, comprobar el estado de publicación en el controlador es decorativo. Sírvelos con `Content-Type` explícito y `X-Content-Type-Options: nosniff`, y acota la ruta a su carpeta.
+- **Los archivos se borran cuando dejan de estar referenciados** (al reemplazar, al vaciar el campo y al eliminar el registro). Con fotos que un propietario pidió retirar, no borrarlas es un problema de datos personales, no solo de disco. Ojo: las semillas comparten archivo entre registros, así que comprueba que nadie más lo use antes de borrar.
+- **Los temporales de Livewire van al disco privado.** Con `FILESYSTEM_DISK=public`, el CSV de cartera de la contadora queda bajo `/storage` mientras dura la subida.
+- **Parseo de dinero en el CSV: el separador decimal es el que está más a la derecha**, y solo cuenta como decimal si le siguen una o dos cifras. Borrar todos los puntos multiplica por cien cualquier archivo exportado en formato inglés. Una celda vacía es **un error de fila**, nunca un cero: dejar una deuda en cero tiene que ser una decisión escrita.
+- **Todo CSV que se genere se escribe con `League\Csv`**, con un formateador que antepone apóstrofo a las celdas que empiezan por `=`, `+`, `-` o `@`. Excel las ejecuta como fórmula, y esos nombres los escribe un tercero.
+- **Producción no arranca con la configuración del demo**: la aplicación falla si corre en producción con `APP_DEBUG=true` o con el mailer en `log`, fuerza HTTPS, y los seeders de cuentas de demostración se niegan a ejecutarse. La contraseña del demo está publicada en el README.
+- **Los formularios se prueban con los campos que manda el navegador.** Un test que inyecta a mano un campo que el formulario real no envía enmascara el fallo: así estuvo roto todo el envío de `/afiliate`, que exigía un `tipo` que su formulario nunca mandaba.
+
+**Y esto es lo que enseñó el rediseño de las bolsas (v6):**
+
+- **Autorizar por permiso y autorizar por propiedad no son intercambiables.** La habilidad `view` de un recurso concede a quien tenga el permiso *o* a quien sea dueño; usarla para una ruta del portal del asociado deja entrar a cualquiera con permiso de panel. Un directivo que además sea dueño de un bar —caso perfectamente real en un gremio— podía leer los datos de los candidatos de todos los establecimientos. Las rutas del portal usan una habilidad **solo de propiedad**.
+- **Un endpoint público que hace «buscar y si no existe crear» revienta con un doble clic.** Dos peticiones pasan el `first()` a la vez y la segunda choca contra el índice único: 500 en la cara del usuario, en un formulario que se envía desde el móvil con conexión lenta. Captura la violación de unicidad, vuelve a buscar y actualiza.
+- **Un `<select>` obligatorio sin opción vacía llega preseleccionado con el primer valor.** Quien no toca el desplegable manda «Administración» y el primer municipio alfabético — y envenena justo los filtros que el módulo existe para ofrecer.
+- **Los plurales del framework son ingleses.** `Str::plural('postulación')` devuelve «postulacións» en la pantalla que más mira el asociado.
+- **Al reconstruir una tabla en una migración, nombra los índices explícitamente.** `Schema::rename()` no renombra los índices, así que quedan con el nombre de la tabla temporal y el `down()` los busca por convención, no los encuentra y revienta: el rollback queda inservible. (Y en SQLite hay que reconstruir, no alterar: no deja soltar una columna atada a una clave foránea.)
+
+**Lo que añadió el despliegue (§29.4, §30.3, §31):**
+
+- **Una URL pública con el nombre del gremio ya no es un entorno de pruebas.** Las fichas de asociados no se publican sin autorización del titular (nacen en borrador; en producción hay cero publicadas y eso es lo correcto). Los costos de trámites no se publican si no salen de la fuente oficial (`null` no es «gratis»). Las 19 fotografías del gremio tienen personas identificables y **no suben a ningún sitio sin autorización de imagen documentada**; la de esas 19 y la del video del Drive la dio el gremio el 1 sep 2026 (§13), y la regla sigue en pie para cualquier foto nueva. `material/nuevomaterial/` (datos de unos 48 propietarios, certificado con NIT, fotos) está en `.gitignore` y ahí se queda: el repositorio es público.
+- **Discos.** `config/almacenamiento.php`: `publico` (lo que se sirve por `/storage`) y `privado` (formatos de la guía, temporales de Livewire, el CSV de cartera). Lo que se sirve tras un control de acceso vive en el privado y lo entrega un controlador con `Content-Type` explícito y `nosniff`. En Cloud el bucket debe llevar la **política acotada a `publico/*`** (runbook §8.3), comprobada con los dos `curl` (200 en lo público, 403 en lo privado): la política evidente abre los formatos de la guía por URL directa.
+- **El correo saliente no tumba la petición que lo dispara** (1 sep 2026, D-23). Los envíos desde los formularios públicos —acuse de PQR, aviso al establecimiento y acuse al candidato— van en `rescue()`: la PQR queda radicada y la postulación guardada aunque el transporte falle, el fallo se reporta al registro, y el aviso de la PQR dice que el acuse no salió en vez de prometerlo. `CorreoSalienteCaidoTest` lo prueba contra un SMTP real apuntado a un puerto cerrado. Todo envío nuevo desde una petición de usuario sigue la misma regla. Las tres acciones del panel que envían tras aprobar o devolver (`AccionesDeAprobacion`) la siguen desde D-24 (1 sep 2026): el efecto devuelve si el correo salió y el aviso del panel lo dice en amarillo y persistente («…, pero el correo no salió») en vez de fingir el éxito; el lote publica todo y cuenta los correos que no salieron.
+- **Retención**, todo configurable y con purga diaria programada en `routes/console.php`: postulaciones 6 meses y aspirantes 12 (`config/bolsas.php`, `bolsas:depurar` 03:30), contacto 12 y PQR 24 (`config/retencion.php`, `mensajes:depurar` 03:45), inscripciones 24 (`inscripciones:depurar` 03:50). Los tres comandos abortan si el plazo no es un entero ≥ 1 y restan meses con `subMonthsNoOverflow()` (§28: con `subMonths()` borraban hasta dos días **antes** del plazo publicado los días 29, 30 y 31).
+- **Consentimiento con evidencia:** fecha, hora, IP, agente y versión del texto de la política, en todos los formularios públicos. La política publicada (`/politica-de-datos`) tiene que describir lo que el sistema hace, incluida la transferencia de los datos del candidato al establecimiento, y sus plazos se leen de la configuración. ⚠️ El texto legal definitivo (P-15) y los encargados de tratamiento siguen pendientes del gremio.
+- **Sin `lang/`:** `locale` es `es` pero el framework solo trae `en`; cualquier regla de validación sin mensaje propio se imprime como `validation.min.string`. Los siete formularios públicos cubren `required` y `max` en sus `messages()`; todo formulario nuevo tiene que hacerlo igual hasta que exista `lang/es/validation.php`.
+
+## 10. Semillas: demostración y contenido oficial son dos cosas distintas
+
+Desde el 1 de septiembre de 2026 (§31) hay dos familias de sembradores y no se mezclan:
+
+**Demostración (solo local).** `DatabaseSeeder` siembra un sitio vivo para desarrollar y demostrar en el portátil, y **se niega en bloque cuando `app()->isProduction()`**. Trae los 8 municipios y 6 categorías reales, y datos **ficticios**: 24 asociados repartidos por municipio y categoría (6 destacados, coordenadas con jitter, portadas de relleno generadas localmente), 6 eventos del gremio (uno con precio para probar pagos, uno con `enlace_externo`), inscripciones, 7 vacantes en 5 asociados (una momentánea y una en `pendiente_aprobacion` para demostrar que lo no aprobado no sale), 4 postulaciones y 7 perfiles del banco de talento, 8 artistas y 10 proveedores, cartera para los 24 (16 al día, 8 en mora), 6 noticias (2 de observatorio con las cifras reales), 10 mensajes (3 PQR con radicado), 6 transacciones, 18 meses de mensualidades con estacionalidad y consultas de la guía por municipio para que el observatorio tenga forma. Usuarios `direccion@asobaresquindio.test` (super_admin), `oficina@asobaresquindio.test` (subadmin) y `asociado@asobaresquindio.test` (asociado vinculado a un establecimiento en mora), contraseña `Asobares2026*`. **Nada de esto existe en producción.** Regla del §28: las semillas con historial restan meses con `startOfMonth()` **primero**; `VentanaDeMesesTest` fija cuatro fechas que desbordan para que valga los 365 días.
+
+**Contenido oficial (producción).** `ContenidoOficialSeeder` nombra en el código qué sembradores pueden tocar la base del gremio y se invoca suelto, nunca a través de `DatabaseSeeder`. Solo entra lo que sale de un documento del gremio, con su fuente: los **19 aliados estratégicos** del catálogo «Beneficios afiliados» (condición real en `detalle_convenio`, privado) y los **4 institucionales**; los **5 beneficios**; las **5 iniciativas** confirmadas contra el TED gremial; los **7 trámites de Armenia** de «Blindemos tu Negocio» más la lista de verificación de la Ley 1801 y el decreto 119, sin costos y fechados el 20 de agosto; los catálogos (8 municipios, 6 categorías, 3 roles, 80 permisos) y los 100 ajustes. `SemillaInstitucionalTest` impide que entre nada inventado (URL a `ejemplo.test`, descuentos sin convenio). Los sembradores van por `updateOrCreate` sobre clave natural y **no hay marca de procedencia**: resembrar en producción pisa lo que la oficina haya corregido desde el panel (deuda abierta, `estado.md`). Los PDF y las imágenes de la demostración escaneada se leyeron extrayendo las páginas incrustadas, no interpretando el nombre del archivo.
+
+## 11. Requisitos no funcionales — lista de verificación
+
+- [ ] Mobile-first verificado en 390 px, 768 px y 1280 px.
+- [ ] Todo el contenido editable desde el panel (RNF-09): si un texto aparece en el sitio, vive en la BD o en settings.
+- [ ] SEO: title/description únicos por página, OG, slugs limpios, sitemap, JSON-LD en fichas.
+- [ ] Imágenes webp + lazy; sin fuentes ni librerías innecesarias.
+- [ ] Accesibilidad base: contraste AA **en los dos temas** (no solo sobre el fondo oscuro), alt en imágenes, labels en formularios, foco visible.
+- [ ] Tema claro/oscuro: cero clases de color cableadas en las vistas; el modo oscuro conserva exactamente los valores con los que se diseñó; sin parpadeo al navegar; el estado activo del selector se distingue por algo más que el color (WCAG 1.4.1 y 1.4.11).
+- [ ] Prueba de guardia que recorra las vistas y falle si reaparece una clase de tema cableada — incluidas las vistas de paquetes publicadas en `resources/views/vendor/`, que es por donde se coló el paginador.
+- [ ] Retención de datos personales de la bolsa configurable y automática; la política publicada dice lo que el sistema hace, incluida la transferencia al establecimiento.
+- [ ] Código en inglés, UI en español; PSR-12 (`laravel/pint`).
+- [ ] Git: repositorio inicializado, commits pequeños y descriptivos por fase.
+
+- [ ] Rendimiento (RNF-02): portada < 2,5 s en móvil 4G. Medido 972 ms de LCP contra `localhost` (18 ago); **pendiente medir contra la URL pública, en caliente** (el sitio duerme por scale-to-zero).
+- [ ] Dispositivos reales (RNF-01, RNF-07): un Android y un iOS de verdad, semana 7.
+
+## 12. Reglas de contenido
+
+- **Alcaldías: se nombran todas las de los municipios cubiertos o ninguna.** Es una instrucción política del directivo, no una preferencia estética.
+- **Aliados en dos niveles.** Institucionales (Asobares Colombia, Cámara de Comercio de Armenia y del Quindío, Comité Intergremial, Gobernación del Quindío) por encima de los comerciales, y con tratamiento visual distinto.
+- **La junta se muestra corta.** Solo directora ejecutiva y presidente, «como lo hace la página nacional»; el directivo dijo que no le gusta «mucha publicidad» personal (`R22 05:41`).
+- **«Quiénes somos» no se copia de la Nacional**, entre otras cosas porque la información del capítulo allí está desactualizada y el propio directivo la va a hacer corregir.
+- **La tarifa del artista no se publica.** Ver §27.2, punto 2.
+- **Cifras que se pueden usar de esta reunión:** ~**60 afiliados** hoy y **1.080 bares** en el universo del departamento (`R22 13:31`). La segunda no estaba en ningún documento anterior.
+
+- **Los eventos son solo del gremio**; lo no-local se enlaza al registro de la Nacional. El boletín es de baja frecuencia y se oculta si está vacío (DPV-07).
+- **La guía normativa solo publica lo que sale de un documento oficial, fechado y con su fuente** (RF-60). Cubre hoy **1 municipio de 12** (Armenia); la página debe decir qué municipios faltan y por qué. Sin logos de alcaldías en V1 (DPV-06).
+- **Los enlaces de la guía tienen que abrir el trámite exacto, no la portada de la entidad** (OBS3-10). Mientras no lleguen las URL, la ficha no promete lo que su enlace no abre (`EnlacePuntualDeLaGuiaTest`).
+- **El WhatsApp institucional no promete respuesta inmediata** (OBS3-14): la autorespuesta es WhatsApp Business del gremio, no código de la plataforma.
+- **Las fotos que se publican corresponden a la realidad** y las de establecimiento las aprueba el gremio antes de salir.
+- **Ninguna cifra del sector que no sea del Observatorio Económico de Asobares** (marzo 2026). La noticia de Expobar 2026 en armenia.gov.co está caída: conseguir soporte antes de publicarla.
+
+## 13. Decisiones que rigen (no se vuelven a discutir sin acta)
+
+| Fecha | Decisión | Dónde está el porqué |
+|---|---|---|
+| 3 ago 2026 | Stack: Laravel 13 + Filament 4 + Livewire 3 + Tailwind 4; SQLite en desarrollo y PostgreSQL 17 en producción; PHPUnit. WordPress y Astro/Strapi descartados. Filament 5 descartado por nuevo | v3 |
+| 4 ago 2026 | El sitio es bicromático con tokens semánticos; arranque `system` (ratificado el 1 sep 2026, OBS3-03) | v5 |
+| 4 ago 2026 | Las bolsas las escribe el tercero (asociado, artista, proveedor) y el gremio modera; nadie aprueba lo que redactó; el gremio no reescribe lo ajeno | v6, §16 |
+| 4 ago 2026 | Reglas duras de la pasarela (§8) y de seguridad (§9), nacidas de la auditoría | v4, §15 |
+| 14 ago 2026 | **Alcance congelado.** La ausencia de una funcionalidad no es incumplimiento mientras no esté en el cronograma firmado ni en la ERS; toda ampliación se registra por escrito **antes** de codificarse (`docs/ingenieria/constancias/`) | §23, §24.5, §26.4 |
+| 15 ago 2026 | Hosting: **Laravel Cloud**, con cuenta y medio de pago **del gremio**, nunca personal. Aprobado por Natalia el 25 ago; cuenta creada el 30 ago | §20, §29 |
+| 19 ago 2026 | Todo artefacto para el gremio nombra a las **dos** practicantes; el documento de práctica de la universidad es **individual** | §24.1 |
+| 20 ago 2026 | Reparto Persona 1 (Sua: plataforma, panel, cartera, pagos, observatorio, infraestructura, suite) / Persona 2 (Ingrid: módulos públicos y contenido); durante la estabilización solo la Persona 1 toca PHP, Composer, `.env` y migraciones. ⚠️ **En revisión desde el 30 ago**: el bloque OBS3 lo cerró la Persona 1 y el reparto quedó suspendido de hecho (§30.3); pendiente reescribirlo | §24.3 |
+| 20 ago 2026 | Ninguna cifra del expediente sale de una suma: se mide ejecutando, sobre clon limpio si va a un documento | §24.6 |
+| 24 ago 2026 | Vigencia y procedencia en la guía normativa (RF-60): lo caducado sale por las cuatro puertas | v12 |
+| 28 ago 2026 | La tarifa del artista no se publica; alcaldías todas o ninguna; aliados en dos niveles; junta corta; «Quiénes somos» propio | §27.5 |
+| 30 ago 2026 | La demo del 4–11 de septiembre va sobre el subdominio de Cloud; el dominio propio se compra en la semana 8 | §29.2 |
+| 30 ago 2026 | Fechas: `startOfMonth()` primero y la resta después; `subMonthsNoOverflow()` donde el límite no sea inicio de mes | §28.2 |
+| 1 sep 2026 | En producción solo entra contenido oficial del gremio, por `ContenidoOficialSeeder` invocado suelto; `DatabaseSeeder` sigue negándose en `production` (se prefirió a poner `APP_ENV=staging`) | §31.3 |
+| 1 sep 2026 | **El sitio arranca en el tema del dispositivo (`system`)**, como hasta ahora: OBS3-03 cerrado sin cambio de código y `localStorage.theme` sin tocar. Decisión del gremio, comunicada por Sua | §33 |
+| 1 sep 2026 | **Uso autorizado de las 19 fotografías** de `material/nuevomaterial/Apoyos visuales/` **y del video nuevo del Drive del gremio** (OBS3-07). Pueden entrar en el hero y en el sitio; siguen faltando los pies de foto (evento, fecha, lugar) y el video hay que bajarlo a `nuevomaterial/`, que no se versiona | §33 |
+| 1 sep 2026 | **Ningún correo saliente tumba la petición que lo dispara.** Los envíos desde formularios públicos van en `rescue()`, se reportan, y el aviso al ciudadano cambia si el acuse no salió (D-23, §9); las tres acciones del panel igual, con aviso en amarillo cuando el correo no sale (D-24) | §34, §35 |
+| 1 sep 2026 | **Los formatos oficiales (PDF de cada entidad, p. ej. Bomberos) ya pueden subirse** a la guía por el campo «Formato oficial (PDF)» del requisito. Condición técnica previa: el bucket con prefijo privado (runbook §8), porque el disco de Cloud es efímero y lo subido desde el panel se pierde en el siguiente despliegue | §33 |
+| 1 sep 2026 | **Franja «El gremio en cifras» en la portada, por ajustes editables** (D-25: opción a, vía 1; Acta 05 emitida el 1 sep, pendiente de firma). Cuatro ranuras valor/detalle en el grupo `gremio`, vacías de fábrica y que `SettingSeeder` crea sin volver a pisar; la franja no se pinta sin cifras; la fecha es la de la última cifra que cambió. Leerlas del Excel de la contadora queda como **Fase II**, cuando exista el archivo con formato acordado | §36.2, §37 |
+
+## 14. Lo que no se hace
+
+- No usar WordPress, WooCommerce, plantillas compradas, page builders ni CSS genérico de framework sin personalizar.
+- No dejar textos "Lorem ipsum": todo el contenido semilla es en español y del contexto del gremio.
+- No inventar credenciales de Bold ni llamar APIs externas de pago; la demostración local usa `PasarelaSimulada`.
+- No usar datos personales reales de establecimientos, artistas, proveedores o personas (salvo los institucionales del punto 2).
+- No publicar eventos de bares individuales en las semillas: solo eventos del gremio.
+- No saltarte el flujo de aprobación "porque es un demo": es EL requisito que estamos evaluando.
+- **No volver a modelar las bolsas como un CRUD del panel.** La vacante la escribe el establecimiento; el gremio modera. Si la oficina tiene que teclear las vacantes, la bolsa no se mueve — ya se probó.
+- **No dejar que el gremio edite contenido de un tercero.** Aprobar, devolver con motivo y, en último caso, eliminar. Reescribir lo ajeno, no.
+- **No guardar datos de personas que buscan empleo sin plazo de borrado**, ni prometer en la política un plazo que el código no cumpla.
+- No terminar con migraciones, seeders o pruebas rotas.
+- **No reabrir el alcance.** La congelación del 14 de agosto sigue vigente y ahora tiene más razón: quedan cinco semanas y lo que falta no se construye, se firma.
+- **No desplegar con cuenta personal.** El §20.6 y el §23.3 lo dicen y el modo de muerte está descrito: la demo sale bien, nadie migra lo que funciona, la práctica termina y las llaves se van.
+- **No mover la escala tipográfica ni el reloj a `tokens.css`.** Repinta 372 reglas de `/admin` en silencio. Hay una prueba que lo prohíbe; si la ves fallar, es esto.
+- **No dar por buena una medición hecha mientras se recompila el CSS.** Media hora de esta sesión se fue diagnosticando un desbordamiento que no existía.
+- **No dar por aceptado el Bloque C en silencio.** Aceptarlo tácitamente es el camino a llegar al 22 de septiembre con todo a medias. El §26.4 ya lo dice para el alcance general; esto es su caso concreto.
+- **No confundir la bitácora con la reversión.** Están a un mundo de distancia de esfuerzo y el cliente probablemente se dé por satisfecho con la primera.
+- **No meter una imagen de fondo en el hero sin comprobar el contraste en los dos temas.** El propio directivo lo advirtió («no sea que afecte la visibilidad de las letras») y el expediente tiene mediciones de contraste que una imagen de fondo puede tumbar en silencio. Ver la trampa del v5 sobre `transition` y custom properties antes de animar nada del fondo.
+- **No devolver la tarifa del artista a la ficha pública** aunque el campo siga en el modelo.
+- **No cambiar el tema por defecto ni tocar `localStorage.theme` como efecto colateral de otro trabajo.**
+- **No construir la consulta del banco de aspirantes desde `/mi-cuenta` sin pasar por el §9.** Son datos personales de terceros y la autorización que hoy firma el aspirante puede no cubrir ese uso.
+- **No resembrar en producción** mientras no exista marca de procedencia: pisa lo que la oficina corrigió desde el panel.
+- **No citar una cifra de la suite sin medirla ese día**, y los días 29, 30 y 31 recordar el §28.
+- **No crear archivos de documentación nuevos** en el repositorio salvo que se pidan: el estado va en `estado.md`, la historia en `bitacora.md`.
+
+## 15. Antes de tocar… (trampas conocidas, por área)
+
+Cada una costó al menos una ronda. Dos o tres líneas por trampa; el detalle y cómo se descubrió están en la sección de bitácora que se indica.
+
+**Tema, CSS y vistas (v5, §21, §22, §26.3)**
+- Chromium **no reinicia una `transition` cuando lo que cambia es la custom property** de detrás: al cambiar de tema hay que apagar las transiciones y devolverlas con respaldo de `setTimeout` (en pestaña de fondo no corre `requestAnimationFrame`).
+- `app.css` escanea `storage/framework/views/*.php`: **`php artisan view:clear` antes de `npm run build`** para desplegar; el tamaño del bundle depende de qué vistas estén compiladas.
+- **No mover la escala tipográfica ni el reloj a `tokens.css`**: repinta 372 reglas de `/admin` en silencio; hay una prueba que lo prohíbe.
+- El aro del pin de Leaflet **no** sigue el tema (se dibuja sobre teselas de OSM, claras en ambos modos).
+- La clase `.dark` se pone desde un script síncrono en el `<head>`; dejarlo para Alpine produce un fogonazo. Cerrar sesión tiene respaldo `<noscript>`.
+- Una imagen de fondo en el hero solo entra por la ranura `medio`, que trae el velo; **medir contraste en los dos temas** antes de darla por buena.
+- Deuda diferida a propósito hasta después del 11 de septiembre: chips de filtro repetidos y 104 `leading-*`/`tracking-*` sueltos en las vistas que el bloque visual va a rehacer.
+
+**Filament (v7, §18.6, §24.4)**
+- `Panel::getAssets()` **no existe** en 4.12: `registerAssets()` + `FilamentAsset::getScripts()`.
+- Una página con `$view` propio **no** invoca `{{ $this->footerWidgets }}` a mano: el envoltorio ya lo hace y duplica cada widget.
+- `ChartWidget` sabe no dibujar con `isEmpty()` y `getEmptyState()` nativos.
+- **`Paginator::$defaultView` es estático**: Livewire lo reapunta al renderizar una tabla del panel y no siempre lo restaura; una prueba de `/admin` puede romper otra del sitio.
+- Un `CreateAction` sin página de creación **no falla**: abre el formulario en un modal y concede lo que la policy prohíbe.
+- `TableroTest` afirma a propósito que `InscripcionesDelMes` **no existe**: el `use` de una clase inexistente es una guarda, no un residuo.
+
+**Bolsas, aprobación y permisos (v6, §16, §30.6)**
+- **El observer de aprobación degrada *cualquier* guardado** de un registro publicado hecho por quien no puede publicar, mire el campo que mire. Las excepciones son acotadas y explícitas (propiedad de instancia, `instanceof`, `try/finally`); relajar la condición general reabre el agujero para los otros ocho modelos publicables.
+- **Autorizar el portal con la habilidad `view` es una fuga de datos**: `view` concede por permiso *o* por propiedad. Las rutas de `/mi-cuenta` usan habilidades **solo de propiedad** (`verEnPortal`, `gestionarFotosEnPortal`).
+- Un endpoint público «buscar y si no existe crear» revienta con doble clic: capturar la violación de unicidad y volver a buscar.
+- Un `<select>` obligatorio sin opción vacía llega preseleccionado y envenena los filtros. `Str::plural()` es inglés («postulacións»).
+- `getMedia()` cachea en la instancia: contar fotos con él se salta las recién subidas. `assertRedirect()` pasa igual con un redirect de error.
+- La aprobación en lote tiene que producir exactamente los efectos de la de fila, y se prueba aparte.
+
+**Fechas, retención y semillas (§28)**
+- **`now()->subMonths(6)` un 30 de agosto da el 2 de marzo, no el 28 de febrero.** `startOfMonth()` primero; `subMonthsNoOverflow()` donde el límite no sea inicio de mes. Toda prueba que dependa de `now()` fija la fecha en días que desbordan.
+- **Un plazo de retención en cero convierte la purga en «borra todo»**, y a cero se llega solo (variable vacía, `config:cache` viejo). Los comandos abortan si el plazo no es un entero ≥ 1.
+- Al reconstruir una tabla en una migración, **nombrar los índices**: `Schema::rename()` no los renombra y el `down()` revienta. En SQLite se reconstruye, no se altera.
+
+**Pagos y CSV (§15, §8, §9)**
+- La firma de Bold es HMAC-SHA256 **del cuerpo en Base64**, comparada en hexadecimal; la prueba congela cuerpo y firma literales.
+- Parseo de dinero: el separador decimal es el de más a la derecha; celda vacía es error de fila, no cero. Todo CSV generado con `League\Csv` y apóstrofo ante `=`, `+`, `-`, `@`.
+- `lockForUpdate()` no bloquea una fila que aún no existe: el consecutivo de PQR bajo concurrencia falla cerrado por índice único.
+
+**Laravel Cloud y despliegue (§29, §31.6, runbook)**
+- **Una variable recién creada no llega al proceso hasta el siguiente despliegue.** Crear → desplegar → ejecutar.
+- **`command:run` no tiene terminal** aunque `isInteractive()` diga que sí: los comandos leen sus entradas de variables de entorno y fallan nombrando la variable.
+- `environment:variables --action=set` cambia **una sola** variable; no hay borrado desde el CLI.
+- Cloud inyecta `DB_HOST`… pero **no `DB_CONNECTION`**: sin ponerla cae a `sqlite` y el sitio entero da 500 con la página de error de Laravel (fue la causa del 500 del 30–31 ago).
+- `LOG_STACK=stderr` o `environment:logs` no muestra nada; `DatabaseSeeder` se niega en `production` (a propósito); el sitio duerme por scale-to-zero: **despertarlo antes de una demo y no medir rendimiento en frío**; la región es US East (la latencia desde Armenia no la tenía `localhost`).
+- El bucket: política acotada a `publico/*` **antes** de crearlo (runbook §8.3).
+
+**Método (v7, §24.6, §28.4, §30.6, §31.5)**
+- **Escribir la prueba no basta: romper el código a propósito y ver el rojo.** Van doce falsos verdes en el proyecto, todos escritos por el autor del plan; ninguno se vio leyendo. Para cada aserción, preguntar qué tendría que romperse para que fallara; si la respuesta es «nada», no es una prueba.
+- **«La suite está en verde» tiene fecha de caducidad**: una prueba que depende de `now()` sin fijarlo no prueba lo que dice ningún día en particular.
+- **El sitio abierto en el navegador dice cosas que la suite no ve**: mirar la página con los datos reales puestos (en local el directorio está lleno de demostración; en producción está vacío). Las guardias comprueban **correspondencia** (si el texto promete costos, algún trámite los tiene), no vocabulario.
+- Los formularios se prueban con los campos que manda el navegador, y la frontera negativa vale tanto como el camino feliz (el vecino no puede editar).
+- Los escaneos sin capa de texto se leen extrayendo sus imágenes de página, no interpretando el nombre del archivo.
+
+**Git y entorno**
+- `GIT_OPTIONAL_LOCKS=0` siempre desde sesiones remotas: el `git status` normal deja un `index.lock` huérfano que no se puede borrar; los huérfanos se renombran a `.git/*.huerfano*` y los borra el dueño a mano.
+- Puede haber otra sesión en el mismo directorio: `git log --oneline -5` y el encabezado de `estado.md` antes de escribir.
+- Tras unificar el repositorio el enlace `public/storage` apuntaba a la carpeta vieja: `php artisan storage:link`.
+- Herd Lite no trae `intl` ni `gd`; `composer install` ya lo detecta desde el 20 ago.
+
+## 16. Guiones de demostración
+
+**Guion de la bolsa de empleo, de punta a punta** (el que demuestra el rediseño de la v6, y el que conviene recorrer a mano antes de entregar):
+
+1. Entrar a `/mi-cuenta` con la cuenta de asociado y abrir **Mis vacantes**.
+2. Publicar una vacante momentánea con fecha límite → queda pendiente y **no** aparece en `/empleo`.
+3. Entrar al panel como secretaría: hay notificación de pendiente. Devolverla con motivo.
+4. Volver a `/mi-cuenta/vacantes`: se ve el motivo. Corregir y reenviar.
+5. Aprobarla desde el panel → aparece en `/empleo` y en su página de detalle.
+6. Postularse desde el detalle **sin iniciar sesión** → aparece en «Mis vacantes» del asociado y en `/admin/postulaciones`.
+7. Marcar «Ya contraté» → la vacante desaparece del muro y su detalle da 404.
+8. Inscribirse como artista desde `/artistas/inscripcion` → la ficha entra pendiente y no es visible; aprobarla desde el panel la publica.
+9. `php artisan bolsas:depurar --pretend` informa sin borrar.
+
+**Guion de la cartera** (README): entrar a `/mi-cuenta` con la cuenta de asociado → ver «Debes N meses · $X» → «Pagar ahora» → pasarela simulada → aprobar → cartera al día y transacción visible en `/admin`. En producción la pasarela simulada no existe: este guion es de local.
+
+**Guion de la segunda demostración ante el gremio (4–11 sep 2026)** — se escribe en `estado.md` cuando se fije la fecha; va sobre la URL pública, en el teléfono del directivo, con el sitio despertado media hora antes.
