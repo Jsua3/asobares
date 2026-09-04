@@ -8,6 +8,7 @@ use App\Models\Asociado;
 use App\Models\Beneficio;
 use App\Models\Evento;
 use App\Models\Iniciativa;
+use App\Support\CifrasDelGremio;
 use App\Support\ReglaDeAlcaldias;
 use Illuminate\Contracts\View\View;
 
@@ -58,6 +59,10 @@ class InicioController
             'proximosEventos' => Evento::publicado()->proximo()->take(3)->get(),
             'iniciativas' => Iniciativa::publicado()->orderBy('orden')->take(5)->get(),
             'totalAsociados' => Asociado::publicado()->count(),
+            // D-25, Acta 05: la franja del gremio solo existe con cifras
+            // tecleadas, y su fecha es la de la última que cambió.
+            'cifrasDelGremio' => $cifrasDelGremio = CifrasDelGremio::vigentes(),
+            'cifrasDelGremioActualizadas' => $cifrasDelGremio->isNotEmpty() ? CifrasDelGremio::actualizadasEl() : null,
         ]);
     }
 }

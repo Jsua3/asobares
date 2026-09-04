@@ -36,12 +36,25 @@ class ContactoController
         $mensaje = Mensaje::create($datos);
 
         if ($mensaje->esPqr()) {
-            Mail::to($mensaje->correo)->send(new AcuseDeRadicado($mensaje));
+            // El acuse no puede tumbar la petición: la PQR ya quedó radicada
+            // y el ciudadano necesita su número aunque el correo saliente
+            // esté caído, que es como estuvo producción desde el primer
+            // despliegue (D-07, bitácora §33.4). Sin esto veía la página de
+            // error después de que su queja quedara guardada. El fallo se
+            // reporta para que la oficina vea en el registro que los acuses
+            // no están saliendo.
+            $acuseEnviado = rescue(function () use ($mensaje): bool {
+                Mail::to($mensaje->correo)->send(new AcuseDeRadicado($mensaje));
+
+                return true;
+            }, false);
 
             return redirect()
                 ->route('contacto')
                 ->with('radicado', $mensaje->radicado)
-                ->with('exito', "Tu PQR quedó radicada con el número {$mensaje->radicado}. Te enviamos el acuse a {$mensaje->correo}.")
+                ->with('exito', $acuseEnviado
+                    ? "Tu PQR quedó radicada con el número {$mensaje->radicado}. Te enviamos el acuse a {$mensaje->correo}."
+                    : "Tu PQR quedó radicada con el número {$mensaje->radicado}. No pudimos enviarte el acuse por correo: guarda este número para hacer seguimiento.")
                 ->withFragment('formulario');
         }
 

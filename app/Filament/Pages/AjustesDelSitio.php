@@ -44,6 +44,7 @@ class AjustesDelSitio extends Page implements HasSchemas
         'inicio' => ['Página de inicio', 'Hero, título de cada sección de la portada y cierre.'],
         'manifiesto' => ['Manifiesto del gremio', 'El discurso del capítulo: apertura, visión a 10 años, barreras del sector y cierre.'],
         'cifras' => ['Cifras del Observatorio', 'La franja de datos que se muestra en el inicio.'],
+        'gremio' => ['El gremio en cifras', 'Cuatro cifras del capítulo que la oficina actualiza cada quince días con el archivo de la contadora. Se pintan solo las que tengan número; si están todas vacías, la franja no aparece en la portada.'],
         'institucional' => ['Quiénes somos', 'Historia, misión, dirección y programas del capítulo.'],
         'contacto' => ['Contacto', 'Datos de la oficina, redes y correo que recibe los formularios.'],
         'guia' => ['Guía normativa', 'Textos de la página «Abre tu negocio».'],
@@ -142,12 +143,25 @@ class AjustesDelSitio extends Page implements HasSchemas
     {
         abort_unless(auth()->user()?->can('editar_ajustes') === true, 403);
 
-        foreach ($this->form->getState() as $clave => $valor) {
-            Setting::where('clave', $clave)->update(['valor' => $valor]);
+        $estado = $this->form->getState();
+        $ajustes = Setting::query()->whereIn('clave', array_keys($estado))->get()->keyBy('clave');
+
+        // Solo se escribe lo que cambió. Antes se actualizaban todas las
+        // claves en cada guardado, y una actualización masiva sella
+        // `updated_at` aunque el valor sea el mismo: la fecha de «El gremio
+        // en cifras» habría sido la del último guardado de cualquier cosa.
+        foreach ($estado as $clave => $valor) {
+            $ajuste = $ajustes->get($clave);
+
+            if (! $ajuste instanceof Setting || (string) $ajuste->valor === (string) $valor) {
+                continue;
+            }
+
+            $ajuste->update(['valor' => $valor]);
         }
 
-        // La actualización masiva no dispara el evento `saved` del modelo,
-        // así que la caché de ajustes se limpia a mano.
+        // Cada `update()` de modelo ya olvida la caché en `saved`; se limpia
+        // igual por si nada cambió, para que el panel y el sitio no discrepen.
         Setting::olvidarCache();
 
         Notification::make()

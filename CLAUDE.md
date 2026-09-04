@@ -176,18 +176,17 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 # ASOBARES Quindío — contexto del proyecto (lee esto antes de tocar nada)
 
-> Este bloque lo mantiene el equipo, no Laravel Boost. Vive fuera de `<laravel-boost-guidelines>` para sobrevivir a una regeneración de Boost.
+> Este bloque lo mantiene el equipo, no Laravel Boost. Vive fuera de `<laravel-boost-guidelines>` para sobrevivir a una regeneración de Boost. **No dice qué está vivo a propósito**: eso envejece, y por eso vive en `material/estado.md`.
 
-**Lee primero `material/prompt-maestro-laravel-filament.md`, sección §0 «Punto de entrada».** Ahí está el estado real del proyecto, qué se está exigiendo y con qué fecha, qué falta y qué problemas conocidos te van a morder. Sin eso vas a proponer trabajo que ya está hecho, o a romper algo que costó una tarde arreglar.
+**Lee primero `material/prompt-maestro-laravel-filament.md`** (unas cien líneas). Es el punto de entrada: qué es el proyecto, qué archivo abrir según lo que vayas a tocar, y cómo se abre y se cierra una sesión. Desde ahí: **`material/estado.md`** es la foto de hoy —qué se exige y cuándo, qué falta, qué está bloqueado y por quién— y se reescribe entera al cerrar cada sesión; **`material/encargo.md`** es lo que el producto es y las reglas con las que se construye; **`material/bitacora.md`** es la historia, solo para cuando algo no cuadra. Sin eso vas a proponer trabajo que ya está hecho, o a romper algo que costó una tarde arreglar.
 
 Lo mínimo que hay que saber antes de escribir una línea:
 
-- **Este no es un proyecto nuevo.** Es la plataforma del gremio de la vida nocturna del Quindío, en producción de facto y ya demostrada al cliente. El prompt maestro es el registro del encargo, no un plan por ejecutar.
-- **Hay dos clientes con dos calendarios:** el gremio (entrega dura **22 de septiembre de 2026**) y la universidad (documento de práctica **individual**, entregas los viernes 11:59:59 pm, tarde = 0.0).
-- **El alcance está congelado desde el 14 de agosto de 2026.** Toda ampliación se registra por escrito **antes** de codificarse. El instrumento es `docs/ingenieria/constancias/`.
-- **El trabajo vivo es el §27** (los catorce señalamientos de la revisión del gremio del 28 de agosto, con archivo y línea) y el **§28** (estado del árbol y la última lección de método).
-- **Escribir la prueba no basta: rompe el código a propósito y comprueba que se pone roja.** Este proyecto ya pagó once falsos verdes y un defecto que solo aparecía los días 29, 30 y 31 del mes.
-- **Antes de citar cualquier cifra** —casos de prueba, migraciones, rendimiento— **mídela.** Ninguna cifra del expediente sale de una suma.
+- **Este no es un proyecto nuevo.** Es la plataforma del gremio de la vida nocturna del Quindío, desplegada con contenido oficial del gremio y ya demostrada al cliente. El encargo está ejecutado; el prompt maestro es el punto de entrada, no un plan.
+- **Hay dos clientes con dos calendarios:** el gremio (entrega dura según el cronograma firmado; la fecha vigente está en `estado.md`) y la universidad (documento de práctica **individual**, entregas los viernes 11:59:59 pm, tarde = 0.0).
+- **El alcance está congelado.** Toda ampliación se registra por escrito **antes** de codificarse; el instrumento es `docs/ingenieria/constancias/`.
+- **Escribir la prueba no basta: rompe el código a propósito y comprueba que se pone roja.** Este proyecto ya pagó doce falsos verdes y un defecto que solo aparecía los días 29, 30 y 31 del mes.
+- **Antes de citar cualquier cifra** —casos de prueba, migraciones, rendimiento— **mídela ese día.** Ninguna cifra del expediente sale de una suma.
 - **Usa siempre `GIT_OPTIONAL_LOCKS=0 git status`**: el `git status` normal deja un `index.lock` huérfano que las sesiones remotas no pueden borrar.
-- **Puede haber otra sesión trabajando en este mismo directorio.** Comprueba `git log --oneline -5` y el final del prompt maestro antes de escribir.
-- **Datos personales:** las fichas nacen en borrador y no se publican sin autorización del titular; `material/nuevomaterial/` está en `.gitignore` y ahí se queda. Cualquier cosa que exponga datos de terceros pasa antes por el §9 del prompt maestro.
+- **Puede haber otra sesión trabajando en este mismo directorio.** Comprueba `git log --oneline -5` y el commit del encabezado de `material/estado.md` antes de escribir.
+- **Datos personales:** las fichas nacen en borrador y no se publican sin autorización del titular; `material/nuevomaterial/` está en `.gitignore` y ahí se queda; en producción solo entra contenido de documento oficial del gremio. Cualquier cosa que exponga datos de terceros pasa antes por el §9 de `material/encargo.md`.

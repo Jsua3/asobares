@@ -5,81 +5,72 @@ namespace Database\Seeders;
 use App\Enums\EstadoPublicacion;
 use App\Models\Municipio;
 use App\Models\RequisitoApertura;
-use Database\Seeders\Support\GeneradorPdf;
 use Illuminate\Database\Seeder;
 
 /**
  * El producto insignia: la guía normativa por municipio.
  *
- * "Es el punto donde caen siempre los negocios y los cierran." Los costos y
- * algunos trámites cambian de un municipio a otro a propósito: esa diferencia
- * es justamente lo que ningún otro gremio documenta.
+ * «Es el punto donde caen siempre los negocios y los cierran.»
+ *
+ * ⚠️ **Esto se rehízo entero contra la fuente oficial.** Lo que había era una
+ * guía de tres municipios --Armenia, Salento y Filandia-- con **costos
+ * inventados** (180.000, 45.000, 380.000, 290.000…) y dos formatos PDF que se
+ * generaban al vuelo rotulados «Formato de ejemplo». En la demostración del
+ * gremio ya se había dicho «todavía no estamos actualizados» (`R21 09:27`), y
+ * el §29.4 lo deja escrito: publicar cifras equivocadas de trámites legales
+ * en una URL con el nombre del gremio encima es un riesgo del gremio, no del
+ * equipo.
+ *
+ * Los siete trámites de Armenia son, **literalmente**, el bloque que ya estaba
+ * transcrito y listo para pegar en
+ * `docs/ingenieria/guia-normativa-armenia-fuente-oficial.md` (§3). Ese
+ * documento sale de `material/REQUISITOS APERTURA - ARMENIA.docx`, la jornada
+ * «BLINDEMOS TU NEGOCIO ARMENIA» hecha con la Alcaldía de Armenia, que el
+ * gremio entregó el **20 de agosto de 2026** — de ahí la fecha de
+ * verificación, que no es ni una invención ni una omisión.
+ *
+ * La octava ficha no está en ese documento: es la lista de verificación de
+ * `material/nuevomaterial/REQUERIMIENTOS BASICOS GENERALES - ESTABLECIMIENTO
+ * NOCTURNO.docx`, apoyada en la **ley 1801 de 2016** y el **decreto 119**. Ese
+ * papel no lleva fecha, así que va sin `verificado_el` y la guía lo dice en su
+ * cara: «Sin verificar contra la fuente oficial».
+ *
+ * Tres consecuencias que no son descuido:
+ *
+ * - **Ningún `costo_aproximado`.** El documento oficial no trae ni una cifra.
+ *   Inventarlas otra vez sería repetir el mismo defecto con mejor letra.
+ * - **Solo Armenia.** Para Salento y Filandia no hay documento. Una guía
+ *   incompleta y cierta vale más que una completa e inventada; el §5 de aquel
+ *   documento ya cuenta los otros once municipios como pendiente del gremio.
+ * - **Sin `adjunto`.** Los PDF que se generaban decían «Formato de ejemplo» y
+ *   llevaban el nombre del gremio encima. Los formatos reales de las entidades
+ *   hay que pedirlos, y el gremio los sube desde el panel.
+ *
+ * ⚠️ **Pendiente que este commit NO cierra:** el §5 de ese mismo documento
+ * pide que la dirección confirme por escrito que esta es la versión vigente
+ * antes de publicar, «porque es información que un empresario va a usar para
+ * decidir si abre o no». Aquí salen publicadas --con su fuente y su fecha a la
+ * vista, que es la salvaguarda que pedía el §29.4-- pero esa confirmación
+ * sigue debiéndose, y desde el panel se pasan a borrador en un clic.
+ *
+ * Nota para quien resiembre sobre una base ya poblada: `updateOrCreate` va por
+ * `(municipio_id, entidad)` y **no borra nada**, así que las fichas viejas de
+ * Salento y Filandia siguen ahí. En desarrollo se limpian con
+ * `migrate:fresh --seed`; en producción la tabla nació vacía.
  */
 class RequisitoAperturaSeeder extends Seeder
 {
-    public function run(GeneradorPdf $pdf): void
+    /** La fuente, tal cual, para que quede en la ficha y se pueda auditar. */
+    public const string FUENTE_ARMENIA = 'Documento oficial de la Alcaldía de Armenia, campaña «Blindemos tu Negocio», entregado al gremio el 20 de agosto de 2026';
+
+    public const string FUENTE_GENERAL = 'Requerimientos básicos generales — Asobares Capítulo Quindío (ley 1801 de 2016 y decreto 119)';
+
+    /** El día en que el gremio entregó el documento. Ver §3 del documento citado. */
+    public const string VERIFICADO_EL = '2026-08-20';
+
+    public function run(): void
     {
-        $formatoBomberos = $pdf->generar(
-            'Solicitud de visita técnica — Cuerpo de Bomberos',
-            'Formato de ejemplo · ASOBARES Capítulo Quindío',
-            [
-                '# Datos del establecimiento',
-                'Razón social: ______________________________________________',
-                'NIT o cédula: ______________________________________________',
-                'Nombre comercial: __________________________________________',
-                'Dirección: _________________________________________________',
-                'Área del local (m2): _______   Aforo solicitado: ___________',
-                '',
-                '# Datos del solicitante',
-                'Nombre completo: ___________________________________________',
-                'Calidad en que actúa: propietario / representante legal',
-                'Teléfono: ______________  Correo: __________________________',
-                '',
-                '# Documentos que se adjuntan',
-                '(  ) Certificado de matrícula mercantil vigente',
-                '(  ) Certificado de uso de suelos',
-                '(  ) Plano o croquis del local con salidas de emergencia',
-                '(  ) Certificado de recarga de extintores',
-                '(  ) Constancia de mantenimiento eléctrico',
-                '',
-                '# Declaración',
-                'Declaro que la información consignada es veraz y autorizo la',
-                'visita técnica en el horario que disponga la entidad.',
-                '',
-                'Firma: __________________________   Fecha: _______________',
-            ],
-            'formatos',
-            'formato-solicitud-visita-bomberos.pdf'
-        );
-
-        $formatoPolicia = $pdf->generar(
-            'Registro de establecimiento abierto al público',
-            'Formato de ejemplo · ASOBARES Capítulo Quindío',
-            [
-                '# Identificación del establecimiento',
-                'Nombre comercial: __________________________________________',
-                'Dirección: _________________________________________________',
-                'Actividad principal: bar / gastrobar / discoteca / café',
-                'Horario de funcionamiento solicitado: ______________________',
-                '',
-                '# Responsable',
-                'Nombre: ____________________________________________________',
-                'Documento: _________________  Teléfono: ____________________',
-                '',
-                '# Compromisos del establecimiento',
-                '(  ) Respetar el horario autorizado por la autoridad local',
-                '(  ) Prohibir el ingreso de menores de edad',
-                '(  ) Mantener niveles de ruido dentro de la norma',
-                '(  ) Contar con personal de seguridad identificado',
-                '(  ) Exhibir de forma visible los documentos de funcionamiento',
-                '',
-                'Firma del responsable: ______________  Fecha: _____________',
-            ],
-            'formatos',
-            'formato-registro-policia.pdf'
-        );
-
-        foreach ($this->guiaPorMunicipio($formatoBomberos, $formatoPolicia) as $slug => $requisitos) {
+        foreach ($this->guiaPorMunicipio() as $slug => $requisitos) {
             $municipio = Municipio::where('slug', $slug)->firstOrFail();
 
             foreach ($requisitos as $orden => $requisito) {
@@ -89,6 +80,10 @@ class RequisitoAperturaSeeder extends Seeder
                         'municipio_id' => $municipio->id,
                         'orden' => $orden + 1,
                         'estado' => EstadoPublicacion::Publicado,
+                        // El documento no trae cifras. No se rellenan.
+                        'costo_aproximado' => null,
+                        'verificado_el' => self::VERIFICADO_EL,
+                        'verificado_con' => self::FUENTE_ARMENIA,
                     ]
                 );
             }
@@ -96,239 +91,110 @@ class RequisitoAperturaSeeder extends Seeder
     }
 
     /** @return array<string, list<array<string, mixed>>> */
-    private function guiaPorMunicipio(string $formatoBomberos, string $formatoPolicia): array
+    private function guiaPorMunicipio(): array
     {
         return [
             'armenia' => [
                 [
+                    'entidad' => 'Alcaldía de Armenia — Planeación municipal y Curaduría',
+                    'descripcion' => 'El certificado de uso de suelos autoriza que en esa dirección pueda funcionar un bar o una discoteca. Son dos puertas distintas: Planeación municipal emite el concepto y la Curaduría ciudadana el documento oficial. Consúltalo ANTES de firmar el arriendo.',
+                    'checklist' => [
+                        'Concepto de uso de suelo emitido por Planeación municipal',
+                        'Documento oficial expedido por la Curaduría ciudadana',
+                        'Verificar que la actividad económica del RUT coincida con el concepto de uso de suelo',
+                    ],
+                    'enlace_externo' => 'https://armenia.gov.co',
+                ],
+                [
                     'entidad' => 'Cámara de Comercio de Armenia y del Quindío',
-                    'descripcion' => 'La matrícula mercantil es el primer paso: sin ella no puedes tramitar nada más. Se renueva cada año antes del 31 de marzo.',
+                    'descripcion' => 'La matrícula mercantil es el registro legal del establecimiento. Debe estar renovada antes del 31 de marzo de cada año.',
                     'checklist' => [
                         'Formulario RUES diligenciado (persona natural o jurídica)',
                         'Cédula del propietario o del representante legal',
                         'RUT expedido por la DIAN',
                         'Consulta previa de homonimia del nombre comercial',
-                        'Pago del derecho de matrícula según los activos declarados',
+                        'Renovación al día: vence el 31 de marzo de cada año',
                     ],
                     'enlace_externo' => 'https://camaraarmenia.org.co',
-                    'costo_aproximado' => 180000,
                 ],
                 [
-                    'entidad' => 'Alcaldía de Armenia — Uso de suelos',
-                    'descripcion' => 'El certificado de uso de suelos dice si en esa dirección se puede operar un establecimiento nocturno. Consúltalo ANTES de firmar el arriendo: es el error más caro y más común.',
+                    'entidad' => 'Secretaría de Salud Municipal — Concepto sanitario',
+                    'descripcion' => 'Es la visita de los inspectores de salud. Se solicita por correo a servicioalcliente@armenia.gov.co con el asunto VISITA SANITARIA, adjuntando nombre del establecimiento, dirección y RUT. El requisito se cumple con el acta de visita con concepto favorable o, mientras llega, con la solicitud radicada.',
                     'checklist' => [
-                        'Solicitud de concepto de uso de suelo por dirección exacta',
-                        'Certificado de matrícula mercantil',
-                        'Croquis de ubicación del inmueble',
-                        'Verificar la distancia mínima a colegios e iglesias',
+                        'Solicitud enviada a servicioalcliente@armenia.gov.co — asunto: VISITA SANITARIA',
+                        'Adjuntar nombre del establecimiento, dirección y RUT',
+                        'Certificado vigente de control de plagas',
+                        'Certificados de manipulación de alimentos (si aplica)',
+                        'Condiciones locativas de los baños en regla',
+                        'Acta de visita con concepto favorable, o la solicitud de visita radicada',
                     ],
-                    'enlace_externo' => 'https://armenia.gov.co',
-                    'costo_aproximado' => 45000,
                 ],
                 [
-                    'entidad' => 'Cuerpo de Bomberos de Armenia',
-                    'descripcion' => 'Concepto técnico de seguridad humana. Revisan extintores, señalización, salidas de emergencia y la instalación eléctrica. Descarga el formato, diligéncialo y radícalo para que agenden la visita.',
+                    'entidad' => 'Cuerpo Oficial de Bomberos de Armenia',
+                    'descripcion' => 'Certificado de seguridad humana y contra incendios emitido por el Cuerpo Oficial de Bomberos de Armenia.',
                     'checklist' => [
-                        'Carta de solicitud de visita técnica diligenciada',
                         'Extintores vigentes y con recarga certificada',
-                        'Señalización de rutas de evacuación y salidas',
+                        'Señalización de rutas de evacuación',
+                        'Luces de emergencia',
                         'Botiquín de primeros auxilios dotado',
-                        'Certificado de mantenimiento de la instalación eléctrica',
-                        'Plan de emergencia y contingencia del establecimiento',
                     ],
-                    'adjunto' => $formatoBomberos,
-                    'adjunto_nombre' => 'Formato de solicitud de visita — Bomberos Armenia',
-                    'costo_aproximado' => 120000,
                 ],
                 [
-                    'entidad' => 'Sayco y Acinpro',
-                    'descripcion' => 'Si suena música en tu establecimiento, causa derechos de autor y derechos conexos. Los afiliados a ASOBARES tienen tarifa preferencial negociada por el gremio.',
+                    'entidad' => 'Corporación Autónoma Regional del Quindío (CRQ) — Intensidad auditiva',
+                    'descripcion' => 'Cumplimiento de los niveles de decibeles permitidos. La medición se solicita a la entidad por correo electrónico. Asegúrate de que el establecimiento tenga el aislamiento acústico necesario para no generar impacto sobre la vecindad.',
+                    'checklist' => [
+                        'Solicitud de medición de intensidad auditiva enviada a la CRQ',
+                        'Aislamiento acústico verificado',
+                        'Medición dentro de los niveles de decibeles permitidos',
+                    ],
+                    'enlace_externo' => 'https://crq.gov.co',
+                ],
+                [
+                    'entidad' => 'Sayco y Acinpro — Derechos de autor',
+                    'descripcion' => 'Comprobante de pago por la comunicación pública de música. Si eres afiliado a ASOBARES Quindío, el gremio puede revisar tu tarifa y darte acceso a descuentos con marcas aliadas.',
                     'checklist' => [
                         'Formulario de declaración del establecimiento',
-                        'Indicar área del local y aforo real',
-                        'Declarar el tipo de música y si hay ejecución en vivo',
-                        'Presentar el carné de afiliación a ASOBARES para el descuento',
+                        'Comprobante de pago por comunicación pública de música',
+                        'Consultar con ASOBARES la revisión de tarifa para afiliados',
                     ],
-                    'enlace_externo' => 'https://www.sayco.org',
-                    'costo_aproximado' => 380000,
                 ],
                 [
-                    'entidad' => 'Secretaría de Salud de Armenia',
-                    'descripcion' => 'Concepto sanitario favorable. Obligatorio si manipulas alimentos o bebidas, es decir: prácticamente siempre.',
+                    'entidad' => 'Policía Nacional — Notificación de apertura',
+                    'descripcion' => 'Solicitud escrita a la estación de policía correspondiente notificando la apertura de un establecimiento de comercio en la zona. Solo aplica a establecimientos abiertos después del año 2019.',
                     'checklist' => [
-                        'Certificados de manipulación de alimentos de todo el personal',
-                        'Concepto sanitario del establecimiento',
-                        'Contrato vigente de control de plagas',
-                        'Certificado de lavado y desinfección de tanques de agua',
-                        'Plan de manejo de residuos sólidos',
+                        'Solicitud escrita dirigida a la estación de policía de la zona',
+                        'Aplica únicamente si el establecimiento abrió después de 2019',
                     ],
-                    'costo_aproximado' => null,
                 ],
                 [
-                    'entidad' => 'Policía Nacional — Control de horarios',
-                    'descripcion' => 'Registro del establecimiento y verificación del horario autorizado. Es la entidad que más visita de noche: ten los papeles a la mano y visibles.',
+                    // La octava no sale de la jornada con la Alcaldía sino de la
+                    // lista que el gremio lleva a la visita. Ese papel no está
+                    // fechado, así que va sin `verificado_el` y la guía lo dice.
+                    'entidad' => 'Documentación general del establecimiento (ley 1801 de 2016)',
+                    'descripcion' => 'La lista que el gremio revisa en la visita, según la ley 1801 (Código Nacional de Policía) y el decreto 119. Ten estos documentos vigentes y a la mano: es lo que piden en un operativo.',
                     'checklist' => [
-                        'Formato de registro del establecimiento diligenciado',
-                        'Aviso visible de prohibición de ingreso a menores de edad',
-                        'Horario autorizado exhibido en la entrada',
-                        'Documentos de funcionamiento disponibles en el local',
-                        'Personal de seguridad debidamente identificado',
+                        'Cámara de comercio del establecimiento',
+                        'RUT con las actividades económicas 5630, 5611, 9007 o 9008',
+                        'Certificado de bomberos, o radicado de la solicitud',
+                        'Concepto sanitario vigente, o radicado de la solicitud de visita',
+                        'Comunicado de notificación de apertura firmado o recibido por la policía local',
+                        'Uso de suelos o licencia de construcción',
+                        'Certificado o recibo de pago de derechos de autor',
+                        'Plan de saneamiento básico',
+                        'Certificado de lavado de tanques',
+                        'Certificado de control de plagas',
+                        'Carné de manipulación de alimentos de los colaboradores',
+                        'Certificados médicos de los colaboradores',
+                        'Certificado RETIE y RETILAP',
+                        'Certificación de resolución de facturación (DIAN)',
+                        'Plan de salud y seguridad en el trabajo',
+                        'Avisos de espacio libre de humo',
+                        'Aviso de prohibición de expendio de bebidas a menores de edad',
+                        'Aviso «Usted está siendo grabado y monitoreado»',
+                        'Acta de propinas',
                     ],
-                    'adjunto' => $formatoPolicia,
-                    'adjunto_nombre' => 'Formato de registro de establecimiento — Policía',
-                    'costo_aproximado' => null,
-                ],
-            ],
-
-            'salento' => [
-                [
-                    'entidad' => 'Cámara de Comercio de Armenia y del Quindío',
-                    'descripcion' => 'Salento se atiende desde la seccional de Armenia. Mismo trámite de matrícula mercantil, con atención presencial los martes en el municipio.',
-                    'checklist' => [
-                        'Formulario RUES diligenciado',
-                        'Cédula del propietario o representante legal',
-                        'RUT expedido por la DIAN',
-                        'Consulta previa de homonimia del nombre comercial',
-                    ],
-                    'enlace_externo' => 'https://camaraarmenia.org.co',
-                    'costo_aproximado' => 180000,
-                ],
-                [
-                    'entidad' => 'Alcaldía de Salento — Uso de suelos',
-                    'descripcion' => 'Salento es Paisaje Cultural Cafetero: el centro histórico tiene restricciones adicionales de fachada, aviso y niveles de ruido que no aplican en otros municipios.',
-                    'checklist' => [
-                        'Solicitud de concepto de uso de suelo',
-                        'Concepto de la oficina de Planeación sobre intervención de fachada',
-                        'Aprobación del diseño del aviso comercial',
-                        'Verificar restricción de ruido en el perímetro del centro histórico',
-                    ],
-                    'costo_aproximado' => 38000,
-                ],
-                [
-                    'entidad' => 'Cuerpo de Bomberos de Salento',
-                    'descripcion' => 'En Salento el concepto de bomberos cuesta cerca de $100.000 y la visita se agenda con menos frecuencia: solicítala con tiempo.',
-                    'checklist' => [
-                        'Carta de solicitud de visita técnica',
-                        'Extintores vigentes con recarga certificada',
-                        'Señalización de evacuación',
-                        'Certificado de la instalación eléctrica',
-                        'Consideraciones especiales para construcciones en bahareque y madera',
-                    ],
-                    'adjunto' => $formatoBomberos,
-                    'adjunto_nombre' => 'Formato de solicitud de visita — Bomberos Salento',
-                    'costo_aproximado' => 100000,
-                ],
-                [
-                    'entidad' => 'Sayco y Acinpro',
-                    'descripcion' => 'Tarifa nacional según área y aforo, con descuento para afiliados al gremio.',
-                    'checklist' => [
-                        'Formulario de declaración del establecimiento',
-                        'Área del local y aforo real',
-                        'Declarar si hay música en vivo',
-                        'Carné de afiliación a ASOBARES para el descuento',
-                    ],
-                    'enlace_externo' => 'https://www.sayco.org',
-                    'costo_aproximado' => 290000,
-                ],
-                [
-                    'entidad' => 'Secretaría de Salud del Quindío',
-                    'descripcion' => 'En municipios sin secretaría propia, el concepto sanitario lo emite la Secretaría departamental.',
-                    'checklist' => [
-                        'Certificados de manipulación de alimentos del personal',
-                        'Concepto sanitario del establecimiento',
-                        'Control de plagas vigente',
-                        'Certificado de potabilidad del agua',
-                    ],
-                    'costo_aproximado' => null,
-                ],
-                [
-                    'entidad' => 'Policía Nacional — Control de horarios',
-                    'descripcion' => 'El horario en Salento es más restrictivo que en Armenia por la vocación turística del municipio. Confirma el horario vigente antes de programar tu operación.',
-                    'checklist' => [
-                        'Formato de registro del establecimiento',
-                        'Aviso de prohibición de ingreso a menores',
-                        'Horario autorizado exhibido en la entrada',
-                        'Documentos de funcionamiento en el local',
-                    ],
-                    'adjunto' => $formatoPolicia,
-                    'adjunto_nombre' => 'Formato de registro de establecimiento — Policía',
-                    'costo_aproximado' => null,
-                ],
-            ],
-
-            'filandia' => [
-                [
-                    'entidad' => 'Cámara de Comercio de Armenia y del Quindío',
-                    'descripcion' => 'Matrícula mercantil para Filandia, tramitada en la seccional de Armenia o en las jornadas móviles del municipio.',
-                    'checklist' => [
-                        'Formulario RUES diligenciado',
-                        'Cédula del propietario o representante legal',
-                        'RUT expedido por la DIAN',
-                        'Consulta de homonimia',
-                    ],
-                    'enlace_externo' => 'https://camaraarmenia.org.co',
-                    'costo_aproximado' => 180000,
-                ],
-                [
-                    'entidad' => 'Alcaldía de Filandia — Uso de suelos',
-                    'descripcion' => 'El centro histórico de Filandia también está protegido. Los balcones y fachadas tienen norma propia y el aviso comercial requiere aprobación.',
-                    'checklist' => [
-                        'Solicitud de concepto de uso de suelo',
-                        'Aprobación de intervención de fachada si aplica',
-                        'Diseño del aviso comercial aprobado por Planeación',
-                        'Verificación de aforo permitido para el inmueble',
-                    ],
-                    'costo_aproximado' => 35000,
-                ],
-                [
-                    'entidad' => 'Cuerpo de Bomberos de Filandia',
-                    'descripcion' => 'Concepto técnico de seguridad humana, con énfasis en las construcciones tradicionales de madera del centro.',
-                    'checklist' => [
-                        'Carta de solicitud de visita técnica',
-                        'Extintores vigentes',
-                        'Señalización de evacuación',
-                        'Certificado eléctrico',
-                        'Medidas reforzadas para inmuebles en madera',
-                    ],
-                    'adjunto' => $formatoBomberos,
-                    'adjunto_nombre' => 'Formato de solicitud de visita — Bomberos Filandia',
-                    'costo_aproximado' => 95000,
-                ],
-                [
-                    'entidad' => 'Sayco y Acinpro',
-                    'descripcion' => 'Declaración y pago de derechos de autor y conexos según área y aforo.',
-                    'checklist' => [
-                        'Formulario de declaración',
-                        'Área y aforo del establecimiento',
-                        'Declarar música en vivo si aplica',
-                        'Carné de afiliación a ASOBARES',
-                    ],
-                    'enlace_externo' => 'https://www.sayco.org',
-                    'costo_aproximado' => 270000,
-                ],
-                [
-                    'entidad' => 'Secretaría de Salud del Quindío',
-                    'descripcion' => 'Concepto sanitario emitido por la Secretaría departamental.',
-                    'checklist' => [
-                        'Certificados de manipulación de alimentos',
-                        'Concepto sanitario',
-                        'Control de plagas vigente',
-                        'Manejo de residuos sólidos',
-                    ],
-                    'costo_aproximado' => null,
-                ],
-                [
-                    'entidad' => 'Policía Nacional — Control de horarios',
-                    'descripcion' => 'Registro y verificación de horarios. Filandia aplica restricciones especiales en temporada alta y festivos.',
-                    'checklist' => [
-                        'Formato de registro del establecimiento',
-                        'Aviso de prohibición de ingreso a menores',
-                        'Horario autorizado visible',
-                        'Documentos de funcionamiento en el local',
-                    ],
-                    'adjunto' => $formatoPolicia,
-                    'adjunto_nombre' => 'Formato de registro de establecimiento — Policía',
-                    'costo_aproximado' => null,
+                    'verificado_el' => null,
+                    'verificado_con' => self::FUENTE_GENERAL,
                 ],
             ],
         ];
