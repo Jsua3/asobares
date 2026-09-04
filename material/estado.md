@@ -28,17 +28,17 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 
 | | |
 |---|---|
-| Fecha | Madrugada del miércoles 2 de septiembre de 2026 (Bogotá), cerrando la sexta sesión del martes 1 |
-| `main` | `a408afc` · 285 confirmaciones · este archivo entra en el commit siguiente; al cerrar, `cifras-del-gremio` se fusiona a `main` por avance rápido y **`main` se sube a `origin`** |
-| Rama de trabajo | Ninguna: la sesión cerró sobre `main` y borró `cifras-del-gremio` |
-| Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5.9). **La suite sí se ejecutó** (§5) |
-| Producción | `https://asobares-production-0jhdcz.laravel.cloud` responde **200** (petición `HEAD`, 1 sep); contenido releído por última vez el 1 sep por la mañana (§31.7). Con el `push` de esta sesión `origin` queda al día: el siguiente despliegue lleva D-23, D-24 y la franja del gremio, que **no se verá hasta que la oficina teclee cifras** |
+| Fecha | Noche del jueves 3 de septiembre de 2026 (Bogotá) |
+| `main` | `0a8e490` · 292 confirmaciones · este archivo entra en el commit siguiente. **`main` está por delante de `origin`: falta el `push`** |
+| Rama de trabajo | Ninguna. Las dos ramas de la Persona 2 entraron a `main` por avance rápido; `origin/p2-redisenio-visual`, `origin/p2/acceso-asociados` y `origin/p2-directorio` siguen publicadas y ya no aportan nada |
+| Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5). **La suite sí se ejecutó** (§5) y el video **sí se miró en el navegador** con la página servida |
+| Producción | `https://asobares-production-0jhdcz.laravel.cloud` responde **200** en 2,46 s en frío (3 sep). **Está sirviendo `6f24ff4`**: no tiene ni el rediseño, ni las bolsas detrás de la sesión, ni el video |
 
 ## 1. Qué se exige y cuándo
 
 | Fecha | Qué | Quién lo exige |
 |---|---|---|
-| **Jue 3 – vie 4 sep, 11:59:59 pm** | Documento de práctica corregido según la revisión CG del 31 ago («veo muy bien el documento»), en `.docx` con sus anexos, en el hilo «Entrega de documento de practicas». Meta interna: jueves 3 | Docente asesor. Tarde = 0.0 |
+| **HOY jue 3 – vie 4 sep, 11:59:59 pm** | Documento de práctica corregido según la revisión CG del 31 ago, en `.docx` con sus anexos, en el hilo «Entrega de documento de practicas». **Ya está corregido y puesto en el repositorio** (`docs/ingenieria/Semana 7 - Documento - Juan Jose Sua - correccion.docx`); falta enviarlo, y falta que describa el sistema que de verdad hay (§2.5) | Docente asesor. Tarde = 0.0 |
 | **Entre el 4 y el 11 de sep** | **Segunda demostración con la capa visual levantada**, sobre la URL pública, en el teléfono del directivo. Fecha exacta sin fijar (pedir jue 10 o vie 11) | Directivo del capítulo (`R24 04:52`) |
 | 7 – 11 sep | Pruebas en dispositivos reales y corrección de lo que salga | Cronograma firmado (S7) |
 | 14 – 18 sep | Dominio, SSL, capacitación y Acta 02 firmada; manual actualizado | Cronograma firmado (S8) |
@@ -52,59 +52,69 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 | Ref. | Estado | Qué falta, y de quién depende |
 |---|---|---|
 | OBS3-01, 02, 04, 05, 06, 08, 12, 13, 14 | ✅ Cerrados con commit (31 ago, §30.1) | — |
-| OBS3-03 | ✅ Cerrado por decisión (1 sep): el sitio arranca en el tema del dispositivo, `system`, como estaba. Sin cambio de código (`encargo.md` §13) | — |
-| OBS3-02 | ⚠️ Ranura y velo del hero puestos, **vacía** | Ya hay medio autorizado y en local (OBS3-07): elegir entre las 19 fotos y el video; si es el video, recortarlo y comprimirlo primero (D-22); medir contraste en los dos temas |
-| OBS3-07 | ⚠️ **Insumo en mano y en local** desde el 1 sep: 19 fotos y el video (48 s, 55,7 MB) en `material/nuevomaterial/` | Pies de foto (D-03); recortar y comprimir el video (D-22); ponerlos en el sitio (franja visual) |
-| OBS3-09 | ⚠️ Mitad cerrada (acuse al postulante) | La otra mitad —que el afiliado consulte aspirantes— **prohibida** hasta releer `encargo.md` §9: datos de terceros |
+| OBS3-03 | ✅ Cerrado por decisión (1 sep): el sitio arranca en el tema del dispositivo, `system` | — |
+| OBS3-02 (medio del hero) | ✅ **Cerrado el 3 sep** (`0a8e490`): la ranura tiene el video institucional. Bucle de 10 s sin audio, 1280×768, 1,48 MB, fundido a negro en los dos extremos, póster propio de 27 KB, y **versionado**, que es lo único que llega a producción | Medir contraste del rótulo en los dos temas con el video corriendo |
+| OBS3-07 (fotos y video del gremio) | ⚠️ **Mitad cerrada**: el video ya está en el sitio. Las 19 fotografías siguen sin usarse | Pies de foto (D-03) y colocarlas en la franja visual |
+| OBS3-09 (bolsa de empleo) | ✅ **Cerrado el 3 sep**: Sua autorizó que el afiliado consulte aspirantes. `/mi-cuenta/aspirantes` muestra nombre, cargo, experiencia, **teléfono con enlace de WhatsApp y correo** a todo establecimiento afiliado con cuenta. **Deja abierto un frente legal: §2.4** | — |
 | OBS3-10 | ⚠️ Código puesto | Las **7 URL de trámite** de Armenia. Insumo del gremio (D-04) |
 | OBS3-11 | ⚠️ Código puesto (todo editable) | El **texto propio** de «Quiénes somos» y nombres/cargos confirmados (D-05) |
-| OBS3-15 a 18 | ❌ Congelados | **Acta 04 sin firmar** (D-01). Una fila sin marcar no aplaza: deja sin decidir |
+| OBS3-15 a 18 | ❌ Congelados | **Acta 04 sin firmar** (D-01) |
 
-De catorce, diez cerrados y cuatro vivos (07, 09, 10, 11); **ninguno de los cuatro se cierra escribiendo código**, y el 07 ya tiene el insumo en local: es trabajo de la franja visual. La franja de diseño que nadie ha hecho: dirección de arte escrita, hero con medio real (el fondo generativo queda como respaldo), estados vacíos que anuncien en vez de esconder (destacados y eventos no se pintan hoy), iconos distintivos de los cinco beneficios, tratamiento de los aliados sin logo, especificación de fotos para el manual. Es de la Persona 2 y puede correr en su worktree esta semana.
+De catorce, **doce cerrados y dos vivos** (10 y 11); ninguno de los dos se cierra escribiendo código.
+
+**Lo que entró el 3 de septiembre desde las ramas de la Persona 2** (`p2-redisenio-visual` + `p2/acceso-asociados`, fusionadas a `main` por avance rápido):
+
+- **Capa visual**: hero editorial con tarjeta audiovisual, escena fotográfica, barra de tema lateral, banda de videos en la portada, 484 líneas nuevas de `app.css` y tokens de movimiento. Es la franja de diseño que llevaba semanas sin hacerse.
+- **Las bolsas dejan de ser públicas**: los contactos de proveedores pasan a `/mi-cuenta/proveedores` y el banco de talento a `/mi-cuenta/aspirantes`, los dos detrás de `['auth','rol.asociado']`. `/proveedores` sigue pública e indexable pero sin un solo contacto: explica la bolsa y cuenta cuántos hay por categoría. `/empleo` no se toca, a propósito: quien busca trabajo tiene que poder ver la vacante.
+- **Se escribió sin PHP delante y no se ejecutó nada.** Al fusionarla salieron dos fallos reales, arreglados en `0a8e490`: `hero_frase_corta` y `hero_video_rotulo` estaban sembradas y exigidas por la prueba sin que ninguna vista las pintara —la tarjeta del video salía muda—, y `VerificacionDeProveedoresTest` abría la sesión del afiliado antes de sembrar, así que el observer degradaba las fichas a `pendiente_aprobacion` (RF-37) y el directorio salía vacío.
 
 ### 2.2 Contenido
 
 | Qué | Estado | Qué falta, y de quién depende |
 |---|---|---|
-| **Franja «El gremio en cifras»** (D-25, Acta 05) | ✅ Código en `a408afc`: cuatro cifras editables en «Ajustes del sitio → El gremio en cifras», vacías de fábrica, la franja no se pinta sin ellas, fecha automática. **En producción no se verá hasta que la oficina teclee la primera** | **Firmar el Acta 05** (emitida 1 sep); **fijar las cuatro cifras y su fuente** con Natalia (punto 5 del acta); teclearlas. Leerlas del Excel de la contadora es Fase II, cuando exista el archivo |
-| Guía normativa | ⚠️ **1 municipio de 12** (Armenia: 7 trámites + lista de verificación Ley 1801/decreto 119, fechados 20 ago, sin costos) | Salento y Filandia perdieron su contenido inventado; el selector ofrece solo Armenia y la página no dice por qué. Los otros 11: orden y fuente (D-21). **Formatos oficiales por entidad: habilitados el 1 sep, pero no han llegado** (ningún PDF de Bomberos ni de otra entidad en el Drive, §35.3). ⚠️ Los dos PDF de `storage/app/private/formatos/` (`formato-solicitud-visita-bomberos.pdf`, `formato-registro-policia.pdf`, 2–3 KB, 3 ago) son los **formatos de ejemplo del prototipo** que generó `GeneradorPdf`, no los oficiales: dicen «Documento de ejemplo generado para el prototipo» y no van a producción (regla 5). **Sua los pide el 2 sep** a la Alcaldía o al gremio; cuando lleguen, se suben desde el panel al requisito, después del bucket (D-13). Dueño del mantenimiento: sin nombrar |
-| Portada | ✅ Todo texto editable; promesas ajustadas a lo que existe | Medios: 6 imágenes y ningún video en la portada publicada; desde el 1 sep hay 19 fotos y el video autorizados y en local (OBS3-07). La franja «La noche en cifras» son cuatro ajustes editables con el estudio del Observatorio de la Nacional |
-| Aliados | ✅ 23 sembrados del catálogo oficial (19 comerciales con condición real privada + 4 institucionales) | Logos en buena resolución (D-06); cuáles aplican al Quindío y convenios locales (D-18) |
-| Beneficios e iniciativas | ✅ 5 y 5, de documento oficial (`BENEFICIOS AFILIADOS PDF.pdf` está en `nuevomaterial/`) | — |
-| «Quiénes somos» | ⚠️ Editable entero; texto provisional | Texto propio, nombres y cargos, relación con el Eje Cafetero y la Nacional (D-05, D-18) |
-| Directorio | ⚠️ **0 fichas publicadas** en producción (correcto sin autorizaciones). En local, 41 en borrador (23 ago). **Las dos versiones de la base (48 filas del 26 ago y 41 del 23 ago) están en `nuevomaterial/` desde el 1 sep** | Importar la de 48 con `asociados:importar` desde **fuera del árbol** y depurar (nombres repetidos, NIT normalizado, categorías reales); autorización de cada titular (propuesta: sección VIII del formulario oficial) |
-| Lista de verificación de funcionamiento (Ley 1801) | ✅ Sembrada como ficha de Armenia | Confirmar qué norma es el «decreto 119» (D-18) |
-| Boletín laboral (Ley 2466 de 2025) | ❌ Sin publicar (`Ley laboral.pdf`, 5,4 MB, está en `nuevomaterial/`) | Redactarlo como calendario vigente a 2026; revisión del aliado jurídico (D-18); categoría `normativa` en el enum (Persona 1) |
-| Formulario oficial de registro | ❌ No está en `/afiliate`. `Registro Establecimiento.xlsx` es ese formulario maquetado en Excel (§35.3), no una tabla | Decidir descargable (opción A, dentro del alcance: se exporta a PDF y se sube) o en línea por pasos (B, Fase II) (D-18) |
-| Certificado de afiliación | ❌ Molde en `Certificado de afiliacion SALSABOR.docx` | Es ampliación (D-18): no se codifica sin constancia |
+| **Los 126 ajustes sembrados** | ⚠️ En producción hay **109**. Los **17 nuevos** de la capa visual (`hero_frase_corta`, `hero_resumen_corto`, los tres `hero_video_*` y los doce `portada_video*`) **no existen todavía en la base** | Correr `ContenidoOficialSeeder` una vez tras el despliegue. Dieciséis traen texto de respaldo en la vista y se ven igual; `hero_frase_corta` no lo lleva a propósito —inventarle un valor sería contenido no oficial— y **no se pinta hasta que alguien la teclee** |
+| **Franja «El gremio en cifras»** (D-25, Acta 05) | ✅ Código en `a408afc`, vacía de fábrica, no se pinta sin cifras | **Firmar el Acta 05**; fijar las cuatro cifras y su fuente con Natalia; teclearlas |
+| **Banda de videos de la portada** | ⚠️ Tres huecos de video con títulos de fábrica («La noche se mueve», «Rutas del gremio», «Agenda viva») y pósters tomados de fotos de asociados. **Hay un solo video y los tres `src` están en `null`** | Decidir si la banda se queda con un hueco real o se recorta a lo que existe. Contradice «promesas ajustadas a lo que existe», que era la regla de la portada |
+| Guía normativa | ⚠️ **1 municipio de 12** (Armenia) | Los otros 11: orden y fuente (D-21). **Formatos oficiales por entidad: sin llegar.** Los dos PDF de `storage/app/private/formatos/` son los de ejemplo del prototipo y no van a producción |
+| Portada | ✅ Todo texto editable | Las 19 fotos autorizadas siguen sin colocarse |
+| Aliados | ✅ 23 sembrados del catálogo oficial | Logos en buena resolución (D-06); cuáles aplican al Quindío (D-18) |
+| Beneficios e iniciativas | ✅ 5 y 5, de documento oficial | — |
+| «Quiénes somos» | ⚠️ Editable entero; texto provisional | Texto propio, nombres y cargos (D-05, D-18) |
+| Directorio | ⚠️ **0 fichas publicadas** en producción (correcto sin autorizaciones). En local, 41 en borrador | Importar la base de 48 con `asociados:importar` **desde `D:/Sua_Files/material-asobares/`**, que es donde vive; autorización de cada titular |
+| Boletín laboral (Ley 2466 de 2025) | ❌ Sin publicar | Redactarlo; revisión del aliado jurídico (D-18) |
+| Formulario oficial de registro | ❌ No está en `/afiliate` | Descargable (opción A) o en línea por pasos (B, Fase II) (D-18) |
+| Certificado de afiliación | ❌ Molde en `nuevomaterial/` | Es ampliación (D-18) |
 | Cifra pública de afiliados | ⚠️ El sitio dice 60; la base 48; el directivo 60 | La fija Natalia (D-18) |
 
 ### 2.3 Infraestructura
 
 | Qué | Estado |
 |---|---|
-| Sitio | ✅ **200** sobre PostgreSQL 17.11 (`bold-leaf-62673759`, esquema `production`), 39 migraciones aplicadas, base con contenido oficial (1 sep) |
-| Cuenta de Laravel Cloud | ✅ Existe, con medio de pago del gremio (30 ago). ⚠️ La organización se llama `juan-sua`: **comprobar a nombre de quién está la facturación**, añadir a Natalia como miembro y anotar el traspaso en el runbook §12 (D-12) |
-| Correo saliente (SMTP) | ❌ **Sin contratar: ver el bloque «Arreglo pendiente» de arriba.** Con el transporte caído ya no se rompe nada: formularios públicos (D-23, `707e21e`) ni acciones del panel (D-24, `07a3033`), `CorreoSalienteCaidoTest` |
-| Bucket | ❌ Sin crear. Política acotada a `publico/*` (runbook §8.3) **antes** de crearlo. Arrastra el disco público con fotos sin moderar (D-13), y desde el 1 sep condiciona también los **formatos oficiales** de la guía y el **video del hero** si se sirve desde el sitio (D-22) |
+| Sitio | ✅ **200** sobre PostgreSQL 17.11, 39 migraciones aplicadas. **Sirviendo `6f24ff4`: le faltan cinco commits** |
+| Despliegue pendiente | ❌ **`main` no está subido.** Sin `push` no hay despliegue, y sin despliegue no hay ni rediseño, ni bolsas cerradas, ni video |
+| Video del hero en producción | ✅ Resuelto por diseño: `public/videos/` **se versiona** y viaja con el código. No depende del bucket. `VideoDelHeroTest` vigila que `.gitignore` no vuelva a taparlo |
+| Cuenta de Laravel Cloud | ✅ Existe, con medio de pago del gremio. ⚠️ La organización se llama `juan-sua`: comprobar la facturación y añadir a Natalia (D-12) |
+| Correo saliente (SMTP) | ❌ **Sin contratar: ver el bloque de arriba.** Con el transporte caído ya no se rompe nada |
+| Bucket | ❌ Sin crear. Ya **no** condiciona el video; sigue condicionando las fotos sin moderar y los formatos oficiales (D-13) |
 | Dominio propio | ❌ Semana 8; sin nombre (D-09) |
-| Indexación | ⚠️ Hoy `robots.txt` responde `Allow: /` con sitemap de 14 URL, sin `X-Robots-Tag` ni `<meta name="robots">`: el sitio invita a indexar un directorio y una bolsa vacíos bajo el nombre del gremio. Decidir `noindex` hasta el lanzamiento (D-08) |
-| Rendimiento contra la URL | ❌ Sin medir. Los 972 ms del expediente son contra `localhost`; medir en caliente (scale-to-zero) |
+| Indexación | ⚠️ `robots.txt` responde `Allow: /`. Decidir `noindex` hasta el lanzamiento (D-08). **Más urgente ahora**: `/proveedores` sigue indexable a propósito, y es la única bolsa que queda abierta |
+| Rendimiento contra la URL | ⚠️ Solo la portada: **2,46 s en frío** (3 sep, `curl`, scale-to-zero). Sin medición completa |
 | Dispositivos reales (RNF-01, RNF-07) | ❌ Sin hacer (S7) |
-| Límite de gasto de Cloud (~US$10) y `LOG_STACK=stderr` | ⚠️ Confirmar en la consola |
-| Repositorio | ⚠️ `Jsua3/asobares`, público, en cuenta personal; sin segundo administrador (D-12). `origin/main` al día al cerrar esta sesión |
+| Repositorio | ⚠️ `Jsua3/asobares`, público. **Cero PR en toda la historia y cero CI** (`.github/workflows/` no existe): nada verifica una rama antes de que entre. Colaboradores: `Jsua3` admin, `INGRIDMONWARTSKI` **write** — sigue sin segundo administrador (D-12) |
+| `docs/ingenieria/decisiones/` | ⚠️ Carpeta **nueva** creada por la Persona 2 para dejar por escrito el cierre de las bolsas. Las ampliaciones van en `constancias/`; decidir si se convierte en Acta 06 o se retira (D-26) |
 
 ### 2.4 Datos personales
 
 | Qué | Estado |
 |---|---|
-| Fichas de asociados | ✅ Nacen en borrador; cero publicadas en producción; R-02 no se materializó |
-| Fotos del propietario pendientes o rechazadas | ⚠️ Viven en el disco público, servidas por URL no enumerable (ULID). Decidir: disco privado con controlador, o aceptar el riesgo por escrito (D-13) |
-| 19 fotografías del gremio y el video | ✅ **Uso autorizado por el gremio el 1 sep** (`encargo.md` §13). Los dos en `material/nuevomaterial/`, que no se versiona. Pies de foto pendientes (D-03). La regla del §9 sigue en pie para cualquier foto nueva |
-| Base de establecimientos del gremio (`.xlsx`) | ⚠️ **Dos copias dentro del árbol** desde el 1 sep, 11:00 p. m. (`Asobares Quindio - Base de datos.xlsx`, 48 filas, y `Base de datos Cap. Quindio.xlsx`, 41): ignoradas por git y sin rastrear, pero `DatosInternosDelAsociadoTest` las detecta por nombre y **la suite está en rojo hasta que salgan del árbol**. La guardia mira el disco a propósito: la base se guarda fuera del repositorio y se carga con `asociados:importar` |
-| Política de tratamiento de datos | ❌ Texto legal definitivo (P-15), encargados que la política no nombra, canal de supresión y revisión legal (G12) (D-19) |
-| `material/nuevomaterial/` | ✅ En `.gitignore`; no se versiona. Desde el 1 sep contiene la copia entera del Drive del gremio (§35.3) |
-| Retención automática | ✅ Tres purgas diarias con `subMonthsNoOverflow()` (§28) |
+| **Banco de talento visible para los afiliados** | ⚠️ **Frente abierto, y es el más serio de la sesión.** Desde el 3 sep los perfiles de aspirantes —nombre, cargo, experiencia, teléfono y correo— los ve cualquier establecimiento afiliado con cuenta; antes solo el panel del gremio. **Los 7 perfiles ya registrados aceptaron con una versión anterior de la política**, que no contemplaba este uso. El formulario nuevo sí lo avisa y `consentimiento_politica` guarda con qué versión aceptó cada persona. Falta: versionar la política y decidir qué se hace con esos 7 (D-27) |
+| Fichas de asociados | ✅ Nacen en borrador; cero publicadas en producción |
+| Fotos del propietario pendientes o rechazadas | ⚠️ Viven en el disco público, servidas por URL no enumerable (ULID). Decidir (D-13) |
+| 19 fotografías del gremio y el video | ✅ Uso autorizado por el gremio el 1 sep. El video ya está en el sitio; el original de 58 MB se queda en `nuevomaterial/`, que no se versiona. Pies de foto pendientes (D-03) |
+| Base de establecimientos del gremio (`.xlsx`) | ✅ **Fuera del árbol desde el 3 sep.** Las dos copias que había dentro eran duplicados byte a byte de `D:/Sua_Files/material-asobares/`; se borraron y no se perdió nada. `DatosInternosDelAsociadoTest` en verde. `Registro Establecimiento.xlsx` se queda: es el formulario oficial, no una base, y la guardia no lo señala |
+| Política de tratamiento de datos | ❌ Texto legal definitivo (P-15), encargados, canal de supresión, revisión legal (D-19). **Ahora bloquea al banco de talento** |
+| `material/nuevomaterial/` | ✅ En `.gitignore`; no se versiona |
+| Retención automática | ✅ Tres purgas diarias con `subMonthsNoOverflow()` |
 
 ### 2.5 Académico
 
@@ -112,79 +122,87 @@ De catorce, diez cerrados y cuatro vivos (07, 09, 10, 11); **ninguno de los cuat
 |---|---|
 | Corte 1 | ✅ 5.0 |
 | Corte 2 | ✅ Entregado a tiempo el 21 ago (no revisado por César por uso evidente de IA) |
-| Corte 3 (60 %) | ⚠️ Documento completo enviado el 27 ago; **revisado el 31 ago con buena valoración** (`Semana 7 - Documento - Juan José Sua - Revisión CG.docx`, comentarios anclados). Falta abrir la revisión, aplicar cada comentario sin tocar lo no observado, releer los capítulos 5 y 6 en voz propia, actualizar 5.5, la Tabla 5 y 6.2 con el despliegue en pie y las cifras medidas ese día, y **enviar el jueves 3** |
-| Constancias | ✅ Acta 01 (diseño) y Formato 03 (retroalimentación) firmados el 25 ago; planeador firmado. ❌ Acta 02 (capacitación, S8), **Acta 04 (ampliación de alcance, emitida 30 ago) y Acta 05 (cifras del gremio, emitida 1 sep) sin firmar** |
+| Corte 3 (60 %) | ⚠️ **Documento corregido y puesto en el repositorio** el 3 sep: `docs/ingenieria/Semana 7 - Documento - Juan Jose Sua - correccion.docx`. Está en `docs/ingenieria/`, no en `entrega-2026-09-04/` junto a los anexos. **Falta enviarlo hoy o mañana** |
+| **Lo que el documento ya no describe bien** | ⚠️ La matriz de trazabilidad (Anexo E) y el capítulo de requisitos describen los **RF de proveedores como públicos**, y desde el 3 sep no lo son. El **banco de talento** (`/mi-cuenta/aspirantes`) es funcionalidad nueva que no aparece. Las cifras del §5 cambiaron |
+| Constancias | ✅ Acta 01 y Formato 03 firmados el 25 ago; planeador firmado. ❌ Acta 02 (S8), **Acta 04 y Acta 05 sin firmar**, y **Acta 06 sin emitir** (D-26) |
 | Menores | Encuesta de Santiago (19 ago) sin confirmar; el documento de Ingrid es aparte e individual |
 
 ## 3. Registro único de decisiones pendientes
 
-Cada decisión con su dueño y la fecha en que se pidió. Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen» de `encargo.md` (el 1 sep salieron D-02, la autorización de D-03, D-23, D-24 y D-25). Consolida las DPV abiertas de la ERS v3 (5 ago), las doce confirmaciones del plan del material (26 ago), el bloque D del acta 3 (28 ago), el §31.8, el §33.3, el §34.3 y el §35.4. **Las D-01, D-04 a D-12 y D-20 caben en una sola reunión con Natalia con esta tabla impresa, y en la misma se firma el Acta 05 y se fijan sus cuatro cifras.**
+Cada decisión con su dueño y la fecha en que se pidió. Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen» de `encargo.md` (el 3 sep salieron **D-22** —el video— y las dos autorizaciones que cerraron OBS3-09 y el cierre de las bolsas). **Las D-01, D-04 a D-12 y D-20 caben en una sola reunión con Natalia con esta tabla impresa.**
 
 | ID | Decisión | Dueño | Pedida | Respondida |
 |---|---|---|---|---|
-| D-01 | **Firma del Acta 04** (`docs/ingenieria/constancias/`): cada fila de OBS3-15 a 18 marcada antes del 22 / Fase II / se descarta, y las dos contrapropuestas del equipo (bitácora sin reversión genérica; sección de documentos del gremio en el portal en vez de módulo financiero). **Y del Acta 05**, con las cuatro cifras de su punto 5 | Natalia + directivo | 30 ago / 1 sep | — |
-| D-03 | **Pies de foto** de las 19 fotografías y del video (evento, fecha, lugar, quiénes). La autorización de uso ya está (1 sep, `encargo.md` §13) y el video ya está en local | Natalia | 26 ago | Autorización: 1 sep ✅ · video en local: 1 sep ✅ · pies: — |
-| D-04 | **Las 7 URL de trámite** de Armenia, o el contacto en la Alcaldía que las tenga (OBS3-10) | Natalia / Alcaldía | 28 ago | — |
-| D-05 | **Texto propio de «Quiénes somos»**; nombre completo y orden de apellidos del presidente; cargo con el que firma Natalia; corrección de los datos del capítulo en el sitio de la Nacional (OBS3-11, OBS3-21, DPV-09, P-11) | Natalia + Nacional | 5 ago / 28 ago | — |
-| D-06 | **Logos institucionales** en buena resolución (Asobares Colombia, Cámara, Comité Intergremial, Gobernación) y de los aliados comerciales (OBS3-04) | Natalia | 31 ago | — |
-| D-07 | **SMTP con el correo del gremio.** Los pasos exactos están en el bloque «Arreglo pendiente» de arriba: opción A, contraseña de aplicación de Google del buzón del gremio (no toca DNS); B, credenciales de Brevo o Mailgun de la Nacional; C, la Nacional añade los registros de Resend. Se hace con la cuenta de Google del gremio delante; luego variables → despliegue → probar segundo factor, acuse de PQR, correos de postulación y aviso de vacante aprobada | Natalia + Sua (A) · Nacional (B, C) | 15 ago / 30 ago / 1 sep | — |
-| D-08 | **Indexación antes del lanzamiento**: `noindex` hasta el lanzamiento oficial (recomendado) o dejar indexar | Natalia + equipo | 30 ago | — |
-| D-09 | **Dominio propio**: nombre, compra (cobro anual), titularidad y autorización de marca a la Nacional (DPV-08, OBS3-22) | Natalia | 5 ago / 28 ago | — |
-| D-10 | **Pasarela**: confirmación escrita de «solo Bold» y cierre de la cuenta de BBVA (OBS3-23); medio PSE o QR y cuenta receptora (DPV-04); documentos para producción de Bold (RUT, cámara de comercio, cuenta bancaria) | Natalia + contadora | 28 ago | — |
-| D-11 | **Cartera**: Excel con el formato real de la contadora, aunque sea con datos ficticios (OBS3-19) —**no vino con el Drive** (§35.3); Sua lo pide el 2 sep; hoy el importador lee CSV con `establecimiento`, `saldo_pendiente`, `meses_mora` y `ultimo_pago`—; Drive vinculado o carga manual (OBS3-20); periodicidad (semanal por ahora) | Luisa + Natalia | 28 ago | — |
-| D-12 | **Titularidad de la infraestructura**: a nombre de quién está la facturación de Cloud; Natalia como miembro de la organización; segundo administrador en GitHub; fecha de traspaso en el runbook §12 | Sua + Natalia | 30 ago | — |
-| D-13 | **Bucket y fotos pendientes o rechazadas**: al disco privado servidas por controlador, o riesgo aceptado por escrito (§30.3). Desde el 1 sep el bucket condiciona también los formatos oficiales de la guía y el video del hero | Sua (técnica, se deja escrita) | 31 ago | — |
-| D-14 | **Marca de procedencia en el contenido sembrado** (`origen` sembrador/oficina, o no sobrescribir filas editadas): sin ella, resembrar pisa lo que la oficina corrigió (§31.4). Desde `a408afc` el grupo `gremio` de ajustes ya no se sobrescribe; el resto sí | Sua | 1 sep | — |
-| D-15 | `GeneradorPdf`: borrar (cero consumidores) o conservar como molde para los formatos oficiales; y borrar los dos PDF de ejemplo huérfanos de `storage/app/private/formatos/` | Sua | 1 sep | — |
-| D-16 | **Reparto Persona 1 / Persona 2**: reescribirlo como quedó de hecho o declarar su suspensión, antes del informe final y la Acta 02 (§30.3) | Sua + Ingrid | 31 ago | — |
-| D-17 | **ERS v3 sin firma** desde el 5 ago y sus DPV abiertas: DPV-01 fecha oficial de lanzamiento; **DPV-02 qué se ve con sesión y qué sin ella** (condiciona 8 RF ya codificados); DPV-03 bolsa de empleo en V1 (ratificación); DPV-05 RF-05; DPV-10 alcance de cartera; DPV-11 tarifa de proveedores; **DPV-13 soporte después del 22 de septiembre** | Natalia + directivo | 5 ago | — |
-| D-18 | **Las confirmaciones del plan del material (26 ago)** que siguen sin respuesta: base vigente y las 7 filas sin municipio; cifra de afiliados; relación con el capítulo Eje Cafetero; aliados que aplican al Quindío y convenios locales; programas nacionales que operan aquí; cuota y cuenta bancaria del formulario; qué norma es el «decreto 119»; revisión jurídica del boletín laboral; certificado desde el portal (ampliación; ya hay molde); formulario oficial descargable (ya hay `Registro Establecimiento.xlsx`) o en línea | Natalia | 26 ago | — |
-| D-19 | **Política de tratamiento de datos**: texto legal (P-15), encargados, canal de supresión, revisión legal (G12) | Natalia / aliado jurídico | 5 ago | — |
+| **D-26** | **Acta 06: ampliación de alcance por las bolsas.** El alcance está congelado y toda ampliación se registra por escrito **antes** de codificarse; aquí el código se escribió primero y el registro que hay es un `.md` en una carpeta nueva, no una constancia. Emitirla con `constancias.mjs`, decir sin adornos que el registro llegó después, y retirar o reubicar `docs/ingenieria/decisiones/` | Sua + Ingrid | 3 sep | — |
+| **D-27** | **Política de tratamiento y los 7 perfiles ya registrados.** El banco de talento expone contactos de terceros a un público nuevo. Versionar la política, decidir si a esos 7 se les vuelve a pedir consentimiento o se les excluye del listado mientras tanto, y quién responde ante una solicitud de supresión | Natalia + aliado jurídico | 3 sep | — |
+| **D-28** | **Alta de credenciales de los afiliados.** No hay registro público de cuentas: las crea el panel. Sin resolver el alta para los establecimientos de la base, **nadie ve lo que se acaba de construir**: ni el directorio de proveedores ni el banco de talento | Natalia + Sua | 3 sep | — |
+| **D-29** | **Dónde va `hero_frase_corta`.** Se puso de antetítulo encima del titular porque la clave estaba sembrada y exigida por la prueba sin que nada la pintara; la intención original no está escrita en ningún sitio. Y la **banda de tres videos** promete piezas que no existen: decidir si se recorta | Ingrid | 3 sep | — |
+| D-01 | **Firma del Acta 04** y del **Acta 05**, con las cuatro cifras de su punto 5 | Natalia + directivo | 30 ago / 1 sep | — |
+| D-03 | **Pies de foto** de las 19 fotografías y del video (evento, fecha, lugar, quiénes) | Natalia | 26 ago | Autorización: 1 sep ✅ · pies: — |
+| D-04 | **Las 7 URL de trámite** de Armenia, o el contacto en la Alcaldía (OBS3-10) | Natalia / Alcaldía | 28 ago | — |
+| D-05 | **Texto propio de «Quiénes somos»**; nombre del presidente; cargo con el que firma Natalia; datos del capítulo en el sitio de la Nacional | Natalia + Nacional | 5 ago / 28 ago | — |
+| D-06 | **Logos institucionales** y de los aliados comerciales en buena resolución | Natalia | 31 ago | — |
+| D-07 | **SMTP con el correo del gremio.** Pasos exactos en el bloque de arriba | Natalia + Sua (A) · Nacional (B, C) | 15 ago / 30 ago / 1 sep | — |
+| D-08 | **Indexación antes del lanzamiento**: `noindex` hasta el lanzamiento o dejar indexar. `/proveedores` es ahora la única bolsa abierta y sigue indexable | Natalia + equipo | 30 ago | — |
+| D-09 | **Dominio propio**: nombre, compra, titularidad y autorización de marca | Natalia | 5 ago / 28 ago | — |
+| D-10 | **Pasarela**: «solo Bold» por escrito; medio PSE o QR y cuenta receptora; documentos de producción de Bold | Natalia + contadora | 28 ago | — |
+| D-11 | **Cartera**: Excel con el formato real de la contadora —no vino con el Drive—; Drive vinculado o carga manual; periodicidad | Luisa + Natalia | 28 ago | — |
+| D-12 | **Titularidad de la infraestructura**: facturación de Cloud, Natalia como miembro, **segundo administrador en GitHub** (Ingrid tiene `write`, no `admin`), fecha de traspaso | Sua + Natalia | 30 ago | — |
+| D-13 | **Bucket y fotos pendientes o rechazadas**: disco privado servido por controlador, o riesgo aceptado por escrito. Ya no condiciona el video | Sua (técnica) | 31 ago | — |
+| D-14 | **Marca de procedencia en el contenido sembrado**: sin ella, resembrar pisa lo que la oficina corrigió. El grupo `gremio` ya no se sobrescribe; el resto sí | Sua | 1 sep | — |
+| D-15 | `GeneradorPdf`: borrar o conservar como molde; y borrar los dos PDF de ejemplo huérfanos | Sua | 1 sep | — |
+| D-16 | **Reparto Persona 1 / Persona 2**: reescribirlo como quedó de hecho o declarar su suspensión | Sua + Ingrid | 31 ago | — |
+| D-17 | **ERS v3 sin firma** y sus DPV abiertas. **DPV-02 —qué se ve con sesión y qué sin ella— quedó respondida de hecho el 3 sep** por el cierre de las bolsas: hay que ratificarlo o revertirlo, porque condiciona 8 RF ya codificados y la matriz de trazabilidad | Natalia + directivo | 5 ago | DPV-02: de hecho, 3 sep ⚠️ |
+| D-18 | **Las confirmaciones del plan del material (26 ago)** que siguen sin respuesta | Natalia | 26 ago | — |
+| D-19 | **Política de tratamiento de datos**: texto legal, encargados, canal de supresión, revisión legal. **Ver D-27** | Natalia / aliado jurídico | 5 ago | — |
 | D-20 | **Fecha de la segunda demostración** (entre el 4 y el 11; pedir jue 10 o vie 11) | Directivo + Natalia | 28 ago | — |
-| D-21 | **Municipios 2 a 12 de la guía**: orden (los seis con afiliados primero), fuente por alcaldía, y qué se declara Fase II | Natalia | 1 sep | — |
-| D-22 | **El video del hero**: el original dura 48 s y pesa 55,7 MB. Recortarlo a un bucle de 10–15 s sin audio, comprimirlo a 2–5 MB (720p/1080p), póster para el primer cuadro y `prefers-reduced-motion`; servirlo desde el bucket público (D-13); contraste bajo el velo en los dos temas. Sin `ffmpeg` en la máquina de Sua | Sua (técnica) + Ingrid (visual) | 1 sep | — |
+| D-21 | **Municipios 2 a 12 de la guía**: orden, fuente por alcaldía, y qué se declara Fase II | Natalia | 1 sep | — |
 
 ## 4. Deuda diferida a propósito
 
 No se «arregla de paso»:
 
-- Los chips de filtro repetidos y los 104 `leading-*`/`tracking-*` sueltos viven en las vistas que la franja visual va a rehacer: **después del 11 de septiembre**.
+- **El correo de ficha de bolsa publicada enlaza a `/proveedores`**, que ya no nombra al proveedor ni muestra su contacto: `ProveedorsTable` pasa `route('proveedores.index')` a `AccionesDeAprobacion`. El proveedor recibe «ya estás publicado» y llega a una página donde no aparece. Comprobado el 3 sep. **Se arregla cuando haya SMTP**, que hoy no manda nada.
+- Los chips de filtro repetidos y los `leading-*`/`tracking-*` sueltos: la capa visual rehízo parte, queda revisar el resto **después del 11 de septiembre**.
 - `@alpinejs/collapse` importado sin consumidor (retirarlo toca `package.json`, que exige aprobación).
-- El consecutivo de PQR bajo concurrencia en PostgreSQL falla cerrado (error, no duplicado); arreglarlo toca el expediente de PQR: decisión del dueño.
-- No existe `lang/`: las reglas sin mensaje propio salen en inglés; los siete formularios públicos están cubiertos por sus `messages()`. Pendiente `php artisan lang:publish` + `lang/es/validation.php`.
-- Salento y Filandia sin guía tras retirar lo inventado: regresión visible aceptada; se resuelve con D-21 y con decirlo en la página.
-- El filtro de municipios del **directorio** lista todos los de la tabla tengan o no fichas publicadas (causa raíz del §30.7); la guía ya filtra bien.
-- Cuatro `index.lock.huerfano*` y la carpeta `.git/huerfanos-cowork-2026-09-01/` siguen en `.git/` (no estorban): **los borra Sua a mano**. `hs_err_pid48556.log` en la raíz y los `~$*.docx` de `docs/ingenieria/` están ignorados por git; basura de IntelliJ y de Word, borrar cuando se quiera.
+- El consecutivo de PQR bajo concurrencia en PostgreSQL falla cerrado (error, no duplicado).
+- No existe `lang/`: las reglas sin mensaje propio salen en inglés. Pendiente `php artisan lang:publish` + `lang/es/validation.php`.
+- Salento y Filandia sin guía tras retirar lo inventado: se resuelve con D-21 y con decirlo en la página.
+- El filtro de municipios del **directorio** lista todos los de la tabla tengan o no fichas publicadas; la guía ya filtra bien.
+- Cuatro `index.lock.huerfano*` y `.git/huerfanos-cowork-2026-09-01/` siguen en `.git/`: **los borra Sua a mano**. `hs_err_pid48556.log` y los `~$*.docx` están ignorados por git.
 
 ## 5. Cifras medidas del árbol
 
-Sobre `a408afc`, 2 de septiembre de 2026 (madrugada). Cada cifra con el comando que la produjo; **vuelve a medirlas antes de citarlas** en un documento.
+Sobre `0a8e490`, 3 de septiembre de 2026 (noche). Cada cifra con el comando que la produjo; **vuelve a medirlas antes de citarlas** en un documento.
 
 | Cifra | Valor | Comando |
 |---|---|---|
-| Confirmaciones | 285 (281 de Sua, 4 de Ingrid; la última de Ingrid el 25 ago) | `git rev-list --count HEAD` · `git shortlog -sn HEAD` |
-| Migraciones | 39 (todas verificadas contra PostgreSQL 17.11) | `ls database/migrations \| wc -l` |
+| Confirmaciones | 292 (283 de Sua, 9 de Ingrid) | `git rev-list --count HEAD` · `git shortlog -sn HEAD` |
+| Migraciones | 39 | `ls database/migrations \| wc -l` |
 | Modelos | 21 | `ls app/Models/*.php \| wc -l` |
 | Sembradores | 21 (+ `Support/`) | `ls database/seeders/*.php \| wc -l` |
-| Archivos de prueba | 81 | `find tests -name '*Test.php' \| wc -l` |
-| Vistas Blade | 66 | `find resources/views -name '*.blade.php' \| wc -l` |
+| Archivos de prueba | 84 | `find tests -name '*Test.php' \| wc -l` |
+| Vistas Blade | 70 | `find resources/views -name '*.blade.php' \| wc -l` |
 | Panel | 19 recursos · 6 páginas · 20 policies | `ls app/Filament/Resources app/Filament/Pages app/Policies` |
-| Comandos de Artisan propios | 5 (`asobares:crear-usuario`, `asociados:importar`, `bolsas:depurar`, `mensajes:depurar`, `inscripciones:depurar`) | `ls app/Console/Commands` |
+| Comandos de Artisan propios | 5 | `ls app/Console/Commands` |
 | Enums | 16 | `ls app/Enums` |
-| Rutas GET | 86 propias · 96 con las de vendor | `php artisan route:list --method=GET --except-vendor --json` · sin `--except-vendor` |
-| Ajustes sembrados | 109: los 100 de producción más los 9 de la franja del gremio (`portada_gremio_titulo` y ocho `gremio_cifra_*`), que entran con el siguiente `ContenidoOficialSeeder` | `SettingSeeder` |
-| **Suite** | **986 casos · 974 pasan · 11 omitidas · 1 fallo · 3.650 aserciones** (medida en esta sesión sobre `a408afc`; seis casos más que el §35: `CifrasDelGremioTest`). **El fallo es ajeno al código**: `DatosInternosDelAsociadoTest::test_la_base_de_datos_del_gremio_no_vive_en_el_repositorio` detecta los dos `.xlsx` de la base del gremio en `material/nuevomaterial/` (§2.4). Vuelve a verde al sacarlos del árbol. La duración no se cita | `php artisan test --compact` |
-| Producción (1 sep, mañana) | 23 aliados · 8 requisitos · 100 ajustes · 8 municipios · 6 categorías · 5 beneficios · 5 iniciativas · 3 roles · 80 permisos · 3 usuarios · **0** asociados, PQR, transacciones, noticias, eventos, vacantes y artistas (correcto) | consola de Cloud / `tinker` (§31.7) |
-| Portada publicada (1 sep, mañana) | 6 `<img>`, 0 `<video>`; destacados y eventos no se pintan (sin datos) | `curl` + conteo de etiquetas (§32.3) |
+| Controladores públicos | 17 | `ls app/Http/Controllers/Publico/*.php \| wc -l` |
+| Rutas GET propias | 88 | `php artisan route:list --method=GET --except-vendor --json` |
+| Ajustes que siembra `SettingSeeder` | **126** (109 anteriores + 17 de la capa visual); en producción hay 109 | reflexión sobre `SettingSeeder::ajustes()` |
+| **Suite** | **1.010 casos · 999 pasan · 11 omitidas · 0 fallos · 3.800 aserciones** · 435 s | `php artisan test --compact` |
+| Video del hero | 10,0 s · 1280×768 · sin audio · **1.550.175 B** · póster 27.188 B (original: 48,1 s, 1680×1008, 58.451.107 B) | `ffprobe` · `ls -la public/videos` |
+| Producción (3 sep) | Portada **200** en 2,46 s en frío | `curl -o /dev/null -w` |
+| Producción (1 sep, mañana) | 23 aliados · 8 requisitos · 100 ajustes · 8 municipios · 6 categorías · 5 beneficios · 5 iniciativas · 3 roles · 80 permisos · 3 usuarios · **0** asociados, PQR, transacciones, noticias, eventos, vacantes y artistas | consola de Cloud / `tinker` |
 
 ## 6. Lo siguiente, en orden
 
-1. **Documento de práctica** (Sua, mar–jue): revisión CG del 31 ago comentario a comentario; 5.5, Tabla 5 y 6.2 con el despliegue en pie; cifras medidas ese día; enviar el jueves 3.
-2. **Sacar del árbol los dos `.xlsx` de la base del gremio** (Sua, un minuto): a una carpeta fuera de `D:\Sua_Files\IdeaProjects\Asobares3`. La suite vuelve a verde y `asociados:importar` los lee desde donde estén.
-3. **Desplegar y sembrar** (Sua): con el `push` de esta sesión `origin` está al día; comprobar en la consola de Cloud que el despliegue arrancó (o lanzarlo); **correr `ContenidoOficialSeeder` una vez** para que existan las nueve claves de la franja (no pisa nada del grupo `gremio`; el resto de ajustes sí, D-14: hacerlo antes de que la oficina edite textos, o aceptar que se resetean); comprobar en la URL pública que una PQR de prueba devuelve el aviso «No pudimos enviarte el acuse» en vez de la página de error.
-4. **Miércoles 2** (Sua): pedir los **formatos oficiales de Bomberos y Policía** y el **Excel de la contadora** (D-11); a `material/nuevomaterial/`, nunca al repositorio.
-5. **Una sola reunión con Natalia** con la tabla del §3 impresa: D-01 (Actas 04 y 05, con las cuatro cifras), D-04 a D-12 y D-20. Si en la reunión está la cuenta de Google del gremio, se hace ahí mismo el bloque «Arreglo pendiente» de arriba (D-07). Con las cifras fijadas, la oficina las teclea en «Ajustes del sitio → El gremio en cifras» y la franja aparece sola.
-6. **Franja visual, ya con insumo real** (Ingrid, en su worktree): recortar y comprimir el video (D-22), elegir el medio del hero entre las 19 fotos y el video, medir contraste en los dos temas (`VeloDelHeroTest`), pies de foto, estados vacíos, iconos de beneficios, chips para aliados sin logo, dirección de arte escrita.
-7. **Fijar la demo 2** (D-20) para el jueves 10 o viernes 11; guion de siete pantallas en este archivo; sitio despierto media hora antes.
-8. **Backend tras el SMTP**: bucket con política `publico/*` y prefijo privado (D-13) → subir los formatos oficiales cuando lleguen; disco privado para fotos pendientes; procedencia de semillas (D-14); `noindex` por variable (D-08); filtro de municipios del directorio; `lang/es`; medición de rendimiento contra la URL en caliente; importar la base de 48 filas desde fuera del árbol y depurarla.
-9. Semana 8: dominio y SSL, manual actualizado (crear usuario, moderar fotos, cargar aliados, publicar ficha con autorización, importar cartera, subir un formato oficial, **teclear las cifras del gremio**) y en PDF, capacitación y Acta 02, traspaso de cuentas (D-12), acuerdo de soporte (DPV-13).
+1. **Enviar el documento de práctica** (Sua, hoy o mañana antes de las 11:59:59 pm). Antes de enviarlo, corregir lo que ya no es cierto: los RF de proveedores **no son públicos** desde hoy, el banco de talento es nuevo, y las cifras del §5 cambiaron.
+2. **`git push`** (Sua, un minuto): `main` está cinco commits por delante de `origin`. Sin esto no hay despliegue y el gremio sigue viendo el sitio del 2 de septiembre.
+3. **Desplegar y sembrar** (Sua): comprobar en la consola de Cloud que el despliegue arrancó; **correr `ContenidoOficialSeeder` una vez** para que existan las 17 claves nuevas (no pisa el grupo `gremio`; el resto sí, D-14). Después, abrir la URL pública y mirar con los ojos: que el video del hero **corra** —no solo que cargue—, que el rótulo se lea en los dos temas, y que la banda de tres videos no deje huecos.
+4. **Emitir el Acta 06** (D-26) y llevarla a la reunión junto con la 04 y la 05.
+5. **Una sola reunión con Natalia** con la tabla del §3 impresa: D-01, D-04 a D-12, D-20, y las tres nuevas D-27, D-28 y D-29. Si está la cuenta de Google del gremio, se hace ahí mismo el SMTP (D-07).
+6. **Resolver D-28 antes de la demo**: sin credenciales de afiliado no hay a quién enseñarle el directorio de proveedores ni el banco de talento, que es la mitad de lo que se acaba de construir.
+7. **Fijar la demo 2** (D-20) para el jueves 10 o viernes 11; guion de siete pantallas; sitio despierto media hora antes.
+8. **Franja visual, lo que queda** (Ingrid): colocar las 19 fotos, pies de foto, decidir la banda de videos y la frase corta (D-29), medir contraste, dirección de arte escrita.
+9. **Backend tras el SMTP**: arreglar el enlace del correo de ficha publicada (§4); bucket con política `publico/*` (D-13); disco privado para fotos pendientes; procedencia de semillas (D-14); `noindex` (D-08); filtro de municipios del directorio; `lang/es`; medición de rendimiento completa; importar la base de 48 filas desde `D:/Sua_Files/material-asobares/`.
+10. Semana 8: dominio y SSL, manual actualizado y en PDF, capacitación y Acta 02, traspaso de cuentas (D-12), acuerdo de soporte (DPV-13).
