@@ -29,7 +29,7 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 | | |
 |---|---|
 | Fecha | Noche del jueves 3 de septiembre de 2026 (Bogotá) |
-| `main` | `0a8e490` · 292 confirmaciones · este archivo entra en el commit siguiente. **`main` está por delante de `origin`: falta el `push`** |
+| `main` | `f83c9ea` · 292 confirmaciones · este archivo entra en el commit siguiente. **`origin/main` al día** |
 | Rama de trabajo | Ninguna. Las dos ramas de la Persona 2 entraron a `main` por avance rápido; `origin/p2-redisenio-visual`, `origin/p2/acceso-asociados` y `origin/p2-directorio` siguen publicadas y ya no aportan nada |
 | Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5). **La suite sí se ejecutó** (§5) y el video **sí se miró en el navegador** con la página servida |
 | Producción | `https://asobares-production-0jhdcz.laravel.cloud` responde **200** en 2,46 s en frío (3 sep). **Está sirviendo `6f24ff4`**: no tiene ni el rediseño, ni las bolsas detrás de la sesión, ni el video |
@@ -53,7 +53,7 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 |---|---|---|
 | OBS3-01, 02, 04, 05, 06, 08, 12, 13, 14 | ✅ Cerrados con commit (31 ago, §30.1) | — |
 | OBS3-03 | ✅ Cerrado por decisión (1 sep): el sitio arranca en el tema del dispositivo, `system` | — |
-| OBS3-02 (medio del hero) | ✅ **Cerrado el 3 sep** (`0a8e490`): la ranura tiene el video institucional. Bucle de 10 s sin audio, 1280×768, 1,48 MB, fundido a negro en los dos extremos, póster propio de 27 KB, y **versionado**, que es lo único que llega a producción | Medir contraste del rótulo en los dos temas con el video corriendo |
+| OBS3-02 (medio del hero) | ✅ **Cerrado el 3 sep** (`f83c9ea`): la ranura tiene el video institucional. Bucle de 10 s sin audio, 1280×768, 1,48 MB, fundido a negro en los dos extremos, póster propio de 27 KB, y **versionado**, que es lo único que llega a producción | Medir contraste del rótulo en los dos temas con el video corriendo |
 | OBS3-07 (fotos y video del gremio) | ⚠️ **Mitad cerrada**: el video ya está en el sitio. Las 19 fotografías siguen sin usarse | Pies de foto (D-03) y colocarlas en la franja visual |
 | OBS3-09 (bolsa de empleo) | ✅ **Cerrado el 3 sep**: Sua autorizó que el afiliado consulte aspirantes. `/mi-cuenta/aspirantes` muestra nombre, cargo, experiencia, **teléfono con enlace de WhatsApp y correo** a todo establecimiento afiliado con cuenta. **Deja abierto un frente legal: §2.4** | — |
 | OBS3-10 | ⚠️ Código puesto | Las **7 URL de trámite** de Armenia. Insumo del gremio (D-04) |
@@ -66,7 +66,7 @@ De catorce, **doce cerrados y dos vivos** (10 y 11); ninguno de los dos se cierr
 
 - **Capa visual**: hero editorial con tarjeta audiovisual, escena fotográfica, barra de tema lateral, banda de videos en la portada, 484 líneas nuevas de `app.css` y tokens de movimiento. Es la franja de diseño que llevaba semanas sin hacerse.
 - **Las bolsas dejan de ser públicas**: los contactos de proveedores pasan a `/mi-cuenta/proveedores` y el banco de talento a `/mi-cuenta/aspirantes`, los dos detrás de `['auth','rol.asociado']`. `/proveedores` sigue pública e indexable pero sin un solo contacto: explica la bolsa y cuenta cuántos hay por categoría. `/empleo` no se toca, a propósito: quien busca trabajo tiene que poder ver la vacante.
-- **Se escribió sin PHP delante y no se ejecutó nada.** Al fusionarla salieron dos fallos reales, arreglados en `0a8e490`: `hero_frase_corta` y `hero_video_rotulo` estaban sembradas y exigidas por la prueba sin que ninguna vista las pintara —la tarjeta del video salía muda—, y `VerificacionDeProveedoresTest` abría la sesión del afiliado antes de sembrar, así que el observer degradaba las fichas a `pendiente_aprobacion` (RF-37) y el directorio salía vacío.
+- **Se escribió sin PHP delante y no se ejecutó nada.** Al fusionarla salieron dos fallos reales, arreglados en `f83c9ea`: `hero_frase_corta` y `hero_video_rotulo` estaban sembradas y exigidas por la prueba sin que ninguna vista las pintara —la tarjeta del video salía muda—, y `VerificacionDeProveedoresTest` abría la sesión del afiliado antes de sembrar, así que el observer degradaba las fichas a `pendiente_aprobacion` (RF-37) y el directorio salía vacío.
 
 ### 2.2 Contenido
 
@@ -173,7 +173,7 @@ No se «arregla de paso»:
 
 ## 5. Cifras medidas del árbol
 
-Sobre `0a8e490`, 3 de septiembre de 2026 (noche). Cada cifra con el comando que la produjo; **vuelve a medirlas antes de citarlas** en un documento.
+Sobre `f83c9ea`, 3 de septiembre de 2026 (noche). Cada cifra con el comando que la produjo; **vuelve a medirlas antes de citarlas** en un documento.
 
 | Cifra | Valor | Comando |
 |---|---|---|

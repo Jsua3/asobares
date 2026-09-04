@@ -1856,7 +1856,7 @@ Las dos copias de la base del gremio dentro del árbol eran **duplicados byte a 
 
 ### 38.7 Lo que se midió
 
-Sobre `0a8e490`: **1.010 casos · 999 pasan · 11 omitidas · 0 fallos · 3.800 aserciones**, 435 s. 292 confirmaciones (283 de Sua, 9 de Ingrid), 84 archivos de prueba, 70 vistas Blade, 88 rutas GET propias, 17 controladores públicos, **126 ajustes** en el sembrador contra los 109 que hay en producción. Portada de producción: **200 en 2,46 s** en frío, sirviendo todavía `6f24ff4`.
+Sobre `f83c9ea`: **1.010 casos · 999 pasan · 11 omitidas · 0 fallos · 3.800 aserciones**, 435 s. 292 confirmaciones (283 de Sua, 9 de Ingrid), 84 archivos de prueba, 70 vistas Blade, 88 rutas GET propias, 17 controladores públicos, **126 ajustes** en el sembrador contra los 109 que hay en producción. Portada de producción: **200 en 2,46 s** en frío, sirviendo todavía `6f24ff4`.
 
 ### 38.8 Lo que entra y sale del estado
 
