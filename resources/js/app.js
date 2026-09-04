@@ -88,6 +88,61 @@ Alpine.data('escena', () => ({
     },
 }));
 
+/*
+ * Video del hero. El elemento sale del servidor sin `autoplay` y con
+ * `preload="none"`: si pidieron menos movimiento, aquí no se toca nada y el
+ * visitante se queda con el póster sin haber descargado el video. Solo cuando
+ * el movimiento está permitido se pide la descarga y se intenta reproducir, y
+ * solo si el navegador acepta --las políticas de reproducción automática
+ * rechazan la promesa sin avisar de otra forma-- se funde la capa encima del
+ * póster. Un `catch` vacío dejaría el póster, que es exactamente lo correcto.
+ */
+Alpine.data('videoHero', () => ({
+    listo: false,
+
+    init() {
+        if (reduceMovimiento()) {
+            return;
+        }
+
+        // Las políticas de reproducción automática solo perdonan el video mudo.
+        this.$el.muted = true;
+
+        /*
+         * Pedir la descarga es cambiar `preload`; NO se llama a `load()`.
+         * Comprobado en el navegador: con `load()` delante, el `play()` que
+         * viene detrás se rechaza --la carga en curso lo aborta--, así que
+         * `listo` se quedaba en falso y el video aparecía parado detrás del
+         * póster **con el archivo entero ya descargado** (`readyState` 4,
+         * `paused` true). Sin `load()`, `play()` resuelve.
+         */
+        this.$el.preload = 'auto';
+
+        this.arrancar();
+
+        // Si todavía no había datos, el primer intento se rechaza; se reintenta
+        // en cuanto el navegador dice que puede. `arrancar()` se protege sola.
+        this.$el.addEventListener('canplay', () => this.arrancar());
+    },
+
+    arrancar() {
+        if (this.listo) {
+            return;
+        }
+
+        const intento = this.$el.play();
+
+        // Navegadores viejos no devuelven promesa: se mira el estado y ya.
+        if (! intento) {
+            this.listo = ! this.$el.paused;
+
+            return;
+        }
+
+        intento.then(() => { this.listo = true; }).catch(() => { this.listo = false; });
+    },
+}));
+
 window.Alpine = Alpine;
 Alpine.start();
 

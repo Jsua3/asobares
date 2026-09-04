@@ -50,6 +50,9 @@ base-de-datos-cap*.xls*
 # fotos de personas identificables y un PDF de 47 MB. Nunca se versiona; entra por importador/sembradores/medios.
 /material/nuevomaterial/
 
-# Video institucional de la portada: 58 MB que no tienen por que vivir
-# en la historia de git. `inicio` lo sirve solo si el archivo existe.
-/public/videos/
+# `public/videos/` SÍ se versiona. El original del gremio son 58 MB y esos no
+# entran en git: lo que se versiona es el bucle de 10 s recortado y comprimido
+# (1,5 MB) más su póster. Cloud despliega desde git, así que un archivo
+# ignorado aquí es un archivo que no existe en producción: el hero se quedaría
+# mudo sin que nadie se entere. `VideoDelHeroTest` lo vigila.
+# El original vive en `material/nuevomaterial/`, que no se versiona.

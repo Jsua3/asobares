@@ -37,13 +37,25 @@
         ],
     ]);
     $videoPrincipal = $videosPortada->first();
+
+    /*
+     * El video del hero viaja en el repositorio (`public/videos/`), no en el
+     * bucket: Cloud despliega desde git y un archivo ignorado es un archivo
+     * que en producción no existe. Su póster es su propio primer fotograma y
+     * no una foto de asociado, porque en producción no hay fichas publicadas
+     * --`$postersVideo` viene vacía-- y porque saltar de una foto ajena al
+     * video se ve como un corte. Las fotos quedan de respaldo para cuando el
+     * video no esté.
+     */
     $videoInstitucional = [
         'titulo' => ajuste('hero_video_titulo', 'ASOBARES Capítulo Quindío'),
         'detalle' => ajuste('hero_video_detalle', 'Una mirada breve al gremio que mueve la noche, la cultura y el territorio.'),
         'src' => file_exists(public_path('videos/asobares-institucional.mp4'))
             ? asset('videos/asobares-institucional.mp4')
             : null,
-        'poster' => $postersVideo->get(0),
+        'poster' => file_exists(public_path('videos/asobares-institucional.jpg'))
+            ? asset('videos/asobares-institucional.jpg')
+            : $postersVideo->get(0),
     ];
 @endphp
 
@@ -58,7 +70,7 @@
                  x-on:pointermove="seguir($event)"
                 x-on:pointerleave="salir()"
                 x-bind:style="`--puntero-x: ${px}; --puntero-y: ${py}`">
-                <div class="absolute inset-0 z-0" x-data="{ videoListo: false }">
+                <div class="absolute inset-0 z-0">
                     @if ($videoInstitucional['poster'])
                         <img src="{{ $videoInstitucional['poster'] }}"
                              alt=""
@@ -70,23 +82,45 @@
                     @endif
 
                     @if ($videoInstitucional['src'])
+                        {{-- Sin `autoplay` y con `preload="none"` a propósito: quien
+                             pidió menos movimiento se queda con el póster y ni
+                             siquiera descarga el megabyte y medio. `videoHero`
+                             --en `app.js`, junto al resto de `reduceMovimiento()`--
+                             es quien lo arranca cuando el movimiento está
+                             permitido, y solo entonces se funde encima. --}}
                         <video class="imagen-viva video-hero-capa absolute inset-0 h-full w-full object-cover"
-                               x-bind:class="videoListo ? 'video-hero-capa--visible' : ''"
-                               x-on:loadeddata="videoListo = true"
-                               x-on:canplay="videoListo = true"
-                               x-on:error="videoListo = false"
+                               x-data="videoHero"
+                               x-bind:class="listo ? 'video-hero-capa--visible' : ''"
+                               x-on:error="listo = false"
                                @if ($videoInstitucional['poster']) poster="{{ $videoInstitucional['poster'] }}" @endif
-                               autoplay
                                muted
                                loop
                                playsinline
-                               preload="auto">
+                               preload="none">
                             <source src="{{ $videoInstitucional['src'] }}" type="video/mp4">
                         </video>
                     @endif
                 </div>
 
                 <div class="video-velo-suave absolute inset-0 z-10"></div>
+
+                {{-- El rótulo del video. `hero_video_rotulo`, `hero_video_titulo`
+                     y `hero_video_detalle` estaban sembrados y exigidos por
+                     `PortadaEditableTest` pero no los pintaba nadie: la tarjeta
+                     salía muda.
+
+                     Lleva franja propia (`.video-velo`, 72 % de negro abajo) y
+                     no se apoya en el velo suave de la tarjeta, que es del 28 %
+                     y deja el texto blanco ilegible en los fotogramas claros
+                     del bucle. `z-20` porque `.hero-video-institucional::after`
+                     ocupa el 15. --}}
+                <div class="video-velo pointer-events-none absolute inset-x-0 bottom-0 z-20 h-2/3"></div>
+
+                <div class="absolute inset-x-0 bottom-0 z-20 p-6 text-white sm:p-8">
+                    <p class="antetitulo text-white/70">{{ ajuste('hero_video_rotulo', 'Video institucional') }}</p>
+                    <p class="mt-2 font-display text-lg font-semibold sm:text-xl">{{ $videoInstitucional['titulo'] }}</p>
+                    <p class="mt-1 max-w-md text-sm leading-relaxed text-white/80">{{ $videoInstitucional['detalle'] }}</p>
+                </div>
             </div>
         </x-slot:escena>
 
@@ -107,6 +141,22 @@
             <p class="mb-5 max-w-2xl font-display text-base font-medium leading-snug text-suave text-balance sm:text-lg">
                 {{ ajuste('manifiesto_apertura') }}
             </p>
+
+            {{-- `hero_frase_corta` estaba sembrada y exigida por
+                 `PortadaEditableTest` sin que ninguna vista la pintara. Va de
+                 antetítulo, justo encima del titular: es el sitio donde una
+                 frase corta no compite con el `<h1>` ni con el manifiesto.
+                 La intención original no está escrita en ningún sitio, así que
+                 esta colocación queda a confirmar con la Persona 2.
+
+                 Vacía no se pinta, y no lleva texto de respaldo: hasta que el
+                 sembrador de contenido oficial corra en producción la clave no
+                 existe, y un párrafo vacío con margen deja un hueco encima del
+                 titular. Inventarle un valor por defecto sería peor: en
+                 producción solo entra texto de documento oficial del gremio. --}}
+            @if ($fraseCorta = ajuste('hero_frase_corta'))
+                <p class="antetitulo mb-3 text-acento">{{ $fraseCorta }}</p>
+            @endif
         </x-slot:encima>
 
         <p class="mt-5 max-w-lg text-base leading-relaxed text-suave sm:text-lg text-pretty">
