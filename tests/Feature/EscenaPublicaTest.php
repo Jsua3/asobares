@@ -52,14 +52,16 @@ class EscenaPublicaTest extends TestCase
         $this->assertStringContainsString('/img/prueba.webp', $html);
     }
 
-    public function test_la_portada_usa_la_escena_y_el_revelado(): void
+    public function test_la_portada_usa_video_de_fondo_y_el_revelado(): void
     {
         $vista = File::get(resource_path('views/publico/inicio.blade.php'));
 
         $this->assertStringContainsString('data-revelar', $vista);
         $this->assertStringContainsString('variante="editorial"', $vista);
         $this->assertStringContainsString('variante="horizontal"', $vista);
-        $this->assertStringContainsString('x-slot:escena', $vista);
+        $this->assertStringContainsString('x-slot:medio', $vista);
+        $this->assertStringContainsString('hero-video-fondo', $vista);
+        $this->assertStringContainsString('portada', $vista);
         $this->assertStringContainsString('atmosfera', $vista);
     }
 
@@ -67,7 +69,7 @@ class EscenaPublicaTest extends TestCase
     {
         $app = File::get(resource_path('css/app.css'));
 
-        foreach (['.vidrio', '.revelar', '.revelar-visto', '.tarjeta-escena', '.imagen-viva', '.luz-ambiente', '.cta-vivo', '.hero-editorial', '.imagen-inclinable'] as $clase) {
+        foreach (['.vidrio', '.revelar', '.revelar-visto', '.tarjeta-escena', '.imagen-viva', '.luz-ambiente', '.cta-vivo', '.hero-editorial', '.hero-portada', '.hero-video-fondo', '.imagen-inclinable'] as $clase) {
             $this->assertStringContainsString($clase, $app, "Falta el portador {$clase} en app.css.");
         }
 

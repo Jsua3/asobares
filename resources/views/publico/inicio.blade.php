@@ -51,44 +51,36 @@
                    :descripcion="ajuste('sitio_descripcion')">
 
     {{-- Hero --}}
-    <x-publico.hero :titulo="ajuste('hero_titulo')" atmosfera audiovisual>
-        <x-slot:escena>
-            <div class="hero-video-institucional tarjeta-escena group relative overflow-hidden"
-                 x-data="escena"
-                 x-on:pointermove="seguir($event)"
-                x-on:pointerleave="salir()"
-                x-bind:style="`--puntero-x: ${px}; --puntero-y: ${py}`">
-                <div class="absolute inset-0 z-0" x-data="{ videoListo: false }">
-                    @if ($videoInstitucional['poster'])
-                        <img src="{{ $videoInstitucional['poster'] }}"
-                             alt=""
-                             width="1200"
-                             height="780"
-                             class="imagen-viva absolute inset-0 h-full w-full object-cover">
-                    @else
-                        <div class="hero-video-respaldo absolute inset-0"></div>
-                    @endif
+    <x-publico.hero :titulo="ajuste('hero_titulo')" atmosfera portada>
+        <x-slot:medio>
+            <div class="hero-video-fondo" x-data="{ videoListo: false }">
+                @if ($videoInstitucional['poster'])
+                    <img src="{{ $videoInstitucional['poster'] }}"
+                         alt=""
+                         width="1600"
+                         height="900"
+                         class="imagen-viva absolute inset-0 h-full w-full object-cover">
+                @else
+                    <div class="hero-video-respaldo absolute inset-0"></div>
+                @endif
 
-                    @if ($videoInstitucional['src'])
-                        <video class="imagen-viva video-hero-capa absolute inset-0 h-full w-full object-cover"
-                               x-bind:class="videoListo ? 'video-hero-capa--visible' : ''"
-                               x-on:loadeddata="videoListo = true"
-                               x-on:canplay="videoListo = true"
-                               x-on:error="videoListo = false"
-                               @if ($videoInstitucional['poster']) poster="{{ $videoInstitucional['poster'] }}" @endif
-                               autoplay
-                               muted
-                               loop
-                               playsinline
-                               preload="auto">
-                            <source src="{{ $videoInstitucional['src'] }}" type="video/mp4">
-                        </video>
-                    @endif
-                </div>
-
-                <div class="video-velo-suave absolute inset-0 z-10"></div>
+                @if ($videoInstitucional['src'])
+                    <video class="imagen-viva video-hero-capa absolute inset-0 h-full w-full object-cover"
+                           x-bind:class="videoListo ? 'video-hero-capa--visible' : ''"
+                           x-on:loadeddata="videoListo = true"
+                           x-on:canplay="videoListo = true"
+                           x-on:error="videoListo = false"
+                           @if ($videoInstitucional['poster']) poster="{{ $videoInstitucional['poster'] }}" @endif
+                           autoplay
+                           muted
+                           loop
+                           playsinline
+                           preload="auto">
+                        <source src="{{ $videoInstitucional['src'] }}" type="video/mp4">
+                    </video>
+                @endif
             </div>
-        </x-slot:escena>
+        </x-slot:medio>
 
         <x-slot:encima>
             {{-- Con el directorio vacío la píldora decía «0 establecimientos
@@ -104,12 +96,12 @@
                     {{ $totalAsociados }} establecimientos afiliados en el Quindío
                 </p>
             @endif
-            <p class="mb-5 max-w-2xl font-display text-base font-medium leading-snug text-suave text-balance sm:text-lg">
+            <p class="mb-5 max-w-2xl font-display text-base font-medium leading-snug text-white/72 text-balance sm:text-lg">
                 {{ ajuste('manifiesto_apertura') }}
             </p>
         </x-slot:encima>
 
-        <p class="mt-5 max-w-lg text-base leading-relaxed text-suave sm:text-lg text-pretty">
+        <p class="mt-5 max-w-xl text-base leading-relaxed text-white/74 sm:text-lg text-pretty">
             {{ ajuste('hero_resumen_corto', 'Representamos la vida nocturna del Quindío con criterio, cultura y territorio.') }}
         </p>
 

@@ -95,7 +95,7 @@
             'cromo-apoyado': desplazado || menuMovil,
             'cromo-expandido': cromoExpandido || menuMovil,
         }"
-        class="cromo cromo-compacto sticky top-0 z-40">
+        class="cromo cromo-fijo cromo-compacto z-40">
     <nav class="cromo-bandeja mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 sm:px-6 lg:px-8"
          aria-label="Navegación principal">
 
