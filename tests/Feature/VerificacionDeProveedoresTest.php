@@ -8,6 +8,7 @@ use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -129,28 +130,43 @@ class VerificacionDeProveedoresTest extends TestCase
         $this->seed(DatabaseSeeder::class);
         Proveedor::query()->delete();
 
-        $this->actingAs($this->afiliado());
+        $afiliado = $this->afiliado();
+
+        /*
+         * Las tres fichas se siembran SIN sesión abierta y la sesión se abre
+         * solo para mirar la página.
+         *
+         * `FlujoDeAprobacionObserver` degrada a «pendiente_aprobacion»
+         * cualquier alta hecha por quien no puede publicar (RF-37), y el
+         * afiliado no puede. Con `actingAs` antes del `create`, el estado
+         * `publicado` de la factoría se perdía en el `saving`, el directorio
+         * salía vacío y esta prueba se ponía roja acusando a la vista de algo
+         * que hacía la propia prueba. Comprobado: `estado` llegaba a la base
+         * como `pendiente_aprobacion` y `Proveedor::publicado()->count()` era 0.
+         */
+        $mirarComoAfiliado = function () use ($afiliado) {
+            return $this->actingAs($afiliado)->get(route('mi-cuenta.proveedores.index'))->assertOk();
+        };
 
         Proveedor::factory()->publicado()->verificado()->create(['nombre' => 'Hielo Al Dia', 'slug' => 'hielo-al-dia']);
 
-        $this->get(route('mi-cuenta.proveedores.index'))
-            ->assertOk()
+        $mirarComoAfiliado()
             ->assertSee(ajuste('proveedores_verificado'), escape: false)
             ->assertDontSee(ajuste('proveedores_sin_verificar'), escape: false);
 
+        Auth::logout();
         Proveedor::query()->delete();
         Proveedor::factory()->publicado()->create(['nombre' => 'Hielo Sin Comprobar', 'slug' => 'hielo-sin-comprobar', 'verificado_el' => null]);
 
-        $this->get(route('mi-cuenta.proveedores.index'))
-            ->assertOk()
+        $mirarComoAfiliado()
             ->assertSee(ajuste('proveedores_sin_verificar'), escape: false)
             ->assertDontSee(ajuste('proveedores_verificado'), escape: false);
 
+        Auth::logout();
         Proveedor::query()->delete();
         Proveedor::factory()->publicado()->verificacionVencida()->create(['nombre' => 'Hielo Viejo', 'slug' => 'hielo-viejo']);
 
-        $this->get(route('mi-cuenta.proveedores.index'))
-            ->assertOk()
+        $mirarComoAfiliado()
             ->assertSee(ajuste('proveedores_verificacion_vieja'), escape: false);
     }
 

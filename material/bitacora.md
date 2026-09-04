@@ -1799,3 +1799,76 @@ Sobre `a408afc`: 285 confirmaciones, **81 archivos de prueba**. **Suite completa
 - **`ajuste()` devuelve `''` para una clave inexistente**, así que `assertDontSee(ajuste('…'))` sobre una clave sin sembrar «falla» por la razón equivocada: la cadena vacía está en todo. Afirmar primero que el ajuste está sembrado y no vacío.
 - **Una prueba que revienta antes de su aserción no ha visto roja esa aserción.** Las tres que fallaban en `teclear()` por la clave inexistente se sabotearon aparte, cada una con su rotura, antes de darlas por buenas.
 - **El panel del navegador sigue sin componer**: capturas negras en claro y en oscuro. La inspección por JS (`getBoundingClientRect`, `getComputedStyle`) es la prueba visual que sí sirve.
+
+---
+
+## 38. LA CAPA VISUAL ENTRA, LAS BOLSAS SE CIERRAN Y EL VIDEO LLEGA A PRODUCCIÓN (3 sep 2026)
+
+Sesión pedida como análisis del estado y de GitHub; terminó siendo la fusión de todo el trabajo de la Persona 2 y el cierre de OBS3-02.
+
+### 38.1 Lo que el estado no sabía
+
+`origin` tenía **dos ramas nuevas** empujadas esa misma tarde por Ingrid, y el estado decía «Rama de trabajo: ninguna». `p2-redisenio-visual` (la capa visual, 39 archivos) y `p2/acceso-asociados`, que la contiene y además mueve los contactos de proveedores y el banco de talento detrás de la sesión del afiliado. Las dos ya traían `main` fusionado, así que entrar era avance rápido limpio.
+
+También apareció que el repositorio no tiene **ni un solo PR en toda su historia ni ningún workflow de CI**. Nada verifica una rama antes de que entre. La propia nota de Ingrid pedía revisión por PR.
+
+### 38.2 Las dos autorizaciones del dueño
+
+Sua autorizó las dos cosas que la rama traía y que el estado declaraba prohibidas o sin decidir:
+
+1. **El afiliado puede consultar aspirantes** (OBS3-09, la mitad que estaba prohibida hasta releer el §9).
+2. **Los contactos de proveedores pasan detrás de la sesión** — que es responder de hecho la DPV-02, abierta desde el 5 de agosto y a nombre de Natalia y el directivo.
+
+Las dos quedan hechas. Lo que **no** quedó hecho es el registro: el alcance está congelado y toda ampliación se escribe **antes** de codificarse, en `constancias/`. Aquí el código se escribió primero y lo que hay es un `.md` en una carpeta nueva, `docs/ingenieria/decisiones/`. De ahí sale **D-26**, y la sesión no emitió el acta por su cuenta: una constancia va con los dos nombres al gremio.
+
+### 38.3 Lo que la rama rompía, y que solo se vio al ejecutarla
+
+La nota de Ingrid lo decía sin rodeos: «el codigo se escribio desde Cowork, que no tiene PHP ni Composer: **nada de esto se ejecuto**». Al fusionar, la suite dio **dos fallos reales**:
+
+- **`hero_frase_corta` y `hero_video_rotulo` estaban sembradas y exigidas por `PortadaEditableTest`, y ninguna vista las pintaba.** La tarjeta del video del hero salía muda: `titulo` y `detalle` se calculaban en el bloque `@php` y no se imprimían en ningún sitio. Se pintan; el rótulo lleva franja de contraste propia (`.video-velo`, 72 % de negro abajo) porque el velo suave de la tarjeta es del 28 % y no sostiene texto blanco sobre los fotogramas claros del bucle.
+- **`VerificacionDeProveedoresTest` abría la sesión del afiliado antes de sembrar las fichas.** `FlujoDeAprobacionObserver` degrada a `pendiente_aprobacion` toda alta hecha por quien no puede publicar (RF-37), así que las fichas nacían sin publicar, el directorio salía vacío y la prueba acusaba a la vista de algo que hacía ella misma. El observer estaba bien; la prueba estaba mal montada. Ahora se siembra sin sesión y se abre solo para mirar.
+
+### 38.4 El video: un defecto que solo existía del lado del despliegue
+
+La portada servía el video con `file_exists(public_path('videos/…'))` mientras `.gitignore` traía `/public/videos/`. **En local funcionaba.** Cloud despliega desde git: allí el archivo no viajaba, la condición era falsa siempre y el hero salía mudo **sin error, sin log y sin que ninguna prueba se enterara**.
+
+Se resolvió versionando el medio en vez de esperar al bucket (D-13, que sigue sin crearse):
+
+- Bucle de **10 s** recortado del original de 48,1 s, **sin audio**, 1280×768, **1.550.175 B**, con fundido a negro de 0,5 s en los dos extremos para que el reinicio no se note. El tramo se eligió mirando una hoja de contacto, no a ciegas: los segundos 17 a 27 son barra y coctelería, y el corte evita el plato blanco que hacía fogonazo al reiniciar.
+- Póster propio de **27.188 B**, primer fotograma del bucle. Antes el póster salía de las fotos de asociados destacados, que **en producción no existen** porque no hay ninguna ficha publicada.
+- El original de 58.451.107 B se queda en `nuevomaterial/`, que no se versiona.
+
+`ffmpeg` **sí estaba instalado**: D-22 afirmaba lo contrario y llevaba desde el 1 de septiembre bloqueando esto por una premisa falsa.
+
+`VideoDelHeroTest` mira el **índice de git**, no el disco: `git ls-files --error-unmatch`. Que el archivo esté en la máquina de quien programa no demuestra nada. Se vio roja con los archivos sin registrar y verde después de `git add`.
+
+### 38.5 Lo que el navegador vio y la suite no
+
+Con la página servida en `localhost:8123`, la inspección por JS dio: `paused: true`, `readyState: 4`, sin la clase `--visible`. **El video se descargaba entero y se quedaba parado detrás del póster.** La causa era propia, no de la rama: el `Alpine.data('videoHero')` recién escrito llamaba a `load()` antes de `play()`, y la carga en curso rechaza esa promesa. Se comprobó llamando a `play()` a mano en la consola de la página: resolvió y el video avanzó. Sin `load()`, funciona; tras el arreglo, `paused: false`, `currentTime` 2,36 s y clase `--visible` puesta.
+
+La misma pasada destapó que `hero_frase_corta` **no está sembrada en la base** —ninguna de las 17 claves nuevas lo está— y el párrafo recién añadido se pintaba vacío, con su margen, encima del titular. No lleva texto de respaldo a propósito: en producción solo entra contenido de documento oficial del gremio. Vacía no se pinta.
+
+Es la regla 7 del prompt maestro cobrándose otra: el sitio abierto en el navegador dice cosas que la suite no ve.
+
+### 38.6 Los `.xlsx` que llevaban dos días poniendo la suite en rojo
+
+Las dos copias de la base del gremio dentro del árbol eran **duplicados byte a byte** (md5 idéntico) de las que ya vivían en `D:/Sua_Files/material-asobares/`. Se borraron sin pérdida. `Registro Establecimiento.xlsx` se queda: es el formulario oficial maquetado, no una base, y la guardia no lo señala. `DatosInternosDelAsociadoTest` vuelve a verde.
+
+### 38.7 Lo que se midió
+
+Sobre `f83c9ea`: **1.010 casos · 999 pasan · 11 omitidas · 0 fallos · 3.800 aserciones**, 435 s. 292 confirmaciones (283 de Sua, 9 de Ingrid), 84 archivos de prueba, 70 vistas Blade, 88 rutas GET propias, 17 controladores públicos, **126 ajustes** en el sembrador contra los 109 que hay en producción. Portada de producción: **200 en 2,46 s** en frío, sirviendo todavía `6f24ff4`.
+
+### 38.8 Lo que entra y sale del estado
+
+- **Salen**: D-22 (el video, resuelto), los `.xlsx` del árbol, OBS3-02 y la mitad de OBS3-07, la mitad prohibida de OBS3-09.
+- **Entran**: **D-26** (Acta 06 de la ampliación), **D-27** (política de tratamiento y los 7 perfiles que aceptaron con otra versión), **D-28** (alta de credenciales de afiliados: sin ellas nadie ve lo que se acaba de construir), **D-29** (dónde va la frase corta, y qué se hace con la banda de tres videos que promete piezas inexistentes).
+- **Cambia de naturaleza D-17**: la DPV-02 quedó respondida de hecho y hay que ratificarla o revertirla, porque condiciona 8 RF ya codificados y la matriz de trazabilidad del documento que se entrega esta semana.
+- **Entra en deuda**: el correo de ficha de bolsa publicada enlaza a `/proveedores`, que ya no nombra al proveedor. Se arregla cuando haya SMTP, que hoy no manda nada.
+
+### 38.9 Trampas de esta sesión
+
+- **No edites archivos mientras corre la suite.** Blade recompila a media carrera y el informe mezcla estados: una corrida entera de cinco minutos tirada y, peor, un fallo que parecía real y era de la edición.
+- **Un reemplazo por la primera ocurrencia pega en el comentario, no en el código.** Al romper `preload="none"` a propósito, el reemplazo acertó en la frase del comentario que lo mencionaba y dejó el atributo intacto: la rotura no rompió nada, y de haberlo dado por bueno la prueba habría quedado «verificada» por engaño.
+- **Una prueba que afirma sobre el disco no prueba lo que se despliega.** Si el archivo puede estar ignorado, hay que preguntarle a git y no a `file_exists`.
+- **`load()` antes de `play()` aborta la reproducción** y deja el elemento con `readyState` 4 y `paused` true: parece que no cargó cuando había cargado entero.
+- El panel del navegador **sigue sin componer fotogramas**: la captura salía negra con la página correcta detrás. La inspección por JS es la que vale.
