@@ -14,10 +14,23 @@ Alpine.plugin(collapse);
  * también el panel /admin.
  */
 Alpine.store('tema', {
+    /* Lo que el usuario eligió: light, dark o system. */
     preferencia: 'system',
 
+    /* Lo que está pintado: light o dark. Alimenta el icono sol/luna. */
+    resuelto: 'light',
+
     init() {
-        this.preferencia = this.resolver(this.leer());
+        this.preferencia = this.leer();
+        this.resuelto = this.resolver(this.preferencia);
+
+        // Con «sistema» elegido, el <head> repinta solo cuando cambia el SO;
+        // aquí solo hace falta enterarse para que el icono siga al pintado.
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            if (this.preferencia === 'system') {
+                this.resuelto = this.resolver('system');
+            }
+        });
     },
 
     leer() {
@@ -27,7 +40,7 @@ Alpine.store('tema', {
             const guardado = localStorage.getItem('theme');
 
             // Un valor que no reconocemos vale lo mismo que no tener ninguno.
-            return ['light', 'dark'].includes(guardado) ? guardado : 'system';
+            return ['light', 'dark', 'system'].includes(guardado) ? guardado : 'system';
         } catch {
             return 'system';
         }
@@ -52,8 +65,11 @@ Alpine.store('tema', {
 
         // Se pasa el valor en vez de dejar que lo relea: si la escritura de
         // arriba falló, releer devolvería el anterior y la página se quedaría
-        // con un tema que ya no coincide con el botón marcado.
+        // con un tema que ya no coincide con el botón marcado. El <head>
+        // entiende 'system' como «seguir al sistema»; se resuelve DESPUÉS de
+        // pintar, leyendo la clase que el <head> acaba de poner.
         window.aplicarTema?.(valor);
+        this.resuelto = this.resolver(valor);
     },
 });
 
@@ -182,6 +198,7 @@ if (document.readyState === 'loading') {
 window.addEventListener('storage', (evento) => {
     if (evento.key === 'theme') {
         const tema = Alpine.store('tema');
-        tema.preferencia = tema.resolver(tema.leer());
+        tema.preferencia = tema.leer();
+        tema.resuelto = tema.resolver(tema.preferencia);
     }
 });

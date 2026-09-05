@@ -65,4 +65,17 @@ class NavbarTresEstadosTest extends TestCase
             $this->assertStringContainsString("{$curva}: linear(0, ", $soporte, "{$curva} sin linear() dentro del @supports");
         }
     }
+
+    /**
+     * Rotura: en `leer()` volver a `['light', 'dark'].includes(guardado)`.
+     */
+    public function test_el_store_de_tema_acepta_sistema_y_distingue_lo_resuelto(): void
+    {
+        $js = File::get(resource_path('js/app.js'));
+
+        $this->assertStringContainsString("resuelto: 'light'", $js);
+        $this->assertStringContainsString("['light', 'dark', 'system'].includes(guardado)", $js);
+        $this->assertStringContainsString('this.resuelto = this.resolver(', $js);
+        $this->assertStringContainsString("matchMedia('(prefers-color-scheme: dark)').addEventListener('change'", $js);
+    }
 }

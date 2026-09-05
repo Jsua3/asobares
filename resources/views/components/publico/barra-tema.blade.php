@@ -27,12 +27,12 @@
         @foreach ($opciones as $opcion)
             <button type="button"
                     x-on:click="$store.tema.elegir('{{ $opcion['valor'] }}')"
-                    x-bind:aria-pressed="$store.tema.preferencia === '{{ $opcion['valor'] }}' ? 'true' : 'false'"
+                    x-bind:aria-pressed="$store.tema.resuelto === '{{ $opcion['valor'] }}' ? 'true' : 'false'"
                     x-bind:class="[
-                        $store.tema.preferencia === '{{ $opcion['valor'] }}'
+                        $store.tema.resuelto === '{{ $opcion['valor'] }}'
                             ? 'tema-lateral__boton--activo'
                             : 'tema-lateral__boton--inactivo',
-                        (! abierto && $store.tema.preferencia !== '{{ $opcion['valor'] }}')
+                        (! abierto && $store.tema.resuelto !== '{{ $opcion['valor'] }}')
                             ? 'tema-lateral__boton--oculto'
                             : '',
                     ]"
