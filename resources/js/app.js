@@ -180,14 +180,24 @@ Alpine.data('desplegable', () => ({
         this.cerrar();
     },
 
+    // El foco vuelve al disparador solo si estaba dentro del componente, y
+    // se lee ANTES de cerrar. Sin esto el panel desaparece con el foco dentro
+    // y el navegador lo tira al <body>, y el siguiente Tab reinicia desde el
+    // principio; pero un panel abierto por hover mientras se escribe en un
+    // campo no puede robarle el foco al campo.
     cerrarYVolverAlFoco() {
         if (! this.abierto) {
             return;
         }
 
+        const teniaElFoco = this.$root.contains(document.activeElement);
+
         this.cerrar();
-        // Sin esto el panel desaparece con el foco dentro y el navegador lo
-        // tira al <body>: el siguiente Tab reinicia desde el principio.
+
+        if (! teniaElFoco) {
+            return;
+        }
+
         this.$refs.disparador.focus();
     },
 }));

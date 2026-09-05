@@ -303,6 +303,11 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringContainsString('max-width var(--duracion-estado)', $this->regla($css, '.logo-doble'));
         $this->assertStringContainsString('max-width var(--duracion-estado)', $this->regla($css, '.control-plegable > button'));
         $this->assertStringContainsString('scale var(--duracion-estado)', $this->regla($css, '.indicador-mas'));
+        // Toda la geometría de la barra, no solo la primera regla de cada
+        // selector: una vuelta parcial a --duracion-rebote (p. ej. en la
+        // visibility de los plegados) descoordinaría el plegado con la suite
+        // verde. --duracion-rebote es de los popovers y vive en las vistas.
+        $this->assertStringNotContainsString('var(--duracion-rebote)', $css, 'app.css no usa --duracion-rebote: la geometría de la barra va toda a --duracion-estado');
 
         $this->assertMatchesRegularExpression(
             '/@media \(hover: hover\) and \(pointer: fine\) \{\s*\.modulo::before \{[^}]*--puntero-x/',
@@ -539,9 +544,36 @@ class NavbarTresEstadosTest extends TestCase
         // llegaba con esa identidad y el propio componente se cerraba.
         // Rotura: volver a `this.$el` en cualquiera de las dos líneas.
         $this->assertStringContainsString("this.\$dispatch('desplegable-abierto', this.\$root);", $js, 'abrir avisa a los demás desplegables con la raíz como identidad');
-        $this->assertStringContainsString('if (raiz === this.$root) {', $js, 'ceder ignora su propio aviso');
-        $this->assertStringNotContainsString('this.$el', substr($js, strpos($js, "Alpine.data('desplegable'"), strpos($js, 'Video del hero') - strpos($js, "Alpine.data('desplegable'")), 'el desplegable nunca usa $el como identidad');
-        $this->assertStringContainsString('this.$refs.disparador.focus();', $js, 'cerrar con teclado devuelve el foco al disparador');
+
+        // Los CUERPOS, no solo las cabeceras: `ceder` sin `cerrar()` dejaba
+        // volver el choque tema/idioma con la suite verde, y `alternar` sin
+        // `abrir()` abría sin avisar (revisión del 5 sep). Roturas: borrar
+        // `this.cerrar();` de ceder; volver alternar a `this.abierto = ! this.abierto`.
+        $this->assertMatchesRegularExpression('/ceder\(raiz\) \{\s*if \(raiz === this\.\$root\) \{\s*return;\s*\}\s*this\.cerrar\(\);/', $js, 'ceder ignora su propio aviso y cierra con los demás');
+        $this->assertMatchesRegularExpression('/alternar\(\) \{\s*if \(this\.abierto\) \{\s*this\.cerrar\(\);\s*return;\s*\}\s*this\.abrir\(\);/', $js, 'alternar abre por abrir(), que es quien avisa');
+
+        // El tramo del componente, anclado en código y no en un comentario, y
+        // con los dos límites comprobados: un strpos falso recortaría nada y
+        // la prohibición pasaría en vacío.
+        $inicio = strpos($js, "Alpine.data('desplegable'");
+        $fin = strpos($js, "Alpine.data('videoHero'");
+        $this->assertNotFalse($inicio);
+        $this->assertNotFalse($fin);
+        $this->assertGreaterThan($inicio, $fin);
+        $componente = substr($js, $inicio, $fin - $inicio);
+        $this->assertStringNotContainsString('this.$el', $componente, 'el desplegable nunca usa $el como identidad');
+        $this->assertStringNotContainsString('this.abierto = ! this.abierto', $componente, 'el componente tampoco alterna sin avisar');
+
+        // Escape devuelve el foco al disparador solo si estaba dentro del
+        // componente: un panel abierto por hover mientras se escribe en un
+        // campo no puede robarle el foco al campo. Y sin el retorno temprano,
+        // los cinco Escape del sitio enfocarían el chip de idioma. Roturas:
+        // quitar `if (! this.abierto)`; quitar la condición de `teniaElFoco`.
+        $this->assertMatchesRegularExpression(
+            '/cerrarYVolverAlFoco\(\) \{\s*if \(! this\.abierto\) \{\s*return;\s*\}\s*const teniaElFoco = this\.\$root\.contains\(document\.activeElement\);\s*this\.cerrar\(\);\s*if \(! teniaElFoco\) \{\s*return;\s*\}\s*this\.\$refs\.disparador\.focus\(\);/',
+            $js,
+            'cerrar con teclado devuelve el foco al disparador solo si estaba dentro'
+        );
         // Solo el RATÓN asoma. En un equipo híbrido (ratón y pantalla táctil)
         // `(hover: hover) and (pointer: fine)` es verdadero y el toque llega
         // como pointerenter de tipo touch y luego como un mouseenter
