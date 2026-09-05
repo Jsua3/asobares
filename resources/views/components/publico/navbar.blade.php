@@ -184,7 +184,7 @@
         {{-- Módulo 3: la cuenta, el tema y el idioma. Con sesión abierta el
              atajo vive dentro del desplegable, para no repetir el mismo enlace
              dos veces en la misma barra. --}}
-        <div class="modulo modulo-cuenta hidden items-center gap-2 px-2 lg:flex lg:justify-self-end">
+        <div class="modulo modulo-cuenta hidden items-center gap-2 px-2 whitespace-nowrap lg:flex lg:justify-self-end">
             @guest
                 <a href="{{ route('mi-cuenta.index') }}"
                    class="nav-enlace enlace-accion -my-1 rounded-lg px-3 py-3 text-sm text-tenue hover:text-fuerte">

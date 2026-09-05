@@ -494,7 +494,7 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringContainsString('bandeja mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-3', $navbar);
         $this->assertStringContainsString('modulo modulo-logo pulsable -my-1.5 flex shrink-0 items-center py-1.5 lg:justify-self-start lg:px-3', $navbar);
         $this->assertStringContainsString('modulo modulo-principal hidden min-h-11 items-center gap-1 px-2 lg:flex lg:justify-self-center', $navbar);
-        $this->assertStringContainsString('modulo modulo-cuenta hidden items-center gap-2 px-2 lg:flex lg:justify-self-end', $navbar);
+        $this->assertStringContainsString('modulo modulo-cuenta hidden items-center gap-2 px-2 whitespace-nowrap lg:flex lg:justify-self-end', $navbar);
     }
 
     /**
