@@ -204,6 +204,7 @@
     --duracion-panel: 240ms; /* menú móvil */
     --duracion-cromo: 520ms; /* apertura de la barra pública */
     --duracion-rebote: 520ms; /* asentamiento de un resorte; el movimiento «llega» hacia los 250 */
+    --duracion-estado: 620ms; /* cambio de estado de la barra de escritorio: el mismo resorte, un punto más lento (Sua, 5 sep) */
 
     /*
      * Desplazamientos. Son tokens y no literales porque bajo

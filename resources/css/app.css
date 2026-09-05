@@ -428,6 +428,10 @@
      * Rebote de verdad por `--ease-rebote-*`, que ya traen su respaldo. Todo
      * `translate`/`scale` va con las propiedades individuales: Tailwind 4
      * compila a ellas y una transición que nombre `transform` no las anima.
+     *
+     * La duración del cambio de estado es `--duracion-estado`, un punto más
+     * larga que `--duracion-rebote`, que se queda para los popovers: Sua
+     * pidió el 5 sep que el paso entre estados fuera «sutilmente más lento».
      */
     /* Sin `border` ni `border-radius` aquí: la píldora y los módulos solo
        existen de 64rem para arriba, y un borde transparente de 1 px en móvil
@@ -441,7 +445,7 @@
         background-color: transparent;
         box-shadow: none;
         transition:
-            gap var(--duracion-rebote) var(--ease-rebote-suave),
+            gap var(--duracion-estado) var(--ease-rebote-suave),
             background-color var(--duracion-entrada) var(--ease-color),
             border-color var(--duracion-entrada) var(--ease-color),
             box-shadow var(--duracion-entrada) var(--ease-color);
@@ -457,7 +461,7 @@
             background-color var(--duracion-entrada) var(--ease-color),
             border-color var(--duracion-entrada) var(--ease-color),
             box-shadow var(--duracion-entrada) var(--ease-color),
-            translate var(--duracion-rebote) var(--ease-rebote-suave);
+            translate var(--duracion-estado) var(--ease-rebote-suave);
     }
 
     /* Brillo especular (::before) y canto de cristal (::after). Apagados en
@@ -503,8 +507,8 @@
         overflow: hidden;
         white-space: nowrap;
         transition:
-            max-width var(--duracion-rebote) var(--ease-rebote-suave),
-            margin var(--duracion-rebote) var(--ease-rebote-suave),
+            max-width var(--duracion-estado) var(--ease-rebote-suave),
+            margin var(--duracion-estado) var(--ease-rebote-suave),
             opacity var(--duracion-entrada) var(--ease-color);
     }
 
@@ -515,7 +519,7 @@
         scale: 0.6;
         transition:
             opacity var(--duracion-entrada) var(--ease-color),
-            scale var(--duracion-rebote) var(--ease-rebote-vivo),
+            scale var(--duracion-estado) var(--ease-rebote-vivo),
             visibility 0s linear var(--duracion-entrada);
     }
 
@@ -523,14 +527,14 @@
     .logo-doble {
         max-width: 11rem;
         overflow: hidden;
-        transition: max-width var(--duracion-rebote) var(--ease-rebote-suave);
+        transition: max-width var(--duracion-estado) var(--ease-rebote-suave);
     }
 
     .logo-doble__completo,
     .logo-doble__isotipo {
         transition:
             opacity var(--duracion-entrada) var(--ease-color),
-            scale var(--duracion-rebote) var(--ease-rebote-vivo);
+            scale var(--duracion-estado) var(--ease-rebote-vivo);
     }
 
     .logo-doble__isotipo {
@@ -654,7 +658,7 @@
         [data-estado="scroll"]:not(:focus-within) .control-plegable {
             visibility: hidden;
             pointer-events: none;
-            transition: visibility 0s linear var(--duracion-rebote);
+            transition: visibility 0s linear var(--duracion-estado);
         }
 
         /* El margen negativo compensa el px-3 del enlace y del botón, que
@@ -666,8 +670,8 @@
             opacity: 0;
             margin-inline: -0.75rem;
             transition:
-                max-width var(--duracion-rebote) var(--ease-rebote-suave),
-                margin var(--duracion-rebote) var(--ease-rebote-suave),
+                max-width var(--duracion-estado) var(--ease-rebote-suave),
+                margin var(--duracion-estado) var(--ease-rebote-suave),
                 opacity var(--duracion-salida) var(--ease-color);
         }
 
@@ -697,7 +701,7 @@
             scale: 1;
             transition:
                 opacity var(--duracion-entrada) var(--ease-color),
-                scale var(--duracion-rebote) var(--ease-rebote-vivo),
+                scale var(--duracion-estado) var(--ease-rebote-vivo),
                 visibility 0s linear 0s;
         }
     }
