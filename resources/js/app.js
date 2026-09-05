@@ -122,10 +122,15 @@ Alpine.data('desplegable', () => ({
     abierto: false,
     cierre: null,
 
+    // La identidad es `$root` y NO `$el`: dentro de un método, `$el` es el
+    // elemento de la directiva que lo llamó, o sea el botón cuando se abre
+    // por clic y la raíz cuando se abre por hover. Con `$el` el aviso del
+    // clic llegaba con el botón, el propio componente lo tomaba por ajeno y
+    // cerraba lo que acababa de abrir: Enter no abría nada (Chromium, 5 sep).
     abrir() {
         clearTimeout(this.cierre);
         this.abierto = true;
-        this.$dispatch('desplegable-abierto', this.$el);
+        this.$dispatch('desplegable-abierto', this.$root);
     },
 
     cerrar() {
@@ -162,7 +167,7 @@ Alpine.data('desplegable', () => ({
 
     // El aviso llega también al que lo emitió: ese se queda como está.
     ceder(raiz) {
-        if (raiz === this.$el) {
+        if (raiz === this.$root) {
             return;
         }
 

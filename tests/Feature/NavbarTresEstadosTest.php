@@ -515,8 +515,13 @@ class NavbarTresEstadosTest extends TestCase
         foreach (['abrir() {', 'cerrar() {', 'alternar() {', 'asomar() {', 'retirar() {', 'ceder(raiz) {', 'cerrarYVolverAlFoco() {'] as $definicion) {
             $this->assertStringContainsString($definicion, $js, "app.js ya no define {$definicion}");
         }
-        $this->assertStringContainsString("this.\$dispatch('desplegable-abierto', this.\$el);", $js, 'abrir avisa a los demás desplegables');
-        $this->assertStringContainsString('if (raiz === this.$el) {', $js, 'ceder ignora su propio aviso');
+        // `$root` y no `$el`: dentro de un método `$el` es el elemento de la
+        // directiva que lo llamó (el botón, al abrir por clic), el aviso
+        // llegaba con esa identidad y el propio componente se cerraba.
+        // Rotura: volver a `this.$el` en cualquiera de las dos líneas.
+        $this->assertStringContainsString("this.\$dispatch('desplegable-abierto', this.\$root);", $js, 'abrir avisa a los demás desplegables con la raíz como identidad');
+        $this->assertStringContainsString('if (raiz === this.$root) {', $js, 'ceder ignora su propio aviso');
+        $this->assertStringNotContainsString('this.$el', substr($js, strpos($js, "Alpine.data('desplegable'"), strpos($js, 'Video del hero') - strpos($js, "Alpine.data('desplegable'")), 'el desplegable nunca usa $el como identidad');
         $this->assertStringContainsString('this.$refs.disparador.focus();', $js, 'cerrar con teclado devuelve el foco al disparador');
         $this->assertMatchesRegularExpression('/asomar\(\) \{\s*if \(! punteroFino\(\)\) \{\s*return;/', $js, 'con dedo no hay hover que valga');
         $this->assertMatchesRegularExpression('/retirar\(\) \{\s*if \(! punteroFino\(\)\) \{\s*return;/', $js);
