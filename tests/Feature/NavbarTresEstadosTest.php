@@ -198,6 +198,9 @@ class NavbarTresEstadosTest extends TestCase
 
         $this->assertStringContainsString('aria-label="Apariencia del sitio"', $boton);
         $this->assertStringContainsString('aria-controls="popover-tema"', $boton);
+        // Un `aria-controls` sin `aria-expanded` no dice si el panel está
+        // abierto. Rotura: quitar el x-bind del botón.
+        $this->assertStringContainsString('x-bind:aria-expanded="abierto ? \'true\' : \'false\'"', $boton);
         // El icono lo decide CSS por la clase `dark` del <html>, no Alpine:
         // sin `x-show`, no hay destello del icono equivocado antes de que
         // arranque el script. Rotura: quitar `dark:hidden` del sol.
@@ -214,6 +217,10 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringContainsString("\$store.tema.elegir('dark')", $popover);
         $this->assertStringContainsString("\$store.tema.elegir('system')", $popover);
         $this->assertSame(3, substr_count($popover, 'x-bind:aria-pressed='), 'las tres filas marcan la activa');
+        // Elegir con teclado no puede dejar el foco en el <body>: las tres
+        // filas cierran devolviéndolo al disparador, igual que Escape.
+        // Rotura: volver a `abierto = false` en cualquiera de las tres.
+        $this->assertSame(3, substr_count($popover, 'cerrarYVolverAlFoco()'), 'elegir devuelve el foco al disparador');
 
         // Lo que las guardias globales exigen a todo desplegable de la barra.
         $this->assertStringContainsString('transicion-desplegable', $html);
@@ -232,8 +239,10 @@ class NavbarTresEstadosTest extends TestCase
         [$boton, $popover] = explode('id="popover-idioma"', $html, 2);
 
         $this->assertStringContainsString('>ES<', $boton);
-        $this->assertStringContainsString('aria-label="Idioma del sitio"', $boton);
+        $this->assertStringContainsString('aria-label="Idioma del sitio: ES"', $boton, 'el nombre accesible contiene el texto visible (WCAG 2.5.3)');
         $this->assertStringContainsString('aria-controls="popover-idioma"', $boton);
+        // Rotura: quitar el x-bind:aria-expanded del botón.
+        $this->assertStringContainsString('x-bind:aria-expanded="abierto ? \'true\' : \'false\'"', $boton);
 
         $this->assertStringContainsString('>Español<', $popover);
         $this->assertStringContainsString('>English<', $popover);
@@ -283,6 +292,7 @@ class NavbarTresEstadosTest extends TestCase
         $modulo = $this->regla($css, '.modulo');
         $this->assertStringContainsString('var(--asb-cromo-desenfoque)', $this->regla($css, '[data-estado="atencion"] .modulo'));
         $this->assertStringNotContainsString('blur(', $modulo);
+        $this->assertStringNotContainsString('blur(', $this->regla($css, '[data-estado="atencion"] .modulo'), 'el vidrio de scroll/atención tampoco lleva blur literal');
         $this->assertStringContainsString('var(--ease-rebote-suave)', $modulo);
         $this->assertStringContainsString('translate var(--duracion-rebote)', $modulo);
 
@@ -307,7 +317,9 @@ class NavbarTresEstadosTest extends TestCase
     }
 
     /**
-     * Rotura: borrar el método alternarAtencion() del x-data del header (no la llamada).
+     * Roturas: borrar el método alternarAtencion() del x-data del header (no
+     * la llamada); borrar del <header> cualquiera de los tres cableados
+     * (scroll.window, mouseenter, mouseleave).
      */
     public function test_el_header_declara_los_tres_estados(): void
     {
@@ -321,6 +333,16 @@ class NavbarTresEstadosTest extends TestCase
         // llamada en el atributo y la barra táctil muerta con la suite verde.
         foreach (['get estado() {', 'punteroFino() {', 'sincronizar() {', 'atender() {', 'soltar() {', 'alternarAtencion() {'] as $definicion) {
             $this->assertStringContainsString($definicion, $navbar, "el x-data del header ya no define {$definicion}");
+        }
+
+        // Y el CABLEADO: sin estos tres atributos la máquina existe y no
+        // hace nada. Rotura: borrar cualquiera de los tres del <header>.
+        foreach ([
+            'x-on:scroll.window.passive="sincronizar()"',
+            'x-on:mouseenter="atender()"',
+            'x-on:mouseleave="soltar()"',
+        ] as $cableado) {
+            $this->assertStringContainsString($cableado, $navbar, "el header ya no conecta {$cableado}");
         }
 
         // Las expresiones de la máquina, literales: invertir el getter o

@@ -429,11 +429,15 @@
      * `translate`/`scale` va con las propiedades individuales: Tailwind 4
      * compila a ellas y una transición que nombre `transform` no las anima.
      */
+    /* Sin `border` ni `border-radius` aquí: la píldora y los módulos solo
+       existen de 64rem para arriba, y un borde transparente de 1 px en móvil
+       subía la cabecera de 56 a 58 px. Los dos pasan al bloque de escritorio.
+       Las listas de `transition` se quedan: animar `border-color` sin borde no
+       cuesta nada. */
     .bandeja {
         position: relative;
         isolation: isolate;
         gap: 1rem;
-        border: 1px solid transparent;
         background-color: transparent;
         box-shadow: none;
         transition:
@@ -446,8 +450,6 @@
     .modulo {
         position: relative;
         isolation: isolate;
-        border: 1px solid transparent;
-        border-radius: 999px;
         background-color: transparent;
         box-shadow: none;
         translate: 0 0;
@@ -595,6 +597,12 @@
         .bandeja {
             width: min(calc(100% - 2rem), 80rem);
             gap: 0;
+            border: 1px solid transparent;
+            border-radius: 999px;
+        }
+
+        .modulo {
+            border: 1px solid transparent;
             border-radius: 999px;
         }
 

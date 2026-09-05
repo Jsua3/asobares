@@ -118,7 +118,7 @@ class TemaClaroOscuroTest extends TestCase
         $respuesta->assertOk()
             ->assertSee('tema-lateral fixed', false)
             ->assertSee('sm:top-1/2', false)
-            ->assertSee('lg:hidden', false)
+            ->assertSee('sm:-translate-y-1/2 lg:hidden', false)
             ->assertSee('id="popover-tema"', false);
     }
 

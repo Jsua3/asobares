@@ -145,7 +145,7 @@
              Dos de ellos se pliegan en scroll por CSS; nada sale del DOM. Con
              dedo, tocar los huecos del módulo o el indicador alterna el estado
              de atención; tocar un enlace o un grupo hace lo suyo y nada más. --}}
-        <div class="modulo modulo-principal hidden items-center gap-1 px-2 lg:flex"
+        <div class="modulo modulo-principal hidden min-h-11 items-center gap-1 px-2 lg:flex"
              x-on:click="if (! $event.target.closest('a, button')) alternarAtencion()"
              x-on:click.outside="if (! punteroFino()) atendiendo = false">
             @foreach ($enlacesDirectos as $enlace)
@@ -169,7 +169,7 @@
             @endforeach
 
             {{-- Solo con dedo y solo en scroll: la señal de que hay más. --}}
-            <span class="indicador-mas -my-1 flex items-center rounded-lg px-2 py-3 text-apagado" aria-hidden="true">
+            <span class="indicador-mas -my-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-2 py-3 text-apagado" aria-hidden="true">
                 <x-heroicon-o-ellipsis-horizontal class="h-4 w-4" />
             </span>
         </div>

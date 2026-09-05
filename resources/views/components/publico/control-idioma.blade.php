@@ -63,7 +63,10 @@
             x-on:click="abierto = ! abierto"
             x-bind:aria-expanded="abierto ? 'true' : 'false'"
             aria-controls="popover-idioma"
-            aria-label="Idioma del sitio"
+            {{-- El nombre accesible CONTIENE el texto visible: un `aria-label`
+                 que lo sustituya deja sin efecto el mando de voz «pulsa ES»
+                 (WCAG 2.5.3, Label in Name). --}}
+            aria-label="Idioma del sitio: {{ $actual['siglas'] }}"
             class="pulsable flex h-11 min-w-11 items-center justify-center gap-1 rounded-full px-2 text-sm font-medium text-suave hover:text-fuerte">
         <span>{{ $actual['siglas'] }}</span>
         {{-- Galón SVG y no carácter: Poppins subconjuntada no trae el glifo. --}}
@@ -86,6 +89,10 @@
          role="group"
          aria-label="Idioma del sitio"
          class="hoja-flotante absolute right-0 z-50 mt-2 w-52 origin-top-right rounded-2xl p-2">
+        {{-- Hoy ninguna fila lleva `x-on:click`: ES ya es el idioma actual y EN
+             está deshabilitado. Cuando un idioma sea elegible, su clic debe
+             terminar en `cerrarYVolverAlFoco()`, como en el control de tema:
+             elegir con teclado no puede dejar el foco en el <body>. --}}
         @foreach ($idiomas as $idioma)
             @php($esActual = $idioma['codigo'] === $actual['codigo'])
             <button type="button"

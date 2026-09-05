@@ -91,7 +91,7 @@
          class="hoja-flotante absolute right-0 z-50 mt-2 w-44 origin-top-right rounded-2xl p-2">
         @foreach ($opciones as $opcion)
             <button type="button"
-                    x-on:click="$store.tema.elegir('{{ $opcion['valor'] }}'); abierto = false"
+                    x-on:click="$store.tema.elegir('{{ $opcion['valor'] }}'); cerrarYVolverAlFoco()"
                     x-bind:aria-pressed="$store.tema.preferencia === '{{ $opcion['valor'] }}' ? 'true' : 'false'"
                     x-bind:class="$store.tema.preferencia === '{{ $opcion['valor'] }}' ? 'text-acento' : 'text-suave hover:text-fuerte'"
                     class="fila-pulsable flex w-full items-center gap-2.5 rounded-lg px-3 py-3 text-left text-sm">
