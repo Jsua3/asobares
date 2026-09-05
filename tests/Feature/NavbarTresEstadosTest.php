@@ -123,7 +123,8 @@ class NavbarTresEstadosTest extends TestCase
     }
 
     /**
-     * Rotura: poner `computer-desktop` en el botón, o quitar la fila Sistema.
+     * Rotura: poner computer-desktop en el botón, quitar la fila Sistema, o
+     * quitar dark:hidden del sol.
      */
     public function test_el_control_de_tema_muestra_sol_o_luna_y_ofrece_sistema_en_el_popover(): void
     {
@@ -133,8 +134,12 @@ class NavbarTresEstadosTest extends TestCase
 
         $this->assertStringContainsString('aria-label="Apariencia del sitio"', $boton);
         $this->assertStringContainsString('aria-controls="popover-tema"', $boton);
-        $this->assertStringContainsString("x-show=\"\$store.tema.resuelto === 'light'\"", $boton);
-        $this->assertStringContainsString("x-show=\"\$store.tema.resuelto === 'dark'\"", $boton);
+        // El icono lo decide CSS por la clase `dark` del <html>, no Alpine:
+        // sin `x-show`, no hay destello del icono equivocado antes de que
+        // arranque el script. Rotura: quitar `dark:hidden` del sol.
+        $this->assertStringContainsString('dark:hidden', $boton, 'el sol se esconde en oscuro por CSS');
+        $this->assertStringContainsString('hidden h-5 w-5 dark:block', $boton, 'la luna solo aparece en oscuro, por CSS');
+        $this->assertStringNotContainsString('x-show', $boton, 'el icono no depende de Alpine para el primer pintado');
         $this->assertStringNotContainsString('computer-desktop', $boton, 'el botón nunca muestra el monitor');
         $this->assertStringNotContainsString('M9 17.25v1.007', $boton, 'ni el path del monitor');
 

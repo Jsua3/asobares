@@ -2,9 +2,11 @@
     Control de tema de la barra de escritorio.
 
     El botón muestra el tema RESUELTO —sol o luna— y nunca el monitor: lo que
-    el visitante ve pintado es lo que el icono tiene que decir. El popover de
-    debajo ofrece las tres preferencias, Sistema incluida (decisión de Sua del
-    3 sep 2026; antes la prueba lo prohibía a propósito).
+    el visitante ve pintado es lo que el icono tiene que decir. Lo resuelve
+    CSS por la clase `dark`, no Alpine: así el icono es correcto desde el
+    primer pintado. El popover de debajo ofrece las tres preferencias,
+    Sistema incluida (decisión de Sua del 3 sep 2026; antes la prueba lo
+    prohibía a propósito).
 
     Es un «disclosure» como el resto de desplegables de la barra: botón con
     aria-expanded y el panel que controla. Con ratón se asoma al pasar y se
@@ -67,8 +69,12 @@
             aria-controls="popover-tema"
             aria-label="Apariencia del sitio"
             class="pulsable flex h-11 w-11 items-center justify-center rounded-full text-suave hover:text-fuerte">
-        <x-heroicon-o-sun x-show="$store.tema.resuelto === 'light'" class="h-5 w-5" aria-hidden="true" />
-        <x-heroicon-o-moon x-show="$store.tema.resuelto === 'dark'" x-cloak class="h-5 w-5" aria-hidden="true" />
+        {{-- El icono lo decide CSS por la clase `dark` del <html>, que el
+             <head> pone antes del primer pintado y que `elegir()` cambia al
+             instante: es el tema resuelto sin esperar a Alpine, así que no hay
+             destello del icono equivocado. --}}
+        <x-heroicon-o-sun class="h-5 w-5 dark:hidden" aria-hidden="true" />
+        <x-heroicon-o-moon class="hidden h-5 w-5 dark:block" aria-hidden="true" />
     </button>
 
     <div id="popover-tema"
