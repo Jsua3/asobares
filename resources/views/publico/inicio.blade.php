@@ -111,8 +111,10 @@
                  es justo ese. Sin fichas publicadas no se presume nada. --}}
             @if ($totalAsociados > 0)
                 {{-- Sobre el video oscuro: borde y fondo de blanco, no de marca
-                     sobre tinta, que sobre negro no se leía. El punto sigue rojo. --}}
-                <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-medium text-white">
+                     sobre tinta, que sobre negro no se leía. El blanco vive en
+                     el portador `.etiqueta-clara` de app.css, no en utilidades
+                     que no siguen al tema. El punto sigue rojo. --}}
+                <p class="mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium etiqueta-clara">
                     <span class="h-1.5 w-1.5 rounded-full bg-marca-500"></span>
                     {{ $totalAsociados }} establecimientos afiliados en el Quindío
                 </p>

@@ -465,7 +465,7 @@
     }
 
     /* Móvil intacto: en `main` la barra era un vidrio a todo lo ancho a
-       cualquier tamaño (`.cromo-bandeja`), y al mover el vidrio a la píldora
+       cualquier tamaño (la bandeja del cromo), y al mover el vidrio a la píldora
        de escritorio el móvil se quedó transparente sin que nadie lo midiera:
        el contenido pasaba por detrás del logo. Y desde la portada a pantalla
        completa el header es fijo: sin esto la hamburguesa se perdía sobre el
@@ -901,6 +901,30 @@
 
     .hero-portada .enlace-accion {
         color: rgb(255 255 255 / 0.84);
+    }
+
+    /*
+     * Dos portadores para fondos oscuros A PROPÓSITO, como el video de la
+     * portada: el contorno del botón y la etiqueta de afiliados. Van en CSS
+     * y no como `border-white`/`bg-white` en la vista porque esas utilidades
+     * no siguen al tema y la guardia de tema las prohíbe; aquí el blanco es
+     * del fondo oscuro, no del tema, igual que el `color: white` del `<h1>`
+     * de arriba. Sin color en la vista, ninguna utilidad les gana.
+     */
+    .contorno-claro {
+        color: white;
+        border-color: rgb(255 255 255 / 0.4);
+    }
+
+    .contorno-claro:hover {
+        border-color: rgb(255 255 255 / 0.7);
+        background-color: rgb(255 255 255 / 0.1);
+    }
+
+    .etiqueta-clara {
+        color: white;
+        border-color: rgb(255 255 255 / 0.25);
+        background-color: rgb(255 255 255 / 0.1);
     }
 
     .hero-medio {

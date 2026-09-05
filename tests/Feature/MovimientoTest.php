@@ -539,11 +539,19 @@ class MovimientoTest extends TestCase
             '<x-publico.boton variante="contorno-claro" href="/afiliate">Afíliate</x-publico.boton>'
         );
 
-        $this->assertStringContainsString('text-white', $claro);
-        $this->assertStringContainsString('border-white/40', $claro);
+        // Como portador y no como utilidades: `bg-white`/`border-white` no
+        // siguen al tema y TemaClaroOscuroTest los prohíbe en las vistas; aquí
+        // el blanco es del fondo oscuro, no del tema, y vive en app.css.
+        $this->assertStringContainsString('contorno-claro', $claro);
         $this->assertStringContainsString('pulsable', $claro);
         $this->assertStringNotContainsString('text-tinta', $claro);
+        $this->assertStringNotContainsString('border-linea-fuerte', $claro);
+        $this->assertStringNotContainsString('-white', $claro);
         $this->assertStringNotContainsString('bg-marca-500', $claro);
+
+        $css = File::get(resource_path('css/app.css'));
+        $this->assertMatchesRegularExpression('/\.contorno-claro \{\s*color: white;\s*border-color: rgb\(255 255 255 \/ 0\.4\);/', $css, 'el portador del contorno claro vive en app.css');
+        $this->assertStringContainsString('.contorno-claro:hover {', $css);
     }
 
     /**
