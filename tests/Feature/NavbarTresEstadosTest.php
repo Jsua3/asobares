@@ -306,6 +306,95 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringContainsString('[data-estado="scroll"]:not(:focus-within) .control-plegable {', $css);
     }
 
+    /**
+     * Rotura: quitar `alternarAtencion` del x-data del header.
+     */
+    public function test_el_header_declara_los_tres_estados(): void
+    {
+        $navbar = File::get(resource_path('views/components/publico/navbar.blade.php'));
+
+        $this->assertStringContainsString('x-bind:data-estado="estado"', $navbar);
+        foreach (["'inicial'", "'scroll'", "'atencion'"] as $estado) {
+            $this->assertStringContainsString($estado, $navbar);
+        }
+        foreach (['sincronizar()', 'atender()', 'soltar()', 'alternarAtencion()', 'punteroFino()'] as $metodo) {
+            $this->assertStringContainsString($metodo, $navbar);
+        }
+
+        // Lo que el panel móvil sigue exigiendo, literal.
+        $this->assertStringContainsString('x-on:keydown.escape.window="menuMovil = false"', $navbar);
+        $this->assertStringContainsString('x-on:click.outside="menuMovil = false"', $navbar);
+        $this->assertStringNotContainsString('cromo-compacto', $navbar);
+        $this->assertStringNotContainsString('cromo-expandido', $navbar);
+
+        $html = $this->get('/contacto')->assertOk()->getContent();
+        $this->assertStringContainsString('data-estado="inicial"', $html, 'el servidor pinta el estado inicial antes de que Alpine arranque');
+    }
+
+    /**
+     * Rotura: añadir `control-plegable` al enlace de Eventos.
+     */
+    public function test_los_cinco_controles_siguen_en_un_solo_bloque_y_solo_dos_se_pliegan(): void
+    {
+        $html = $this->get('/contacto')->assertOk()->getContent();
+        preg_match('/<header\b.*?<\/header>/s', $html, $header);
+
+        $dom = new \DOMDocument;
+        libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$header[0]);
+        libxml_clear_errors();
+        $xpath = new \DOMXPath($dom);
+
+        $this->assertSame(1, $xpath->query('//nav')->length, 'una sola <nav>');
+        $this->assertSame(3, $xpath->query('//nav/*[contains(@class, "modulo")]')->length, 'tres módulos, hijos directos de <nav>');
+
+        $principal = $xpath->query('//nav/div[contains(@class, "gap-1")]')->item(0);
+        $this->assertNotNull($principal);
+        $this->assertStringContainsString('modulo-principal', $principal->getAttribute('class'));
+
+        $plegables = $xpath->query('.//*[contains(@class, "control-plegable")]', $principal);
+        $this->assertSame(2, $plegables->length);
+
+        // Por forma y no por texto: la raíz del grupo lleva dentro su panel.
+        $abreTuNegocio = $plegables->item(0);
+        $this->assertSame('a', $abreTuNegocio->nodeName);
+        $this->assertSame(route('guia.index'), $abreTuNegocio->getAttribute('href'));
+
+        $elGremio = $plegables->item(1);
+        $this->assertSame('div', $elGremio->nodeName);
+        $this->assertSame(1, $xpath->query('.//button[@aria-controls="menu-el-gremio"]', $elGremio)->length);
+
+        $this->assertSame(1, $xpath->query('//nav/div[contains(@class, "gap-1")]/span[contains(@class, "indicador-mas")]')->length);
+        $this->assertSame(1, $xpath->query('//nav/a[contains(@class, "modulo-logo")]//span[contains(@class, "logo-doble")]')->length);
+    }
+
+    /**
+     * Rotura: mover `<x-publico.control-tema />` debajo de `<div id="menu-movil"`.
+     */
+    public function test_los_popovers_van_antes_del_panel_movil_y_el_anonimo_ve_lo_suyo(): void
+    {
+        $html = $this->get('/contacto')->assertOk()->getContent();
+
+        $this->assertLessThan(strpos($html, 'id="menu-movil"'), strpos($html, 'id="popover-tema"'));
+        $this->assertLessThan(strpos($html, 'id="menu-movil"'), strpos($html, 'id="popover-idioma"'));
+
+        $inicio = strpos($html, 'modulo modulo-cuenta');
+        $fin = strpos($html, 'id="menu-movil"');
+        $this->assertNotFalse($inicio, 'existe el módulo de cuenta');
+        $this->assertNotFalse($fin, 'existe el panel móvil');
+        $cuenta = substr($html, $inicio, $fin - $inicio);
+
+        // El enlace rinde con saltos de línea alrededor del texto: se afirma
+        // el texto y el destino, no `>Mi cuenta<`.
+        $this->assertStringContainsString('Mi cuenta', $cuenta);
+        $this->assertStringContainsString(route('mi-cuenta.index'), $cuenta);
+        $this->assertStringContainsString('Afíliate', $cuenta);
+        $this->assertStringContainsString('id="popover-tema"', $cuenta);
+        $this->assertStringContainsString('id="popover-idioma"', $cuenta);
+        $this->assertStringNotContainsString('menu-cuenta', $html);
+        $this->assertStringNotContainsString('Cerrar sesión', $html);
+    }
+
     /** El cuerpo de la primera regla cuyo selector empieza así. */
     private function regla(string $css, string $selector): string
     {

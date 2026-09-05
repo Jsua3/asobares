@@ -52,69 +52,108 @@
      apoya —sombra en claro, filo de luz en oscuro— cuando hay algo pasando por
      debajo. El umbral de 8 px evita que el rebote elástico del scroll en iOS
      la encienda y apague sola en el tope. --}}
+{{-- Tres estados de escritorio, resueltos aquí y pintados por CSS desde
+     `data-estado`: `inicial` en el tope, `scroll` al bajar, `atencion` cuando
+     el usuario pide la barra entera (ratón encima, toque en el módulo
+     principal, o teclado dentro, que lo resuelve CSS con :focus-within).
+     Spec: docs/ingenieria/navbar-tres-estados-diseno.md. --}}
 <header x-data="{
             menuMovil: false,
             desplazado: false,
-            cromoExpandido: false,
-            cierreCromo: null,
-            sincronizar() {
-                const actual = Math.max(window.scrollY, 0);
+            atendiendo: false,
+            cierre: null,
+            scrollAlAtender: 0,
+            get estado() {
+                if (! this.desplazado) {
+                    return 'inicial';
+                }
 
-                this.desplazado = actual > 8;
+                return this.atendiendo ? 'atencion' : 'scroll';
             },
             punteroFino() {
                 return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
             },
-            abrirCromo() {
-                if (! this.punteroFino()) {
-                    return;
-                }
+            sincronizar() {
+                const actual = Math.max(window.scrollY, 0);
 
-                clearTimeout(this.cierreCromo);
-                this.cromoExpandido = true;
+                this.desplazado = actual > 8;
+
+                // Con dedo, desplazarse es soltar: 24 px desde que se abrió.
+                if (this.atendiendo && ! this.punteroFino() && Math.abs(actual - this.scrollAlAtender) > 24) {
+                    this.atendiendo = false;
+                }
             },
-            cerrarCromoConPausa() {
+            atender() {
                 if (! this.punteroFino()) {
                     return;
                 }
 
-                clearTimeout(this.cierreCromo);
-                this.cierreCromo = setTimeout(() => {
-                    this.cromoExpandido = false;
+                clearTimeout(this.cierre);
+                this.atendiendo = true;
+            },
+            soltar() {
+                if (! this.punteroFino()) {
+                    return;
+                }
+
+                clearTimeout(this.cierre);
+                this.cierre = setTimeout(() => {
+                    this.atendiendo = false;
                 }, 280);
+            },
+            alternarAtencion() {
+                if (this.punteroFino()) {
+                    return;
+                }
+
+                this.atendiendo = ! this.atendiendo;
+                this.scrollAlAtender = Math.max(window.scrollY, 0);
             },
         }"
         x-init="sincronizar()"
-        x-on:mouseenter="abrirCromo()"
-        x-on:mouseleave="cerrarCromoConPausa()"
+        x-on:mouseenter="atender()"
+        x-on:mouseleave="soltar()"
         x-on:scroll.window.passive="sincronizar()"
         x-on:keydown.escape.window="menuMovil = false"
         x-on:click.outside="menuMovil = false"
         x-on:resize.window="if (window.innerWidth >= 1024) menuMovil = false"
-        x-bind:class="{
-            'cromo-apoyado': desplazado || menuMovil,
-            'cromo-expandido': cromoExpandido || menuMovil,
-        }"
-        class="cromo cromo-compacto sticky top-0 z-40">
-    <nav class="cromo-bandeja mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 sm:px-6 lg:px-8"
+        x-bind:data-estado="estado"
+        x-bind:class="{ 'cromo-apoyado': desplazado || menuMovil }"
+        data-estado="inicial"
+        class="cromo sticky top-0 z-40">
+    {{-- La <nav> es la píldora exterior y la escena del brillo: `escena` ya
+         existe en app.js y escribe --puntero-x/y; con dedo o con movimiento
+         reducido no hace nada, que es lo que se quiere. --}}
+    <nav x-data="escena"
+         x-on:pointermove="seguir($event)"
+         x-on:pointerleave="salir()"
+         x-on:keydown.escape.window="atendiendo = false"
+         x-bind:style="`--puntero-x: ${px}; --puntero-y: ${py}`"
+         class="bandeja mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:px-3"
          aria-label="Navegación principal">
 
-        {{-- `-my-1.5 py-1.5` es padding negativo óptico: el logo mide 32 px de
-             alto en móvil y el relleno lo lleva a 44, mientras el margen
-             negativo devuelve al flujo esos mismos 32. La barra no cambia de
-             alto y el logo no se mueve un píxel. --}}
-        <a href="{{ route('inicio') }}" class="pulsable -my-1.5 flex shrink-0 items-center py-1.5" aria-label="Inicio — ASOBARES Capítulo Quindío">
-            <x-publico.logo alto="h-7 sm:h-8" />
+        {{-- Módulo 1: la marca. `-my-1.5 py-1.5` es padding negativo óptico: el
+             logo mide 32 px de alto en móvil y el relleno lo lleva a 44,
+             mientras el margen negativo devuelve al flujo esos mismos 32. --}}
+        <a href="{{ route('inicio') }}"
+           class="modulo modulo-logo pulsable -my-1.5 flex shrink-0 items-center py-1.5 lg:px-3"
+           aria-label="Inicio — ASOBARES Capítulo Quindío">
+            <x-publico.logo doble alto="h-7 sm:h-8" />
         </a>
 
-        {{-- Escritorio --}}
-        <div class="cromo-desplegable hidden items-center gap-1 lg:flex">
+        {{-- Módulo 2: los cinco controles, siempre los cinco y en este orden.
+             Dos de ellos se pliegan en scroll por CSS; nada sale del DOM. Con
+             dedo, tocar el módulo alterna el estado de atención. --}}
+        <div class="modulo modulo-principal hidden items-center gap-1 px-2 lg:flex"
+             x-on:click="alternarAtencion()"
+             x-on:click.outside="if (! punteroFino()) atendiendo = false">
             @foreach ($enlacesDirectos as $enlace)
                 @php($actual = request()->routeIs($patron($enlace['ruta'])))
                 <a href="{{ route($enlace['ruta']) }}"
                    @if ($actual) aria-current="page" @endif
                    @class([
                        'nav-enlace enlace-accion -my-1 rounded-lg px-3 py-3 text-sm',
+                       'control-plegable' => $enlace['ruta'] === 'guia.index',
                        'text-acento' => $actual,
                        'text-suave hover:text-fuerte' => ! $actual,
                    ])>
@@ -123,13 +162,21 @@
             @endforeach
 
             @foreach ($grupos as $grupo)
-                <x-publico.menu-grupo :titulo="$grupo['titulo']" :enlaces="$grupo['enlaces']" />
+                <x-publico.menu-grupo :titulo="$grupo['titulo']"
+                                      :enlaces="$grupo['enlaces']"
+                                      :class="$grupo['titulo'] === 'El gremio' ? 'control-plegable' : ''" />
             @endforeach
+
+            {{-- Solo con dedo y solo en scroll: la señal de que hay más. --}}
+            <span class="indicador-mas -my-1 flex items-center rounded-lg px-2 py-3 text-apagado" aria-hidden="true">
+                <x-heroicon-o-ellipsis-horizontal class="h-4 w-4" />
+            </span>
         </div>
 
-        <div class="cromo-desplegable hidden items-center gap-2 lg:flex">
-            {{-- Con sesión abierta el atajo vive dentro del desplegable, para no
-                 repetir el mismo enlace dos veces en la misma barra. --}}
+        {{-- Módulo 3: la cuenta, el tema y el idioma. Con sesión abierta el
+             atajo vive dentro del desplegable, para no repetir el mismo enlace
+             dos veces en la misma barra. --}}
+        <div class="modulo modulo-cuenta hidden items-center gap-2 px-2 lg:flex">
             @guest
                 <a href="{{ route('mi-cuenta.index') }}"
                    class="nav-enlace enlace-accion -my-1 rounded-lg px-3 py-3 text-sm text-tenue hover:text-fuerte">
@@ -156,6 +203,8 @@
             @auth
                 <x-publico.menu-usuario />
             @endauth
+            <x-publico.control-tema />
+            <x-publico.control-idioma />
         </div>
 
         {{-- Móvil --}}

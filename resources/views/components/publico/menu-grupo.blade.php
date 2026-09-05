@@ -53,7 +53,7 @@
           detrás —dos desplegables desplegados a la vez— y con el ratón eso no
           pasa nunca porque `click.outside` lo tapa. --}}
      x-on:focusout="if (! $el.contains($event.relatedTarget)) abierto = false"
-     class="relative">
+     {{ $attributes->merge(['class' => 'relative']) }}>
 
     {{-- Misma geometría que los enlaces sueltos de la barra: `py-3` lleva la
          caja a 45,7 px y el `-my-1` devuelve al flujo los 37,7 de antes, así
