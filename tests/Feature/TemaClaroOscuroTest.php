@@ -81,7 +81,19 @@ class TemaClaroOscuroTest extends TestCase
             ->assertSee('requestAnimationFrame', false);
     }
 
-    public function test_el_selector_ofrece_solo_claro_y_oscuro(): void
+    /**
+     * Hasta el 3 sep 2026 esta prueba prohibía «Sistema» a propósito (OBS3-03:
+     * el sitio arranca en el tema del dispositivo, y el selector solo ofrecía
+     * forzar uno). Sua decidió ese día que el popover de la barra de
+     * escritorio ofrezca las tres: el arranque sigue siendo el del
+     * dispositivo; lo que cambia es que se puede VOLVER a él tras forzar uno.
+     * Anotado en encargo.md §13.
+     *
+     * Las cadenas '>Claro<' y '>Oscuro<' las emiten dos controles a la vez:
+     * la barra lateral (móvil) y el popover (escritorio). '>Sistema<' solo el
+     * popover.
+     */
+    public function test_el_selector_ofrece_claro_oscuro_y_sistema(): void
     {
         $respuesta = $this->get('/contacto');
 
@@ -89,10 +101,10 @@ class TemaClaroOscuroTest extends TestCase
             ->assertSee('Apariencia del sitio', false)
             ->assertSee('>Claro<', false)
             ->assertSee('>Oscuro<', false)
+            ->assertSee('>Sistema<', false)
             ->assertSee("\$store.tema.elegir('light')", false)
             ->assertSee("\$store.tema.elegir('dark')", false)
-            ->assertDontSee('>Sistema<', false)
-            ->assertDontSee("\$store.tema.elegir('system')", false);
+            ->assertSee("\$store.tema.elegir('system')", false);
     }
 
     public function test_el_control_de_tema_vive_en_una_barra_lateral_fija(): void

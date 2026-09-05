@@ -121,4 +121,35 @@ class NavbarTresEstadosTest extends TestCase
             ->assertOk()
             ->assertSee('rel="preload" as="image" href="http://localhost:8000/img/monograma-asobares.png" media="(min-width: 64rem)"', false);
     }
+
+    /**
+     * Rotura: poner `computer-desktop` en el botón, o quitar la fila Sistema.
+     */
+    public function test_el_control_de_tema_muestra_sol_o_luna_y_ofrece_sistema_en_el_popover(): void
+    {
+        $html = Blade::render('<x-publico.control-tema />');
+
+        [$boton, $popover] = explode('id="popover-tema"', $html, 2);
+
+        $this->assertStringContainsString('aria-label="Apariencia del sitio"', $boton);
+        $this->assertStringContainsString('aria-controls="popover-tema"', $boton);
+        $this->assertStringContainsString("x-show=\"\$store.tema.resuelto === 'light'\"", $boton);
+        $this->assertStringContainsString("x-show=\"\$store.tema.resuelto === 'dark'\"", $boton);
+        $this->assertStringNotContainsString('computer-desktop', $boton, 'el botón nunca muestra el monitor');
+        $this->assertStringNotContainsString('M9 17.25v1.007', $boton, 'ni el path del monitor');
+
+        $this->assertStringContainsString('>Claro<', $popover);
+        $this->assertStringContainsString('>Oscuro<', $popover);
+        $this->assertStringContainsString('>Sistema<', $popover);
+        $this->assertStringContainsString("\$store.tema.elegir('light')", $popover);
+        $this->assertStringContainsString("\$store.tema.elegir('dark')", $popover);
+        $this->assertStringContainsString("\$store.tema.elegir('system')", $popover);
+        $this->assertSame(3, substr_count($popover, 'x-bind:aria-pressed='), 'las tres filas marcan la activa');
+
+        // Lo que las guardias globales exigen a todo desplegable de la barra.
+        $this->assertStringContainsString('transicion-desplegable', $html);
+        $this->assertStringContainsString('fila-pulsable', $html);
+        $this->assertStringContainsString('ease-rebote-vivo duration-(--duracion-rebote)', $html);
+        $this->assertStringContainsString('scale-(--asb-escala-popover) translate-y-(--asb-desplazamiento-popover)', $html);
+    }
 }
