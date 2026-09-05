@@ -26,12 +26,17 @@ class MovimientoTest extends TestCase
         $this->assertStringContainsString('--ease-color: ease', $tokens);
 
         // Duraciones: la escala codifica que la salida es más rápida que la
-        // entrada (160 < 200) y que nada de interfaz pasa de 300 ms.
+        // entrada (160 < 200) y que nada de interfaz pasa de 300 ms, con dos
+        // excepciones con nombre: la apertura de la barra lateral y el
+        // asentamiento del resorte de la barra de escritorio (spec del 3 sep
+        // 2026, D7). Un resorte «llega» hacia los 250 ms; el resto es la cola
+        // que se asienta, y cortarla es quitarle el rebote.
         $this->assertStringContainsString('--duracion-instante: 100ms', $tokens);
         $this->assertStringContainsString('--duracion-boton: 140ms', $tokens);
         $this->assertStringContainsString('--duracion-salida: 160ms', $tokens);
         $this->assertStringContainsString('--duracion-entrada: 200ms', $tokens);
         $this->assertStringContainsString('--duracion-panel: 240ms', $tokens);
+        $this->assertStringContainsString('--duracion-rebote: 520ms', $tokens);
 
         // Desplazamientos: son tokens y no literales porque el interruptor de
         // `prefers-reduced-motion` los anula sin tocar las duraciones.

@@ -30,6 +30,15 @@
     --ease-cajon: cubic-bezier(0.32, 0.72, 0, 1);
     --ease-color: ease;
 
+    /*
+     * Resortes reales para la barra de escritorio. Nacen como la curva del
+     * cajón (respaldo) y el @supports del final los sustituye por linear()
+     * donde exista: una segunda declaración no serviría de respaldo porque
+     * var() es inválido en tiempo de cómputo y la propiedad caería a `ease`.
+     */
+    --ease-rebote-suave: cubic-bezier(0.32, 0.72, 0, 1);
+    --ease-rebote-vivo: cubic-bezier(0.32, 0.72, 0, 1);
+
     /* --- Paleta principal --- */
     /* Pub Red #EE4137: dinamismo, accion y movimiento. Unico acento. */
     --color-marca-50: #fef3f2;
@@ -194,6 +203,7 @@
     --duracion-entrada: 200ms; /* enter de desplegables, alertas */
     --duracion-panel: 240ms; /* menú móvil */
     --duracion-cromo: 520ms; /* apertura de la barra pública */
+    --duracion-rebote: 520ms; /* asentamiento de un resorte; el movimiento «llega» hacia los 250 */
 
     /*
      * Desplazamientos. Son tokens y no literales porque bajo
@@ -246,6 +256,17 @@
     --asb-revelar-desplazamiento: 10px;
     --asb-inclinacion: 3;
     --asb-avance-flecha: 3px;
+
+    /*
+     * Geometría de la barra en tres estados (escritorio). La separación entre
+     * módulos es layout y sobrevive al movimiento reducido; caída, escalas y
+     * desplazamiento son movimiento y el interruptor del final los anula.
+     */
+    --asb-separacion-modulos: 0.75rem;
+    --asb-caida-modulo: 6px;
+    --asb-escala-popover: 0.92;
+    --asb-desplazamiento-popover: -6px;
+    --asb-escala-isotipo: 0.9;
 }
 
 .dark {
@@ -408,6 +429,18 @@
  * Va después de `.dark` para ganar por orden de aparición: misma
  * especificidad, gana la última.
  */
+/*
+ * Oscilador amortiguado muestreado en 25 paradas. Suave: amortiguación 0,70,
+ * sobreimpulso 4,6 % en el 54 % del recorrido. Vivo: 0,55, sobreimpulso
+ * 12,5 % en el 33 %. Solo donde el navegador entiende linear().
+ */
+@supports (animation-timing-function: linear(0, 1)) {
+    :root {
+        --ease-rebote-suave: linear(0, 0.050 4%, 0.168 8%, 0.319 12%, 0.475 17%, 0.620 21%, 0.744 25%, 0.845 29%, 0.922 33%, 0.977 38%, 1.013 42%, 1.034 46%, 1.044 50%, 1.046 54%, 1.043 58%, 1.037 62%, 1.030 67%, 1.023 71%, 1.017 75%, 1.011 79%, 1.006 83%, 1.003 88%, 1.001 92%, 0.999 96%, 1);
+        --ease-rebote-vivo: linear(0, 0.086 4%, 0.283 8%, 0.516 12%, 0.735 17%, 0.910 21%, 1.030 25%, 1.099 29%, 1.125 33%, 1.121 38%, 1.099 42%, 1.071 46%, 1.042 50%, 1.018 54%, 1.000 58%, 0.990 62%, 0.985 67%, 0.984 71%, 0.986 75%, 0.990 79%, 0.994 83%, 0.997 88%, 0.999 92%, 1.001 96%, 1);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     :root {
         --asb-levante: 0px;
@@ -424,5 +457,16 @@
         --asb-revelar-desplazamiento: 0px;
         --asb-inclinacion: 0;
         --asb-avance-flecha: 0px;
+
+        /* Barra en tres estados: la caída, las escalas y el desplazamiento son
+           movimiento; la separación entre módulos es layout y se queda. */
+        --asb-caida-modulo: 0px;
+        --asb-escala-popover: 1;
+        --asb-desplazamiento-popover: 0px;
+        --asb-escala-isotipo: 1;
+
+        /* El rebote ES geometría: sin sobreimpulso. */
+        --ease-rebote-suave: var(--ease-cajon);
+        --ease-rebote-vivo: var(--ease-cajon);
     }
 }
