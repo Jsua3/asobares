@@ -95,12 +95,23 @@ Bajo `html.sin-desplazamiento` (movimiento reducido, clase que ya pone el `<head
 
 ### 5.1 Curvas (en el `@theme` de `tokens.css`, junto a las cuatro existentes)
 
-Dos resortes reales, calculados con la ecuación del oscilador amortiguado y codificados como `linear()` con 25 paradas. Cada uso los declara con respaldo:
+Dos resortes reales, calculados con la ecuación del oscilador amortiguado y codificados como `linear()` con 25 paradas. El respaldo para navegadores sin `linear()` **no puede ser una segunda declaración**: si el valor de `var(--ease-rebote-suave)` no se entiende, la propiedad no cae a la declaración anterior sino a su valor inicial (`ease`), porque `var()` es inválido en tiempo de cómputo y no en tiempo de análisis. El mecanismo correcto es `@supports`:
 
 ```css
-transition-timing-function: var(--ease-cajon);          /* navegadores sin linear() */
-transition-timing-function: var(--ease-rebote-suave);
+@theme {
+    --ease-rebote-suave: cubic-bezier(0.32, 0.72, 0, 1);  /* respaldo: la curva del cajón */
+    --ease-rebote-vivo: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@supports (animation-timing-function: linear(0, 1)) {
+    :root {
+        --ease-rebote-suave: linear(…);
+        --ease-rebote-vivo: linear(…);
+    }
+}
 ```
+
+Los usos escriben solo `var(--ease-rebote-suave)`: el token ya trae su respaldo. (Corregido el 5 sep al escribir el plan.)
 
 **`--ease-rebote-suave`** — amortiguación ζ = 0,70, sobreimpulso 4,6 % en el 54 % del recorrido. Para separar y fundir módulos, cambiar anchos, plegar controles.
 
@@ -252,7 +263,7 @@ Regla del proyecto: cada aserción nueva se ve **roja** rompiendo el código a p
 | los cinco controles siguen en un solo bloque | XPath sobre `/contacto`: cinco controles en orden, y **exactamente dos** (`Abre tu negocio`, `El gremio`) llevan `control-plegable` | añadir la clase a `Eventos` |
 | el isotipo viaja y se precarga | `/contacto` contiene `monograma-asobares.png` dos veces (img + preload) y la precarga lleva `media="(min-width: 64rem)"` | quitar el `media` |
 | el rebote es un token | `tokens.css` contiene `--ease-rebote-suave: linear(`, `--ease-rebote-vivo: linear(`, `--duracion-rebote: 520ms`, y tras `prefers-reduced-motion: reduce` contiene `--asb-caida-modulo: 0px`, `--asb-escala-popover: 1`, `--ease-rebote-suave: var(--ease-cajon)` | borrar la anulación de `--asb-caida-modulo` |
-| el rebote lleva respaldo | en `app.css`, toda regla con `var(--ease-rebote-` va precedida en el mismo bloque por `var(--ease-cajon)` | quitar un respaldo |
+| el rebote lleva respaldo | en `tokens.css`, `--ease-rebote-suave` y `--ease-rebote-vivo` se declaran dos veces: una con `cubic-bezier(0.32, 0.72, 0, 1)` fuera de todo `@supports` y otra con `linear(` dentro de `@supports (animation-timing-function: linear(0, 1))` | borrar la declaración de respaldo |
 | el vidrio usa tokens | `.modulo` en `app.css` contiene `var(--asb-cromo-desenfoque)` y ningún `blur(` literal en las reglas nuevas | escribir `blur(20px)` |
 | el brillo tiene puerta táctil | la regla `.modulo::before` que usa `--puntero-x` está dentro de un bloque `@media (hover: hover) and (pointer: fine)` (se acota a esa regla: la escena de la portada ya usa `--puntero-x` fuera de la puerta y no es de esta spec) | sacar `.modulo::before` de la puerta |
 | el store acepta sistema | `app.js` contiene `resuelto` y `elegir` escribe `'system'`; `/contacto` contiene `$store.tema.elegir('system')` y `>Sistema<` | quitar la fila Sistema |
