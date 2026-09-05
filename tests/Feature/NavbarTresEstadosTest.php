@@ -157,4 +157,34 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringContainsString('ease-rebote-vivo duration-(--duracion-rebote)', $html);
         $this->assertStringContainsString('scale-(--asb-escala-popover) translate-y-(--asb-desplazamiento-popover)', $html);
     }
+
+    /**
+     * Rotura: quitar `disabled` de la fila de English.
+     */
+    public function test_el_chip_de_idioma_se_ve_y_el_ingles_no_funciona_a_proposito(): void
+    {
+        $html = Blade::render('<x-publico.control-idioma />');
+
+        [$boton, $popover] = explode('id="popover-idioma"', $html, 2);
+
+        $this->assertStringContainsString('>ES<', $boton);
+        $this->assertStringContainsString('aria-label="Idioma del sitio"', $boton);
+        $this->assertStringContainsString('aria-controls="popover-idioma"', $boton);
+
+        $this->assertStringContainsString('>Español<', $popover);
+        $this->assertStringContainsString('>English<', $popover);
+        $this->assertStringContainsString('próximamente', $popover);
+        $this->assertStringContainsString('data-pais="co"', $popover);
+        $this->assertStringContainsString('data-pais="us"', $popover);
+
+        [, $filaIngles] = explode('lang="en"', $popover, 2);
+        $filaIngles = strstr($filaIngles, '</button>', true);
+        $this->assertStringContainsString('disabled', $popover);
+        $this->assertStringContainsString('aria-disabled="true"', $popover);
+        $this->assertStringContainsString('>English<', $filaIngles);
+
+        $this->assertStringContainsString('aria-pressed="true"', $popover);
+        $this->assertStringContainsString('transicion-desplegable', $html);
+        $this->assertStringContainsString('fila-pulsable', $html);
+    }
 }
