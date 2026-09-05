@@ -927,6 +927,11 @@
         background-color: rgb(255 255 255 / 0.1);
     }
 
+    /* El filete del pie del video, por lo mismo: blanco del fondo oscuro. */
+    .hero-portada .pie-de-video {
+        border-color: rgb(255 255 255 / 0.3);
+    }
+
     .hero-medio {
         position: absolute;
         inset: 0;

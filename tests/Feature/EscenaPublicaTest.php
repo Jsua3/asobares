@@ -70,6 +70,9 @@ class EscenaPublicaTest extends TestCase
         // `variante="contorno"` en el hero; devolver `text-acento-fuerte` a la píldora.
         $this->assertStringContainsString('variante="contorno-claro" :href="route(\'afiliate\')"', $vista);
         $this->assertStringContainsString('rounded-full border px-3 py-1 text-xs font-medium etiqueta-clara', $vista);
+        // El pie del video: su filete blanco también va en CSS, no en `border-white`.
+        $this->assertStringContainsString('border-l pl-4 text-sm leading-relaxed text-white/72 pie-de-video', $vista);
+        $this->assertMatchesRegularExpression('/\.hero-portada \.pie-de-video \{\s*border-color: rgb\(255 255 255 \/ 0\.3\);/', File::get(resource_path('css/app.css')));
         $this->assertMatchesRegularExpression('/\.etiqueta-clara \{\s*color: white;\s*border-color: rgb\(255 255 255 \/ 0\.25\);\s*background-color: rgb\(255 255 255 \/ 0\.1\);/', File::get(resource_path('css/app.css')), 'el portador de la etiqueta clara vive en app.css');
         $this->assertStringNotContainsString('text-acento-fuerte', substr($vista, 0, strpos($vista, '</x-publico.hero>')), 'nada de tinta de fondo claro dentro del hero oscuro');
     }

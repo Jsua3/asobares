@@ -159,7 +159,7 @@
              completa (Persona 2, 4 sep) y quedó anotado «hay que decidir dónde
              van»: van al pie del texto del hero, como pie de foto del video que
              corre detrás. Colocación a confirmar con la Persona 2. --}}
-        <p class="mt-10 max-w-md border-l border-white/30 pl-4 text-sm leading-relaxed text-white/72">
+        <p class="mt-10 max-w-md border-l pl-4 text-sm leading-relaxed text-white/72 pie-de-video">
             <span class="antetitulo block text-white/60">{{ ajuste('hero_video_rotulo', 'Video institucional') }}</span>
             <span class="mt-1 block font-display font-semibold text-white">{{ $videoInstitucional['titulo'] }}</span>
             <span class="mt-0.5 block">{{ $videoInstitucional['detalle'] }}</span>
