@@ -260,4 +260,59 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringContainsString('transicion-desplegable', $html);
         $this->assertStringContainsString('fila-pulsable', $html);
     }
+
+    /**
+     * Rotura: escribir `blur(20px)` literal en `.modulo`, o sacar
+     * `.modulo::before` de la puerta táctil.
+     */
+    public function test_el_vidrio_usa_tokens_y_el_brillo_tiene_puerta_tactil(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+
+        $this->assertStringContainsString('.bandeja {', $css);
+        $this->assertStringContainsString('.modulo {', $css);
+        $this->assertStringContainsString('.control-plegable {', $css);
+        $this->assertStringContainsString('.indicador-mas {', $css);
+        $this->assertStringContainsString('.logo-doble__isotipo {', $css);
+
+        // Retiradas: sustituidas por las de arriba.
+        $this->assertStringNotContainsString('.cromo-bandeja', $css);
+        $this->assertStringNotContainsString('.cromo-compacto', $css);
+        $this->assertStringNotContainsString('.cromo-desplegable', $css);
+
+        $modulo = $this->regla($css, '.modulo');
+        $this->assertStringContainsString('var(--asb-cromo-desenfoque)', $this->regla($css, '[data-estado="atencion"] .modulo'));
+        $this->assertStringNotContainsString('blur(', $modulo);
+        $this->assertStringContainsString('var(--ease-rebote-suave)', $modulo);
+        $this->assertStringContainsString('translate var(--duracion-rebote)', $modulo);
+
+        $this->assertMatchesRegularExpression(
+            '/@media \(hover: hover\) and \(pointer: fine\) \{\s*\.modulo::before \{[^}]*--puntero-x/',
+            $css,
+            'el brillo que sigue al puntero va dentro de la puerta táctil'
+        );
+        $this->assertSame(
+            1,
+            preg_match_all('/\.modulo::before \{[^}]*--puntero-x/', $css),
+            'solo la regla con puerta usa --puntero-x'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/@media \(hover: none\) \{\s*\[data-estado="scroll"\] \.indicador-mas \{/',
+            $css,
+            'el indicador solo aparece con puntero grueso y en scroll'
+        );
+
+        $this->assertStringContainsString('[data-estado="scroll"]:not(:focus-within) .control-plegable {', $css);
+    }
+
+    /** El cuerpo de la primera regla cuyo selector empieza así. */
+    private function regla(string $css, string $selector): string
+    {
+        $inicio = strpos($css, $selector.' {');
+        $this->assertNotFalse($inicio, "no existe la regla {$selector}");
+        $fin = strpos($css, '}', $inicio);
+
+        return substr($css, $inicio, $fin - $inicio);
+    }
 }
