@@ -18,7 +18,9 @@
        x-on:mouseleave="abierto = false"
        x-on:focusin="abierto = true"
        x-on:focusout="if (! $el.contains($event.relatedTarget)) abierto = false"
-       class="tema-lateral fixed bottom-4 right-3 z-30 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2"
+       {{-- Solo por debajo de 1024 px: en escritorio el tema vive en la barra
+            de navegación (control-tema). Así el móvil no cambia. --}}
+       class="tema-lateral fixed bottom-4 right-3 z-30 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 lg:hidden"
        aria-label="Apariencia del sitio">
     <div class="tema-lateral__cuerpo"
          x-bind:class="abierto ? 'tema-lateral__cuerpo--abierto' : ''"

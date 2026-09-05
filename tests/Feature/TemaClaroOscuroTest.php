@@ -107,13 +107,19 @@ class TemaClaroOscuroTest extends TestCase
             ->assertSee("\$store.tema.elegir('system')", false);
     }
 
-    public function test_el_control_de_tema_vive_en_una_barra_lateral_fija(): void
+    /**
+     * Desde el 3 sep 2026 el tema de escritorio vive en la barra de
+     * navegación (popover-tema) y la barra lateral se queda solo en móvil.
+     */
+    public function test_el_control_de_tema_vive_en_la_barra_lateral_en_movil_y_en_la_navbar_en_escritorio(): void
     {
         $respuesta = $this->get('/contacto');
 
         $respuesta->assertOk()
             ->assertSee('tema-lateral fixed', false)
-            ->assertSee('sm:top-1/2', false);
+            ->assertSee('sm:top-1/2', false)
+            ->assertSee('lg:hidden', false)
+            ->assertSee('id="popover-tema"', false);
     }
 
     // --- Quién ve qué en el desplegable de cuenta ---

@@ -154,12 +154,6 @@ class ObjetivoTactilTest extends TestCase
                 'rounded-lg px-3 py-3 text-sm text-suave',
                 'py-2 dejaba la fila en 37,7 px',
             ],
-            'selector de tema' => [
-                'components/publico/selector-tema.blade.php',
-                'flex min-h-11 flex-1 items-center justify-center rounded-lg px-3',
-                'el icono mide 18 px: con py-2 el botón quedaba en 34',
-            ],
-
             // Formularios. `min-h-11` y no `py-3`: el control mide 43,7 px y
             // solo le faltan 0,3, así que el mínimo no mueve ni un campo.
             'campo, los tres controles' => [

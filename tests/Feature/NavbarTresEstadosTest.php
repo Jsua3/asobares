@@ -410,6 +410,18 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringNotContainsString('Cerrar sesión', $html);
     }
 
+    /**
+     * Rotura: quitar `lg:hidden` del <aside> de la barra lateral.
+     */
+    public function test_la_barra_lateral_de_tema_se_queda_solo_en_movil(): void
+    {
+        $barra = File::get(resource_path('views/components/publico/barra-tema.blade.php'));
+        $this->assertStringContainsString('tema-lateral fixed', $barra);
+        $this->assertStringContainsString('lg:hidden', $barra);
+
+        $this->assertFileDoesNotExist(resource_path('views/components/publico/selector-tema.blade.php'), 'el selector huérfano se borró');
+    }
+
     /** El cuerpo de la primera regla cuyo selector empieza así. */
     private function regla(string $css, string $selector): string
     {
