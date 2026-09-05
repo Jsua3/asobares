@@ -123,20 +123,27 @@
         class="cromo sticky top-0 z-40">
     {{-- La <nav> es la píldora exterior y la escena del brillo: `escena` ya
          existe en app.js y escribe --puntero-x/y; con dedo o con movimiento
-         reducido no hace nada, que es lo que se quiere. --}}
+         reducido no hace nada, que es lo que se quiere.
+
+         En escritorio es una rejilla `1fr auto 1fr` y no un flex con
+         `justify-between`: así el módulo principal queda en el centro de la
+         PANTALLA en los tres estados, gane lo que gane el logo al encogerse
+         o la cuenta con un nombre largo. Con `justify-between` caía en el
+         punto medio entre los otros dos, 120 px a la izquierda en scroll
+         (medido a 1440, 1280 y 1024 el 5 sep). --}}
     <nav x-data="escena"
          x-on:pointermove="seguir($event)"
          x-on:pointerleave="salir()"
          x-on:keydown.escape.window="atendiendo = false"
          x-bind:style="`--puntero-x: ${px}; --puntero-y: ${py}`"
-         class="bandeja mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:px-3"
+         class="bandeja mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-3"
          aria-label="Navegación principal">
 
         {{-- Módulo 1: la marca. `-my-1.5 py-1.5` es padding negativo óptico: el
              logo mide 32 px de alto en móvil y el relleno lo lleva a 44,
              mientras el margen negativo devuelve al flujo esos mismos 32. --}}
         <a href="{{ route('inicio') }}"
-           class="modulo modulo-logo pulsable -my-1.5 flex shrink-0 items-center py-1.5 lg:px-3"
+           class="modulo modulo-logo pulsable -my-1.5 flex shrink-0 items-center py-1.5 lg:justify-self-start lg:px-3"
            aria-label="Inicio — ASOBARES Capítulo Quindío">
             <x-publico.logo doble alto="h-7 sm:h-8" />
         </a>
@@ -145,7 +152,7 @@
              Dos de ellos se pliegan en scroll por CSS; nada sale del DOM. Con
              dedo, tocar los huecos del módulo o el indicador alterna el estado
              de atención; tocar un enlace o un grupo hace lo suyo y nada más. --}}
-        <div class="modulo modulo-principal hidden min-h-11 items-center gap-1 px-2 lg:flex"
+        <div class="modulo modulo-principal hidden min-h-11 items-center gap-1 px-2 lg:flex lg:justify-self-center"
              x-on:click="if (! $event.target.closest('a, button')) alternarAtencion()"
              x-on:click.outside="if (! punteroFino()) atendiendo = false">
             @foreach ($enlacesDirectos as $enlace)
@@ -177,7 +184,7 @@
         {{-- Módulo 3: la cuenta, el tema y el idioma. Con sesión abierta el
              atajo vive dentro del desplegable, para no repetir el mismo enlace
              dos veces en la misma barra. --}}
-        <div class="modulo modulo-cuenta hidden items-center gap-2 px-2 lg:flex">
+        <div class="modulo modulo-cuenta hidden items-center gap-2 px-2 lg:flex lg:justify-self-end">
             @guest
                 <a href="{{ route('mi-cuenta.index') }}"
                    class="nav-enlace enlace-accion -my-1 rounded-lg px-3 py-3 text-sm text-tenue hover:text-fuerte">
