@@ -120,7 +120,7 @@
         x-bind:data-estado="estado"
         x-bind:class="{ 'cromo-apoyado': desplazado || menuMovil }"
         data-estado="inicial"
-        class="cromo sticky top-0 z-40">
+        class="cromo cromo-fijo z-40">
     {{-- La <nav> es la píldora exterior y la escena del brillo: `escena` ya
          existe en app.js y escribe --puntero-x/y; con dedo o con movimiento
          reducido no hace nada, que es lo que se quiere.

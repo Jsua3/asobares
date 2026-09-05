@@ -1,4 +1,4 @@
-@props(['titulo', 'subtitulo' => null, 'compacto' => false, 'atmosfera' => false, 'audiovisual' => false])
+@props(['titulo', 'subtitulo' => null, 'compacto' => false, 'atmosfera' => false, 'audiovisual' => false, 'portada' => false])
 
 {{--
     Ranura `medio` (OBS3-02): imagen o video de fondo para darle vida al hero.
@@ -26,6 +26,7 @@
     'resplandor-marca border-b border-linea',
     'hero-con-medio' => isset($medio),
     'hero-editorial' => isset($escena),
+    'hero-portada' => $portada,
     'luz-ambiente' => $atmosfera,
 ])>
     @isset($medio)
@@ -37,16 +38,19 @@
 
     <div @class([
         'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8',
+        'flex min-h-[calc(100svh-1rem)] items-center pb-20 pt-28 sm:pb-24 sm:pt-32 lg:pt-36' => $portada,
         'py-16 sm:py-24 lg:py-28' => ! $compacto && isset($escena),
-        'py-14 sm:py-20' => ! $compacto && ! isset($escena),
+        'py-14 sm:py-20' => ! $compacto && ! isset($escena) && ! $portada,
         'py-10 sm:py-14' => $compacto,
     ])>
         <div @class([
+            'w-full' => $portada,
             'grid items-center gap-10 lg:grid-cols-12 lg:gap-14' => isset($escena) && ! $audiovisual,
             'grid items-center gap-10 lg:grid-cols-12 lg:gap-10' => isset($escena) && $audiovisual,
         ])>
             <div @class([
-                'max-w-3xl' => ! isset($escena),
+                'max-w-3xl' => ! isset($escena) && ! $portada,
+                'max-w-4xl' => $portada,
                 'lg:col-span-6 xl:col-span-5' => isset($escena) && ! $audiovisual,
                 'lg:col-span-4' => isset($escena) && $audiovisual,
             ])>

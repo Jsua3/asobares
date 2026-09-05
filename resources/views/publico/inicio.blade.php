@@ -63,66 +63,43 @@
                    :descripcion="ajuste('sitio_descripcion')">
 
     {{-- Hero --}}
-    <x-publico.hero :titulo="ajuste('hero_titulo')" atmosfera audiovisual>
-        <x-slot:escena>
-            <div class="hero-video-institucional tarjeta-escena group relative overflow-hidden"
-                 x-data="escena"
-                 x-on:pointermove="seguir($event)"
-                x-on:pointerleave="salir()"
-                x-bind:style="`--puntero-x: ${px}; --puntero-y: ${py}`">
-                <div class="absolute inset-0 z-0">
-                    @if ($videoInstitucional['poster'])
-                        <img src="{{ $videoInstitucional['poster'] }}"
-                             alt=""
-                             width="1200"
-                             height="780"
-                             class="imagen-viva absolute inset-0 h-full w-full object-cover">
-                    @else
-                        <div class="hero-video-respaldo absolute inset-0"></div>
-                    @endif
+    <x-publico.hero :titulo="ajuste('hero_titulo')" atmosfera portada>
+        <x-slot:medio>
+            <div class="hero-video-fondo">
+                @if ($videoInstitucional['poster'])
+                    <img src="{{ $videoInstitucional['poster'] }}"
+                         alt=""
+                         width="1600"
+                         height="900"
+                         class="imagen-viva absolute inset-0 h-full w-full object-cover">
+                @else
+                    <div class="hero-video-respaldo absolute inset-0"></div>
+                @endif
 
-                    @if ($videoInstitucional['src'])
-                        {{-- Sin `autoplay` y con `preload="none"` a propósito: quien
-                             pidió menos movimiento se queda con el póster y ni
-                             siquiera descarga el megabyte y medio. `videoHero`
-                             --en `app.js`, junto al resto de `reduceMovimiento()`--
-                             es quien lo arranca cuando el movimiento está
-                             permitido, y solo entonces se funde encima. --}}
-                        <video class="imagen-viva video-hero-capa absolute inset-0 h-full w-full object-cover"
-                               x-data="videoHero"
-                               x-bind:class="listo ? 'video-hero-capa--visible' : ''"
-                               x-on:error="listo = false"
-                               @if ($videoInstitucional['poster']) poster="{{ $videoInstitucional['poster'] }}" @endif
-                               muted
-                               loop
-                               playsinline
-                               preload="none">
-                            <source src="{{ $videoInstitucional['src'] }}" type="video/mp4">
-                        </video>
-                    @endif
-                </div>
+                @if ($videoInstitucional['src'])
+                    {{-- Sin `autoplay` y con `preload="none"` a propósito: quien pidió
+                         menos movimiento se queda con el póster y ni siquiera descarga
+                         el megabyte y medio. `videoHero` --en `app.js`, junto al resto
+                         de `reduceMovimiento()`-- es quien lo arranca cuando el
+                         movimiento está permitido, y solo entonces se funde encima.
 
-                <div class="video-velo-suave absolute inset-0 z-10"></div>
-
-                {{-- El rótulo del video. `hero_video_rotulo`, `hero_video_titulo`
-                     y `hero_video_detalle` estaban sembrados y exigidos por
-                     `PortadaEditableTest` pero no los pintaba nadie: la tarjeta
-                     salía muda.
-
-                     Lleva franja propia (`.video-velo`, 72 % de negro abajo) y
-                     no se apoya en el velo suave de la tarjeta, que es del 28 %
-                     y deja el texto blanco ilegible en los fotogramas claros
-                     del bucle. `z-20` porque `.hero-video-institucional::after`
-                     ocupa el 15. --}}
-                <div class="video-velo pointer-events-none absolute inset-x-0 bottom-0 z-20 h-2/3"></div>
-
-                <div class="absolute inset-x-0 bottom-0 z-20 p-6 text-white sm:p-8">
-                    <p class="antetitulo text-white/70">{{ ajuste('hero_video_rotulo', 'Video institucional') }}</p>
-                    <p class="mt-2 font-display text-lg font-semibold sm:text-xl">{{ $videoInstitucional['titulo'] }}</p>
-                    <p class="mt-1 max-w-md text-sm leading-relaxed text-white/80">{{ $videoInstitucional['detalle'] }}</p>
-                </div>
+                         El fondo a pantalla completa es de esta rama; el
+                         comportamiento del video viene de f83c9ea, que arregló el hero
+                         mudo en producción. Las dos cosas caben. --}}
+                    <video class="imagen-viva video-hero-capa absolute inset-0 h-full w-full object-cover"
+                           x-data="videoHero"
+                           x-bind:class="listo ? 'video-hero-capa--visible' : ''"
+                           x-on:error="listo = false"
+                           @if ($videoInstitucional['poster']) poster="{{ $videoInstitucional['poster'] }}" @endif
+                           muted
+                           loop
+                           playsinline
+                           preload="none">
+                        <source src="{{ $videoInstitucional['src'] }}" type="video/mp4">
+                    </video>
+                @endif
             </div>
-        </x-slot:escena>
+        </x-slot:medio>
 
         <x-slot:encima>
             {{-- Con el directorio vacío la píldora decía «0 establecimientos
@@ -138,7 +115,7 @@
                     {{ $totalAsociados }} establecimientos afiliados en el Quindío
                 </p>
             @endif
-            <p class="mb-5 max-w-2xl font-display text-base font-medium leading-snug text-suave text-balance sm:text-lg">
+            <p class="mb-5 max-w-2xl font-display text-base font-medium leading-snug text-white/72 text-balance sm:text-lg">
                 {{ ajuste('manifiesto_apertura') }}
             </p>
 
@@ -159,7 +136,7 @@
             @endif
         </x-slot:encima>
 
-        <p class="mt-5 max-w-lg text-base leading-relaxed text-suave sm:text-lg text-pretty">
+        <p class="mt-5 max-w-xl text-base leading-relaxed text-white/74 sm:text-lg text-pretty">
             {{ ajuste('hero_resumen_corto', 'Representamos la vida nocturna del Quindío con criterio, cultura y territorio.') }}
         </p>
 
@@ -171,6 +148,18 @@
                 {{ ajuste('hero_cta_afiliate') }}
             </x-publico.boton>
         </div>
+
+        {{-- El rótulo del video: `hero_video_rotulo`, `_titulo` y `_detalle` están
+             sembrados con contenido oficial y `PortadaEditableTest` exige que se
+             pinten. La tarjeta que los pintaba se fue con la portada a pantalla
+             completa (Persona 2, 4 sep) y quedó anotado «hay que decidir dónde
+             van»: van al pie del texto del hero, como pie de foto del video que
+             corre detrás. Colocación a confirmar con la Persona 2. --}}
+        <p class="mt-10 max-w-md border-l border-white/30 pl-4 text-sm leading-relaxed text-white/72">
+            <span class="antetitulo block text-white/60">{{ ajuste('hero_video_rotulo', 'Video institucional') }}</span>
+            <span class="mt-1 block font-display font-semibold text-white">{{ $videoInstitucional['titulo'] }}</span>
+            <span class="mt-0.5 block">{{ $videoInstitucional['detalle'] }}</span>
+        </p>
     </x-publico.hero>
 
     {{-- Cifras del Observatorio --}}
