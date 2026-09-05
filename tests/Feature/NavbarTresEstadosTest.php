@@ -614,6 +614,29 @@ class NavbarTresEstadosTest extends TestCase
         }
     }
 
+    /**
+     * Móvil intacto de verdad: en `main` la barra era un vidrio a todo lo
+     * ancho a cualquier tamaño (`.cromo-bandeja`), y al mover el vidrio a la
+     * píldora de escritorio el móvil se quedó transparente sin que nadie lo
+     * midiera: el contenido pasaba por detrás del logo. Con el header fijo
+     * de la portada a pantalla completa, además, la hamburguesa se perdía
+     * sobre el video (5 sep, al fusionar la portada de la Persona 2).
+     *
+     * Rotura: borrar el bloque `@media (max-width: 63.999rem)` de app.css.
+     */
+    public function test_el_movil_conserva_el_vidrio_de_la_barra(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+
+        $movil = strstr($css, '@media (max-width: 63.999rem) {');
+        $this->assertNotFalse($movil, 'app.css ya no tiene el bloque de vidrio del móvil');
+        $bandeja = $this->regla($movil, '.bandeja');
+
+        $this->assertStringContainsString('background-color: var(--asb-cromo-velo);', $bandeja);
+        $this->assertStringContainsString('backdrop-filter: var(--asb-cromo-desenfoque);', $bandeja);
+        $this->assertStringContainsString('var(--asb-cromo-apoyo)', $bandeja);
+    }
+
     /** El cuerpo de la primera regla cuyo selector empieza así. */
     private function regla(string $css, string $selector): string
     {

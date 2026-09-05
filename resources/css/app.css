@@ -464,6 +464,23 @@
             box-shadow var(--duracion-entrada) var(--ease-color);
     }
 
+    /* Móvil intacto: en `main` la barra era un vidrio a todo lo ancho a
+       cualquier tamaño (`.cromo-bandeja`), y al mover el vidrio a la píldora
+       de escritorio el móvil se quedó transparente sin que nadie lo midiera:
+       el contenido pasaba por detrás del logo. Y desde la portada a pantalla
+       completa el header es fijo: sin esto la hamburguesa se perdía sobre el
+       video. Aquí vuelve, con la misma receta que tenía. */
+    @media (max-width: 63.999rem) {
+        .bandeja {
+            background-color: var(--asb-cromo-velo);
+            -webkit-backdrop-filter: var(--asb-cromo-desenfoque);
+            backdrop-filter: var(--asb-cromo-desenfoque);
+            box-shadow:
+                var(--asb-cromo-apoyo),
+                inset 0 1px 0 rgb(255 255 255 / 0.26);
+        }
+    }
+
     .modulo {
         position: relative;
         isolation: isolate;
