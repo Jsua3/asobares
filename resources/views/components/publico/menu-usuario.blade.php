@@ -26,6 +26,13 @@
         (bool) $usuario?->esAsociado() => $usuario->asociado?->nombre ?? 'Establecimiento afiliado',
         default => null,
     };
+
+    /* Lo que va en la barra, corto: el rol largo sigue dentro del panel. */
+    $prefijoRol = match (true) {
+        (bool) $usuario?->esSuperAdmin() => 'Admin',
+        (bool) $usuario?->esSubadmin() => 'Sec.',
+        default => null,
+    };
 @endphp
 
 {{-- Es un «disclosure», no un menú ARIA: botón con aria-expanded más el panel
@@ -56,12 +63,16 @@
             aria-controls="menu-cuenta"
             {{-- Padding negativo óptico: `p-1` lleva el botón a 44x44 y `-m-1`
                  devuelve al flujo los 36x36 del avatar, que es marca y no se
-                 puede agrandar. --}}
+                 puede agrandar. El nombre al lado es escritorio: en móvil el
+                 panel ya lo escribe. --}}
             class="pulsable -m-1 flex items-center gap-2 rounded-full p-1 text-tenue hover:text-tinta">
         <span class="sr-only">Configuración y sesión de {{ $usuario->name }}</span>
         <span aria-hidden="true"
               class="flex h-9 w-9 items-center justify-center rounded-full bg-marca-500 text-xs font-bold tracking-wide text-white">
             {{ $iniciales }}
+        </span>
+        <span aria-hidden="true" class="hidden max-w-40 truncate pr-1 text-sm font-medium lg:block">
+            @if ($prefijoRol)<span class="text-apagado">{{ $prefijoRol }}</span> @endif{{ $usuario->name }}
         </span>
     </button>
 

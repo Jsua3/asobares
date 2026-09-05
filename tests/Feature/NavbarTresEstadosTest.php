@@ -2,9 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\Asociado;
+use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
@@ -15,6 +19,66 @@ use Tests\TestCase;
 class NavbarTresEstadosTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(DatabaseSeeder::class);
+    }
+
+    /**
+     * @param  list<string>  $roles
+     */
+    private function usuarioCon(array $roles, ?Asociado $asociado = null): User
+    {
+        foreach ($roles as $rol) {
+            Role::findOrCreate($rol, 'web');
+        }
+
+        $usuario = User::factory()->create([
+            'name' => 'Lola Pantoja',
+            'asociado_id' => $asociado?->id,
+        ]);
+        $usuario->syncRoles($roles);
+
+        return $usuario->fresh();
+    }
+
+    /**
+     * Rotura: invertir el orden del `match` que resuelve `$prefijoRol`.
+     */
+    public function test_el_disparador_de_cuenta_lleva_el_prefijo_del_rol(): void
+    {
+        $asociado = Asociado::query()->firstOrFail();
+
+        $this->actingAs($this->usuarioCon([User::ROL_ASOCIADO], $asociado))
+            ->get('/contacto')
+            ->assertOk()
+            ->assertSee('Lola Pantoja')
+            ->assertDontSee('>Sec.<', false)
+            ->assertDontSee('>Admin<', false);
+
+        $this->actingAs($this->usuarioCon([User::ROL_SUBADMIN]))
+            ->get('/contacto')
+            ->assertOk()
+            ->assertSee('>Sec.<', false)
+            ->assertSee('Secretaría del gremio')
+            ->assertDontSee('>Admin<', false);
+
+        $this->actingAs($this->usuarioCon([User::ROL_SUPER_ADMIN]))
+            ->get('/contacto')
+            ->assertOk()
+            ->assertSee('>Admin<', false)
+            ->assertSee('Dirección del gremio')
+            ->assertDontSee('>Sec.<', false);
+
+        // Con los dos roles gana Admin.
+        $this->actingAs($this->usuarioCon([User::ROL_SUPER_ADMIN, User::ROL_SUBADMIN]))
+            ->get('/contacto')
+            ->assertOk()
+            ->assertSee('>Admin<', false)
+            ->assertDontSee('>Sec.<', false);
+    }
 
     /**
      * Rotura: borrar `--asb-caida-modulo: 0px` del bloque de movimiento reducido.
