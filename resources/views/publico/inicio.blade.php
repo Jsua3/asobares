@@ -110,7 +110,9 @@
                  retiraron--, así que el estado inicial del sitio en producción
                  es justo ese. Sin fichas publicadas no se presume nada. --}}
             @if ($totalAsociados > 0)
-                <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-marca-500/30 bg-marca-500/10 px-3 py-1 text-xs font-medium text-acento-fuerte">
+                {{-- Sobre el video oscuro: borde y fondo de blanco, no de marca
+                     sobre tinta, que sobre negro no se leía. El punto sigue rojo. --}}
+                <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-medium text-white">
                     <span class="h-1.5 w-1.5 rounded-full bg-marca-500"></span>
                     {{ $totalAsociados }} establecimientos afiliados en el Quindío
                 </p>
@@ -144,7 +146,7 @@
             <x-publico.boton :href="route('directorio.index')">
                 {{ ajuste('hero_cta_directorio') }}
             </x-publico.boton>
-            <x-publico.boton variante="contorno" :href="route('afiliate')">
+            <x-publico.boton variante="contorno-claro" :href="route('afiliate')">
                 {{ ajuste('hero_cta_afiliate') }}
             </x-publico.boton>
         </div>

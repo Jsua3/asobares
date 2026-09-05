@@ -26,6 +26,9 @@
 
     $estilos = match ($variante) {
         'contorno' => 'border border-linea-fuerte text-tinta hover:border-marca-500/50 hover:bg-superficie-alta',
+        // Para fondos oscuros, como el video de la portada: el contorno de
+        // tinta era un botón invisible sobre negro.
+        'contorno-claro' => 'border border-white/40 text-white hover:border-white/70 hover:bg-white/10',
         default => 'cta-vivo bg-marca-500 text-white hover:bg-marca-600',
     };
 @endphp

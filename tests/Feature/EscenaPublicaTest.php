@@ -63,6 +63,14 @@ class EscenaPublicaTest extends TestCase
         $this->assertStringContainsString('hero-video-fondo', $vista);
         $this->assertStringContainsString('portada', $vista);
         $this->assertStringContainsString('atmosfera', $vista);
+
+        // Sobre el video oscuro, lo que era para fondo claro desaparecía: el
+        // «Afíliate» de contorno (tinta sobre negro) y la píldora de
+        // afiliados (rojo oscuro sobre negro). Roturas: volver a
+        // `variante="contorno"` en el hero; devolver `text-acento-fuerte` a la píldora.
+        $this->assertStringContainsString('variante="contorno-claro" :href="route(\'afiliate\')"', $vista);
+        $this->assertStringContainsString('rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-medium text-white', $vista);
+        $this->assertStringNotContainsString('text-acento-fuerte', substr($vista, 0, strpos($vista, '</x-publico.hero>')), 'nada de tinta de fondo claro dentro del hero oscuro');
     }
 
     public function test_los_portadores_de_escena_existen_en_el_css_publico(): void

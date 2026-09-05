@@ -531,6 +531,19 @@ class MovimientoTest extends TestCase
         $this->assertStringContainsString('href="/directorio"', $contorno);
         $this->assertStringContainsString('border-linea-fuerte', $contorno);
         $this->assertStringNotContainsString('bg-marca-500', $contorno);
+
+        // El contorno sobre fondo oscuro (la portada a pantalla completa):
+        // tinta sobre video negro era un botón invisible. Rotura: quitar la
+        // variante `contorno-claro` del match.
+        $claro = Blade::render(
+            '<x-publico.boton variante="contorno-claro" href="/afiliate">Afíliate</x-publico.boton>'
+        );
+
+        $this->assertStringContainsString('text-white', $claro);
+        $this->assertStringContainsString('border-white/40', $claro);
+        $this->assertStringContainsString('pulsable', $claro);
+        $this->assertStringNotContainsString('text-tinta', $claro);
+        $this->assertStringNotContainsString('bg-marca-500', $claro);
     }
 
     /**
