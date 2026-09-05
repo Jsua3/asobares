@@ -1872,3 +1872,49 @@ Sobre `f83c9ea`: **1.010 casos · 999 pasan · 11 omitidas · 0 fallos · 3.800 
 - **Una prueba que afirma sobre el disco no prueba lo que se despliega.** Si el archivo puede estar ignorado, hay que preguntarle a git y no a `file_exists`.
 - **`load()` antes de `play()` aborta la reproducción** y deja el elemento con `readyState` 4 y `paused` true: parece que no cargó cuando había cargado entero.
 - El panel del navegador **sigue sin componer fotogramas**: la captura salía negra con la página correcta detrás. La inspección por JS es la que vale.
+
+---
+
+## 39. LA OPCIÓN B: LA BARRA DE ESCRITORIO EN TRES ESTADOS, CONSTRUIDA EN UNA RAMA (3–5 sep 2026)
+
+Sesión larga con Sua, en dos noches, cortada una vez por el límite de uso. Entró como «analicemos la barra de Ingrid» y salió como una rama publicada con veinte commits, una spec, un plan y una barra alternativa lista para que la dirección elija. **Nada de esto está en `main`** y este apunte vive, por ahora, solo en la rama `p1-navbar-alternativa`.
+
+### 39.1 De la opinión a la decisión
+
+La barra de la Persona 2 (opción A, en producción desde el 3 sep) se grabó en tres tamaños con Playwright antes de opinar. La grabación del iPad Pro 11 en horizontal es la que vale: a 1024 px o más con dedo **no hay forma de abrir el menú** —la regla que encoge la píldora solo mira el ancho y la que la expande exige ratón; la hamburguesa es `lg:hidden`— y «Afíliate» queda oculto en reposo. Sua decidió no tocar producción y construir su propia barra en una rama para llevar las dos a la reunión.
+
+### 39.2 Diseño primero, con seis lectores y ocho decisiones
+
+Antes de escribir código, seis lectores en paralelo mapearon roles, tema, movimiento, idiomas, pruebas y marca (bitácora de la sesión, no del repositorio). Salió lo que no se sabía: el DOM no se puede duplicar (siete pruebas cuentan controles y `aria-current`), el proyecto no tiene ninguna curva de rebote, la opción «Sistema» la prohibía una prueba a propósito (OBS3-03), y solo existe isotipo rojo. Sua decidió ocho cosas en la sesión (spec §2): idiomas fuera —chip visible con inglés «próximamente», acta aparte—, un toque abre con dedo, móvil intacto, vuelta al inicial al tope, resortes en CSS con `linear()`, isotipo en scroll, 520 ms con token propio, banderas Colombia y Estados Unidos.
+
+La spec (`docs/ingenieria/navbar-tres-estados-diseno.md`) y el plan (`…-plan.md`, doce tareas con la prueba antes y la rotura que la pone roja) se confirmaron antes de la primera línea. Un error mío en la spec se cazó al bajar al plan: **el respaldo de `linear()` no puede ser una segunda declaración** —`var()` es inválido al computar y la propiedad cae a `ease`, no a la anterior—; va por `@supports`.
+
+### 39.3 Doce tareas, doce revisiones, y lo que las revisiones cazaron
+
+Cada tarea la hizo un agente fresco con su brief, y otro la revisó contra la spec. Las revisiones no fueron decorativas:
+
+- **T5:** el sol sin `x-cloak` destellaba en oscuro antes de que arrancara Alpine. El icono pasó a decidirlo CSS por la clase `dark` del `<html>`, que el `<head>` pone antes del primer pintado: sin destello y sin depender de JS.
+- **T6:** `assertStringContainsString('disabled', …)` lo satisfacía `aria-disabled`: quitar el atributo real dejaba la prueba verde.
+- **T9 (Critical, del plan):** `overflow: hidden` en `.control-plegable` cayó sobre la raíz `position: relative` del grupo «El gremio», bloque contenedor de su panel absoluto: **el desplegable no se veía en ningún estado**. La geometría del plegado se movió al enlace y al botón; la raíz solo se esconde. Verificado por `elementFromPoint`, porque el rectángulo del panel medía lo mismo recortado que sin recortar.
+- **T11:** la fila de los popovers solo vigilaba `control-tema`; las filas idénticas de `control-idioma` quedaban sin guardia.
+- **T12, pasada de mutaciones:** 12 de 13 roturas rojas. La 13.ª —borrar el método `alternarAtencion`— dejaba la suite verde porque la prueba afirmaba la *llamada*, que sobrevive en `x-on:click`. Se afirman las definiciones.
+- **Revisión final (opus, en Chromium real):** lista para la demo; para fusionar, cuatro bloqueos: las guardias probaban que la máquina estaba *construida* pero no *conectada* (borrar `x-on:scroll.window` mataba la barra con 1.026 verdes); elegir tema con teclado tiraba el foco al `<body>`; el `min-height: 44px` que la spec §6.2 pedía nunca se construyó (39,7 px; indicador 32×40); y el chip `ES` fallaba «Label in Name». Más un menor que rompía la decisión de móvil intacto: la cabecera móvil había crecido a 58 px por un borde base. Una ola de arreglos y una re-revisión: los nueve cerrados, cabecera móvil de vuelta a 56.
+
+### 39.4 Lo que se midió
+
+Sobre `84b6798`: **1.028 casos · 1.017 pasan · 11 omitidas · 0 fallos · 3.993 aserciones**, 272 s. En Chromium (playwright-cli, no el panel): módulo principal 44 px en scroll, indicador 44×44, botón de tema 44×44, chip 50×44, filas 45,7, cabecera móvil 56, `.bandeja` 1280 px a 1440 de ancho (`min(1408, 1280)`, no los 1248 que el plan decía), «El gremio» 224×155 y alcanzable en los tres estados, foco de vuelta al disparador tras elegir tema. Seis vídeos en el scratchpad de la sesión (tres de la A, tres de la B). **Sin verificar:** `prefers-reduced-transparency`, que Playwright acepta y no aplica.
+
+### 39.5 Lo que entra y sale del estado
+
+- **Entra:** la rama como opción B (§0, §2.1, §2.3); **D-30** (elegir A o B), **D-31** (transparencia reducida en equipo real), **D-32** (idiomas como subsistema con acta); la deuda de la rama anotada por su revisión final (§4); dos defectos preexistentes en `main` vistos de paso (§4); las cifras de la rama (§5).
+- **Cambia:** el documento de práctica pasa a «vencido, sin confirmación de envío»; OBS3-03 con el matiz de «Sistema».
+- **No cambia:** `main`, producción, ni las decisiones D-01 a D-29.
+- Este estado vive en la rama; el de `main` sigue en `f83c9ea`. La sesión que cierre D-30 lo reescribe donde toque.
+
+### 39.6 Trampas de esta sesión
+
+- **El panel del navegador congela las transiciones**, no solo las capturas: `document.hidden === true` mata `requestAnimationFrame`, y una `width` o un `x-show` se quedan en su valor inicial aunque la regla ya no aplique. Medir valores finales con `*{transition:none!important}` inyectado; el comportamiento, con playwright-cli.
+- **Un rectángulo no ve un recorte.** `getBoundingClientRect()` de un panel recortado por `overflow: hidden` mide exactamente lo mismo que sano; `document.elementFromPoint` en el centro de un enlace sí lo ve.
+- **Mutar por prueba no basta.** La pasada «una rotura por docblock» dio 12/13 y pareció rigurosa; los tres cableados de eventos sin guardia se quedaron fuera porque ningún docblock los nombraba. La lista que hay que mutar es la de «atributos sin los cuales la función está muerta», escrita al escribir el marcado.
+- **`git checkout -- archivo` para restaurar una mutación se lleva también lo que ya habías arreglado en ese archivo.** Pasó tres veces en la ola final; lo cazó `git status`. Restaurar desde copia del archivo ya arreglado, no desde HEAD.
+- **Una revisión en opus de una rama entera puede morir por límite de uso a mitad de lectura** sin dejar informe; la segunda arrancó de cero. Dividir en pases y escribir el informe antes de agotar el margen.
