@@ -183,14 +183,14 @@
 
         {{-- Módulo 3: la cuenta, el tema y el idioma. Con sesión abierta el
              atajo vive dentro del desplegable, para no repetir el mismo enlace
-             dos veces en la misma barra. --}}
+             dos veces en la misma barra; y «Afíliate» tampoco se ofrece: quien
+             ya es del gremio no se afilia (Sua, 5 sep). --}}
         <div class="modulo modulo-cuenta hidden items-center gap-2 px-2 whitespace-nowrap lg:flex lg:justify-self-end">
             @guest
                 <a href="{{ route('mi-cuenta.index') }}"
                    class="nav-enlace enlace-accion -my-1 rounded-lg px-3 py-3 text-sm text-tenue hover:text-fuerte">
                     Mi cuenta
                 </a>
-            @endguest
             <a href="{{ route('afiliate') }}"
                {{-- ::after y no padding: es la única pastilla pintada de la barra
                     y agrandarla se vería. `-inset-y-1` da 37,7 + 8 = 45,7 px de
@@ -208,6 +208,7 @@
                class="pulsable cta-vivo relative rounded-lg bg-marca-500 px-4 py-1.5 text-sm font-semibold text-white after:absolute after:inset-x-0 after:-inset-y-1 after:content-[''] hover:bg-marca-600">
                 Afíliate
             </a>
+            @endguest
             @auth
                 <x-publico.menu-usuario />
             @endauth
@@ -321,15 +322,18 @@
                 </div>
             @endforeach
 
-            <div class="mt-5 space-y-1">
-                @guest
+            {{-- Solo sin sesión: entrar y afiliarse. Con sesión el bloque de
+                 abajo ya trae lo suyo, y «Afíliate» no le interesa a quien ya
+                 es del gremio. --}}
+            @guest
+                <div class="mt-5 space-y-1">
                     <a href="{{ route('mi-cuenta.index') }}" class="fila-pulsable block rounded-lg px-3 py-3 text-sm text-tinta">Mi cuenta</a>
-                @endguest
-                <a href="{{ route('afiliate') }}"
-                   class="pulsable mt-2 block rounded-lg bg-marca-500 px-3 py-3 text-center text-sm font-semibold text-white">
-                    Afíliate
-                </a>
-            </div>
+                    <a href="{{ route('afiliate') }}"
+                       class="pulsable mt-2 block rounded-lg bg-marca-500 px-3 py-3 text-center text-sm font-semibold text-white">
+                        Afíliate
+                    </a>
+                </div>
+            @endguest
         </div>
 
         @auth

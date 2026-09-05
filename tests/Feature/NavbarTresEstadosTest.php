@@ -615,6 +615,56 @@ class NavbarTresEstadosTest extends TestCase
     }
 
     /**
+     * «Afíliate» es una invitación a quien todavía no es del gremio. Con
+     * sesión abierta —socio, secretaría o dirección— no le interesa y se
+     * comía el sitio de la cuenta (Sua, 5 sep). La spec §6.3 ya lo decía:
+     * anónimo ve «Mi cuenta» y «Afíliate»; los demás, su disparador. Se
+     * esconde en la barra de escritorio y en el panel móvil; el pie lo
+     * conserva, que es otra cosa.
+     *
+     * Roturas: sacar el enlace del `@guest` del módulo de cuenta; quitar el
+     * `@guest` que envuelve el bloque de invitado del panel móvil.
+     */
+    public function test_afiliate_solo_se_ofrece_a_quien_no_tiene_sesion(): void
+    {
+        $afiliate = 'href="'.route('afiliate').'"';
+
+        $this->assertSame(
+            2,
+            substr_count($this->cabecera('/contacto'), $afiliate),
+            'sin sesión, una vez en el módulo de cuenta y otra en el panel móvil'
+        );
+
+        $asociado = Asociado::query()->firstOrFail();
+
+        foreach ([
+            'asociado' => $this->usuarioCon([User::ROL_ASOCIADO], $asociado),
+            'secretaría' => $this->usuarioCon([User::ROL_SUBADMIN]),
+            'dirección' => $this->usuarioCon([User::ROL_SUPER_ADMIN]),
+        ] as $rol => $usuario) {
+            $this->actingAs($usuario);
+
+            $this->assertStringNotContainsString(
+                $afiliate,
+                $this->cabecera('/contacto'),
+                "con sesión de {$rol} la barra sigue ofreciendo Afíliate"
+            );
+
+            // El pie sigue enlazando la afiliación para todo el mundo.
+            $this->assertStringContainsString($afiliate, $this->get('/contacto')->getContent());
+        }
+    }
+
+    /** El `<header>` de la página, aislado del pie, que también enlaza a /afiliate. */
+    private function cabecera(string $ruta): string
+    {
+        $html = $this->get($ruta)->assertOk()->getContent();
+        $this->assertSame(1, preg_match('/<header\b.*?<\/header>/s', $html, $trozos), 'la página tiene un <header>');
+
+        return $trozos[0];
+    }
+
+    /**
      * Móvil intacto de verdad: en `main` la barra era un vidrio a todo lo
      * ancho a cualquier tamaño (`.cromo-bandeja`), y al mover el vidrio a la
      * píldora de escritorio el móvil se quedó transparente sin que nadie lo
