@@ -307,7 +307,7 @@ class NavbarTresEstadosTest extends TestCase
     }
 
     /**
-     * Rotura: quitar `alternarAtencion` del x-data del header.
+     * Rotura: borrar el método alternarAtencion() del x-data del header (no la llamada).
      */
     public function test_el_header_declara_los_tres_estados(): void
     {
@@ -317,8 +317,10 @@ class NavbarTresEstadosTest extends TestCase
         foreach (["'inicial'", "'scroll'", "'atencion'"] as $estado) {
             $this->assertStringContainsString($estado, $navbar);
         }
-        foreach (['sincronizar()', 'atender()', 'soltar()', 'alternarAtencion()', 'punteroFino()'] as $metodo) {
-            $this->assertStringContainsString($metodo, $navbar);
+        // Las DEFINICIONES, no las llamadas: borrar el método deja viva la
+        // llamada en el atributo y la barra táctil muerta con la suite verde.
+        foreach (['get estado() {', 'punteroFino() {', 'sincronizar() {', 'atender() {', 'soltar() {', 'alternarAtencion() {'] as $definicion) {
+            $this->assertStringContainsString($definicion, $navbar, "el x-data del header ya no define {$definicion}");
         }
 
         // Las expresiones de la máquina, literales: invertir el getter o
