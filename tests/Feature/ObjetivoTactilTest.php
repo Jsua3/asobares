@@ -154,6 +154,22 @@ class ObjetivoTactilTest extends TestCase
                 'rounded-lg px-3 py-3 text-sm text-suave',
                 'py-2 dejaba la fila en 37,7 px',
             ],
+            // Los controles nuevos de la barra de escritorio (3 sep 2026).
+            'navbar, control de tema' => [
+                'components/publico/control-tema.blade.php',
+                'flex h-11 w-11 items-center justify-center rounded-full',
+                'el icono mide 20 px: h-11 w-11 dan 44x44 medidos',
+            ],
+            'navbar, chip de idioma' => [
+                'components/publico/control-idioma.blade.php',
+                'flex h-11 min-w-11 items-center justify-center gap-1 rounded-full px-2',
+                'medido 50x44: h-11 da 44 de alto exactos y min-w-11 deja que ES + galón nunca bajen de 44 de ancho',
+            ],
+            'navbar, filas de los popovers' => [
+                'components/publico/control-tema.blade.php',
+                'fila-pulsable flex w-full items-center gap-2.5 rounded-lg px-3 py-3 text-left text-sm',
+                'misma geometría que las filas del menú de usuario: 45,7 px medidos',
+            ],
             // Formularios. `min-h-11` y no `py-3`: el control mide 43,7 px y
             // solo le faltan 0,3, así que el mínimo no mueve ni un campo.
             'campo, los tres controles' => [
