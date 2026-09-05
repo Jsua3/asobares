@@ -485,16 +485,35 @@ class NavbarTresEstadosTest extends TestCase
      * scroll y atención, medido a 1440, 1280 y 1024 el 5 sep. La rejilla
      * `1fr auto 1fr` lo clava al centro del viewport en los tres estados.
      *
-     * Rotura: quitar `lg:grid-cols-[1fr_auto_1fr]` de la <nav>.
+     * Roturas: quitar `lg:grid-cols-[1fr_auto_1fr]` de la <nav>; borrar la
+     * regla `.modulo-logo { min-width: max-content; }` del bloque de 64rem.
      */
     public function test_el_modulo_principal_se_centra_por_rejilla_en_escritorio(): void
     {
         $navbar = File::get(resource_path('views/components/publico/navbar.blade.php'));
 
         $this->assertStringContainsString('bandeja mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-3', $navbar);
+        // `shrink-0` sigue porque por debajo de 64rem la <nav> es flex y ahí
+        // sí protege al logo; en rejilla es inerte.
         $this->assertStringContainsString('modulo modulo-logo pulsable -my-1.5 flex shrink-0 items-center py-1.5 lg:justify-self-start lg:px-3', $navbar);
         $this->assertStringContainsString('modulo modulo-principal hidden min-h-11 items-center gap-1 px-2 lg:flex lg:justify-self-center', $navbar);
         $this->assertStringContainsString('modulo modulo-cuenta hidden items-center gap-2 px-2 whitespace-nowrap lg:flex lg:justify-self-end', $navbar);
+
+        // En rejilla la pista 1fr toma como mínimo la aportación min-content
+        // del enlace, que con un <img> de max-width: 100% es casi cero: entre
+        // 1024 y ~1190 px aplastaba el logotipo (24 px de ancho a 1024) y en
+        // atención lo borraba (revisión del 5 sep). El mínimo real le devuelve
+        // lo que `shrink-0` le daba en flex.
+        $css = File::get(resource_path('css/app.css'));
+        $escritorio = strstr($css, '@media (min-width: 64rem) {');
+        $this->assertNotFalse($escritorio, 'app.css ya no tiene el bloque de escritorio de la barra');
+        $siguiente = strpos($escritorio, '@media', 10);
+        $this->assertNotFalse($siguiente);
+        $this->assertMatchesRegularExpression(
+            '/\.modulo-logo \{\s*min-width: max-content;/',
+            substr($escritorio, 0, $siguiente),
+            'el módulo del logo declara su mínimo real dentro de la rejilla'
+        );
     }
 
     /**

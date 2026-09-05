@@ -617,6 +617,16 @@
             border-radius: 999px;
         }
 
+        /* En rejilla `shrink-0` no hace nada: la pista 1fr toma como mínimo
+           la aportación min-content del enlace, que con un <img> de
+           max-width: 100% es casi cero, y entre 1024 y ~1190 px la rejilla
+           aplastaba el logotipo (24 px de ancho a 1024) o lo borraba en
+           atención. El mínimo real le devuelve lo que el flex le daba; lo
+           que no cabe desborda a la derecha, como antes de la rejilla (D-33). */
+        .modulo-logo {
+            min-width: max-content;
+        }
+
         /* --- inicial: una sola píldora de vidrio --- */
         [data-estado="inicial"] .bandeja {
             border-color: var(--asb-linea);
