@@ -105,6 +105,83 @@ Alpine.data('escena', () => ({
 }));
 
 /*
+ * Desplegable de la barra de escritorio. Los dos grupos, la cuenta, el tema
+ * y el idioma son el mismo «disclosure» —botón con aria-expanded y el panel
+ * que controla— y se comportan igual: con puntero fino se asoma al pasar y
+ * se retira con una gracia que perdona el camino hasta el panel; con dedo y
+ * con teclado, al pulsar. Abrir uno avisa a los demás y esos ceden al
+ * instante, así que nunca hay dos paneles abiertos a la vez, que era como el
+ * popover de tema y el de idioma se pisaban al pasar del sol al chip.
+ *
+ * Los cableados (mouseenter, mouseleave, click.outside, focusout, Escape y
+ * el aviso) van en cada vista y no aquí: las guardias los leen crudos.
+ */
+const GRACIA_AL_RETIRAR_MS = 280;
+
+Alpine.data('desplegable', () => ({
+    abierto: false,
+    cierre: null,
+
+    abrir() {
+        clearTimeout(this.cierre);
+        this.abierto = true;
+        this.$dispatch('desplegable-abierto', this.$el);
+    },
+
+    cerrar() {
+        clearTimeout(this.cierre);
+        this.abierto = false;
+    },
+
+    alternar() {
+        if (this.abierto) {
+            this.cerrar();
+
+            return;
+        }
+
+        this.abrir();
+    },
+
+    asomar() {
+        if (! punteroFino()) {
+            return;
+        }
+
+        this.abrir();
+    },
+
+    retirar() {
+        if (! punteroFino()) {
+            return;
+        }
+
+        clearTimeout(this.cierre);
+        this.cierre = setTimeout(() => this.cerrar(), GRACIA_AL_RETIRAR_MS);
+    },
+
+    // El aviso llega también al que lo emitió: ese se queda como está.
+    ceder(raiz) {
+        if (raiz === this.$el) {
+            return;
+        }
+
+        this.cerrar();
+    },
+
+    cerrarYVolverAlFoco() {
+        if (! this.abierto) {
+            return;
+        }
+
+        this.cerrar();
+        // Sin esto el panel desaparece con el foco dentro y el navegador lo
+        // tira al <body>: el siguiente Tab reinicia desde el principio.
+        this.$refs.disparador.focus();
+    },
+}));
+
+/*
  * Video del hero. El elemento sale del servidor sin `autoplay` y con
  * `preload="none"`: si pidieron menos movimiento, aquí no se toca nada y el
  * visitante se queda con el póster sin haber descargado el video. Solo cuando

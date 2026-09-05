@@ -9,8 +9,11 @@
     prohibía a propósito).
 
     Es un «disclosure» como el resto de desplegables de la barra: botón con
-    aria-expanded y el panel que controla. Con ratón se asoma al pasar y se
-    retira con 280 ms de gracia; con dedo y con teclado, al pulsar.
+    aria-expanded y el panel que controla. El comportamiento es el
+    `Alpine.data('desplegable')` de app.js, el mismo del idioma, la cuenta y
+    los grupos: con ratón se asoma al pasar y se retira con gracia; con dedo
+    y con teclado, al pulsar; abrir uno cierra a los demás, que es lo que
+    impide que este popover y el de idioma se pisen.
 
     `fila-pulsable` y no `pulsable` en las filas, sin ningún hover:bg-*: el
     fondo lo trae el portador detrás de la puerta táctil. `MovimientoTest`
@@ -24,47 +27,18 @@
     ];
 @endphp
 
-<div x-data="{
-        abierto: false,
-        cierre: null,
-        punteroFino() {
-            return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-        },
-        asomar() {
-            if (! this.punteroFino()) {
-                return;
-            }
-
-            clearTimeout(this.cierre);
-            this.abierto = true;
-        },
-        retirar() {
-            if (! this.punteroFino()) {
-                return;
-            }
-
-            clearTimeout(this.cierre);
-            this.cierre = setTimeout(() => { this.abierto = false; }, 280);
-        },
-        cerrarYVolverAlFoco() {
-            if (! this.abierto) {
-                return;
-            }
-
-            this.abierto = false;
-            this.$refs.disparador.focus();
-        },
-     }"
+<div x-data="desplegable"
      x-on:mouseenter="asomar()"
      x-on:mouseleave="retirar()"
-     x-on:click.outside="abierto = false"
+     x-on:desplegable-abierto.window="ceder($event.detail)"
+     x-on:click.outside="cerrar()"
      x-on:keydown.escape.window="cerrarYVolverAlFoco()"
-     x-on:focusout="if (! $el.contains($event.relatedTarget)) abierto = false"
+     x-on:focusout="if (! $el.contains($event.relatedTarget)) cerrar()"
      class="relative">
 
     <button type="button"
             x-ref="disparador"
-            x-on:click="abierto = ! abierto"
+            x-on:click="alternar()"
             x-bind:aria-expanded="abierto ? 'true' : 'false'"
             aria-controls="popover-tema"
             aria-label="Apariencia del sitio"

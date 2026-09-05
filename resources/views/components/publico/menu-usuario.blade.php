@@ -1,9 +1,10 @@
 {{--
     Desplegable de cuenta de la navbar.
 
-    El cambio de apariencia vive en la barra lateral pública; este menú queda
-    solo para sesión, con el atajo al sitio que corresponde: /mi-cuenta al dueño
-    del establecimiento, /admin a la secretaría y a la dirección.
+    El cambio de apariencia vive en la barra lateral (móvil) y en el control
+    de tema (escritorio); este menú queda solo para sesión, con el atajo al
+    sitio que corresponde: /mi-cuenta al dueño del establecimiento, /admin a
+    la secretaría y a la dirección.
 --}}
 @php
     $usuario = auth()->user();
@@ -39,26 +40,20 @@
      que controla. Por eso no lleva aria-haspopup ni role="menu", que anunciarían
      navegación con flechas que este panel no implementa. --}}
 @auth
-<div x-data="{
-        abierto: false,
-        cerrarYVolverAlFoco() {
-            if (! this.abierto) {
-                return;
-            }
-
-            this.abierto = false;
-            // Sin esto el panel desaparece con el foco dentro y el navegador
-            // lo tira al <body>: el siguiente Tab reinicia desde el principio.
-            this.$refs.disparador.focus();
-        },
-     }"
-     x-on:click.outside="abierto = false"
+<div x-data="desplegable"
+     x-on:mouseenter="asomar()"
+     x-on:mouseleave="retirar()"
+     x-on:desplegable-abierto.window="ceder($event.detail)"
+     x-on:click.outside="cerrar()"
      x-on:keydown.escape.window="cerrarYVolverAlFoco()"
+     {{-- Ya no es el último control de la barra: le siguen el tema y el
+          idioma, así que tabular fuera tiene que cerrarlo como a los grupos. --}}
+     x-on:focusout="if (! $el.contains($event.relatedTarget)) cerrar()"
      class="relative">
 
     <button type="button"
             x-ref="disparador"
-            x-on:click="abierto = ! abierto"
+            x-on:click="alternar()"
             x-bind:aria-expanded="abierto ? 'true' : 'false'"
             aria-controls="menu-cuenta"
             {{-- Padding negativo óptico: `p-1` lleva el botón a 44x44 y `-m-1`

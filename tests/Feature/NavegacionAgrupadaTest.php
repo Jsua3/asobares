@@ -261,15 +261,22 @@ class NavegacionAgrupadaTest extends TestCase
         $vista = File::get(resource_path('views/components/publico/menu-grupo.blade.php'));
 
         $salidas = [
-            'x-on:click.outside="abierto = false"' => 'clic fuera',
+            'x-on:click.outside="cerrar()"' => 'clic fuera',
             'x-on:keydown.escape.window="cerrarYVolverAlFoco()"' => 'Escape',
-            '$refs.disparador.focus()' => 'el foco vuelve al disparador y el siguiente Tab no reinicia',
-            'x-on:focusout="if (! $el.contains($event.relatedTarget)) abierto = false"' => 'tabular fuera del grupo',
+            'x-on:focusout="if (! $el.contains($event.relatedTarget)) cerrar()"' => 'tabular fuera del grupo',
         ];
 
         foreach ($salidas as $codigo => $porque) {
             $this->assertStringContainsString($codigo, $vista, "El desplegable perdió la salida por {$porque}.");
         }
+
+        // El cuerpo de las salidas vive en el componente compartido de app.js
+        // desde el 5 sep; lo que devuelve el foco al disparador se vigila ahí.
+        $this->assertStringContainsString(
+            '$refs.disparador.focus()',
+            File::get(resource_path('js/app.js')),
+            'El desplegable perdió la salida por: el foco vuelve al disparador y el siguiente Tab no reinicia.'
+        );
     }
 
     /**

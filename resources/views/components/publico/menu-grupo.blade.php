@@ -32,27 +32,21 @@
     $panel = 'menu-'.Str::slug($titulo);
 @endphp
 
-<div x-data="{
-        abierto: false,
-        cerrarYVolverAlFoco() {
-            if (! this.abierto) {
-                return;
-            }
+{{-- El comportamiento es el `Alpine.data('desplegable')` de app.js, el mismo
+     de la cuenta, el tema y el idioma: con ratón se asoma al pasar y se
+     retira con gracia (Sua, 5 sep: «así tal cual el de modo oscuro»); con
+     dedo y con teclado, al pulsar; abrir uno cierra a los demás.
 
-            this.abierto = false;
-            // Sin esto el panel desaparece con el foco dentro y el navegador
-            // lo tira al <body>: el siguiente Tab reinicia desde el principio.
-            this.$refs.disparador.focus();
-        },
-     }"
-     x-on:click.outside="abierto = false"
+     La salida por `focusout` es la que el teclado necesita: sin ella,
+     tabular de un grupo al siguiente dejaba el primero abierto, y con el
+     ratón eso no pasaba nunca porque `click.outside` lo tapa. --}}
+<div x-data="desplegable"
+     x-on:mouseenter="asomar()"
+     x-on:mouseleave="retirar()"
+     x-on:desplegable-abierto.window="ceder($event.detail)"
+     x-on:click.outside="cerrar()"
      x-on:keydown.escape.window="cerrarYVolverAlFoco()"
-     {{-- La cuarta salida, y esta no la necesitaba el menú de usuario porque
-          era el último control de la barra: tabular fuera del grupo lo cierra.
-          Sin ella, recorrer la barra con teclado va dejando paneles abiertos
-          detrás —dos desplegables desplegados a la vez— y con el ratón eso no
-          pasa nunca porque `click.outside` lo tapa. --}}
-     x-on:focusout="if (! $el.contains($event.relatedTarget)) abierto = false"
+     x-on:focusout="if (! $el.contains($event.relatedTarget)) cerrar()"
      {{ $attributes->merge(['class' => 'relative']) }}>
 
     {{-- Misma geometría que los enlaces sueltos de la barra: `py-3` lleva la
@@ -60,7 +54,7 @@
          que el disparador cumple los 44 px sin subir el alto del header. --}}
     <button type="button"
             x-ref="disparador"
-            x-on:click="abierto = ! abierto"
+            x-on:click="alternar()"
             x-bind:aria-expanded="abierto ? 'true' : 'false'"
             aria-controls="{{ $panel }}"
             @class([

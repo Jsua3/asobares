@@ -88,6 +88,10 @@ class NavbarTresEstadosTest extends TestCase
         $tokens = File::get(resource_path('css/tokens.css'));
 
         $this->assertStringContainsString('--duracion-rebote: 520ms', $tokens);
+        // El cambio de estado va un punto más lento que el rebote de los
+        // popovers (Sua, 5 sep: «sutilmente más lenta»). Rotura: volver a
+        // usar --duracion-rebote en la geometría de la barra.
+        $this->assertStringContainsString('--duracion-estado: 620ms', $tokens);
         $this->assertStringContainsString('--asb-separacion-modulos: 0.75rem', $tokens);
         $this->assertStringContainsString('--asb-caida-modulo: 6px', $tokens);
         $this->assertStringContainsString('--asb-escala-popover: 0.92', $tokens);
@@ -294,7 +298,11 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringNotContainsString('blur(', $modulo);
         $this->assertStringNotContainsString('blur(', $this->regla($css, '[data-estado="atencion"] .modulo'), 'el vidrio de scroll/atención tampoco lleva blur literal');
         $this->assertStringContainsString('var(--ease-rebote-suave)', $modulo);
-        $this->assertStringContainsString('translate var(--duracion-rebote)', $modulo);
+        $this->assertStringContainsString('translate var(--duracion-estado)', $modulo);
+        $this->assertStringContainsString('gap var(--duracion-estado)', $this->regla($css, '.bandeja'));
+        $this->assertStringContainsString('max-width var(--duracion-estado)', $this->regla($css, '.logo-doble'));
+        $this->assertStringContainsString('max-width var(--duracion-estado)', $this->regla($css, '.control-plegable > button'));
+        $this->assertStringContainsString('scale var(--duracion-estado)', $this->regla($css, '.indicador-mas'));
 
         $this->assertMatchesRegularExpression(
             '/@media \(hover: hover\) and \(pointer: fine\) \{\s*\.modulo::before \{[^}]*--puntero-x/',
@@ -444,6 +452,93 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringContainsString('lg:hidden', $barra);
 
         $this->assertFileDoesNotExist(resource_path('views/components/publico/selector-tema.blade.php'), 'el selector huérfano se borró');
+    }
+
+    /**
+     * La raya roja de apoyo es del diseño de banda que el móvil conserva; en
+     * escritorio la barra es una píldora que flota y la raya cruzaba la
+     * pantalla entera por debajo de ella (Sua, 5 sep).
+     *
+     * Rotura: borrar `.cromo::before { content: none; }` del bloque de escritorio.
+     */
+    public function test_la_raya_de_apoyo_no_existe_en_escritorio(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+
+        $escritorio = strstr($css, '@media (min-width: 64rem) {');
+        $this->assertNotFalse($escritorio, 'app.css ya no tiene el bloque de escritorio de la barra');
+        $siguiente = strpos($escritorio, '@media', 10);
+        $this->assertNotFalse($siguiente);
+        $bloque = substr($escritorio, 0, $siguiente);
+
+        $this->assertMatchesRegularExpression('/\.cromo::before \{\s*content: none;/', $bloque, 'en escritorio la raya roja del apoyo se apaga');
+
+        // Fuera de ese bloque sigue encendiéndose al apoyar: el móvil intacto.
+        $movil = strstr($css, '@media (min-width: 64rem) {', true);
+        $this->assertStringContainsString('.cromo-apoyado::before {', $movil);
+        $this->assertStringNotContainsString('content: none', $this->regla($css, '.cromo::before'));
+    }
+
+    /**
+     * Con `justify-between` el módulo principal caía en el punto medio entre
+     * el logo y la cuenta, no en el de la pantalla: 120 px a la izquierda en
+     * scroll y atención, medido a 1440, 1280 y 1024 el 5 sep. La rejilla
+     * `1fr auto 1fr` lo clava al centro del viewport en los tres estados.
+     *
+     * Rotura: quitar `lg:grid-cols-[1fr_auto_1fr]` de la <nav>.
+     */
+    public function test_el_modulo_principal_se_centra_por_rejilla_en_escritorio(): void
+    {
+        $navbar = File::get(resource_path('views/components/publico/navbar.blade.php'));
+
+        $this->assertStringContainsString('bandeja mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-3', $navbar);
+        $this->assertStringContainsString('modulo modulo-logo pulsable -my-1.5 flex shrink-0 items-center py-1.5 lg:justify-self-start lg:px-3', $navbar);
+        $this->assertStringContainsString('modulo modulo-principal hidden min-h-11 items-center gap-1 px-2 lg:flex lg:justify-self-center', $navbar);
+        $this->assertStringContainsString('modulo modulo-cuenta hidden items-center gap-2 px-2 lg:flex lg:justify-self-end', $navbar);
+    }
+
+    /**
+     * Los cuatro desplegables de la barra —dos grupos, cuenta, tema e idioma—
+     * salen del mismo `Alpine.data('desplegable')`: con puntero fino se
+     * asoman al pasar y se retiran con gracia, y abrir uno cierra a los demás
+     * al instante, que es lo que impide que el popover de tema y el de
+     * idioma se pisen (Sua, 5 sep: los dos abiertos a la vez a los 120 ms).
+     *
+     * Roturas: borrar `ceder(raiz)` de app.js; quitar `x-on:mouseenter` de
+     * menu-grupo; devolver un x-data inline a control-tema.
+     */
+    public function test_los_desplegables_comparten_componente_y_se_excluyen(): void
+    {
+        $js = File::get(resource_path('js/app.js'));
+
+        $this->assertStringContainsString("Alpine.data('desplegable', () => ({", $js);
+        foreach (['abrir() {', 'cerrar() {', 'alternar() {', 'asomar() {', 'retirar() {', 'ceder(raiz) {', 'cerrarYVolverAlFoco() {'] as $definicion) {
+            $this->assertStringContainsString($definicion, $js, "app.js ya no define {$definicion}");
+        }
+        $this->assertStringContainsString("this.\$dispatch('desplegable-abierto', this.\$el);", $js, 'abrir avisa a los demás desplegables');
+        $this->assertStringContainsString('if (raiz === this.$el) {', $js, 'ceder ignora su propio aviso');
+        $this->assertStringContainsString('this.$refs.disparador.focus();', $js, 'cerrar con teclado devuelve el foco al disparador');
+        $this->assertMatchesRegularExpression('/asomar\(\) \{\s*if \(! punteroFino\(\)\) \{\s*return;/', $js, 'con dedo no hay hover que valga');
+        $this->assertMatchesRegularExpression('/retirar\(\) \{\s*if \(! punteroFino\(\)\) \{\s*return;/', $js);
+
+        foreach (['menu-grupo', 'menu-usuario', 'control-tema', 'control-idioma'] as $vista) {
+            $contenido = File::get(resource_path("views/components/publico/{$vista}.blade.php"));
+
+            $this->assertStringContainsString('x-data="desplegable"', $contenido, "{$vista} no usa el componente compartido");
+            foreach ([
+                'x-on:mouseenter="asomar()"',
+                'x-on:mouseleave="retirar()"',
+                'x-on:desplegable-abierto.window="ceder($event.detail)"',
+                'x-on:click.outside="cerrar()"',
+                'x-on:keydown.escape.window="cerrarYVolverAlFoco()"',
+                'x-on:focusout="if (! $el.contains($event.relatedTarget)) cerrar()"',
+                'x-on:click="alternar()"',
+            ] as $cableado) {
+                $this->assertStringContainsString($cableado, $contenido, "{$vista} ya no conecta {$cableado}");
+            }
+            $this->assertStringNotContainsString('asomar() {', $contenido, "{$vista} vuelve a definir el desplegable inline");
+            $this->assertStringNotContainsString('abierto = ! abierto', $contenido, "{$vista} alterna sin avisar a los demás");
+        }
     }
 
     /** El cuerpo de la primera regla cuyo selector empieza así. */

@@ -9,7 +9,8 @@
     configuración y `$actual` del locale de la petición.
 
     Popover VERTICAL, con bandera y nombre del idioma en su propia lengua.
-    Mismo disclosure que el control de tema.
+    Mismo disclosure que el control de tema: el `Alpine.data('desplegable')`
+    de app.js, que cierra a los demás al abrirse.
 --}}
 @php
     $idiomas = [
@@ -20,47 +21,18 @@
     $actual = $idiomas[0];
 @endphp
 
-<div x-data="{
-        abierto: false,
-        cierre: null,
-        punteroFino() {
-            return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-        },
-        asomar() {
-            if (! this.punteroFino()) {
-                return;
-            }
-
-            clearTimeout(this.cierre);
-            this.abierto = true;
-        },
-        retirar() {
-            if (! this.punteroFino()) {
-                return;
-            }
-
-            clearTimeout(this.cierre);
-            this.cierre = setTimeout(() => { this.abierto = false; }, 280);
-        },
-        cerrarYVolverAlFoco() {
-            if (! this.abierto) {
-                return;
-            }
-
-            this.abierto = false;
-            this.$refs.disparador.focus();
-        },
-     }"
+<div x-data="desplegable"
      x-on:mouseenter="asomar()"
      x-on:mouseleave="retirar()"
-     x-on:click.outside="abierto = false"
+     x-on:desplegable-abierto.window="ceder($event.detail)"
+     x-on:click.outside="cerrar()"
      x-on:keydown.escape.window="cerrarYVolverAlFoco()"
-     x-on:focusout="if (! $el.contains($event.relatedTarget)) abierto = false"
+     x-on:focusout="if (! $el.contains($event.relatedTarget)) cerrar()"
      class="relative">
 
     <button type="button"
             x-ref="disparador"
-            x-on:click="abierto = ! abierto"
+            x-on:click="alternar()"
             x-bind:aria-expanded="abierto ? 'true' : 'false'"
             aria-controls="popover-idioma"
             {{-- El nombre accesible CONTIENE el texto visible: un `aria-label`
