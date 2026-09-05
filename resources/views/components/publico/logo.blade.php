@@ -1,4 +1,4 @@
-@props(['variante' => 'color', 'alto' => 'h-10'])
+@props(['variante' => 'color', 'alto' => 'h-10', 'doble' => false])
 
 {{--
     Logo oficial de ASOBARES Capítulo Quindío, tal cual viene del kit de marca.
@@ -6,6 +6,12 @@
     El manual prohíbe reorganizar, deformar o recolorear la marca, así que el
     archivo se usa completo y sin filtros. `blanco` es la única alternativa
     permitida, para fondos rojos o fotografías.
+
+    `doble` pinta el logotipo completo y el isotipo «ab» superpuestos en la
+    misma caja: el CSS de la barra de escritorio los cruza según `data-estado`
+    (logotipo en reposo, isotipo al hacer scroll). El isotipo es el archivo
+    del kit sin recortar ni recolorear; en oscuro va rojo sobre negro, como el
+    favicon, porque no existe versión blanca del isotipo.
 --}}
 {{--
     El archivo de color es PNG y no SVG a propósito, y no es una degradación de
@@ -24,8 +30,23 @@
     $archivo = $variante === 'blanco' ? 'img/logo-asobares-blanco.png' : 'img/logo-asobares.png';
 @endphp
 
-<img src="{{ asset($archivo) }}"
-     alt="ASOBARES Capítulo Quindío"
-     width="592" height="108"
-     fetchpriority="high"
-     {{ $attributes->merge(['class' => "{$alto} w-auto"]) }}>
+@if ($doble)
+    <span {{ $attributes->merge(['class' => "logo-doble relative block {$alto}"]) }}>
+        <img src="{{ asset($archivo) }}"
+             alt="ASOBARES Capítulo Quindío"
+             width="592" height="108"
+             fetchpriority="high"
+             class="logo-doble__completo h-full w-auto">
+        {{-- alt vacío: la marca ya la anuncia el logotipo de al lado. --}}
+        <img src="{{ asset('img/monograma-asobares.png') }}"
+             alt=""
+             width="156" height="108"
+             class="logo-doble__isotipo absolute inset-y-0 left-0 h-full w-auto">
+    </span>
+@else
+    <img src="{{ asset($archivo) }}"
+         alt="ASOBARES Capítulo Quindío"
+         width="592" height="108"
+         fetchpriority="high"
+         {{ $attributes->merge(['class' => "{$alto} w-auto"]) }}>
+@endif

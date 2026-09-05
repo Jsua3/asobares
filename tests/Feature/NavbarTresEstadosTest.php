@@ -97,4 +97,28 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringContainsString('aria-hidden="true"', $colombia);
         $this->assertStringContainsString('#FCD116', $colombia);
     }
+
+    /**
+     * Rotura: quitar el atributo `media` de la precarga del isotipo.
+     */
+    public function test_el_isotipo_existe_se_pinta_doble_y_se_precarga_solo_en_escritorio(): void
+    {
+        $this->assertFileExists(public_path('img/monograma-asobares.png'));
+
+        $doble = Blade::render('<x-publico.logo doble alto="h-8" />');
+        $this->assertStringContainsString('logo-doble__completo', $doble);
+        $this->assertStringContainsString('logo-doble__isotipo', $doble);
+        $this->assertStringContainsString('img/logo-asobares.png', $doble);
+        $this->assertStringContainsString('img/monograma-asobares.png', $doble);
+        $this->assertSame(1, substr_count($doble, 'alt="ASOBARES Capítulo Quindío"'), 'la marca se anuncia una sola vez');
+        $this->assertStringContainsString('alt=""', $doble);
+        $this->assertStringContainsString('width="156" height="108"', $doble);
+
+        $simple = Blade::render('<x-publico.logo alto="h-8" />');
+        $this->assertStringNotContainsString('logo-doble', $simple, 'sin `doble` el componente rinde lo de siempre');
+
+        $this->get('/contacto')
+            ->assertOk()
+            ->assertSee('rel="preload" as="image" href="http://localhost:8000/img/monograma-asobares.png" media="(min-width: 64rem)"', false);
+    }
 }

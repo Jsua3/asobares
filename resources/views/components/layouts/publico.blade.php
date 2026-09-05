@@ -46,6 +46,9 @@
         tiene que cambiar aquí o la precarga deja de servir para nada.
     --}}
     <link rel="preload" as="image" href="{{ asset('img/logo-asobares.png') }}" fetchpriority="high">
+    {{-- El isotipo solo lo pinta la barra de escritorio al hacer scroll; se
+         precarga solo ahí, o el cruce de logo parpadea la primera vez. --}}
+    <link rel="preload" as="image" href="{{ asset('img/monograma-asobares.png') }}" media="(min-width: 64rem)">
     {{-- El valor claro es el que corresponde al marcado servido: sin la clase
          `.dark` el CSS pinta el tema claro. El script de abajo lo corrige al
          instante según la preferencia real. --}}
