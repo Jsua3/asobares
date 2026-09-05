@@ -485,8 +485,17 @@
         z-index: 1;
     }
 
-    /* Los dos controles que se pliegan en scroll. */
+    /* Los dos controles que se pliegan en scroll. La geometría va en el
+       enlace y en el botón del grupo, NUNCA en la raíz del grupo: esa raíz
+       es `position: relative` y por tanto el bloque contenedor de su panel
+       absoluto; un `overflow: hidden` ahí recortaba el desplegable entero.
+       La raíz es hijo de flex y sigue el ancho de su botón. */
     .control-plegable {
+        transition: visibility 0s linear 0s;
+    }
+
+    a.control-plegable,
+    .control-plegable > button {
         max-width: 12rem;
         opacity: 1;
         overflow: hidden;
@@ -494,8 +503,7 @@
         transition:
             max-width var(--duracion-rebote) var(--ease-rebote-suave),
             margin var(--duracion-rebote) var(--ease-rebote-suave),
-            opacity var(--duracion-entrada) var(--ease-color),
-            visibility 0s linear 0s;
+            opacity var(--duracion-entrada) var(--ease-color);
     }
 
     /* Tres puntos para el dedo: solo hay puntero grueso, solo en scroll. */
@@ -627,23 +635,25 @@
             opacity: 1;
         }
 
-        /* Los dos controles plegados, salvo si el teclado está dentro. El
-           margen negativo compensa el px-3 del enlace, que es utilidad y gana
-           a esta capa: sin él quedarían 24 px de relleno vacío. */
+        /* Los dos controles plegados, salvo si el teclado está dentro. */
         [data-estado="scroll"]:not(:focus-within) .control-plegable {
-            max-width: 0;
-            opacity: 0;
             visibility: hidden;
             pointer-events: none;
+            transition: visibility 0s linear var(--duracion-rebote);
+        }
+
+        /* El margen negativo compensa el px-3 del enlace y del botón, que
+           son utilidades y ganan a esta capa: sin él quedarían 24 px de
+           relleno vacío. */
+        [data-estado="scroll"]:not(:focus-within) a.control-plegable,
+        [data-estado="scroll"]:not(:focus-within) .control-plegable > button {
+            max-width: 0;
+            opacity: 0;
+            margin-inline: -0.75rem;
             transition:
                 max-width var(--duracion-rebote) var(--ease-rebote-suave),
                 margin var(--duracion-rebote) var(--ease-rebote-suave),
-                opacity var(--duracion-salida) var(--ease-color),
-                visibility 0s linear var(--duracion-rebote);
-        }
-
-        [data-estado="scroll"]:not(:focus-within) a.control-plegable {
-            margin-inline: -0.75rem;
+                opacity var(--duracion-salida) var(--ease-color);
         }
 
         /* --- el cruce del logo --- */

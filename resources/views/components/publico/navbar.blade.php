@@ -143,9 +143,10 @@
 
         {{-- Módulo 2: los cinco controles, siempre los cinco y en este orden.
              Dos de ellos se pliegan en scroll por CSS; nada sale del DOM. Con
-             dedo, tocar el módulo alterna el estado de atención. --}}
+             dedo, tocar los huecos del módulo o el indicador alterna el estado
+             de atención; tocar un enlace o un grupo hace lo suyo y nada más. --}}
         <div class="modulo modulo-principal hidden items-center gap-1 px-2 lg:flex"
-             x-on:click="alternarAtencion()"
+             x-on:click="if (! $event.target.closest('a, button')) alternarAtencion()"
              x-on:click.outside="if (! punteroFino()) atendiendo = false">
             @foreach ($enlacesDirectos as $enlace)
                 @php($actual = request()->routeIs($patron($enlace['ruta'])))

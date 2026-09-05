@@ -321,6 +321,15 @@ class NavbarTresEstadosTest extends TestCase
             $this->assertStringContainsString($metodo, $navbar);
         }
 
+        // Las expresiones de la máquina, literales: invertir el getter o
+        // cambiar un umbral tiene que verse. Rotura: intercambiar 'atencion'
+        // y 'scroll' en el getter.
+        $this->assertStringContainsString("return this.atendiendo ? 'atencion' : 'scroll';", $navbar);
+        $this->assertStringContainsString('this.desplazado = actual > 8;', $navbar);
+        $this->assertStringContainsString('Math.abs(actual - this.scrollAlAtender) > 24', $navbar);
+        $this->assertStringContainsString('}, 280);', $navbar);
+        $this->assertStringContainsString("if (! \$event.target.closest('a, button')) alternarAtencion()", $navbar);
+
         // Lo que el panel móvil sigue exigiendo, literal.
         $this->assertStringContainsString('x-on:keydown.escape.window="menuMovil = false"', $navbar);
         $this->assertStringContainsString('x-on:click.outside="menuMovil = false"', $navbar);
@@ -337,7 +346,7 @@ class NavbarTresEstadosTest extends TestCase
     public function test_los_cinco_controles_siguen_en_un_solo_bloque_y_solo_dos_se_pliegan(): void
     {
         $html = $this->get('/contacto')->assertOk()->getContent();
-        preg_match('/<header\b.*?<\/header>/s', $html, $header);
+        $this->assertSame(1, preg_match('/<header\b.*?<\/header>/s', $html, $header), 'la página tiene un <header>');
 
         $dom = new \DOMDocument;
         libxml_use_internal_errors(true);
@@ -375,8 +384,14 @@ class NavbarTresEstadosTest extends TestCase
     {
         $html = $this->get('/contacto')->assertOk()->getContent();
 
-        $this->assertLessThan(strpos($html, 'id="menu-movil"'), strpos($html, 'id="popover-tema"'));
-        $this->assertLessThan(strpos($html, 'id="menu-movil"'), strpos($html, 'id="popover-idioma"'));
+        $panelMovil = strpos($html, 'id="menu-movil"');
+        $popoverTema = strpos($html, 'id="popover-tema"');
+        $popoverIdioma = strpos($html, 'id="popover-idioma"');
+        $this->assertNotFalse($panelMovil, 'existe el panel móvil');
+        $this->assertNotFalse($popoverTema, 'existe el popover de tema');
+        $this->assertNotFalse($popoverIdioma, 'existe el popover de idioma');
+        $this->assertLessThan($panelMovil, $popoverTema, 'el popover de tema va antes del panel móvil');
+        $this->assertLessThan($panelMovil, $popoverIdioma, 'el popover de idioma va antes del panel móvil');
 
         $inicio = strpos($html, 'modulo modulo-cuenta');
         $fin = strpos($html, 'id="menu-movil"');
