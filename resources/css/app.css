@@ -594,6 +594,13 @@
             padding-block: 0.4rem 0;
         }
 
+        /* La raya roja del apoyo es de la banda del móvil. Aquí la barra es
+           una píldora que flota, y la raya cruzaba la pantalla entera por
+           debajo de ella (Sua, 5 sep). */
+        .cromo::before {
+            content: none;
+        }
+
         .bandeja {
             width: min(calc(100% - 2rem), 80rem);
             gap: 0;
