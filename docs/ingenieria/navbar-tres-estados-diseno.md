@@ -26,7 +26,7 @@ Este documento es la especificación de diseño. Se escribió **antes** de la pr
 | D4 | Vuelta al estado inicial | **Al volver al tope** (`scrollY ≤ 8`), con la fusión animada al revés |
 | D5 | Enfoque de movimiento | **A: resortes nativos en CSS con `linear()`**, todo declarativo, sin dependencias |
 | D6 | Módulo del logo en scroll | **Isotipo «ab» solo** (`public/img/monograma-asobares.png`, 156×108, rojo) |
-| D7 | Duración del rebote | Hasta **520 ms** de reloj con token `--duracion-rebote` y excepción anotada en la suite |
+| D7 | Duración del rebote | Hasta **520 ms** de reloj con token `--duracion-rebote` y excepción anotada en la suite. **5 sep:** el cambio de estado sube a **620 ms** con token propio `--duracion-estado`, a petición de Sua («sutilmente más lento»); los popovers siguen en 520 |
 | D8 | Banderas del chip de idioma | **Colombia** para ES, **Estados Unidos** para EN |
 
 ## 3. Restricciones que gobiernan el diseño
@@ -70,7 +70,7 @@ Salen del mapa de contexto y no se negocian aquí; si una cambia, cambia el dise
 </header>
 ```
 
-Los **tres hijos del `<nav>` son los tres módulos**. En `inicial` la píldora exterior lleva el vidrio y los módulos son transparentes; en `scroll` y `atencion` la píldora exterior se vuelve transparente (fondo, borde, sombra) y cada módulo enciende su propio vidrio. El `gap` del `<nav>` crece de `0` a `var(--asb-separacion-modulos)`. Ningún nodo se añade ni se quita al cambiar de estado.
+Los **tres hijos del `<nav>` son los tres módulos**. En `inicial` la píldora exterior lleva el vidrio y los módulos son transparentes; en `scroll` y `atencion` la píldora exterior se vuelve transparente (fondo, borde, sombra) y cada módulo enciende su propio vidrio. El `gap` del `<nav>` crece de `0` a `var(--asb-separacion-modulos)`. Ningún nodo se añade ni se quita al cambiar de estado. **Desde el 5 sep** la `<nav>` es, de 64rem para arriba, una rejilla `1fr auto 1fr` (`lg:grid lg:grid-cols-[1fr_auto_1fr]`) y cada módulo se justifica en su celda (`justify-self` start · center · end): el principal queda en el centro de la **pantalla** en los tres estados, gane lo que gane el logo al encogerse. Con `justify-between` caía en el punto medio entre los otros dos (56 px a la izquierda en inicial, 120 en scroll; medido en Chromium). La cuenta lleva `whitespace-nowrap` para que la rejilla respete su mínimo (313 px) en vez de envolver «Mi cuenta», y el módulo del logo lleva `min-width: max-content` en el bloque de 64rem porque en rejilla `shrink-0` es inerte y sin ese mínimo la pista aplastaba el logotipo entre 1024 y 1190 px (24 px de ancho a 1024).
 
 ### 4.2 Estado en Alpine
 
@@ -135,14 +135,15 @@ linear(0, 0.086 4%, 0.283 8%, 0.516 12%, 0.735 17%, 0.910 21%, 1.030 25%, 1.099 
 
 | Token | Valor | Uso |
 |---|---|---|
-| `--duracion-rebote` | `520ms` | Toda transición con curva de rebote. El movimiento «llega» hacia los 250 ms; el resto es asentamiento |
+| `--duracion-rebote` | `520ms` | Los popovers y toda transición con curva de rebote que no sea el cambio de estado. El movimiento «llega» hacia los 250 ms; el resto es asentamiento |
+| `--duracion-estado` | `620ms` | La geometría del cambio de estado: separación, caída, plegado de los dos controles, cruce del logo, indicador. Un punto más lento que el rebote de los popovers (Sua, 5 sep) |
 | `--asb-separacion-modulos` | `0.75rem` | `gap` del `<nav>` en scroll/atención. **Es layout, no movimiento: no se anula** bajo movimiento reducido |
 | `--asb-caida-modulo` | `6px` | `translate` vertical de los módulos al separarse (bajan y asientan) |
 | `--asb-escala-popover` | `0.92` | escala de arranque de los popovers de tema e idioma |
 | `--asb-desplazamiento-popover` | `-6px` | `translate` de arranque de los popovers |
 | `--asb-escala-isotipo` | `0.9` | escala de arranque de la imagen entrante en el cruce del logo |
 
-`--duracion-cromo` (520 ms, de la barra de la Persona 2) **se conserva**: lo sigue usando `.tema-lateral__cuerpo`, que se queda en móvil. Las reglas de escritorio que se reemplazan pasan a `--duracion-rebote`; los dos tokens valen lo mismo y significan cosas distintas (uno abre la barra lateral, otro asienta un resorte).
+`--duracion-cromo` (520 ms, de la barra de la Persona 2) **se conserva**: lo sigue usando `.tema-lateral__cuerpo`, que se queda en móvil. Las reglas de escritorio que se reemplazan pasan a `--duracion-rebote`; los dos tokens valen lo mismo y significan cosas distintas (uno abre la barra lateral, otro asienta un resorte). **Desde el 5 sep** la geometría del cambio de estado usa `--duracion-estado` (620 ms) y `--duracion-rebote` se queda para los popovers.
 
 ### 5.3 Movimiento reducido
 
@@ -206,9 +207,11 @@ Orden de izquierda a derecha: `[cuenta] [tema] [idioma]`.
 
 El prefijo se resuelve en `menu-usuario.blade.php` a partir de `esSuperAdmin()` / `esSubadmin()`; si tiene los dos, gana `Admin`. Las cadenas largas «Secretaría del gremio» / «Dirección del gremio» siguen **dentro** del panel porque las pruebas las exigen ahí. El cierre de sesión sigue siendo `POST` con `@csrf` a `mi-cuenta.salir`, y el `<noscript>` del header se conserva.
 
-**Tema.** Un `<button>` de 44×44 con `aria-label="Apariencia del sitio"`, `aria-expanded`, `aria-controls="popover-tema"`. Muestra `heroicon-o-sun` si el tema **resuelto** es claro y `heroicon-o-moon` si es oscuro; **nunca el monitor**. El icono lo decide CSS por la clase `dark` del `<html>` (`dark:hidden` / `hidden dark:block`), no `x-show`: el `<head>` pone esa clase antes del primer pintado y `elegir()` la cambia al instante, así que es el tema resuelto sin destello del icono equivocado antes de que arranque Alpine (corregido el 5 sep tras la revisión de la tarea 5). Con puntero fino se abre en `mouseenter` (280 ms de gracia al salir); con grueso, al tocar; con teclado, al pulsar. El popover `#popover-tema` es una `hoja-flotante` **debajo** de la barra, alineada al botón, con tres filas `fila-pulsable` de 44 px: `☀ Claro`, `🌙 Oscuro`, `🖥 Sistema` (iconos Heroicons `sun`, `moon`, `computer-desktop` con `<span class="sr-only">` y texto visible), cada una con `aria-pressed` ligado a `$store.tema.preferencia` y un punto indicador en la activa. Cierra con clic fuera, Escape (devuelve el foco al botón) y `focusout`.
+**Tema.** Un `<button>` de 44×44 con `aria-label="Apariencia del sitio"`, `aria-expanded`, `aria-controls="popover-tema"`. Muestra `heroicon-o-sun` si el tema **resuelto** es claro y `heroicon-o-moon` si es oscuro; **nunca el monitor**. El icono lo decide CSS por la clase `dark` del `<html>` (`dark:hidden` / `hidden dark:block`), no `x-show`: el `<head>` pone esa clase antes del primer pintado y `elegir()` la cambia al instante, así que es el tema resuelto sin destello del icono equivocado antes de que arranque Alpine (corregido el 5 sep tras la revisión de la tarea 5). Con puntero fino se abre al posarse el ratón (280 ms de gracia al salir); con grueso, al tocar; con teclado, al pulsar. Desde el 5 sep el comportamiento es el `Alpine.data('desplegable')` compartido (§6.4), que asoma por `pointerenter` de tipo ratón y cierra a los demás al abrirse. El popover `#popover-tema` es una `hoja-flotante` **debajo** de la barra, alineada al botón, con tres filas `fila-pulsable` de 44 px: `☀ Claro`, `🌙 Oscuro`, `🖥 Sistema` (iconos Heroicons `sun`, `moon`, `computer-desktop` con `<span class="sr-only">` y texto visible), cada una con `aria-pressed` ligado a `$store.tema.preferencia` y un punto indicador en la activa. Cierra con clic fuera, Escape (devuelve el foco al botón) y `focusout`.
 
 **Idioma.** Un `<button>` de 44×44 con el texto `ES` (siglas ISO 639-1 del idioma actual) y un galón, `aria-label="Idioma del sitio: ES"` (siglas del idioma actual), `aria-controls="popover-idioma"`. El nombre accesible contiene el texto visible (WCAG 2.5.3, corregido el 5 sep tras la revisión final). El popover `#popover-idioma` es **vertical**: dos filas `fila-pulsable` con bandera SVG inline de 20×14 + nombre del idioma en su propia lengua: `🇨🇴 Español` (activa, `aria-pressed="true"`, punto indicador) y `🇺🇸 English` (`disabled`, `aria-disabled="true"`, con «próximamente» en `text-2xs text-apagado`). Las banderas son un componente `x-publico.bandera` con `pais="co"|"us"`: Colombia en tres franjas (amarillo 50 %, azul 25 %, rojo 25 %); Estados Unidos **simplificada** (trece franjas y cantón azul sin estrellas, que a 14 px no se resuelven). No se instala ningún paquete.
+
+**6.4 El desplegable compartido (5 sep).** Los dos grupos, la cuenta, el tema y el idioma usan el mismo `Alpine.data('desplegable')` de `app.js` (`x-data="desplegable"`), con los cableados en cada vista para que las guardias los lean: `pointerenter` a `asomar($event)` y `pointerleave` a `retirar($event)` (280 ms de gracia; los dos salen si `pointerType` no es `mouse` o no hay puntero fino), el `click` del disparador a `alternar()`, `click.outside` y el `focusout` fuera de la raíz a `cerrar()`, `Escape` a `cerrarYVolverAlFoco()`, y `desplegable-abierto.window` a `ceder($event.detail)`. `abrir()` despacha `desplegable-abierto` con **`$root`** como identidad y los demás ceden al instante: nunca hay dos paneles abiertos, que era como el popover de tema y el de idioma se pisaban al pasar del sol al chip. La identidad es `$root` y no `$el` porque dentro de un método `$el` es el elemento de la directiva que lo llamó (el botón, al abrir por clic o teclado): con `$el` el propio componente se tomaba por ajeno y Enter no abría nada. Se asoma por `pointerenter` y no por `mouseenter` porque en un equipo híbrido (ratón y pantalla táctil) la consulta de puntero fino es verdadera y el toque llega también como `mouseenter` sintético: abría y el `click` del mismo gesto cerraba. Escape devuelve el foco al disparador **solo si estaba dentro del componente**, leído antes de cerrar: un panel abierto por hover mientras se escribe en un campo no roba el foco al campo. «Bolsas», «El gremio» y la cuenta abren así al pasar el cursor, como el tema (pedido de Sua del 5 sep); la cuenta gana la salida por `focusout`, que antes no necesitaba por ser el último control de la barra. Guardias: `NavbarTresEstadosTest` (los cuerpos enteros de los métodos en `app.js`, los siete cableados en cada una de las cuatro vistas, `$root` en el aviso y en `ceder`, ningún `mouseenter` en las vistas) y `NavegacionAgrupadaTest` (las salidas).
 
 **La barra lateral de la Persona 2** (`x-publico.barra-tema`) **se conserva solo por debajo de 1024 px** con `lg:hidden` en su `<aside>`: el móvil no pierde el control de tema y sigue literalmente igual.
 
@@ -242,9 +245,9 @@ OBS3-03 (1 sep) fijó «el sitio arranca en el tema del dispositivo» y la prueb
 | `resources/views/components/publico/bandera.blade.php` | **Nuevo**: SVG inline `co` / `us` |
 | `resources/views/components/publico/barra-tema.blade.php` | `lg:hidden` en el `<aside>`; marca activo por `$store.tema.resuelto` en vez de `preferencia` (tres enlaces), consecuencia del store de §7 |
 | `resources/views/components/layouts/publico.blade.php` | `preload` del isotipo con `media="(min-width: 64rem)"` |
-| `resources/css/tokens.css` | Dos curvas `linear()`, `--duracion-rebote`, cinco tokens de geometría, bloque de movimiento reducido ampliado; `--duracion-cromo` se conserva |
+| `resources/css/tokens.css` | Dos curvas `linear()`, `--duracion-rebote`, `--duracion-estado` (5 sep), cinco tokens de geometría, bloque de movimiento reducido ampliado; `--duracion-cromo` se conserva |
 | `resources/css/app.css` | Reglas `.bandeja`, `.modulo*`, `.control-plegable`, `.indicador-mas`, brillo y lente; **retira** `.cromo-bandeja`, `.cromo-compacto`, `.cromo-expandido`, `.cromo-desplegable`, sustituidas; conserva `.cromo`, `.cromo-apoyado`, `.cromo-oculto`, `.nav-enlace` (subrayado de la sección actual), `.hoja-flotante`, `.tema-lateral*` |
-| `resources/js/app.js` | Store de tema (§7.1); `Alpine.data('escena')` sin cambios, reutilizado |
+| `resources/js/app.js` | Store de tema (§7.1); `Alpine.data('escena')` sin cambios, reutilizado; `Alpine.data('desplegable')` (§6.4, 5 sep) |
 | `tests/Feature/NavbarTresEstadosTest.php` | **Nuevo** (§9.1) |
 | `tests/Feature/TemaClaroOscuroTest.php`, `ObjetivoTactilTest.php`, `MovimientoTest.php` | Actualizaciones justificadas (§9.2) |
 | `material/encargo.md` §13 | Nota fechada: el popover ofrece «Sistema» |
@@ -282,7 +285,7 @@ Regla del proyecto: cada aserción nueva se ve **roja** rompiendo el código a p
 | `TemaClaroOscuroTest::test_el_selector_ofrece_solo_claro_y_oscuro` | prohíbe `>Sistema<` | pasa a `..._ofrece_claro_oscuro_y_sistema` y lo exige | decisión de Sua del 3 sep (§7.2) |
 | `TemaClaroOscuroTest::test_el_control_de_tema_vive_en_una_barra_lateral_fija` | exige `tema-lateral fixed` | exige además `lg:hidden` en el `<aside>` y `popover-tema` en la página | el control cambió de sitio en escritorio, no en móvil |
 | `ObjetivoTactilTest` filas de `navbar`, `menu-usuario` | cadenas actuales | cadenas nuevas de los controles nuevos (tema, idioma, disparador con prefijo), **re-medidas en Chromium con playwright-cli ≥ 44×44**; se borra la fila de `selector-tema.blade.php` | el archivo se borra y hay controles nuevos |
-| `MovimientoTest` comentario «nada pasa de 300 ms» | techo implícito | excepción anotada: `--duracion-rebote` es la única duración > 300 ms y se justifica por el asentamiento del resorte; se añade guardia literal `--duracion-rebote: 520ms` | D7 |
+| `MovimientoTest` comentario «nada pasa de 300 ms» | techo implícito | excepción anotada: `--duracion-rebote` es la única duración > 300 ms y se justifica por el asentamiento del resorte; se añade guardia literal `--duracion-rebote: 520ms` (5 sep: `--duracion-estado: 620ms` es la segunda, con su guardia) | D7 |
 
 ### 9.3 Verificación en navegador (fuera de PHPUnit)
 
