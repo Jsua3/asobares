@@ -170,6 +170,11 @@ class ObjetivoTactilTest extends TestCase
                 'fila-pulsable flex w-full items-center gap-2.5 rounded-lg px-3 py-3 text-left text-sm',
                 'misma geometría que las filas del menú de usuario: 45,7 px medidos',
             ],
+            'navbar, filas del popover de idioma' => [
+                'components/publico/control-idioma.blade.php',
+                'fila-pulsable flex w-full items-center gap-2.5 rounded-lg px-3 py-3 text-left text-sm',
+                'misma cadena que las filas del popover de tema, en su propio archivo: 45,7 px medidos',
+            ],
             // Formularios. `min-h-11` y no `py-3`: el control mide 43,7 px y
             // solo le faltan 0,3, así que el mínimo no mueve ni un campo.
             'campo, los tres controles' => [
