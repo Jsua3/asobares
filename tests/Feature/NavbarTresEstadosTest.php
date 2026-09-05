@@ -159,7 +159,7 @@ class NavbarTresEstadosTest extends TestCase
     }
 
     /**
-     * Rotura: quitar `disabled` de la fila de English.
+     * Rotura: quitar el atributo disabled (y solo ese) de la fila de English.
      */
     public function test_el_chip_de_idioma_se_ve_y_el_ingles_no_funciona_a_proposito(): void
     {
@@ -177,11 +177,20 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringContainsString('data-pais="co"', $popover);
         $this->assertStringContainsString('data-pais="us"', $popover);
 
-        [, $filaIngles] = explode('lang="en"', $popover, 2);
+        // La fila de English va desde su `lang="en"` hasta el cierre del botón;
+        // `aria-disabled` contiene `disabled` como subcadena, así que el
+        // atributo propio se exige con un espacio delante y un cierre detrás.
+        // Rotura: quitar `disabled` (y solo `disabled`) de esa fila.
+        [$antesDeIngles, $filaIngles] = explode('lang="en"', $popover, 2);
         $filaIngles = strstr($filaIngles, '</button>', true);
-        $this->assertStringContainsString('disabled', $popover);
-        $this->assertStringContainsString('aria-disabled="true"', $popover);
+        $etiquetaDeApertura = strstr($filaIngles, '>', true);
+
+        $this->assertMatchesRegularExpression('/\sdisabled(\s|$)/', $etiquetaDeApertura, 'la fila de English lleva el atributo `disabled` propio');
+        $this->assertStringContainsString('aria-disabled="true"', $etiquetaDeApertura);
         $this->assertStringContainsString('>English<', $filaIngles);
+
+        // Y la de Español no está deshabilitada.
+        $this->assertStringNotContainsString('disabled', strstr($antesDeIngles, 'lang="es"'));
 
         $this->assertStringContainsString('aria-pressed="true"', $popover);
         $this->assertStringContainsString('transicion-desplegable', $html);
