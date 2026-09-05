@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
@@ -77,5 +78,23 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringContainsString("['light', 'dark', 'system'].includes(guardado)", $js);
         $this->assertStringContainsString('this.resuelto = this.resolver(', $js);
         $this->assertStringContainsString("matchMedia('(prefers-color-scheme: dark)').addEventListener('change'", $js);
+    }
+
+    /**
+     * Rotura: cambiar `data-pais="co"` por `data-pais="es"`.
+     */
+    public function test_las_banderas_son_colombia_y_estados_unidos(): void
+    {
+        $bandera = File::get(resource_path('views/components/publico/bandera.blade.php'));
+
+        $this->assertStringContainsString('data-pais="co"', $bandera);
+        $this->assertStringContainsString('data-pais="us"', $bandera);
+        $this->assertStringNotContainsString('data-pais="es"', $bandera);
+        $this->assertStringNotContainsString('data-pais="gb"', $bandera);
+
+        $colombia = Blade::render('<x-publico.bandera pais="co" />');
+        $this->assertStringContainsString('<svg', $colombia);
+        $this->assertStringContainsString('aria-hidden="true"', $colombia);
+        $this->assertStringContainsString('#FCD116', $colombia);
     }
 }
