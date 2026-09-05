@@ -113,7 +113,7 @@ Alpine.data('escena', () => ({
  * instante, así que nunca hay dos paneles abiertos a la vez, que era como el
  * popover de tema y el de idioma se pisaban al pasar del sol al chip.
  *
- * Los cableados (mouseenter, mouseleave, click.outside, focusout, Escape y
+ * Los cableados (pointerenter, pointerleave, click.outside, focusout, Escape y
  * el aviso) van en cada vista y no aquí: las guardias los leen crudos.
  */
 const GRACIA_AL_RETIRAR_MS = 280;
@@ -148,16 +148,22 @@ Alpine.data('desplegable', () => ({
         this.abrir();
     },
 
-    asomar() {
-        if (! punteroFino()) {
+    // Solo el ratón asoma. En un equipo híbrido (ratón y pantalla táctil) la
+    // consulta de puntero fino es verdadera, y un toque llega primero como
+    // pointerenter de tipo touch y después como un mouseenter sintético: con
+    // mouseenter el toque abría y el click del mismo gesto cerraba, y había
+    // que tocar dos veces. Por eso las vistas cablean pointerenter y
+    // pointerleave, y aquí solo cuenta el puntero que de verdad se posa.
+    asomar(evento) {
+        if (evento.pointerType !== 'mouse' || ! punteroFino()) {
             return;
         }
 
         this.abrir();
     },
 
-    retirar() {
-        if (! punteroFino()) {
+    retirar(evento) {
+        if (evento.pointerType !== 'mouse' || ! punteroFino()) {
             return;
         }
 

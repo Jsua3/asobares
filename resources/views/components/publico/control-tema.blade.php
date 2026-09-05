@@ -11,9 +11,10 @@
     Es un «disclosure» como el resto de desplegables de la barra: botón con
     aria-expanded y el panel que controla. El comportamiento es el
     `Alpine.data('desplegable')` de app.js, el mismo del idioma, la cuenta y
-    los grupos: con ratón se asoma al pasar y se retira con gracia; con dedo
-    y con teclado, al pulsar; abrir uno cierra a los demás, que es lo que
-    impide que este popover y el de idioma se pisen.
+    los grupos: con ratón se asoma al pasar y se retira con gracia (por
+    pointerenter, no por mouseenter: en un híbrido el toque también lo
+    sintetiza); con dedo y con teclado, al pulsar; abrir uno cierra a los
+    demás, que es lo que impide que este popover y el de idioma se pisen.
 
     `fila-pulsable` y no `pulsable` en las filas, sin ningún hover:bg-*: el
     fondo lo trae el portador detrás de la puerta táctil. `MovimientoTest`
@@ -28,8 +29,8 @@
 @endphp
 
 <div x-data="desplegable"
-     x-on:mouseenter="asomar()"
-     x-on:mouseleave="retirar()"
+     x-on:pointerenter="asomar($event)"
+     x-on:pointerleave="retirar($event)"
      x-on:desplegable-abierto.window="ceder($event.detail)"
      x-on:click.outside="cerrar()"
      x-on:keydown.escape.window="cerrarYVolverAlFoco()"

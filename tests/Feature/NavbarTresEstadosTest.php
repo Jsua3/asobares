@@ -531,7 +531,7 @@ class NavbarTresEstadosTest extends TestCase
         $js = File::get(resource_path('js/app.js'));
 
         $this->assertStringContainsString("Alpine.data('desplegable', () => ({", $js);
-        foreach (['abrir() {', 'cerrar() {', 'alternar() {', 'asomar() {', 'retirar() {', 'ceder(raiz) {', 'cerrarYVolverAlFoco() {'] as $definicion) {
+        foreach (['abrir() {', 'cerrar() {', 'alternar() {', 'asomar(evento) {', 'retirar(evento) {', 'ceder(raiz) {', 'cerrarYVolverAlFoco() {'] as $definicion) {
             $this->assertStringContainsString($definicion, $js, "app.js ya no define {$definicion}");
         }
         // `$root` y no `$el`: dentro de un método `$el` es el elemento de la
@@ -542,16 +542,33 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringContainsString('if (raiz === this.$root) {', $js, 'ceder ignora su propio aviso');
         $this->assertStringNotContainsString('this.$el', substr($js, strpos($js, "Alpine.data('desplegable'"), strpos($js, 'Video del hero') - strpos($js, "Alpine.data('desplegable'")), 'el desplegable nunca usa $el como identidad');
         $this->assertStringContainsString('this.$refs.disparador.focus();', $js, 'cerrar con teclado devuelve el foco al disparador');
-        $this->assertMatchesRegularExpression('/asomar\(\) \{\s*if \(! punteroFino\(\)\) \{\s*return;/', $js, 'con dedo no hay hover que valga');
-        $this->assertMatchesRegularExpression('/retirar\(\) \{\s*if \(! punteroFino\(\)\) \{\s*return;/', $js);
+        // Solo el RATÓN asoma. En un equipo híbrido (ratón y pantalla táctil)
+        // `(hover: hover) and (pointer: fine)` es verdadero y el toque llega
+        // como pointerenter de tipo touch y luego como un mouseenter
+        // sintético: con mouseenter el toque abría y el click del mismo gesto
+        // cerraba, y había que tocar dos veces (revisión del 5 sep). Roturas:
+        // volver a x-on:mouseenter en una vista; quitar la comparación del
+        // pointerType; borrar `this.abrir()` de asomar; borrar el setTimeout
+        // de retirar; cambiar la gracia.
+        $this->assertMatchesRegularExpression(
+            '/asomar\(evento\) \{\s*if \(evento\.pointerType !== \'mouse\' \|\| ! punteroFino\(\)\) \{\s*return;\s*\}\s*this\.abrir\(\);/',
+            $js,
+            'con dedo no hay hover que valga, tampoco en un híbrido'
+        );
+        $this->assertMatchesRegularExpression(
+            '/retirar\(evento\) \{\s*if \(evento\.pointerType !== \'mouse\' \|\| ! punteroFino\(\)\) \{\s*return;\s*\}\s*clearTimeout\(this\.cierre\);\s*this\.cierre = setTimeout\(\(\) => this\.cerrar\(\), GRACIA_AL_RETIRAR_MS\);/',
+            $js
+        );
+        $this->assertStringContainsString('const GRACIA_AL_RETIRAR_MS = 280;', $js, 'la gracia al retirar es la misma que la del header');
 
         foreach (['menu-grupo', 'menu-usuario', 'control-tema', 'control-idioma'] as $vista) {
             $contenido = File::get(resource_path("views/components/publico/{$vista}.blade.php"));
 
             $this->assertStringContainsString('x-data="desplegable"', $contenido, "{$vista} no usa el componente compartido");
+            $this->assertStringNotContainsString('x-on:mouseenter', $contenido, "{$vista} vuelve a asomar por mouseenter, que un toque en un híbrido también dispara");
             foreach ([
-                'x-on:mouseenter="asomar()"',
-                'x-on:mouseleave="retirar()"',
+                'x-on:pointerenter="asomar($event)"',
+                'x-on:pointerleave="retirar($event)"',
                 'x-on:desplegable-abierto.window="ceder($event.detail)"',
                 'x-on:click.outside="cerrar()"',
                 'x-on:keydown.escape.window="cerrarYVolverAlFoco()"',

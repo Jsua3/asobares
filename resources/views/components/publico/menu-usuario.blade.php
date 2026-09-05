@@ -41,8 +41,8 @@
      navegación con flechas que este panel no implementa. --}}
 @auth
 <div x-data="desplegable"
-     x-on:mouseenter="asomar()"
-     x-on:mouseleave="retirar()"
+     x-on:pointerenter="asomar($event)"
+     x-on:pointerleave="retirar($event)"
      x-on:desplegable-abierto.window="ceder($event.detail)"
      x-on:click.outside="cerrar()"
      x-on:keydown.escape.window="cerrarYVolverAlFoco()"
