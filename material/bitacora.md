@@ -1960,3 +1960,46 @@ Medido en Chromium sobre `8e53813`: portada a 1440 con header fijo de 70 px sobr
 ### 39.11 Producción tras el push (5 sep, mediodía)
 
 Se empujó `main` a las 12:07 (hora local) como `76b6620`. Una sonda consultó producción cada 30 s: a los 68 s del push la portada ya servía `data-estado="inicial"` y `cromo-fijo` y había dejado de servir `cromo-compacto`; el video del hero respondió 200 con 1.550.175 bytes y /contacto 200 en 1,2 s; una consulta posterior vio también `contorno-claro` y `pie-de-video`. **La barra B con la portada de la Persona 2 está en producción.** No se corrió `ContenidoOficialSeeder`: toca datos de producción y no estaba en el pedido; hasta entonces el rótulo del video usa sus textos de respaldo y la frase corta no se pinta. La consola de Cloud no se miró desde aquí. Este cierre entra en `main` como un commit más, y Cloud volverá a desplegar el mismo código con la documentación al día.
+
+## 40. «AFÍLIATE» SE ESCONDE CON SESIÓN, Y LA BARRA MÓVIL 2.1 SE DISEÑA ANTES DE ESCRIBIRSE (5–6 sep 2026)
+
+### 40.1 Dos encargos en un mensaje
+
+La noche del 5 sep Sua vio en escritorio la pastilla «Afíliate» junto a «Admin Natalia Gutié…» y pidió esconderla a quien ya tiene sesión, sea socio, secretaría o dirección: «para él no es de interés». En el mismo mensaje abrió la fase siguiente, la **navBar 2.1**: el móvil en dos módulos, el superior con el logo, el tema y «Afíliate» sin sesión o el nombre y el rango con sesión; el inferior, que es el principal, con Directorio, Abre tu negocio y «los desplegables de bolsas y empleo» que abren al pulsar; los estados de escritorio menos atención; y un `scroll` que solo compacta al bajar y vuelve al tamaño inicial al subir. Dos cosas del brief se leyeron y no se resolvieron en silencio: «empleo» casi seguro es «El gremio» (Empleo es la primera fila de Bolsas), y Eventos no está en la lista.
+
+### 40.2 «Afíliate» con sesión: una guardia vista roja dos veces (`09e8c17`)
+
+La spec de la Parte I §6.3 ya decía que solo el anónimo ve «Mi cuenta» y «Afíliate»; el código nunca lo cumplió. El enlace pasa dentro del `@guest` del módulo de cuenta y, por coherencia, el bloque de invitado del panel móvil se envuelve entero; el pie lo conserva para todos. La guardia (`NavbarTresEstadosTest::test_afiliate_solo_se_ofrece_a_quien_no_tiene_sesion`) cuenta el `href` en el `<header>`: dos sin sesión, cero con sesión de cada uno de los tres roles, y el pie sigue enlazándolo. Roja antes del cambio (el header con sesión de asociado seguía ofreciéndolo) y roja otra vez al devolverle el enlace al panel móvil. Las siete clases de la barra en verde: 118 casos, 1.258 aserciones, 24 s.
+
+### 40.3 El taller de dieciocho agentes
+
+El móvil no se empezó por el código: el proyecto registra por escrito antes de codificar, y el dueño «eligió, no delegó» las ocho decisiones de la Parte I. Con Ultracode encendido se lanzó un taller sobre `09e8c17`: seis lectores en paralelo (guardias, CSS y layout, Alpine y estado, cuenta y roles, el móvil real, marca e iconos); tres diseñadores con ángulos distintos (A: un solo DOM y el mínimo cambio; B: la interacción táctil primero; C: el oficio del movimiento); tres jueces con pesos distintos (A ganó dos de tres, B uno); una síntesis a partir del ganador con las ideas de los otros; cuatro críticos adversarios por lente (guardias y DOM, iOS y Android reales, accesibilidad, fidelidad y oficio: 34 hallazgos verificados) y un revisor final que incorporó los 34 y rechazó ocho alternativas con su razón. El resultado es la **Parte II de `docs/ingenieria/navbar-tres-estados-diseno.md`** (`83e7390`), con dieciocho decisiones para Sua, cada una con recomendación (§2), guardias que cambian con su porqué (§8.1), la guardia nueva `NavbarMovilTest` con la rotura de cada prueba (§8.2), y la verificación en navegador (§8.4).
+
+El taller se cortó dos veces por el límite de uso de la sesión (los tres diseñadores a las 9 pm, los cuatro críticos y el revisor a las 2 am) y se reanudó con `resumeFromRunId`: los agentes ya terminados vuelven de caché. La primera caída además tumbó el guion: un diseñador que muere devuelve `null`, y envuelto en `.then(d => ({ clave, diseno: d }))` pasa el `filter(Boolean)`; el filtro tiene que mirar el campo interior. Ultracode se apagó a mitad de la sesión; reanudar el mismo taller es continuar lo que Sua ya había pedido, no lanzar uno nuevo.
+
+### 40.4 Lo que se midió (punto de partida)
+
+Antes de diseñar, la barra móvil de hoy en Chromium real: cabecera de 56 px a 390, 360, 768 y 844 de ancho; logo de 153×40 (h-7 más `py-1.5`); hamburguesa de 44×44; barra lateral de tema a 16 px del borde inferior, justo donde iría un módulo inferior; rótulo del video a 134 px del borde inferior a 390×844 y a 112 a 360×800; en apaisado el hero mide 764 px sobre 390 de alto; la primera sección de /contacto lleva 112 px de apartado; `.cromo` computa `transform: matrix(1, 0, 0, 1, 0, 0)` y `.bandeja` `backdrop-filter: blur(20px) saturate(1.8)`. Guion en `f4/movil-base.js` del scratchpad de la sesión.
+
+### 40.5 Lo que el taller destapó
+
+- **`.cromo` es bloque contenedor de todo `position: fixed` descendiente**: lleva `transform: translateY(0)` con transición, que solo existían para `.cromo-oculto`, clase que ninguna vista usa. Un módulo inferior fijo dentro del header se pegaría bajo la cabecera de 56 px y no al fondo de la pantalla. Se retiran los tres.
+- **Un vidrio no es ancestro de otro vidrio** (raíz de fondo, Filter Effects 2): con el `backdrop-filter` en la `.bandeja`, las hojas que cuelgan de ella no tienen página que desenfocar. El vidrio de cada módulo va a un `::before`. De paso: los popovers de escritorio en `inicial` cuelgan de una bandeja con vidrio, hallazgo de la Parte I que se mide aparte. Y **`view-transition-name` también forma raíz de fondo** (View Transitions 1 §2.1.1): la síntesis lo había puesto en los dos módulos y un crítico lo cazó.
+- **Las guardias cuentan nodos dentro del `<header>`**: una sola `<nav>`, tres hijos `modulo`, el primer `div` con `gap-1`, dos `aria-current`, el `href` de afiliación. El módulo inferior tiene que vivir en el header y ser un segundo `<nav>` que se llame «Navegación principal», porque bajo 64rem la primera solo contiene logo y cuenta.
+- **El apartado de 7rem colgaba del orden del layout**: `.cromo-fijo + .tema-lateral + main` deja de casar si la barra lateral se retira, y todas las páginas salvo la portada se meterían bajo el header sin que nada se pusiera rojo. Pasa a `~` con guardia.
+- **11 px sobre el velo del 72 % no llegan a 4,5:1** (unos 3,0:1 en claro y 1,9:1 en oscuro sobre fotos): el velo móvil sube al 88/85 % por token, con la misma guardia calculada que el velo del hero (D-M18).
+- **La histéresis de dirección se mide desde el extremo del recorrido**, no desde el último punto de decisión, o volver cuesta entre 12 y 36 px; los extremos del documento son zona muerta (rebote elástico), un salto de más de 200 px no es gesto, y bajo movimiento reducido no hay estado `scroll` (WCAG 2.3.3).
+- **El inset de la zona segura no puede entrar en una altura transicionada**: en iOS salta de 0 a 34 px a mitad de gesto y se animaría 620 ms con sobreimpulso. Y `viewport-fit=cover` mete todo el documento bajo la muesca, no solo los módulos.
+- **Cerrar una hoja por scroll no puede robar el foco**: con el foco dentro, una flecha abajo desplaza el documento y cerrar tiraría el foco al `<body>`, el defecto que el 5 sep se corrigió para Escape.
+
+### 40.6 Trampas de esta sesión
+
+- **Un agente de taller que muere devuelve `null`**, y envuelto en un `.then` que lo mete en un objeto sobrevive al `filter(Boolean)`: el guion revienta más abajo. Filtrar por el campo interior y fallar con mensaje si no queda ninguno.
+- **El límite de uso mata a los agentes en vuelo y no a los terminados**: `resumeFromRunId` reproduce el prefijo intacto desde caché, y editar el posprocesado del guion no lo invalida.
+- **En `run-code` de playwright-cli, un ayudante definido fuera de `page.evaluate` no existe dentro**: `ReferenceError: rect is not defined`. Los ayudantes se definen dentro de la función que se evalúa.
+- **Las guardias que leen archivos crudos leen también los comentarios**: tres aseveraciones nuevas del diseño se habrían puesto rojas con los propios comentarios que el diseño escribía («solo servían a .cromo-oculto», «no innerWidth», «nunca filter: drop-shadow»). Nombrar sin pegar vale también para el CSS.
+- **Una revisión por lentes vale lo que cuesta, otra vez**: los cuatro críticos cazaron 34 cosas en una síntesis que tres jueces habían dado por buena, y la más grave (el `view-transition-name`) contradecía en silencio la restricción central del propio diseño.
+
+### 40.7 Lo que entra y sale del estado
+
+Entra **D-34**, las dieciocho decisiones de la Parte II, dueño Sua. «Afíliate» con sesión pasa a hecho (`09e8c17`). `main` queda tres commits por delante de `origin/main` y nada de hoy está desplegado hasta empujar. La suite entera no se corrió: solo las siete clases de la barra sobre `09e8c17`. No se abrió rama: la barra móvil no se escribe hasta que Sua responda.
