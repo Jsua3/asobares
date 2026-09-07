@@ -1797,3 +1797,78 @@ El segundo factor es obligatorio, así que ninguna sesión automatizada abre `/a
 **Capa 5. Sua, a mano, una vez.** Lo que ninguna capa puede decir: si el cristal parece cristal sobre el tablero real, si el resorte se siente como lo pidió, si el viaje entre dos páginas del panel no salta, y si el botón atrás deja la barra donde debe. Con una lista corta de observaciones escritas, en claro y en oscuro, y en el teléfono antes de la demo.
 
 **Regla que gobierna las cinco:** cada guardia se ve roja por rotura deliberada antes de escribir el código que la pone verde, y se muta **por comportamiento**: cada cableado, cada `aria-*` y cada constante por separado, cada uno poniendo roja su propia afirmación y solo la suya. Afirmar que una función está definida no vale; hay que afirmar también que se llama.
+
+
+---
+
+## Ampliación del 7 sep: los módulos y la parte superior
+
+**Por qué existe esta sección.** Con las tareas 1 a 5 construidas, Sua miró el panel y dijo dos cosas: que **no se aprecian los módulos** que presenta la barra de escritorio, y que **lo único que cambió fue el color**. Tiene razón, y la Parte III lo explica sin querer: sus dieciocho decisiones son todas de material, de movimiento y de señal, y ninguna toca la ESTRUCTURA. La barra sigue siendo una superficie plana con una lista encima.
+
+En el mismo mensaje pidió rehacer la parte superior del panel: el control de tema, la campana de notificaciones («su funcionalidad es muy poca») y la cuenta del usuario, «asemejándola a la que hay actualmente en la navBar de escritorio».
+
+**Esto es ampliación de alcance sobre la Parte III aprobada**, así que va por escrito antes de codificarse. Cinco decisiones, D-L19 a D-L23.
+
+**Lo que la barra de escritorio hace y esta no.** La bandeja es una píldora exterior que contiene tres módulos: logo, principal y cuenta. En `inicial` el vidrio lo pone la píldora y los módulos están apagados; en `scroll` y en `atención` la píldora se apaga y **cada módulo enciende el suyo**, con brillo especular en un pseudoelemento y canto de cristal en el otro. Eso es lo que se lee como «módulos», y es lo que aquí no existe.
+
+### D-L19. ¿Qué es un módulo en una barra vertical?
+
+**Hoy.** Un solo plano: cristal, y encima cinco grupos que solo se distinguen por su rótulo en mayúsculas y por el aire entre ellos.
+
+| Opción | Coste |
+|---|---|
+| A. **Cada grupo de navegación es un módulo**: cinco cristales apilados con su canto y su brillo, el rótulo dentro como título del módulo | Cinco módulos es mucho módulo para 244 px de ancho, y el aire entre ellos come alto en una lista que ya se corta el 38 % |
+| B. **Tres módulos por función, como en escritorio**: marca arriba, navegación en medio (con los cinco grupos dentro, como están), cuenta abajo | Es la traducción literal de la barra de escritorio girada. Obliga a decidir D-L21 (la cuenta baja de la parte superior) para que el tercer módulo exista |
+| C. **Dos módulos**: navegación y cuenta, sin módulo de marca, porque con topbar Filament esconde la cabecera de la barra en escritorio | Menos fiel al original, pero es lo que de verdad se ve en escritorio |
+
+**Recomendación: B**, con el módulo de marca visible solo en el cajón, que es donde Filament pinta la cabecera. Porque los módulos de la barra de escritorio son **funcionales y no decorativos**: agrupan por papel, no por sección, y eso es lo que hace que se lean como piezas y no como cajas.
+
+### D-L20. ¿Cuándo enciende cada módulo su vidrio, si aquí no hay estado de atención?
+
+**Hoy.** Nada enciende nada.
+
+| Opción | Coste |
+|---|---|
+| A. El módulo de navegación enciende su canto **siempre**, y el de cuenta también; el brillo especular solo aparece al recibir puntero o foco dentro | Se pierde el contraste entre «apagado» y «encendido» que en escritorio marca el cambio de estado |
+| B. Los módulos nacen apagados y encienden en `data-barra-estado="scroll"`, es decir cuando la lista se ha desplazado, calcando el reparto de la barra de escritorio | El encendido depende de que el usuario desplace la lista, y quien no la desplace nunca ve los módulos |
+| C. El módulo de **navegación** enciende con el desplazamiento (es el que se desplaza) y el de **cuenta** está encendido siempre (es el ancla que no se mueve) | Dos conductas distintas que hay que justificar, y es justo lo que las hace legibles |
+
+**Recomendación: C.** Porque en escritorio el encendido significa «esta pieza se separó de la página», y aquí la única que se separa es la lista. La cuenta no se desplaza nunca: encenderla siempre la convierte en el suelo de la barra.
+
+### D-L21. ¿Dónde vive la cuenta del usuario?
+
+**Hoy.** En la parte superior, a la derecha: un círculo con las iniciales que abre un menú con Perfil, tres iconos de tema y Salir. El nombre no se ve por ninguna parte.
+
+| Opción | Coste |
+|---|---|
+| A. **Baja al pie de la barra lateral** como tercer módulo, con avatar, nombre y rango, igual que el chip de escritorio, y abre su hoja hacia arriba | Es un gancho (`SIDEBAR_FOOTER`) y una vista propia. Deja la parte superior con muy poco dentro, lo que obliga a decidir qué queda arriba. En el cajón hay que comprobar que la hoja cabe |
+| B. **Se queda arriba** pero se rehace como el chip de escritorio: avatar, nombre y rango | No añade módulo ninguno a la barra, así que la queja de Sua queda a medias |
+| C. En los dos sitios | Dos disparadores para la misma sesión: se contradicen en cuanto uno cambie |
+
+**Recomendación: A.** Porque resuelve las dos quejas con un solo movimiento: la barra gana el módulo que le faltaba y la cuenta gana el nombre y el rango que hoy no muestra. Y porque el pie de la barra es donde el ojo ya busca la sesión en un panel.
+
+### D-L22. La campana de notificaciones
+
+**Hoy.** Filament la pinta con `databaseNotifications()` y sondeo cada 30 s. Sua dice que su funcionalidad es muy poca, y es cierto: el tablero ya tiene la banda «Te está esperando» con lo que hay que aprobar, que es la misma información mejor contada.
+
+| Opción | Coste |
+|---|---|
+| A. **Se retira del cromo** y la información queda donde ya está, en la banda del tablero | Hay que comprobar que ninguna parte del panel dependa de ella para avisar de algo que no salga en la banda |
+| B. Se queda y se le da contenido real | Es un frente propio: decidir qué notifica, quién lo emite y cuándo se marca leído. No es una tarde |
+| C. Se queda como está | Ocupa el sitio del cromo que estamos rehaciendo y no dice nada |
+
+**Recomendación: A**, con B anotada como frente aparte si el gremio pide avisos de verdad. Porque un adorno que no informa compite por la atención con lo que sí informa.
+
+### D-L23. ¿Qué queda en la parte superior, y con qué aspecto?
+
+**Hoy.** Campana, círculo de iniciales y un segmentado de dos botones para claro y oscuro, que no existe en el sitio público.
+
+| Opción | Coste |
+|---|---|
+| A. Queda el **control de tema con la misma forma que en el sitio**: un botón redondo de 44 px con sol o luna que abre un popover con las tres preferencias (claro, oscuro y sistema), con `aria-expanded` y `aria-controls`, sin `role="menu"` | Hay que reescribir el conmutador que entró con el panel de Ingrid. Gana coherencia con el sitio y pierde la comodidad de un clic |
+| B. Se conserva el segmentado de dos botones | El sistema deja de ser elegible desde el cromo, y hoy lo es desde el menú de usuario, que en la opción A de D-L21 se va abajo |
+| C. El control de tema también baja al pie de la barra | La parte superior se queda vacía y el tema deja de estar donde el ojo lo busca |
+
+**Recomendación: A.** Porque el encargo es que el panel se parezca al sitio, y el control de tema del sitio es un popover de tres opciones, no un interruptor de dos. La parte superior queda con el título de la página a la izquierda y el control de tema a la derecha, que es lo que un panel necesita arriba.
+
+**Lo que no cambia en esta ampliación:** el ancho de la barra, el orden de los grupos, los destinos, el idioma de los rótulos y el logotipo. Y sigue fuera de alcance el carril de iconos plegable.
