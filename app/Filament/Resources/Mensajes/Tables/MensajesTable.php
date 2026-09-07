@@ -6,6 +6,7 @@ use App\Enums\EstadoMensaje;
 use App\Enums\TipoMensaje;
 use App\Models\Mensaje;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
@@ -21,26 +22,26 @@ class MensajesTable
     {
         return $table
             ->columns([
-                TextColumn::make('radicado')
-                    ->label('Radicado')
-                    ->placeholder('—')
-                    ->searchable()
-                    ->copyable()
-                    ->fontFamily('mono')
-                    ->weight('medium'),
+                TextColumn::make('nombre')
+                    ->label('Remitente')
+                    ->searchable(['nombre', 'correo', 'radicado', 'mensaje'])
+                    ->sortable()
+                    ->weight('medium')
+                    ->description(fn (Mensaje $registro): string => collect([
+                        $registro->radicado,
+                        $registro->correo,
+                    ])->filter()->implode(' · '))
+                    ->wrap()
+                    ->width('16rem'),
                 TextColumn::make('tipo')
                     ->label('Tipo')
                     ->badge()
-                    ->sortable(),
-                TextColumn::make('nombre')
-                    ->label('Remitente')
-                    ->searchable()
-                    ->description(fn (Mensaje $registro): string => $registro->correo),
+                    ->sortable()
+                    ->visibleFrom('md'),
                 TextColumn::make('mensaje')
-                    ->label('Mensaje')
-                    ->limit(70)
-                    ->wrap()
-                    ->tooltip(fn (Mensaje $registro): string => $registro->mensaje),
+                    ->label('Resumen')
+                    ->limit(48)
+                    ->visibleFrom('md'),
                 TextColumn::make('estado')
                     ->label('Estado')
                     ->badge()
@@ -48,7 +49,8 @@ class MensajesTable
                 TextColumn::make('created_at')
                     ->label('Recibido')
                     ->since()
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('lg'),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
@@ -57,8 +59,14 @@ class MensajesTable
             ])
             ->recordActions([
                 ViewAction::make()->label('Ver'),
-                self::marcarRespondido(),
+                ActionGroup::make([
+                    self::marcarRespondido(),
+                ])
+                    ->label('Acciones')
+                    ->icon('heroicon-m-ellipsis-horizontal')
+                    ->tooltip('Más acciones'),
             ])
+            ->recordActionsColumnLabel('Acciones')
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()->label('Eliminar'),

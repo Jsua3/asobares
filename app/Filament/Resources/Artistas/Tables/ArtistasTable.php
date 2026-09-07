@@ -4,12 +4,15 @@ namespace App\Filament\Resources\Artistas\Tables;
 
 use App\Enums\EstadoPublicacion;
 use App\Filament\Support\AccionesDeAprobacion;
+use App\Models\Artista;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class ArtistasTable
@@ -17,52 +20,51 @@ class ArtistasTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('municipio'))
             ->columns([
                 TextColumn::make('nombre')
-                    ->searchable(),
-                TextColumn::make('slug')
-                    ->searchable(),
+                    ->label('Artista')
+                    ->searchable(['nombre', 'slug', 'genero_musical', 'whatsapp'])
+                    ->sortable()
+                    ->weight('medium')
+                    ->description(fn (Artista $registro): ?string => self::lineaSecundaria([
+                        $registro->genero_musical,
+                        $registro->municipio?->nombre,
+                    ]))
+                    ->wrap()
+                    ->width('18rem'),
                 TextColumn::make('tipo')
+                    ->label('Tipo')
                     ->badge()
-                    ->searchable(),
-                TextColumn::make('genero_musical')
-                    ->searchable(),
-                TextColumn::make('tarifa_desde')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('video_url')
-                    ->searchable(),
-                TextColumn::make('whatsapp')
-                    ->searchable(),
-                TextColumn::make('instagram_url')
-                    ->searchable(),
-                TextColumn::make('foto')
-                    ->searchable(),
-                TextColumn::make('municipio.nombre')
-                    ->label('Municipio')
-                    ->searchable(),
+                    ->searchable()
+                    ->visibleFrom('md'),
                 TextColumn::make('estado')
+                    ->label('Estado')
                     ->badge()
-                    ->searchable(),
+                    ->sortable(),
                 TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Ingreso')
+                    ->since()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->visibleFrom('lg'),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('estado')
                     ->label('Estado')
                     ->options(EstadoPublicacion::class),
             ])
             ->recordActions([
-                AccionesDeAprobacion::aprobarFichaDeBolsa(fn (Model $registro): string => route('artistas.show', $registro)),
-                AccionesDeAprobacion::devolver(),
-                EditAction::make()->label('Editar'),
+                ActionGroup::make([
+                    AccionesDeAprobacion::aprobarFichaDeBolsa(fn (Model $registro): string => route('artistas.show', $registro)),
+                    AccionesDeAprobacion::devolver(),
+                    EditAction::make()->label('Editar'),
+                ])
+                    ->label('Acciones')
+                    ->icon('heroicon-m-ellipsis-horizontal')
+                    ->tooltip('Acciones del artista'),
             ])
+            ->recordActionsColumnLabel('Acciones')
             ->toolbarActions([
                 BulkActionGroup::make([
                     AccionesDeAprobacion::aprobarFichasEnLote(
@@ -72,5 +74,15 @@ class ArtistasTable
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    /**
+     * @param  list<string|null>  $partes
+     */
+    private static function lineaSecundaria(array $partes): ?string
+    {
+        $linea = collect($partes)->filter()->implode(' · ');
+
+        return $linea === '' ? null : $linea;
     }
 }
