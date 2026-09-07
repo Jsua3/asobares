@@ -137,6 +137,56 @@ class BarraLateralTest extends TestCase
     }
 
     /**
+     * El material va en los pseudoelementos y nunca en el elemento. Un
+     * `backdrop-filter` en el elemento lo vuelve raíz de fondo y deja a todo lo
+     * que anide dentro sin página que desenfocar, así que el halo del ítem
+     * activo no funcionaría. Y el desenfoque solo se consume en el cajón: en
+     * escritorio la barra es `lg:sticky` y detrás no pasa contenido, así que
+     * ahí desenfocar es pagar compositor por nada (medido el 7 sep).
+     * Rotura: mover el `backdrop-filter` al elemento, o sacarlo de la media.
+     */
+    public function test_el_material_de_la_barra_vive_en_los_pseudoelementos(): void
+    {
+        $tema = $this->tema();
+        $elemento = $this->regla($tema, '.fi-sidebar');
+
+        $this->assertStringNotContainsString('backdrop-filter', $elemento, 'El desenfoque no puede ir en el elemento: lo vuelve raíz de fondo para todo lo que anide dentro.');
+        $this->assertStringNotContainsString('filter:', $elemento, 'Ningún filtro en el elemento, por la misma razón.');
+        $this->assertMatchesRegularExpression('/background:\s*transparent;/', $elemento, 'Filament da fondo opaco propio a la barra bajo `lg`: hay que ponerlo transparente explícitamente o el cajón queda opaco bajo el velo.');
+
+        $velo = $this->regla($tema, '.fi-sidebar::before');
+        $this->assertStringContainsString('var(--asb-admin-barra-velo)', $velo, 'El velo vive en `::before`.');
+
+        // Todo consumo del desenfoque tiene que caer dentro de la media del
+        // cajón: se cuenta en el archivo entero y dentro del bloque, y los dos
+        // números tienen que coincidir.
+        $cajon = $this->bloque($tema, '@media (max-width: 63.999rem)');
+        $enElArchivo = substr_count($tema, 'var(--asb-admin-barra-desenfoque)');
+        $enElCajon = substr_count($cajon, 'var(--asb-admin-barra-desenfoque)');
+
+        $this->assertGreaterThan(0, $enElCajon, 'El cajón no consume el desenfoque, que es el único sitio donde hay página que refractar.');
+        $this->assertSame($enElArchivo, $enElCajon, "El desenfoque se consume {$enElArchivo} veces y solo {$enElCajon} caen en la media del cajón: fuera de ahí no desenfoca nada y cuesta compositor.");
+    }
+
+    /**
+     * El límite de la región lo hacen una línea y una sombra, en luminancia. El
+     * filo luminiscente va encima como segunda capa: el rojo claro contra la
+     * página clara da 2,60:1 y el oscuro contra la oscura 1,93:1, así que
+     * ninguno de los dos llega solo a los 3:1 que pide un borde de región.
+     * Rotura: quitar la línea y dejar solo el filo.
+     */
+    public function test_el_limite_de_la_barra_no_lo_hace_solo_la_luz(): void
+    {
+        $tema = $this->tema();
+        $elemento = $this->regla($tema, '.fi-sidebar');
+
+        $this->assertStringContainsString('var(--asb-admin-barra-borde)', $elemento, 'La línea que separa la barra del contenido sale del token de borde, derivado de la luminancia.');
+
+        $capa = $this->regla($tema, '.fi-sidebar::after');
+        $this->assertStringContainsString('var(--asb-admin-barra-filo)', $capa, 'El filo luminiscente va en `::after`, encima del velo.');
+    }
+
+    /**
      * El contraste de la barra, recalculado leyendo los porcentajes del
      * archivo y no repitiéndolos aquí.
      *
@@ -221,6 +271,36 @@ class BarraLateralTest extends TestCase
                 $this->assertGreaterThan($escritorio, $cajon, 'En claro el velo de cierre de Filament solo llega al 50 %, así que el cajón necesita más velo que el escritorio.');
             }
         }
+    }
+
+    /**
+     * Todo lo que declara el archivo para `$selector`, juntando las reglas
+     * donde aparece como selector completo. Junta y no elige la primera porque
+     * el archivo usa listas (`.fi-sidebar::before, .fi-sidebar::after`) y
+     * quedarse con la primera coincidencia leería el bloque equivocado.
+     */
+    private function regla(string $css, string $selector): string
+    {
+        // Sin comentarios: si no, el bloque de comentario que precede a una
+        // regla entra en la captura del selector y nada casa.
+        $limpio = preg_replace('#/\*.*?\*/#s', '', $css);
+
+        preg_match_all('/([^{}]+)\{([^{}]*)\}/', $limpio, $reglas, PREG_SET_ORDER);
+
+        $cuerpos = [];
+
+        foreach ($reglas as $regla) {
+            foreach (explode(',', $regla[1]) as $suyo) {
+                if (trim($suyo) === $selector) {
+                    $cuerpos[] = $regla[2];
+                }
+            }
+        }
+
+        $this->assertNotEmpty($cuerpos, "no existe ninguna regla para {$selector}");
+
+        return implode('
+', $cuerpos);
     }
 
     /**
