@@ -2034,3 +2034,12 @@ Sua respondió D-35 en tres palabras: «fusiona la rama y empuja». `p1-navbar-m
 ### 41.7 Lo que queda abierto
 
 El teléfono real del directivo (Safari de iOS, la barra de direcciones, el rebote elástico, el teclado y la transparencia reducida) sigue siendo lo único que puede cerrar la barra. Dos cosas más quedan anotadas en la §13.3 de la spec: el foco se pierde al cruzar 64rem con una hoja abierta, y el móvil paga dos `backdrop-filter` permanentes sobre el video cuando el velo al 88 % deja al desenfoque un 12 % del píxel.
+
+
+## 42. EL PANEL DE INGRID ENTRA DETRÁS DE LA BARRA MÓVIL (7 sep 2026)
+
+Con `main` ya al día, Sua pidió traer `p2/acceso-asociados`, la rama donde Ingrid rehízo el panel de administración: identidad visual y tablero, páginas y tablas operativas unificadas, flujos de vacantes y gestión de imágenes, un conmutador de tema en la barra superior y la salida del panel hacia la portada. Cuatro commits del 6 sep sobre 31 archivos, todos del panel. No comparte un solo archivo con la barra móvil 2.1, así que la fusión no tuvo conflictos y el árbol resultante se probó entero antes de empujar.
+
+**Llegó con dos guardias en rojo, y no era cosa de la fusión: ya fallaban en su rama por separado.** La primera, `TipografiaTest`: el tema del panel había cambiado el tracking de los titulares de `-0.02em` a cero, y el plano es decisión registrada, porque allí la interfaz es densa y no hay titulares de 60 px. Volvió al bloque base, y las reglas por elemento que Ingrid añadió siguen mandando donde las hay. La segunda, `TemaClaroOscuroTest`: la bandeja de moderación de fotos usaba `text-gray-950`, `text-gray-600` y `text-gray-400`, grises de fábrica que no siguen el tema; pasan a `text-fuerte` y `text-tenue`, los tokens de las demás vistas. Los dos arreglos van en un commit aparte del de la fusión, con el porqué escrito, para que se le pueda enseñar a Ingrid sin que parezca que se le tocó el diseño sin avisar. Se vieron rojos antes, verdes después y rojos otra vez al deshacerlos.
+
+La suite sobre la fusión: 1.069 casos, 1.058 pasan, 11 omitidas, 0 fallos, 4.721 aserciones, 322 s. Lo que ninguna prueba cubre es el aspecto: la entrada al panel exige el segundo factor con la app TOTP, así que la sesión no pudo verlo con ojos y eso queda para Sua e Ingrid.
