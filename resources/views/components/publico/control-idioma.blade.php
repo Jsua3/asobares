@@ -1,5 +1,6 @@
 {{--
-    Chip de idioma de la barra de escritorio.
+    Chip de idioma de la barra, en los dos anchos: oculto por debajo de 64rem
+    hasta que exista la traducción (Parte II, D-M5).
 
     Se ve y NO funciona a propósito: el sitio no tiene traducción (no existe
     lang/, cero __() en las vistas, y la tabla de ajustes es monolingüe).
@@ -28,7 +29,12 @@
      x-on:click.outside="cerrar()"
      x-on:keydown.escape.window="cerrarYVolverAlFoco()"
      x-on:focusout="if (! $el.contains($event.relatedTarget)) cerrar()"
-     class="relative">
+     x-on:pointerdown.outside="cerrar()"
+     x-on:scroll.window.passive="cerrarSiSeDesplaza()"
+     x-on:pageshow.window="if ($event.persisted) cerrar()"
+     {{-- Oculto bajo 64rem (Parte II, D-M5): no funciona todavía y en 360 px
+          no sobra un control; sigue en el DOM para las guardias. --}}
+     class="relative max-lg:hidden">
 
     <button type="button"
             x-ref="disparador"

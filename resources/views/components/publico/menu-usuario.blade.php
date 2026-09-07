@@ -1,10 +1,14 @@
 {{--
     Desplegable de cuenta de la navbar.
 
-    El cambio de apariencia vive en la barra lateral (móvil) y en el control
-    de tema (escritorio); este menú queda solo para sesión, con el atajo al
-    sitio que corresponde: /mi-cuenta al dueño del establecimiento, /admin a
-    la secretaría y a la dirección.
+    El cambio de apariencia vive en el control de tema de la barra, en los
+    dos anchos; este menú queda solo para sesión, con el atajo al sitio que
+    corresponde: /mi-cuenta al dueño del establecimiento, /admin a la
+    secretaría y a la dirección.
+
+    Desde el 6 sep (Parte II, D-M8) el disparador es el chip con avatar,
+    nombre y rango en los dos anchos: en móvil es lo que Sua pidió en el
+    módulo superior con sesión, y toca abrir la misma hoja de siempre.
 --}}
 @php
     $usuario = auth()->user();
@@ -34,6 +38,9 @@
         (bool) $usuario?->esSubadmin() => 'Sec.',
         default => null,
     };
+
+    /* Lo que cabe en el chip: el rango largo sigue en la hoja. */
+    $rangoCorto = $rol === 'Establecimiento afiliado' ? 'Afiliado' : $rol;
 @endphp
 
 {{-- Es un «disclosure», no un menú ARIA: botón con aria-expanded más el panel
@@ -49,7 +56,13 @@
      {{-- Ya no es el último control de la barra: le siguen el tema y el
           idioma, así que tabular fuera tiene que cerrarlo como a los grupos. --}}
      x-on:focusout="if (! $el.contains($event.relatedTarget)) cerrar()"
-     class="relative">
+     x-on:pointerdown.outside="cerrar()"
+     x-on:scroll.window.passive="cerrarSiSeDesplaza()"
+     x-on:pageshow.window="if ($event.persisted) cerrar()"
+     {{-- `min-w-0` deja que el chip encoja; `max-lg:static` ancla la hoja al
+          módulo de cuenta y no al chip: anclada al chip, a 320 px desborda
+          4 px por la izquierda (Parte II §6.1). --}}
+     class="relative min-w-0 max-lg:static">
 
     <button type="button"
             x-ref="disparador"
@@ -58,16 +71,23 @@
             aria-controls="menu-cuenta"
             {{-- Padding negativo óptico: `p-1` lleva el botón a 44x44 y `-m-1`
                  devuelve al flujo los 36x36 del avatar, que es marca y no se
-                 puede agrandar. El nombre al lado es escritorio: en móvil el
-                 panel ya lo escribe. --}}
-            class="pulsable -m-1 flex items-center gap-2 rounded-full p-1 text-tenue hover:text-tinta">
-        <span class="sr-only">Configuración y sesión de {{ $usuario->name }}</span>
+                 puede agrandar. El nombre y el rango van al lado en los dos
+                 anchos (Parte II, D-M8); `min-w-0` deja que el texto encoja y
+                 se trunque en vez de empujar al tema fuera de la bandeja. --}}
+            class="pulsable -m-1 flex items-center gap-2 rounded-full p-1 min-w-0 text-tenue hover:text-tinta">
+        {{-- El texto visible va PRIMERO y completo en el nombre accesible (WCAG
+             2.5.3, la regla del chip de idioma): «pulsa Sec. Natalia» tiene que
+             casar por prefijo. --}}
+        <span class="sr-only">@if ($prefijoRol){{ $prefijoRol }} @endif{{ $usuario->name }}@if ($rol), {{ $rol }}@endif: configuración y sesión</span>
         <span aria-hidden="true"
-              class="flex h-9 w-9 items-center justify-center rounded-full bg-marca-500 text-xs font-bold tracking-wide text-white">
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-marca-500 text-xs font-bold tracking-wide text-white">
             {{ $iniciales }}
         </span>
-        <span aria-hidden="true" class="hidden max-w-40 truncate pr-1 text-sm font-medium lg:block">
-            @if ($prefijoRol)<span class="text-apagado">{{ $prefijoRol }}</span> @endif{{ $usuario->name }}
+        {{-- Se trunca por CSS y nunca en el servidor (cortar el nombre daría
+             «Secretaría del»). El nombre entero sigue en la hoja. --}}
+        <span aria-hidden="true" class="min-w-0 max-w-40 pr-1 text-left">
+            <span class="block truncate text-sm font-medium">@if ($prefijoRol)<span class="text-apagado">{{ $prefijoRol }}</span> @endif{{ $usuario->name }}</span>
+            <span class="block truncate text-2xs text-tenue lg:hidden">{{ $rangoCorto }}</span>
         </span>
     </button>
 

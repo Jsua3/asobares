@@ -406,16 +406,15 @@
      * desplazar y se va al volver arriba, que es lo que hace que la barra se
      * lea como algo que flota sobre el contenido y no como parte del papel.
      */
+    /* Sin opacidad ni desplazamiento: solo servían a la clase de ocultación
+       del cromo, que ninguna vista usaba, y con ellos el header era bloque
+       contenedor de todo descendiente fijo: el módulo inferior del móvil se
+       pegaba a la cabecera en vez de al viewport (Parte II §3.3). */
     .cromo {
         background-color: transparent;
         box-shadow: none;
         isolation: isolate;
-        opacity: 1;
-        transform: translateY(0);
-        transition:
-            box-shadow var(--duracion-entrada) var(--ease-color),
-            opacity var(--duracion-panel) var(--ease-out),
-            transform var(--duracion-panel) var(--ease-cajon);
+        transition: box-shadow var(--duracion-entrada) var(--ease-color);
     }
 
     /* El header es fijo y no sticky desde la portada a pantalla completa
@@ -427,8 +426,11 @@
         top: 0;
     }
 
-    .cromo-fijo + .tema-lateral + main > section:first-child:not(.hero-portada) {
-        padding-top: 7rem;
+    /* Hermano general y no adyacente: la barra lateral de tema ya no está
+       entre el header y main (6 sep), y el apartado no puede depender del
+       orden del layout. Con `viewport-fit=cover` la muesca también se aparta. */
+    .cromo-fijo ~ main > section:first-child:not(.hero-portada) {
+        padding-top: calc(7rem + env(safe-area-inset-top, 0px));
     }
 
     /*
@@ -464,14 +466,34 @@
             box-shadow var(--duracion-entrada) var(--ease-color);
     }
 
-    /* Móvil intacto: en `main` la barra era un vidrio a todo lo ancho a
-       cualquier tamaño (la bandeja del cromo), y al mover el vidrio a la píldora
-       de escritorio el móvil se quedó transparente sin que nadie lo midiera:
-       el contenido pasaba por detrás del logo. Y desde la portada a pantalla
-       completa el header es fijo: sin esto la hamburguesa se perdía sobre el
-       video. Aquí vuelve, con la misma receta que tenía. */
+    /* El módulo superior del móvil (Parte II §6.1): la bandeja con su alto por
+       token y el vidrio en su pseudoelemento, porque un vidrio no es ancestro
+       de otro vidrio (raíz de fondo, Filter Effects 2): las hojas que cuelgan
+       de la bandeja tienen que desenfocar la página y no el interior de la
+       bandeja. El header es fijo desde la portada a pantalla completa. El
+       resto del CSS móvil va en un segundo bloque, tras el de escritorio. */
     @media (max-width: 63.999rem) {
+        /* La raya roja del apoyo es del header y la bandeja es `relative` con
+           z-index 2 y aislamiento: sin z-index propio la raya se pintaba bajo
+           el vidrio al 88 % y no se veía (los dos bordes en 48,0 el 6 sep). */
+        .cromo::before {
+            z-index: 3;
+        }
+
         .bandeja {
+            z-index: 2;
+            height: var(--asb-alto-modulo-superior);
+            transition:
+                height var(--duracion-estado) var(--ease-rebote-suave),
+                gap var(--duracion-estado) var(--ease-rebote-suave);
+        }
+
+        .bandeja::before {
+            content: '';
+            pointer-events: none;
+            position: absolute;
+            inset: calc(-1 * env(safe-area-inset-top, 0px)) calc(-1 * env(safe-area-inset-right, 0px)) 0 calc(-1 * env(safe-area-inset-left, 0px));
+            z-index: -1;
             background-color: var(--asb-cromo-velo);
             -webkit-backdrop-filter: var(--asb-cromo-desenfoque);
             backdrop-filter: var(--asb-cromo-desenfoque);
@@ -589,11 +611,6 @@
 
     .cromo-apoyado {
         box-shadow: none;
-    }
-
-    .cromo-oculto {
-        opacity: 0;
-        transform: translateY(calc(-100% - 10px));
     }
 
     .nav-enlace {
@@ -760,12 +777,13 @@
      * Hoja flotante: los paneles de los desplegables. Sombra más profunda que
      * el cromo porque están más cerca del ojo, y con sus dos recetas — en
      * oscuro la profundidad la da el filo de luz del `inset`, no la sombra,
-     * que sobre negro no se ve.
+     * que sobre negro no se ve. El velo es token desde el 6 sep: sólido bajo
+     * transparencia reducida y bajo más contraste, que antes no lo alcanzaban.
      */
     .hoja-flotante {
         background:
             radial-gradient(16rem circle at 18% 0%, rgb(238 65 55 / 0.09), transparent 54%),
-            color-mix(in oklab, var(--asb-superficie) 84%, transparent);
+            var(--asb-hoja-velo);
         border: 1px solid var(--asb-hoja-borde);
         box-shadow:
             var(--asb-hoja-sombra),
@@ -774,87 +792,257 @@
         backdrop-filter: var(--asb-cromo-desenfoque);
     }
 
-    .tema-lateral {
-        filter: drop-shadow(0 18px 36px rgb(11 9 10 / 0.12));
-    }
-
-    .tema-lateral__cuerpo {
-        display: flex;
-        width: 3.5rem;
-        min-height: 3.5rem;
-        align-items: center;
-        justify-content: center;
-        gap: 0.25rem;
-        overflow: hidden;
-        padding: 0.375rem;
-        border: 1px solid var(--asb-linea);
-        border-radius: 999px;
-        background:
-            radial-gradient(9rem circle at 50% 0%, rgb(238 65 55 / 0.12), transparent 58%),
-            var(--asb-cromo-velo);
-        -webkit-backdrop-filter: var(--asb-cromo-desenfoque);
-        backdrop-filter: var(--asb-cromo-desenfoque);
-        box-shadow:
-            inset 0 1px 0 rgb(255 255 255 / 0.22),
-            0 12px 34px rgb(238 65 55 / 0.08);
-        transition:
-            width var(--duracion-cromo) var(--ease-cajon),
-            min-height var(--duracion-cromo) var(--ease-cajon),
-            box-shadow var(--duracion-boton) var(--ease-out);
-    }
-
-    .tema-lateral__cuerpo--abierto {
-        width: 6.875rem;
-        box-shadow:
-            inset 0 1px 0 rgb(255 255 255 / 0.26),
-            0 16px 42px rgb(238 65 55 / 0.12);
-    }
-
-    .tema-lateral__boton {
-        display: flex;
-        min-width: 2.75rem;
-        min-height: 2.75rem;
-        align-items: center;
-        justify-content: center;
-        border-radius: 999px;
-        color: var(--asb-apagado);
-        opacity: 1;
-        transition:
-            opacity var(--duracion-boton) var(--ease-color),
-            color var(--duracion-boton) var(--ease-color),
-            background-color var(--duracion-boton) var(--ease-color),
-            transform var(--duracion-instante) var(--ease-out);
-    }
-
-    .tema-lateral__boton--activo {
-        color: var(--asb-acento);
-        background-color: rgb(238 65 55 / 0.13);
-        box-shadow: inset 0 0 0 1px rgb(238 65 55 / 0.28);
-    }
-
-    .tema-lateral__boton--inactivo:hover {
-        color: var(--asb-tinta);
-        background-color: var(--asb-superficie-alta);
-    }
-
-    .tema-lateral__boton--oculto {
-        min-width: 0;
-        width: 0;
-        opacity: 0;
-        pointer-events: none;
-        transform: scale(0.88);
-    }
-
-    @media (min-width: 40rem) {
-        .tema-lateral__cuerpo {
-            flex-direction: column;
-            width: 3.5rem;
-            min-height: 3.5rem;
+    /*
+     * La barra móvil en dos módulos (Parte II de la spec). Va DESPUÉS del
+     * bloque de escritorio y de la puerta táctil a propósito: las guardias
+     * leen la primera regla de cada selector. Ningún módulo lleva nombre de
+     * transición de vista: un elemento con nombre es raíz de fondo (View
+     * Transitions 1, §2.1.1) y dejaría a sus hojas sin página que desenfocar.
+     */
+    @media (max-width: 63.999rem) {
+        /* El estado cambia DOS tokens y nada más; toda la geometría los lee. */
+        .cromo[data-estado="scroll"] {
+            --asb-alto-modulo-superior: var(--asb-alto-modulo-superior-compacto);
+            --asb-alto-modulo-inferior: var(--asb-alto-modulo-inferior-compacto);
         }
 
-        .tema-lateral__cuerpo--abierto {
-            width: 3.5rem;
-            min-height: 6.875rem;
+        /* Los insets van aquí y no en la bandeja: su px-4 es utilidad y ganaría
+           a cualquier relleno de componente. */
+        .cromo-fijo {
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
+        }
+
+        .bandeja {
+            touch-action: manipulation;
+        }
+
+        /* El cruce del logo: la D6 de escritorio, sin `atencion`, y además con
+           sesión (D-M7): el logotipo no cabe junto a nombre, rango y tema. */
+        [data-estado="scroll"] .logo-doble,
+        .marca-compacta .logo-doble {
+            max-width: 2.9rem;
+        }
+
+        [data-estado="scroll"] .logo-doble__completo,
+        .marca-compacta .logo-doble__completo {
+            opacity: 0;
+            scale: var(--asb-escala-isotipo);
+        }
+
+        [data-estado="scroll"] .logo-doble__isotipo,
+        .marca-compacta .logo-doble__isotipo {
+            opacity: 1;
+            scale: 1;
+        }
+
+        /* Por debajo de 22.5rem el logotipo no cabe con la pastilla y el tema:
+           isotipo siempre, por ancho y no por recorte. */
+        @media (max-width: 22.499rem) {
+            .logo-doble {
+                max-width: 2.9rem;
+            }
+
+            .logo-doble__completo {
+                opacity: 0;
+                scale: var(--asb-escala-isotipo);
+            }
+
+            .logo-doble__isotipo {
+                opacity: 1;
+                scale: 1;
+            }
+        }
+
+        /* Módulo inferior. Fijo al viewport, z-index dentro del contexto del
+           header. El alto lo lleva la fila (.pestanas); el nav solo paga la
+           zona segura, fuera de la caja de toque y fuera de toda transición:
+           en iOS el inset salta de 0 a 34 px a mitad de gesto. Sin recorte de
+           pintado: la hoja cuelga fuera de la caja. */
+        .modulo-inferior {
+            position: fixed;
+            inset-inline: 0;
+            bottom: 0;
+            z-index: 1;
+            isolation: isolate;
+            display: flex;
+            align-items: stretch;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
+            touch-action: manipulation;
+            /* Sin valores iniciales explícitos: un `translate` distinto de none
+               haría al módulo bloque contenedor de cualquier fixed que cuelgue
+               de él, la misma trampa que se le quitó al header (6 sep). */
+            transition:
+                translate var(--duracion-panel) var(--ease-cajon),
+                opacity var(--duracion-salida) var(--ease-color),
+                visibility 0s linear 0s;
+        }
+
+        .pestanas {
+            height: var(--asb-alto-modulo-inferior);
+            transition: height var(--duracion-estado) var(--ease-rebote-suave);
+        }
+
+        /* El vidrio, en el pseudoelemento. Sombra en box-shadow, nunca por
+           filtro. El filo de luz arriba: es el canto que mira al contenido. */
+        .modulo-inferior::before {
+            content: '';
+            pointer-events: none;
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background-color: var(--asb-cromo-velo);
+            -webkit-backdrop-filter: var(--asb-cromo-desenfoque);
+            backdrop-filter: var(--asb-cromo-desenfoque);
+            box-shadow:
+                var(--asb-cromo-apoyo-inferior),
+                inset 0 1px 0 rgb(255 255 255 / 0.26);
+        }
+
+        /* La raya roja de apoyo en el canto superior, encendida por el mismo
+           cromo-apoyado que la del superior. */
+        .modulo-inferior::after {
+            content: '';
+            pointer-events: none;
+            position: absolute;
+            inset: 0 0 auto;
+            height: 1px;
+            opacity: 0;
+            background: linear-gradient(90deg, transparent, rgb(238 65 55 / 0.36), transparent);
+            transition: opacity var(--duracion-boton) var(--ease-color);
+        }
+
+        .cromo-apoyado .modulo-inferior::after {
+            opacity: 1;
+        }
+
+        /* Retirada ante el teclado virtual: visibilidad y fundido siempre; el
+           desplazamiento es token y se anula bajo movimiento reducido. */
+        .cromo[data-teclado="abierto"] .modulo-inferior {
+            visibility: hidden;
+            opacity: 0;
+            translate: 0 var(--asb-retirada-barra);
+            transition:
+                translate var(--duracion-panel) var(--ease-cajon),
+                opacity var(--duracion-salida) var(--ease-color),
+                visibility 0s linear var(--duracion-panel);
+        }
+
+        .pestana {
+            row-gap: 0.1875rem;
+        }
+
+        /* El rótulo pliega por pista de rejilla, nunca por `height`. El texto no
+           se recorta (WCAG 1.4.12): la reserva de dos líneas sale de la escala
+           y `overflow-wrap` parte antes que esconder. */
+        .pestana__rotulo {
+            display: grid;
+            grid-template-rows: 1fr;
+            min-height: var(--asb-alto-rotulo-pestana);
+            opacity: 1;
+            transition:
+                grid-template-rows var(--duracion-estado) var(--ease-rebote-suave),
+                min-height var(--duracion-estado) var(--ease-rebote-suave),
+                opacity var(--duracion-entrada) var(--ease-color);
+        }
+
+        .pestana__rotulo > span {
+            min-height: 0;
+            overflow: hidden;
+            overflow-wrap: anywhere;
+        }
+
+        [data-estado="scroll"] .pestana__rotulo {
+            grid-template-rows: 0fr;
+            min-height: 0;
+            opacity: 0;
+            transition:
+                grid-template-rows var(--duracion-estado) var(--ease-rebote-suave),
+                min-height var(--duracion-estado) var(--ease-rebote-suave),
+                opacity var(--duracion-salida) var(--ease-color);
+        }
+
+        /* La hoja que sube: solo el resplandor al canto que mira a la barra. En
+           vertical NO es contenedor de scroll: desplazarse es cerrar. */
+        .hoja-inferior {
+            background-image: radial-gradient(16rem circle at 18% 100%, rgb(238 65 55 / 0.09), transparent 54%);
+        }
+
+        /* Apartado para lo fijo abajo (el pie es hermano de main) y para la
+           muesca en apaisado; el scroll-padding para anclas y foco. Se reserva
+           la altura inicial: compacta, sobran 20 px de aire al final. */
+        body {
+            padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
+            padding-bottom: calc(var(--asb-alto-modulo-inferior) + env(safe-area-inset-bottom, 0px));
+        }
+
+        html {
+            scroll-padding-top: calc(var(--asb-alto-modulo-superior) + env(safe-area-inset-top, 0px) + 2.5rem);
+            scroll-padding-bottom: calc(var(--asb-alto-modulo-inferior) + env(safe-area-inset-bottom, 0px) + 1rem);
+        }
+
+        /* Tableta vertical: cinco pestañas de 150 px se leen como una regla
+           vacía. La fila se acota y se centra; la banda sigue a todo lo ancho. */
+        @media (min-width: 48rem) {
+            .pestanas {
+                max-width: 36rem;
+            }
+        }
+
+        /* Teléfono apaisado: compacto de nacimiento (D-M14); aquí sí las hojas
+           pueden desbordar y desplazan por dentro sin perder el zoom. Sobre el
+           header y no sobre :root: los altos nacen en :root en tokens.css, fuera
+           de toda capa, y una regla de esta capa sobre :root perdería siempre. */
+        @media (orientation: landscape) and (max-height: 30rem) {
+            .cromo {
+                --asb-alto-modulo-superior: var(--asb-alto-modulo-superior-compacto);
+                --asb-alto-modulo-inferior: var(--asb-alto-modulo-inferior-compacto);
+            }
+
+            .pestana__rotulo {
+                grid-template-rows: 0fr;
+                min-height: 0;
+                opacity: 0;
+            }
+
+            .hoja-flotante {
+                max-height: calc(100svh - var(--asb-alto-modulo-superior) - var(--asb-alto-modulo-inferior) - env(safe-area-inset-bottom, 0px) - 1.5rem);
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                touch-action: pan-y pinch-zoom;
+            }
+        }
+
+        /* Viewport muy corto (zoom al 400 %): dos barras fijas se comían 96 de
+           180 px. Sacar del fijo SOLO al inferior no lo devolvía al flujo del
+           documento: sigue siendo hijo del header, así que se volvía una
+           segunda fila de una cabecera fija de 96 px, justo lo que se quería
+           evitar (medido a 320x180 el 6 sep). Sale del fijo el header entero y
+           la barra se va con el desplazamiento; el inferior queda `relative`
+           para seguir siendo el bloque contenedor de sus hojas. */
+        @media (max-height: 20rem) {
+            .cromo-fijo {
+                position: static;
+            }
+
+            .modulo-inferior {
+                position: relative;
+            }
+
+            body {
+                padding-bottom: 0;
+            }
+
+            /* Con la barra en el flujo no hay nada que apartar ni bajo un ancla
+               ni bajo la primera sección. */
+            html {
+                scroll-padding-top: 0;
+            }
+
+            .cromo-fijo ~ main > section:first-child:not(.hero-portada) {
+                padding-top: 0;
+            }
         }
     }
 
@@ -1246,11 +1434,6 @@
 
     html {
         scroll-behavior: auto !important;
-    }
-
-    .cromo-oculto {
-        opacity: 1;
-        transform: none;
     }
 }
 

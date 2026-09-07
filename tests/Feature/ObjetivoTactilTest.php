@@ -85,8 +85,8 @@ class ObjetivoTactilTest extends TestCase
      * el área efectiva que salió. Si alguien la recorta, esto lo dice y dice
      * cuánto se pierde.
      *
-     * Seis de estas cadenas perdieron su `transition-colors` —y las filas del
-     * menú móvil su `hover:bg-superficie-alta`— al repartirse los portadores de
+     * Seis de estas cadenas perdieron su `transition-colors` —y las filas de
+     * los desplegables su `hover:bg-superficie-alta`— al repartirse los portadores de
      * acuse: en `@layer utilities` esas utilidades pisan al portador de
      * `@layer components` y con ellas moría el `transition-duration: 0ms` del
      * `:active`. Lo que esta clase vigila es la GEOMETRÍA (`py-3`, `min-h-11`,
@@ -104,7 +104,7 @@ class ObjetivoTactilTest extends TestCase
             'navbar, logo' => [
                 'components/publico/navbar.blade.php',
                 '-my-1.5 flex shrink-0 items-center py-1.5',
-                'el logo mide 32 px de alto en móvil; sin el py-1.5 el objetivo vuelve a 32x175',
+                'el logo mide 28 px de alto en móvil (h-7): el py-1.5 y el min-h-11 de al lado lo llevan a 44x153,5, y a 44x46 con el isotipo (6 sep)',
             ],
             'navbar, enlaces de sección' => [
                 'components/publico/navbar.blade.php',
@@ -118,22 +118,20 @@ class ObjetivoTactilTest extends TestCase
             ],
             'navbar, «Afíliate»' => [
                 'components/publico/navbar.blade.php',
-                "after:absolute after:inset-x-0 after:-inset-y-1 after:content-['']",
-                'es la única pastilla pintada de la barra: crece el área, no el dibujo (37,7 → 45,7)',
-            ],
-            'navbar, hamburguesa' => [
-                'components/publico/navbar.blade.php',
-                '-m-0.5 rounded-lg p-2.5',
-                'p-2 daba 40x40; p-2.5 da 44,7x44,7 medidos y -m-0.5 devuelve los 40 al flujo',
-            ],
-            'navbar, filas del menú móvil' => [
-                'components/publico/navbar.blade.php',
-                'rounded-lg px-3 py-3 text-sm text-tinta',
-                'py-2.5 dejaba la fila en 41,7 px',
+                "after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-['']",
+                'es la única pastilla pintada de la barra: crece el área, no el dibujo. 33,7 de pastilla y 45,7 de área medidos el 6 sep a 1440 y a 390; con 4 px por lado daban 42',
             ],
             // Los dos grupos que reagruparon la barra. Nacieron cumpliendo:
             // misma geometría que los enlaces sueltos de al lado, para que el
             // disparador mida lo mismo y la barra no cambie de alto por él.
+            // La fila de pie de la hoja («Entrar como afiliado»): es el único
+            // acceso del anónimo a su cuenta desde la barra del teléfono y su
+            // cadena es distinta de la de los enlaces normales del grupo.
+            'menu-grupo, fila de pie de la hoja' => [
+                'components/publico/menu-grupo.blade.php',
+                'fila-pulsable block rounded-lg px-3 py-3 text-sm text-suave hover:text-fuerte',
+                '46 px de alto medidos a 390 el 6 sep, los mismos que las filas de arriba',
+            ],
             'navbar, disparador de grupo' => [
                 'components/publico/menu-grupo.blade.php',
                 '-my-1 inline-flex items-center gap-1 rounded-lg px-3 py-3 text-sm',
@@ -142,12 +140,12 @@ class ObjetivoTactilTest extends TestCase
             'navbar, filas del desplegable de grupo' => [
                 'components/publico/menu-grupo.blade.php',
                 'fila-pulsable block rounded-lg px-3 py-3 text-sm',
-                'medidas 45,7 x 206 px dentro del panel de 224',
+                'medidas 45,7 x 206 px dentro del panel de 224; en la hoja del móvil, 46 x 356 a 390 (6 sep)',
             ],
             'menú de usuario, disparador' => [
                 'components/publico/menu-usuario.blade.php',
                 '-m-1 flex items-center gap-2 rounded-full p-1',
-                'el avatar es marca y mide 36x36: el p-1 lo lleva a 44,7x44,7 sin tocarlo',
+                'el avatar es marca y mide 36x36: el p-1 lo lleva a 44,7x44,7 sin tocarlo; con el nombre y el rango al lado (6 sep) el chip mide 47,8 de alto y 212 de ancho a 390',
             ],
             'menú de usuario, filas' => [
                 'components/publico/menu-usuario.blade.php',
@@ -187,6 +185,29 @@ class ObjetivoTactilTest extends TestCase
                 'components/publico/navbar.blade.php',
                 'indicador-mas -my-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-2 py-3',
                 'solo se ve con puntero grueso y es el toque más natural: 44x44 medidos en iPad Pro 11 landscape (antes 32x40)',
+            ],
+            // La barra móvil en dos módulos (6 sep 2026, Parte II): medidos en
+            // Chromium a 390x844 y 320x568 con toques por CDP, esquinas del
+            // cuadrado de 44 incluidas (`elementFromPoint` en las cuatro).
+            'navbar, pestaña directa del módulo inferior' => [
+                'components/publico/navbar.blade.php',
+                'pestana fila-pulsable flex min-h-11 flex-1 flex-col items-center justify-center rounded-xl px-0.5',
+                '79,6x68 a 390 y 65,6x68 a 320 en inicial, 48 de alto en scroll; las cuatro esquinas del cuadrado de 44 responden',
+            ],
+            'navbar, pestaña de grupo del módulo inferior' => [
+                'components/publico/menu-grupo.blade.php',
+                'pestana fila-pulsable flex min-h-11 w-full flex-col items-center justify-center rounded-xl px-0.5',
+                '75,6x68 a 390 y 61,6x68 a 320; mismas esquinas',
+            ],
+            'navbar, logo con mínimo de 44' => [
+                'components/publico/navbar.blade.php',
+                "'min-h-11',",
+                'el enlace medía 40 de alto con el logo de 28; con el mínimo, 44 en los dos anchos',
+            ],
+            'menú de usuario, rango del chip' => [
+                'components/publico/menu-usuario.blade.php',
+                'block truncate text-2xs text-tenue lg:hidden',
+                'el segundo renglón del chip: con él el disparador mide 47,8 de alto, y la hoja de cuenta cabe a 320 (de 48 a 304) anclada al módulo',
             ],
             // Formularios. `min-h-11` y no `py-3`: el control mide 43,7 px y
             // solo le faltan 0,3, así que el mínimo no mueve ni un campo.

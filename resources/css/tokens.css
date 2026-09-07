@@ -201,8 +201,7 @@
     --duracion-boton: 140ms; /* hover, color */
     --duracion-salida: 160ms; /* leave de desplegables */
     --duracion-entrada: 200ms; /* enter de desplegables, alertas */
-    --duracion-panel: 240ms; /* menú móvil */
-    --duracion-cromo: 520ms; /* apertura de la barra pública */
+    --duracion-panel: 240ms; /* capas que aparecen o se retiran: el revelado de la portada, la capa del video y el módulo inferior ante el teclado */
     --duracion-rebote: 520ms; /* asentamiento de un resorte; el movimiento «llega» hacia los 250 */
     --duracion-estado: 620ms; /* cambio de estado de la barra de escritorio: el mismo resorte, un punto más lento (Sua, 5 sep) */
 
@@ -212,7 +211,6 @@
      * borde sigue fundiendo y lo único que desaparece es el movimiento.
      */
     --asb-levante: -2px;
-    --asb-desplazamiento-panel: -4%;
     --asb-desplazamiento-alerta: -25%;
 
     /*
@@ -268,6 +266,35 @@
     --asb-escala-popover: 0.92;
     --asb-desplazamiento-popover: -6px;
     --asb-escala-isotipo: 0.9;
+
+    /*
+     * Barra móvil en dos módulos (Parte II de la spec). Los cuatro altos son
+     * LAYOUT, como --asb-separacion-modulos: no se anulan bajo movimiento
+     * reducido (allí simplemente no existe el estado scroll). El estado
+     * `scroll` los cambia reasignando los dos primeros sobre el header.
+     */
+    --asb-alto-modulo-superior: 3.5rem; /* 56 px: lo que la cabecera mide hoy */
+    --asb-alto-modulo-superior-compacto: 3rem; /* 48 px: un control de 44 con 2 px por lado */
+    --asb-alto-modulo-inferior: 4.25rem; /* 68 px: icono de 24, 3 de aire y rótulo a dos líneas de la escala */
+    --asb-alto-modulo-inferior-compacto: 3rem; /* 48 px: icono solo, pestaña de 44 en flujo */
+    --asb-alto-rotulo-pestana: calc(2 * 1.65 * 0.6875rem); /* dos líneas de --text-2xs, sin leading suelto */
+
+    /* Movimiento: la hoja sube desde la barra (el gemelo positivo de
+       --asb-desplazamiento-popover) y la barra se retira ante el teclado.
+       Los dos se anulan abajo. */
+    --asb-desplazamiento-hoja: 6px;
+    --asb-retirada-barra: 100%;
+
+    /* Velo de las hojas, una sola receta: `.dark` es el propio <html>, así
+       que el var() de --asb-superficie ya resuelve al tema. Hasta hoy
+       .hoja-flotante lo cableaba y la transparencia reducida no lo alcanzaba. */
+    --asb-hoja-velo: color-mix(in oklab, var(--asb-superficie) 84%, transparent);
+
+    /* Apoyo de un módulo que cuelga del canto INFERIOR: la receta del cromo,
+       invertida. Dos recetas, como --asb-cromo-apoyo. */
+    --asb-cromo-apoyo-inferior:
+        0 -1px 0 rgb(11 9 10 / 0.07),
+        0 -8px 24px rgb(11 9 10 / 0.06);
 }
 
 .dark {
@@ -348,6 +375,27 @@
 
     --asb-vidrio-velo: color-mix(in oklab, var(--asb-superficie) 55%, transparent);
     --asb-luz-ambiente: rgb(238 65 55 / 0.18);
+
+    --asb-cromo-apoyo-inferior:
+        0 -1px 0 rgb(255 255 255 / 0.1),
+        0 -8px 28px rgb(0 0 0 / 0.55);
+}
+
+/*
+ * El velo del móvil sostiene texto de 11 px sobre fotos (los rótulos de las
+ * pestañas y el rango del chip): mínimo calculado contra la imagen más
+ * hostil, no gusto, como --asb-velo-hero. `NavbarMovilTest` lo recalcula
+ * leyendo este archivo. El desenfoque no cambia hasta medirlo con el video
+ * de la portada corriendo (D-M18).
+ */
+@media (max-width: 63.999rem) {
+    :root {
+        --asb-cromo-velo: color-mix(in oklab, var(--asb-fondo) 88%, transparent);
+    }
+
+    :root.dark {
+        --asb-cromo-velo: color-mix(in oklab, var(--asb-fondo) 85%, transparent);
+    }
 }
 
 /*
@@ -367,6 +415,7 @@
         --asb-cromo-desenfoque: none;
         --asb-vidrio-velo: var(--asb-superficie);
         --asb-vidrio-desenfoque: none;
+        --asb-hoja-velo: var(--asb-superficie);
     }
 }
 
@@ -377,6 +426,11 @@
         --asb-tenue: #1b191a;
         --asb-apagado: #282628;
         --asb-hoja-borde: rgb(11 9 10 / 0.42);
+        /* Quien pide más contraste no lee 11 px a través de una foto: el
+           material se vuelve sólido, como bajo transparencia reducida. */
+        --asb-cromo-velo: var(--asb-fondo);
+        --asb-cromo-desenfoque: none;
+        --asb-hoja-velo: var(--asb-superficie);
     }
 
     :root.dark {
@@ -385,6 +439,9 @@
         --asb-tenue: #e8e5e6;
         --asb-apagado: #d0cccd;
         --asb-hoja-borde: rgb(255 255 255 / 0.38);
+        --asb-cromo-velo: var(--asb-fondo);
+        --asb-cromo-desenfoque: none;
+        --asb-hoja-velo: var(--asb-superficie);
     }
 }
 
@@ -445,7 +502,6 @@
 @media (prefers-reduced-motion: reduce) {
     :root {
         --asb-levante: 0px;
-        --asb-desplazamiento-panel: 0%;
         --asb-desplazamiento-alerta: 0%;
 
         /* Se anulan los dos encogimientos y NADA más de los acuses: la
@@ -465,6 +521,11 @@
         --asb-escala-popover: 1;
         --asb-desplazamiento-popover: 0px;
         --asb-escala-isotipo: 1;
+
+        /* Barra móvil: sube la hoja y se retira la barra, movimiento; los
+           altos son layout y se quedan. */
+        --asb-desplazamiento-hoja: 0px;
+        --asb-retirada-barra: 0%;
 
         /* El rebote ES geometría: sin sobreimpulso. */
         --ease-rebote-suave: var(--ease-cajon);

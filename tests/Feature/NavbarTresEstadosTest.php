@@ -12,9 +12,11 @@ use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
- * La barra pública de escritorio en tres estados (spec:
- * docs/ingenieria/navbar-tres-estados-diseno.md). Cada prueba nombra en su
- * docblock la rotura que la pone roja; se hizo antes de darla por buena.
+ * La barra pública: de escritorio en tres estados (Parte I de la spec
+ * docs/ingenieria/navbar-tres-estados-diseno.md) y, desde el 6 sep, la del
+ * móvil en dos módulos (Parte II; sus guardias viven en NavbarMovilTest).
+ * Cada prueba nombra en su docblock la rotura que la pone roja; se hizo
+ * antes de darla por buena.
  */
 class NavbarTresEstadosTest extends TestCase
 {
@@ -167,9 +169,10 @@ class NavbarTresEstadosTest extends TestCase
     }
 
     /**
-     * Rotura: quitar el atributo `media` de la precarga del isotipo.
+     * Rotura: devolver el `media` a la precarga: el móvil cruza al isotipo en
+     * scroll y con sesión, y sin precarga el primer cruce parpadea.
      */
-    public function test_el_isotipo_existe_se_pinta_doble_y_se_precarga_solo_en_escritorio(): void
+    public function test_el_isotipo_existe_se_pinta_doble_y_se_precarga_en_los_dos_anchos(): void
     {
         $this->assertFileExists(public_path('img/monograma-asobares.png'));
 
@@ -185,9 +188,9 @@ class NavbarTresEstadosTest extends TestCase
         $simple = Blade::render('<x-publico.logo alto="h-8" />');
         $this->assertStringNotContainsString('logo-doble', $simple, 'sin `doble` el componente rinde lo de siempre');
 
-        $this->get('/contacto')
-            ->assertOk()
-            ->assertSee('rel="preload" as="image" href="http://localhost:8000/img/monograma-asobares.png" media="(min-width: 64rem)"', false);
+        $html = $this->get('/contacto')->assertOk()->getContent();
+        $this->assertStringContainsString('rel="preload" as="image" href="http://localhost:8000/img/monograma-asobares.png">', $html, 'el móvil cruza al isotipo en scroll y con sesión: se precarga en los dos anchos');
+        $this->assertStringNotContainsString('monograma-asobares.png" media=', $html);
     }
 
     /**
@@ -367,9 +370,8 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringContainsString('}, 280);', $navbar);
         $this->assertStringContainsString("if (! \$event.target.closest('a, button')) alternarAtencion()", $navbar);
 
-        // Lo que el panel móvil sigue exigiendo, literal.
-        $this->assertStringContainsString('x-on:keydown.escape.window="menuMovil = false"', $navbar);
-        $this->assertStringContainsString('x-on:click.outside="menuMovil = false"', $navbar);
+        // El panel móvil se retiró el 6 sep (Parte II): su nombre no vuelve.
+        $this->assertStringNotContainsString('menuMovil', $navbar);
         $this->assertStringNotContainsString('cromo-compacto', $navbar);
         $this->assertStringNotContainsString('cromo-expandido', $navbar);
 
@@ -391,7 +393,12 @@ class NavbarTresEstadosTest extends TestCase
         libxml_clear_errors();
         $xpath = new \DOMXPath($dom);
 
-        $this->assertSame(1, $xpath->query('//nav')->length, 'una sola <nav>');
+        // Dos <nav> desde el 6 sep (Parte II, D-M9): la primera es la bandeja,
+        // que bajo 64rem solo expone logo y cuenta; la segunda es la navegación
+        // real del teléfono. Los nombres dicen la verdad por ancho.
+        $this->assertSame(2, $xpath->query('//nav')->length, 'la bandeja y el módulo inferior');
+        $this->assertSame('menu-movil', $xpath->query('//header/nav[2]/@id')->item(0)?->nodeValue);
+        $this->assertSame('Navegación principal', $xpath->query('//header/nav[2]/@aria-label')->item(0)?->nodeValue);
         $this->assertSame(3, $xpath->query('//nav/*[contains(@class, "modulo")]')->length, 'tres módulos, hijos directos de <nav>');
 
         $principal = $xpath->query('//nav/div[contains(@class, "gap-1")]')->item(0);
@@ -415,7 +422,7 @@ class NavbarTresEstadosTest extends TestCase
     }
 
     /**
-     * Rotura: mover `<x-publico.control-tema />` debajo de `<div id="menu-movil"`.
+     * Rotura: mover `<x-publico.control-tema />` debajo de `<nav id="menu-movil"`.
      */
     public function test_los_popovers_van_antes_del_panel_movil_y_el_anonimo_ve_lo_suyo(): void
     {
@@ -448,14 +455,13 @@ class NavbarTresEstadosTest extends TestCase
     }
 
     /**
-     * Rotura: quitar `lg:hidden` del <aside> de la barra lateral.
+     * La barra lateral se retiró el 6 sep (Parte II, D-M6): el tema vive en
+     * el módulo superior por control-tema. Rotura: devolver el <aside>.
      */
-    public function test_la_barra_lateral_de_tema_se_queda_solo_en_movil(): void
+    public function test_la_barra_lateral_de_tema_se_retiro_con_la_parte_ii(): void
     {
-        $barra = File::get(resource_path('views/components/publico/barra-tema.blade.php'));
-        $this->assertStringContainsString('tema-lateral fixed', $barra);
-        $this->assertStringContainsString('lg:hidden', $barra);
-
+        $this->assertFileDoesNotExist(resource_path('views/components/publico/barra-tema.blade.php'));
+        $this->assertStringNotContainsString('barra-tema', File::get(resource_path('views/components/layouts/publico.blade.php')));
         $this->assertFileDoesNotExist(resource_path('views/components/publico/selector-tema.blade.php'), 'el selector huérfano se borró');
     }
 
@@ -502,7 +508,7 @@ class NavbarTresEstadosTest extends TestCase
         // sí protege al logo; en rejilla es inerte.
         $this->assertStringContainsString('modulo modulo-logo pulsable -my-1.5 flex shrink-0 items-center py-1.5 lg:justify-self-start lg:px-3', $navbar);
         $this->assertStringContainsString('modulo modulo-principal hidden min-h-11 items-center gap-1 px-2 lg:flex lg:justify-self-center', $navbar);
-        $this->assertStringContainsString('modulo modulo-cuenta hidden items-center gap-2 px-2 whitespace-nowrap lg:flex lg:justify-self-end', $navbar);
+        $this->assertStringContainsString('modulo modulo-cuenta flex min-w-0 items-center gap-2 whitespace-nowrap lg:justify-self-end lg:px-2', $navbar);
 
         // En rejilla la pista 1fr toma como mínimo la aportación min-content
         // del enlace, que con un <img> de max-width: 100% es casi cero: entre
@@ -528,15 +534,21 @@ class NavbarTresEstadosTest extends TestCase
      * al instante, que es lo que impide que el popover de tema y el de
      * idioma se pisen (Sua, 5 sep: los dos abiertos a la vez a los 120 ms).
      *
+     * Desde el 6 sep (Parte II) los cuatro llevan además el toque fuera por
+     * `pointerdown` (Safari no despacha `click` a `document` sobre fondo sin
+     * oyente), el cierre a los 24 px de scroll y el cierre al volver del
+     * bfcache.
+     *
      * Roturas: borrar `ceder(raiz)` de app.js; quitar `x-on:mouseenter` de
-     * menu-grupo; devolver un x-data inline a control-tema.
+     * menu-grupo; devolver un x-data inline a control-tema; quitar
+     * `x-on:pageshow.window` de control-tema.
      */
     public function test_los_desplegables_comparten_componente_y_se_excluyen(): void
     {
         $js = File::get(resource_path('js/app.js'));
 
         $this->assertStringContainsString("Alpine.data('desplegable', () => ({", $js);
-        foreach (['abrir() {', 'cerrar() {', 'alternar() {', 'asomar(evento) {', 'retirar(evento) {', 'ceder(raiz) {', 'cerrarYVolverAlFoco() {'] as $definicion) {
+        foreach (['abrir() {', 'cerrar() {', 'cerrarSiSeDesplaza() {', 'alternar() {', 'asomar(evento) {', 'retirar(evento) {', 'ceder(raiz) {', 'cerrarYVolverAlFoco() {'] as $definicion) {
             $this->assertStringContainsString($definicion, $js, "app.js ya no define {$definicion}");
         }
         // `$root` y no `$el`: dentro de un método `$el` es el elemento de la
@@ -544,6 +556,10 @@ class NavbarTresEstadosTest extends TestCase
         // llegaba con esa identidad y el propio componente se cerraba.
         // Rotura: volver a `this.$el` en cualquiera de las dos líneas.
         $this->assertStringContainsString("this.\$dispatch('desplegable-abierto', this.\$root);", $js, 'abrir avisa a los demás desplegables con la raíz como identidad');
+        // Abrir recuerda dónde estaba el documento, con el mismo clamp que el
+        // header: sin él, una hoja abierta con la página al final se cerraba
+        // con un tirón de 25 px que no desplazaba nada. Rotura: quitar la línea.
+        $this->assertStringContainsString('this.scrollAlAbrir = posicionDelDocumento();', $js);
 
         // Los CUERPOS, no solo las cabeceras: `ceder` sin `cerrar()` dejaba
         // volver el choque tema/idioma con la suite verde, y `alternar` sin
@@ -605,6 +621,9 @@ class NavbarTresEstadosTest extends TestCase
                 'x-on:click.outside="cerrar()"',
                 'x-on:keydown.escape.window="cerrarYVolverAlFoco()"',
                 'x-on:focusout="if (! $el.contains($event.relatedTarget)) cerrar()"',
+                'x-on:pointerdown.outside="cerrar()"',
+                'x-on:scroll.window.passive="cerrarSiSeDesplaza()"',
+                'x-on:pageshow.window="if ($event.persisted) cerrar()"',
                 'x-on:click="alternar()"',
             ] as $cableado) {
                 $this->assertStringContainsString($cableado, $contenido, "{$vista} ya no conecta {$cableado}");
@@ -619,20 +638,19 @@ class NavbarTresEstadosTest extends TestCase
      * sesión abierta —socio, secretaría o dirección— no le interesa y se
      * comía el sitio de la cuenta (Sua, 5 sep). La spec §6.3 ya lo decía:
      * anónimo ve «Mi cuenta» y «Afíliate»; los demás, su disparador. Se
-     * esconde en la barra de escritorio y en el panel móvil; el pie lo
-     * conserva, que es otra cosa.
+     * esconde en el módulo de cuenta, que desde el 6 sep es el mismo DOM en
+     * los dos anchos; el pie lo conserva, que es otra cosa.
      *
-     * Roturas: sacar el enlace del `@guest` del módulo de cuenta; quitar el
-     * `@guest` que envuelve el bloque de invitado del panel móvil.
+     * Rotura: sacar el enlace del `@guest` del módulo de cuenta.
      */
     public function test_afiliate_solo_se_ofrece_a_quien_no_tiene_sesion(): void
     {
         $afiliate = 'href="'.route('afiliate').'"';
 
         $this->assertSame(
-            2,
+            1,
             substr_count($this->cabecera('/contacto'), $afiliate),
-            'sin sesión, una vez en el módulo de cuenta y otra en el panel móvil'
+            'sin sesión, una vez: el módulo de cuenta es el mismo DOM en los dos anchos'
         );
 
         $asociado = Asociado::query()->firstOrFail();
@@ -665,14 +683,14 @@ class NavbarTresEstadosTest extends TestCase
     }
 
     /**
-     * Móvil intacto de verdad: en `main` la barra era un vidrio a todo lo
-     * ancho a cualquier tamaño (`.cromo-bandeja`), y al mover el vidrio a la
-     * píldora de escritorio el móvil se quedó transparente sin que nadie lo
-     * midiera: el contenido pasaba por detrás del logo. Con el header fijo
-     * de la portada a pantalla completa, además, la hamburguesa se perdía
-     * sobre el video (5 sep, al fusionar la portada de la Persona 2).
+     * El vidrio del móvil vive en el pseudoelemento de la bandeja desde el 6
+     * sep (Parte II §3.4): un vidrio no es ancestro de otro vidrio (raíz de
+     * fondo, Filter Effects 2), y las hojas que cuelgan de la bandeja tienen
+     * que desenfocar la página, no el interior de la bandeja. Antes, el 5
+     * sep, este vidrio había vuelto a la propia bandeja porque la rama B lo
+     * había perdido y el contenido pasaba por detrás del logo.
      *
-     * Rotura: borrar el bloque `@media (max-width: 63.999rem)` de app.css.
+     * Rotura: devolver el `backdrop-filter` a `.bandeja`.
      */
     public function test_el_movil_conserva_el_vidrio_de_la_barra(): void
     {
@@ -680,11 +698,16 @@ class NavbarTresEstadosTest extends TestCase
 
         $movil = strstr($css, '@media (max-width: 63.999rem) {');
         $this->assertNotFalse($movil, 'app.css ya no tiene el bloque de vidrio del móvil');
-        $bandeja = $this->regla($movil, '.bandeja');
+        $vidrio = $this->regla($movil, '.bandeja::before');
 
-        $this->assertStringContainsString('background-color: var(--asb-cromo-velo);', $bandeja);
-        $this->assertStringContainsString('backdrop-filter: var(--asb-cromo-desenfoque);', $bandeja);
-        $this->assertStringContainsString('var(--asb-cromo-apoyo)', $bandeja);
+        $this->assertStringContainsString('background-color: var(--asb-cromo-velo);', $vidrio);
+        $this->assertStringContainsString('-webkit-backdrop-filter: var(--asb-cromo-desenfoque);', $vidrio);
+        $this->assertStringContainsString('backdrop-filter: var(--asb-cromo-desenfoque);', $vidrio);
+        $this->assertStringContainsString('var(--asb-cromo-apoyo)', $vidrio);
+
+        $bandeja = $this->regla($movil, '.bandeja');
+        $this->assertStringNotContainsString('backdrop-filter', $bandeja, 'la bandeja no es raíz de fondo');
+        $this->assertStringContainsString('height: var(--asb-alto-modulo-superior);', $bandeja);
     }
 
     /** El cuerpo de la primera regla cuyo selector empieza así. */

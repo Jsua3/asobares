@@ -26,6 +26,13 @@
                 <ul class="mt-1 text-sm">
                     <li><a href="{{ route('quienes-somos') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Quiénes somos</a></li>
                     <li><a href="{{ route('afiliate') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Afíliate</a></li>
+                    {{-- La entrada del afiliado en todos los anchos y sin JavaScript: en el
+                         teléfono la barra la ofrece como fila de la hoja de El gremio (D-M4).
+                         Del anónimo, como esa fila: a quien ya tiene sesión el formulario de
+                         afiliados le reemplazaría la suya. --}}
+                    @guest
+                        <li><a href="{{ route('mi-cuenta.entrar') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Entrar a mi cuenta</a></li>
+                    @endguest
                     <li><a href="{{ route('boletin.index') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Boletín</a></li>
                     <li><a href="{{ route('eventos.index') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Eventos y capacitaciones</a></li>
                     @if ($enlaceNacional = enlaceSeguro(ajuste('url_nacional')))

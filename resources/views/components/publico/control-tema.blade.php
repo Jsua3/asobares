@@ -1,5 +1,6 @@
 {{--
-    Control de tema de la barra de escritorio.
+    Control de tema de la barra, en los dos anchos (desde el 6 sep también
+    en el módulo superior del móvil, Parte II D-M17).
 
     El botón muestra el tema RESUELTO —sol o luna— y nunca el monitor: lo que
     el visitante ve pintado es lo que el icono tiene que decir. Lo resuelve
@@ -35,6 +36,9 @@
      x-on:click.outside="cerrar()"
      x-on:keydown.escape.window="cerrarYVolverAlFoco()"
      x-on:focusout="if (! $el.contains($event.relatedTarget)) cerrar()"
+     x-on:pointerdown.outside="cerrar()"
+     x-on:scroll.window.passive="cerrarSiSeDesplaza()"
+     x-on:pageshow.window="if ($event.persisted) cerrar()"
      class="relative">
 
     <button type="button"

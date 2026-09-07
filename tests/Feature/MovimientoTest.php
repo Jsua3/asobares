@@ -26,12 +26,13 @@ class MovimientoTest extends TestCase
         $this->assertStringContainsString('--ease-color: ease', $tokens);
 
         // Duraciones: la escala codifica que la salida es más rápida que la
-        // entrada (160 < 200) y que nada de interfaz pasa de 300 ms, con tres
-        // excepciones con nombre: la apertura de la barra lateral, el
-        // asentamiento del resorte de los popovers (spec del 3 sep 2026, D7)
-        // y el cambio de estado de la barra de escritorio, un punto más lento
-        // a petición de Sua (5 sep). Un resorte «llega» hacia los 250 ms; el
-        // resto es la cola que se asienta, y cortarla es quitarle el rebote.
+        // entrada (160 < 200) y que nada de interfaz pasa de 300 ms, con dos
+        // excepciones con nombre: el asentamiento del resorte de los popovers
+        // (spec del 3 sep 2026, D7) y el cambio de estado de la barra, un
+        // punto más lento a petición de Sua (5 sep). La barra lateral de tema
+        // y su reloj se retiraron el 6 sep con la Parte II. Un resorte
+        // «llega» hacia los 250 ms; el resto es la cola que se asienta, y
+        // cortarla es quitarle el rebote.
         $this->assertStringContainsString('--duracion-instante: 100ms', $tokens);
         $this->assertStringContainsString('--duracion-boton: 140ms', $tokens);
         $this->assertStringContainsString('--duracion-salida: 160ms', $tokens);
@@ -43,7 +44,7 @@ class MovimientoTest extends TestCase
         // Desplazamientos: son tokens y no literales porque el interruptor de
         // `prefers-reduced-motion` los anula sin tocar las duraciones.
         $this->assertStringContainsString('--asb-levante: -2px', $tokens);
-        $this->assertStringContainsString('--asb-desplazamiento-panel: -4%', $tokens);
+        $this->assertStringContainsString('--asb-desplazamiento-hoja: 6px', $tokens);
         $this->assertStringContainsString('--asb-desplazamiento-alerta: -25%', $tokens);
     }
 
@@ -95,7 +96,7 @@ class MovimientoTest extends TestCase
 
         $this->assertStringContainsString('@media (prefers-reduced-motion: reduce)', $tokens);
         $this->assertStringContainsString('--asb-levante: 0px', $tokens);
-        $this->assertStringContainsString('--asb-desplazamiento-panel: 0%', $tokens);
+        $this->assertStringContainsString('--asb-desplazamiento-hoja: 0px', $tokens);
         $this->assertStringContainsString('--asb-desplazamiento-alerta: 0%', $tokens);
 
         // Las duraciones NO se anulan: si alguien las pone a cero aquí, está
@@ -398,15 +399,15 @@ class MovimientoTest extends TestCase
      * Todos los desplegables tienen que usar el portador. Si uno se queda con
      * su propia lista, se mueve distinto que los demás y nadie lo nota.
      *
-     * Eran tres —menú móvil, hamburguesa y menú de usuario— y con la
-     * reagrupación de la barra son cinco: los dos grupos de escritorio salen
-     * del mismo componente, así que basta con que ese componente entre en la
-     * lista.
+     * Eran tres (menú móvil, hamburguesa y menú de usuario); con la
+     * reagrupación de la barra fueron cinco, y desde el 6 sep son el menú de
+     * usuario y el componente de grupo, que pinta los dos grupos de escritorio
+     * y las dos hojas del móvil. La barra ya no lleva ningún x-transition
+     * propio: la hamburguesa y el panel se retiraron con la Parte II.
      */
     public function test_los_desplegables_usan_el_portador(): void
     {
         $vistas = [
-            'components/publico/navbar.blade.php',
             'components/publico/menu-usuario.blade.php',
             'components/publico/menu-grupo.blade.php',
         ];

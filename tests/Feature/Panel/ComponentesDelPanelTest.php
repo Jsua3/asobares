@@ -67,7 +67,7 @@ class ComponentesDelPanelTest extends TestCase
         // Los valores, no la presencia: es lo único que prueba que la guarda
         // hace algo.
         $this->assertStringContainsString('--asb-levante: 0px', $tokens);
-        $this->assertStringContainsString('--asb-desplazamiento-panel: 0%', $tokens);
+        $this->assertStringContainsString('--asb-desplazamiento-hoja: 0px', $tokens);
         $this->assertStringContainsString('--asb-desplazamiento-alerta: 0%', $tokens);
     }
 

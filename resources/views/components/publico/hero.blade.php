@@ -38,7 +38,9 @@
 
     <div @class([
         'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8',
-        'flex min-h-[calc(100svh-1rem)] items-center pb-20 pt-28 sm:pb-24 sm:pt-32 lg:pt-36' => $portada,
+        // `pb-28`: 112 px cubren el módulo inferior de 68 más la zona segura
+        // de 34 (Parte II §6.4); en escritorio no hay módulo inferior.
+        'flex min-h-[calc(100svh-1rem)] items-center pb-28 pt-28 sm:pt-32 lg:pb-24 lg:pt-36' => $portada,
         'py-16 sm:py-24 lg:py-28' => ! $compacto && isset($escena),
         'py-14 sm:py-20' => ! $compacto && ! isset($escena) && ! $portada,
         'py-10 sm:py-14' => $compacto,
