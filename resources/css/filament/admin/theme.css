@@ -128,6 +128,12 @@
     --asb-admin-barra-fila-alto: 2.75rem;
     --asb-admin-barra-fila-radio: 0.625rem;
     --asb-admin-barra-aviso-alto: 1.5rem;
+    /* El módulo: canto de cristal y brillo especular, los dos recursos que la
+       barra de escritorio enciende cuando la píldora exterior se apaga. */
+    --asb-admin-barra-modulo-canto: rgb(11 9 10 / 0.1);
+    --asb-admin-barra-modulo-brillo: rgb(255 255 255 / 0.55);
+    --asb-admin-barra-modulo-radio: 1rem;
+    --asb-admin-barra-modulo-sombra: 0 12px 28px rgb(11 9 10 / 0.06);
     --asb-admin-barra-brote: 0.35;
     --asb-admin-barra-empuje: 2px;
 
@@ -154,6 +160,9 @@
     --asb-admin-barra-activo: var(--asb-acento);
     --asb-admin-barra-activo-fondo: color-mix(in oklab, var(--asb-acento) 16%, transparent);
     --asb-admin-barra-hover-fondo: rgb(255 255 255 / 0.06);
+    --asb-admin-barra-modulo-canto: rgb(255 255 255 / 0.1);
+    --asb-admin-barra-modulo-brillo: rgb(255 255 255 / 0.06);
+    --asb-admin-barra-modulo-sombra: 0 12px 28px rgb(0 0 0 / 0.28);
     --asb-admin-foco-anillo: #ffffff;
     --asb-admin-foco-halo: #0b090a;
     --asb-admin-card-borde: rgb(255 255 255 / 0.09);
@@ -376,6 +385,72 @@
         z-index: 1;
     }
 
+    /* El chip del módulo de cuenta: avatar, nombre y rango, como el de la
+       barra pública de escritorio. El disparador entero es el objetivo, así
+       que su alto sale del mismo token que las filas de navegación. */
+    .asb-barra-chip {
+        display: flex;
+        gap: 0.55rem;
+        align-items: center;
+        width: 100%;
+        min-height: var(--asb-admin-barra-fila-alto);
+        padding: 0.35rem 0.5rem;
+        border-radius: var(--asb-admin-barra-fila-radio);
+        color: var(--asb-admin-barra-tinta);
+        transition:
+            background-color var(--duracion-boton) var(--ease-color),
+            translate var(--duracion-boton) var(--ease-out);
+    }
+
+    .asb-barra-chip .text-2xs {
+        color: var(--asb-admin-barra-tenue);
+    }
+
+    /* El avatar es marca: no crece ni encoge. */
+    .asb-barra-avatar {
+        display: grid;
+        flex-shrink: 0;
+        place-items: center;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 999px;
+        background-color: var(--asb-admin-barra-activo-fondo);
+        color: var(--asb-admin-barra-activo);
+        font-size: 0.75rem;
+        font-weight: 650;
+    }
+
+    /* La hoja abre hacia arriba, porque el módulo es el suelo de la barra. */
+    .asb-barra-hoja {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        margin-bottom: 0.35rem;
+        padding: 0.3rem;
+        border-radius: var(--asb-admin-barra-fila-radio);
+        box-shadow: inset 0 0 0 1px var(--asb-admin-barra-modulo-canto);
+    }
+
+    .asb-barra-fila {
+        display: flex;
+        gap: 0.55rem;
+        align-items: center;
+        min-height: var(--asb-admin-barra-fila-alto);
+        padding-inline: 0.5rem;
+        border-radius: var(--asb-admin-barra-fila-radio);
+        color: var(--asb-admin-barra-tinta);
+        font-size: 0.875rem;
+        text-align: start;
+        transition: background-color var(--duracion-boton) var(--ease-color);
+    }
+
+    .asb-barra-chip:focus-visible,
+    .asb-barra-fila:focus-visible {
+        outline: 2px solid var(--asb-admin-foco-anillo);
+        outline-offset: 2px;
+        box-shadow: 0 0 0 4px var(--asb-admin-foco-halo);
+    }
+
     /*
      * Por debajo de 64 rem la barra es un cajón que entra sobre el contenido:
      * ahí SÍ pasa página por debajo y el cristal se gana el sueldo. Es el único
@@ -404,8 +479,73 @@
         max-height: 2rem;
     }
 
+    /*
+     * Los tres módulos (D-L19). La barra de escritorio no es un plano: es una
+     * píldora con módulos dentro, y cada uno enciende su propio vidrio cuando
+     * la píldora se apaga. Aquí son tres y por función: marca (solo en el
+     * cajón, porque con topbar Filament esconde la cabecera en escritorio),
+     * navegación y cuenta.
+     *
+     * El material de este va en el ELEMENTO y no en un pseudoelemento, al
+     * revés que en el resto de la barra: `.fi-sidebar-nav` es el scroller
+     * (`overflow: hidden auto`), y un pseudoelemento con `inset: 0` dentro de
+     * un scroller se desplaza con el contenido y deja de cubrir el módulo.
+     * Los fondos no se desplazan, así que el canto y el brillo van aquí.
+     */
     .fi-sidebar-nav {
-        padding-inline: 0.75rem;
+        margin: 0.5rem 0.6rem;
+        padding-inline: 0.4rem;
+        border-radius: var(--asb-admin-barra-modulo-radio);
+        box-shadow: inset 0 0 0 1px var(--asb-admin-barra-modulo-canto);
+        transition:
+            box-shadow var(--duracion-entrada) var(--ease-color),
+            background-image var(--duracion-entrada) var(--ease-color);
+    }
+
+    /*
+     * El encendido (D-L20). El módulo de navegación es el único que se
+     * desplaza, así que es el único que enciende: cuando la lista se ha
+     * movido, gana el brillo especular por arriba, que es lo que en la barra
+     * de escritorio dice «esta pieza se separó de la página». El de cuenta
+     * está encendido siempre, porque no se desplaza nunca.
+     */
+    body[data-barra-estado="scroll"] .fi-sidebar-nav {
+        background-image: linear-gradient(180deg, var(--asb-admin-barra-modulo-brillo), transparent 6rem);
+        box-shadow:
+            inset 0 0 0 1px var(--asb-admin-barra-modulo-canto),
+            var(--asb-admin-barra-modulo-sombra);
+    }
+
+    /* El módulo de marca. Solo se ve en el cajón: con topbar, Filament marca
+       la cabecera `lg:hidden`. */
+    .fi-sidebar-header {
+        margin: 0.6rem 0.6rem 0;
+        border-radius: var(--asb-admin-barra-modulo-radio);
+        box-shadow: inset 0 0 0 1px var(--asb-admin-barra-modulo-canto);
+    }
+
+    /*
+     * El módulo de cuenta, al pie (D-L21). Aquí sí hay pseudoelementos libres,
+     * así que el brillo va en uno y el canto en el otro, como en la barra de
+     * escritorio. Encendido siempre: es el suelo de la barra.
+     */
+    .asb-barra-cuenta {
+        position: relative;
+        isolation: isolate;
+        margin: 0 0.6rem 0.6rem;
+        padding: 0.4rem;
+        border-radius: var(--asb-admin-barra-modulo-radio);
+        box-shadow: inset 0 0 0 1px var(--asb-admin-barra-modulo-canto);
+    }
+
+    .asb-barra-cuenta::before {
+        content: '';
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        background-image: linear-gradient(180deg, var(--asb-admin-barra-modulo-brillo), transparent 4rem);
     }
 
     .fi-sidebar-group {
@@ -879,6 +1019,14 @@
             color: var(--asb-admin-barra-activo);
         }
 
+        .asb-panel-tema__disparador:hover,
+        .asb-panel-tema__opcion:hover,
+        .asb-barra-chip:hover,
+        .asb-barra-fila:hover {
+            background-color: var(--asb-admin-barra-hover-fondo);
+            color: var(--asb-admin-barra-activo);
+        }
+
         .fi-sidebar .fi-sidebar-item-btn[aria-current="page"]:hover,
         .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn:hover {
             background-color: var(--asb-admin-barra-activo-fondo);
@@ -932,7 +1080,7 @@
             gap: 0.5rem;
         }
 
-        .asb-panel-theme-switcher {
+        .asb-panel-tema {
             margin-inline-end: 0;
         }
 
@@ -998,67 +1146,84 @@
         }
     }
 
-    .asb-panel-theme-switcher {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.18rem;
-        padding: 0.22rem;
+    /*
+     * El control de tema, con la misma forma que el del sitio (D-L23): un
+     * disparador redondo de 44 px y un popover con las tres preferencias. El
+     * segmentado de dos botones que había aquí no ofrecía «el del sistema», y
+     * el menú de usuario donde vivía esa tercera opción se retiró al bajar la
+     * cuenta al pie de la barra (D-L21).
+     */
+    .asb-panel-tema {
+        position: relative;
         margin-inline-end: 0.45rem;
-        border: 1px solid rgb(15 23 42 / 0.1);
-        border-radius: 999px;
-        background:
-            radial-gradient(circle at 20% 0%, rgb(238 65 55 / 0.14), transparent 42%),
-            rgb(255 255 255 / 0.76);
-        box-shadow:
-            0 1px 2px rgb(11 9 10 / 0.06),
-            0 10px 28px rgb(238 65 55 / 0.08);
-        backdrop-filter: blur(14px);
     }
 
-    .dark .asb-panel-theme-switcher {
-        border-color: rgb(255 255 255 / 0.1);
-        background:
-            radial-gradient(circle at 80% 0%, rgb(238 65 55 / 0.2), transparent 44%),
-            rgb(255 255 255 / 0.055);
-        box-shadow: 0 12px 36px rgb(238 65 55 / 0.08);
-    }
-
-    .asb-panel-theme-switcher__button {
+    .asb-panel-tema__disparador {
         display: grid;
-        box-sizing: border-box;
-        width: 2rem;
-        height: 2rem;
-        flex-shrink: 0;
+        width: 2.75rem;
+        height: 2.75rem;
         place-items: center;
-        padding: 0;
-        border: 0;
         border-radius: 999px;
-        color: rgb(82 82 91);
-        line-height: 1;
+        color: var(--asb-admin-barra-tenue);
         transition:
-            color 180ms ease,
-            background-color 180ms ease,
-            box-shadow 180ms ease;
+            color var(--duracion-boton) var(--ease-color),
+            background-color var(--duracion-boton) var(--ease-color);
     }
 
-    .dark .asb-panel-theme-switcher__button {
-        color: rgb(212 212 216);
+    .asb-panel-tema__icono {
+        width: 1.25rem;
+        height: 1.25rem;
     }
 
-    .asb-panel-theme-switcher__button.is-active {
-        color: rgb(255 255 255);
-        background-color: rgb(238 65 55);
-        box-shadow: 0 8px 18px rgb(238 65 55 / 0.28);
+    /* El popover SÍ desenfoca: flota sobre la página y debajo pasa contenido.
+       Usa el desenfoque del vidrio del panel, que ya se apaga bajo
+       transparencia reducida, y no el de la barra, que es solo del cajón. */
+    .asb-panel-tema__popover {
+        position: absolute;
+        inset-inline-end: 0;
+        inset-block-start: calc(100% + 0.4rem);
+        z-index: 40;
+        display: flex;
+        min-width: 12rem;
+        flex-direction: column;
+        gap: 0.15rem;
+        padding: 0.3rem;
+        border-radius: var(--asb-admin-barra-modulo-radio);
+        background-color: var(--asb-admin-barra-velo-cajon);
+        box-shadow:
+            inset 0 0 0 1px var(--asb-admin-barra-modulo-canto),
+            var(--asb-admin-barra-modulo-sombra);
+        -webkit-backdrop-filter: var(--asb-vidrio-desenfoque);
+        backdrop-filter: var(--asb-vidrio-desenfoque);
     }
 
-    .dark .asb-panel-theme-switcher__button.is-active {
-        color: rgb(255 255 255);
-        background-color: rgb(238 65 55 / 0.92);
+    .asb-panel-tema__opcion {
+        display: flex;
+        gap: 0.55rem;
+        align-items: center;
+        min-height: var(--asb-admin-barra-fila-alto);
+        padding-inline: 0.55rem;
+        border-radius: var(--asb-admin-barra-fila-radio);
+        color: var(--asb-admin-barra-tinta);
+        font-size: 0.875rem;
+        text-align: start;
+        transition: background-color var(--duracion-boton) var(--ease-color);
     }
 
-    .asb-panel-theme-switcher__icon {
-        width: 1.05rem;
-        height: 1.05rem;
+    /* La preferencia vigente no se marca solo con color: lleva el mismo canto
+       que el módulo, que es forma y sobrevive al contraste forzado. */
+    .asb-panel-tema__opcion[aria-current="true"] {
+        color: var(--asb-admin-barra-activo);
+        background-color: var(--asb-admin-barra-activo-fondo);
+        box-shadow: inset 0 0 0 1px var(--asb-admin-barra-modulo-canto);
+        font-weight: 650;
+    }
+
+    .asb-panel-tema__disparador:focus-visible,
+    .asb-panel-tema__opcion:focus-visible {
+        outline: 2px solid var(--asb-admin-foco-anillo);
+        outline-offset: 2px;
+        box-shadow: 0 0 0 4px var(--asb-admin-foco-halo);
     }
 
     @media (hover: hover) and (pointer: fine) {
@@ -1067,9 +1232,6 @@
             transform: translateY(var(--asb-levante));
         }
 
-        .asb-panel-theme-switcher__button:hover {
-            box-shadow: 0 6px 14px rgb(238 65 55 / 0.16);
-        }
     }
 
     /*
@@ -1388,7 +1550,8 @@
 @media (prefers-reduced-motion: reduce) {
     .fi-topbar,
     .fi-topbar .fi-logo,
-    .asb-panel-theme-switcher__button {
+    .asb-panel-tema__disparador,
+    .asb-panel-tema__opcion {
         transition-duration: 0.01ms;
     }
 }

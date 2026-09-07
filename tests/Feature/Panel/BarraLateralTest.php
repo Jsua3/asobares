@@ -327,6 +327,40 @@ class BarraLateralTest extends TestCase
     }
 
     /**
+     * Los tres módulos (D-L19 y D-L20). La barra de escritorio no es un plano:
+     * es una píldora con módulos dentro que encienden su propio vidrio. Aquí
+     * son tres, por función y no por sección: marca (solo visible en el cajón,
+     * porque con topbar Filament esconde la cabecera en escritorio),
+     * navegación y cuenta.
+     *
+     * El material del módulo de navegación va en el ELEMENTO y no en un
+     * pseudoelemento, al revés que en el resto de la barra, y por una razón
+     * medida: ese elemento es el scroller (`overflow: hidden auto`), y un
+     * pseudoelemento con `inset: 0` dentro de un scroller se desplaza con el
+     * contenido y deja de cubrir el módulo. Los fondos no se desplazan.
+     * Rotura: quitar el canto del módulo de navegación, o el del de cuenta.
+     */
+    public function test_la_barra_tiene_sus_tres_modulos(): void
+    {
+        $tema = $this->tema();
+
+        $navegacion = $this->regla($tema, '.fi-sidebar-nav');
+        $this->assertStringContainsString('var(--asb-admin-barra-modulo-canto)', $navegacion, 'El módulo de navegación no tiene canto de cristal.');
+        $this->assertStringContainsString('border-radius', $navegacion, 'Un módulo sin radio no se lee como pieza.');
+
+        $cuenta = $this->regla($tema, '.asb-barra-cuenta');
+        $this->assertStringContainsString('var(--asb-admin-barra-modulo-canto)', $cuenta, 'El módulo de cuenta no tiene canto de cristal.');
+
+        // El de navegación enciende al desplazarse la lista; el de cuenta está
+        // encendido siempre, porque no se desplaza nunca (D-L20).
+        $this->assertStringContainsString(
+            'body[data-barra-estado="scroll"] .fi-sidebar-nav',
+            preg_replace('/\s+/', ' ', $tema),
+            'El módulo de navegación no cambia con el estado de la lista.'
+        );
+    }
+
+    /**
      * El contraste de la barra, recalculado leyendo los porcentajes del
      * archivo y no repitiéndolos aquí.
      *

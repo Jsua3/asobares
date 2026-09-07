@@ -84,6 +84,18 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::TOPBAR_END,
                 fn (): HtmlString => new HtmlString(view('filament.components.theme-switcher-topbar')->render()),
             )
+            // El módulo de cuenta, al pie de la barra lateral (D-L21, 7 sep).
+            // Baja de la parte superior porque la barra necesitaba su tercer
+            // módulo y la cuenta necesitaba el nombre y el rango que el círculo
+            // de iniciales no mostraba.
+            ->renderHook(
+                PanelsRenderHook::SIDEBAR_FOOTER,
+                fn (): HtmlString => new HtmlString(view('filament.components.cuenta-en-la-barra')->render()),
+            )
+            // Con la cuenta abajo, el menú de usuario de Filament sobra: dos
+            // disparadores para la misma sesión se contradicen en cuanto uno
+            // cambie. Perfil, sitio y salida viven ahora en la hoja del módulo.
+            ->userMenu(false)
             // Pub Red, exacto según el manual de marca de Asobares Colombia.
             ->colors([
                 'primary' => Color::hex('#EE4137'),
@@ -109,8 +121,13 @@ class AdminPanelProvider extends PanelProvider
                 ],
                 isRequired: true,
             )
-            ->databaseNotifications()
-            ->databaseNotificationsPolling('30s')
+            // La campana se retira (D-L22, 7 sep): lo que anunciaba lo cuenta
+            // mejor la banda «Te está esperando» del tablero, que además dice
+            // qué hay que aprobar y desde cuándo espera. Si el gremio pide
+            // avisos de verdad, es un frente propio con su decisión.
+            //
+            // ->databaseNotifications()
+            // ->databaseNotificationsPolling('30s')
             // Sin icono de grupo a propósito: Filament no admite iconos en el
             // grupo y en sus items a la vez, y el icono por recurso orienta más.
             ->navigationGroups([

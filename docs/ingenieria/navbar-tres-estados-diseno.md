@@ -1807,7 +1807,7 @@ El segundo factor es obligatorio, así que ninguna sesión automatizada abre `/a
 
 En el mismo mensaje pidió rehacer la parte superior del panel: el control de tema, la campana de notificaciones («su funcionalidad es muy poca») y la cuenta del usuario, «asemejándola a la que hay actualmente en la navBar de escritorio».
 
-**Esto es ampliación de alcance sobre la Parte III aprobada**, así que va por escrito antes de codificarse. Cinco decisiones, D-L19 a D-L23.
+**Esto es ampliación de alcance sobre la Parte III aprobada**, así que fue por escrito antes de codificarse. Cinco decisiones, D-L19 a D-L23, **aprobadas por Sua el 7 sep 2026** («apruebo») con la recomendación de cada una.
 
 **Lo que la barra de escritorio hace y esta no.** La bandeja es una píldora exterior que contiene tres módulos: logo, principal y cuenta. En `inicial` el vidrio lo pone la píldora y los módulos están apagados; en `scroll` y en `atención` la píldora se apaga y **cada módulo enciende el suyo**, con brillo especular en un pseudoelemento y canto de cristal en el otro. Eso es lo que se lee como «módulos», y es lo que aquí no existe.
 
