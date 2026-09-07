@@ -29,11 +29,11 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 | | |
 |---|---|
 | Fecha | Lunes 7 de septiembre de 2026 (Bogotá), madrugada; sesión con Sua que empezó la noche del 5 y construyó la barra móvil el 6 |
-| **Dónde vive este archivo** | **En la rama `p1-navbar-movil`**, en su commit de cierre; a `main` llega cuando Sua decida fusionar. **`main` local sigue tres commits por delante de `origin/main`** (`09e8c17`, `83e7390` y `0ecb43c`): **nada de esto está desplegado hasta empujar** |
-| `main` | `0ecb43c` · sin empujar desde `809c4fa` (5 sep): `09e8c17` esconde «Afíliate» con sesión (pedido de Sua), `83e7390` es la Parte II de la spec y `0ecb43c` el cierre del 6 sep. **La barra móvil 2.1 no está en `main`**: vive en su rama |
-| Rama de trabajo | **`p1-navbar-movil`**, abierta el 6 sep con las dieciocho decisiones ya respondidas. Cinco commits: la Parte II de la spec y del plan, uno de código con la barra entera, uno de documentación y este cierre. **Falta que Sua decida si se fusiona y se empuja** (D-35), porque el push despliega |
-| Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5). Suite completa del 7 sep: 1.058 casos · 1.047 pasan · 11 omitidas · 0 fallos · 4.607 aserciones · 537 s (7 sep, madrugada, con el servidor de desarrollo y Chromium abiertos; eran 312 s el 6 sep, antes de las dos últimas tareas). Geometría, dirección, hojas, teclado y sesión medidos en Chromium con `playwright-cli` a 320, 360, 390, 768 y 844×390, con toques por CDP |
-| Producción | Sin cambios desde el 5 sep: `https://asobares-production-0jhdcz.laravel.cloud` sirve `809c4fa`, la barra B con la portada nueva (bitácora §39.11). **Lo de hoy no está desplegado**: el «Afíliate» escondido con sesión sale con el próximo push. `ContenidoOficialSeeder` sigue sin correrse (toca datos: visto bueno aparte) |
+| **Dónde vive este archivo** | **En `main`**; medido sobre `2d7dd12`, el cierre de `p1-navbar-movil` ya fusionada, y este archivo entra en el commit siguiente. **`main` se empuja hoy**: con el push, la barra móvil 2.1 queda desplegada |
+| `main` | `2d7dd12` más este commit de estado · `p1-navbar-movil` fusionada por avance rápido el 7 sep (mismo árbol que se probó) · se empuja hoy con los cuatro commits que esperaban desde `809c4fa`: `09e8c17` (el «Afíliate» escondido con sesión), `83e7390` y `0ecb43c` (la Parte II de la spec y su cierre) y la barra móvil 2.1 |
+| Rama de trabajo | Ninguna abierta: `p1-navbar-movil` quedó fusionada en `main` el 7 sep y se conserva en `origin` como historia, igual que `p1-navbar-alternativa` |
+| Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5). Suite completa del 7 sep: 1.058 casos · 1.047 pasan · 11 omitidas · 0 fallos · 4.607 aserciones · 535 s (7 sep, madrugada, sobre `main` ya fusionada, con el servidor de desarrollo y Chromium abiertos; eran 312 s el 6 sep, antes de las dos últimas tareas). Geometría, dirección, hojas, teclado y sesión medidos en Chromium con `playwright-cli` a 320, 360, 390, 768 y 844×390, con toques por CDP |
+| Producción | `https://asobares-production-0jhdcz.laravel.cloud`. **Con el push del 7 sep pasa a servir la barra móvil 2.1**, el «Afíliate» escondido con sesión y el velo de escritorio devuelto al 72 %. No cambian datos: la rama no trae migraciones y `UsuarioSeeder` solo se corre a mano |
 
 ## 1. Qué se exige y cuándo
 
@@ -133,12 +133,11 @@ De catorce, **doce cerrados y dos vivos** (10 y 11); ninguno se cierra escribien
 
 ## 3. Registro único de decisiones pendientes
 
-Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen» de `encargo.md` (el 3 sep salieron D-22 y las tres de la rama B; el 5 sep sale D-30; el 6 sep sale D-34, las dieciocho de la barra móvil). **Las D-01, D-04 a D-12 y D-20 caben en una sola reunión con Natalia con esta tabla impresa; D-30 la resolvió Sua el 5 sep, la B fusionada y desplegada, y sale de aquí.**
+Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen» de `encargo.md` (el 3 sep salieron D-22 y las tres de la rama B; el 5 sep sale D-30; el 6 sep sale D-34, las dieciocho de la barra móvil; el 7 sep sale D-35, fusionar y empujar). **Las D-01, D-04 a D-12 y D-20 caben en una sola reunión con Natalia con esta tabla impresa; D-30 la resolvió Sua el 5 sep, la B fusionada y desplegada, y sale de aquí.**
 
 | ID | Decisión | Dueño | Pedida | Respondida |
 |---|---|---|---|---|
-| **D-35** | **¿Se fusiona `p1-navbar-movil` y se empuja?** La barra móvil 2.1 está construida, medida en Chromium y revisada; la rama no toca datos ni dependencias. El push despliega, y antes conviene verla en un teléfono real (§4). | Sua | 7 sep | — |
-| **D-31** | **`prefers-reduced-transparency` en un equipo real** antes de la demo de la B: Playwright acepta la emulación y no la aplica; el CSS usa los tokens que la señal apaga, pero no está medido | Sua | 5 sep | — |
+| **D-31** | **`prefers-reduced-transparency` en un equipo real** antes de la demo: Playwright acepta la emulación y no la aplica. | Sua | 5 sep | — |
 | **D-32** | **Idiomas como subsistema propio**: `lang/`, middleware de locale, traducir vistas y volver multilingüe la tabla de ajustes. **Ampliación de alcance: acta antes de codificar.** El chip de la B es su sitio reservado y no funciona a propósito | Natalia + Sua | 3 sep | — |
 | **D-33** | **Qué cede en la barra entre 1024 y ~1130 px de ancho** (iPad mini y los iPad de 10 pulgadas antiguos, en horizontal): en `inicial` y `atención` los tres módulos suman 1.102 px y la píldora mide 968. Con el logo protegido, a 1024 en inicial la píldora desborda 124 px a la derecha y el documento gana 107 px de desplazamiento horizontal (medido el 5 sep); en scroll cabe (727 px). Opciones: isotipo también en inicial por debajo de ~1150 px, o esconder el texto de «Mi cuenta» en esa franja; ninguna se toma sin Sua. Ya desbordaba antes de la rejilla, **y ahora está en producción** | Sua | 5 sep | — |
 | D-26 | **Acta 06** de la ampliación de las bolsas (3 sep): emitirla con `constancias.mjs`, decir que el registro llegó después del código, y retirar o reubicar `docs/ingenieria/decisiones/` | Sua + Ingrid | 3 sep | — |
@@ -213,7 +212,7 @@ Sobre **`8e53813` (`main` tras la fusión, con la portada de la P2)**, 5 de sept
 ## 6. Lo siguiente, en orden
 
 1. **Confirmar que el documento de práctica se envió** el 4 sep (Sua). Si no, es 0.0 y hay que hablar con el docente.
-2. **Decidir si `p1-navbar-movil` se fusiona y se empuja (D-35).** La barra está construida, medida y revisada; la rama lleva cinco commits y no toca datos ni dependencias. **El push despliega**, así que la decisión es de Sua. Antes de enseñarla al gremio hay que verla en un teléfono real: Safari de iOS, la barra de direcciones, el rebote elástico, el teclado y la transparencia reducida son lo único que Chromium no enseña.
+2. **Ver la barra en un teléfono real** (Android y un iPhone): Safari de iOS, la barra de direcciones que crece y encoge, el rebote elástico, el teclado y la transparencia reducida son lo único que Chromium no enseña, y es lo que exige la S7 del cronograma. Si algo cede, se corrige sobre `main` y se vuelve a empujar.
 3. **Empujar `main`** cuando Sua quiera: lleva el «Afíliate» escondido con sesión (`09e8c17`) y la Parte II; **el push despliega**. Y comprobar en la consola de Cloud que el despliegue de `809c4fa` (5 sep) corrió.
 4. **Enseñar a la dirección la barra desplegada** (D-30 ya ejecutada por Sua) y cerrar el Acta 06 (D-26) con el cambio de barra. Antes, si se puede, **D-31**: transparencia reducida en un equipo real y un iPad de verdad; y **D-33**: qué cede entre 1024 y 1130 px, que ya está en producción.
 5. **Lo que queda de la fusión:** correr `ContenidoOficialSeeder` una vez en producción **con visto bueno aparte, porque toca datos** (sin él la portada usa los textos de respaldo del rótulo y la frase corta no se pinta); confirmar con Ingrid dónde va el rótulo del video y los dos portadores claros; corregir el documento de práctica, que describe la barra A; y decidir con ella si se reescribe `239eda0` para quitar el `Co-Authored-By`.

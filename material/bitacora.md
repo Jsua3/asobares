@@ -2027,6 +2027,10 @@ Seis lectores independientes sobre el diff (uno murió por el límite de sesión
 
 Inicial: bandeja 56, fila de pestañas 68, módulo inferior en 776..844 a 390×844. Scroll: 48 y 48 con los rótulos plegados y el isotipo visible. Objetivos de 44 en las cuatro esquinas del cuadrado para pestañas, logo (153,5×44), chip (212×47,8) y «Afíliate» (45,7). El cambio de estado cae entre 30 y 40 px bajando; subir 10 no devuelve y subir 13 sí. Sin desbordar a 360, 320 y 768; a 320 el logo cruza al isotipo. Las hojas abren por toque con `pointer: coarse` verdadero, cierran por toque fuera, por desplazamiento de 30 px y por Escape devolviendo el foco. Con el video de la portada corriendo, 180 fotogramas durante un desplazamiento guiado: 6,1 ms de mediana, 6,3 el percentil 95 y 6,5 el máximo, **en este equipo y no en el teléfono**.
 
-### 41.6 Lo que queda abierto
+### 41.6 Fusionada y desplegada (7 sep)
+
+Sua respondió D-35 en tres palabras: «fusiona la rama y empuja». `p1-navbar-movil` entró en `main` por avance rápido, así que el árbol desplegado es exactamente el que se probó, y `main` se empujó con los cuatro commits que esperaban desde el 5 sep. El push despliega: producción pasa a servir la barra móvil 2.1, el «Afíliate» escondido con sesión y el velo de escritorio devuelto al 72 %. No cambian datos, porque la rama no trae migraciones y los sembradores se corren a mano.
+
+### 41.7 Lo que queda abierto
 
 El teléfono real del directivo (Safari de iOS, la barra de direcciones, el rebote elástico, el teclado y la transparencia reducida) sigue siendo lo único que puede cerrar la barra. Dos cosas más quedan anotadas en la §13.3 de la spec: el foco se pierde al cruzar 64rem con una hoja abierta, y el móvil paga dos `backdrop-filter` permanentes sobre el video cuando el velo al 88 % deja al desenfoque un 12 % del píxel.
