@@ -1459,20 +1459,20 @@ Cómo se hizo: cinco miradas independientes sobre el mismo encargo (movimiento, 
 
 ## Cifras de partida, medidas el 7 sep 2026
 
-Las midió Sua en su propio navegador, con el panel abierto y la sesión iniciada, porque el segundo factor impide que una sesión automatizada llegue a `/admin`. La ventana medía **201 x 987**, es decir, **por debajo de 64 rem: lo medido es el CAJÓN**, no la barra de escritorio. Las cifras que no dependen del ancho valen para las dos, y las que sí lo hacen quedan señaladas.
+Las midió Sua en su propio navegador, con el panel abierto y la sesión iniciada, porque el segundo factor impide que una sesión automatizada llegue a `/admin`. Se tomaron **dos veces**: a **201 x 987**, por debajo de 64 rem, que es el **cajón**; y a **1.084 x 1.083**, por encima, que es la **barra de escritorio**. Las dos coinciden en todo salvo en la posición y en cuánto se corta la lista.
 
 | Qué | Medido | Lectura |
 |---|---|---|
 | Ancho de la barra | 244 px (15,25 rem) | Coincide con `--asb-admin-sidebar-ancho`. Vale en los dos anchos |
-| Posición | `fixed` | Es el cajón. En escritorio Filament la deja `lg:sticky` y en flujo (D-L1) |
+| Posición | `fixed` en el cajón, **`sticky` a 1.084 px** | **Medido, no deducido: en escritorio la barra va en flujo y pegada, así que detrás de ella no pasa contenido.** Es el hecho que sostiene D-L1 y el que convierte el `blur(14px)` de hoy en coste sin imagen |
 | Desenfoque | `blur(14px)` | Aquí SÍ desenfoca, porque bajo el cajón pasa contenido. En escritorio es el que no se ve |
 | Fondo computado | `rgba(0, 0, 0, 0)` | El degradado va en `background-image`, así que el color computa transparente: la franja burdeos que se ve la pinta el degradado, no el color |
 | Ítems | 24, todos de **43,5 px** | **Ninguno llega a 44**: faltan 0,5 px, y la comprobación de las cuatro esquinas del cuadrado da `false` en los 24. Es el defecto de partida que D-L12 y la retícula corrigen |
-| Lista | 1.651 px de contenido en 913 de hueco | **Se corta el 45 %**: la lista desborda casi el doble de lo que cabe, que es exactamente lo que justifica el aviso de borde de D-L15 y que el estado lo mande el scroll interno (D-L3) |
+| Lista | 1.651 px de contenido en 913 de hueco (cajón) y en **1.019 (escritorio)** | **Se corta el 45 % y el 38 %**. El recorte no depende del ancho sino del alto de la ventana, así que la lista está cortada siempre: es lo que justifica el aviso de borde de D-L15 y que el estado lo mande el scroll interno (D-L3). Los 24 ítems suman 1.044 px; el resto hasta 1.651 son los rótulos de grupo y los huecos |
 | Rótulo de grupo | 11,52 px, `rgb(191, 165, 166)` | Es `#bfa5a6`. Sobre el burdeos de hoy da 7,77:1, así que hoy sobra contraste; el cristal es lo que lo pone en juego y por eso D-L11 recalcula el velo |
 | Ítem activo | 43,5 px de alto, blanco sobre `rgba(238, 65, 55, 0.16)`, con filo rojo de 3 px hacia dentro | El filo interior de 3 px ya existe y es el germen del indicador de D-L7 |
 
-Falta una medición equivalente **con la ventana maximizada**, que es donde la barra es `lg:sticky` y donde se juzga el cristal pintado de D-L1. Se toma antes de dar la barra por cerrada.
+Las dos mediciones están tomadas, así que no queda nada por medir antes de construir. Lo que sigue sin medirse es lo de después: el cristal nuevo, que se juzga contra estas mismas cifras.
 
 
 ## Contradicciones entre miradas, resueltas
