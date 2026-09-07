@@ -84,12 +84,13 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::TOPBAR_END,
                 fn (): HtmlString => new HtmlString(view('filament.components.theme-switcher-topbar')->render()),
             )
-            // El módulo de cuenta, al pie de la barra lateral (D-L21, 7 sep).
-            // Baja de la parte superior porque la barra necesitaba su tercer
-            // módulo y la cuenta necesitaba el nombre y el rango que el círculo
-            // de iniciales no mostraba.
+            // La cuenta, como PRIMERA FILA de la barra (D-L21, corregida el
+            // 7 sep). Bajó de la parte superior porque necesitaba el nombre y
+            // el rango que el círculo de iniciales no mostraba, y subió al
+            // principio de la lista porque al pie no se leía como parte de la
+            // navegación.
             ->renderHook(
-                PanelsRenderHook::SIDEBAR_FOOTER,
+                PanelsRenderHook::SIDEBAR_NAV_START,
                 fn (): HtmlString => new HtmlString(view('filament.components.cuenta-en-la-barra')->render()),
             )
             // Con la cuenta abajo, el menú de usuario de Filament sobra: dos

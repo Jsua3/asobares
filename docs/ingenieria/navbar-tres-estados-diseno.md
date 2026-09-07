@@ -1872,3 +1872,28 @@ En el mismo mensaje pidió rehacer la parte superior del panel: el control de te
 **Recomendación: A.** Porque el encargo es que el panel se parezca al sitio, y el control de tema del sitio es un popover de tres opciones, no un interruptor de dos. La parte superior queda con el título de la página a la izquierda y el control de tema a la derecha, que es lo que un panel necesita arriba.
 
 **Lo que no cambia en esta ampliación:** el ancho de la barra, el orden de los grupos, los destinos, el idioma de los rótulos y el logotipo. Y sigue fuera de alcance el carril de iconos plegable.
+
+
+---
+
+## Corrección del 7 sep: la barra se aplana
+
+**Qué pasó.** Con D-L19 a D-L23 construidas, Sua abrió el panel y dijo dos cosas: que todo está **muy apeñuscado**, y que el perfil del usuario al pie **no le gusta**. Trajo además una referencia, la barra lateral de Roblox, y pidió opinión.
+
+**Lo que la referencia hace, mecánicamente.** No tiene módulos: ni cantos, ni cristal, ni cajas. Es el fondo de la página, más oscuro, y encima una lista. La única caja es la tarjeta de suscripción del final, y es caja precisamente porque no es navegación. No tiene rótulos de grupo: trece destinos con la misma forma. Las filas miden unos 48 px con mucho aire lateral y la activa es una pastilla llena de ancho completo. Los contadores viven dentro de las filas, así que no hay campana compitiendo. Y el perfil está **arriba, como primera fila**.
+
+**Por qué la nuestra se ve apretada, con números.** La fila quedó con 210 px útiles de los 244 de la barra: los 34 que faltan se los comieron el margen del módulo, su relleno y su canto. Y los cantos meten una caja dentro de otra dentro de otra: barra, módulo y fila. Eso es lo que se lee como amontonado, y viene directamente de D-L19.
+
+**Lo que se revierte, y por qué.** Las tres eran recomendación de esta sesión, Sua las aprobó sobre el papel y en pantalla no funcionaron. Se dice aquí para que no se vuelvan a proponer sin leer esto:
+
+- **D-L19 queda sin efecto.** Los módulos dejan de ser cajas con vidrio propio. El ritmo lo hace el aire, no el canto. Los tokens `--asb-admin-barra-modulo-*` no se borran: pasan a alimentar solo la hoja de la cuenta y el popover del tema, que son capas flotantes y sí deben tener canto.
+- **D-L20 queda sin objeto.** Si no hay módulo que encender, el estado del desplazamiento no enciende nada: pasa a alimentar **solo** el aviso de lista cortada de D-L15.
+- **D-L21 cambia de sitio, no de contenido.** La cuenta sube a la primera fila, con la misma composición (avatar, nombre y rango) y la misma hoja, que ahora abre hacia abajo.
+
+**Lo que entra, con sus valores.** La barra es **una sola superficie de cristal**: velo, línea de límite, filo luminiscente y resplandor de esquina, y nada más. El aire entre grupos sube de 18 a 28 px por encima del rótulo, el rótulo gana 8 px por debajo, y entre filas entran 2 px. La fila sube de 2,75rem a **3rem**, con el icono a 20 px y 12 px de separación con el texto.
+
+**El coste, medido antes de escribirlo.** Con la fila a 48 px la lista pasa de 1.216 a 1.312 px y, en una ventana de 1.019 de hueco, se corta el 22 % en vez del 16 %: de un vistazo caben 20 filas de 24 en vez de 22. Por eso el aviso de lista cortada (D-L15) deja de ser conveniente y pasa a ser necesario.
+
+**Los contadores entran en las filas.** El mecanismo ya existe y lo usan cuatro sitios del panel, entre ellos las fotos por aprobar y la cartera en mora. Aquí se les da estilo propio, alineados a la derecha de la fila, en rojo solo cuando urgen. Cada insignia es una consulta por carga de página: si se extienden a más destinos, hay que medirlo antes.
+
+**Lo que NO se toca.** El cristal y su velo calibrado, las dos luces, la línea del límite, el indicador del ítem activo con su brote, el anillo de foco de dos colores, los rótulos de grupo (más ligeros, pero siguen, porque veinticuatro destinos en plano no tienen dónde agarrarse), el control de tema con sus tres preferencias, y todas las guardias y tokens ya escritos.

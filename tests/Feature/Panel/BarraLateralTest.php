@@ -319,6 +319,12 @@ class BarraLateralTest extends TestCase
 
         $this->assertGreaterThanOrEqual(44, $enPixeles, "La fila declara {$alto[1]}rem, que son {$enPixeles} px: por debajo del mínimo táctil.");
 
+        // 48 y no 44 es elección, no mínimo: la corrección del 7 sep subió la
+        // fila para que la barra respirara, sabiendo el coste (la lista pasa de
+        // 1.216 a 1.312 px y se corta el 22 % en vez del 16 % a 1.019 de hueco).
+        // Bajarla otra vez deshace esa decisión sin que nadie se entere.
+        $this->assertSame(48.0, $enPixeles, "La fila declara {$alto[1]}rem: la decisión del 7 sep fue 3rem, o sea 48 px.");
+
         $this->assertStringContainsString(
             'min-height: var(--asb-admin-barra-fila-alto);',
             $this->regla($tema, '.fi-sidebar .fi-sidebar-item-btn'),
@@ -327,37 +333,57 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * Los tres módulos (D-L19 y D-L20). La barra de escritorio no es un plano:
-     * es una píldora con módulos dentro que encienden su propio vidrio. Aquí
-     * son tres, por función y no por sección: marca (solo visible en el cajón,
-     * porque con topbar Filament esconde la cabecera en escritorio),
-     * navegación y cuenta.
+     * La barra es UNA superficie, no cajas dentro de cajas (corrección del
+     * 7 sep). Con los módulos encajados la fila se quedaba en 210 px útiles de
+     * 244, y los cantos apilaban tres niveles: barra, módulo y fila. El ritmo
+     * lo hace el aire.
      *
-     * El material del módulo de navegación va en el ELEMENTO y no en un
-     * pseudoelemento, al revés que en el resto de la barra, y por una razón
-     * medida: ese elemento es el scroller (`overflow: hidden auto`), y un
-     * pseudoelemento con `inset: 0` dentro de un scroller se desplaza con el
-     * contenido y deja de cubrir el módulo. Los fondos no se desplazan.
-     * Rotura: quitar el canto del módulo de navegación, o el del de cuenta.
+     * Los tokens de módulo siguen vivos, pero solo para las capas que flotan
+     * sobre la página: la hoja de la cuenta y el popover del tema. Ahí el canto
+     * sí separa algo.
+     * Rotura: devolver el canto al módulo de navegación.
      */
-    public function test_la_barra_tiene_sus_tres_modulos(): void
+    public function test_la_barra_es_una_sola_superficie(): void
     {
         $tema = $this->tema();
 
-        $navegacion = $this->regla($tema, '.fi-sidebar-nav');
-        $this->assertStringContainsString('var(--asb-admin-barra-modulo-canto)', $navegacion, 'El módulo de navegación no tiene canto de cristal.');
-        $this->assertStringContainsString('border-radius', $navegacion, 'Un módulo sin radio no se lee como pieza.');
+        foreach (['.fi-sidebar-nav', '.fi-sidebar-header'] as $selector) {
+            $this->assertStringNotContainsString(
+                'var(--asb-admin-barra-modulo-canto)',
+                $this->regla($tema, $selector),
+                "{$selector} vuelve a ser una caja dentro de la barra."
+            );
+        }
 
-        $cuenta = $this->regla($tema, '.asb-barra-cuenta');
-        $this->assertStringContainsString('var(--asb-admin-barra-modulo-canto)', $cuenta, 'El módulo de cuenta no tiene canto de cristal.');
-
-        // El de navegación enciende al desplazarse la lista; el de cuenta está
-        // encendido siempre, porque no se desplaza nunca (D-L20).
-        $this->assertStringContainsString(
+        $this->assertStringNotContainsString(
             'body[data-barra-estado="scroll"] .fi-sidebar-nav',
             preg_replace('/\s+/', ' ', $tema),
-            'El módulo de navegación no cambia con el estado de la lista.'
+            'El estado del desplazamiento ya no enciende ningún módulo: alimenta solo el aviso de lista cortada.'
         );
+
+        // Las capas que sí flotan conservan su canto.
+        foreach (['.asb-barra-hoja', '.asb-panel-tema__popover'] as $flotante) {
+            $this->assertStringContainsString(
+                'var(--asb-admin-barra-modulo-canto)',
+                $this->regla($tema, $flotante),
+                "{$flotante} flota sobre la página y necesita su canto."
+            );
+        }
+    }
+
+    /**
+     * La cuenta va ARRIBA, como primera fila (corrección del 7 sep). Estuvo al
+     * pie menos de una hora: Sua la vio y no le gustó ahí, y la referencia que
+     * trajo la pone arriba con la misma forma que las demás filas.
+     * Rotura: devolver el gancho a SIDEBAR_FOOTER.
+     */
+    public function test_la_cuenta_va_al_principio_de_la_barra(): void
+    {
+        $proveedor = File::get(app_path('Providers/Filament/AdminPanelProvider.php'));
+
+        $this->assertStringContainsString('PanelsRenderHook::SIDEBAR_NAV_START', $proveedor, 'La cuenta no se pinta al principio de la barra.');
+        $this->assertStringNotContainsString('PanelsRenderHook::SIDEBAR_FOOTER', $proveedor, 'La cuenta sigue anclada al pie.');
+        $this->assertStringContainsString('->userMenu(false)', $proveedor, 'Con la cuenta en la barra, el menú de usuario de Filament sobra.');
     }
 
     /**

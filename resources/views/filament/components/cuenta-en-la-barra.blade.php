@@ -35,7 +35,24 @@
          }"
          x-on:keydown.escape.window="cerrarYVolverAlFoco()"
          x-on:pointerdown.outside="cerrar()">
-        {{-- La hoja abre hacia ARRIBA: el módulo es el suelo de la barra. --}}
+        <button type="button"
+                x-ref="disparador"
+                x-on:click="abierto = ! abierto"
+                x-bind:aria-expanded="abierto ? 'true' : 'false'"
+                aria-controls="asb-hoja-cuenta"
+                class="asb-barra-chip">
+            <span class="sr-only">{{ $usuario?->name }}, {{ $rango }}: perfil y sesión</span>
+
+            <span aria-hidden="true" class="asb-barra-avatar">{{ $iniciales }}</span>
+
+            <span aria-hidden="true" class="min-w-0 flex-1 text-left">
+                <span class="block truncate text-sm font-medium">{{ $usuario?->name }}</span>
+                <span class="block truncate text-2xs">{{ $rango }}</span>
+            </span>
+
+            <x-heroicon-o-chevron-up-down aria-hidden="true" class="h-4 w-4 shrink-0" />
+        </button>
+        {{-- La hoja abre hacia ABAJO: la cuenta es la primera fila de la barra. --}}
         <div x-cloak
              x-show="abierto"
              x-transition:enter="transicion-desplegable ease-out duration-(--duracion-entrada)"
@@ -65,22 +82,5 @@
             </form>
         </div>
 
-        <button type="button"
-                x-ref="disparador"
-                x-on:click="abierto = ! abierto"
-                x-bind:aria-expanded="abierto ? 'true' : 'false'"
-                aria-controls="asb-hoja-cuenta"
-                class="asb-barra-chip">
-            <span class="sr-only">{{ $usuario?->name }}, {{ $rango }}: perfil y sesión</span>
-
-            <span aria-hidden="true" class="asb-barra-avatar">{{ $iniciales }}</span>
-
-            <span aria-hidden="true" class="min-w-0 flex-1 text-left">
-                <span class="block truncate text-sm font-medium">{{ $usuario?->name }}</span>
-                <span class="block truncate text-2xs">{{ $rango }}</span>
-            </span>
-
-            <x-heroicon-o-chevron-up-down aria-hidden="true" class="h-4 w-4 shrink-0" />
-        </button>
     </div>
 @endauth
