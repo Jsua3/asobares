@@ -1447,15 +1447,33 @@ La Parte II se escribió antes de tocar código y el código la contradijo en oc
 
 ---
 
-# Parte III · La barra lateral del panel: cristal, luz y resorte — diseño PROPUESTO
+# Parte III · La barra lateral del panel: cristal, luz y resorte — diseño aprobado
 
-**7 de septiembre de 2026** · Persona 1 (Sua) con Claude Code · sobre `main` en `b1b270d` · **pendiente de aprobación**: las dieciocho decisiones de más abajo (D-L1 a D-L18), cada una con su recomendación. Se escribe **antes** de la primera línea de código, como las dos partes anteriores. Encargo de Sua del 7 sep, textual: «vamos a hacerle rework al menú de la izquierda que ahora mismo está rojo oscuro, y el rework hará que sea muy semejante a la navBar de escritorio pero vertical [...] debe permitir observar animaciones de resorte a la hora de scrollear y en general tenemos que definir todo su funcionamiento, animación y calidad gráfica [...] también quiero que aquí mantenga un cristal con detalles luminiscentes en rojo claro para el modo claro y en rojo oscuro para el modo oscuro».
+**7 de septiembre de 2026** · Persona 1 (Sua) con Claude Code · sobre `main` en `b1b270d` · **aprobada por Sua el 7 sep 2026**, textual: «apruebo todo». Las dieciocho decisiones de más abajo (D-L1 a D-L18) quedan tomadas con la recomendación de cada una. Se escribe **antes** de la primera línea de código, como las dos partes anteriores. Encargo de Sua del 7 sep, textual: «vamos a hacerle rework al menú de la izquierda que ahora mismo está rojo oscuro, y el rework hará que sea muy semejante a la navBar de escritorio pero vertical [...] debe permitir observar animaciones de resorte a la hora de scrollear y en general tenemos que definir todo su funcionamiento, animación y calidad gráfica [...] también quiero que aquí mantenga un cristal con detalles luminiscentes en rojo claro para el modo claro y en rojo oscuro para el modo oscuro».
 
 Cómo se hizo: cinco miradas independientes sobre el mismo encargo (movimiento, material, estados, encaje con Filament y accesibilidad), cada una criticada por un adversario que verificó contra el repositorio, y una síntesis que resolvió las cinco contradicciones entre ellas. Los hechos que sostienen las decisiones están comprobados en el vendor de Filament 4.12.5 y en las guardias vigentes; los tres principales se volvieron a comprobar a mano antes de registrar esto.
 
 **Qué es esta barra.** Es la navegación permanente del panel de administración: una columna de 15,25 rem con 24 destinos repartidos en cinco grupos, que en escritorio vive en el flujo del layout (`.fi-layout` es `flex`, `.fi-main-ctn` es `flex-1`) y se queda pegada con `lg:sticky` bajo el topbar, y que por debajo de 64 rem es un cajón `fixed` que entra sobre el contenido. Tiene que hablar el idioma de la barra pública: un solo DOM, el estado en un atributo, todo el CSS por selector, el vidrio siempre en un pseudoelemento, el vocabulario en tokens y el comportamiento en JavaScript con nombres en español.
 
 **Qué NO es.** No es la navBar de escritorio girada noventa grados. La navBar pública se retrae porque le roba alto a la lectura; esta barra no le roba nada al contenido, que va a su lado, así que no se retrae, no se compacta y no se va. Su cabecera con el logotipo no existe en escritorio (Filament la marca `lg:hidden` cuando hay topbar), así que no hay logotipo que condensar. Y detrás de ella, en escritorio, no pasa nada: solo el color plano de `.fi-body`. No es tampoco un carril de iconos: el plegado de escritorio está apagado y encenderlo es otro encargo. Lo único que de verdad se desplaza aquí es su propia lista, y ahí es donde tiene que estar todo lo que se mueve.
+
+## Cifras de partida, medidas el 7 sep 2026
+
+Las midió Sua en su propio navegador, con el panel abierto y la sesión iniciada, porque el segundo factor impide que una sesión automatizada llegue a `/admin`. La ventana medía **201 x 987**, es decir, **por debajo de 64 rem: lo medido es el CAJÓN**, no la barra de escritorio. Las cifras que no dependen del ancho valen para las dos, y las que sí lo hacen quedan señaladas.
+
+| Qué | Medido | Lectura |
+|---|---|---|
+| Ancho de la barra | 244 px (15,25 rem) | Coincide con `--asb-admin-sidebar-ancho`. Vale en los dos anchos |
+| Posición | `fixed` | Es el cajón. En escritorio Filament la deja `lg:sticky` y en flujo (D-L1) |
+| Desenfoque | `blur(14px)` | Aquí SÍ desenfoca, porque bajo el cajón pasa contenido. En escritorio es el que no se ve |
+| Fondo computado | `rgba(0, 0, 0, 0)` | El degradado va en `background-image`, así que el color computa transparente: la franja burdeos que se ve la pinta el degradado, no el color |
+| Ítems | 24, todos de **43,5 px** | **Ninguno llega a 44**: faltan 0,5 px, y la comprobación de las cuatro esquinas del cuadrado da `false` en los 24. Es el defecto de partida que D-L12 y la retícula corrigen |
+| Lista | 1.651 px de contenido en 913 de hueco | **Se corta el 45 %**: la lista desborda casi el doble de lo que cabe, que es exactamente lo que justifica el aviso de borde de D-L15 y que el estado lo mande el scroll interno (D-L3) |
+| Rótulo de grupo | 11,52 px, `rgb(191, 165, 166)` | Es `#bfa5a6`. Sobre el burdeos de hoy da 7,77:1, así que hoy sobra contraste; el cristal es lo que lo pone en juego y por eso D-L11 recalcula el velo |
+| Ítem activo | 43,5 px de alto, blanco sobre `rgba(238, 65, 55, 0.16)`, con filo rojo de 3 px hacia dentro | El filo interior de 3 px ya existe y es el germen del indicador de D-L7 |
+
+Falta una medición equivalente **con la ventana maximizada**, que es donde la barra es `lg:sticky` y donde se juzga el cristal pintado de D-L1. Se toma antes de dar la barra por cerrada.
+
 
 ## Contradicciones entre miradas, resueltas
 
