@@ -12,10 +12,14 @@
         --font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
     }
 
+    /* El tracking plano del panel es decisión escrita, no descuido: aquí la
+       interfaz es densa y no hay titulares de 60 px, así que la escala del
+       sitio público no aplica (`TipografiaTest`). Las reglas por elemento
+       de más abajo siguen mandando donde las hay. */
     h1, h2, h3, h4 {
         font-family: var(--font-display);
         font-weight: 700;
-        letter-spacing: 0;
+        letter-spacing: -0.02em;
     }
 
     html {
