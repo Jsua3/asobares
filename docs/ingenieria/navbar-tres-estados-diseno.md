@@ -1443,3 +1443,339 @@ La Parte II se escribió antes de tocar código y el código la contradijo en oc
 - **El foco al cruzar 64rem.** El header despacha el cierre general y cada desplegable llama a `cerrar()`, no a la variante que devuelve el foco: girar un iPad con teclado y una hoja abierta deja el foco en el cuerpo. Devolverlo al disparador tampoco sirve, porque ese disparador se oculta con su módulo. Pide decisión propia.
 - **Los dos vidrios sobre el video.** El móvil paga dos `backdrop-filter` permanentes y un tercero con la hoja abierta, cuando el velo al 88 % deja al desenfoque como mucho un 12 % del píxel. En este equipo el desplazamiento guiado dio 6,1 ms de mediana con el video corriendo; la medición que decide es la del teléfono de gama baja, que D-M18 dejó pendiente.
 - **La duplicación del degradado de la raya.** `.cromo::before` y `.modulo-inferior::after` repiten el mismo `linear-gradient`. Un token lo unificaría; no se toca hoy para no mover el vocabulario de tokens en la misma rama que estrena la barra.
+
+
+---
+
+# Parte III · La barra lateral del panel: cristal, luz y resorte — diseño PROPUESTO
+
+**7 de septiembre de 2026** · Persona 1 (Sua) con Claude Code · sobre `main` en `b1b270d` · **pendiente de aprobación**: las dieciocho decisiones de más abajo (D-L1 a D-L18), cada una con su recomendación. Se escribe **antes** de la primera línea de código, como las dos partes anteriores. Encargo de Sua del 7 sep, textual: «vamos a hacerle rework al menú de la izquierda que ahora mismo está rojo oscuro, y el rework hará que sea muy semejante a la navBar de escritorio pero vertical [...] debe permitir observar animaciones de resorte a la hora de scrollear y en general tenemos que definir todo su funcionamiento, animación y calidad gráfica [...] también quiero que aquí mantenga un cristal con detalles luminiscentes en rojo claro para el modo claro y en rojo oscuro para el modo oscuro».
+
+Cómo se hizo: cinco miradas independientes sobre el mismo encargo (movimiento, material, estados, encaje con Filament y accesibilidad), cada una criticada por un adversario que verificó contra el repositorio, y una síntesis que resolvió las cinco contradicciones entre ellas. Los hechos que sostienen las decisiones están comprobados en el vendor de Filament 4.12.5 y en las guardias vigentes; los tres principales se volvieron a comprobar a mano antes de registrar esto.
+
+**Qué es esta barra.** Es la navegación permanente del panel de administración: una columna de 15,25 rem con 24 destinos repartidos en cinco grupos, que en escritorio vive en el flujo del layout (`.fi-layout` es `flex`, `.fi-main-ctn` es `flex-1`) y se queda pegada con `lg:sticky` bajo el topbar, y que por debajo de 64 rem es un cajón `fixed` que entra sobre el contenido. Tiene que hablar el idioma de la barra pública: un solo DOM, el estado en un atributo, todo el CSS por selector, el vidrio siempre en un pseudoelemento, el vocabulario en tokens y el comportamiento en JavaScript con nombres en español.
+
+**Qué NO es.** No es la navBar de escritorio girada noventa grados. La navBar pública se retrae porque le roba alto a la lectura; esta barra no le roba nada al contenido, que va a su lado, así que no se retrae, no se compacta y no se va. Su cabecera con el logotipo no existe en escritorio (Filament la marca `lg:hidden` cuando hay topbar), así que no hay logotipo que condensar. Y detrás de ella, en escritorio, no pasa nada: solo el color plano de `.fi-body`. No es tampoco un carril de iconos: el plegado de escritorio está apagado y encenderlo es otro encargo. Lo único que de verdad se desplaza aquí es su propia lista, y ahí es donde tiene que estar todo lo que se mueve.
+
+## Contradicciones entre miradas, resueltas
+
+Cinco puntos donde dos análisis decían cosas incompatibles. Se resuelven aquí, con la evidencia delante, para que no se vuelvan a abrir dentro de tres decisiones.
+
+1. **¿La barra es `fixed` de alto completo o está en flujo?** Gana "en flujo". `vendor/filament/filament/resources/css/components/sidebar.css:62-115`: `.fi-sidebar` nace `fixed`, pero en la rama de este panel (sin navegación superior y sin plegado de escritorio) recibe `lg:sticky` y `lg:translate-x-0`. Consecuencia dura: **detrás de la barra no pasa el contenido**, y todo el análisis que daba por hecho un `backdrop-filter` útil en escritorio se cae.
+2. **¿Cristal real o cristal pintado?** Gana pintado en escritorio, real solo en el cajón. Además del punto anterior, el campo ambiental rojo que se proponía pintar detrás difiere de un color plano en uno o dos niveles de 255 tras el velo: desenfocar eso devuelve el mismo color. Y el sitio propuesto para ese campo, `.fi-body::before`, está **prohibido por una guardia verde** (`tests/Feature/Panel/TemaDelPanelTest.php:134`).
+3. **¿El resorte al hacer scroll va en la cabecera de la barra?** No: esa cabecera es `lg:hidden` con topbar (`sidebar.css:130`), y las reglas que hoy le dedicamos (`theme.css:250-260`) son CSS muerto en escritorio. El resorte se muda a los bordes de la lista, a la llegada del indicador, a la flecha del grupo y al cajón.
+4. **¿El estado lo dispara el scroll del documento o el de la lista?** Lo dispara la lista. En escritorio la barra no se mueve con el documento, así que compactar por el documento es efecto sin causa; y la lista desborda casi siempre (23 entradas agrupadas más dos sueltas contra unos 900 px útiles).
+5. **¿El rojo luminiscente es claro sobre claro, o invertido?** Se parte en dos oficios. El rojo que **alumbra** (filo y halo) sigue la palabra de Sua: claro en claro, oscuro en oscuro. El rojo que **informa** (rótulo del ítem activo) va en dirección contraria porque lo manda la aritmética: `#ee4137` no llega a 4,5:1 en ningún tema.
+
+---
+
+## D-L1. ¿Qué puede ser el cristal en escritorio, si detrás de la barra no pasa nada?
+
+**Hoy.** `theme.css:227-238` pinta un degradado opaco `#3b1113 → #291012 → #171012` y encima `backdrop-filter: blur(14px)` sobre el propio elemento. El desenfoque no se ve (el fondo que lleva encima es opaco), cuesta una pasada de compositor sobre 244 px por 100 dvh, y al ir en el elemento convierte la barra en raíz de fondo para todo lo que anide dentro.
+
+| Opción | Coste |
+|---|---|
+| A. Cristal **pintado** en escritorio (velo translúcido, filo, halo, canto interior de luz y sombra) y cristal **real** solo por debajo de 64 rem, donde sí pasa contenido bajo el cajón | Dos recetas que documentar. En escritorio no hay difusión: el material se lee como panel translúcido, no como lente |
+| B. Cristal real en los dos anchos, creando un campo ambiental detrás | Descartada con evidencia: el sitio natural del campo está vetado por guardia, y el campo que se proponía es indistinguible de un color plano tras el velo. Se paga el compositor para no ver nada |
+| C. Dejar el `blur(14px)` de hoy | Cero trabajo y una mentira medible |
+
+**Recomendación: A.** Porque un desenfoque solo vale lo que vale su fondo, y en escritorio el fondo es un color plano: allí el cristal lo hacen el velo, la luz y la sombra, y solo el cajón tiene página que refractar.
+
+**Consecuencia que hay que escribir, no descubrir:** Filament da a `.fi-sidebar` un fondo opaco propio (`bg-white`, `dark:bg-gray-900`) y solo lo vuelve transparente en `lg`. Hay que declarar `background: transparent` explícitamente sobre el elemento, no limitarse a borrar nuestra declaración, o el cajón queda opaco bajo el velo.
+
+## D-L2. ¿Dónde vive el material y qué portador se anima?
+
+**Hoy.** Fondo, borde, sombra y desenfoque cuelgan del elemento `.fi-sidebar`.
+
+| Opción | Coste |
+|---|---|
+| A. `::before` lleva el velo y el desenfoque del cajón; `::after` lleva el material que responde al estado (filo y sombra, por opacidad); el elemento no lleva ningún filtro | Dos pseudoelementos gastados: si más adelante hace falta un tercero, hay que un envoltorio real |
+| B. Todo en el elemento, como hoy | Deja a cualquier descendiente sin página que desenfocar y ata el filo al `transition-property` que Filament pone en el elemento |
+
+**Recomendación: A.** Porque la regla del proyecto no es teoría aquí: el ítem activo va a querer su propia luz, y con el filtro en el elemento ninguna funcionaría.
+
+**Dato que corrige un miedo heredado:** `.fi-sidebar` **ya** es bloque contenedor de sus descendientes `fixed`, porque Filament le aplica `lg:translate-x-0` fuera de toda media. No es algo que vayamos a provocar ni algo que desaparezca al quitar el `backdrop-filter`. Esta especificación no añade ninguna propiedad nueva de las que crean bloque contenedor, y esa abstención es deliberada.
+
+## D-L3. ¿Qué scroll manda el estado, con qué vocabulario, y hay estado de atención?
+
+**Hoy.** La barra no reacciona a nada. El topbar sí, por posición (`scrollY > 8`), desde el conmutador de tema.
+
+| Opción | Coste |
+|---|---|
+| A. Manda el scroll interno de `.fi-sidebar-nav`, con el vocabulario ya registrado `data-estado="inicial \| scroll"` y **sin** `atencion`; aparte, `data-borde="ninguno \| arriba \| abajo \| ambos"` para el aviso funcional de lista cortada | Dos atributos y un oyente. Hay que justificar por escrito que aquí no hay `atencion` |
+| B. Manda el scroll del documento, con la histéresis de la barra pública | Efecto sin causa: en escritorio la barra no se ha movido y encoge; y en páginas cortas del panel el estado no se alcanza nunca |
+| C. Los dos, un ancla por scroller | Dos anclas y dos guardas para gobernar un material que solo cambia de opacidad. Coste sin ganancia una vez que la cabecera sale del cuadro |
+
+**Recomendación: A.** Porque la única superficie que se mueve aquí es la lista, y porque `atencion` en la barra pública significa "el usuario quiere más barra": aquí la barra entera está siempre a la vista y no hay nada que pedir.
+
+**Por qué son dos atributos y no tres valores de uno:** el aviso de borde es funcional y tiene que sobrevivir mientras el material cambia; meterlos en un solo enum obliga a apagar el aviso justo cuando el usuario está recorriendo la lista.
+
+## D-L4. ¿Quién escribe el estado y sobre qué elemento?
+
+**Hoy.** El único escritor de estado del panel es `syncTopbar()` dentro del conmutador de tema, protegido por la guardia `test_la_topbar_reacciona_al_scroll_sin_un_script_adicional` (`TemaDelPanelTest.php:137-147`).
+
+| Opción | Coste |
+|---|---|
+| A. Módulo propio `resources/js/panel-barra-lateral.js`, registrado en `assetsDelPanel()` con `->module()`, que escribe los dos atributos **sobre `<body>`** y los reescribe en `livewire:navigated` | Un archivo y una entrada más. Los selectores del CSS empiezan por `body[data-barra-estado]` |
+| B. Lo mismo, pero escribiendo sobre `#fi-main-sidebar` | Ese nodo está dentro del componente Livewire `Sidebar`, que se re-renderiza por evento propio: el morph borra los atributos que no vienen del servidor y el estado desaparece sin error y sin navegación |
+| C. Un `x-data` inyectado por `SIDEBAR_START` | Muere y renace en cada navegación, lo que está bien para reanclar y mal para recordar; y añade un segundo dueño de la señal |
+
+**Recomendación: A.** Porque `<body>` es el único ancla que ni el morph del componente ni la navegación SPA tocan, y `->module()` es lo que de verdad garantiza que el módulo no se reevalúe (`data-navigate-once` en modo SPA), no la analogía con `panel-graficas.js`.
+
+**Lo que NO se hace en esta entrega:** unificar el dueño de la señal de scroll con el topbar. Es un defecto real (el topbar pierde su clase al volver atrás) pero borrar `syncTopbar()` revierte una decisión registrada y pone roja una guardia por tres afirmaciones. Va a constancia, no a este commit. Y no hay esquina que desincronizar mientras la barra no responda al scroll del documento.
+
+## D-L5. ¿Dónde vive el resorte que pidió Sua, si nada de la barra se retrae?
+
+**Hoy.** Ninguna transición de la barra usa los resortes; el único movimiento es `transform 160ms` en la fila, neutralizado por un `transform: none` en el bloque de hover.
+
+| Opción | Coste |
+|---|---|
+| A. El resorte se muda a cuatro sitios: el filete del borde de lista entra con `--ease-rebote-vivo`, el indicador del ítem activo llega con resorte, la flecha del grupo rota con resorte, y el cajón entra con `--ease-rebote-suave` | Ninguno de los cuatro está bajo el puntero mientras se desplaza. Hay que explicar a Sua que el resorte no está en la barra entera |
+| B. Las filas se compactan por dirección de scroll, calcando el módulo de la barra pública | Descartada: en vertical el scroller y el objetivo del puntero son la misma superficie, así que encoger las filas mueve lo que el usuario está a punto de pulsar, y con 520 ms el objetivo sigue asentándose medio segundo después de soltar la rueda |
+| C. Rebote elástico de la lista en sus extremos | Exige interceptar rueda y toque y pelear con el scroll nativo. No es una tarde y en híbridos sale mal |
+
+**Recomendación: A.** Porque el resorte tiene que ir donde algo empieza y termina por voluntad del usuario, y recorrer una lista no es ni lo uno ni lo otro.
+
+## D-L6. El indicador del ítem activo: ¿llega, o viaja de una fila a otra?
+
+**Hoy.** El indicador es `inset 3px 0 0 #ee4137` y nace en su sitio final, porque el panel es SPA (`->spa()`), la barra es un componente Livewire sin `x-persist` y su DOM se sustituye entero en cada navegación.
+
+| Opción | Coste |
+|---|---|
+| A. **Llega**: el indicador brota con `scaleY` desde `--asb-admin-barra-brote` con `--ease-rebote-vivo` en `--duracion-rebote`. Puro compositor, sin medir nada, igual en navegación SPA y en carga completa | La barra se lee como cinco listas que se repintan, no como un objeto continuo |
+| B. **Viaja** por FLIP: se guarda la posición de la fila saliente en ámbito de módulo y el indicador nuevo nace desplazado y se suelta a cero | Quince líneas y tres guardas, más una trampa demostrada: `offsetTop` no mide contra el `<nav>` (su `offsetParent` es `.fi-sidebar`), así que hay que medir con `getBoundingClientRect` contra el nav más su `scrollTop`, y el respaldo tiene que expresarse en esa misma unidad. Es la pieza más frágil de todo el encargo |
+| C. `x-persist` sobre la barra, o transiciones de vista | Descartadas. Con `x-persist` sobrevive el DOM viejo y `aria-current` lo pinta el servidor: la barra marcaría la página anterior para siempre, y además congela las dos insignias vivas. `view-transition-name` crea raíz de fondo y contexto de apilamiento |
+
+**Recomendación: A, y B como decisión aparte que Sua puede pedir después.** Porque un viaje mal medido se lee como un error y no como un resorte, y porque el alcance está congelado: la llegada ya cumple la petición de resorte con una décima parte del riesgo.
+
+**Dato que quita una precondición falsa:** no hace falta añadir `wire:scroll` a la lista. El store de Filament ya guarda el `scrollTop` del nav en `livewire:navigate` y lo restaura dentro de un `requestAnimationFrame` en `livewire:navigated` (`vendor/filament/filament/resources/js/stores/sidebar.js:10-38`). Cualquier cosa nuestra que toque el scroll tiene que encolarse después de ese rAF.
+
+## D-L7. ¿Con qué se dibuja el indicador?
+
+**Hoy.** `inset 3px 0 0 #ee4137` dentro de un `box-shadow` de tres capas, sobre una caja de 43,5 px con radio 0,9 rem.
+
+| Opción | Coste |
+|---|---|
+| A. Pseudoelemento absoluto sobre `.fi-sidebar-item-btn` (que ya es `position: relative`): barra de 3 px por 20 px con radio completo, centrada en vertical | Una regla más y hay que reservar el aire para que no lo recorte el radio de la fila |
+| B. Conservar el `inset box-shadow` | En modo de contraste forzado de Windows el navegador descarta `box-shadow` y el indicador desaparece; contra el radio de 14,4 px se lee como una coma y no como un filo; y no se puede trasladar sin arrastrar el texto |
+
+**Recomendación: A.** Porque el segundo canal del ítem activo no puede evaporarse justo en el modo que existe para que la gente vea mejor.
+
+## D-L8. ¿La barra invierte con el tema, o sigue siendo oscura siempre?
+
+**Hoy.** El mismo degradado en `:root` y en `.dark`, y una paleta privada en hexadecimal cableado repartida en dos bloques: `theme.css:227-320` (`#f3e9e9`, `#d8babb`, `#bfa5a6`, `#ff7168`, `#ee4137`, `rgb(255 255 255)` en la fila activa) y `theme.css:673-696`, dentro del bloque de puntero fino (`rgb(255 255 255)`, `rgb(255 255 255 / 0.06)`, `#ff8a82`, `#ff7168`).
+
+| Opción | Coste |
+|---|---|
+| A. El material invierte y los colores de texto se leen de los tokens del sitio (`--asb-tinta`, `--asb-suave`, `--asb-tenue`, `--asb-acento`) a través de los tokens de la barra | Cambio visual grande, y hay que reescribir los **dos** bloques: el de hover no es opcional, es donde vive la mitad de la paleta privada |
+| B. Vidrio oscuro siempre, tokenizado | Conserva la queja de origen: en modo claro sigue habiendo un rail nocturno pegado a una página blanca |
+| C. Vidrio claro siempre | El defecto inverso, y peor: en oscuro deslumbra |
+
+**Recomendación: A.** Porque el mayor arreglo de correctitud de todo el encargo no es un color, es que la barra deje de tener paleta privada: el día que la paleta se mueva, se mueve con ella, y bajo `prefers-contrast: more` ya sube sola.
+
+## D-L9. Los dos oficios del rojo: ¿qué rojo alumbra y qué rojo informa?
+
+**Hoy.** El mismo `#ee4137` hace de filo, de fondo y de señal, y `#ff7168` de rótulo activo en los dos temas.
+
+| Opción | Coste |
+|---|---|
+| A. **Luz** con la palabra de Sua: rojo claro en el tema claro, rojo oscuro en el tema oscuro, alimentando solo filo, halo y resplandor. **Tinta** con la aritmética: `--asb-acento-fuerte` en claro y `--asb-acento` en oscuro para el rótulo del ítem activo | Hay que explicar por qué el rojo del texto va en dirección contraria al rojo de la luz. Es una conversación, no un problema |
+| B. Un solo rojo para todo | `#ee4137` da 3,49:1 sobre el cristal claro y 4,27:1 sobre el oscuro. No llega a 4,5 en ninguno de los dos: no puede ser el color de ningún rótulo |
+| C. Aclarar el rojo oscuro hasta que pase el umbral | Deja de ser rojo oscuro, que es exactamente lo que Sua pidió |
+
+**Recomendación: A.** Porque la luz no lleva información y por eso puede ir en la dirección que Sua eligió, mientras que el rótulo sí la lleva y no tiene margen.
+
+**Nota que hay que dejar escrita en el CSS, con el número:** en claro, `--asb-acento` (`#b71f18`) sobre el fondo activo con el halo compuesto encima cae por debajo del umbral; solo `--asb-acento-fuerte` pasa. La asimetría entre temas parece un descuido y cualquier limpieza razonable la "arreglaría".
+
+## D-L10. ¿Qué separa la barra del contenido?
+
+**Hoy.** Un burdeos opaco contra una página `#f7f6f5`: el límite es enorme y gratis. Con cristal desaparece.
+
+| Opción | Coste |
+|---|---|
+| A. El límite lo hacen una **línea** (`--asb-admin-barra-borde`, derivada de `--asb-linea-fuerte`) y la sombra proyectada; el filo luminiscente va encima como segunda capa, no como único canto | Hay que resistir la tentación futura de quitar la línea "porque el vidrio ya separa" |
+| B. Solo el filo luminiscente | Medido: el rojo claro contra la página clara da 2,60:1 y el rojo oscuro contra la oscura 1,93:1, y el velo aporta 1,05:1. Con eso ningún canal llega a 3:1 y la barra deja de ser una región |
+| C. Doble canto: línea neutra fuera y luz roja dentro, separadas un píxel | A escalas de pantalla no enteras (125 %, 150 %, que es lo normal en Windows) se funden en una raya sucia |
+
+**Recomendación: A.** Porque el borde de una región se juzga contra 3:1 y eso solo lo sostiene la luminancia, no el color; la luz dice que el material es cristal, la línea dice dónde termina.
+
+## D-L11. ¿Cuánto velo lleva el cristal, y es el mismo en el cajón?
+
+**Hoy.** Opaco, así que el contraste sobra y nadie ha tenido que calcularlo.
+
+| Opción | Coste |
+|---|---|
+| A. Un velo alto calibrado para el rótulo de grupo (11,5 px, texto normal, 4,5:1 sin excepción) con el halo compuesto encima, y un **segundo velo más alto para el cajón**, donde debajo pasa contenido variable tras el velo de cierre de Filament | Dos valores y una guardia que los recalcula. Queda poco cristal a la vista: es lo que cuesta sostener texto de 11,5 px sobre material translúcido |
+| B. Reutilizar `--asb-cromo-velo` del sitio público | Está calibrado para texto de 14 px contra fotos y vídeo, y por debajo de 64 rem sube por una razón que no es esta. Compartirlo ata dos calibraciones distintas |
+| C. Un solo velo para los dos anchos | Con el velo de escritorio, en el cajón claro el rótulo de grupo y el rojo activo se caen por debajo de 4,5:1. Es el fallo que este proyecto ya pagó dos veces |
+
+**Recomendación: A.** Porque el cajón es el único sitio donde el fondo no se conoce de antemano, y un velo se calibra contra el peor fondo posible, no contra el habitual.
+
+**Regla de procedimiento:** los porcentajes concretos se fijan el día que se escriba el CSS, recalculando con el trait `MideContraste` (`$this->componer(...)`, `$this->contraste(...)`, que son métodos de instancia, no estáticos) sobre los hexadecimales del archivo, y con el halo compuesto encima en su punto más intenso. Ningún número de este documento entra en el CSS sin recalcularse ese día.
+
+## D-L12. ¿Qué canal marca el ítem activo además del color?
+
+**Hoy.** Color, fondo teñido y filo. El fondo teñido da 1,21:1 contra la barra: no es un canal, es decoración.
+
+| Opción | Coste |
+|---|---|
+| A. Indicador de forma fija (D-L7) más peso tipográfico, sobre el `aria-current="page"` que Filament ya pinta | Cero archivos PHP tocados. El peso solo es un canal débil, así que el trabajo lo hace el indicador |
+| B. A, más el icono en variante sólida (`$activeNavigationIcon` en 24 clases) | Es el canal más legible de los tres y el que la barra pública ya eligió, pero son 24 archivos de `app/Filament`: ampliación de alcance, superficie de conflicto con otras sesiones y constancia previa |
+| C. Subir el tinte del fondo hasta que se distinga solo | Para llegar a 3:1 hay que teñir tanto que deja de ser cristal. Y sigue siendo color: no es un segundo canal, es más del primero |
+
+**Recomendación: A**, con B anotada como la primera ampliación que se pide si Sua la quiere. Porque el indicador de forma sobrevive al daltonismo, al contraste forzado y a una pantalla mal calibrada sin tocar un solo archivo PHP.
+
+## D-L13. El plegado de grupo: ¿quién manda en su curva?
+
+**Hoy.** `x-collapse.duration.200ms` en el `<ul>`, y el plugin escribe `transition-property`, `transition-duration` y `cubic-bezier(0.4, 0, 0.2, 1)` **en el elemento**, que gana a cualquier hoja sin `!important`. `Configuración` nace plegado, así que ese movimiento se ve en cada carga.
+
+| Opción | Coste |
+|---|---|
+| A. Pisar solo el reloj y la curva del alto con un `!important` acotado (`--ease-cajon` a `--duracion-panel`), y poner el resorte en la **flecha**, que hoy rota sin ninguna transición | Un `!important` que hay que justificar en la línea de al lado. Ninguna vista publicada |
+| B. Publicar `components/sidebar/group.blade.php` y retimar desde el modificador | Una vista del vendor bifurcada con mantenimiento perpetuo en cada actualización de Filament, y ampliación de alcance con constancia |
+| C. Resorte también en el alto | Descartada con mecanismo: un sobreimpulso en `height` dentro de un scroller hace oscilar `scrollHeight` medio segundo, la barra de desplazamiento tiembla y el navegador puede recortar `scrollTop` en mitad del rebote |
+
+**Recomendación: A.** Porque el reparto es lo que hace que esto parezca diseñado: la flecha rebota, el alto no; la flecha es una rotación que no arrastra layout, el alto arrastra media lista y un scroller detrás.
+
+**Aviso para la guardia:** `theme.css` ya tiene un `!important` hoy, en el bloque de impresión. Una guardia que exija "exactamente uno" nace roja. Lo que hay que exigir es que todo `!important` fuera de `@media print` esté en una lista de selectores permitidos y lleve su comentario justificándolo.
+
+## D-L14. ¿Puede quedar plegado el grupo que contiene la página actual?
+
+**Hoy.** Sí, y pasa: `Configuración` nace plegado y sus cinco destinos quedan en `display: none`. Quien entre a Ajustes del sitio no ve ningún ítem activo en toda la barra.
+
+| Opción | Coste |
+|---|---|
+| A. Al arrancar y en cada `livewire:navigated`, si el grupo con `fi-active` está plegado, se saca de `collapsedGroups` | Ocho líneas. Efecto declarado: tras la primera visita a Ajustes, Configuración deja de nacer plegada, contradiciendo el `->collapsed()` del provider |
+| B. Abrirlo solo en memoria, sin escribir en el almacenamiento | Pelea con `x-show`, que escribe estilo en línea, y con el `<script>` en línea que Filament ejecuta antes de Alpine y en cada navegación SPA |
+| C. Dejarlo | La barra miente: estás en una página y ningún ítem está marcado. La barra nueva lo hace más visible, no menos |
+
+**Recomendación: A.** Porque un grupo no puede quedar cerrado con la página que estás mirando dentro, y el efecto secundario es defendible como producto.
+
+## D-L15. El aviso de "hay más lista": ¿máscara de borde o rótulo de grupo pegajoso?
+
+**Hoy.** Nada. Con cinco grupos y 24 destinos, la lista desborda y no hay ninguna pista de por dónde vas.
+
+| Opción | Coste |
+|---|---|
+| A. Máscara de desvanecido más filete luminiscente en el canto que oculta lista, gobernados por `data-borde` | Media hora. Es el único sitio de una barra vertical donde el resorte no mueve lo que el usuario apunta |
+| B. Rótulo de grupo pegajoso a `top: 0` dentro del nav | Aterriza exactamente donde vive la máscara y se desvanece justo cuando se pega, que es el único momento en el que sirve. Si se quiere, tiene que pegarse **por debajo** de la máscara |
+| C. Las dos, sin decidir | Es lo que hicieron dos miradas por separado y es lo que no puede pasar |
+
+**Recomendación: A.** Porque resuelve el hecho que de verdad tiene esta barra (la lista se corta) y porque el rótulo pegajoso, para funcionar, obliga a apagar el aviso o a desplazarlo, que es pagar dos veces por lo mismo.
+
+## D-L16. Hover, foco y toque: dónde hay gesto y dónde hay lectura
+
+**Hoy.** Dos defectos vivos y uno heredado. El único `:focus-visible` de la barra está **dentro** de `@media (hover: hover) and (pointer: fine)` (`theme.css:673-677`), así que en un portátil táctil o una tableta con teclado la barra se navega sin ningún indicador de foco, y Filament ya quitó el contorno nativo. La misma regla neutraliza el movimiento con `transform: none`. Y la fila mide `2.72rem`, o sea 43,52 px.
+
+| Opción | Coste |
+|---|---|
+| A. **Hover**: la fila se desliza 2 px hacia el contenido con `translate`, dentro de la puerta de puntero fino y atado a `pointerenter`. **Foco**: `:focus-visible` **fuera** de toda media de puntero, anillo de dos colores (tinta más halo, invertidos por tema), sin mover nada y con `scroll-behavior: auto`. **Toque**: `:active` con el encogimiento de forma ancha, nunca el de control de 44 px. **Fila a 2.75rem** | Un token de empuje, un par de tokens de foco, y ampliar la guardia de hover táctil para que también vigile `translate` y no solo `transform` |
+| B. Un solo anillo de foco en el color de tinta del tema | Impecable en escritorio, donde el fondo es conocido; en el cajón el fondo efectivo varía y el anillo puede desaparecer sobre él |
+| C. Conservar el contorno rojo que el panel usa en `.asb-operativo` | Da 2,06:1 sobre el cristal claro contra un umbral de 3, y además compite con el color del ítem activo |
+
+**Recomendación: A.** Porque el foco es lectura y no gesto (quien tabula necesita saber dónde está antes que ver cómo llegó), y porque el anillo de dos colores es el único que se puede demostrar sobre un fondo que no se conoce de antemano.
+
+**Dos avisos.** El encogimiento del toque no puede reutilizar el token de control de 44 px: su razón escrita dice que sobre cajas anchas ese porcentaje se lee como una arruga, y la fila mide más de 200 px. Y los 44 px no pueden entrar en `ObjetivoTactilTest`: ese proveedor empareja vistas Blade con cadenas de clases y no abre `theme.css`; hace falta una guardia propia del panel más la medición en Chromium.
+
+## D-L17. Las señales del sistema: qué muere y qué sobrevive
+
+**Hoy.** Ninguna llega a la barra. El bloque `@media (prefers-reduced-motion: reduce)` de `theme.css:1182` solo nombra el topbar, el logo y el conmutador; el desenfoque es un `blur()` literal que ninguna media alcanza; `prefers-contrast: more` y `forced-colors` no aparecen.
+
+| Opción | Coste |
+|---|---|
+| A. Cuatro señales con conducta escrita. **Movimiento reducido**: no hay estado `scroll`, no hay brote ni empuje ni desplazamiento del cajón; sobreviven los fundidos de color y opacidad y el plegado del grupo (que es layout); la flecha deja de rebotar sola porque los dos resortes ya se reasignan a `--ease-cajon` en `tokens.css`. **Transparencia reducida**: velo opaco y desenfoque `none`; las dos luces intactas, y por eso tienen que pintarse **encima** del velo desde el primer día. **Más contraste**: velo opaco también, tinta más fuerte, y el filo deja de ser luz y se vuelve la línea. **Contraste forzado**: las luces se apagan y el indicador se repinta con `outline` y `border`, porque el navegador descarta `box-shadow` | Cuatro bloques y una regla de orden de pintado que hay que escribir |
+| B. Solo movimiento reducido | Deja la barra con un desenfoque que ninguna media apaga, que es el defecto de hoy con más líneas |
+| C. Apagar el reloj entero bajo movimiento reducido | Mata también los fundidos, que son lo que hay que conservar |
+
+**Recomendación: A.** Porque la señal pide que el material deje de ser translúcido, no que deje de ser un material: se pierde la profundidad y se conserva la jerarquía.
+
+**Dónde viven los tokens, y por qué no en `tokens.css`.** Van en `theme.css`, que ya tiene su `:root` propio fuera de capa y su bloque de movimiento reducido fuera de capa: la media alcanza al token igual, y `tokens.css` es el archivo compartido con el sitio público, que no consume nada de esto. Y hay un precedente roto que sirve de aviso: `theme.css:48` y `:79` redeclaran `--asb-vidrio-desenfoque` después del `@import`, con lo que la anulación por transparencia reducida no llega al panel en modo claro. Un token declarado dos veces deja una media sin efecto y nadie se entera.
+
+## D-L18. El cajón por debajo de 64 rem
+
+**Hoy.** El cajón cerrado no es `display: none`, solo está desplazado: sus enlaces siguen recibiendo tabulación fuera de pantalla, nadie pone `inert`, no hay Escape y el foco no vuelve al disparador. La transición es el `transition-all` por defecto de Tailwind, que ningún token toca.
+
+| Opción | Coste |
+|---|---|
+| A. Mismo idioma con más velo (D-L11), entrada con `--ease-rebote-suave` y salida con `--ease-cajon`, `transition-property` declarado explícitamente para no envenenar el cajón con el `transition-all` de Filament, más las tres correcciones de foco (`inert`, Escape, devolución) y la fila a 44 px | Las tres correcciones son defectos presentes, no funciones nuevas. Son lo último que puede quedarse fuera si hay que recortar |
+| B. Cajón opaco | Cero riesgo de contraste y de compositor, y rompe el mismo idioma visual. Reserva si la medición en un teléfono de gama baja sale mal |
+| C. Trampa de foco completa | Filament no lo declara como diálogo, y media trampa es peor que ninguna |
+
+**Recomendación: A.** Porque el cajón es donde el cristal se gana el sueldo y donde el dedo mide de verdad, y porque un cajón cerrado que sigue recibiendo tabulación es un incumplimiento vivo que la barra nueva heredaría.
+
+---
+
+## Tokens nuevos
+
+Todos en `resources/css/filament/admin/theme.css`, declarados una sola vez en su `:root` y su `.dark`, y reasignados en los bloques de media del mismo archivo. Prefijo `--asb-admin-barra-` para que nunca se confundan con las dos barras públicas.
+
+| Token | Claro | Oscuro | Porqué |
+|---|---|---|---|
+| `--asb-admin-barra-velo` | Velo alto derivado de `--asb-superficie` | Velo alto derivado de `--asb-superficie` | El cristal se levanta de la página en los dos temas. No reutiliza `--asb-cromo-velo` porque aquel está calibrado para 14 px contra fotos. Pasa a `var(--asb-superficie)` a secas bajo transparencia reducida y bajo más contraste |
+| `--asb-admin-barra-velo-cajon` | Más alto que el de escritorio | El mismo que el de escritorio | Debajo del cajón pasa contenido variable tras el velo de cierre de Filament; el de escritorio se compone sobre un color conocido. En oscuro no hace falta subirlo porque el velo de cierre ya es negro al 75 % |
+| `--asb-admin-barra-desenfoque` | `blur(18px) saturate(130%)` | `blur(18px) saturate(130%)` | Solo se consume en la regla del cajón, donde hay página que refractar. Nunca un `blur()` literal, para que las medias lo puedan apagar. Vale `none` bajo transparencia reducida y bajo más contraste |
+| `--asb-admin-barra-luz` | Rojo claro derivado de `#ee4137` | Rojo oscuro derivado de `#ee4137` | El rojo luminiscente que pidió Sua, en la dirección que pidió. No es nunca valor de `color`: solo alimenta `box-shadow`, `border-*-color` y `background-image` |
+| `--asb-admin-barra-filo` | `color-mix` de la luz | `color-mix` de la luz | El canto encendido del cristal. Existe aparte de la luz por una sola razón: bajo más contraste se reasigna a `var(--asb-linea-fuerte)` y deja de ser luz para volverse línea |
+| `--asb-admin-barra-halo` | `color-mix` de la luz | `color-mix` de la luz | El resplandor del ítem activo, dibujado por el mismo pseudoelemento que su indicador para que no puedan separarse. Sus porcentajes son los que se usaron para calibrar el velo: subirlos sin recalcular rompe el umbral del rótulo activo |
+| `--asb-admin-barra-borde` | Derivado de `--asb-linea-fuerte` | Derivado de `--asb-linea-fuerte` | El límite real de la región. El velo aporta 1,05:1 y el filo no llega a 3:1: la separación la hacen esta línea y la sombra, en luminancia |
+| `--asb-admin-barra-tinta` | Tinta oscura del sitio | `#f3e9e9` heredado a token | Rótulo de ítem, 14 px, 4,5:1 |
+| `--asb-admin-barra-tenue` | Gris que llegue a 4,5:1 | Gris que llegue a 4,5:1 | Rótulo de grupo e icono, unificados. Hoy son dos hexadecimales distintos para el mismo papel y nadie recuerda por qué. El rótulo de grupo mide 11,52 px: no es texto grande bajo ninguna lectura, así que manda el umbral más exigente de los dos |
+| `--asb-admin-barra-activo` | `var(--asb-acento-fuerte)` | `var(--asb-acento)` | Rótulo del ítem activo. La asimetría entre temas es la respuesta a una asimetría real: el halo claro aclara el fondo y empuja al texto hacia el fallo, el oscuro lo empuja hacia el aprobado |
+| `--asb-admin-barra-activo-fondo` | Tinte bajo | Tinte algo más alto | Sobre cristal claro la misma opacidad se lee más fuerte que sobre cristal oscuro: no puede ser un valor único |
+| `--asb-admin-barra-hover-fondo` | Tinte de la marca | Blanco muy bajo | El `rgb(255 255 255 / 0.06)` de hoy sobre un cristal claro es indistinguible del fondo: el hover deja de existir |
+| `--asb-admin-barra-fila-alto` | `2.75rem` | `2.75rem` | Geometría, no movimiento: no se anula bajo movimiento reducido. Hoy la fila mide `2.72rem`, es decir 43,52 px, medio píxel por debajo del mínimo táctil |
+| `--asb-admin-barra-fila-radio` | `0.625rem` | `0.625rem` | Concentricidad, y para que el indicador de 3 px no quede recortado por el radio como le pasa hoy al `inset box-shadow` |
+| `--asb-admin-barra-aviso-alto` | `1.5rem` | `1.5rem` | Alto de la máscara de desvanecido del canto que oculta lista, gobernada por `data-borde` |
+| `--asb-admin-barra-brote` | `0.35` | `0.35` | Escala de arranque del indicador al llegar. A `1` bajo movimiento reducido |
+| `--asb-admin-barra-empuje` | `2px` | `2px` | Deslizamiento horizontal de la fila al recibir puntero fino. No reutiliza `--asb-levante` porque es de otro eje y de otro componente: un levantamiento vertical sobre una fila dentro de una lista que se desplaza se lee como que la fila se despega. A `0` bajo movimiento reducido |
+| `--asb-admin-foco-anillo` | `#0b090a` | `#ffffff` | Mitad del anillo de dos colores. Un solo anillo desaparece sobre el fondo variable del cajón |
+| `--asb-admin-foco-halo` | `#ffffff` | `#0b090a` | La otra mitad. Bajo contraste forzado el halo no puede ir en `box-shadow`: se pinta con `border` o con un segundo `outline` |
+
+## Riesgos conocidos
+
+1. **`.fi-sidebar` ya es bloque contenedor de sus descendientes `fixed`**, por el `lg:translate-x-0` que Filament le aplica fuera de toda media. No lo provocamos nosotros y no desaparece al quitar el `backdrop-filter`. Una guardia que solo lea nuestra hoja buscando `translate` da seguridad falsa.
+2. **Por debajo de 64 rem, `.fi-sidebar` trae `transition-all` de Filament** (por encima es `transition-none`). Cualquier propiedad que toquemos transicionará ahí con el reloj por defecto de Tailwind, y el cristal entraría fundiéndose mientras el cajón se desliza. Hay que declarar `transition-property` explícito.
+3. **`.fi-sidebar` trae fondo opaco propio bajo `lg`** (`bg-white`, `dark:bg-gray-900`). Borrar nuestra declaración de `background` no basta: hay que poner `transparent` explícito o el cajón queda opaco bajo el velo.
+4. **La costura con el topbar puede tener 4 px de hueco**: Filament ancla la barra en `lg:top-[4rem]` y el panel pinta el topbar con `min-height: 3.75rem`. Es aritmética sobre dos `min-height`, no una medida: el alto real del topbar puede superar el suyo. Hay que medirlo en Chromium antes de decidir si el topbar sube a 4 rem o la barra se reancla al token, y es decisión de Sua porque cambia el alto del cromo.
+5. **`x-collapse` escribe la transición en el elemento** y Filament re-ejecuta el `<script>` en línea que oculta los grupos plegados en cada navegación SPA. Cualquier animación de entrada de un grupo arranca desde `display: none` en cada cambio de página.
+6. **Los atributos escritos por JavaScript sobre el nodo de la barra no sobreviven a un re-render del componente Livewire** (el morph borra los que no vienen del servidor), y eso no lo ve ninguna de las capas de verificación previstas. Por eso el estado vive en `<body>`.
+7. **El panel no tiene la clase `sin-desplazamiento`**: esa la pone el `<head>` del layout público. Copiar `menosMovimiento()` de la barra pública deja la guarda siempre en falso, y sería un falso verde silencioso porque la clase nunca está. Aquí se consulta `matchMedia` en vivo y se escucha su `change`.
+8. **`prefers-reduced-transparency` no llega hoy al panel en modo claro**, porque `theme.css:48` y `:79` redeclaran `--asb-vidrio-desenfoque` después del `@import` con la misma especificidad. Afecta a ModerarFotos y al widget de Pendientes. Arreglarlo toca esas dos piezas: hay que decirlo, no dejarlo como efecto colateral.
+9. **Playwright acepta la emulación de transparencia reducida y no la aplica.** Cualquier medición de esa señal que no confirme `matchMedia(...).matches` dentro de la página es nula y no cuenta como verde.
+10. **Quedan dos `blur()` literales más en el mismo archivo** (`.fi-topbar` y el conmutador de tema). Arreglar solo la barra deja el panel atendiendo la señal en la mitad de su cromo. O se amplía o se dice por escrito que se deja, con su ticket.
+11. **La lista desborda casi siempre**, y con las filas a 44 px desborda un poco más. Con `Configuración` plegado el contenido supera con holgura la altura útil a 1080 px. Hay que comprobar que ese grupo, al final del recorrido, no quede sin ninguna pista de que existe.
+12. **El objetivo táctil de la fila de grupo no es un control accesible**: el rótulo vive en un `<div>` con `x-on:click`, sin `role`, sin nombre accesible y sin `tabindex`; el único elemento alcanzable por teclado es la flecha. Agrandarlo a 44 px agranda un área que el teclado no puede usar.
+13. **El fuera-de-uno de 1024 px es real y está tapado.** El ítem cierra el cajón con `matchMedia('(max-width: 1024px)')` y el store decide escritorio con `innerWidth >= 1024`, que incluye la barra de desplazamiento clásica mientras la media query no: la banda ambigua es más ancha que un píxel. Hoy no se ve porque el ancho está forzado; se vería el día que se encienda el plegado.
+14. **Toda cifra de este documento es aritmética sobre valores declarados.** Los contrastes salen del método sancionado y son fiables como orientación; las geometrías (los 4 px de costura, el alto de la lista, los 44 px reales) no lo son hasta que playwright las mida el día que se escriban.
+15. **Puede haber otra sesión en este mismo directorio.** Antes de codificar: `GIT_OPTIONAL_LOCKS=0 git status`, `git log --oneline -5` y el commit del encabezado de `material/estado.md`.
+
+## Fuera de alcance
+
+- **El carril de iconos de escritorio** (`sidebarCollapsibleOnDesktop()`). Hoy está apagado, y encenderlo obliga a dar icono a los cinco grupos y quitárselo a los 24 destinos, porque Filament no admite las dos cosas a la vez; además saca a la luz el fuera-de-uno de 1024 px y cuelga `opacity-0` con `transition-all` al contenedor principal. Es un rediseño de la navegación, no un añadido: constancia previa.
+- **El viaje del indicador por FLIP** (D-L6, opción B). Decisión propia, con su medición, si Sua la pide.
+- **El icono en variante sólida para el ítem activo** (D-L12, opción B). 24 archivos de `app/Filament`.
+- **Unificar el dueño de la señal de scroll con el topbar.** Revierte una decisión registrada y reescribe una guardia verde. Constancia.
+- **Publicar cualquier vista del vendor.** Todo lo que pide el encargo cabe entre CSS del tema, un módulo registrado en `assetsDelPanel()` y, si hiciera falta un nodo, los ganchos con constante.
+- **Compactar las filas por dirección de scroll**, rebote elástico de la lista, entrada escalonada de los ítems al navegar, parallax del degradado, y que el carril se despliegue al pasar el puntero.
+- **`view-transition-name`** en cualquier parte de la barra o de sus ancestros.
+- **Navegación por flechas dentro de la lista** y trampa de foco completa en el cajón. Se rechazan por concepto: es una lista de enlaces dentro de un landmark, no un menú, y Filament no declara el cajón como diálogo.
+- **Cambiar el ancho de 15,25 rem.** Solo se abre si la medición de los 29 rótulos en la Poppins servida demuestra que alguno se recorta.
+- **Renombrar o reagrupar los grupos y destinos**, y recolorear el logotipo. Son contenido y marca, no diseño.
+- **El contorno de foco de `.asb-operativo`** (2,06:1 sobre cristal claro). Mismo defecto de fondo, otro sitio: ticket propio y guardia propia.
+- **`forced-colors` en el resto del panel.** Aquí solo se atiende en la barra.
+
+## Cómo se comprueba, sabiendo que nadie puede entrar al panel
+
+El segundo factor es obligatorio, así que ninguna sesión automatizada abre `/admin` por la puerta. La verificación se reparte en cuatro capas y **ninguna cifra sale de una sola**.
+
+**Capa 1. PHPUnit sobre el HTML servido.** No necesita navegador y sí necesita sesión, pero la sesión de PHPUnit sí existe: `actingAs($usuario)->get('/admin')->assertOk()` ya funciona en la suite. Cubre estructura y ARIA: exactamente un `aria-current="page"` por ruta probada, cada `aria-controls` apuntando a un `id` presente una sola vez, el enlace de salto como primer elemento enfocable, y el `fi-active` del grupo que contiene la página. Cubre también los roles: la secretaria ve menos entradas, así que la lista puede no desbordar y `data-borde` tiene que dar `ninguno`; probar solo con super_admin deja ese caso sin ejercer.
+
+**Capa 2. Guardias de archivo, que son las que se ponen rojas solas.** Leen el CSS y el JS crudos y afirman: que ningún selector que empiece por `.fi-sidebar` lleva un color literal (barriendo también el bloque de hover de `theme.css:673-696`, que es donde vive la mitad de la paleta privada); que `backdrop-filter` no aparece dentro del bloque del elemento y sí dentro del pseudoelemento; que los tokens de la barra se declaran una sola vez fuera de las medias y que las cuatro medias los reasignan; que el `:focus-visible` de la barra **no** está dentro del bloque de puntero fino; que la regla del ítem activo cambia al menos una propiedad que no sea color ni fondo; que todo `!important` fuera de `@media print` está en la lista de permitidos con su comentario; y que el módulo se registra con `->module()` dentro del `try/catch (ViteException)` que hoy protege a artisan en un clon sin manifiesto. **Aritmética de contraste en la misma capa**: se extraen los porcentajes del archivo con expresión regular, no se repiten a mano, y se recomponen con el trait `MideContraste` sobre el peor fondo posible y con el halo encima, exigiendo 4,5:1 al rótulo de grupo, al rótulo de ítem y al ítem activo, y 3:1 al indicador y al límite de región.
+
+**Capa 3. Guardia de contrato sobre el vendor.** Es lo único que se rompe solo, en una actualización de Filament, sin que nadie toque una línea nuestra. Afirma una por una, con el porqué en el mensaje, las cadenas de las que depende el tema: `x-collapse.duration.200ms`, `fi-sidebar-open`, `lg:hidden` en la cabecera con topbar, `scrollbar-gutter: stable` en el nav, la ausencia de `x-persist` en la barra, la restauración de `scrollTop` en el store, y que `isSidebarCollapsibleOnDesktop()` sigue siendo falso en el panel real. Se ve roja copiando el archivo del vendor a un temporal, borrándole una cadena y apuntando la guardia a la copia: tres mutaciones distintas, no una.
+
+**Capa 4. Maqueta medida en Chromium, sin sesión.** Un comando local genera `public/_medicion/barra-lateral.html` renderizando los mismos componentes de Filament que pinta el panel, y playwright-cli lo abre por `file://`. La maqueta no se guarda en el repositorio y se regenera en cada verificación. Para que mida algo tiene que llevar cuatro piezas, y eso es parte de su coste: el bloque `<style>` de `x-cloak` que Filament emite en el layout base (sin él la barra es `display: none` por debajo de 1024 px), Alpine, un `$store.sidebar` de mentira con `isOpen`, `groupIsCollapsed` y `toggleCollapsedGroup` (sin él la barra nunca recibe `fi-sidebar-open` y se queda fuera de pantalla), y la hoja compilada resuelta leyendo `public/build/manifest.json`, nunca por nombre con hash. Antes de medir nada se confirma dentro de la página que `.fi-sidebar` tiene 244 px de ancho y `x = 0`; y antes de medir bajo una señal emulada se confirma `matchMedia(...).matches` dentro de la página. Ahí se miden: las cuatro esquinas del cuadrado de 44 px con `elementFromPoint`, incluidas las de los controles vecinos; la costura entre topbar y barra; el contraste real por `getImageData` con una franja blanca y una negra bajo el cajón; la curva y la duración reales con `getAnimations()`; el estado tras un scroll programado del nav; y que ningún `scrollWidth` de rótulo supera su `clientWidth`. La propia maqueta se comprueba: una guardia ejecuta el comando y exige que la salida traiga `fi-sidebar-nav`, al menos cinco `fi-sidebar-group` y la barra visible a 390 px.
+
+**Capa 5. Sua, a mano, una vez.** Lo que ninguna capa puede decir: si el cristal parece cristal sobre el tablero real, si el resorte se siente como lo pidió, si el viaje entre dos páginas del panel no salta, y si el botón atrás deja la barra donde debe. Con una lista corta de observaciones escritas, en claro y en oscuro, y en el teléfono antes de la demo.
+
+**Regla que gobierna las cinco:** cada guardia se ve roja por rotura deliberada antes de escribir el código que la pone verde, y se muta **por comportamiento**: cada cableado, cada `aria-*` y cada constante por separado, cada uno poniendo roja su propia afirmación y solo la suya. Afirmar que una función está definida no vale; hay que afirmar también que se llama.
