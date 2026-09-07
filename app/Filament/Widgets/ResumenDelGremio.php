@@ -31,6 +31,13 @@ use Illuminate\Support\Str;
  */
 class ResumenDelGremio extends StatsOverviewWidget
 {
+    /** @var array<string, string> Desglosado: ver `PendientesDeAprobacion`. */
+    protected int|string|array $columnSpan = [
+        'default' => 'full',
+        'md' => 'full',
+        'xl' => 'full',
+    ];
+
     protected ?string $heading = 'El gremio hoy';
 
     protected static ?int $sort = 1;

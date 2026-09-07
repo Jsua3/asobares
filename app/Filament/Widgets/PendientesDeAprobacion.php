@@ -20,7 +20,18 @@ class PendientesDeAprobacion extends Widget
 
     protected static ?int $sort = 0;
 
-    protected int|string|array $columnSpan = 'full';
+    /**
+     * Desglosado a propósito: `'full'` a secas Filament lo guarda como
+     * `['lg' => …]` y la rejilla del tablero (2 en `md`, 6 en `xl`) dejaría el
+     * widget en una sola pista por debajo de `lg`.
+     *
+     * @var array<string, string>
+     */
+    protected int|string|array $columnSpan = [
+        'default' => 'full',
+        'md' => 'full',
+        'xl' => 'full',
+    ];
 
     /**
      * @return array<int, array{
