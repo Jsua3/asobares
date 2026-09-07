@@ -391,16 +391,17 @@
         }
     }
 
+    /* Solo se ve en el cajón: con topbar, Filament marca esta cabecera
+       `lg:hidden`, así que en escritorio estas reglas no pintan nada. */
     .fi-sidebar-header {
         min-height: 4.65rem;
         padding-block: 0.85rem;
-        border-bottom: 1px solid rgb(255 255 255 / 0.08);
-        background: linear-gradient(180deg, rgb(255 255 255 / 0.055), transparent);
+        border-bottom: 1px solid var(--asb-admin-barra-borde);
+        background: transparent;
     }
 
     .fi-sidebar-header .fi-logo {
         max-height: 2rem;
-        filter: drop-shadow(0 8px 18px rgb(0 0 0 / 0.16));
     }
 
     .fi-sidebar-nav {
@@ -412,49 +413,89 @@
     }
 
     .fi-sidebar-group-label {
-        color: #bfa5a6;
+        color: var(--asb-admin-barra-tenue);
         font-size: 0.72rem;
         font-weight: 650;
         letter-spacing: 0.04em;
         text-transform: uppercase;
     }
 
+    /* La fila sube de 2,72rem a 2,75rem: los 43,52 px de antes quedaban medio
+       píxel por debajo del mínimo táctil, medido el 7 sep en las 24 filas. El
+       radio baja para que el indicador de 3 px no lo recorte la curva. */
     .fi-sidebar .fi-sidebar-item-btn {
-        min-height: 2.72rem;
-        border-radius: 0.9rem;
-        color: #f3e9e9;
+        position: relative;
+        min-height: var(--asb-admin-barra-fila-alto);
+        border-radius: var(--asb-admin-barra-fila-radio);
+        color: var(--asb-admin-barra-tinta);
         transition:
-            color 160ms var(--ease-color),
-            background-color 160ms var(--ease-color),
-            box-shadow 160ms var(--ease-color),
-            transform 160ms var(--ease-out);
+            color var(--duracion-boton) var(--ease-color),
+            background-color var(--duracion-boton) var(--ease-color),
+            translate var(--duracion-boton) var(--ease-out);
     }
 
+    /* El icono y el rótulo de grupo comparten papel y ahora comparten token:
+       eran dos hexadecimales distintos para lo mismo y nadie recordaba por qué. */
     .fi-sidebar .fi-sidebar-item-btn > .fi-icon,
     .fi-sidebar .fi-sidebar-group-collapse-btn,
     .fi-sidebar .fi-sidebar-group-collapse-button {
-        color: #d8babb;
+        color: var(--asb-admin-barra-tenue);
     }
 
     .fi-sidebar .fi-sidebar-item-label {
-        color: #f3e9e9;
+        color: var(--asb-admin-barra-tinta);
         font-weight: 600;
     }
 
+    /*
+     * El ítem activo. El color no es su único canal: lo marcan además el
+     * indicador de forma fija de aquí abajo y el peso del rótulo. El fondo
+     * teñido no cuenta como canal, da 1,21:1 contra la barra y es decoración.
+     */
     .fi-sidebar .fi-sidebar-item-btn[aria-current="page"],
     .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
-        color: rgb(255 255 255);
-        background: rgb(238 65 55 / 0.16);
-        box-shadow:
-            inset 3px 0 0 #ee4137,
-            inset 0 1px 0 rgb(255 255 255 / 0.08),
-            0 10px 22px rgb(11 9 10 / 0.12);
+        color: var(--asb-admin-barra-activo);
+        background-color: var(--asb-admin-barra-activo-fondo);
+        font-weight: 650;
+    }
+
+    /*
+     * El indicador y su halo, dibujados por el mismo pseudoelemento para que no
+     * puedan separarse: el halo es lo que se calibró junto al velo, y subirlo
+     * por su cuenta rompe el umbral del rótulo activo.
+     *
+     * Pseudoelemento y no `inset box-shadow`: en contraste forzado el navegador
+     * descarta las sombras y el indicador desaparecía. `scaleY` desde el token
+     * de brote es el resorte de la llegada (D-L6): puro compositor, sin medir
+     * nada, y llega igual en navegación SPA que en carga completa.
+     */
+    .fi-sidebar .fi-sidebar-item-btn[aria-current="page"]::before,
+    .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn::before {
+        content: '';
+        pointer-events: none;
+        position: absolute;
+        inset-inline-start: 0;
+        inset-block-start: 50%;
+        width: 3px;
+        height: 20px;
+        border-radius: 999px;
+        background-color: var(--asb-admin-barra-activo);
+        box-shadow: 0 0 12px 2px var(--asb-admin-barra-halo);
+        translate: 0 -50%;
+        scale: 1 var(--asb-admin-barra-brote);
+        animation: barra-brota var(--duracion-rebote) var(--ease-rebote-vivo) forwards;
+    }
+
+    @keyframes barra-brota {
+        to {
+            scale: 1 1;
+        }
     }
 
     .fi-sidebar .fi-sidebar-item-btn[aria-current="page"] > .fi-icon,
     .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon,
     .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-sidebar-item-label {
-        color: #ff7168;
+        color: var(--asb-admin-barra-activo);
     }
 
     .fi-main {
@@ -814,30 +855,51 @@
             border-color: rgb(238 65 55 / 0.2);
         }
 
-        .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover,
-        .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:focus-visible {
-            color: rgb(255 255 255);
-            background-color: rgb(255 255 255 / 0.06);
-            transform: none;
+        /*
+         * El hover de la fila. Aquí dentro va solo el hover, que es gesto de
+         * puntero: el foco salió de esta media (más abajo), porque en un
+         * portátil táctil o en una tableta con teclado esta media no aplica y
+         * la barra se navegaba sin ningún indicador de foco, con el contorno
+         * nativo ya quitado por Filament.
+         *
+         * El empuje es `translate` y no `transform`: en Tailwind 4 son
+         * propiedades distintas, y el `transform: none` de antes ni siquiera
+         * neutralizaba nada porque no había transform que neutralizar.
+         */
+        .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover {
+            color: var(--asb-admin-barra-activo);
+            background-color: var(--asb-admin-barra-hover-fondo);
+            translate: var(--asb-admin-barra-empuje) 0;
         }
 
         .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover > .fi-icon,
         .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover > .fi-sidebar-item-label,
         .fi-sidebar .fi-sidebar-group-collapse-btn:hover,
         .fi-sidebar .fi-sidebar-group-collapse-button:hover {
-            color: #ff8a82;
+            color: var(--asb-admin-barra-activo);
         }
 
         .fi-sidebar .fi-sidebar-item-btn[aria-current="page"]:hover,
         .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn:hover {
-            background-color: rgb(238 65 55 / 0.18);
+            background-color: var(--asb-admin-barra-activo-fondo);
         }
+    }
 
-        .fi-sidebar .fi-sidebar-item-btn[aria-current="page"]:hover > .fi-icon,
-        .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn:hover > .fi-icon,
-        .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn:hover > .fi-sidebar-item-label {
-            color: #ff7168;
-        }
+    /*
+     * El foco, FUERA de toda media de puntero: quien tabula necesita saber
+     * dónde está, tenga ratón o no. Anillo de dos colores porque en el cajón el
+     * fondo efectivo varía con la página de debajo y un solo anillo puede
+     * desaparecer sobre él; el halo es la segunda mitad y también lo dibuja
+     * `outline`, no `box-shadow`, para que el contraste forzado no lo descarte.
+     */
+    .fi-sidebar .fi-sidebar-item-btn:focus-visible,
+    .fi-sidebar .fi-sidebar-group-collapse-btn:focus-visible,
+    .fi-sidebar .fi-sidebar-group-collapse-button:focus-visible {
+        outline: 2px solid var(--asb-admin-foco-anillo);
+        outline-offset: 2px;
+        box-shadow: 0 0 0 4px var(--asb-admin-foco-halo);
+        /* Nada se mueve al recibir foco: el foco es lectura, no gesto. */
+        translate: 0 0;
     }
 
     @media (max-width: 40rem) {

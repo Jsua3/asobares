@@ -187,6 +187,146 @@ class BarraLateralTest extends TestCase
     }
 
     /**
+     * Se acabó la paleta privada. La barra tenía nueve colores en hexadecimal
+     * repartidos en dos bloques, y el segundo, el de puntero fino, es el que
+     * se olvida: ahí vivían `rgb(255 255 255)`, `rgb(255 255 255 / 0.06)`,
+     * `#ff8a82` y `#ff7168`. Con colores propios la barra no sigue al tema, y
+     * el día que la paleta se mueva se queda atrás.
+     * Rotura: devolver `#ff7168` al rótulo del ítem activo.
+     */
+    /**
+     * Se acabó la paleta privada. La barra tenía nueve colores en hexadecimal
+     * repartidos en dos bloques, y el segundo, el de puntero fino, es el que
+     * se olvida: ahí vivían `rgb(255 255 255)`, `rgb(255 255 255 / 0.06)`,
+     * `#ff8a82` y `#ff7168`. Con colores propios la barra no sigue al tema, y
+     * el día que la paleta se mueva se queda atrás.
+     *
+     * Barrido por líneas y no por bloques: el archivo anida medias dentro de
+     * medias y las listas de selectores ocupan varias líneas, así que partir
+     * por llaves se equivoca de bloque sin avisar.
+     * Rotura: devolver `#ff7168` al rótulo del ítem activo.
+     */
+    public function test_ningun_selector_de_la_barra_lleva_un_color_literal(): void
+    {
+        $sinComentarios = preg_replace('#/\*.*?\*/#s', '', $this->tema());
+
+        $hallazgos = [];
+        $selector = null;
+        $acumulado = '';
+
+        foreach (explode('
+', $sinComentarios) as $numero => $linea) {
+            $limpia = trim($linea);
+
+            if ($limpia === '') {
+                continue;
+            }
+
+            // Una lista de selectores puede ocupar varias líneas: se acumulan
+            // hasta la que abre la llave.
+            if (str_ends_with($limpia, ',')) {
+                $acumulado .= ' '.$limpia;
+
+                continue;
+            }
+
+            if (str_ends_with($limpia, '{')) {
+                $encabezado = trim($acumulado.' '.substr($limpia, 0, -1));
+                $selector = str_contains($encabezado, '.fi-sidebar') ? $encabezado : null;
+                $acumulado = '';
+
+                continue;
+            }
+
+            $acumulado = '';
+
+            if ($limpia === '}') {
+                $selector = null;
+
+                continue;
+            }
+
+            if ($selector === null) {
+                continue;
+            }
+
+            foreach (['/#[0-9a-fA-F]{3,8}/', '/\brgba?\(/', '/\bhsla?\(/', '/\boklch\(/'] as $patron) {
+                if (preg_match($patron, $limpia)) {
+                    $hallazgos[] = sprintf('línea %d, %s: %s', $numero + 1, $selector, $limpia);
+
+                    break;
+                }
+            }
+        }
+
+        $this->assertSame([], $hallazgos, 'La barra vuelve a tener paleta privada:
+'.implode('
+', $hallazgos));
+    }
+
+    /**
+     * El foco no puede depender del puntero. El único `:focus-visible` de la
+     * barra vivía dentro de `@media (hover: hover) and (pointer: fine)`, así
+     * que en un portátil táctil o en una tableta con teclado la barra se
+     * navegaba sin ningún indicador, con el contorno nativo ya quitado por
+     * Filament. Se comprueba por posición en el archivo, que es lo que de
+     * verdad falla: la regla existía y no aplicaba.
+     * Rotura: devolver el `:focus-visible` al bloque de puntero fino.
+     */
+    public function test_el_foco_de_la_barra_no_depende_del_puntero(): void
+    {
+        $tema = $this->tema();
+        $puntero = $this->bloque($tema, '@media (hover: hover) and (pointer: fine)');
+
+        $this->assertStringContainsString('.fi-sidebar .fi-sidebar-item-btn:focus-visible', $tema, 'La barra no declara foco visible en ningún sitio.');
+        $atrapadas = [];
+
+        foreach (explode('
+', $puntero) as $linea) {
+            if (str_contains($linea, '.fi-sidebar') && str_contains($linea, 'focus-visible')) {
+                $atrapadas[] = trim($linea);
+            }
+        }
+
+        $this->assertSame([], $atrapadas, 'El foco de la barra sigue atrapado dentro de la media de puntero fino:
+'.implode('
+', $atrapadas));
+
+        foreach (['--asb-admin-foco-anillo', '--asb-admin-foco-halo'] as $token) {
+            $this->assertStringContainsString($token, $tema, "El anillo de foco de dos colores no usa {$token}.");
+        }
+    }
+
+    /**
+     * Las 24 filas medían 43,5 px el 7 sep en el panel de Sua, y ninguna
+     * pasaba la comprobación de las cuatro esquinas del cuadrado de 44. La
+     * altura sale de un token para que la medición y el CSS no se separen.
+     * Rotura: devolver la fila a 2.72rem.
+     */
+    public function test_la_fila_de_la_barra_llega_a_los_44_px(): void
+    {
+        $tema = $this->tema();
+        $raiz = $this->bloque($tema, '
+:root {');
+
+        $this->assertSame(
+            1,
+            preg_match('/--asb-admin-barra-fila-alto: ([0-9.]+)rem;/', $raiz, $alto),
+            'La altura de la fila no se declara en un token.'
+        );
+
+        $enPixeles = ((float) $alto[1]) * 16;
+
+        $this->assertGreaterThanOrEqual(44, $enPixeles, "La fila declara {$alto[1]}rem, que son {$enPixeles} px: por debajo del mínimo táctil.");
+
+        $this->assertStringContainsString(
+            'min-height: var(--asb-admin-barra-fila-alto);',
+            $this->regla($tema, '.fi-sidebar .fi-sidebar-item-btn'),
+            'La fila no consume el token de altura.'
+        );
+    }
+
+    /**
      * El contraste de la barra, recalculado leyendo los porcentajes del
      * archivo y no repitiéndolos aquí.
      *
