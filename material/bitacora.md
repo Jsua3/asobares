@@ -2003,3 +2003,30 @@ Antes de diseñar, la barra móvil de hoy en Chromium real: cabecera de 56 px a 
 ### 40.7 Lo que entra y sale del estado
 
 Entra **D-34**, las dieciocho decisiones de la Parte II, dueño Sua. «Afíliate» con sesión pasa a hecho (`09e8c17`). `main` queda tres commits por delante de `origin/main` y nada de hoy está desplegado hasta empujar. La suite entera no se corrió: solo las siete clases de la barra sobre `09e8c17`. No se abrió rama: la barra móvil no se escribe hasta que Sua responda.
+
+
+## 41. LA BARRA MÓVIL 2.1: DOS MÓDULOS, CONSTRUIDA CONTRA LA SPEC Y REVISADA CONTRA SÍ MISMA (6–7 sep 2026)
+
+### 41.1 Las dieciocho decisiones, respondidas antes del código
+
+La Parte II de la spec llegó con dieciocho decisiones abiertas y una recomendación en cada una. Sua respondió en una línea: «desde D-M1 hasta la D-M18 apruebo y apruebo todas las recomendaciones que propones». Con eso se abrió `p1-navbar-movil` y se derivó el plan por tareas. Lo que quedó decidido: «bolsas y empleo» son **Bolsas** y **El gremio**; Eventos como quinta pestaña; «Abre tu negocio» a dos líneas; la entrada del anónimo como fila de pie de la hoja de El gremio; el chip de idioma oculto bajo 64rem; la barra lateral de tema retirada; isotipo en scroll y con sesión; el chip con nombre y rango abre la hoja de cuenta; un segundo `<nav>` con su propio landmark; `viewport-fit=cover`; `MenuMovilTest` renombrada y reescrita; cierre por desplazamiento también en escritorio; rótulos plegados en scroll; apaisado compacto de nacimiento; el usuario demo de secretaría como persona; y el velo del móvil al 88 / 85 % para que los rótulos de 11 px lleguen a 4,5:1 sobre fotos.
+
+### 41.2 Once tareas, cada guardia vista roja
+
+Se construyó en once tareas con la regla de siempre: la prueba primero, la rotura deliberada después y la guardia vista roja antes de escribir el código que la pone verde. Veintisiete mutaciones en las nueve primeras tareas y cuatro más en la revisión. El resultado es un solo `<header>` con dos `<nav>`: la bandeja de arriba (logo doble con cruce a isotipo, chip de cuenta, tema) y el módulo inferior fijo con cinco pestañas y dos hojas que abren por toque. La máquina de estados vive en el `x-data` del header y decide por **dirección**: el ancla sigue al extremo del recorrido, compactar cuesta 24 px y volver 12, los dos extremos del documento son zona muerta y un salto de más de 200 px no es un gesto.
+
+### 41.3 Lo que el navegador corrigió sobre la marcha
+
+Cinco cosas que la spec daba por buenas y el navegador desmintió: el apaisado reasignaba tokens sobre `:root` desde `@layer components` y **una regla sin capa gana siempre**, así que los tokens se reasignan sobre `.cromo`; la pastilla «Afíliate» mide 33,7 px por la escala tipográfica y con 4 px por lado daba 42 de área, no 44, así que pasó a `-inset-y-1.5`; el segundo bloque de CSS móvil tenía que ir después de `.hoja-flotante`; a 320×180 sacar del fijo solo al módulo inferior no lo devolvía al flujo, porque sigue siendo hijo del header fijo, y dejaba una cabecera de 96 px sobre 180; y la raya roja del módulo superior se pintaba debajo del vidrio de la bandeja, que es `relative` con `z-index: 2`.
+
+### 41.4 La revisión adversaria encontró lo que ninguna guardia veía
+
+Seis lectores independientes sobre el diff (uno murió por el límite de sesión). Diez hallazgos, ocho arreglados. El grave: **el velo base de `:root` había subido de 72 % a 88 %** en el primer WIP, así que la barra de **escritorio** en claro cambió de material sin decisión mientras el oscuro seguía en 62 %; cuatro lectores lo señalaron por separado y ninguna prueba lo miraba, porque la del móvil lee el bloque de la media. También: el pie ofrecía «Entrar a mi cuenta» a quien ya tiene sesión, cuando la fila equivalente de la hoja es del anónimo; el módulo inferior declaraba un `translate: 0 0` que lo volvía bloque contenedor de los fijos, la misma trampa que se le había quitado al header el 4 sep; la aritmética de contraste WCAG estaba copiada por cuarta vez en vez de usar el rasgo `MideContraste`; y la fila de pie de la hoja no tenía objetivo táctil medido.
+
+### 41.5 Lo medido en Chromium
+
+Inicial: bandeja 56, fila de pestañas 68, módulo inferior en 776..844 a 390×844. Scroll: 48 y 48 con los rótulos plegados y el isotipo visible. Objetivos de 44 en las cuatro esquinas del cuadrado para pestañas, logo (153,5×44), chip (212×47,8) y «Afíliate» (45,7). El cambio de estado cae entre 30 y 40 px bajando; subir 10 no devuelve y subir 13 sí. Sin desbordar a 360, 320 y 768; a 320 el logo cruza al isotipo. Las hojas abren por toque con `pointer: coarse` verdadero, cierran por toque fuera, por desplazamiento de 30 px y por Escape devolviendo el foco. Con el video de la portada corriendo, 180 fotogramas durante un desplazamiento guiado: 6,1 ms de mediana, 6,3 el percentil 95 y 6,5 el máximo, **en este equipo y no en el teléfono**.
+
+### 41.6 Lo que queda abierto
+
+El teléfono real del directivo (Safari de iOS, la barra de direcciones, el rebote elástico, el teclado y la transparencia reducida) sigue siendo lo único que puede cerrar la barra. Dos cosas más quedan anotadas en la §13.3 de la spec: el foco se pierde al cruzar 64rem con una hoja abierta, y el móvil paga dos `backdrop-filter` permanentes sobre el video cuando el velo al 88 % deja al desenfoque un 12 % del píxel.

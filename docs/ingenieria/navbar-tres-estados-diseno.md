@@ -701,7 +701,7 @@ Presupuesto (aritmética, §3.10): `px-4` 32 + logotipo 153,5 + pastilla 82 + `g
 
 **Tema (D-M17).** `x-publico.control-tema` tal cual (`control-tema.blade.php:31-82`): 44×44 medidos (`ObjetivoTactilTest.php:158-162`), sol o luna por la clase `dark`, popover con Claro, Oscuro y Sistema. Es un cambio respecto a hoy que se decide con Sua: la barra lateral ofrece Claro y Oscuro a **un** toque (`barra-tema.blade.php:29-47`, con `mouseenter`, patrón desterrado de las vistas, `:17-18`) y el popover cuesta dos; a cambio gana Sistema (decisión del 3 sep) y un solo vocabulario con el escritorio. El popover cuelga hacia abajo del superior y, con el vidrio de la bandeja en `::before`, desenfoca la página.
 
-**«Afíliate» (anónimo).** La pastilla de escritorio dentro de `@guest`, cadena medida `after:absolute after:inset-x-0 after:-inset-y-1 after:content-['']` (`ObjetivoTactilTest.php:119-123`) y sus cuatro piezas (`:314-348`); se re-mide en la bandeja de 56 y de 48. El `href="/afiliate"` en el header pasa de **2 a 1** para el anónimo (`NavbarTresEstadosTest.php:632-636`).
+**«Afíliate» (anónimo).** La pastilla de escritorio dentro de `@guest`, cadena medida `after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-['']` (`ObjetivoTactilTest.php:119-123`) y sus cuatro piezas (`:314-348`); se re-mide en la bandeja de 56 y de 48. El `href="/afiliate"` en el header pasa de **2 a 1** para el anónimo (`NavbarTresEstadosTest.php:632-636`).
 
 **La entrada del anónimo (D-M4).** Una fila «Entrar como afiliado» al final de la hoja de El gremio, **declarada en `navbar.blade.php` dentro del grupo** (§6.2) y pintada solo en la variante `pestana` y solo `@guest`, enlazando a `mi-cuenta.entrar` (ahorra el 302 de `bootstrap/app.php:44-46`); más un enlace «Entrar a mi cuenta» en la columna «El gremio» del pie. El enlace «Mi cuenta» de escritorio sigue en el DOM con `max-lg:hidden` (`NavbarTresEstadosTest.php:441-442` lo sigue encontrando).
 
@@ -1319,7 +1319,7 @@ Con `document.elementFromPoint` sobre el cuadrado de 44×44 en Chromium a **320 
 | navbar, filas de la hoja inferior y «Entrar como afiliado» | `menu-grupo.blade.php` | `fila-pulsable block rounded-lg px-3 py-3 text-sm` (ya existe) | 45,7 a 368 de ancho |
 | navbar, logo con mínimo | `navbar.blade.php` | `-my-1.5 flex shrink-0 items-center py-1.5` + `min-h-11` | 44×153,5 y 44×40 |
 | menú de usuario, chip a dos renglones | `menu-usuario.blade.php` | `-m-1 flex items-center gap-2 rounded-full p-1` (ya existe) | 47,9 de alto; no roba el toque al tema; la hoja no desborda a 320 |
-| navbar, «Afíliate» en móvil | `navbar.blade.php` | `after:absolute after:inset-x-0 after:-inset-y-1 after:content-['']` | 45,7 en la bandeja de 56 y de 48 |
+| navbar, «Afíliate» en móvil | `navbar.blade.php` | `after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-['']` | 45,7 en la bandeja de 56 y de 48 (medido el 6 sep: la escala tipográfica dejaba la pastilla en 33,7 y con `-inset-y-1` el área daba 42) |
 | navbar, control de tema | `control-tema.blade.php` | `flex h-11 w-11 items-center justify-center rounded-full` | 44×44 en los dos estados |
 | pie, «Entrar a mi cuenta» y última fila | `footer.blade.php` | `flex min-h-11 items-center` | responden con la página al final y la barra encima |
 
@@ -1418,3 +1418,28 @@ Cada hallazgo se verificó en el repositorio (`main` en `09e8c17`).
 6. **`<span class="sr-only">, sección actual</span>` en el botón de grupo** (accesibilidad, como alternativa a `aria-current="true"`). No: el proyecto ya usa `aria-current="true"` en dos filtros (`guia/index.blade.php:31`, `conmutador-eventos.blade.php:70`), es semántica nativa y no suma texto invisible que un lector recite con la coma; y no se lleva al disparador de escritorio en esta fase porque es un hallazgo de la Parte I y toca un archivo con cadenas pinzadas (`menu-grupo.blade.php:55-75`).
 7. **Bajar el desenfoque móvil «si Sua quiere más transparencia» hasta 0,72 y pasar el rótulo activo a `text-tinta` con el rojo solo en el icono** (accesibilidad, variante). No se toma como alternativa de la tabla: dejaría el rótulo activo sin el color que en escritorio marca la sección (`text-acento`, `NavegacionAgrupadaTest.php:325-331`) y dos vocabularios por ancho; el velo al 88/85 % es lo que permite conservar el mismo lenguaje. Si Sua prefiere más transparencia, es una decisión nueva con su propia medición, no una nota al pie.
 8. **Cambiar la guardia de `:394` de vuelta a un solo `<nav>` con un `<div role="navigation">`** (implícito en la restricción 1 de la Parte I). Ya rechazado en la primera versión y se mantiene: esquivar la guardia con ARIA en vez del elemento nativo es esconder el cambio.
+
+
+## 13. Lo que la construcción cambió (6 sep 2026)
+
+La Parte II se escribió antes de tocar código y el código la contradijo en ocho sitios. Lo que sigue es lo que de verdad quedó, para que la próxima sesión lea esto y no la propuesta.
+
+### 13.1 Lo que el navegador corrigió mientras se construía
+
+1. **El apaisado compacta desde `.cromo`, no desde `:root`.** La media de `max-height: 30rem` reasignaba los tokens de alto sobre `:root` dentro de `@layer components`, y `tokens.css` no está en ninguna capa: una regla sin capa gana a cualquier regla en capa, así que la reasignación no llegaba nunca. Medido: 56/68 con los rótulos ya plegados, en vez de 48/48. Los tokens se reasignan sobre `.cromo`, que es de la capa y del componente.
+2. **La pastilla «Afíliate» necesita `-inset-y-1.5`.** La escala tipográfica deja la pastilla en 33,7 px de alto, no en 37,7: con 4 px por lado el área pulsable daba 42 y no los 44 exigidos. Con 6 px da 45,7, medidos a 1440 y a 390 y también en la bandeja compacta.
+3. **El segundo bloque de CSS móvil va después de `.hoja-flotante`.** Colocado antes, las reglas de la hoja pisaban las del módulo por orden de cascada.
+4. **A 320×180 no basta con sacar del fijo al módulo inferior.** `position: static` sobre el módulo no lo devuelve al flujo del documento: sigue siendo hijo del `<header>` fijo, así que solo lo convertía en una segunda fila de una cabecera de 96 px, que es exactamente lo que la media quería evitar (medido: 96 de 180 px, y la barra no se iba con el desplazamiento). Sale del fijo el header entero; el módulo queda `relative` para seguir siendo el bloque contenedor de sus hojas, y se apagan el apartado de la primera sección y el `scroll-padding-top`.
+5. **La raya roja del módulo superior necesita `z-index: 3`.** La bandeja es `relative` con `z-index: 2` y aísla, y la raya del header es absoluta sin z-index: se pintaba debajo del vidrio al 88 %, es decir un 4 % de rojo efectivo. Los dos bordes coinciden en 48,0 px, así que no era cuestión de geometría sino de orden de pintado.
+
+### 13.2 Lo que la revisión adversaria encontró (y no había guardia que lo viera)
+
+6. **El velo base había subido de 72 % a 88 %.** D-M18 reasigna el velo del móvil bajo 64rem; el primer WIP cambió además la línea base de `:root`, con lo que la barra de **escritorio** en claro cambió de material sin decisión mientras el oscuro seguía en 62 %. Cuatro lectores independientes lo señalaron. La guardia nueva fija 72 en la base y 62 en `.dark`, y deja el 88 / 85 solo dentro de la media del móvil.
+7. **El pie ofrecía la entrada del afiliado con sesión abierta.** La fila «Entrar a mi cuenta» nació en esta rama para que la entrada exista sin JavaScript (D-M4); como la fila de la hoja de El gremio, es del anónimo. A quien ya tiene sesión el formulario de afiliados le reemplazaría la suya.
+8. **El módulo inferior declaraba `translate: 0 0`.** Un translate identidad hace al elemento bloque contenedor de sus descendientes fijos: la misma trampa que se le había quitado al header el 4 sep. Se retira junto con los otros dos valores iniciales redundantes.
+
+### 13.3 Lo que queda abierto
+
+- **El foco al cruzar 64rem.** El header despacha el cierre general y cada desplegable llama a `cerrar()`, no a la variante que devuelve el foco: girar un iPad con teclado y una hoja abierta deja el foco en el cuerpo. Devolverlo al disparador tampoco sirve, porque ese disparador se oculta con su módulo. Pide decisión propia.
+- **Los dos vidrios sobre el video.** El móvil paga dos `backdrop-filter` permanentes y un tercero con la hoja abierta, cuando el velo al 88 % deja al desenfoque como mucho un 12 % del píxel. En este equipo el desplazamiento guiado dio 6,1 ms de mediana con el video corriendo; la medición que decide es la del teléfono de gama baja, que D-M18 dejó pendiente.
+- **La duplicación del degradado de la raya.** `.cromo::before` y `.modulo-inferior::after` repiten el mismo `linear-gradient`. Un token lo unificaría; no se toca hoy para no mover el vocabulario de tokens en la misma rama que estrena la barra.

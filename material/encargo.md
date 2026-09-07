@@ -258,6 +258,7 @@ Desde el 1 de septiembre de 2026 (§31) hay dos familias de sembradores y no se 
 |---|---|---|
 | 3 ago 2026 | Stack: Laravel 13 + Filament 4 + Livewire 3 + Tailwind 4; SQLite en desarrollo y PostgreSQL 17 en producción; PHPUnit. WordPress y Astro/Strapi descartados. Filament 5 descartado por nuevo | v3 |
 | 4 ago 2026 | El sitio es bicromático con tokens semánticos; arranque `system` (ratificado el 1 sep 2026, OBS3-03) | v5 |
+| 6 sep 2026 | **La barra del teléfono son dos módulos**: arriba marca, tema y «Afíliate» (o el nombre y el rango de quien tiene sesión); abajo, principal y fijo, cinco pestañas con las dos hojas que abren por toque. Los estados de escritorio menos «atención», y el estado scroll solo compacta al bajar. Dieciocho decisiones (D-M1 a D-M18) respondidas por Sua antes de escribir una línea | `docs/ingenieria/navbar-tres-estados-diseno.md`, Parte II |
 | 4 ago 2026 | Las bolsas las escribe el tercero (asociado, artista, proveedor) y el gremio modera; nadie aprueba lo que redactó; el gremio no reescribe lo ajeno | v6, §16 |
 | 4 ago 2026 | Reglas duras de la pasarela (§8) y de seguridad (§9), nacidas de la auditoría | v4, §15 |
 | 14 ago 2026 | **Alcance congelado.** La ausencia de una funcionalidad no es incumplimiento mientras no esté en el cronograma firmado ni en la ERS; toda ampliación se registra por escrito **antes** de codificarse (`docs/ingenieria/constancias/`) | §23, §24.5, §26.4 |
