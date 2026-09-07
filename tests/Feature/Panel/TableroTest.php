@@ -430,28 +430,50 @@ class TableroTest extends TestCase
     }
 
     /**
-     * El tablero ya no declara `getColumns()`: los cinco widgets son
-     * `columnSpan = 'full'`, así que ninguno depende de cuántas columnas
-     * tenga la rejilla de la página. Sin esto, cualquier widget que se
-     * registre sin declarar ancho hereda el `1` de `Widget` y, bajo
-     * cualquier rejilla de más de una columna, queda apretado en una
-     * fracción de la fila — es justo lo que le pasó a
-     * `AsociadosPorMunicipio` (una gráfica de doce municipios en un cuarto
-     * de ancho, con el resto de la fila vacío) cuando la página tenía una
-     * rejilla de 4 columnas y este widget no declaraba `columnSpan`.
+     * Composición visual del tablero: en `xl` (6 columnas) recaudo ocupa 4
+     * y municipios 2, en la misma fila. El resto va a todo el ancho. En
+     * `md` y móvil las dos gráficas siguen en `full` para que doce
+     * municipios no queden ilegibles. Esto no cubre datos ni permisos.
+     *
+     * @return array<class-string, int|string|array<string, int|string>>
      */
-    public function test_ningun_widget_del_tablero_queda_en_una_fraccion_de_la_fila(): void
+    private function anchosAprobadosDelTablero(): array
+    {
+        return [
+            PendientesDeAprobacion::class => 'full',
+            ResumenDelGremio::class => 'full',
+            RecaudoMensual::class => [
+                'default' => 'full',
+                'md' => 'full',
+                'xl' => 4,
+            ],
+            AsociadosPorMunicipio::class => [
+                'default' => 'full',
+                'md' => 'full',
+                'xl' => 2,
+            ],
+            UltimasTransacciones::class => 'full',
+        ];
+    }
+
+    public function test_el_tablero_reparte_recaudo_y_municipios_en_escritorio(): void
     {
         $panel = (new AdminPanelProvider($this->app))->panel(Panel::make());
+        $esperados = $this->anchosAprobadosDelTablero();
+
+        $this->assertEqualsCanonicalizing(
+            array_keys($esperados),
+            array_values($panel->getWidgets()),
+        );
 
         foreach ($panel->getWidgets() as $claseWidget) {
             $widget = new $claseWidget;
             $columnSpan = (fn () => $this->columnSpan)->call($widget);
 
             $this->assertSame(
-                'full',
+                $esperados[$claseWidget],
                 $columnSpan,
-                "{$claseWidget} no declara columnSpan = 'full', asi que hereda el 1 de Widget y puede quedar apretado en una fraccion de la fila."
+                "{$claseWidget} no declara el columnSpan de la composición aprobada."
             );
         }
     }

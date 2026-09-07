@@ -124,4 +124,34 @@ class TemaDelPanelTest extends TestCase
             'Debe apuntar a un archivo compilado de verdad (con su hash de build), no a una ruta inventada.'
         );
     }
+
+    public function test_el_fondo_se_aplica_al_workspace_real_en_ambos_temas(): void
+    {
+        $tema = File::get(resource_path('css/filament/admin/theme.css'));
+
+        $this->assertStringContainsString('.fi-main-ctn {', $tema);
+        $this->assertStringContainsString('.dark .fi-main-ctn {', $tema);
+        $this->assertStringNotContainsString('.fi-body::before', $tema);
+    }
+
+    public function test_la_topbar_reacciona_al_scroll_sin_un_script_adicional(): void
+    {
+        $componente = File::get(resource_path('views/filament/components/theme-switcher-topbar.blade.php'));
+        $tema = File::get(resource_path('css/filament/admin/theme.css'));
+
+        $this->assertStringContainsString('x-on:scroll.window.passive="syncTopbar()"', $componente);
+        $this->assertStringContainsString("closest('.fi-topbar-ctn')", $componente);
+        $this->assertStringContainsString('asb-topbar--scrolled', $componente);
+        $this->assertStringContainsString('.fi-topbar-ctn.asb-topbar--scrolled .fi-topbar', $tema);
+        $this->assertStringContainsString('@media (prefers-reduced-motion: reduce)', $tema);
+    }
+
+    public function test_el_tema_define_la_base_visual_de_tarjetas_y_tablas(): void
+    {
+        $tema = File::get(resource_path('css/filament/admin/theme.css'));
+
+        $this->assertStringContainsString('.fi-section', $tema);
+        $this->assertStringContainsString('.fi-ta-header-cell', $tema);
+        $this->assertStringContainsString('.fi-ta-row:hover', $tema);
+    }
 }
