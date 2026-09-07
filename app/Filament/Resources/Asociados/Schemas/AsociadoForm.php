@@ -93,6 +93,15 @@ class AsociadoForm
                         SubidaSegura::make('foto_portada')
                             ->label('Foto de portada')
                             ->imagen()
+                            ->deletable()
+                            ->downloadable()
+                            ->openable()
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([
+                                '16:9',
+                                '4:3',
+                                '1:1',
+                            ])
                             ->directory('asociados'),
                         // La librería de medios trae su propio nombrador, así
                         // que no hereda la defensa de `SubidaSegura`: sin esto
@@ -110,7 +119,16 @@ class AsociadoForm
                             ->customProperties([Asociado::FOTO_APROBADA => true])
                             ->multiple()
                             ->reorderable()
+                            ->deletable()
+                            ->downloadable()
+                            ->openable()
                             ->image()
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([
+                                '16:9',
+                                '4:3',
+                                '1:1',
+                            ])
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(5120)
                             ->getUploadedFileNameForStorageUsing(

@@ -20,6 +20,7 @@ use App\Models\Proveedor;
 use App\Models\User;
 use App\Models\Vacante;
 use Database\Seeders\RolYPermisoSeeder;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
@@ -211,7 +212,51 @@ class ModeracionDeBolsasTest extends TestCase
         Mail::assertNothingSent();
     }
 
-    // --- Aprobación en lote (B1: el lote produce el mismo efecto que la fila) ---
+    // --- Presentación controlada de las acciones de Vacantes. ---
+
+    public function test_las_acciones_individuales_de_vacantes_viven_en_un_solo_menu(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $acciones = Livewire::test(ListVacantes::class)
+            ->instance()
+            ->getTable()
+            ->getRecordActions();
+
+        $this->assertCount(1, $acciones);
+        $this->assertInstanceOf(ActionGroup::class, $acciones[0]);
+        $this->assertSame(
+            ['aprobar', 'devolver', 'dejar_de_publicar', 'postulaciones', 'delete'],
+            array_keys($acciones[0]->getFlatActions())
+        );
+    }
+
+    public function test_la_barra_contextual_conserva_solo_las_acciones_masivas_seguras(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        Livewire::test(ListVacantes::class)
+            ->assertTableBulkActionExists('aprobar_lote')
+            ->assertTableBulkActionExists('delete');
+    }
+
+    public function test_el_menu_conserva_las_condiciones_por_estado_y_por_postulaciones(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $pendiente = Vacante::factory()->pendiente()->create();
+        $publicadaSinPostulaciones = Vacante::factory()->publicado()->create();
+        $publicadaConPostulaciones = Vacante::factory()->publicado()->create();
+        Postulacion::factory()->for($publicadaConPostulaciones)->create();
+
+        Livewire::test(ListVacantes::class)
+            ->assertActionVisible(TestAction::make('aprobar')->table($pendiente))
+            ->assertActionHidden(TestAction::make('dejar_de_publicar')->table($pendiente))
+            ->assertActionHidden(TestAction::make('aprobar')->table($publicadaSinPostulaciones))
+            ->assertActionVisible(TestAction::make('dejar_de_publicar')->table($publicadaSinPostulaciones))
+            ->assertActionVisible(TestAction::make('postulaciones')->table($publicadaSinPostulaciones))
+            ->assertActionVisible(TestAction::make('postulaciones')->table($publicadaConPostulaciones));
+    }
 
     public function test_aprobar_en_lote_de_vacantes_publica_limpia_el_motivo_y_avisa(): void
     {
@@ -249,13 +294,6 @@ class ModeracionDeBolsasTest extends TestCase
         Mail::assertNothingSent();
     }
 
-    /**
-     * El lote filtraba solo por policy, no por estado: un «seleccionar
-     * todo → Aprobar y publicar» le reescribía el estado y reenviaba el
-     * correo a una vacante que ya estaba publicada. Debe comportarse como
-     * aplicar la acción de fila a cada registro, que se oculta para lo ya
-     * publicado.
-     */
     public function test_aprobar_en_lote_de_vacantes_no_reenvia_el_correo_a_las_ya_publicadas(): void
     {
         Mail::fake();

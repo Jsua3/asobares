@@ -216,6 +216,29 @@ class AccionesDeAprobacion
             });
     }
 
+    /** Quita una vacante ya aprobada del sitio sin tratarla como devolución. */
+    public static function dejarDePublicarVacante(): Action
+    {
+        return Action::make('dejar_de_publicar')
+            ->label('Dejar de publicar')
+            ->icon('heroicon-o-eye-slash')
+            ->color('warning')
+            ->requiresConfirmation()
+            ->modalHeading('Dejar de publicar esta vacante')
+            ->modalDescription('La vacante saldrá de la bolsa de empleo pública, pero quedará guardada en el panel.')
+            ->modalSubmitActionLabel('Sí, quitar del sitio')
+            ->visible(fn (Vacante $registro): bool => $registro->estado === EstadoPublicacion::Publicado
+                && auth()->user()?->can('publicar', $registro) === true)
+            ->action(function (Vacante $registro): void {
+                $registro->update(['estado' => EstadoPublicacion::Borrador]);
+
+                Notification::make()
+                    ->title('Vacante retirada del sitio')
+                    ->warning()
+                    ->send();
+            });
+    }
+
     /**
      * Aprobación de una ficha de artista o proveedor llegada por el formulario
      * público. Se avisa al solicitante si dejó correo.
