@@ -7,8 +7,11 @@ use App\Filament\Widgets\PendientesDeAprobacion;
 use App\Filament\Widgets\RecaudoMensual;
 use App\Filament\Widgets\ResumenDelGremio;
 use App\Filament\Widgets\UltimasTransacciones;
+use App\Http\Responses\LogoutDelPanelResponse;
+use Filament\Auth\Http\Responses\Contracts\LogoutResponse as LogoutResponseContract;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Auth\MultiFactor\Email\EmailAuthentication;
+use Filament\Enums\ThemeMode;
 use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -32,12 +35,20 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
+    public function register(): void
+    {
+        parent::register();
+
+        $this->app->bind(LogoutResponseContract::class, LogoutDelPanelResponse::class);
+    }
+
     public function panel(Panel $panel): Panel
     {
         return $panel
             ->default()
             ->id('admin')
             ->path('admin')
+            ->spa()
             ->login()
             ->profile(isSimple: false)
             ->brandName('ASOBARES Quindío')
@@ -48,6 +59,9 @@ class AdminPanelProvider extends PanelProvider
             // que ya usa el sitio público.
             ->brandLogo(asset('img/logo-asobares.png'))
             ->brandLogoHeight('2rem')
+            ->darkMode()
+            ->defaultThemeMode(ThemeMode::Light)
+            ->themeSwitcher()
             ->viteTheme('resources/css/filament/admin/theme.css')
             // Sin esto Filament ignora el `--font-family: 'Poppins'` de
             // theme.css: su propio layout base siempre pinta un `<style>`
@@ -66,7 +80,10 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::HEAD_END,
                 fn (): HtmlString => Vite::fonts(),
             )
-            ->darkModeBrandLogo(asset('img/logo-asobares-blanco.png'))
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_END,
+                fn (): HtmlString => new HtmlString(view('filament.components.theme-switcher-topbar')->render()),
+            )
             // Pub Red, exacto según el manual de marca de Asobares Colombia.
             ->colors([
                 'primary' => Color::hex('#EE4137'),

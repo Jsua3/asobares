@@ -83,6 +83,17 @@ class LoginDelPanelTest extends TestCase
         $this->assertAuthenticatedAs($secretaria);
     }
 
+    public function test_cerrar_sesion_desde_el_panel_vuelve_al_sitio_publico(): void
+    {
+        $direccion = $this->crearUsuario(User::ROL_SUPER_ADMIN);
+
+        $this->actingAs($direccion)
+            ->post(Filament::getPanel('admin')->getLogoutUrl())
+            ->assertRedirect(route('inicio'));
+
+        $this->assertGuest();
+    }
+
     /**
      * Lo que compra el segundo factor: quien robe la contraseña no entra con
      * ella sola. Antes bastaba, porque nadie estaba obligado a configurarlo.
