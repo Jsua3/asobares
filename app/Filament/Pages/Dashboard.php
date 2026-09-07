@@ -8,12 +8,12 @@ use Filament\Pages\Dashboard as TableroDeFabrica;
 /**
  * El tablero del panel, con vocabulario del gremio.
  *
- * Reemplaza al de fábrica para poder ordenar las tres bandas del diseño:
- * primero lo que hay que hacer (`PendientesDeAprobacion`), después las cuatro
- * cifras del oficio (`ResumenDelGremio`), y al final las gráficas. Las tres
- * bandas las ordena `getSort()` de cada widget, no una rejilla propia: los
- * cinco son `columnSpan = 'full'`, así que la página no necesita declarar
- * columnas.
+ * Reemplaza al de fábrica para poder ordenar las bandas del diseño: primero lo
+ * que hay que hacer (`PendientesDeAprobacion`), después las cuatro cifras del
+ * oficio (`ResumenDelGremio`), y al final los widgets operativos reales. Las
+ * bandas las ordena `getSort()` de cada widget. La rejilla (`xl` = 6) solo
+ * reparte recaudo (4) y municipios (2) en escritorio; no cambia datos ni
+ * permisos.
  */
 class Dashboard extends TableroDeFabrica
 {
@@ -23,21 +23,31 @@ class Dashboard extends TableroDeFabrica
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-home';
 
+    /**
+     * Marca el cuerpo del tablero para que la cabecera institucional
+     * (`.asb-dashboard .fi-page-header-main-ctn > .fi-header`) no dependa de `:has()` ni
+     * se pinte en otras páginas. No cambia textos, widgets ni datos.
+     *
+     * @var array<string, string>
+     */
+    protected array $extraBodyAttributes = [
+        'class' => 'asb-dashboard',
+    ];
+
     public function getSubheading(): ?string
     {
         return 'Lo que te espera hoy, y cómo va el gremio.';
     }
 
-    /*
-     * Sin `getColumns()` propio: los cinco widgets del tablero declaran
-     * `columnSpan = 'full'` (los cuatro explícitos, más `ResumenDelGremio`
-     * porque lo hereda de `StatsOverviewWidget`), así que cada uno ocupa
-     * toda la fila sin importar cuántas columnas tenga la rejilla. Las
-     * cuatro tarjetas de la banda 2 no se reparten por esta rejilla: las
-     * calcula `StatsOverviewWidget` por dentro, ajeno al `getColumns()` de
-     * la página. Una rejilla de 4 columnas aquí no ayudaba a esas tarjetas y
-     * sí perjudicaba a `AsociadosPorMunicipio`, el único widget que no
-     * declaraba ancho: heredaba el `1` de `Widget` y quedaba en un cuarto
-     * de fila con el resto vacío.
+    /**
+     * @return int|array<string, int|null>
      */
+    public function getColumns(): int|array
+    {
+        return [
+            'default' => 1,
+            'md' => 2,
+            'xl' => 6,
+        ];
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Carteras\Tables;
 
+use App\Support\FormatoMoneda;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -35,9 +36,13 @@ class CarterasTable
                     ->sortable(),
                 TextColumn::make('saldo_pendiente')
                     ->label('Saldo pendiente')
-                    ->money('COP', locale: 'es_CO')
+                    ->formatStateUsing(fn (mixed $state): string => FormatoMoneda::pesos($state))
                     ->sortable()
-                    ->summarize(Sum::make()->label('Total')->money('COP', locale: 'es_CO')),
+                    ->summarize(
+                        Sum::make()
+                            ->label('Total')
+                            ->formatStateUsing(fn (mixed $state): string => FormatoMoneda::pesos($state))
+                    ),
                 TextColumn::make('ultimo_pago_at')
                     ->label('Último pago')
                     ->date('d/m/Y')

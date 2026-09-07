@@ -39,9 +39,9 @@ class ModerarFotos extends Page implements HasTable
 
     protected static ?int $navigationSort = 3;
 
-    protected static ?string $title = 'Fotos por aprobar';
+    protected static ?string $title = 'Fotos enviadas por afiliados';
 
-    protected static ?string $navigationLabel = 'Fotos por aprobar';
+    protected static ?string $navigationLabel = 'Fotos de afiliados';
 
     protected static ?string $slug = 'fotos-por-aprobar';
 
@@ -76,8 +76,8 @@ class ModerarFotos extends Page implements HasTable
         return $table
             ->query(fn (): Builder => self::consultaBase())
             ->defaultSort('created_at')
-            ->emptyStateHeading('No hay fotos esperando')
-            ->emptyStateDescription('Cuando un afiliado suba una foto desde su cuenta, aparecerá aquí.')
+            ->emptyStateHeading('No hay fotos enviadas por afiliados')
+            ->emptyStateDescription('Cuando un afiliado entre a Mi cuenta > Mis fotos y suba una imagen, aparecerá aquí para aprobarla o devolverla.')
             ->columns([
                 ImageColumn::make('id')
                     ->label('Foto')

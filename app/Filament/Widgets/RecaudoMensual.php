@@ -27,7 +27,11 @@ class RecaudoMensual extends ChartWidget
 
     protected static ?int $sort = 2;
 
-    protected int|string|array $columnSpan = 'full';
+    protected int|string|array $columnSpan = [
+        'default' => 'full',
+        'md' => 'full',
+        'xl' => 4,
+    ];
 
     private const array MESES = [
         1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun',

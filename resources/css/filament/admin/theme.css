@@ -15,7 +15,15 @@
     h1, h2, h3, h4 {
         font-family: var(--font-display);
         font-weight: 700;
-        letter-spacing: -0.02em;
+        letter-spacing: 0;
+    }
+
+    html {
+        /* `stable` solo reserva el canal si el root puede hacer scroll.
+           Sin overflow-y el gutter no iguala páginas cortas (Aliados)
+           con páginas largas (Asociados): clientWidth 1440 vs 1425. */
+        overflow-y: scroll;
+        scrollbar-gutter: stable;
     }
 }
 
@@ -37,6 +45,28 @@
     --asb-vidrio-sombra:
         0 1px 2px rgb(11 9 10 / 0.05),
         0 8px 24px rgb(11 9 10 / 0.06);
+    --asb-admin-rojo: #ee4137;
+    --asb-admin-borgona: #291012;
+    --asb-admin-borgona-profundo: #171012;
+    --asb-admin-carbon: #0b090a;
+    --asb-admin-fondo-claro: #f7f6f5;
+    --asb-admin-card: rgb(255 255 255 / 0.86);
+    --asb-admin-card-borde: rgb(58 13 16 / 0.12);
+    --asb-admin-card-sombra:
+        0 1px 2px rgb(11 9 10 / 0.04),
+        0 14px 34px rgb(58 13 16 / 0.07);
+    --asb-admin-dashboard-borde: rgb(58 13 16 / 0.11);
+    --asb-admin-dashboard-sombra:
+        0 1px 2px rgb(11 9 10 / 0.035),
+        0 18px 42px rgb(58 13 16 / 0.06);
+    /*
+     * Ruta relativa al CSS, no url("/img/..."): con `public/hot`, Vite
+     * reescribe el path absoluto al origen HMR y responde 404. El
+     * archivo vive en public/img/panel/cabecera-dashboard.png.
+     */
+    --asb-admin-dashboard-image: url("../../../../public/img/panel/cabecera-dashboard.png");
+    --asb-admin-topbar-alto: 3.75rem;
+    --asb-admin-sidebar-ancho: 15.25rem;
 }
 
 .dark {
@@ -44,6 +74,15 @@
     --asb-vidrio-borde: rgb(255 255 255 / 0.09);
     --asb-vidrio-desenfoque: blur(12px);
     --asb-vidrio-sombra: none;
+    --asb-admin-card: rgb(24 22 23 / 0.88);
+    --asb-admin-card-borde: rgb(255 255 255 / 0.09);
+    --asb-admin-card-sombra:
+        inset 0 1px 0 rgb(255 255 255 / 0.04),
+        0 18px 44px rgb(0 0 0 / 0.28);
+    --asb-admin-dashboard-borde: rgb(255 255 255 / 0.085);
+    --asb-admin-dashboard-sombra:
+        inset 0 1px 0 rgb(255 255 255 / 0.035),
+        0 22px 54px rgb(0 0 0 / 0.32);
 }
 
 @layer components {
@@ -70,11 +109,1077 @@
             transform var(--duracion-boton) var(--ease-out);
     }
 
+    .fi-body {
+        position: relative;
+        background-color: var(--asb-admin-fondo-claro);
+        overflow-x: clip;
+    }
+
+    .dark .fi-body {
+        background-color: var(--asb-admin-carbon);
+    }
+
+    .fi-layout {
+        position: relative;
+    }
+
+    .fi-main-ctn {
+        position: relative;
+        background:
+            radial-gradient(54rem 32rem at 13% -4%, rgb(255 255 255 / 0.96), transparent 66%),
+            radial-gradient(34rem 22rem at 78% 2%, rgb(238 65 55 / 0.025), transparent 74%),
+            radial-gradient(28rem 18rem at 38% 48%, rgb(58 13 16 / 0.012), transparent 78%),
+            linear-gradient(180deg, rgb(253 252 251) 0%, var(--asb-admin-fondo-claro) 48%, rgb(244 242 241) 100%);
+        isolation: isolate;
+    }
+
+    .fi-main-ctn::before {
+        position: fixed;
+        inset: var(--asb-admin-topbar-alto) 0 0 var(--asb-admin-sidebar-ancho);
+        z-index: 0;
+        pointer-events: none;
+        content: "";
+        background:
+            linear-gradient(115deg, transparent 0 34%, rgb(238 65 55 / 0.012) 48%, transparent 64%),
+            radial-gradient(24rem 16rem at 92% 18%, rgb(238 65 55 / 0.024), transparent 70%);
+        opacity: 0.54;
+    }
+
+    .dark .fi-main-ctn {
+        background:
+            radial-gradient(58rem 34rem at 12% -4%, rgb(255 255 255 / 0.045), transparent 66%),
+            radial-gradient(40rem 26rem at 82% 2%, rgb(238 65 55 / 0.105), transparent 74%),
+            radial-gradient(30rem 20rem at 38% 48%, rgb(238 65 55 / 0.045), transparent 76%),
+            linear-gradient(180deg, rgb(18 14 15) 0%, var(--asb-admin-carbon) 54%, rgb(18 16 17) 100%);
+    }
+
+    .dark .fi-main-ctn::before {
+        background:
+            linear-gradient(115deg, transparent 0 36%, rgb(238 65 55 / 0.075) 50%, transparent 66%),
+            radial-gradient(24rem 16rem at 92% 18%, rgb(238 65 55 / 0.1), transparent 72%);
+        opacity: 0.48;
+    }
+
+    .fi-topbar {
+        min-height: var(--asb-admin-topbar-alto);
+        background:
+            linear-gradient(90deg, rgb(255 255 255 / 0.78), rgb(250 247 246 / 0.7)),
+            radial-gradient(26rem circle at 18% 0%, rgb(238 65 55 / 0.06), transparent 68%);
+        border-bottom: 1px solid rgb(58 13 16 / 0.08);
+        box-shadow: 0 1px 0 rgb(255 255 255 / 0.7);
+        -webkit-backdrop-filter: blur(16px) saturate(145%);
+        backdrop-filter: blur(16px) saturate(145%);
+        transition:
+            background 220ms var(--ease-color),
+            border-color 220ms var(--ease-color),
+            box-shadow 220ms var(--ease-color),
+            backdrop-filter 220ms var(--ease-color);
+    }
+
+    .dark .fi-topbar {
+        background:
+            linear-gradient(90deg, rgb(22 18 19 / 0.78), rgb(15 12 13 / 0.72)),
+            radial-gradient(26rem circle at 18% 0%, rgb(238 65 55 / 0.075), transparent 68%);
+        border-bottom-color: rgb(255 255 255 / 0.08);
+        box-shadow: 0 1px 0 rgb(255 255 255 / 0.035);
+    }
+
+    .fi-topbar-ctn.asb-topbar--scrolled .fi-topbar {
+        background:
+            linear-gradient(90deg, rgb(255 255 255 / 0.94), rgb(250 247 246 / 0.9)),
+            radial-gradient(28rem circle at 18% 0%, rgb(238 65 55 / 0.075), transparent 68%);
+        border-bottom-color: rgb(58 13 16 / 0.14);
+        box-shadow: 0 10px 28px rgb(58 13 16 / 0.1);
+        -webkit-backdrop-filter: blur(16px) saturate(130%);
+        backdrop-filter: blur(16px) saturate(130%);
+    }
+
+    .dark .fi-topbar-ctn.asb-topbar--scrolled .fi-topbar {
+        background:
+            linear-gradient(90deg, rgb(22 18 19 / 0.96), rgb(15 12 13 / 0.93)),
+            radial-gradient(28rem circle at 18% 0%, rgb(238 65 55 / 0.1), transparent 68%);
+        border-bottom-color: rgb(255 255 255 / 0.12);
+        box-shadow: 0 12px 32px rgb(0 0 0 / 0.36);
+    }
+
+    .fi-topbar-start {
+        display: flex;
+        margin-inline: 0.4rem 0.75rem;
+    }
+
+    .fi-topbar .fi-logo {
+        transform: scale(1);
+        transform-origin: left center;
+        transition:
+            transform 180ms var(--ease-out),
+            opacity 180ms var(--ease-color);
+    }
+
+    .fi-topbar-ctn.asb-topbar--scrolled .fi-logo {
+        opacity: 0.94;
+        transform: scale(0.9);
+    }
+
+    .fi-sidebar {
+        --sidebar-width: var(--asb-admin-sidebar-ancho);
+        background:
+            radial-gradient(18rem 16rem at 24% 0%, rgb(238 65 55 / 0.09), transparent 66%),
+            linear-gradient(180deg, #3b1113 0%, #291012 54%, #171012 100%);
+        border-inline-end: 1px solid rgb(255 255 255 / 0.09);
+        box-shadow:
+            inset -1px 0 0 rgb(255 255 255 / 0.035),
+            18px 0 44px rgb(58 13 16 / 0.16);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+    }
+
+    .dark .fi-sidebar {
+        background:
+            radial-gradient(18rem 16rem at 24% 0%, rgb(238 65 55 / 0.1), transparent 66%),
+            linear-gradient(180deg, #3b1113 0%, #291012 54%, #171012 100%);
+        border-inline-end-color: rgb(255 255 255 / 0.08);
+        box-shadow:
+            inset -1px 0 0 rgb(255 255 255 / 0.035),
+            18px 0 44px rgb(0 0 0 / 0.32);
+    }
+
+    .fi-sidebar-header {
+        min-height: 4.65rem;
+        padding-block: 0.85rem;
+        border-bottom: 1px solid rgb(255 255 255 / 0.08);
+        background: linear-gradient(180deg, rgb(255 255 255 / 0.055), transparent);
+    }
+
+    .fi-sidebar-header .fi-logo {
+        max-height: 2rem;
+        filter: drop-shadow(0 8px 18px rgb(0 0 0 / 0.16));
+    }
+
+    .fi-sidebar-nav {
+        padding-inline: 0.75rem;
+    }
+
+    .fi-sidebar-group {
+        margin-block: 0.25rem 0.9rem;
+    }
+
+    .fi-sidebar-group-label {
+        color: #bfa5a6;
+        font-size: 0.72rem;
+        font-weight: 650;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .fi-sidebar .fi-sidebar-item-btn {
+        min-height: 2.72rem;
+        border-radius: 0.9rem;
+        color: #f3e9e9;
+        transition:
+            color 160ms var(--ease-color),
+            background-color 160ms var(--ease-color),
+            box-shadow 160ms var(--ease-color),
+            transform 160ms var(--ease-out);
+    }
+
+    .fi-sidebar .fi-sidebar-item-btn > .fi-icon,
+    .fi-sidebar .fi-sidebar-group-collapse-btn,
+    .fi-sidebar .fi-sidebar-group-collapse-button {
+        color: #d8babb;
+    }
+
+    .fi-sidebar .fi-sidebar-item-label {
+        color: #f3e9e9;
+        font-weight: 600;
+    }
+
+    .fi-sidebar .fi-sidebar-item-btn[aria-current="page"],
+    .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+        color: rgb(255 255 255);
+        background: rgb(238 65 55 / 0.16);
+        box-shadow:
+            inset 3px 0 0 #ee4137,
+            inset 0 1px 0 rgb(255 255 255 / 0.08),
+            0 10px 22px rgb(11 9 10 / 0.12);
+    }
+
+    .fi-sidebar .fi-sidebar-item-btn[aria-current="page"] > .fi-icon,
+    .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon,
+    .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-sidebar-item-label {
+        color: #ff7168;
+    }
+
+    .fi-main {
+        position: relative;
+        z-index: 1;
+        row-gap: 1.35rem;
+    }
+
+    .fi-header {
+        row-gap: 0.55rem;
+        /* Filament suma 0.35rem aquí y `sm:mt-7` en las acciones cuando
+           hay breadcrumbs. Eso desplaza título y Crear al cambiar de
+           recurso. El tablero no usa breadcrumbs y trae su propio padding. */
+        padding-block-start: 0;
+    }
+
+    .fi-header.fi-header-has-breadcrumbs .fi-header-actions-ctn {
+        margin-top: 0;
+    }
+
+    .fi-main:has(.fi-wi-stats-overview) {
+        row-gap: 0.85rem;
+    }
+
+    /*
+     * Cabecera institucional del tablero.
+     * ::before pinta la fotografía; ::after es el velo. El fondo del
+     * .fi-header no puede llevar el overlay: en el stacking context
+     * queda DETRÁS de ::before y no velaría la foto (y con Vite el
+     * url() absoluto tampoco llegaba a pintar).
+     */
+    .asb-dashboard .fi-page-header-main-ctn > .fi-header {
+        position: relative;
+        align-items: center;
+        min-height: 10rem;
+        padding: 1rem 1.2rem;
+        overflow: hidden;
+        background-color: rgb(253 252 251);
+        border: 1px solid var(--asb-admin-dashboard-borde);
+        border-radius: 1rem;
+        box-shadow: var(--asb-admin-dashboard-sombra);
+        isolation: isolate;
+    }
+
+    .asb-dashboard .fi-page-header-main-ctn > .fi-header::before {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        content: "";
+        background-image: var(--asb-admin-dashboard-image);
+        background-position: 18% 42%;
+        background-repeat: no-repeat;
+        background-size: cover;
+        opacity: 1;
+    }
+
+    .asb-dashboard .fi-page-header-main-ctn > .fi-header::after {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        content: "";
+        background: rgb(255 255 255 / 0.1);
+    }
+
+    .dark .asb-dashboard .fi-page-header-main-ctn > .fi-header {
+        background-color: var(--asb-admin-carbon);
+        border-color: var(--asb-admin-dashboard-borde);
+    }
+
+    .dark .asb-dashboard .fi-page-header-main-ctn > .fi-header::before {
+        opacity: 0.55;
+    }
+
+    .dark .asb-dashboard .fi-page-header-main-ctn > .fi-header::after {
+        background: rgb(11 9 10 / 0.5);
+    }
+
+    .asb-dashboard .fi-page-header-main-ctn > .fi-header > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    .asb-dashboard .fi-page-header-main-ctn > .fi-header .fi-header-heading {
+        color: rgb(22 17 19);
+        font-size: 1.75rem;
+        line-height: 1.08;
+        letter-spacing: 0;
+    }
+
+    .asb-dashboard .fi-page-header-main-ctn > .fi-header .fi-header-subheading {
+        max-width: 46rem;
+        color: rgb(92 82 84);
+        font-size: 0.98rem;
+        line-height: 1.5;
+    }
+
+    .dark .asb-dashboard .fi-page-header-main-ctn > .fi-header .fi-header-heading {
+        color: rgb(255 255 255);
+    }
+
+    .dark .asb-dashboard .fi-page-header-main-ctn > .fi-header .fi-header-subheading {
+        color: rgb(219 203 204 / 0.76);
+    }
+
+    .fi-section:not(.fi-section-not-contained),
+    .fi-wi-stats-overview-stat {
+        background:
+            linear-gradient(180deg, rgb(255 255 255 / 0.9), var(--asb-admin-card)),
+            radial-gradient(18rem 12rem at 14% 0%, rgb(238 65 55 / 0.055), transparent 64%);
+        border: 1px solid var(--asb-admin-card-borde);
+        border-radius: 1rem;
+        box-shadow: var(--asb-admin-card-sombra);
+    }
+
+    .dark .fi-section:not(.fi-section-not-contained),
+    .dark .fi-wi-stats-overview-stat {
+        background:
+            linear-gradient(180deg, rgb(255 255 255 / 0.045), var(--asb-admin-card)),
+            radial-gradient(18rem 12rem at 14% 0%, rgb(238 65 55 / 0.075), transparent 64%);
+        border-color: var(--asb-admin-card-borde);
+        box-shadow: var(--asb-admin-card-sombra);
+    }
+
+    .fi-section-content,
+    .fi-wi-stats-overview-stat {
+        padding-block: 1rem;
+    }
+
+    .fi-wi-stats-overview-stat {
+        min-height: 8.25rem;
+    }
+
+    .fi-main:has(.fi-wi-stats-overview) .fi-wi {
+        row-gap: 0.7rem;
+    }
+
+    .fi-main:has(.fi-wi-stats-overview) .fi-wi-stats-overview-stat {
+        min-height: 6.5rem;
+        padding: 0.85rem 0.95rem;
+        background:
+            radial-gradient(14rem 9rem at 92% 0%, rgb(238 65 55 / 0.055), transparent 70%),
+            rgb(255 255 255 / 0.94);
+        border-color: var(--asb-admin-dashboard-borde);
+        box-shadow: var(--asb-admin-dashboard-sombra);
+    }
+
+    .dark .fi-main:has(.fi-wi-stats-overview) .fi-wi-stats-overview-stat {
+        background:
+            radial-gradient(14rem 9rem at 92% 0%, rgb(238 65 55 / 0.09), transparent 70%),
+            rgb(25 23 24 / 0.9);
+    }
+
+    .fi-main:has(.fi-wi-stats-overview) .fi-wi-stats-overview-stat-content {
+        gap: 0.42rem;
+    }
+
+    .fi-wi-stats-overview-stat-value {
+        line-height: 1.05;
+        letter-spacing: 0;
+    }
+
+    .fi-main:has(.fi-wi-stats-overview) .fi-wi-stats-overview-stat-label {
+        color: rgb(106 94 96);
+        font-size: 0.86rem;
+        font-weight: 650;
+    }
+
+    .fi-main:has(.fi-wi-stats-overview) .fi-wi-stats-overview-stat-value {
+        color: rgb(18 14 15);
+        font-size: 1.85rem;
+        font-weight: 800;
+    }
+
+    .fi-main:has(.fi-wi-stats-overview) .fi-wi-stats-overview-stat-description {
+        font-size: 0.82rem;
+        line-height: 1.32;
+    }
+
+    .dark .fi-main:has(.fi-wi-stats-overview) .fi-wi-stats-overview-stat-label {
+        color: rgb(219 203 204 / 0.68);
+    }
+
+    .dark .fi-main:has(.fi-wi-stats-overview) .fi-wi-stats-overview-stat-value {
+        color: rgb(255 255 255);
+    }
+
+    .fi-wi-stats-overview-stat-label,
+    .fi-wi-stats-overview-stat-description {
+        line-height: 1.35;
+    }
+
+    .fi-main:has(.fi-wi-stats-overview) .fi-section-header {
+        padding-block: 0.55rem;
+    }
+
+    .fi-main:has(.fi-wi-stats-overview) .fi-section-heading {
+        color: rgb(23 16 18);
+        font-size: 0.95rem;
+        letter-spacing: 0;
+    }
+
+    .dark .fi-main:has(.fi-wi-stats-overview) .fi-section-heading {
+        color: rgb(255 255 255);
+    }
+
+    .fi-main:has(.fi-wi-stats-overview) .fi-wi-chart .fi-section-content {
+        padding-block: 0.45rem 0.55rem;
+    }
+
+    .fi-main:has(.fi-wi-stats-overview) .fi-wi-chart-frame,
+    .fi-main:has(.fi-wi-stats-overview) .fi-wi-chart-frame:not(.fi-wi-chart-frame-no-aspect-ratio) {
+        aspect-ratio: auto;
+        width: 100%;
+        height: 12.25rem;
+        min-height: 12.25rem;
+        max-height: 13.75rem;
+    }
+
+    .fi-ta-table > thead {
+        background: rgb(11 9 10 / 0.025);
+    }
+
+    .dark .fi-ta-table > thead {
+        background: rgb(255 255 255 / 0.025);
+    }
+
+    .fi-ta-header-cell {
+        border-bottom: 1px solid rgb(11 9 10 / 0.075);
+        letter-spacing: 0.015em;
+    }
+
+    .dark .fi-ta-header-cell {
+        border-bottom-color: rgb(255 255 255 / 0.075);
+    }
+
+    .fi-ta-row {
+        border-top: 1px solid rgb(11 9 10 / 0.045);
+    }
+
+    .dark .fi-ta-row {
+        border-top-color: rgb(255 255 255 / 0.05);
+    }
+
+    /*
+     * Resumen ejecutivo de Últimas transacciones en el tablero.
+     * Solo `.asb-dashboard .fi-wi-table`: no toca tablas de Resources.
+     */
+    .asb-dashboard .fi-wi-table .fi-ta-ctn {
+        background: rgb(255 255 255 / 0.94);
+        border: 1px solid var(--asb-admin-dashboard-borde);
+        border-radius: 1rem;
+        box-shadow: var(--asb-admin-dashboard-sombra);
+    }
+
+    .dark .asb-dashboard .fi-wi-table .fi-ta-ctn {
+        background: rgb(24 22 23 / 0.88);
+        border-color: var(--asb-admin-dashboard-borde);
+        box-shadow: var(--asb-admin-dashboard-sombra);
+    }
+
+    .asb-dashboard .fi-wi-table .fi-ta-header {
+        padding: 0.7rem 1.05rem;
+        border-bottom-color: rgb(11 9 10 / 0.06);
+    }
+
+    .dark .asb-dashboard .fi-wi-table .fi-ta-header {
+        border-bottom-color: rgb(255 255 255 / 0.07);
+    }
+
+    .asb-dashboard .fi-wi-table .fi-ta-header-heading {
+        color: rgb(23 16 18);
+        font-size: 0.95rem;
+        letter-spacing: 0;
+    }
+
+    .dark .asb-dashboard .fi-wi-table .fi-ta-header-heading {
+        color: rgb(255 255 255);
+    }
+
+    .asb-dashboard .fi-wi-table .fi-ta-table > thead {
+        background: transparent;
+    }
+
+    .asb-dashboard .fi-wi-table .fi-ta-header-cell {
+        padding-block: 0.45rem;
+        color: rgb(106 94 96);
+        font-size: 0.7rem;
+        font-weight: 650;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .dark .asb-dashboard .fi-wi-table .fi-ta-header-cell {
+        color: rgb(219 203 204 / 0.68);
+        border-bottom-color: rgb(255 255 255 / 0.06);
+    }
+
+    .asb-dashboard .fi-wi-table .fi-ta-row {
+        border-top-color: rgb(11 9 10 / 0.035);
+    }
+
+    .dark .asb-dashboard .fi-wi-table .fi-ta-row {
+        border-top-color: rgb(255 255 255 / 0.045);
+    }
+
+    .asb-dashboard .fi-wi-table .fi-ta-text {
+        padding-block: 0.5rem;
+        font-size: 0.8125rem;
+        line-height: 1.35;
+    }
+
+    .asb-dashboard .fi-wi-table .fi-ta-cell-monto .fi-ta-text {
+        color: rgb(18 14 15);
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .dark .asb-dashboard .fi-wi-table .fi-ta-cell-monto .fi-ta-text {
+        color: rgb(255 255 255);
+    }
+
+    .asb-dashboard .fi-wi-table .fi-ta-cell-created-at .fi-ta-text {
+        color: rgb(106 94 96);
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .dark .asb-dashboard .fi-wi-table .fi-ta-cell-created-at .fi-ta-text {
+        color: rgb(219 203 204 / 0.68);
+    }
+
+    .asb-dashboard .fi-wi-table .fi-badge {
+        font-size: 0.7rem;
+        line-height: 1.2;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .fi-ta-row:hover {
+            background-color: rgb(238 65 55 / 0.025);
+        }
+
+        .dark .fi-ta-row:hover {
+            background-color: rgb(238 65 55 / 0.035);
+        }
+
+        .fi-section:not(.fi-section-not-contained),
+        .fi-wi-stats-overview-stat {
+            transition:
+                border-color 160ms var(--ease-color),
+                box-shadow 160ms var(--ease-color);
+        }
+
+        .fi-section:not(.fi-section-not-contained):hover,
+        .fi-wi-stats-overview-stat:hover {
+            border-color: rgb(238 65 55 / 0.2);
+        }
+
+        .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover,
+        .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:focus-visible {
+            color: rgb(255 255 255);
+            background-color: rgb(255 255 255 / 0.06);
+            transform: none;
+        }
+
+        .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover > .fi-icon,
+        .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover > .fi-sidebar-item-label,
+        .fi-sidebar .fi-sidebar-group-collapse-btn:hover,
+        .fi-sidebar .fi-sidebar-group-collapse-button:hover {
+            color: #ff8a82;
+        }
+
+        .fi-sidebar .fi-sidebar-item-btn[aria-current="page"]:hover,
+        .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn:hover {
+            background-color: rgb(238 65 55 / 0.18);
+        }
+
+        .fi-sidebar .fi-sidebar-item-btn[aria-current="page"]:hover > .fi-icon,
+        .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn:hover > .fi-icon,
+        .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn:hover > .fi-sidebar-item-label {
+            color: #ff7168;
+        }
+    }
+
+    @media (max-width: 40rem) {
+        .fi-main-ctn::before {
+            inset-inline-start: 0;
+            opacity: 0.45;
+        }
+
+        .fi-topbar {
+            min-height: 3.45rem;
+            padding-inline: 0.75rem;
+        }
+
+        .fi-topbar-ctn.asb-topbar--scrolled .fi-topbar {
+            min-height: 3.45rem;
+        }
+
+        .fi-topbar-start {
+            min-width: 0;
+            margin-inline: 0.25rem 0.4rem;
+        }
+
+        .fi-topbar .fi-logo {
+            width: auto;
+            max-width: 6.5rem;
+            object-fit: contain;
+        }
+
+        .fi-topbar-end {
+            gap: 0.5rem;
+        }
+
+        .asb-panel-theme-switcher {
+            margin-inline-end: 0;
+        }
+
+        .fi-main {
+            row-gap: 1rem;
+        }
+
+        .asb-dashboard .fi-page-header-main-ctn > .fi-header {
+            align-items: flex-start;
+            justify-content: center;
+            min-height: 6.375rem;
+            padding: 0.85rem 0.95rem;
+            border-radius: 0.85rem;
+            box-shadow: none;
+        }
+
+        .asb-dashboard .fi-page-header-main-ctn > .fi-header::before,
+        .asb-dashboard .fi-page-header-main-ctn > .fi-header::after {
+            content: none;
+        }
+
+        .asb-dashboard .fi-page-header-main-ctn > .fi-header .fi-header-heading {
+            font-size: 1.45rem;
+        }
+
+        .asb-dashboard .fi-page-header-main-ctn > .fi-header .fi-header-subheading {
+            font-size: 0.88rem;
+        }
+
+        .fi-section-content,
+        .fi-wi-stats-overview-stat {
+            padding-block: 0.85rem;
+        }
+
+        .fi-main:has(.fi-wi-stats-overview) .fi-wi-stats-overview-stat {
+            min-height: 6.85rem;
+        }
+
+        .fi-main:has(.fi-wi-stats-overview) .fi-wi-stats-overview-stat-value {
+            font-size: 1.68rem;
+        }
+
+        .fi-main:has(.fi-wi-stats-overview) .fi-wi-chart-frame,
+        .fi-main:has(.fi-wi-stats-overview) .fi-wi-chart-frame:not(.fi-wi-chart-frame-no-aspect-ratio) {
+            height: 11rem;
+            min-height: 11rem;
+            max-height: 12rem;
+        }
+    }
+
+    @media (min-width: 40rem) and (max-width: 64rem) {
+        .fi-main-ctn::before {
+            inset-inline-start: 0;
+        }
+
+        .asb-dashboard .fi-page-header-main-ctn > .fi-header {
+            min-height: 8.25rem;
+            padding: 0.9rem 1.05rem;
+        }
+
+        .asb-dashboard .fi-page-header-main-ctn > .fi-header .fi-header-heading {
+            font-size: 1.65rem;
+        }
+    }
+
+    .asb-panel-theme-switcher {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.18rem;
+        padding: 0.22rem;
+        margin-inline-end: 0.45rem;
+        border: 1px solid rgb(15 23 42 / 0.1);
+        border-radius: 999px;
+        background:
+            radial-gradient(circle at 20% 0%, rgb(238 65 55 / 0.14), transparent 42%),
+            rgb(255 255 255 / 0.76);
+        box-shadow:
+            0 1px 2px rgb(11 9 10 / 0.06),
+            0 10px 28px rgb(238 65 55 / 0.08);
+        backdrop-filter: blur(14px);
+    }
+
+    .dark .asb-panel-theme-switcher {
+        border-color: rgb(255 255 255 / 0.1);
+        background:
+            radial-gradient(circle at 80% 0%, rgb(238 65 55 / 0.2), transparent 44%),
+            rgb(255 255 255 / 0.055);
+        box-shadow: 0 12px 36px rgb(238 65 55 / 0.08);
+    }
+
+    .asb-panel-theme-switcher__button {
+        display: grid;
+        box-sizing: border-box;
+        width: 2rem;
+        height: 2rem;
+        flex-shrink: 0;
+        place-items: center;
+        padding: 0;
+        border: 0;
+        border-radius: 999px;
+        color: rgb(82 82 91);
+        line-height: 1;
+        transition:
+            color 180ms ease,
+            background-color 180ms ease,
+            box-shadow 180ms ease;
+    }
+
+    .dark .asb-panel-theme-switcher__button {
+        color: rgb(212 212 216);
+    }
+
+    .asb-panel-theme-switcher__button.is-active {
+        color: rgb(255 255 255);
+        background-color: rgb(238 65 55);
+        box-shadow: 0 8px 18px rgb(238 65 55 / 0.28);
+    }
+
+    .dark .asb-panel-theme-switcher__button.is-active {
+        color: rgb(255 255 255);
+        background-color: rgb(238 65 55 / 0.92);
+    }
+
+    .asb-panel-theme-switcher__icon {
+        width: 1.05rem;
+        height: 1.05rem;
+    }
+
     @media (hover: hover) and (pointer: fine) {
         .vidrio-hover:hover {
             border-color: rgb(238 65 55 / 0.45);
             transform: translateY(var(--asb-levante));
         }
+
+        .asb-panel-theme-switcher__button:hover {
+            box-shadow: 0 6px 14px rgb(238 65 55 / 0.16);
+        }
+    }
+
+    /*
+     * Patrón piloto de listados operativos. Hoy solo vive en Asociados
+     * (body.asb-operativo). No altera el tablero ni otras Resources.
+     */
+    .asb-operativo .fi-main {
+        row-gap: 0.55rem;
+    }
+
+    .asb-operativo .fi-header {
+        align-items: center;
+        gap: 0.15rem 1rem;
+        row-gap: 0.15rem;
+        padding-block: 0;
+    }
+
+    .asb-operativo .fi-breadcrumbs {
+        margin-bottom: 0;
+    }
+
+    .asb-operativo .fi-header-heading {
+        color: rgb(22 17 19);
+        font-size: 1.5rem;
+        line-height: 1.12;
+        letter-spacing: 0;
+    }
+
+    .dark .asb-operativo .fi-header-heading {
+        color: rgb(255 255 255);
+    }
+
+    .asb-operativo .fi-header-actions-ctn {
+        align-self: center;
+        gap: 0.4rem;
+    }
+
+    .asb-operativo .fi-header-actions-ctn .fi-btn,
+    .asb-operativo .fi-header-actions-ctn .fi-btn.fi-ac-btn-action,
+    .asb-operativo .fi-header-actions-ctn .fi-btn.fi-color-primary {
+        min-height: 2rem;
+        padding-inline: 0.8rem;
+        border: 1px solid rgb(238 65 55 / 0.28);
+        border-radius: 0.7rem;
+        background-color: rgb(238 65 55 / 0.08);
+        box-shadow: none;
+        color: #c52822;
+        font-size: 0.8rem;
+        font-weight: 650;
+    }
+
+    .dark .asb-operativo .fi-header-actions-ctn .fi-btn,
+    .dark .asb-operativo .fi-header-actions-ctn .fi-btn.fi-ac-btn-action,
+    .dark .asb-operativo .fi-header-actions-ctn .fi-btn.fi-color-primary {
+        border-color: rgb(238 65 55 / 0.38);
+        background-color: rgb(238 65 55 / 0.14);
+        color: #ff8a82;
+    }
+
+    .asb-operativo .fi-header-actions-ctn .fi-btn:focus-visible,
+    .asb-operativo .fi-ta-actions .fi-btn:focus-visible,
+    .asb-operativo .fi-ta-actions .fi-link:focus-visible,
+    .asb-operativo .fi-icon-btn:focus-visible {
+        outline: 2px solid rgb(238 65 55 / 0.55);
+        outline-offset: 2px;
+    }
+
+    .asb-operativo .fi-ta-actions .fi-btn:focus-visible,
+    .asb-operativo .fi-ta-actions .fi-link:focus-visible {
+        background-color: rgb(238 65 55 / 0.08);
+        color: #c52822;
+    }
+
+    .dark .asb-operativo .fi-ta-actions .fi-btn:focus-visible,
+    .dark .asb-operativo .fi-ta-actions .fi-link:focus-visible {
+        background-color: rgb(238 65 55 / 0.12);
+        color: #ff8a82;
+    }
+
+    .asb-operativo .fi-ta-ctn {
+        overflow: hidden;
+        background: rgb(255 255 255 / 0.97);
+        border: 1px solid var(--asb-admin-dashboard-borde);
+        border-radius: 1rem;
+        box-shadow: var(--asb-admin-dashboard-sombra);
+    }
+
+    .dark .asb-operativo .fi-ta-ctn {
+        background: rgb(24 22 23 / 0.92);
+        border-color: var(--asb-admin-dashboard-borde);
+        box-shadow: var(--asb-admin-dashboard-sombra);
+    }
+
+    .asb-operativo .fi-ta-header-toolbar {
+        align-items: center;
+        min-height: 2.85rem;
+        padding: 0.42rem 0.85rem;
+        border-bottom: 1px solid rgb(11 9 10 / 0.08);
+        background: rgb(250 248 247 / 0.72);
+    }
+
+    .dark .asb-operativo .fi-ta-header-toolbar {
+        border-bottom-color: rgb(255 255 255 / 0.08);
+        background: rgb(255 255 255 / 0.025);
+    }
+
+    .asb-operativo .fi-ta-search-field {
+        max-width: 17.5rem;
+    }
+
+    .asb-operativo .fi-ta-search-field .fi-input,
+    .asb-operativo .fi-ta-search-field input {
+        min-height: 1.95rem;
+        height: 1.95rem;
+        padding-block: 0;
+        font-size: 0.8125rem;
+    }
+
+    .asb-operativo .fi-ta-header-toolbar .fi-icon-btn,
+    .asb-operativo .fi-ta-filters-dropdown .fi-icon-btn,
+    .asb-operativo .fi-ta-col-manager-dropdown .fi-icon-btn {
+        width: 1.95rem;
+        height: 1.95rem;
+    }
+
+    .asb-operativo .fi-ta-filters {
+        gap: 0.65rem;
+    }
+
+    .asb-operativo .fi-ta-filter .fi-fo-field-wrp-label,
+    .asb-operativo .fi-ta-filters .fi-fo-field-wrp-label {
+        font-size: 0.72rem;
+        font-weight: 650;
+    }
+
+    .asb-operativo .fi-ta-table > thead {
+        background: rgb(11 9 10 / 0.018);
+    }
+
+    .dark .asb-operativo .fi-ta-table > thead {
+        background: rgb(255 255 255 / 0.02);
+    }
+
+    .asb-operativo .fi-ta-header-cell {
+        padding-block: 0.38rem;
+        padding-inline: 0.7rem;
+        color: rgb(118 106 108);
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        border-bottom: 1px solid rgb(11 9 10 / 0.07);
+    }
+
+    .dark .asb-operativo .fi-ta-header-cell {
+        color: rgb(219 203 204 / 0.62);
+        border-bottom-color: rgb(255 255 255 / 0.06);
+    }
+
+    .asb-operativo .fi-ta-row {
+        border-top-color: rgb(11 9 10 / 0.028);
+    }
+
+    .dark .asb-operativo .fi-ta-row {
+        border-top-color: rgb(255 255 255 / 0.04);
+    }
+
+    .asb-operativo .fi-ta-text {
+        padding-block: 0.52rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        line-height: 1.3;
+    }
+
+    .asb-operativo .fi-ta-text-description {
+        margin-top: 0.08rem;
+        color: rgb(118 106 108);
+        font-size: 0.72rem;
+        font-weight: 450;
+    }
+
+    .dark .asb-operativo .fi-ta-text-description {
+        color: rgb(219 203 204 / 0.64);
+    }
+
+    .asb-operativo .fi-ta-cell-foto-portada,
+    .asb-operativo .fi-ta-image {
+        vertical-align: middle;
+    }
+
+    .asb-operativo .fi-ta-image {
+        display: block;
+        border-radius: 0.4rem;
+    }
+
+    .asb-operativo .fi-ta-cell-foto-portada .fi-ta-col,
+    .asb-operativo .fi-ta-cell-foto-portada .fi-ta-cell-content {
+        display: flex;
+        align-items: center;
+    }
+
+    .asb-operativo .fi-badge {
+        font-size: 0.68rem;
+        line-height: 1.15;
+    }
+
+    @media (min-width: 40rem) {
+        .asb-operativo .fi-ta-header-cell-destacado,
+        .asb-operativo .fi-ta-cell-destacado {
+            width: 1%;
+            white-space: nowrap;
+        }
+    }
+
+    .asb-operativo .fi-ta-cell:has(.fi-ta-actions) {
+        padding-block: 0.35rem;
+        padding-inline-end: 0.65rem;
+    }
+
+    .asb-operativo .fi-ta-actions {
+        flex-wrap: nowrap;
+        gap: 0.18rem;
+    }
+
+    .asb-operativo .fi-ta-actions .fi-btn,
+    .asb-operativo .fi-ta-actions .fi-link,
+    .asb-operativo .fi-ta-actions .fi-link.fi-color-primary,
+    .asb-operativo .fi-ta-actions .fi-link.fi-color-warning {
+        min-height: 1.7rem;
+        padding-inline: 0.45rem;
+        border-radius: 0.45rem;
+        background-color: transparent;
+        box-shadow: none;
+        color: rgb(92 82 84);
+        font-size: 0.6875rem;
+        font-weight: 500;
+        line-height: 1.1;
+        transition:
+            color 140ms ease,
+            background-color 140ms ease;
+    }
+
+    .dark .asb-operativo .fi-ta-actions .fi-btn,
+    .dark .asb-operativo .fi-ta-actions .fi-link,
+    .dark .asb-operativo .fi-ta-actions .fi-link.fi-color-primary,
+    .dark .asb-operativo .fi-ta-actions .fi-link.fi-color-warning {
+        color: rgb(196 184 185);
+    }
+
+    .asb-operativo .fi-ta-actions .fi-btn .fi-icon,
+    .asb-operativo .fi-ta-actions .fi-btn svg,
+    .asb-operativo .fi-ta-actions .fi-link .fi-icon,
+    .asb-operativo .fi-ta-actions .fi-link svg {
+        width: 0.85rem;
+        height: 0.85rem;
+        color: inherit;
+    }
+
+    .asb-operativo .fi-pagination {
+        padding: 0.5rem 0.85rem;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .asb-operativo .fi-ta-row:hover {
+            background-color: rgb(238 65 55 / 0.014);
+        }
+
+        .dark .asb-operativo .fi-ta-row:hover {
+            background-color: rgb(238 65 55 / 0.028);
+        }
+
+        .asb-operativo .fi-header-actions-ctn .fi-btn:hover {
+            border-color: rgb(238 65 55 / 0.45);
+            background: rgb(238 65 55 / 0.12);
+            box-shadow: none;
+        }
+
+        .asb-operativo .fi-ta-actions .fi-btn:hover,
+        .asb-operativo .fi-ta-actions .fi-link:hover,
+        .asb-operativo .fi-ta-actions .fi-link.fi-color-primary:hover,
+        .asb-operativo .fi-ta-actions .fi-link.fi-color-warning:hover {
+            background-color: rgb(238 65 55 / 0.08);
+            box-shadow: none;
+            color: #c52822;
+        }
+
+        .dark .asb-operativo .fi-ta-actions .fi-btn:hover,
+        .dark .asb-operativo .fi-ta-actions .fi-link:hover,
+        .dark .asb-operativo .fi-ta-actions .fi-link.fi-color-primary:hover,
+        .dark .asb-operativo .fi-ta-actions .fi-link.fi-color-warning:hover {
+            background-color: rgb(238 65 55 / 0.12);
+            color: #ff8a82;
+        }
+    }
+
+    @media (max-width: 40rem) {
+        .asb-operativo .fi-header-heading {
+            font-size: 1.28rem;
+        }
+
+        .asb-operativo .fi-header-actions-ctn .fi-btn {
+            min-height: 1.9rem;
+        }
+
+        .asb-operativo .fi-ta-header-toolbar,
+        .asb-operativo .fi-pagination {
+            padding-inline: 0.7rem;
+        }
+
+        .asb-operativo .fi-ta-actions {
+            flex-wrap: wrap;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fi-topbar,
+    .fi-topbar .fi-logo,
+    .asb-panel-theme-switcher__button {
+        transition-duration: 0.01ms;
     }
 }
 

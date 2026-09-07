@@ -13,14 +13,16 @@ class AsociadosPorMunicipio extends ChartWidget
     protected static ?int $sort = 3;
 
     /**
-     * Sin esto hereda el `1` de `Widget` y, en una rejilla de varias
-     * columnas, una gráfica de doce municipios queda apretada en una
-     * fracción del ancho con el resto de la fila vacío. Los otros cuatro
-     * widgets del tablero ya son `'full'` (los tres explícitos y
-     * `ResumenDelGremio` porque `StatsOverviewWidget` lo trae de fábrica);
-     * a este solo le faltaba declararlo.
+     * En escritorio (`xl`, 6 columnas) comparte fila con el recaudo: este
+     * widget ocupa 2. En `md` y móvil va a todo el ancho para que los doce
+     * municipios se lean. Sin un span explícito heredaría el `1` de
+     * `Widget` y quedaría en una sexta parte de la fila.
      */
-    protected int|string|array $columnSpan = 'full';
+    protected int|string|array $columnSpan = [
+        'default' => 'full',
+        'md' => 'full',
+        'xl' => 2,
+    ];
 
     protected function getData(): array
     {
