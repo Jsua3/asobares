@@ -1,0 +1,277 @@
+<?php
+
+namespace Tests\Feature\Panel;
+
+use Illuminate\Support\Facades\File;
+use Tests\Support\MideContraste;
+use Tests\TestCase;
+
+/**
+ * La barra lateral del panel: cristal, luz y resorte (Parte III de la spec,
+ * aprobada por Sua el 7 sep 2026).
+ *
+ * Esta clase vigila lo que ninguna otra puede: que la barra no vuelva a tener
+ * paleta privada, que su material viva en los pseudoelementos, que las señales
+ * del sistema la alcancen, y que el velo sostenga por aritmética el rótulo de
+ * grupo, que mide 11,52 px y por tanto es texto pequeño sin discusión.
+ */
+class BarraLateralTest extends TestCase
+{
+    use MideContraste;
+
+    /** Los diecinueve tokens de la Parte III, en el orden de su tabla. */
+    private const TOKENS = [
+        '--asb-admin-barra-velo',
+        '--asb-admin-barra-velo-cajon',
+        '--asb-admin-barra-desenfoque',
+        '--asb-admin-barra-luz',
+        '--asb-admin-barra-filo',
+        '--asb-admin-barra-halo',
+        '--asb-admin-barra-borde',
+        '--asb-admin-barra-tinta',
+        '--asb-admin-barra-tenue',
+        '--asb-admin-barra-activo',
+        '--asb-admin-barra-activo-fondo',
+        '--asb-admin-barra-hover-fondo',
+        '--asb-admin-barra-fila-alto',
+        '--asb-admin-barra-fila-radio',
+        '--asb-admin-barra-aviso-alto',
+        '--asb-admin-barra-brote',
+        '--asb-admin-barra-empuje',
+        '--asb-admin-foco-anillo',
+        '--asb-admin-foco-halo',
+    ];
+
+    private function tema(): string
+    {
+        return File::get(resource_path('css/filament/admin/theme.css'));
+    }
+
+    /**
+     * El bloque de nivel superior que abre con `$marca`, contando llaves. No
+     * sirve `strstr`: el archivo anida medias dentro de medias.
+     */
+    private function bloque(string $css, string $marca): string
+    {
+        $inicio = strpos($css, $marca);
+        $this->assertNotFalse($inicio, "no existe el bloque {$marca}");
+
+        $profundidad = 0;
+        $desde = strpos($css, '{', $inicio);
+
+        for ($i = $desde; $i < strlen($css); $i++) {
+            if ($css[$i] === '{') {
+                $profundidad++;
+            } elseif ($css[$i] === '}') {
+                $profundidad--;
+
+                if ($profundidad === 0) {
+                    return substr($css, $desde, $i - $desde + 1);
+                }
+            }
+        }
+
+        $this->fail("el bloque {$marca} no cierra");
+    }
+
+    /**
+     * Un token declarado dos veces en el mismo bloque deja sin efecto a la
+     * media que lo reasigna, y nadie se entera: es exactamente el defecto que
+     * `--asb-vidrio-desenfoque` arrastraba en este archivo.
+     * Rotura: declarar dos veces cualquiera de los diecinueve, o borrar uno.
+     */
+    public function test_los_tokens_de_la_barra_se_declaran_una_sola_vez_en_su_raiz(): void
+    {
+        $tema = $this->tema();
+        $raiz = $this->bloque($tema, "\n:root {");
+
+        foreach (self::TOKENS as $token) {
+            $veces = substr_count($raiz, $token.':');
+
+            $this->assertSame(1, $veces, "{$token} se declara {$veces} veces en el `:root` del tema, y tiene que ser una.");
+        }
+    }
+
+    /**
+     * Los que cambian con el tema se redeclaran en `.dark`; los de geometría y
+     * los de movimiento no, porque no dependen del tema.
+     * Rotura: mover `--asb-admin-barra-fila-alto` al bloque oscuro.
+     */
+    public function test_solo_los_tokens_de_color_se_redeclaran_en_oscuro(): void
+    {
+        $oscuro = $this->bloque($this->tema(), "\n.dark {");
+
+        foreach (['--asb-admin-barra-luz', '--asb-admin-barra-activo', '--asb-admin-foco-anillo'] as $token) {
+            $this->assertStringContainsString($token.':', $oscuro, "{$token} depende del tema y falta en `.dark`.");
+        }
+
+        foreach (['--asb-admin-barra-fila-alto', '--asb-admin-barra-fila-radio', '--asb-admin-barra-brote', '--asb-admin-barra-empuje'] as $token) {
+            $this->assertStringNotContainsString($token.':', $oscuro, "{$token} es geometría o movimiento: no puede depender del tema.");
+        }
+    }
+
+    /**
+     * `tokens.css` apaga `--asb-vidrio-desenfoque` bajo transparencia reducida,
+     * pero el tema lo redeclaraba después con la misma especificidad y la
+     * anulación no llegaba: el panel seguía desenfocando para quien pidió que
+     * no. Afectaba al vidrio de ModerarFotos y al widget de pendientes.
+     * Rotura: borrar el bloque de transparencia reducida del tema.
+     */
+    public function test_la_transparencia_reducida_alcanza_al_vidrio_del_panel(): void
+    {
+        $tema = $this->tema();
+
+        $this->assertStringContainsString(
+            '@media (prefers-reduced-transparency: reduce)',
+            $tema,
+            'El tema redeclara `--asb-vidrio-desenfoque` después del import, así que tiene que reasignarlo él mismo bajo transparencia reducida.'
+        );
+
+        $reducida = $this->bloque($tema, '@media (prefers-reduced-transparency: reduce)');
+
+        $this->assertMatchesRegularExpression(
+            '/--asb-vidrio-desenfoque:\s*none;/',
+            $reducida,
+            'La transparencia reducida no apaga el desenfoque del vidrio del panel.'
+        );
+    }
+
+    /**
+     * El contraste de la barra, recalculado leyendo los porcentajes del
+     * archivo y no repitiéndolos aquí.
+     *
+     * Lo que la construcción descubrió el 7 sep: el que manda NO es el rótulo
+     * de grupo. Sobre el cristal del panel sale a 11,27:1 en claro y 7,68:1 en
+     * oscuro, y ni bajando el velo al 40 % baja de 10:1, porque la superficie y
+     * el fondo del panel son casi el mismo color. El que tiene el margen justo
+     * es el RÓTULO DEL ÍTEM ACTIVO, que se lee sobre el tinte del ítem con el
+     * halo compuesto encima: ahí el halo aclara el fondo y el texto sufre.
+     * Con los valores de hoy da 6,35:1 en claro y 5,20:1 en oscuro; con el halo
+     * al 60 % cae a 4,12:1 y 4,34:1, y con el rojo de marca en vez del acento
+     * fuerte, a 2,92:1, que es lo que D-L9 rechazó.
+     *
+     * Rotura: subir el halo sin recalcular, o poner `#ee4137` de rótulo activo.
+     */
+    public function test_el_contraste_de_la_barra_aguanta_en_los_dos_temas(): void
+    {
+        $tema = $this->tema();
+        $raiz = $this->bloque($tema, "\n:root {");
+        $oscuro = $this->bloque($tema, "\n.dark {");
+
+        // El halo se deriva de la luz, así que su porcentaje es uno solo y vive
+        // en la raíz; lo que cambia con el tema es el color de la luz.
+        $halo = $this->porcentaje($raiz, '--asb-admin-barra-halo', 'raíz');
+
+        foreach ([
+            'claro' => [$raiz, '#ffffff', '#f7f6f5', '#3d393b', '#b71f18'],
+            'oscuro' => [$oscuro, '#121011', '#0b090a', '#a8a3a5', '#f27166'],
+        ] as $tema_ => [$bloque, $superficie, $fondo, $tenue, $acento]) {
+            // El color del rótulo activo se LEE del archivo y se resuelve
+            // contra la paleta: si alguien lo cambia, la cuenta cambia con él.
+            $activo = $this->resuelve($bloque, '--asb-admin-barra-activo', $tema_);
+            $velo = $this->porcentaje($bloque, '--asb-admin-barra-velo', $tema_);
+            $tinte = $this->porcentaje($bloque, '--asb-admin-barra-activo-fondo', $tema_);
+            $luz = $this->hex($bloque, '--asb-admin-barra-luz');
+
+            $cristal = $this->componer($superficie, $velo, $fondo);
+            $conTinte = $this->componer($acento, $tinte, $cristal);
+            $conHalo = $this->componer($luz, $halo, $conTinte);
+
+            $delGrupo = $this->contraste($tenue, $cristal);
+            $delActivo = $this->contraste($activo, $conHalo);
+
+            $this->assertGreaterThanOrEqual(
+                4.5,
+                $delGrupo,
+                sprintf('El rótulo de grupo sobre el cristal %s al %d %% da %.2f:1.', $tema_, $velo * 100, $delGrupo)
+            );
+
+            $this->assertGreaterThanOrEqual(
+                4.5,
+                $delActivo,
+                sprintf('El rótulo del ítem activo %s, sobre el tinte al %d %% y el halo al %d %%, da %.2f:1 contra %s.', $tema_, $tinte * 100, $halo * 100, $delActivo, $conHalo)
+            );
+        }
+    }
+
+    /**
+     * Debajo del cajón pasa contenido que no se conoce; debajo de la barra de
+     * escritorio, un color plano. Por eso el velo del cajón nunca puede ser más
+     * bajo que el de escritorio, y en claro tiene que ser más alto: es la regla
+     * de D-L11 y es lo único del velo que de verdad se puede romper, porque el
+     * contraste aquí no lo constriñe.
+     * Rotura: igualar los dos velos en claro, o bajar el del cajón.
+     */
+    public function test_el_velo_del_cajon_nunca_baja_del_de_escritorio(): void
+    {
+        $tema = $this->tema();
+
+        foreach ([
+            'claro' => [$this->bloque($tema, '
+:root {'), true],
+            'oscuro' => [$this->bloque($tema, '
+.dark {'), false],
+        ] as $nombre => [$bloque, $exigeMas]) {
+            $escritorio = $this->porcentaje($bloque, '--asb-admin-barra-velo', $nombre);
+            $cajon = $this->porcentaje($bloque, '--asb-admin-barra-velo-cajon', $nombre);
+
+            $this->assertGreaterThanOrEqual($escritorio, $cajon, "El velo del cajón {$nombre} es más bajo que el de escritorio, y debajo del cajón pasa contenido desconocido.");
+
+            if ($exigeMas) {
+                $this->assertGreaterThan($escritorio, $cajon, 'En claro el velo de cierre de Filament solo llega al 50 %, así que el cajón necesita más velo que el escritorio.');
+            }
+        }
+    }
+
+    /**
+     * El valor de un token de color del tema, resuelto hasta el hexadecimal: si
+     * apunta a la paleta con `var(--asb-…)`, se busca en `tokens.css`, en el
+     * bloque del mismo tema. Sin esto, cambiar el token no cambiaría la cuenta
+     * y la guardia daría un verde falso.
+     */
+    private function resuelve(string $bloque, string $token, string $tema): string
+    {
+        $this->assertSame(
+            1,
+            preg_match('/'.preg_quote($token, '/').': ([^;]+);/', $bloque, $valor),
+            "{$token} no se declara en el bloque {$tema}"
+        );
+
+        $crudo = trim($valor[1]);
+
+        if (str_starts_with($crudo, '#')) {
+            return $crudo;
+        }
+
+        $this->assertSame(1, preg_match('/^var\((--asb-[a-z-]+)\)$/', $crudo, $apunta), "{$token} no es un hexadecimal ni un `var()` de la paleta: {$crudo}");
+
+        $paleta = File::get(resource_path('css/tokens.css'));
+        $suyo = $this->bloque($paleta, $tema === 'oscuro' ? '
+.dark {' : '
+:root {');
+
+        return $this->hex($suyo, $apunta[1]);
+    }
+
+    private function porcentaje(string $bloque, string $token, string $tema): float
+    {
+        $this->assertSame(
+            1,
+            preg_match('/'.preg_quote($token, '/').': color-mix\(in oklab, [^)]+\) (\d+)%, transparent\);/', $bloque, $valor),
+            "{$token} no es un color-mix con porcentaje en el tema {$tema}"
+        );
+
+        return ((int) $valor[1]) / 100;
+    }
+
+    private function hex(string $bloque, string $token): string
+    {
+        $this->assertSame(
+            1,
+            preg_match('/'.preg_quote($token, '/').': (#[0-9a-f]{6});/', $bloque, $valor),
+            "{$token} no es un hexadecimal en ese bloque"
+        );
+
+        return $valor[1];
+    }
+}

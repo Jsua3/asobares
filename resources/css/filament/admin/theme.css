@@ -71,6 +71,67 @@
     --asb-admin-dashboard-image: url("../../../../public/img/panel/cabecera-dashboard.png");
     --asb-admin-topbar-alto: 3.75rem;
     --asb-admin-sidebar-ancho: 15.25rem;
+
+    /*
+     * La barra lateral (Parte III de la spec, aprobada el 7 sep 2026). Prefijo
+     * propio para que nunca se confundan con los de las dos barras públicas, y
+     * declarados aquí una sola vez: un token declarado dos veces deja sin
+     * efecto a la media que lo reasigna, que es el defecto que
+     * `--asb-vidrio-desenfoque` arrastraba en este mismo archivo.
+     *
+     * El velo se calibró el 7 sep con `MideContraste` sobre la superficie y el
+     * fondo del panel, con el halo compuesto encima en su punto más intenso:
+     * el rótulo de grupo (11,52 px, texto pequeño) da 11,27:1 en claro y
+     * 7,68:1 en oscuro. El del cajón sube porque debajo pasa contenido que no
+     * se conoce: contra negro puro tras el velo de cierre de Filament da
+     * 9,54:1 al rótulo y 6,33:1 al ítem activo.
+     */
+    --asb-admin-barra-velo: color-mix(in oklab, var(--asb-superficie) 88%, transparent);
+    --asb-admin-barra-velo-cajon: color-mix(in oklab, var(--asb-superficie) 94%, transparent);
+    /* Nunca un `blur()` literal: solo así las medias pueden apagarlo. Se
+       consume únicamente en la regla del cajón, que es donde hay página que
+       refractar; en escritorio la barra es `lg:sticky` y detrás no pasa nada. */
+    --asb-admin-barra-desenfoque: blur(18px) saturate(130%);
+
+    /*
+     * Los dos oficios del rojo (D-L9). La LUZ va en la dirección que pidió
+     * Sua: rojo claro en el tema claro, rojo oscuro en el oscuro. Nunca es
+     * valor de `color`: solo alimenta filo, halo y resplandor.
+     */
+    --asb-admin-barra-luz: #ff6a5e;
+    --asb-admin-barra-filo: color-mix(in oklab, var(--asb-admin-barra-luz) 55%, transparent);
+    --asb-admin-barra-halo: color-mix(in oklab, var(--asb-admin-barra-luz) 12%, transparent);
+    /* El límite de la región lo hace la luminancia, no el color: el filo rojo
+       no llega a 3:1 contra la página y la luz sola no separa nada. */
+    --asb-admin-barra-borde: var(--asb-linea-fuerte);
+
+    /* La TINTA va con la aritmética, aunque contradiga a la luz. Recalculado el
+       7 sep sobre el fondo activo con el halo encima (#f8d9d7 en claro): el
+       rojo de marca #ee4137 da 2,92:1 y queda descartado; `--asb-acento`
+       (#b71f18) da 4,93:1 y pasaría por poco; `--asb-acento-fuerte` (#971d18)
+       da 6,35:1 y es el que se usa, por margen, no por obligación. La spec
+       decía que el acento normal no llegaba: la cuenta dice que sí, y queda
+       corregido aquí. La asimetría con el tema oscuro parece un descuido y no
+       lo es: allí el halo oscurece y el acento normal sube a 5,20:1. */
+    --asb-admin-barra-tinta: var(--asb-tinta);
+    --asb-admin-barra-tenue: var(--asb-tenue);
+    --asb-admin-barra-activo: var(--asb-acento-fuerte);
+    --asb-admin-barra-activo-fondo: color-mix(in oklab, var(--asb-acento) 10%, transparent);
+    --asb-admin-barra-hover-fondo: color-mix(in oklab, var(--asb-acento) 7%, transparent);
+
+    /* Geometría y movimiento: no dependen del tema. La fila sube de 2,72rem
+       (43,52 px medidos el 7 sep en el panel de Sua, medio píxel por debajo
+       del mínimo táctil) a 2,75rem. */
+    --asb-admin-barra-fila-alto: 2.75rem;
+    --asb-admin-barra-fila-radio: 0.625rem;
+    --asb-admin-barra-aviso-alto: 1.5rem;
+    --asb-admin-barra-brote: 0.35;
+    --asb-admin-barra-empuje: 2px;
+
+    /* Anillo de foco de dos colores: uno solo desaparece sobre el fondo
+       variable del cajón. */
+    --asb-admin-foco-anillo: #0b090a;
+    --asb-admin-foco-halo: #ffffff;
 }
 
 .dark {
@@ -79,6 +140,18 @@
     --asb-vidrio-desenfoque: blur(12px);
     --asb-vidrio-sombra: none;
     --asb-admin-card: rgb(24 22 23 / 0.88);
+
+    /* La barra lateral en oscuro. El velo del cajón NO sube aquí: el velo de
+       cierre de Filament ya es negro al 75 %, así que el fondo bajo el cajón
+       llega casi neutralizado. */
+    --asb-admin-barra-velo: color-mix(in oklab, var(--asb-superficie) 88%, transparent);
+    --asb-admin-barra-velo-cajon: color-mix(in oklab, var(--asb-superficie) 88%, transparent);
+    --asb-admin-barra-luz: #7e1a16;
+    --asb-admin-barra-activo: var(--asb-acento);
+    --asb-admin-barra-activo-fondo: color-mix(in oklab, var(--asb-acento) 16%, transparent);
+    --asb-admin-barra-hover-fondo: rgb(255 255 255 / 0.06);
+    --asb-admin-foco-anillo: #ffffff;
+    --asb-admin-foco-halo: #0b090a;
     --asb-admin-card-borde: rgb(255 255 255 / 0.09);
     --asb-admin-card-sombra:
         inset 0 1px 0 rgb(255 255 255 / 0.04),
@@ -87,6 +160,20 @@
     --asb-admin-dashboard-sombra:
         inset 0 1px 0 rgb(255 255 255 / 0.035),
         0 22px 54px rgb(0 0 0 / 0.32);
+}
+
+/*
+ * Transparencia reducida: `tokens.css` ya apaga `--asb-vidrio-desenfoque`, pero
+ * este archivo lo redeclara después con la misma especificidad, así que la
+ * anulación no llegaba al panel y el vidrio de ModerarFotos y del widget de
+ * pendientes seguía desenfocando para quien pidió que no (7 sep 2026). Va
+ * fuera de capa, como el `:root` de arriba, para que alcance al token.
+ */
+@media (prefers-reduced-transparency: reduce) {
+    :root,
+    :root.dark {
+        --asb-vidrio-desenfoque: none;
+    }
 }
 
 @layer components {
