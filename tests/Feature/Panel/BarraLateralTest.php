@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Panel;
 
+use Filament\Facades\Filament;
 use Illuminate\Support\Facades\File;
 use Tests\Support\MideContraste;
 use Tests\TestCase;
@@ -794,6 +795,65 @@ class BarraLateralTest extends TestCase
         $proveedor = File::get(app_path('Providers/Filament/AdminPanelProvider.php'));
         $this->assertStringContainsString("Js::make('panel-barra-lateral'", $proveedor, 'El módulo no se registra en el panel.');
         $this->assertStringContainsString('panel-barra-lateral.js', File::get(base_path('vite.config.js')), 'El módulo no está en las entradas de Vite, así que `Vite::asset` lanzaría y el panel se quedaría sin activos.');
+    }
+
+    /**
+     * El contrato con Filament (tarea 9 del plan). Este tema no decora a
+     * Filament: se apoya en hechos concretos de su vendor, y cada uno de ellos
+     * cambió una decisión de diseño. Si Filament sube de versión y uno se cae,
+     * lo que se rompe no es una regla: es el motivo por el que la regla está
+     * escrita como está. Por eso el porqué va en el mensaje, uno por uno.
+     *
+     * Es la única guardia de esta clase que se rompe sola, sin que nadie toque
+     * nuestro código.
+     *
+     * Rotura: borrarle una cadena al archivo del vendor.
+     */
+    public function test_el_contrato_con_filament_sigue_en_pie(): void
+    {
+        $css = File::get(base_path('vendor/filament/filament/resources/css/components/sidebar.css'));
+
+        foreach ([
+            'lg:shadow-none' => 'Filament anula la sombra del elemento en escritorio. Por eso la sombra de la barra vive en un pseudoelemento: declarada en el elemento computaba rgba(0,0,0,0) 0 0 0 0.',
+            'lg:sticky' => 'En escritorio la barra no se mueve con la página, y por eso la máquina de estados lee el scroll INTERNO de la lista y no el del documento.',
+            'lg:translate-x-0' => 'Sin la clase fi-sidebar-open la barra queda fuera de pantalla: la maqueta tiene que ponerla o no mide nada.',
+            'scrollbar-gutter: stable' => 'Filament reserva canal de barra de desplazamiento; nosotros lo pasamos a auto y escondemos la barra, así que el desvanecido es la única pista de que hay más lista.',
+            'overflow-y-auto' => 'La lista es el contenedor que desborda, no la barra: si dejara de serlo, el aviso de borde no tendría a quién escuchar.',
+        ] as $cadena => $porque) {
+            $this->assertNotFalse(
+                strpos($css, $cadena),
+                "El vendor de Filament ya no trae «{$cadena}». {$porque}"
+            );
+        }
+
+        // La cabecera con el logotipo es `lg:hidden`: solo se ve en el cajón.
+        $this->assertNotFalse(
+            strpos($css, '.fi-sidebar-header'),
+            'Desapareció la cabecera de la barra, que este tema solo pinta para el cajón porque Filament la esconde en escritorio.'
+        );
+
+        $store = File::get(base_path('vendor/filament/filament/resources/js/stores/sidebar.js'));
+
+        foreach ([
+            'livewire:navigated' => 'Sin ese evento nuestro módulo no tendría cuándo rehacer el estado tras navegar.',
+            'requestAnimationFrame' => 'Filament restaura el scrollTop dentro de un fotograma; por eso lo nuestro se encola con doble rAF, o mediríamos la lista antes de que vuelva a su sitio.',
+            'nav.scrollTop = this.scrollTop' => 'Esa es la restauración que esperamos. Si cambia de forma, el doble rAF deja de tener sentido.',
+            'groupIsCollapsed' => 'Abrimos el grupo de la página activa disparando el botón que Filament escucha, no tocando su almacenamiento.',
+            'toggleCollapsedGroup' => 'Lo mismo: es el método que está detrás del disparador del grupo.',
+        ] as $cadena => $porque) {
+            $this->assertNotFalse(
+                strpos($store, $cadena),
+                "El almacén de la barra de Filament ya no trae «{$cadena}». {$porque}"
+            );
+        }
+
+        // Y el hecho del panel real, no del vendor: la barra no se pliega en
+        // escritorio, así que `x-show="$store.sidebar.isOpen"` no esconde nada
+        // y el ancho es siempre `--sidebar-width`.
+        $this->assertFalse(
+            Filament::getPanel('admin')->isSidebarCollapsibleOnDesktop(),
+            'El panel dejó la barra plegable en escritorio: el ancho deja de ser fijo y el rótulo de los grupos puede desaparecer.'
+        );
     }
 
     /**
