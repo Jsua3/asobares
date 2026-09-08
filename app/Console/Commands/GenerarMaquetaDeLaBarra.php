@@ -44,6 +44,18 @@ class GenerarMaquetaDeLaBarra extends Command
 
     public function handle(): int
     {
+        /*
+         * Lo que este comando escribe queda SERVIDO: vive dentro de `public/`.
+         * En una máquina de trabajo es justo lo que se quiere; en producción es
+         * publicar una página que nadie pidió, con el marcado del panel dentro.
+         * La negativa va antes de tocar el disco.
+         */
+        if (app()->isProduction()) {
+            $this->error('La maqueta se sirve desde public/: no se genera en producción.');
+
+            return self::FAILURE;
+        }
+
         $activos = $this->activosCompilados();
 
         if ($activos === null) {

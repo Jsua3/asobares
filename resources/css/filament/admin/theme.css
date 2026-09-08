@@ -49,9 +49,6 @@
     --asb-vidrio-sombra:
         0 1px 2px rgb(11 9 10 / 0.05),
         0 8px 24px rgb(11 9 10 / 0.06);
-    --asb-admin-rojo: #ee4137;
-    --asb-admin-borgona: #291012;
-    --asb-admin-borgona-profundo: #171012;
     --asb-admin-carbon: #0b090a;
     --asb-admin-fondo-claro: #f7f6f5;
     --asb-admin-card: rgb(255 255 255 / 0.86);
@@ -111,14 +108,14 @@
      * valor de `color`: solo alimenta filo, halo y resplandor.
      */
     --asb-admin-barra-luz: #ff6a5e;
-    --asb-admin-barra-filo: color-mix(in oklab, var(--asb-admin-barra-luz) 55%, transparent);
     --asb-admin-barra-halo: color-mix(in oklab, var(--asb-admin-barra-luz) 12%, transparent);
-    /* El límite de la región lo hace la luminancia, no el color: el filo rojo
-       no llega a 3:1 contra la página y la luz sola no separa nada. */
+    /* El límite de la región lo hace la luminancia, no el color. El filo rojo
+       que llevaba este sitio se retiró el 8 sep con su token: dejó de tener
+       consumidor cuando Sua pidió continuidad, y un token huérfano sostiene
+       guardias verdes sobre algo que no pinta nada. */
     --asb-admin-barra-borde: var(--asb-linea-fuerte);
     /* La otra mitad del límite. Proyectada, no interior: la interior la tapa el
        velo y deja de separar nada. */
-    --asb-admin-barra-sombra: 22px 0 48px -18px rgb(58 13 16 / 0.22);
 
     /* La TINTA va con la aritmética, aunque contradiga a la luz. Recalculado el
        7 sep sobre el fondo activo con el halo encima (#f8d9d7 en claro): el
@@ -180,7 +177,6 @@
     --asb-admin-barra-velo: color-mix(in oklab, var(--asb-superficie) 76%, transparent);
     --asb-admin-barra-velo-cajon: color-mix(in oklab, var(--asb-superficie) 88%, transparent);
     --asb-admin-barra-luz: #7e1a16;
-    --asb-admin-barra-sombra: 22px 0 48px -14px rgb(0 0 0 / 0.5);
     --asb-admin-barra-activo: var(--asb-acento);
     --asb-admin-barra-activo-fondo: color-mix(in oklab, var(--asb-acento) 16%, transparent);
     --asb-admin-barra-hover-fondo: rgb(255 255 255 / 0.06);
@@ -1864,7 +1860,6 @@
         --asb-admin-barra-desenfoque: none;
         --asb-admin-topbar-desenfoque: none;
         --asb-admin-topbar-desenfoque-firme: none;
-        --asb-admin-barra-filo: var(--asb-linea-fuerte);
         --asb-admin-barra-modulo-canto: var(--asb-linea-fuerte);
         --asb-admin-barra-tenue: var(--asb-tinta);
     }

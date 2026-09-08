@@ -1457,6 +1457,22 @@ Cómo se hizo: cinco miradas independientes sobre el mismo encargo (movimiento, 
 
 **Qué NO es.** No es la navBar de escritorio girada noventa grados. La navBar pública se retrae porque le roba alto a la lectura; esta barra no le roba nada al contenido, que va a su lado, así que no se retrae, no se compacta y no se va. Su cabecera con el logotipo no existe en escritorio (Filament la marca `lg:hidden` cuando hay topbar), así que no hay logotipo que condensar. Y detrás de ella, en escritorio, no pasa nada: solo el color plano de `.fi-body`. No es tampoco un carril de iconos: el plegado de escritorio está apagado y encenderlo es otro encargo. Lo único que de verdad se desplaza aquí es su propia lista, y ahí es donde tiene que estar todo lo que se mueve.
 
+## La revisión adversaria, 8 sep 2026 (tarea 11)
+
+Hecha por ángulos sobre lo construido, verificando cada sospecha contra el repositorio. Dos hallazgos confirmados, los dos arreglados con la guardia vista roja antes del arreglo.
+
+**1. Cinco tokens declarados y sin ningún consumidor, y dos guardias verdes encima de uno de ellos.** `--asb-admin-barra-filo` existía —según D-L9 y D-L17— para volverse línea bajo más contraste, y dos pruebas afirmaban que estaba declarado y que la señal lo reasignaba. Hacía dos días que **nadie lo consumía**: perdió su consumidor cuando Sua rechazó el filo rojo y pidió continuidad. Lo mismo `--asb-admin-barra-sombra`, la otra mitad de aquel límite. Y tres más de la paleta borgoña vieja del panel: `--asb-admin-rojo`, `--asb-admin-borgona`, `--asb-admin-borgona-profundo`. Los cinco fuera.
+
+La guardia que existía vigilaba un token concreto, `--asb-admin-barra-union`. La nueva **generaliza a los cuarenta y dos**: ninguno se declara sin que alguien lo consuma, contando el consumo por `var()` en CSS y por `getPropertyValue` en JavaScript, que es como el campo de puntos lee su color.
+
+**Corrección a D-L9 y D-L17, entonces:** el filo ya no existe como token. Bajo más contraste, lo que se vuelve línea es `--asb-admin-barra-modulo-canto`, que es el canto que de verdad se pinta.
+
+**2. El comando de la maqueta escribía dentro de `public/`, y eso queda servido.** En una máquina de trabajo es lo que se quiere; en producción es publicar una página que nadie pidió con el marcado del panel dentro. El comando se niega ahora en producción, y se niega **antes** de tocar el disco.
+
+**Barrido final:** sin sondas, sin `dd(`, sin `console.log`, sin `FUGA`, y `git status` limpio salvo lo que entra en el commit.
+
+---
+
 ## La medición de la barra ya construida, 8 sep 2026 (tarea 10)
 
 Tomada en Chromium sobre la maqueta que genera `php artisan maqueta:barra`, servida por HTTP. **Ninguna cifra sale de una suma.** Antes de medir nada se confirmó dentro de la página lo que la propia spec exige: la barra lleva `fi-sidebar-open`, empieza en `x = 0` y mide lo que dice su token.

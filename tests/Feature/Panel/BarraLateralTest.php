@@ -26,7 +26,6 @@ class BarraLateralTest extends TestCase
         '--asb-admin-barra-velo-cajon',
         '--asb-admin-barra-desenfoque',
         '--asb-admin-barra-luz',
-        '--asb-admin-barra-filo',
         '--asb-admin-barra-halo',
         '--asb-admin-barra-borde',
         '--asb-admin-barra-tinta',
@@ -689,7 +688,7 @@ class BarraLateralTest extends TestCase
         $senales = [
             '(prefers-reduced-motion: reduce)' => ['--asb-admin-barra-brote', '--asb-admin-barra-empuje'],
             '(prefers-reduced-transparency: reduce)' => ['--asb-admin-barra-velo', '--asb-admin-barra-desenfoque'],
-            '(prefers-contrast: more)' => ['--asb-admin-barra-velo', '--asb-admin-barra-filo'],
+            '(prefers-contrast: more)' => ['--asb-admin-barra-velo', '--asb-admin-barra-modulo-canto'],
             '(forced-colors: active)' => [],
         ];
 
@@ -798,6 +797,65 @@ class BarraLateralTest extends TestCase
     }
 
     /**
+     * Ningún token del panel se queda declarado sin que nadie lo consuma. No es
+     * higiene: un token huérfano sostiene guardias verdes sobre algo que no
+     * pinta nada. `--asb-admin-barra-filo` lo demostró el 8 sep: dos guardias
+     * afirmaban que estaba declarado y que la señal de más contraste lo
+     * reasignaba, y hacía dos días que no tenía consumidor, desde que Sua
+     * rechazó el filo rojo que lo pintaba.
+     *
+     * La guardia ya existía para un token concreto, `--asb-admin-barra-union`.
+     * Esta la generaliza a los cuarenta y dos.
+     *
+     * Rotura: declarar un token y no consumirlo.
+     */
+    public function test_ningun_token_del_panel_se_queda_sin_consumidor(): void
+    {
+        $tema = $this->tema();
+        $sinComentarios = preg_replace('#/\*.*?\*/#s', '', $tema);
+
+        preg_match_all('/^\s*(--asb-admin-[a-z0-9-]+)\s*:/m', $sinComentarios, $declarados);
+
+        $this->assertNotEmpty($declarados[1], 'No se encontró ningún token del panel: la lectura del archivo cambió de forma.');
+
+        // Los consumidores viven en el tema, en las vistas del panel y en sus
+        // módulos: un token puede consumirse desde cualquiera de los tres.
+        $consumidores = $sinComentarios;
+
+        foreach (['views/filament', 'views/components/panel', 'js', 'css'] as $carpeta) {
+            $ruta = resource_path($carpeta);
+
+            if (! File::isDirectory($ruta)) {
+                continue;
+            }
+
+            foreach (File::allFiles($ruta) as $archivo) {
+                $consumidores .= File::get($archivo->getPathname());
+            }
+        }
+
+        $huerfanos = [];
+
+        foreach (array_unique($declarados[1]) as $token) {
+            // `var(` en CSS, `getPropertyValue` en JavaScript: el campo de
+            // puntos lee su color desde el lienzo y no por cascada, y ese
+            // consumo cuenta igual.
+            $porCascada = str_contains($consumidores, 'var('.$token);
+            $porGuion = str_contains($consumidores, "getPropertyValue('".$token."')");
+
+            if (! $porCascada && ! $porGuion) {
+                $huerfanos[] = $token;
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $huerfanos,
+            'Estos tokens del panel están declarados y nadie los consume, así que cualquier guardia sobre ellos es un verde vacío: '.implode(', ', $huerfanos)
+        );
+    }
+
+    /**
      * La maqueta con la que se mide (tarea 10 del plan). El panel exige segundo
      * factor, así que ninguna sesión automatizada lo abre: sin poder ver la
      * barra se entregaron dos regresiones visuales seguidas. La maqueta es lo
@@ -861,6 +919,33 @@ class BarraLateralTest extends TestCase
                 'La maqueta no apunta a la hoja compilada de hoy: mediría una vieja sin avisar.'
             );
         } finally {
+            File::deleteDirectory(base_path('public/_medicion'));
+        }
+    }
+
+    /**
+     * La maqueta escribe dentro de `public/`, así que lo que genera queda
+     * SERVIDO. En una máquina de trabajo eso es justo lo que se quiere; en
+     * producción es publicar una página que nadie pidió, con el marcado del
+     * panel dentro. El comando se niega, y se niega antes de escribir nada.
+     *
+     * Rotura: quitarle la negativa al comando.
+     */
+    public function test_la_maqueta_no_se_genera_en_produccion(): void
+    {
+        $ruta = 'public/_medicion/produccion.html';
+
+        $this->app->detectEnvironment(fn () => 'production');
+
+        try {
+            $this->artisan('maqueta:barra', ['--ruta' => $ruta])->assertFailed();
+
+            $this->assertFileDoesNotExist(
+                base_path($ruta),
+                'El comando escribió la maqueta en producción: se niega ANTES de escribir, no después.'
+            );
+        } finally {
+            $this->app->detectEnvironment(fn () => 'testing');
             File::deleteDirectory(base_path('public/_medicion'));
         }
     }
