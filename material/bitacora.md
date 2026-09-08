@@ -2062,3 +2062,25 @@ El rojo se partió en dos oficios. El que **alumbra**, el filo y el halo, sigue 
 ### 43.3 Lo que midió Sua, y lo que falta medir
 
 El segundo factor impide que una sesión automatizada abra el panel, así que las cifras de partida las tomó Sua en su propio navegador con un guion pegado en la consola. Dieron tres cosas duras: los **24 ítems miden 43,5 px** y ninguno pasa la comprobación de las cuatro esquinas del cuadrado de 44; la lista tiene **1.651 px de contenido en 913 de hueco**, es decir que **se corta el 45 %**, que es justo lo que justifica el aviso de borde; y el fondo computa transparente porque la franja burdeos la pinta un `background-image`. La primera medición se tomó a 201 px de ancho, así que fue el cajón; Sua repitió con la ventana maximizada, a 1.084 x 1.083, y ahí la barra computó **`position: sticky`**. Eso convierte en hecho medido lo que hasta entonces era una lectura del vendor: en escritorio la barra va en flujo y pegada, detrás de ella no pasa contenido, y el `blur(14px)` que lleva hoy es coste sin imagen. Con la ventana grande la lista se corta el 38 % en vez del 45 %, porque el recorte depende del alto y no del ancho: está cortada siempre.
+
+## 44. LA BARRA LATERAL DEL PANEL: CRISTAL, LUZ Y UN CAMPO DE PUNTOS (7-8 sep 2026)
+
+### 44.1 Dieciocho decisiones y un taller de cinco miradas
+
+Sua pidió rehacer el menú de la izquierda, «muy semejante a la navBar de escritorio pero vertical», con resorte al desplazarse y cristal con detalles luminiscentes en rojo. El diseño se hizo antes de escribir una línea: cinco miradas independientes sobre el mismo encargo, cada una criticada por un adversario que verificó contra el repositorio, y una síntesis que resolvió las cinco contradicciones entre ellas. Cuarenta y dos decisiones fundidas en dieciocho, aprobadas en bloque.
+
+Tres hechos comprobados a mano cambiaron el encargo tal como se imaginó: en escritorio la barra es `lg:sticky` y detrás no pasa contenido, así que el `blur(14px)` que llevaba no desenfocaba nada; su cabecera con el logotipo es `lg:hidden`; y una guardia verde ya prohibía el sitio donde una de las miradas quería pintar el campo ambiental.
+
+### 44.2 Lo que costó llegar: siete correcciones y dos regresiones
+
+La construcción no fue en línea recta y conviene que quede escrito. **Los módulos con vidrio permanente sobre un fondo liso se leen como cajas dentro de cajas**: la fila se quedaba en 210 px útiles de 244 y Sua lo llamó «apeñuscado». Se aplanó todo, y entonces faltaban los módulos que el encargo pedía. Volvieron apagados, encendiendo por estado, y por fin permanentes cuando hubo un campo de puntos detrás que refractar. **La cuenta del usuario pasó por tres sitios el mismo día.** Y **el límite pasó por tres formas** —línea, filo y franja difusa— hasta que quedó claro que ninguna servía: con el fondo continuo, nada separa la barra del contenido.
+
+Dos regresiones visuales se entregaron sin verlas, y esa es la lección del día. La segunda rompió la barra entera: el lienzo del campo perdía su posición absoluta porque `.fi-sidebar > *` empata en especificidad con su regla y va después, caía al flujo con alto completo y empujaba la lista fuera de la vista.
+
+### 44.3 La maqueta, que debió existir desde el principio
+
+El panel exige segundo factor, así que ninguna sesión automatizada lo abre. Tras la segunda regresión se construyó una maqueta que reproduce el marcado de la barra con el tema compilado y se sirve por HTTP. Se ganó el sueldo dos veces: la primera vez que se abrió reprodujo el aviso que la spec ya tenía anotado (sin `fi-sidebar-open`, Filament deja la barra fuera de pantalla), y después cazó un falso verde propio: la guardia afirmaba que la barra tenía sombra y el navegador computaba `rgba(0,0,0,0) 0 0 0 0`, porque Filament le aplica `lg:shadow-none` desde una capa que gana. Estar escrita no es aplicarse.
+
+### 44.4 Cómo quedó
+
+La barra no tiene fondo propio: el fondo es un campo de puntos que huyen del cursor, dibujado en un lienzo fijo detrás de toda la interfaz, con su color en tokens (invierte con el tema) y la repulsión apagada bajo movimiento reducido. Cada apartado es una lámina de cristal. La zona del panel la marca un resplandor rojo, claro en el tema claro y oscuro en el oscuro. La fila mide 48 px, contra los 43,5 medidos al empezar, que no pasaban el mínimo táctil en ninguno de los 24 destinos. El foco salió de la media de puntero, donde estaba atrapado. La cuenta vive arriba con nombre y rango, la campana se retiró y el control de tema tiene ya las tres preferencias del sitio público.

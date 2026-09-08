@@ -1956,3 +1956,21 @@ En el mismo mensaje pidió rehacer la parte superior del panel: el control de te
 **Lo que se pierde:** los degradados del fondo del contenido, que hoy tapan cualquier cosa que se pinte debajo. El fondo pasa a ser la superficie plana más los puntos.
 
 **Cómo quedó, y qué falta medir (7 sep).** El cristal de los apartados se construyó **sin `backdrop-filter`**: es velo, canto y brillo especular sobre el campo de puntos, que ya da la refracción a la vista. Así la combinación cara de la condición 1 no llega a existir, y por eso el desenfoque no se midió: no hay ninguno que medir. Lo que sí queda pendiente es el coste del propio campo con el puntero en movimiento, medido en una máquina real: el panel de la sesión no pinta fotogramas cuando la ventana no está delante, así que la medición de `requestAnimationFrame` no se pudo tomar aquí y la toma Sua.
+
+---
+
+## Lo que la construcción cambió (Parte III, 7 y 8 sep 2026)
+
+Las dieciocho decisiones se escribieron antes de tocar código, y el código las contradijo o las amplió en siete sitios. Lo que sigue es lo que de verdad quedó.
+
+1. **El velo no es lo que sostiene el contraste, y el rótulo de grupo tampoco es el que manda.** La spec calibró el velo contra el rótulo de grupo. Recalculado el 7 sep: sobre el cristal del panel da 11,27:1 en claro y 7,68:1 en oscuro, y ni bajando el velo al 40 % baja de 10:1, porque la superficie y el fondo del panel son casi el mismo color. El que tiene el margen justo es el **rótulo del ítem activo** sobre el tinte con el halo encima: 6,35:1 y 5,20:1. La guardia se reescribió para vigilar ese, que es el que puede romperse.
+2. **La aritmética corrigió a la spec en el rojo del rótulo activo.** El documento decía que `--asb-acento` no llegaba a 4,5:1 en claro. Da 4,93:1 y sí llega. Se usa `--asb-acento-fuerte` igual, por margen (6,35:1), no por obligación.
+3. **Los módulos con vidrio propio y permanente no funcionan sobre un fondo liso.** D-L19 los pintaba siempre y se leían como cajas dentro de cajas: la fila se quedaba en 210 px útiles de 244. Se aplanó todo (corrección del 7 sep) y luego volvieron, primero apagados y encendidos por estado, y por fin **permanentes pero sobre el campo de puntos** (D-L26), que es lo que les da algo que refractar.
+4. **La cuenta pasó por tres sitios el mismo día**: pie de la barra (D-L21), primera fila de la lista, y por fin el cromo superior junto al control de tema, que es donde Sua la quiso.
+5. **El límite pasó por tres formas y ninguna sobrevivió**: línea de un píxel (D-L10), filo rojo, y franja difusa de 40 px (D-L25). Las tres se leían como un corte vertical. Con el campo de puntos gobernando el fondo, **nada separa la barra del contenido**.
+6. **Filament anula la sombra del elemento en escritorio.** `.fi-sidebar` recibe `lg:shadow-none` desde una capa que gana, así que una sombra declarada en el elemento computa `rgba(0,0,0,0) 0 0 0 0`. Lo cazó la maqueta, no una guardia: la guardia afirmaba que la sombra estaba escrita, y estarlo no es aplicarse.
+7. **El lienzo del campo se coló en el flujo** porque `.fi-sidebar > *` empata en especificidad con su regla y va después: le quitaba el `position: absolute`, empujaba la lista fuera de la vista y rompía la barra entera. Hay `:not()` y guardia.
+
+**Lo que la maqueta enseñó, y por qué existe.** El panel exige segundo factor, así que ninguna sesión automatizada lo abre. Se construyó una maqueta que reproduce el marcado de la barra con el tema compilado y se sirve por HTTP: sin ella se entregaron dos regresiones visuales seguidas. La primera vez que se abrió reprodujo el aviso que la propia spec anotaba: sin `fi-sidebar-open`, Filament deja la barra fuera de pantalla.
+
+**Lo que queda pendiente de las doce tareas del plan:** las cuatro señales del sistema (tarea 8), la guardia de contrato sobre el vendor (tarea 9), la medición completa en Chromium con la maqueta (tarea 10) y la revisión adversaria (tarea 11). Y una medición que solo puede hacer Sua: el coste del campo de puntos en marcha, porque el navegador de la sesión no pinta fotogramas con la ventana detrás.
