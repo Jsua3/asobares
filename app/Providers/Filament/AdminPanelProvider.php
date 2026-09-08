@@ -90,7 +90,16 @@ class AdminPanelProvider extends PanelProvider
             // el rango que el círculo de iniciales de Filament no mostraba.
             ->renderHook(
                 PanelsRenderHook::TOPBAR_END,
-                fn (): HtmlString => new HtmlString(view('filament.components.cuenta-en-la-barra')->render()),
+                fn (): HtmlString => new HtmlString(view('filament.components.cuenta-en-la-barra', ['donde' => 'cromo'])->render()),
+            )
+            // Y la MISMA cuenta al pie de la barra, que es donde la quiso Sua en
+            // el teléfono (D-L30): anclada abajo a la izquierda y con los iconos
+            // pasando por debajo. Las dos copias existen a la vez en el marcado y
+            // el CSS apaga con `display: none` la que no toca, que es lo único
+            // que la saca del orden de tabulación.
+            ->renderHook(
+                PanelsRenderHook::SIDEBAR_FOOTER,
+                fn (): HtmlString => new HtmlString(view('filament.components.cuenta-en-la-barra', ['donde' => 'pie'])->render()),
             )
             // El campo de puntos del fondo de TODA la interfaz (D-L24, ampliado
             // en D-L26). Va lo primero del cuerpo, fijo y por debajo de todo.

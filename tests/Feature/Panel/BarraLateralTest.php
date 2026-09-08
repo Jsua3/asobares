@@ -388,20 +388,32 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * La cuenta vive en el cromo superior, junto al control de tema. Pasó por
-     * el pie de la barra y por la primera fila de la lista el mismo día; Sua la
-     * quiso arriba, al lado de la configuración de claro y oscuro.
-     * Rotura: devolverla a SIDEBAR_FOOTER o a SIDEBAR_NAV_START.
+     * La cuenta vive en el cromo superior EN ESCRITORIO, junto al control de
+     * tema. Pasó por el pie de la barra y por la primera fila de la lista el
+     * mismo día; Sua la quiso arriba, al lado de la configuración de claro y
+     * oscuro.
+     *
+     * Desde D-L30 hay una segunda copia al pie de la barra, que es donde la
+     * quiso **en el teléfono**. Lo que este caso sigue exigiendo es que la del
+     * cromo exista y que el menú de usuario de Filament no vuelva: dos
+     * disparadores para la misma sesión se contradicen en cuanto uno cambie.
+     * De que solo una esté viva a la vez se ocupa
+     * `test_la_cuenta_esta_en_dos_ganchos_sin_duplicar_identificadores`.
+     *
+     * Rotura: quitarla del cromo; devolver el menú de usuario de Filament.
      */
     public function test_la_cuenta_vive_en_el_cromo_superior(): void
     {
         $proveedor = File::get(app_path('Providers/Filament/AdminPanelProvider.php'));
 
-        $this->assertStringContainsString("view('filament.components.cuenta-en-la-barra')", $proveedor, 'La cuenta no se pinta en ninguna parte.');
-        $this->assertStringNotContainsString('PanelsRenderHook::SIDEBAR_FOOTER', $proveedor, 'La cuenta sigue anclada al pie de la barra.');
+        $this->assertStringContainsString(
+            "view('filament.components.cuenta-en-la-barra', ['donde' => 'cromo'])",
+            $proveedor,
+            'La cuenta no se pinta en el cromo superior.'
+        );
         $this->assertStringNotContainsString('PanelsRenderHook::SIDEBAR_NAV_START', $proveedor, 'La cuenta sigue siendo la primera fila de la lista.');
         $this->assertSame(2, substr_count($proveedor, 'PanelsRenderHook::TOPBAR_END'), 'El cromo superior tiene que llevar dos piezas: el control de tema y la cuenta.');
-        $this->assertStringContainsString('->userMenu(false)', $proveedor, 'Con nuestro chip arriba, el menú de usuario de Filament sobra.');
+        $this->assertStringContainsString('->userMenu(false)', $proveedor, 'Con nuestro chip, el menú de usuario de Filament sobra.');
     }
 
     /**
@@ -1020,6 +1032,121 @@ class BarraLateralTest extends TestCase
             2.75,
             (float) $ancho[1],
             'El riel mide menos de 44 px: el icono no tiene dónde recibir el dedo.'
+        );
+    }
+
+    /**
+     * En el teléfono, el logotipo va al CENTRO y el control de tema a la
+     * derecha (D-L30). La hamburguesa se queda donde estaba, a la izquierda.
+     *
+     * El centrado es absoluto contra el ancho del cromo y no por reparto de
+     * espacio: los dos costados miden lo mismo —44 px de botón a cada lado—
+     * así que centrar contra el ancho es centrar entre ellos, y deja de
+     * depender de cuántos hijos tenga la barra, que Filament cambia entre
+     * versiones.
+     *
+     * Rotura: quitar el centrado; dejar el control de tema pegado al logotipo;
+     * dejar la cuenta en el cromo del teléfono.
+     */
+    public function test_en_el_telefono_el_logotipo_va_en_el_centro(): void
+    {
+        $movil = $this->mediasDeReglas($this->tema(), '(max-width: 63.999rem)');
+
+        foreach ([
+            'position: absolute;' => 'el logotipo no sale del reparto de espacio, así que no puede quedar centrado',
+            'inset-inline: 0;' => 'el logotipo no se centra contra el ancho del cromo',
+            'justify-content: center;' => 'el logotipo no se centra dentro de su hueco',
+            'margin-inline-start: auto;' => 'el control de tema no se va al canto derecho',
+        ] as $cadena => $porque) {
+            $this->assertNotFalse(strpos($movil, $cadena), "En el cromo del teléfono, {$porque}.");
+        }
+
+        // Y la cuenta se va del cromo: en el teléfono vive al pie de la barra.
+        $this->assertNotFalse(
+            strpos($movil, '.fi-topbar .asb-barra-cuenta'),
+            'La cuenta sigue en el cromo del teléfono, donde ya no va.'
+        );
+    }
+
+    /**
+     * La cuenta vive en DOS ganchos —el cromo en escritorio, el pie de la barra
+     * en el teléfono— y eso trae dos peligros que se afirman aquí.
+     *
+     * Uno: el identificador. Dos copias del mismo componente con el mismo `id`
+     * dejan un `aria-controls` apuntando a dos sitios, y el lector de pantalla
+     * se queda con el primero. El identificador se compone.
+     *
+     * Dos: la copia que no toca. Si solo se esconde a la vista, sigue
+     * recibiendo tabulación; tiene que salir del árbol con `display: none`.
+     *
+     * Rotura: volver al `id` literal; esconder la copia con opacidad o con
+     * `visibility`.
+     */
+    public function test_la_cuenta_esta_en_dos_ganchos_sin_duplicar_identificadores(): void
+    {
+        $proveedor = File::get(app_path('Providers/Filament/AdminPanelProvider.php'));
+
+        $this->assertNotFalse(strpos($proveedor, 'PanelsRenderHook::SIDEBAR_FOOTER'), 'La cuenta no se pinta al pie de la barra.');
+        $this->assertSame(
+            2,
+            substr_count($proveedor, 'filament.components.cuenta-en-la-barra'),
+            'La cuenta tiene que pintarse en dos sitios: el cromo y el pie de la barra.'
+        );
+
+        $vista = File::get(resource_path('views/filament/components/cuenta-en-la-barra.blade.php'));
+
+        $this->assertFalse(
+            strpos($vista, 'aria-controls="asb-hoja-cuenta"') !== false,
+            'El identificador de la hoja sigue siendo literal: con dos copias, `aria-controls` apunta a dos sitios.'
+        );
+        $this->assertNotFalse(strpos($vista, '$donde'), 'El componente no distingue dónde se pinta, así que no puede componer su identificador.');
+
+        // La copia que no toca sale del árbol, no se esconde a la vista.
+        $tema = $this->tema();
+        $movil = $this->mediasDeReglas($tema, '(max-width: 63.999rem)');
+
+        $this->assertNotFalse(
+            strpos($movil, 'display: none'),
+            'En el teléfono, la copia del cromo no sale del árbol y se queda recibiendo tabulación.'
+        );
+        $this->assertNotFalse(
+            strpos($tema, '.asb-cuenta-al-pie'),
+            'No hay regla para la cuenta del pie: sin ella se pinta en los dos sitios a la vez.'
+        );
+    }
+
+    /**
+     * El perfil está ANCLADO al pie de la barra y los iconos pasan por DEBAJO
+     * (D-L30). Es la diferencia entre flotar y ser el último elemento: si fuera
+     * un hermano al pie, la lista terminaría encima y no habría nada que pasara
+     * por debajo, que es justo lo que Sua pidió.
+     *
+     * Y si flota, la lista tiene que reservar su alto o el último destino queda
+     * inalcanzable, que es un incumplimiento y no un detalle.
+     *
+     * Rotura: dejar la cuenta en el flujo; quitarle el relleno inferior a la
+     * lista.
+     */
+    public function test_el_perfil_flota_sobre_la_lista_y_la_lista_le_reserva_sitio(): void
+    {
+        $movil = $this->mediasDeReglas($this->tema(), '(max-width: 63.999rem)');
+
+        $desde = strpos($movil, '.fi-sidebar .asb-cuenta-al-pie');
+
+        $this->assertNotFalse($desde, 'No hay regla para la cuenta del pie.');
+
+        $regla = substr($movil, $desde, strpos($movil, '}', $desde) - $desde);
+
+        foreach (['position: absolute', 'inset-block-end', 'z-index'] as $pieza) {
+            $this->assertNotFalse(
+                strpos($regla, $pieza),
+                "La cuenta del pie no flota sobre la lista (le falta «{$pieza}»): los iconos chocarían con ella en vez de pasar por debajo."
+            );
+        }
+
+        $this->assertNotFalse(
+            strpos($movil, '.fi-sidebar .fi-sidebar-nav {'),
+            'La lista no reserva el alto de la cuenta con un selector que gane: el `padding-block` de la regla base lo pisa y el último destino queda debajo de ella.'
         );
     }
 

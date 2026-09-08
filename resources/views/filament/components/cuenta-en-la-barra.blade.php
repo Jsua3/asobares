@@ -11,6 +11,16 @@
      * que controla. Sin aria-haspopup ni role="menu", que anunciarían navegación
      * con flechas que este panel no implementa.
      */
+    /*
+     * `$donde` dice en cuál de los dos ganchos se está pintando: 'cromo' en
+     * escritorio, 'pie' en el teléfono. Dos copias del mismo componente con el
+     * mismo `id` dejarían un `aria-controls` apuntando a dos sitios, y el
+     * lector de pantalla se queda con el primero. Por eso el identificador se
+     * compone y no es literal.
+     */
+    $donde = $donde ?? 'cromo';
+    $hoja = 'asb-hoja-cuenta-'.$donde;
+
     $usuario = filament()->auth()->user();
 
     $rango = match (true) {
@@ -27,7 +37,7 @@
 @endphp
 
 @auth
-    <div class="asb-barra-cuenta"
+    <div class="asb-barra-cuenta asb-cuenta-{{ $donde === 'pie' ? 'al-pie' : 'en-el-cromo' }}"
          x-data="{
              abierto: false,
              cerrar() { this.abierto = false; },
@@ -39,7 +49,7 @@
                 x-ref="disparador"
                 x-on:click="abierto = ! abierto"
                 x-bind:aria-expanded="abierto ? 'true' : 'false'"
-                aria-controls="asb-hoja-cuenta"
+                aria-controls="{{ $hoja }}"
                 class="asb-barra-chip">
             <span class="sr-only">{{ $usuario?->name }}, {{ $rango }}: perfil y sesión</span>
 
@@ -52,7 +62,7 @@
 
             <x-heroicon-o-chevron-up-down aria-hidden="true" class="h-4 w-4 shrink-0" />
         </button>
-        {{-- La hoja abre hacia ABAJO: la cuenta es la primera fila de la barra. --}}
+        {{-- Arriba abre hacia abajo; al pie de la barra, hacia arriba. --}}
         <div x-cloak
              x-show="abierto"
              x-transition:enter="transicion-desplegable ease-out duration-(--duracion-entrada)"
@@ -60,7 +70,7 @@
              x-transition:leave="transicion-desplegable ease-out duration-(--duracion-salida)"
              x-transition:leave-start="opacity-100 scale-100"
              x-transition:leave-end="opacity-0 scale-95"
-             id="asb-hoja-cuenta"
+             id="{{ $hoja }}"
              class="asb-barra-hoja">
             <a href="{{ route('filament.admin.auth.profile') }}"
                class="asb-barra-fila">

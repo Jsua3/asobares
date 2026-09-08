@@ -161,7 +161,16 @@
     --asb-admin-barra-resplandor-ancho: 13rem;
     /* El riel del teléfono (D-L29): 3,5 rem son 56 px, con margen sobre los
        44 del mínimo táctil para que quepan las cuatro esquinas. */
-    --asb-admin-barra-riel: 3.5rem;
+    /*
+     * 4 rem y no 3,5: los módulos dejan de estar pegados al canto (Sua, 8 sep)
+     * y ese aire sale de algún sitio. Con 3,5 y 0,5 de aire a cada lado el
+     * módulo caería a 40 px y se rompería el mínimo táctil; con 4 quedan 48.
+     * El aire no se paga con el dedo.
+     */
+    --asb-admin-barra-riel: 4rem;
+    --asb-admin-barra-riel-aire: 0.5rem;
+    /* Lo que la cuenta anclada ocupa al pie, y lo que la lista le reserva. */
+    --asb-admin-barra-cuenta-alto: 4.25rem;
     --asb-admin-barra-modulo-sombra: 0 12px 28px rgb(11 9 10 / 0.06);
     --asb-admin-barra-brote: 0.35;
     --asb-admin-barra-empuje: 2px;
@@ -684,7 +693,95 @@
         }
 
         .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-nav {
-            padding-inline: 0.4rem;
+            padding-inline: var(--asb-admin-barra-riel-aire);
+        }
+
+        /*
+         * EL CROMO DEL TELÉFONO (D-L30). Hamburguesa donde estaba, logotipo al
+         * centro, control de tema a la derecha.
+         *
+         * El centrado saca al logotipo del reparto de espacio en vez de repartir
+         * huecos: así no depende de cuántos hijos tenga el cromo, que Filament
+         * cambia entre versiones. Y centra de verdad, porque los dos costados
+         * miden lo mismo: 44 px de botón a cada lado.
+         */
+        .fi-topbar {
+            position: relative;
+        }
+
+        .fi-topbar-start {
+            position: absolute;
+            inset-inline: 0;
+            justify-content: center;
+            margin-inline: 0;
+            /* El hueco centrado cruza todo el cromo, así que no puede comerse
+               los toques de la hamburguesa ni los del tema. */
+            pointer-events: none;
+        }
+
+        .fi-topbar-start > * {
+            pointer-events: auto;
+        }
+
+        .asb-panel-tema {
+            margin-inline-start: auto;
+        }
+
+        /* La cuenta cambia de sitio: se va del cromo y aparece al pie. */
+        .fi-topbar .asb-barra-cuenta {
+            display: none;
+        }
+
+        /*
+         * Con `.fi-sidebar` delante, y no a secas. Suelto, `.asb-cuenta-al-pie`
+         * empata en especificidad con `.asb-barra-cuenta`, que declara
+         * `position: relative`, y la pelea la decide el orden del archivo
+         * COMPILADO, que no es el nuestro: `lightningcss` agrupa y mueve.
+         * Medido el 8 sep: salía `relative` y la cuenta no flotaba. Con un
+         * selector más específico el orden deja de tener voto.
+         */
+        .fi-sidebar .asb-cuenta-al-pie {
+            /*
+             * FLOTA sobre la lista, no es su último elemento: si fuera un
+             * hermano al pie, la lista terminaría encima y no habría nada que
+             * pasara por debajo, que es lo que Sua pidió.
+             */
+            display: block;
+            position: absolute;
+            inset-block-end: var(--asb-admin-barra-riel-aire);
+            inset-inline: var(--asb-admin-barra-riel-aire);
+            z-index: 10;
+            margin-inline-end: 0;
+            padding: 0;
+            /*
+             * Una lámina más, no una barra: mismo radio y mismo canto que los
+             * módulos, y separada del borde por el mismo aire. El velo es el del
+             * cajón y no el del módulo porque este sí tapa: por debajo pasan los
+             * iconos, y tienen que desaparecer, no transparentarse a medias.
+             */
+            border-radius: var(--asb-admin-barra-modulo-radio);
+            background-color: var(--asb-admin-barra-velo-cajon);
+            box-shadow: inset 0 0 0 1px var(--asb-admin-barra-modulo-canto);
+            -webkit-backdrop-filter: var(--asb-admin-barra-desenfoque);
+            backdrop-filter: var(--asb-admin-barra-desenfoque);
+        }
+
+        /* Y la lista le reserva su alto, o el último destino queda debajo de
+           ella y no se puede tocar. Con `.fi-sidebar` delante por la misma
+           razón: sin él lo pisa el `padding-block` de la regla base. */
+        .fi-sidebar .fi-sidebar-nav {
+            padding-block-end: var(--asb-admin-barra-cuenta-alto);
+        }
+
+        /* En el riel se ve solo el avatar; con la barra abierta, el chip entero. */
+        .fi-sidebar:not(.fi-sidebar-open) .asb-cuenta-al-pie .asb-barra-chip {
+            justify-content: center;
+            max-width: none;
+        }
+
+        .fi-sidebar:not(.fi-sidebar-open) .asb-cuenta-al-pie .asb-barra-chip > span:not(.asb-barra-avatar):not(.sr-only),
+        .fi-sidebar:not(.fi-sidebar-open) .asb-cuenta-al-pie .asb-barra-chip > svg {
+            display: none;
         }
 
         /*
@@ -906,6 +1003,26 @@
     .asb-barra-cuenta {
         position: relative;
         margin-inline-end: 0.35rem;
+    }
+
+    /*
+     * La cuenta se pinta en DOS ganchos y solo una está viva a la vez. Se apaga
+     * con `display: none` y no escondiéndola: una copia invisible pero presente
+     * sigue recibiendo tabulación, y entonces hay dos disparadores para la
+     * misma sesión, que es lo que este panel ya evitó retirando el menú de
+     * usuario de Filament.
+     *
+     * Va en su PROPIA media de escritorio y no como regla suelta. Suelta, tiene
+     * la misma especificidad que la del teléfono y la pelea la decide el orden
+     * del archivo compilado —y ese orden no es el nuestro: `lightningcss`
+     * agrupa las medias y mueve reglas. Medido el 8 sep: la regla de escritorio
+     * salía DESPUÉS de la del teléfono y la anulaba. Con dos medias que se
+     * excluyen, el orden deja de importar.
+     */
+    @media (min-width: 64rem) {
+        .asb-cuenta-al-pie {
+            display: none;
+        }
     }
 
     .fi-sidebar-group {

@@ -189,11 +189,17 @@ class GenerarMaquetaDeLaBarra extends Command
         </head>
         <body class="fi-body fi-body-has-topbar fi-body-has-navigation">
         <div class="fi-topbar-ctn"><div class="fi-topbar">
+        <button type="button" class="fi-icon-btn fi-topbar-open-sidebar-btn" aria-label="Abrir el men&uacute;">{$this->hamburguesa()}</button>
         <div class="fi-topbar-start"><span class="fi-logo">asobares</span></div>
+        <div class="fi-topbar-end"></div>
+        <div class="asb-panel-tema"><button type="button" class="asb-panel-tema__disparador" aria-label="Tema">{$this->sol()}</button></div>
+        <div class="asb-barra-cuenta asb-cuenta-en-el-cromo"><button type="button" class="asb-barra-chip"><span class="asb-barra-avatar">NG</span></button></div>
         </div></div>
         <div class="fi-layout">
         <aside class="fi-sidebar{$abierta}"><canvas class="asb-barra-puntos" aria-hidden="true"></canvas>
-        <ul class="fi-sidebar-nav">{$lista}</ul></aside>
+        <ul class="fi-sidebar-nav">{$lista}</ul>
+        <div class="asb-barra-cuenta asb-cuenta-al-pie"><button type="button" class="asb-barra-chip"><span class="asb-barra-avatar">NG</span><span class="min-w-0 flex-1 text-left"><span class="block truncate text-sm font-medium">Natalia Guti&eacute;rrez</span><span class="block truncate text-2xs">Direcci&oacute;n del gremio</span></span>{$this->chevron()}</button></div>
+        </aside>
         <div class="fi-main-ctn" style="display: flex; opacity: 1;"><main class="fi-main hueco"><h1>Maqueta</h1><p>Solo para medir la barra lateral.</p></main></div>
         </div>
         <script>
@@ -214,6 +220,16 @@ class GenerarMaquetaDeLaBarra extends Command
     private function icono(): string
     {
         return '<svg class="fi-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="3"/></svg>';
+    }
+
+    private function hamburguesa(): string
+    {
+        return '<svg class="fi-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+    }
+
+    private function sol(): string
+    {
+        return '<svg class="fi-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4"/><path d="M12 3v2m0 14v2M3 12h2m14 0h2"/></svg>';
     }
 
     private function chevron(): string

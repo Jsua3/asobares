@@ -1518,6 +1518,50 @@ Y el cristal de los apartados baja del 76 % al **66 %** por debajo de 64 rem, qu
 
 ---
 
+### D-L30. El teléfono, rehecho: cromo, perfil anclado, riel con aire y resorte al gesto
+
+**Pedido de Sua, 8 sep, viendo el panel en un teléfono.** Cuatro cosas, y una quinta que resolvió al preguntarle: **el cambio es solo del teléfono**. En escritorio no se toca nada, porque lo que hay está aprobado y desplegado.
+
+**Qué skill se usó, y qué no.** Sua propuso una de diseño de Apple. **No existe** entre las suyas ni entre las que puede añadir; se dijo en vez de improvisar una. Se usó `ui-ux-pro-max`, que trae su guía pero no su buscador, y de ella salen cuatro exigencias que se aplican aquí: objetivo táctil de 44 px, nombre accesible en botones de solo icono, escala de `z-index` declarada, y `prefers-reduced-motion` respetado. Los principios de la escuela de Apple que Sua quería —deferencia, manipulación directa, muelles con masa— ya son el idioma de este proyecto: están en `--ease-rebote-suave` y `--ease-rebote-vivo` desde la Parte I.
+
+#### 1. El cromo superior
+
+Hamburguesa a la izquierda **donde está**, logotipo **centrado**, control de tema a la derecha. La cuenta se va de ahí.
+
+El centrado es por rejilla `1fr auto 1fr` y no por `justify-content`, que es lo mismo que hace la barra pública de escritorio: con dos costados de anchura distinta, centrar el contenedor deja el logotipo descentrado a ojo, y el ojo lo nota.
+
+#### 2. El perfil, anclado al pie de la barra
+
+Baja a la barra lateral, **abajo a la izquierda y anclado**, visible en cualquier momento. Los iconos que se desplazan **pasan por debajo**, no chocan con él.
+
+Eso obliga a que el perfil **flote sobre la lista**, no que sea su último elemento: si fuera un hermano al pie, la lista terminaría encima y no habría nada que pasara por debajo. Va absoluto sobre el canto inferior, con el cristal de la casa —velo y desenfoque— para que lo que pasa debajo se intuya y no estorbe. La lista gana relleno inferior igual a su alto, o el último destino quedaría inalcanzable.
+
+En el riel se ve **solo el avatar**; con la barra abierta, avatar, nombre y rango, que es el chip que ya existe. **El del cromo y el de la barra son el mismo componente en dos ganchos**, y el que no toca se apaga con `display: none` y no solo se esconde: si no, quedaría un duplicado invisible recibiendo tabulación, que es un incumplimiento que este proyecto ya arregló una vez en el cajón.
+
+#### 3. El riel gana aire, y por eso crece
+
+Los módulos dejan de estar pegados al canto. Pero el aire sale de algún sitio: con el riel en 56 px y 8 px a cada lado, el módulo cae a 40 y **el objetivo táctil se rompe**. Así que el riel **sube a 4 rem (64 px)**: 8 px de aire a cada lado, módulo de 48, fila de 48. Es la cuenta que hace que el aire no se pague con el dedo.
+
+#### 4. El resorte va en los iconos, ligado al gesto
+
+Al desplazar el riel, cada icono **se retrasa respecto al dedo y llega con muelle**, y tanto más cuanto más rápido el gesto. Es manipulación directa: el movimiento responde a lo que hace la mano, no a un reloj.
+
+| Opción | Coste |
+|---|---|
+| A. Un desfase por ícono, integrado con muelle, escalonado por posición | 22 nodos con `translate` por fotograma. Solo compositor, sin disposición ni pintura. El bucle corre mientras algo se mueve y se para solo, como el campo de puntos |
+| B. El desfase por módulo, cinco nodos | Más barato y se lee como cinco bloques rebotando, no como una lista con inercia. No es lo que se pidió |
+| C. Una transición CSS por ícono | No puede depender de la velocidad del gesto: es un reloj, no una respuesta |
+
+**Recomendación: A**, con tres condiciones que no se negocian:
+
+1. **`translate` y nada más.** Ni `top`, ni `margin`, ni `height`: cualquiera de esos mide la página en cada fotograma.
+2. **El bucle se para solo** cuando todo está en su sitio, y no arranca bajo `prefers-reduced-motion`. Mismo contrato que el campo de puntos.
+3. **Nada de lo que se mueve recibe el dedo mientras se mueve** más de 4 px: un destino que huye del pulgar es peor que un destino quieto.
+
+**Lo que NO cambia:** el escritorio entero; el cajón abierto con sus nombres; el campo de puntos; el resplandor; y el objetivo táctil de 48 px, que sigue siendo el suelo.
+
+---
+
 ---
 
 ## La medición de la barra ya construida, 8 sep 2026 (tarea 10)
