@@ -798,6 +798,74 @@ class BarraLateralTest extends TestCase
     }
 
     /**
+     * La maqueta con la que se mide (tarea 10 del plan). El panel exige segundo
+     * factor, así que ninguna sesión automatizada lo abre: sin poder ver la
+     * barra se entregaron dos regresiones visuales seguidas. La maqueta es lo
+     * que permite verla, y este comando es lo que la hace reproducible.
+     *
+     * Se afirma pieza por pieza, porque cada una se ganó el sitio a base de
+     * medir mal sin ella: sin `fi-sidebar-open` Filament deja la barra fuera de
+     * pantalla; sin el botón de plegado no reprodujo el defecto del canto
+     * derecho; y con las rutas a mano se mediría una hoja vieja sin avisar.
+     *
+     * Rotura: quitarle al comando cualquiera de esas piezas.
+     */
+    public function test_el_comando_de_la_maqueta_la_deja_medible(): void
+    {
+        $ruta = 'public/_medicion/prueba-barra.html';
+
+        try {
+            $this->artisan('maqueta:barra', ['--ruta' => $ruta])->assertSuccessful();
+
+            $this->assertFileExists(base_path($ruta));
+
+            $maqueta = File::get(base_path($ruta));
+
+            // `strpos` y no `assertStringContainsString`: aquel vuelca los diez
+            // kilobytes de la maqueta en el mensaje de fallo.
+            $this->assertNotFalse(strpos($maqueta, 'fi-sidebar-nav'), 'La maqueta no trae la lista, que es lo que se mide.');
+
+            $this->assertSame(
+                5,
+                substr_count($maqueta, 'class="fi-sidebar-group fi-collapsible"'),
+                'La maqueta no trae los cinco apartados del panel: cinco láminas es lo que hay que ver.'
+            );
+
+            $this->assertNotFalse(
+                strpos($maqueta, 'fi-sidebar-open'),
+                'Sin `fi-sidebar-open` Filament deja la barra fuera de pantalla y la maqueta no mide nada.'
+            );
+
+            $this->assertNotFalse(
+                strpos($maqueta, 'fi-sidebar-group-collapse-btn'),
+                'Sin el botón de plegado la maqueta no reproduce el marcado real del grupo, y así dio verde sobre un defecto que en el panel se veía.'
+            );
+
+            $this->assertNotFalse(strpos($maqueta, '[x-cloak]'), 'Falta el estilo de x-cloak.');
+            $this->assertNotFalse(strpos($maqueta, '$store'), 'Falta el almacén de mentira: sin él la consola se llena de errores que esconden a los de verdad.');
+
+            // Las rutas salen del manifiesto, no escritas a mano: si no, la
+            // maqueta mediría una hoja vieja sin que nadie se entere.
+            $manifiesto = json_decode(File::get(public_path('build/manifest.json')), true);
+            $tema = null;
+
+            foreach ($manifiesto as $clave => $entrada) {
+                if (str_ends_with($clave, 'filament/admin/theme.css')) {
+                    $tema = $entrada['file'];
+                }
+            }
+
+            $this->assertNotNull($tema, 'El manifiesto no trae el tema del panel.');
+            $this->assertNotFalse(
+                strpos($maqueta, '/build/'.$tema),
+                'La maqueta no apunta a la hoja compilada de hoy: mediría una vieja sin avisar.'
+            );
+        } finally {
+            File::deleteDirectory(base_path('public/_medicion'));
+        }
+    }
+
+    /**
      * El contrato con Filament (tarea 9 del plan). Este tema no decora a
      * Filament: se apoya en hechos concretos de su vendor, y cada uno de ellos
      * cambió una decisión de diseño. Si Filament sube de versión y uno se cae,

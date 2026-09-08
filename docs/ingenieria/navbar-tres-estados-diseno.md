@@ -1457,6 +1457,37 @@ Cómo se hizo: cinco miradas independientes sobre el mismo encargo (movimiento, 
 
 **Qué NO es.** No es la navBar de escritorio girada noventa grados. La navBar pública se retrae porque le roba alto a la lectura; esta barra no le roba nada al contenido, que va a su lado, así que no se retrae, no se compacta y no se va. Su cabecera con el logotipo no existe en escritorio (Filament la marca `lg:hidden` cuando hay topbar), así que no hay logotipo que condensar. Y detrás de ella, en escritorio, no pasa nada: solo el color plano de `.fi-body`. No es tampoco un carril de iconos: el plegado de escritorio está apagado y encenderlo es otro encargo. Lo único que de verdad se desplaza aquí es su propia lista, y ahí es donde tiene que estar todo lo que se mueve.
 
+## La medición de la barra ya construida, 8 sep 2026 (tarea 10)
+
+Tomada en Chromium sobre la maqueta que genera `php artisan maqueta:barra`, servida por HTTP. **Ninguna cifra sale de una suma.** Antes de medir nada se confirmó dentro de la página lo que la propia spec exige: la barra lleva `fi-sidebar-open`, empieza en `x = 0` y mide lo que dice su token.
+
+| Qué | Cuánto | Cómo |
+|---|---|---|
+| Ancho de la barra | **252 px**, `x = 0`, `fi-sidebar-open` puesta | `getBoundingClientRect` |
+| Alto de fila, el mínimo de las 22 | **48 px** en escritorio y a 375 px de ancho | `getBoundingClientRect` sobre las 22 |
+| Objetivo táctil | **Las 22 filas pasan las cuatro esquinas** del cuadrado de 44 px | `elementFromPoint` en las cuatro esquinas, desplazando la lista para que cada fila entre en el viewport |
+| Rótulos recortados | **Ninguno**, ni en escritorio ni a 375 px | `scrollWidth` contra `clientWidth` |
+| Desborde de la lista | **750 px** más de contenido que de hueco | `scrollHeight - clientHeight` |
+| Sombra del módulo en `scroll` | `rgba(11, 9, 10, 0.06) 0 12px 28px` — **se aplica** | Computada con la transición apagada |
+| Canto de cristal | `rgba(11, 9, 10, 0.1) 0 0 0 1px inset`, en el pseudoelemento | `getComputedStyle(g, '::after')` |
+| Brote del indicador | `barra-brota`, **520 ms** | `getAnimations()` sobre el ítem activo |
+| Cajón a 375 px | 252 px de ancho, velo al **94 %**, `blur(18px) saturate(1.3)` | Computadas |
+| Rótulo de grupo | `rgb(61, 57, 59)` | Computada |
+| Rótulo del ítem activo | `rgb(151, 29, 24)` | Computada |
+| Las cuatro señales | Las cuatro condiciones existen en el CSSOM compilado y **ninguna cae dentro de una capa**; las de Filament sí caen dentro, así que las nuestras ganan | Recorrido de `document.styleSheets` |
+
+**Dos cosas que la medición enseñó y que no eran defectos.** `elementFromPoint` devuelve `null` para todo lo que cae fuera del viewport, así que medir el objetivo táctil sin desplazar la lista da catorce filas «rotas» que están perfectamente bien. Y leer `box-shadow` justo después de cambiar el estado devuelve `rgba(0, 0, 0, 0) 0 0 0 0`: es el valor interpolado en t = 0 de la transición, no una sombra anulada. La primera vez pareció el mismo defecto que `lg:shadow-none`; no lo era.
+
+**Un defecto de fidelidad de la maqueta, arreglado.** A 375 px la barra medía 246 px y no 252, porque el `aside` era un ítem flex que encogía. En el panel el cajón es fijo y no lo encoge nadie: la maqueta lleva ya `flex-shrink: 0`.
+
+**Lo que esta medición NO puede dar, y por qué:**
+
+- **La costura con el topbar.** La maqueta no lo pinta y el panel exige segundo factor. Lo que sí se sabe, de la consola del panel real: `.fi-topbar-ctn` computa `position: sticky` con `z-index: 20`.
+- **Las cuatro señales aplicadas de verdad.** El navegador de la sesión no emula movimiento reducido, transparencia reducida ni más contraste. Lo verificado es que los cuatro bloques llegan al CSSOM fuera de capa y que `matchMedia` soporta las cuatro condiciones; que **apliquen** hay que verlo en un equipo con la preferencia puesta (D-31 ya lo pide).
+- **El coste del campo de puntos en marcha.** Con la ventana detrás el navegador no pinta fotogramas y `requestAnimationFrame` no corre. Lo mide Sua.
+
+---
+
 ## Cifras de partida, medidas el 7 sep 2026
 
 Las midió Sua en su propio navegador, con el panel abierto y la sesión iniciada, porque el segundo factor impide que una sesión automatizada llegue a `/admin`. Se tomaron **dos veces**: a **201 x 987**, por debajo de 64 rem, que es el **cajón**; y a **1.084 x 1.083**, por encima, que es la **barra de escritorio**. Las dos coinciden en todo salvo en la posición y en cuánto se corta la lista.
