@@ -1,13 +1,13 @@
-<x-layouts.publico :titulo="ajuste('empleo_titulo').' — ASOBARES Quindío'"
-                   descripcion="Vacantes de bartender, chef, mesero y administrador en bares y gastrobares del Quindío. Publican solo los establecimientos asociados.">
+<x-layouts.publico :titulo="ajuste('seo_empleo_titulo', ajuste('empleo_titulo').' — ASOBARES Quindío')"
+                   :descripcion="ajuste('seo_empleo_descripcion', 'Vacantes de bartender, chef, mesero y administrador en bares y gastrobares del Quindío. Publican solo los establecimientos asociados.')">
 
     <x-publico.hero :titulo="ajuste('empleo_titulo')" :subtitulo="ajuste('empleo_intro')" compacto atmosfera>
         <div class="mt-7 flex flex-col gap-3 sm:flex-row">
             <x-publico.boton href="#perfil">
-                Déjanos tu perfil
+                {{ ajuste('empleo_cta_perfil', 'Déjanos tu perfil') }}
             </x-publico.boton>
             <x-publico.boton variante="contorno" href="#vacantes">
-                Ver vacantes
+                {{ ajuste('empleo_cta_vacantes', 'Ver vacantes') }}
             </x-publico.boton>
         </div>
     </x-publico.hero>
@@ -17,7 +17,7 @@
         {{-- Muro de vacantes --}}
         <section id="vacantes" aria-labelledby="titulo-vacantes">
             <div class="flex flex-wrap items-end justify-between gap-4">
-                <h2 id="titulo-vacantes" class="font-display text-2xl font-bold">Vacantes abiertas</h2>
+                <h2 id="titulo-vacantes" class="font-display text-2xl font-bold">{{ ajuste('empleo_vacantes_titulo', 'Vacantes abiertas') }}</h2>
                 <p class="text-xs text-apagado">{{ ajuste('empleo_aviso') }}</p>
             </div>
 
@@ -117,9 +117,9 @@
 
         {{-- Formulario de aspirante --}}
         <section id="perfil" class="tarjeta mt-16 p-7 sm:p-9" aria-labelledby="titulo-perfil">
-            <h2 id="titulo-perfil" class="font-display text-2xl font-bold">Déjanos tu perfil</h2>
+            <h2 id="titulo-perfil" class="font-display text-2xl font-bold">{{ ajuste('empleo_perfil_titulo', 'Déjanos tu perfil') }}</h2>
             <p class="mt-2 text-sm text-tenue">
-                Cuando un establecimiento asociado busque tu cargo, te contactamos. No necesitas cuenta.
+                {{ ajuste('empleo_perfil_texto', 'Cuando un establecimiento asociado busque tu cargo, te contactamos. No necesitas cuenta.') }}
             </p>
 
             @if (session('exito'))
@@ -140,15 +140,14 @@
                 </div>
 
                 <x-publico.campo nombre="experiencia" etiqueta="Tu experiencia" tipo="textarea" filas="3"
-                                 placeholder="Cuéntanos en pocas líneas dónde has trabajado y qué sabes hacer."
-                                 ayuda="Con dos o tres frases es suficiente." />
+                                 :placeholder="ajuste('empleo_perfil_experiencia_placeholder', 'Cuéntanos en pocas líneas dónde has trabajado y qué sabes hacer.')"
+                                 :ayuda="ajuste('empleo_perfil_experiencia_ayuda', 'Con dos o tres frases es suficiente.')" />
 
                 {{-- Ley 1581: el perfil deja de ser solo para la secretaria y pasa a
                      verlo cualquier establecimiento afiliado. Eso se dice aqui, junto a
                      la casilla, y no solo en la politica. --}}
                 <p class="text-xs leading-relaxed text-apagado">
-                    Tu perfil quedará visible para los establecimientos afiliados a ASOBARES Capítulo
-                    Quindío, que podrán contactarte directamente para ofrecerte trabajo.
+                    {{ ajuste('empleo_perfil_privacidad', 'Tu perfil quedará visible para los establecimientos afiliados a ASOBARES Capítulo Quindío, que podrán contactarte directamente para ofrecerte trabajo.') }}
                 </p>
 
                 <x-publico.habeas-data />

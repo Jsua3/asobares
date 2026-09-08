@@ -1,5 +1,6 @@
 <x-layouts.publico titulo="Entrar a mi cuenta — ASOBARES Quindío"
-                   descripcion="Acceso para los establecimientos afiliados: consulta tu estado de cuenta y el detalle de los convenios.">
+                   descripcion="Acceso para los establecimientos afiliados: consulta tu estado de cuenta y el detalle de los convenios."
+                   :sin-navegacion="true">
 
     <div class="resplandor-marca flex min-h-[75vh] items-center">
         <div class="mx-auto w-full max-w-md px-4 py-16 sm:px-6">

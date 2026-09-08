@@ -1,8 +1,8 @@
-<x-layouts.publico titulo="Eventos y capacitaciones — ASOBARES Quindío"
-                   descripcion="ExpoBar, foros, congresos y capacitaciones del gremio de la vida nocturna del Quindío.">
+<x-layouts.publico :titulo="ajuste('seo_eventos_titulo', 'Eventos y capacitaciones — ASOBARES Quindío')"
+                   :descripcion="ajuste('seo_eventos_descripcion', 'ExpoBar, foros, congresos y capacitaciones del gremio de la vida nocturna del Quindío.')">
 
-    <x-publico.hero titulo="Eventos y capacitaciones" compacto atmosfera
-                    subtitulo="Solo eventos del gremio: ferias, foros y formación para los establecimientos del Quindío." />
+    <x-publico.hero :titulo="ajuste('eventos_titulo', 'Eventos y capacitaciones')" compacto atmosfera
+                    :subtitulo="ajuste('eventos_intro', 'Solo eventos del gremio: ferias, foros y formación para los establecimientos del Quindío.')" />
 
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 
@@ -13,9 +13,9 @@
         @if ($eventos->isEmpty())
             <div class="tarjeta mt-8 p-12 text-center">
                 <p class="font-display text-lg font-semibold">
-                    {{ $cuando === 'proximos' ? 'No hay eventos programados por ahora' : 'Todavía no hay eventos pasados' }}
+                    {{ $cuando === 'proximos' ? ajuste('eventos_vacios_proximos', 'No hay eventos programados por ahora') : ajuste('eventos_vacios_pasados', 'Todavía no hay eventos pasados') }}
                 </p>
-                <p class="mt-2 text-sm text-tenue">Publicamos aquí la agenda del gremio.</p>
+                <p class="mt-2 text-sm text-tenue">{{ ajuste('eventos_vacios_texto', 'Publicamos aquí la agenda del gremio.') }}</p>
             </div>
         @else
             <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

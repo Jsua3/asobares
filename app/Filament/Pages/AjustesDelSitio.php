@@ -9,6 +9,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
@@ -40,19 +42,42 @@ class AjustesDelSitio extends Page implements HasSchemas
 
     /** Títulos legibles para cada grupo de ajustes. */
     private const array GRUPOS = [
-        'identidad' => ['Identidad', 'Nombre, eslogan y descripción para buscadores.'],
+        'identidad' => ['Identidad', 'Nombre, eslogan y descripción general.'],
         'inicio' => ['Página de inicio', 'Hero, título de cada sección de la portada y cierre.'],
         'manifiesto' => ['Manifiesto del gremio', 'El discurso del capítulo: apertura, visión a 10 años, barreras del sector y cierre.'],
         'cifras' => ['Cifras del Observatorio', 'La franja de datos que se muestra en el inicio.'],
         'gremio' => ['El gremio en cifras', 'Cuatro cifras del capítulo que la oficina actualiza cada quince días con el archivo de la contadora. Se pintan solo las que tengan número; si están todas vacías, la franja no aparece en la portada.'],
         'institucional' => ['Quiénes somos', 'Historia, misión, dirección y programas del capítulo.'],
         'contacto' => ['Contacto', 'Datos de la oficina, redes y correo que recibe los formularios.'],
+        'directorio' => ['Directorio', 'Encabezados y textos públicos del directorio de establecimientos.'],
         'guia' => ['Guía normativa', 'Textos de la página «Abre tu negocio».'],
         'empleo' => ['Bolsa de empleo', 'Títulos y avisos del muro de vacantes.'],
-        'modulos' => ['Artistas y proveedores', 'Textos de los dos directorios.'],
+        'artistas' => ['Artistas', 'Textos públicos de la bolsa de artistas.'],
+        'proveedores' => ['Proveedores', 'Textos públicos de la bolsa de proveedores.'],
+        'eventos' => ['Eventos', 'Encabezados y mensajes públicos de eventos.'],
         'boletin' => ['Boletín', 'Encabezados de la sección de noticias.'],
         'afiliacion' => ['Afiliación', 'Textos de la página «Afíliate».'],
+        'mi_cuenta' => ['Mi cuenta', 'Mensajes institucionales del portal privado del asociado.'],
+        'seo' => ['SEO', 'Títulos y descripciones para buscadores por página.'],
         'legal' => ['Legal', 'Datos del responsable del tratamiento de datos.'],
+    ];
+
+    /** Organización visible del panel para que el cliente edite por página. */
+    private const array PESTANAS = [
+        'general' => ['General', ['identidad']],
+        'inicio' => ['Inicio', ['inicio', 'cifras', 'gremio']],
+        'institucional' => ['Institucional', ['manifiesto', 'institucional']],
+        'directorio' => ['Directorio', ['directorio']],
+        'afiliacion' => ['Afiliación', ['afiliacion']],
+        'empleo' => ['Empleo', ['empleo']],
+        'artistas' => ['Artistas', ['artistas']],
+        'proveedores' => ['Proveedores', ['proveedores']],
+        'eventos' => ['Eventos', ['eventos']],
+        'boletin' => ['Boletín', ['boletin']],
+        'contacto' => ['Contacto', ['contacto']],
+        'mi_cuenta' => ['Mi cuenta', ['mi_cuenta']],
+        'seo' => ['SEO', ['seo']],
+        'legal' => ['Legal', ['legal']],
     ];
 
     public static function canAccess(): bool
@@ -70,31 +95,44 @@ class AjustesDelSitio extends Page implements HasSchemas
     public function form(Schema $schema): Schema
     {
         return $schema
-            ->components($this->secciones())
+            ->components([
+                Tabs::make('Ajustes por sección')
+                    ->persistTabInQueryString('seccion')
+                    ->tabs($this->pestanas()),
+            ])
             ->statePath('data');
     }
 
-    /** @return list<Section> */
-    private function secciones(): array
+    /** @return list<Tab> */
+    private function pestanas(): array
     {
         $porGrupo = Setting::query()->orderBy('id')->get()->groupBy('grupo');
-        $secciones = [];
+        $pestanas = [];
 
-        foreach (self::GRUPOS as $grupo => [$titulo, $descripcion]) {
-            $ajustes = $porGrupo->get($grupo);
+        foreach (self::PESTANAS as [$titulo, $grupos]) {
+            $secciones = [];
 
-            if ($ajustes === null) {
-                continue;
+            foreach ($grupos as $grupo) {
+                $ajustes = $porGrupo->get($grupo);
+
+                if ($ajustes === null) {
+                    continue;
+                }
+
+                [$seccion, $descripcion] = self::GRUPOS[$grupo];
+
+                $secciones[] = Section::make($seccion)
+                    ->description($descripcion)
+                    ->columns(2)
+                    ->schema($ajustes->map(fn (Setting $ajuste) => $this->campo($ajuste))->all());
             }
 
-            $secciones[] = Section::make($titulo)
-                ->description($descripcion)
-                ->collapsed($grupo !== 'identidad')
-                ->columns(2)
-                ->schema($ajustes->map(fn (Setting $ajuste) => $this->campo($ajuste))->all());
+            if ($secciones !== []) {
+                $pestanas[] = Tab::make($titulo)->schema($secciones);
+            }
         }
 
-        return $secciones;
+        return $pestanas;
     }
 
     private function campo(Setting $ajuste): TextInput|Textarea

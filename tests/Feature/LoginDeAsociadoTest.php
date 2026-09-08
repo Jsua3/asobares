@@ -54,6 +54,17 @@ class LoginDeAsociadoTest extends TestCase
             ->post(route('mi-cuenta.entrar.post'), ['email' => $email, 'password' => $clave]);
     }
 
+    public function test_la_pantalla_de_acceso_no_renderiza_la_navegacion_publica(): void
+    {
+        $this->get(route('mi-cuenta.entrar'))
+            ->assertSuccessful()
+            ->assertSee('Entra a tu cuenta')
+            ->assertSee('logo-asobares.png')
+            ->assertDontSee('aria-label="Navegación principal"', escape: false)
+            ->assertDontSee('tema-lateral', escape: false)
+            ->assertDontSee('<footer', escape: false);
+    }
+
     public function test_un_asociado_con_sus_datos_correctos_entra(): void
     {
         $socio = $this->crearUsuario(User::ROL_ASOCIADO);

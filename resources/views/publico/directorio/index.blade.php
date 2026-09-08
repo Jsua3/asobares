@@ -27,11 +27,11 @@
         ?->foto_portada;
 @endphp
 
-<x-layouts.publico titulo="Directorio de establecimientos — ASOBARES Quindío"
-                   descripcion="Bares, gastrobares, cafés y discotecas afiliados al gremio en Armenia, Salento, Filandia y todo el Quindío.">
+<x-layouts.publico :titulo="ajuste('seo_directorio_titulo', 'Directorio de establecimientos — ASOBARES Quindío')"
+                   :descripcion="ajuste('seo_directorio_descripcion', 'Bares, gastrobares, cafés y discotecas afiliados al gremio en Armenia, Salento, Filandia y todo el Quindío.')">
 
-    <x-publico.hero titulo="Directorio de establecimientos" compacto atmosfera
-                    subtitulo="Bares, gastrobares, cafés y discotecas afiliados en el Quindío.">
+    <x-publico.hero :titulo="ajuste('directorio_titulo', 'Directorio de establecimientos')" compacto atmosfera
+                    :subtitulo="ajuste('directorio_intro', 'Bares, gastrobares, cafés y discotecas afiliados en el Quindío.')">
         @if ($fotoHeroDirectorio)
             <x-slot:medio>
                 <img src="{{ Storage::disk('public')->url($fotoHeroDirectorio) }}"

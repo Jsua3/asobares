@@ -2,11 +2,11 @@
     $whatsapp = enlaceWhatsapp(ajuste('contacto_whatsapp'), 'Hola, escribo desde la página de ASOBARES Quindío.');
 @endphp
 
-<x-layouts.publico titulo="Contacto y PQR — ASOBARES Quindío"
-                   descripcion="Escríbenos: contacto general, peticiones, quejas y reclamos, propuestas de alianza o solicitud para entrar a la bolsa de proveedores.">
+<x-layouts.publico :titulo="ajuste('seo_contacto_titulo', 'Contacto y PQR — ASOBARES Quindío')"
+                   :descripcion="ajuste('seo_contacto_descripcion', 'Escríbenos: contacto general, peticiones, quejas y reclamos, propuestas de alianza o solicitud para entrar a la bolsa de proveedores.')">
 
-    <x-publico.hero titulo="Hablemos" compacto atmosfera
-                    subtitulo="Contacto general, PQR, propuestas de alianza o solicitud para entrar a la bolsa de proveedores." />
+    <x-publico.hero :titulo="ajuste('contacto_titulo_pagina', 'Hablemos')" compacto atmosfera
+                    :subtitulo="ajuste('contacto_subtitulo', 'Contacto general, PQR, propuestas de alianza o solicitud para entrar a la bolsa de proveedores.')" />
 
     <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
         <div class="revelar grid gap-10 lg:grid-cols-5" data-revelar>
@@ -14,7 +14,7 @@
             {{-- Formulario --}}
             <section id="formulario" class="lg:col-span-3" aria-labelledby="titulo-formulario">
                 <div class="vidrio rounded-[1.75rem] p-7 sm:p-8">
-                    <h2 id="titulo-formulario" class="font-display text-xl font-semibold">Escríbenos</h2>
+                    <h2 id="titulo-formulario" class="font-display text-xl font-semibold">{{ ajuste('contacto_formulario_titulo', 'Escríbenos') }}</h2>
 
                     @if (session('radicado'))
                         <x-publico.alerta class="mt-5">
@@ -57,7 +57,7 @@
             {{-- Datos de la oficina --}}
             <aside class="space-y-5 lg:col-span-2 lg:sticky lg:top-24 lg:self-start">
                 <div class="tarjeta-escena vidrio rounded-[1.5rem] p-6">
-                    <h2 class="font-display text-base font-semibold">La oficina</h2>
+                    <h2 class="font-display text-base font-semibold">{{ ajuste('contacto_oficina_titulo', 'La oficina') }}</h2>
                     <address class="mt-4 space-y-3 text-sm not-italic text-suave">
                         <p>{{ ajuste('contacto_direccion') }}<br>{{ ajuste('contacto_ciudad') }}</p>
                         <p>

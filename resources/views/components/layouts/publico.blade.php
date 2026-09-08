@@ -1,3 +1,11 @@
+@props([
+    'titulo' => null,
+    'descripcion' => null,
+    'ogTipo' => null,
+    'ogImagen' => null,
+    'sinNavegacion' => false,
+])
+
 <!DOCTYPE html>
 <html lang="es" class="scroll-pt-24">
 <head>
@@ -192,14 +200,18 @@
         Saltar al contenido
     </a>
 
-    <x-publico.navbar />
-    <x-publico.barra-tema />
+    @unless ($sinNavegacion)
+        <x-publico.navbar />
+        <x-publico.barra-tema />
+    @endunless
 
     <main id="contenido">
         {{ $slot }}
     </main>
 
-    <x-publico.footer />
+    @unless ($sinNavegacion)
+        <x-publico.footer />
+    @endunless
 
     @stack('scripts')
 </body>

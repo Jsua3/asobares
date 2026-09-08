@@ -187,6 +187,14 @@ class SettingSeeder extends Seeder
             $this->texto('contacto_lat', '4.5378', 'contacto', 'Latitud de la oficina'),
             $this->texto('contacto_lng', '-75.6757', 'contacto', 'Longitud de la oficina'),
             $this->texto('contacto_correo_destino', 'asobaresquindio@asobares.org', 'contacto', 'Correo que recibe los formularios'),
+            $this->texto('contacto_titulo_pagina', 'Hablemos', 'contacto', 'Título de la página de contacto'),
+            $this->largo('contacto_subtitulo', 'Contacto general, PQR, propuestas de alianza o solicitud para entrar a la bolsa de proveedores.', 'contacto', 'Introducción de contacto'),
+            $this->texto('contacto_formulario_titulo', 'Escríbenos', 'contacto', 'Título del formulario de contacto'),
+            $this->texto('contacto_oficina_titulo', 'La oficina', 'contacto', 'Título de datos de oficina'),
+
+            // --- Directorio ---
+            $this->texto('directorio_titulo', 'Directorio de establecimientos', 'directorio', 'Título del directorio'),
+            $this->largo('directorio_intro', 'Bares, gastrobares, cafés y discotecas afiliados en el Quindío.', 'directorio', 'Introducción del directorio'),
 
             // --- Guía normativa ---
             // OBS3-10. Dos rotulos porque el enlace no siempre cumple lo mismo.
@@ -199,33 +207,107 @@ class SettingSeeder extends Seeder
             // día se edita esta línea desde el panel, que es donde vive.
             $this->largo('guia_intro', 'La normatividad cambia de un municipio a otro. Escoge el tuyo y revisa, entidad por entidad, qué te van a pedir y ante quién se tramita.', 'guia', 'Introducción de la guía'),
             $this->largo('guia_descargo', 'Esta guía es orientativa y se actualiza con la información que cada entidad entrega al gremio. Los requisitos, costos y formatos pueden cambiar sin aviso: verifica siempre directamente con la entidad competente antes de iniciar tu trámite.', 'guia', 'Texto de descargo'),
+            $this->largo('guia_selector_ayuda', 'Estamos levantando la guía municipio por municipio con la información que cada entidad entrega al gremio. Si falta el tuyo, escríbenos.', 'guia', 'Ayuda bajo el selector de municipio'),
+            $this->texto('guia_cta_titulo', '¿Dudas con algún trámite?', 'guia', 'Título del llamado final'),
+            $this->largo('guia_cta_texto', 'La orientación jurídica es gratuita para los afiliados, pero si estás empezando y todavía no haces parte del gremio, escríbenos igual: para eso existe esta guía.', 'guia', 'Texto del llamado final'),
 
             // --- Bolsa de empleo ---
             $this->texto('empleo_titulo', 'Bolsa de empleo del sector', 'empleo', 'Título'),
             $this->largo('empleo_intro', 'Bartenders, chefs, meseros y administradores para la vida nocturna del Quindío. Conseguir un buen bartender acá es lo más difícil; por eso el muro existe.', 'empleo', 'Introducción'),
             $this->texto('empleo_aviso', 'Solo los establecimientos asociados publican vacantes en este muro.', 'empleo', 'Aviso del muro'),
+            $this->texto('empleo_cta_perfil', 'Déjanos tu perfil', 'empleo', 'Botón hacia el formulario de aspirante'),
+            $this->texto('empleo_cta_vacantes', 'Ver vacantes', 'empleo', 'Botón hacia el listado de vacantes'),
+            $this->texto('empleo_vacantes_titulo', 'Vacantes abiertas', 'empleo', 'Título del listado público de vacantes'),
+            $this->texto('empleo_perfil_titulo', 'Déjanos tu perfil', 'empleo', 'Título del formulario de aspirante'),
+            $this->largo('empleo_perfil_texto', 'Cuando un establecimiento asociado busque tu cargo, te contactamos. No necesitas cuenta.', 'empleo', 'Texto del formulario de aspirante'),
+            $this->largo('empleo_perfil_experiencia_placeholder', 'Cuéntanos en pocas líneas dónde has trabajado y qué sabes hacer.', 'empleo', 'Placeholder de experiencia del aspirante'),
+            $this->texto('empleo_perfil_experiencia_ayuda', 'Con dos o tres frases es suficiente.', 'empleo', 'Ayuda de experiencia del aspirante'),
+            $this->largo('empleo_perfil_privacidad', 'Tu perfil quedará visible para los establecimientos afiliados a ASOBARES Capítulo Quindío, que podrán contactarte directamente para ofrecerte trabajo.', 'empleo', 'Aviso de visibilidad del perfil'),
 
             // --- Artistas y proveedores ---
-            $this->texto('artistas_titulo', 'Directorio de artistas', 'modulos', 'Título de artistas'),
-            $this->largo('artistas_intro', 'DJs, bandas y solistas de la región. Son las once de la noche, se te cayó el DJ y necesitas uno: aquí está su género, su contacto y un video para escucharlo antes de llamar.', 'modulos', 'Introducción de artistas'),
+            $this->texto('artistas_titulo', 'Directorio de artistas', 'artistas', 'Título de artistas'),
+            $this->largo('artistas_intro', 'DJs, bandas y solistas de la región. Son las once de la noche, se te cayó el DJ y necesitas uno: aquí está su género, su contacto y un video para escucharlo antes de llamar.', 'artistas', 'Introducción de artistas'),
             // OBS3-08. El acta ofrecía dos redacciones --«a convenir» o
             // «según el evento»--, así que la decide el gremio desde el panel.
-            $this->texto('artistas_tarifa_leyenda', 'A convenir', 'modulos', 'Artistas · leyenda en lugar de la tarifa'),
+            $this->texto('artistas_tarifa_leyenda', 'A convenir', 'artistas', 'Artistas · leyenda en lugar de la tarifa'),
+            $this->texto('artistas_bloque_titulo', '¿Eres DJ, banda o solista?', 'artistas', 'Título del bloque de inscripción'),
+            $this->largo('artistas_bloque_texto', 'Inscríbete gratis en la bolsa de artistas del gremio y aparece cuando un establecimiento busque música para su noche.', 'artistas', 'Texto del bloque de inscripción'),
+            $this->texto('artistas_bloque_cta', 'Inscribirme en la bolsa', 'artistas', 'Botón del bloque de inscripción'),
             // OBS3-12. Los tres estados de la verificacion de un proveedor.
-            $this->texto('proveedores_verificado', 'Contacto verificado el', 'modulos', 'Proveedores · rótulo de verificado'),
-            $this->texto('proveedores_verificacion_vieja', 'Sin confirmar desde', 'modulos', 'Proveedores · rótulo de verificación vencida'),
-            $this->texto('proveedores_sin_verificar', 'El gremio no ha confirmado este contacto', 'modulos', 'Proveedores · rótulo de sin verificar'),
-            $this->texto('proveedores_titulo', 'Bolsa de proveedores', 'modulos', 'Título de proveedores'),
-            $this->largo('proveedores_intro', 'Hielo, licores, alimentos, aseo, seguridad y mantenimiento. ¿Quién te arregla la campana de extracción un sábado? Aquí.', 'modulos', 'Introducción de proveedores'),
+            $this->texto('proveedores_verificado', 'Contacto verificado el', 'proveedores', 'Proveedores · rótulo de verificado'),
+            $this->texto('proveedores_verificacion_vieja', 'Sin confirmar desde', 'proveedores', 'Proveedores · rótulo de verificación vencida'),
+            $this->texto('proveedores_sin_verificar', 'El gremio no ha confirmado este contacto', 'proveedores', 'Proveedores · rótulo de sin verificar'),
+            $this->texto('proveedores_titulo', 'Bolsa de proveedores', 'proveedores', 'Título de proveedores'),
+            $this->largo('proveedores_intro', 'Hielo, licores, alimentos, aseo, seguridad y mantenimiento. ¿Quién te arregla la campana de extracción un sábado? Aquí.', 'proveedores', 'Introducción de proveedores'),
+            $this->texto('proveedores_beneficio_titulo', 'Un beneficio de estar afiliado', 'proveedores', 'Título del beneficio público'),
+            $this->largo('proveedores_beneficio_texto', 'La secretaría verifica cada proveedor y anota la fecha de la última revisión, para que nadie llame a un número que ya no responde. El listado con nombres, WhatsApp y correos es para los establecimientos afiliados: aquí solo se ve de qué está hecho.', 'proveedores', 'Explicación del beneficio público'),
+            $this->texto('proveedores_afiliado_titulo', 'Ya estás afiliado', 'proveedores', 'Título para afiliados'),
+            $this->largo('proveedores_afiliado_texto', 'Entra al directorio completo con los contactos de cada proveedor.', 'proveedores', 'Texto para afiliados'),
+            $this->texto('proveedores_afiliado_cta', 'Ver el directorio', 'proveedores', 'Botón para afiliados'),
+            $this->texto('proveedores_no_afiliado_titulo', '¿Quieres los contactos?', 'proveedores', 'Título para visitantes no afiliados'),
+            $this->largo('proveedores_no_afiliado_texto', 'El directorio con nombres, WhatsApp y correos es para los establecimientos afiliados a ASOBARES Capítulo Quindío.', 'proveedores', 'Texto para visitantes no afiliados'),
+            $this->texto('proveedores_no_afiliado_cta', 'Afiliar mi establecimiento', 'proveedores', 'Botón de afiliación para proveedores'),
+            $this->texto('proveedores_no_afiliado_login_cta', 'Ya soy afiliado', 'proveedores', 'Botón de ingreso para afiliados'),
+            $this->largo('proveedores_inscripcion_texto', '¿Le vendes al sector nocturno del Quindío?', 'proveedores', 'Texto de inscripción de proveedor'),
+            $this->texto('proveedores_inscripcion_cta', 'Inscríbete en la bolsa', 'proveedores', 'Botón de inscripción de proveedor'),
+
+            // --- Eventos ---
+            $this->texto('eventos_titulo', 'Eventos y capacitaciones', 'eventos', 'Título de eventos'),
+            $this->largo('eventos_intro', 'Solo eventos del gremio: ferias, foros y formación para los establecimientos del Quindío.', 'eventos', 'Introducción de eventos'),
+            $this->texto('eventos_vacios_proximos', 'No hay eventos programados por ahora', 'eventos', 'Mensaje sin próximos eventos'),
+            $this->texto('eventos_vacios_pasados', 'Todavía no hay eventos pasados', 'eventos', 'Mensaje sin eventos pasados'),
+            $this->texto('eventos_vacios_texto', 'Publicamos aquí la agenda del gremio.', 'eventos', 'Texto del mensaje sin eventos'),
 
             // --- Boletín ---
             $this->texto('boletin_titulo', 'Boletín del gremio', 'boletin', 'Título del boletín'),
             $this->largo('boletin_intro', 'Publicamos poco y publicamos cuando hay algo que decir: cifras del Observatorio Económico que envía la Nacional, decisiones que afectan al sector y los proyectos en los que está trabajando el capítulo.', 'boletin', 'Introducción del boletín'),
+            $this->texto('boletin_vacio_titulo', 'Todavía no hay publicaciones', 'boletin', 'Mensaje sin publicaciones'),
+            $this->texto('boletin_vacio_texto', 'El boletín se publica alrededor de una vez al mes.', 'boletin', 'Frecuencia del boletín'),
 
             // --- Afiliación ---
             $this->texto('afiliate_titulo', 'Afíliate al gremio', 'afiliacion', 'Título'),
             $this->largo('afiliate_intro', 'Tu establecimiento deja de estar solo frente a una visita de control, una norma nueva o una tarifa de derechos de autor. Déjanos tus datos y te contactamos.', 'afiliacion', 'Introducción'),
             $this->largo('afiliate_como_funciona', "Nos escribes por el formulario o por WhatsApp.\nAgendamos una visita a tu establecimiento para conocerte.\nFirmas la afiliación y defines qué información tuya se publica en el directorio.\nQuedas dentro: representación, convenios, formación y orientación jurídica.", 'afiliacion', 'Cómo funciona'),
+            $this->texto('afiliate_beneficios_titulo', 'Lo que incluye la afiliación', 'afiliacion', 'Título de beneficios'),
+            $this->largo('afiliate_beneficios_intro', 'Representación, orientación y beneficios concretos para que tu establecimiento no camine solo.', 'afiliacion', 'Introducción de beneficios'),
+            $this->texto('afiliate_formulario_titulo', 'Déjanos tus datos', 'afiliacion', 'Título del formulario'),
+            $this->largo('afiliate_formulario_texto', 'Te contactamos para agendar la visita a tu establecimiento.', 'afiliacion', 'Texto de apoyo del formulario'),
+            $this->texto('afiliate_whatsapp_cta', 'Escribirnos por WhatsApp', 'afiliacion', 'Botón de WhatsApp tras enviar solicitud'),
+            $this->texto('afiliate_contacto_texto', '¿Prefieres hablar directo?', 'afiliacion', 'Texto del contacto directo'),
+            $this->texto('afiliate_contacto_cta', 'Escríbenos por WhatsApp al', 'afiliacion', 'Enlace del contacto directo'),
+
+            // --- Mi cuenta ---
+            $this->texto('mi_cuenta_pago_al_dia_titulo', 'Estás al día', 'mi_cuenta', 'Título cuando el asociado está al día'),
+            $this->largo('mi_cuenta_pago_al_dia_texto', 'No tienes saldos pendientes con el capítulo.', 'mi_cuenta', 'Texto cuando el asociado está al día'),
+            $this->texto('mi_cuenta_pago_metodos', 'PSE o tarjeta', 'mi_cuenta', 'Texto bajo el botón de pago'),
+            $this->largo('mi_cuenta_pago_ayuda', 'Si no coincide con tus registros, escríbenos a', 'mi_cuenta', 'Ayuda bajo estado de cuenta'),
+            $this->texto('mi_cuenta_convenios_titulo', 'Convenios vigentes', 'mi_cuenta', 'Título de convenios'),
+            $this->largo('mi_cuenta_convenios_texto', 'El detalle de cada convenio es información privada de los afiliados. No aparece en el sitio público.', 'mi_cuenta', 'Texto de convenios'),
+            $this->texto('mi_cuenta_convenios_vacio_titulo', 'Todavía no hay convenios publicados', 'mi_cuenta', 'Título sin convenios'),
+            $this->largo('mi_cuenta_convenios_vacio_texto', 'Cuando el gremio publique un aliado con condiciones para afiliados, aparece aquí.', 'mi_cuenta', 'Texto sin convenios'),
+            $this->texto('mi_cuenta_convenio_condiciones_rotulo', 'Condiciones del convenio', 'mi_cuenta', 'Rótulo de condiciones del convenio'),
+            $this->texto('mi_cuenta_convenio_sin_condiciones', 'Este aliado todavía no tiene condiciones comerciales publicadas.', 'mi_cuenta', 'Texto de convenio sin condiciones'),
+            $this->texto('mi_cuenta_convenio_enlace', 'Sitio del aliado', 'mi_cuenta', 'Enlace del aliado'),
+
+            // --- SEO por página ---
+            $this->texto('seo_directorio_titulo', 'Directorio de establecimientos — ASOBARES Quindío', 'seo', 'SEO · título del directorio'),
+            $this->largo('seo_directorio_descripcion', 'Bares, gastrobares, cafés y discotecas afiliados al gremio en Armenia, Salento, Filandia y todo el Quindío.', 'seo', 'SEO · descripción del directorio'),
+            $this->texto('seo_contacto_titulo', 'Contacto y PQR — ASOBARES Quindío', 'seo', 'SEO · título de contacto'),
+            $this->largo('seo_contacto_descripcion', 'Escríbenos: contacto general, peticiones, quejas y reclamos, propuestas de alianza o solicitud para entrar a la bolsa de proveedores.', 'seo', 'SEO · descripción de contacto'),
+            $this->texto('seo_afiliate_titulo', 'Afíliate al gremio — ASOBARES Quindío', 'seo', 'SEO · título de afiliación'),
+            $this->largo('seo_afiliate_descripcion', 'Afíliate a ASOBARES Capítulo Quindío y accede a representación, convenios, formación y orientación para tu establecimiento.', 'seo', 'SEO · descripción de afiliación'),
+            $this->texto('seo_guia_titulo', 'Abre tu negocio — ASOBARES Quindío', 'seo', 'SEO · título de la guía normativa'),
+            $this->largo('seo_guia_descripcion', 'Requisitos para abrir un bar, gastrobar o café en el Quindío: qué pide cada entidad y ante quién se tramita, municipio por municipio.', 'seo', 'SEO · descripción de la guía normativa'),
+            $this->texto('seo_empleo_titulo', 'Bolsa de empleo — ASOBARES Quindío', 'seo', 'SEO · título de empleo'),
+            $this->largo('seo_empleo_descripcion', 'Vacantes de bartender, chef, mesero y administrador en bares y gastrobares del Quindío. Publican solo los establecimientos asociados.', 'seo', 'SEO · descripción de empleo'),
+            $this->texto('seo_artistas_titulo', 'Directorio de artistas — ASOBARES Quindío', 'seo', 'SEO · título de artistas'),
+            $this->largo('seo_artistas_descripcion', 'DJs, bandas y solistas del Quindío: género musical, contacto directo y video para escucharlos.', 'seo', 'SEO · descripción de artistas'),
+            $this->texto('seo_proveedores_titulo', 'Bolsa de proveedores — ASOBARES Quindío', 'seo', 'SEO · título de proveedores'),
+            $this->largo('seo_proveedores_descripcion', 'Bolsa de proveedores verificados para bares y gastrobares del Quindío: un beneficio para los establecimientos afiliados a ASOBARES.', 'seo', 'SEO · descripción de proveedores'),
+            $this->texto('seo_eventos_titulo', 'Eventos y capacitaciones — ASOBARES Quindío', 'seo', 'SEO · título de eventos'),
+            $this->largo('seo_eventos_descripcion', 'ExpoBar, foros, congresos y capacitaciones del gremio de la vida nocturna del Quindío.', 'seo', 'SEO · descripción de eventos'),
+            $this->texto('seo_boletin_titulo', 'Boletín del gremio — ASOBARES Quindío', 'seo', 'SEO · título de boletín'),
+            $this->largo('seo_boletin_descripcion', 'Noticias, cifras y decisiones del gremio de la vida nocturna del Quindío.', 'seo', 'SEO · descripción de boletín'),
 
             // --- Legal ---
             $this->texto('politica_responsable', 'Asociación de Bares de Colombia — Capítulo Quindío', 'legal', 'Responsable del tratamiento'),

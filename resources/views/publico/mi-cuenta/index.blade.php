@@ -57,9 +57,9 @@
                             </svg>
                         </span>
                         <div>
-                            <p class="font-display text-2xl font-bold text-exito">Estás al día</p>
+                            <p class="font-display text-2xl font-bold text-exito">{{ ajuste('mi_cuenta_pago_al_dia_titulo', 'Estás al día') }}</p>
                             <p class="mt-1.5 text-sm text-exito-suave">
-                                No tienes saldos pendientes con el capítulo.
+                                {{ ajuste('mi_cuenta_pago_al_dia_texto', 'No tienes saldos pendientes con el capítulo.') }}
                                 @if ($cartera->ultimo_pago_at)
                                     Tu último pago fue el {{ $cartera->ultimo_pago_at->translatedFormat('d \d\e F \d\e Y') }}.
                                 @endif
@@ -99,7 +99,7 @@
                             >
                                 Pagar ahora
                             </x-publico.boton>
-                            <p class="mt-2 text-center text-[.65rem] text-apagado">PSE o tarjeta</p>
+                            <p class="mt-2 text-center text-[.65rem] text-apagado">{{ ajuste('mi_cuenta_pago_metodos', 'PSE o tarjeta') }}</p>
                         </form>
                     </div>
                 </div>
@@ -108,7 +108,7 @@
             @if ($cartera->actualizado_at)
                 <p class="mt-3 text-xs text-apagado">
                     Información actualizada {{ $cartera->actualizado_at->diffForHumans() }}.
-                    Si no coincide con tus registros, escríbenos a
+                    {{ ajuste('mi_cuenta_pago_ayuda', 'Si no coincide con tus registros, escríbenos a') }}
                     <a href="mailto:{{ ajuste('contacto_correo') }}" class="enlace-accion text-acento">{{ ajuste('contacto_correo') }}</a>.
                 </p>
             @endif
@@ -148,17 +148,17 @@
                 <svg class="h-4 w-4 text-acento" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/>
                 </svg>
-                <h2 id="convenios" class="font-display text-xl font-bold">Convenios vigentes</h2>
+                <h2 id="convenios" class="font-display text-xl font-bold">{{ ajuste('mi_cuenta_convenios_titulo', 'Convenios vigentes') }}</h2>
             </div>
             <p class="mt-2 text-sm text-tenue">
-                El detalle de cada convenio es información privada de los afiliados. No aparece en el sitio público.
+                {{ ajuste('mi_cuenta_convenios_texto', 'El detalle de cada convenio es información privada de los afiliados. No aparece en el sitio público.') }}
             </p>
 
             @if ($aliados->isEmpty())
                 <div class="tarjeta mt-6 p-12 text-center">
-                    <p class="font-display text-lg font-semibold">Todavía no hay convenios publicados</p>
+                    <p class="font-display text-lg font-semibold">{{ ajuste('mi_cuenta_convenios_vacio_titulo', 'Todavía no hay convenios publicados') }}</p>
                     <p class="mt-2 text-sm text-tenue">
-                        Cuando el gremio publique un aliado con condiciones para afiliados, aparece aquí.
+                        {{ ajuste('mi_cuenta_convenios_vacio_texto', 'Cuando el gremio publique un aliado con condiciones para afiliados, aparece aquí.') }}
                     </p>
                 </div>
             @else
@@ -180,20 +180,20 @@
                             @if ($aliado->tieneConvenioPrivado())
                                 <div class="mt-4 rounded-xl border border-marca-500/25 bg-marca-panel p-4">
                                     <p class="text-[.65rem] font-semibold uppercase tracking-wider text-acento">
-                                        Condiciones del convenio
+                                        {{ ajuste('mi_cuenta_convenio_condiciones_rotulo', 'Condiciones del convenio') }}
                                     </p>
                                     <p class="mt-2 text-sm leading-relaxed text-tinta">{{ $aliado->detalle_convenio }}</p>
                                 </div>
                             @else
                                 <p class="mt-4 text-xs text-apagado">
-                                    Este aliado todavía no tiene condiciones comerciales publicadas.
+                                    {{ ajuste('mi_cuenta_convenio_sin_condiciones', 'Este aliado todavía no tiene condiciones comerciales publicadas.') }}
                                 </p>
                             @endif
 
                         @if ($aliado->url)
                             <a href="{{ $aliado->url }}" target="_blank" rel="noopener"
                                class="enlace-accion relative mt-4 inline-block text-sm text-acento after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento-fuerte">
-                                Sitio del aliado&nbsp;<x-publico.flecha direccion="externa" />
+                                {{ ajuste('mi_cuenta_convenio_enlace', 'Sitio del aliado') }}&nbsp;<x-publico.flecha direccion="externa" />
                             </a>
                         @endif
                     </div>

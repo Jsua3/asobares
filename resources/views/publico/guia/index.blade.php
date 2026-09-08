@@ -1,5 +1,5 @@
-<x-layouts.publico :titulo="ajuste('guia_titulo').' — ASOBARES Quindío'"
-                   descripcion="Requisitos para abrir un bar, gastrobar o café en el Quindío: qué pide cada entidad, cuánto cuesta y qué formatos descargar, municipio por municipio.">
+<x-layouts.publico :titulo="ajuste('seo_guia_titulo', ajuste('guia_titulo').' — ASOBARES Quindío')"
+                   :descripcion="ajuste('seo_guia_descripcion', 'Requisitos para abrir un bar, gastrobar o café en el Quindío: qué pide cada entidad y ante quién se tramita, municipio por municipio.')">
 
     @if (! ($seleccionado && $requisitos->isNotEmpty()))
         {{-- Un municipio cuya guía entera caducó (o que nunca la tuvo) deja
@@ -34,9 +34,7 @@
                 @endforeach
             </div>
             <p class="mt-3 text-xs text-apagado">
-                Estamos levantando la guía municipio por municipio con la información que cada entidad
-                entrega al gremio. Si falta el tuyo,
-                <a href="{{ route('contacto') }}" class="enlace-accion text-acento hover:text-acento-fuerte">escríbenos</a>.
+                {{ ajuste('guia_selector_ayuda', 'Estamos levantando la guía municipio por municipio con la información que cada entidad entrega al gremio. Si falta el tuyo, escríbenos.') }}
             </p>
         </section>
 
@@ -185,10 +183,9 @@
 
             {{-- CTA --}}
             <div class="revelar tarjeta-escena vidrio mt-8 rounded-[1.75rem] p-8 text-center" data-revelar>
-                <h2 class="font-display text-xl font-semibold">¿Dudas con algún trámite?</h2>
+                <h2 class="font-display text-xl font-semibold">{{ ajuste('guia_cta_titulo', '¿Dudas con algún trámite?') }}</h2>
                 <p class="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-tenue">
-                    La orientación jurídica es gratuita para los afiliados, pero si estás empezando y todavía no
-                    haces parte del gremio, escríbenos igual: para eso existe esta guía.
+                    {{ ajuste('guia_cta_texto', 'La orientación jurídica es gratuita para los afiliados, pero si estás empezando y todavía no haces parte del gremio, escríbenos igual: para eso existe esta guía.') }}
                 </p>
                 <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
                     <x-publico.boton :href="route('contacto')">

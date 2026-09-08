@@ -1,5 +1,5 @@
-<x-layouts.publico :titulo="ajuste('artistas_titulo').' — ASOBARES Quindío'"
-                   descripcion="DJs, bandas y solistas del Quindío: género musical, contacto directo y video para escucharlos.">
+<x-layouts.publico :titulo="ajuste('seo_artistas_titulo', ajuste('artistas_titulo').' — ASOBARES Quindío')"
+                   :descripcion="ajuste('seo_artistas_descripcion', 'DJs, bandas y solistas del Quindío: género musical, contacto directo y video para escucharlos.')">
 
     <x-publico.hero :titulo="ajuste('artistas_titulo')" :subtitulo="ajuste('artistas_intro')" compacto atmosfera />
 
@@ -94,13 +94,12 @@
         @endif
 
         <section class="revelar tarjeta-escena vidrio mt-16 rounded-[1.75rem] p-8 text-center" data-revelar>
-            <h2 class="font-display text-xl font-bold">¿Eres DJ, banda o solista?</h2>
+            <h2 class="font-display text-xl font-bold">{{ ajuste('artistas_bloque_titulo', '¿Eres DJ, banda o solista?') }}</h2>
             <p class="mx-auto mt-2 max-w-xl text-sm text-tenue">
-                Inscríbete gratis en la bolsa de artistas del gremio y aparece cuando un establecimiento
-                busque música para su noche.
+                {{ ajuste('artistas_bloque_texto', 'Inscríbete gratis en la bolsa de artistas del gremio y aparece cuando un establecimiento busque música para su noche.') }}
             </p>
             <x-publico.boton :href="route('artistas.inscripcion')" class="mt-6">
-                Inscribirme en la bolsa
+                {{ ajuste('artistas_bloque_cta', 'Inscribirme en la bolsa') }}
             </x-publico.boton>
         </section>
     </div>

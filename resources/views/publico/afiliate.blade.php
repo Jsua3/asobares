@@ -2,8 +2,8 @@
     $whatsapp = enlaceWhatsapp(ajuste('contacto_whatsapp'), 'Hola, quiero afiliar mi establecimiento a ASOBARES Quindío.');
 @endphp
 
-<x-layouts.publico :titulo="ajuste('afiliate_titulo').' — ASOBARES Quindío'"
-                   :descripcion="ajuste('afiliate_intro')">
+<x-layouts.publico :titulo="ajuste('seo_afiliate_titulo', ajuste('afiliate_titulo').' — ASOBARES Quindío')"
+                   :descripcion="ajuste('seo_afiliate_descripcion', ajuste('afiliate_intro'))">
 
     <x-publico.hero :titulo="ajuste('afiliate_titulo')" :subtitulo="ajuste('afiliate_intro')" atmosfera />
 
@@ -11,7 +11,10 @@
 
         {{-- Beneficios en grande --}}
         <section class="revelar" data-revelar aria-labelledby="beneficios">
-            <h2 id="beneficios" class="font-display text-2xl font-bold">Lo que incluye la afiliación</h2>
+            <h2 id="beneficios" class="font-display text-2xl font-bold">{{ ajuste('afiliate_beneficios_titulo', 'Lo que incluye la afiliación') }}</h2>
+            <p class="mt-2 max-w-2xl text-sm leading-relaxed text-tenue">
+                {{ ajuste('afiliate_beneficios_intro', 'Representación, orientación y beneficios concretos para que tu establecimiento no camine solo.') }}
+            </p>
             <div class="mt-8 grid gap-5 sm:grid-cols-2">
                 @foreach ($beneficios as $indice => $beneficio)
                     <div @class([
@@ -45,15 +48,15 @@
 
         {{-- Formulario --}}
         <section id="formulario" class="revelar vidrio mt-16 rounded-[1.75rem] p-7 sm:p-9" data-revelar aria-labelledby="titulo-formulario">
-            <h2 id="titulo-formulario" class="font-display text-2xl font-bold">Déjanos tus datos</h2>
-            <p class="mt-2 text-sm text-tenue">Te contactamos para agendar la visita a tu establecimiento.</p>
+            <h2 id="titulo-formulario" class="font-display text-2xl font-bold">{{ ajuste('afiliate_formulario_titulo', 'Déjanos tus datos') }}</h2>
+            <p class="mt-2 text-sm text-tenue">{{ ajuste('afiliate_formulario_texto', 'Te contactamos para agendar la visita a tu establecimiento.') }}</p>
 
             @if (session('exito'))
                 <x-publico.alerta class="mt-6">
                     {{ session('exito') }}
                     @if ($whatsapp)
                         <x-publico.boton :href="$whatsapp" target="_blank" rel="noopener" class="mt-3">
-                            Escribirnos por WhatsApp
+                            {{ ajuste('afiliate_whatsapp_cta', 'Escribirnos por WhatsApp') }}
                         </x-publico.boton>
                 {{-- OBS3-14: el aviso honesto. Al otro lado hay una persona,
                      no un bot; prometer inmediatez con un «ya» es lo que hace
@@ -85,9 +88,9 @@
 
             @if ($whatsapp)
                 <p class="mt-6 border-t border-linea pt-6 text-sm text-tenue">
-                    ¿Prefieres hablar directo?
+                    {{ ajuste('afiliate_contacto_texto', '¿Prefieres hablar directo?') }}
                     <a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="enlace-accion text-acento hover:text-acento-fuerte">
-                        Escríbenos por WhatsApp al {{ ajuste('contacto_whatsapp_visible') }}
+                        {{ ajuste('afiliate_contacto_cta', 'Escríbenos por WhatsApp al') }} {{ ajuste('contacto_whatsapp_visible') }}
                     </a>
                 </p>
                 <p class="mt-1 text-2xs text-apagado">{{ ajuste('contacto_whatsapp_aviso') }}</p>

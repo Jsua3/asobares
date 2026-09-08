@@ -1,5 +1,5 @@
-<x-layouts.publico :titulo="ajuste('boletin_titulo').' — ASOBARES Quindío'"
-                   :descripcion="ajuste('boletin_intro')">
+<x-layouts.publico :titulo="ajuste('seo_boletin_titulo', ajuste('boletin_titulo').' — ASOBARES Quindío')"
+                   :descripcion="ajuste('seo_boletin_descripcion', ajuste('boletin_intro'))">
 
     <x-publico.hero :titulo="ajuste('boletin_titulo')" :subtitulo="ajuste('boletin_intro')" compacto atmosfera />
 
@@ -27,8 +27,8 @@
 
         @if ($noticias->isEmpty())
             <div class="tarjeta mt-8 p-12 text-center">
-                <p class="font-display text-lg font-semibold">Todavía no hay publicaciones</p>
-                <p class="mt-2 text-sm text-tenue">El boletín se publica alrededor de una vez al mes.</p>
+                <p class="font-display text-lg font-semibold">{{ ajuste('boletin_vacio_titulo', 'Todavía no hay publicaciones') }}</p>
+                <p class="mt-2 text-sm text-tenue">{{ ajuste('boletin_vacio_texto', 'El boletín se publica alrededor de una vez al mes.') }}</p>
             </div>
         @else
             <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
