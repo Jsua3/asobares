@@ -10,10 +10,12 @@ use App\Enums\MetodoPago;
 use App\Enums\TipoMensaje;
 use App\Filament\Widgets\AsociadosPorMunicipio;
 use App\Filament\Widgets\InscripcionesDelMes;
+use App\Filament\Widgets\PaginasMasVisitadas;
 use App\Filament\Widgets\PendientesDeAprobacion;
 use App\Filament\Widgets\RecaudoMensual;
 use App\Filament\Widgets\ResumenDelGremio;
 use App\Filament\Widgets\UltimasTransacciones;
+use App\Filament\Widgets\VisitasDelSitio;
 use App\Models\Asociado;
 use App\Models\Mensaje;
 use App\Models\Municipio;
@@ -412,9 +414,11 @@ class TableroTest extends TestCase
                 RecaudoMensual::class,
                 AsociadosPorMunicipio::class,
                 UltimasTransacciones::class,
+                VisitasDelSitio::class,
+                PaginasMasVisitadas::class,
             ],
             $widgets,
-            'El tablero debe traer exactamente estos cinco widgets: ni de menos, ni con ninguna gráfica del observatorio colada por discoverWidgets().'
+            'El tablero debe traer exactamente estos siete widgets: ni de menos, ni con ninguna gráfica del observatorio colada por discoverWidgets().'
         );
 
         foreach ($widgets as $widget) {
@@ -468,6 +472,18 @@ class TableroTest extends TestCase
                 'default' => 'full',
                 'md' => 'full',
                 'xl' => 'full',
+            ],
+            // La banda de analítica repite el reparto de la de recaudo: 4 + 2
+            // completan las seis columnas de `xl`.
+            VisitasDelSitio::class => [
+                'default' => 'full',
+                'md' => 'full',
+                'xl' => 4,
+            ],
+            PaginasMasVisitadas::class => [
+                'default' => 'full',
+                'md' => 'full',
+                'xl' => 2,
             ],
         ];
     }

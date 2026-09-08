@@ -3,10 +3,12 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Widgets\AsociadosPorMunicipio;
+use App\Filament\Widgets\PaginasMasVisitadas;
 use App\Filament\Widgets\PendientesDeAprobacion;
 use App\Filament\Widgets\RecaudoMensual;
 use App\Filament\Widgets\ResumenDelGremio;
 use App\Filament\Widgets\UltimasTransacciones;
+use App\Filament\Widgets\VisitasDelSitio;
 use App\Http\Responses\LogoutDelPanelResponse;
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse as LogoutResponseContract;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
@@ -171,6 +173,8 @@ class AdminPanelProvider extends PanelProvider
                 RecaudoMensual::class,
                 AsociadosPorMunicipio::class,
                 UltimasTransacciones::class,
+                VisitasDelSitio::class,
+                PaginasMasVisitadas::class,
             ])
             ->assets($this->assetsDelPanel())
             ->middleware([
