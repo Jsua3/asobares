@@ -628,13 +628,16 @@
          * activo cae de 4,5:1 sobre el peor fondo posible (contenido negro con
          * el velo de cierre de Filament encima).
          */
+        /*
+         * El cajón TAMPOCO tiene suelo (Sua, 8 sep, por segunda vez y con
+         * razón): los módulos quedan libres, igual que en el riel, y entre
+         * ellos se ve la página atenuada. Aquí no queda nada.
+         *
+         * Lo que sostiene la lectura es entonces el cristal de cada módulo, y
+         * por eso ese sí sube: ver más abajo.
+         */
         .fi-sidebar.fi-sidebar-open::before {
-            inset: var(--asb-admin-barra-riel-aire);
-            border-radius: var(--asb-admin-barra-modulo-radio);
-            background-color: var(--asb-admin-barra-velo-cajon);
-            box-shadow: inset 0 0 0 1px var(--asb-admin-barra-modulo-canto);
-            -webkit-backdrop-filter: var(--asb-admin-barra-desenfoque);
-            backdrop-filter: var(--asb-admin-barra-desenfoque);
+            content: none;
         }
 
         /* Sin fondo propio del elemento: Filament le da `bg-white` por debajo de
@@ -828,6 +831,22 @@
             inset-inline-start: 0;
             inset-inline-end: auto;
             z-index: 50;
+        }
+
+        /*
+         * El cristal del módulo, DENTRO del cajón, al 84 % y no al 66 del riel.
+         * No es un capricho: en el riel, detrás del módulo hay campo de puntos
+         * sobre la superficie del panel, que es un color conocido; dentro del
+         * cajón hay PÁGINA, y la página puede ser cualquier cosa.
+         *
+         * Medido el 8 sep sobre los dos extremos, con el velo de cierre de
+         * Filament en medio: al 66 %, sobre página negra, el rótulo del ítem
+         * activo da 3,03:1 y no pasa. Al 84 % da 4,61 sobre negra y 5,49 sobre
+         * blanca, y en oscuro 5,30 y 4,78. Ese 84 es el suelo, no una
+         * preferencia.
+         */
+        .fi-sidebar.fi-sidebar-open {
+            --asb-admin-barra-velo: color-mix(in oklab, var(--asb-superficie) 84%, transparent);
         }
 
         /* En el riel se ve solo el avatar; con la barra abierta, el chip entero. */

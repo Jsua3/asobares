@@ -205,6 +205,8 @@ class GenerarMaquetaDeLaBarra extends Command
         </div></div>
         <div class="fi-layout">
         <aside class="fi-sidebar{$abierta}"><canvas class="asb-barra-puntos" aria-hidden="true"></canvas>
+        <!-- La cabecera del cajon: Filament la pinta con bg-white y la esconde en escritorio. -->
+        <div class="fi-sidebar-header"><span class="fi-logo">asobares</span></div>
         <ul class="fi-sidebar-nav">{$lista}</ul>
         <div class="asb-barra-cuenta asb-cuenta-al-pie"><button type="button" class="asb-barra-chip"><span class="asb-barra-avatar">NG</span><span class="min-w-0 flex-1 text-left"><span class="block truncate text-sm font-medium">Natalia Guti&eacute;rrez</span><span class="block truncate text-2xs">Direcci&oacute;n del gremio</span></span>{$this->chevron()}</button></div>
         </aside>

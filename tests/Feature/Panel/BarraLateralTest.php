@@ -981,27 +981,22 @@ class BarraLateralTest extends TestCase
         );
 
         /*
-         * El riel NO tiene suelo. El velo del cajón existe porque debajo del
-         * cajón pasa contenido variable que hay que tapar (D-L18); el riel no
-         * tapa nada, solo está a un lado. Pintándolo, los módulos quedaban
-         * pegados sobre una barra blanca en vez de flotar sobre el campo, que
-         * es lo que Sua vio el 8 sep.
-         *
-         * Se afirma que el velo y el desenfoque cuelgan del estado ABIERTO.
+         * LA BARRA NO TIENE SUELO, ni cerrada ni abierta (Sua lo pidió dos
+         * veces, el 8 sep). Los módulos flotan y entre ellos se ve lo que hay
+         * detrás. Se afirma sobre el `::before` de la barra, que es la única
+         * pieza que podría pintar esa barra blanca; el velo del cajón sigue
+         * existiendo como token porque la cuenta anclada sí tapa —por debajo
+         * de ella pasan los iconos y tienen que desaparecer— y eso lo vigila
+         * `test_el_perfil_flota_sobre_la_lista_y_la_lista_le_reserva_sitio`.
          */
-        foreach (['background-color: var(--asb-admin-barra-velo-cajon)', 'backdrop-filter: var(--asb-admin-barra-desenfoque)'] as $material) {
-            $desde = strpos($movil, $material);
+        $desde = strpos($movil, '.fi-sidebar::before');
 
-            $this->assertNotFalse($desde, "El cajón perdió su {$material}: debajo pasa contenido y hay que taparlo.");
+        if ($desde !== false) {
+            $suelo = substr($movil, $desde, strpos($movil, '}', $desde) - $desde);
 
-            $regla = substr($movil, 0, $desde);
-            $abre = strrpos($regla, '{');
-            $selector = trim(substr($regla, strrpos(substr($regla, 0, $abre), '}') + 1, $abre - strrpos(substr($regla, 0, $abre), '}') - 1));
-
-            $this->assertStringContainsString(
-                '.fi-sidebar-open',
-                $selector,
-                "El material del cajón se pinta también en el riel («{$selector}»): los módulos dejan de flotar y quedan sobre una barra blanca."
+            $this->assertFalse(
+                strpos($suelo, 'background-color') !== false,
+                'La barra vuelve a pintar suelo propio: los módulos quedan sobre una barra blanca en vez de flotar.'
             );
         }
 
@@ -1221,33 +1216,43 @@ class BarraLateralTest extends TestCase
         $movil = $this->mediasDeReglas($tema, '(max-width: 63.999rem)');
 
         foreach ([
-            'inset: var(--asb-admin-barra-riel-aire)' => 'el cajón sigue pegado al borde en vez de flotar',
-            'border-radius: var(--asb-admin-barra-modulo-radio)' => 'el cajón no tiene el radio de los módulos',
             '.fi-sidebar-nav > .fi-sidebar-item' => 'los ítems sin grupo no reciben el trato de módulo',
             'background: transparent' => 'la barra conserva el `bg-white` que Filament le da por debajo de `lg`, que es el cuadrado blanco',
         ] as $cadena => $porque) {
             $this->assertNotFalse(strpos($movil, $cadena), "En el teléfono, {$porque}.");
         }
 
-        // El velo del cajón, con su suelo medido.
-        $reasignados = $this->medias($tema, '(max-width: 63.999rem)');
+        /*
+         * El cajón NO tiene suelo: ni velo ni desenfoque propios. Los módulos
+         * quedan libres y entre ellos se ve la página atenuada, que es lo que
+         * Sua pidió dos veces. Se lee el cuerpo de la regla, no el archivo
+         * entero, porque el mismo material sí vive en otras piezas.
+         */
+        $desde = strpos($movil, '.fi-sidebar.fi-sidebar-open::before');
 
+        $this->assertNotFalse($desde, 'Falta la regla del suelo del cajón.');
+
+        $suelo = substr($movil, $desde, strpos($movil, '}', $desde) - $desde);
+
+        $this->assertNotFalse(strpos($suelo, 'content: none'), 'El cajón vuelve a pintar suelo: los módulos dejan de estar libres.');
+        $this->assertFalse(strpos($suelo, 'background-color') !== false, 'El cajón vuelve a pintar velo propio, que es la barra blanca del fondo.');
+
+        /*
+         * Y como no hay suelo, lo que sostiene la lectura es el cristal de cada
+         * módulo, que DENTRO del cajón sube al 84 %. Medido el 8 sep: al 66 %
+         * del riel, sobre página negra con el velo de cierre de Filament en
+         * medio, el rótulo del ítem activo da 3,03:1 y no pasa.
+         */
         $this->assertSame(
             1,
-            preg_match('/--asb-admin-barra-velo-cajon: color-mix\(in oklab, var\(--asb-superficie\) (\d+)%/', $reasignados, $velo),
-            'El velo del cajón no se reasigna en el teléfono, así que sigue siendo el cuadrado opaco.'
+            preg_match('/\.fi-sidebar\.fi-sidebar-open \{\s*--asb-admin-barra-velo: color-mix\(in oklab, var\(--asb-superficie\) (\d+)%/', $movil, $velo),
+            'El cristal del módulo no sube dentro del cajón: sin suelo detrás, ahí hay página y la página puede ser cualquier cosa.'
         );
 
         $this->assertGreaterThanOrEqual(
             84,
             (int) $velo[1],
-            "El velo del cajón está al {$velo[1]} %: por debajo del 84 el rótulo del ítem activo cae de 4,5:1 sobre el peor fondo posible."
-        );
-
-        $this->assertLessThan(
-            94,
-            (int) $velo[1],
-            'El velo del cajón volvió a ser opaco: Sua lo quiere con transparencia bastante para separarlo del fondo.'
+            "El cristal del módulo dentro del cajón está al {$velo[1]} %: por debajo del 84, sobre página negra, el rótulo del ítem activo cae de 4,5:1."
         );
     }
 
