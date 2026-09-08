@@ -4,6 +4,7 @@ use App\Http\Controllers\PagoController;
 use App\Http\Controllers\Publico\AfiliacionController;
 use App\Http\Controllers\Publico\ArtistaController;
 use App\Http\Controllers\Publico\ContactoController;
+use App\Http\Controllers\Publico\ContrasenaAsociadoController;
 use App\Http\Controllers\Publico\DirectorioController;
 use App\Http\Controllers\Publico\EmpleoController;
 use App\Http\Controllers\Publico\EventoController;
@@ -147,6 +148,12 @@ Route::get('/mi-cuenta/entrar', [SesionAsociadoController::class, 'mostrarFormul
 Route::post('/mi-cuenta/entrar', [SesionAsociadoController::class, 'entrar'])
     ->middleware('throttle:5,1')
     ->name('mi-cuenta.entrar.post');
+Route::get('/mi-cuenta/contrasena/{token}', [ContrasenaAsociadoController::class, 'editar'])
+    ->middleware('guest')
+    ->name('mi-cuenta.password.reset');
+Route::post('/mi-cuenta/contrasena', [ContrasenaAsociadoController::class, 'actualizar'])
+    ->middleware(['guest', 'throttle:5,1'])
+    ->name('mi-cuenta.password.update');
 Route::post('/mi-cuenta/salir', [SesionAsociadoController::class, 'salir'])->name('mi-cuenta.salir');
 
 Route::middleware(['auth', 'rol.asociado'])->group(function (): void {

@@ -26,7 +26,7 @@ class RolYPermisoSeeder extends Seeder
     public const array CATALOGOS = ['beneficio', 'municipio', 'categoria'];
 
     /** Bandejas que la secretaría sí gestiona por completo. */
-    public const array BANDEJAS = ['mensaje', 'aspirante', 'inscripcion', 'postulacion'];
+    public const array BANDEJAS = ['mensaje', 'solicitud_afiliacion', 'aspirante', 'inscripcion', 'postulacion'];
 
     /**
      * Las bolsas las publican terceros —el asociado su vacante, el artista y

@@ -6,19 +6,28 @@ use App\Enums\CargoDelSector;
 use App\Enums\EstadoPublicacion;
 use App\Enums\TipoMensaje;
 use App\Mail\AcuseDeRadicado;
+use App\Mail\NuevaPqr;
+use App\Mail\NuevaSolicitudAfiliacion;
+use App\Mail\NuevoMensajeContacto;
 use App\Models\Aliado;
 use App\Models\Asociado;
 use App\Models\Aspirante;
 use App\Models\Cartera;
+use App\Models\Categoria;
 use App\Models\Evento;
 use App\Models\Inscripcion;
 use App\Models\Mensaje;
+use App\Models\Municipio;
+use App\Models\Setting;
+use App\Models\SolicitudAfiliacion;
 use App\Models\User;
 use App\Models\Vacante;
 use App\Support\Formulario;
 use Database\Seeders\RolYPermisoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Mail;
+use Symfony\Component\Mailer\Exception\TransportException;
 use Tests\TestCase;
 
 class FormulariosPublicosTest extends TestCase
@@ -128,6 +137,7 @@ class FormulariosPublicosTest extends TestCase
     public function test_una_pqr_genera_radicado_consecutivo_y_envia_acuse(): void
     {
         Mail::fake();
+        $this->correoInstitucional('oficina@asobares.test');
 
         foreach (['Primera queja del año', 'Segunda queja del año', 'Tercera queja del año'] as $texto) {
             $this->post(route('contacto.store'), [
@@ -149,10 +159,15 @@ class FormulariosPublicosTest extends TestCase
         );
 
         Mail::assertSent(AcuseDeRadicado::class, 3);
+        Mail::assertSent(NuevaPqr::class, 3);
+        Mail::assertSent(NuevaPqr::class, fn (NuevaPqr $correo): bool => $correo->hasTo('oficina@asobares.test'));
     }
 
     public function test_un_mensaje_de_contacto_normal_no_recibe_radicado(): void
     {
+        Mail::fake();
+        $this->correoInstitucional('oficina@asobares.test');
+
         $this->post(route('contacto.store'), [
             'tipo' => TipoMensaje::Contacto->value,
             'nombre' => 'Paula Restrepo',
@@ -162,23 +177,122 @@ class FormulariosPublicosTest extends TestCase
         ]);
 
         $this->assertNull(Mensaje::firstOrFail()->radicado);
+        Mail::assertSent(NuevoMensajeContacto::class, fn (NuevoMensajeContacto $correo): bool => $correo->hasTo('oficina@asobares.test'));
     }
 
-    /**
-     * El formulario real de /afiliate NO manda `tipo` —lo fija el controlador—.
-     * Este test lo envía como lo envía el navegador: sin ese campo. Antes se
-     * inyectaba a mano, y eso enmascaraba que toda afiliación fallaba.
-     */
-    public function test_la_afiliacion_se_guarda_como_mensaje_del_tipo_correcto(): void
+    public function test_la_afiliacion_se_guarda_como_solicitud_estructurada(): void
     {
+        Mail::fake();
+        $this->correoInstitucional('oficina@asobares.test');
+        $municipio = Municipio::factory()->create();
+        $categoria = Categoria::factory()->create();
+
         $this->post(route('afiliate.store'), [
-            'nombre' => 'Sandra Ríos',
-            'correo' => 'sandra@ejemplo.test',
-            'mensaje' => 'Tengo un gastrobar en Armenia y quiero afiliarme al gremio.',
+            'solicitante_nombre' => 'Sandra Ríos',
+            'solicitante_identificacion' => '1094.123.456',
+            'solicitante_telefono' => '3145551234',
+            'solicitante_correo' => 'sandra@ejemplo.test',
+            'solicitante_cargo' => 'Propietaria',
+            'establecimiento_nombre' => 'Bruma Gastrobar',
+            'razon_social' => 'Bruma Gastrobar S.A.S.',
+            'nit' => '901234567-8',
+            'municipio_id' => $municipio->id,
+            'direccion' => 'Calle 10 # 12-34',
+            'establecimiento_telefono' => '3145555678',
+            'establecimiento_correo' => 'hola@bruma.test',
+            'categoria_id' => $categoria->id,
+            'descripcion' => 'Gastrobar con operación nocturna y música en vivo.',
             'acepta_datos' => '1',
         ])->assertSessionHas('exito');
 
-        $this->assertSame(TipoMensaje::Afiliacion, Mensaje::firstOrFail()->tipo);
+        $this->assertSame(1, SolicitudAfiliacion::count());
+        $this->assertSame(0, Mensaje::where('tipo', TipoMensaje::Afiliacion)->count());
+        Mail::assertSent(NuevaSolicitudAfiliacion::class, fn (NuevaSolicitudAfiliacion $correo): bool => $correo->hasTo('oficina@asobares.test'));
+    }
+
+    public function test_fallo_de_correo_institucional_no_pierde_mensaje_de_contacto(): void
+    {
+        $this->correoInstitucional('oficina@asobares.test');
+        config([
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp.host' => '127.0.0.1',
+            'mail.mailers.smtp.port' => 1,
+            'mail.mailers.smtp.timeout' => 2,
+        ]);
+        Exceptions::fake();
+
+        $this->post(route('contacto.store'), [
+            'tipo' => TipoMensaje::Contacto->value,
+            'nombre' => 'Paula Restrepo',
+            'correo' => 'paula@ejemplo.test',
+            'mensaje' => 'Quisiera información sobre las cifras del Observatorio.',
+            'acepta_datos' => '1',
+        ])->assertSessionHas('exito');
+
+        $this->assertSame(1, Mensaje::count());
+        Exceptions::assertReported(TransportException::class);
+    }
+
+    public function test_fallo_de_correo_no_pierde_pqr_ni_radicado(): void
+    {
+        $this->correoInstitucional('oficina@asobares.test');
+        config([
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp.host' => '127.0.0.1',
+            'mail.mailers.smtp.port' => 1,
+            'mail.mailers.smtp.timeout' => 2,
+        ]);
+        Exceptions::fake();
+
+        $this->post(route('contacto.store'), [
+            'tipo' => TipoMensaje::Pqr->value,
+            'nombre' => 'Carlos Muñoz',
+            'correo' => 'carlos@ejemplo.test',
+            'mensaje' => 'Una queja con suficiente detalle para quedar radicada.',
+            'acepta_datos' => '1',
+        ])->assertSessionHas('radicado');
+
+        $mensaje = Mensaje::firstOrFail();
+
+        $this->assertTrue($mensaje->esPqr());
+        $this->assertNotNull($mensaje->radicado);
+        Exceptions::assertReported(TransportException::class);
+    }
+
+    public function test_fallo_de_aviso_interno_no_pierde_solicitud_de_afiliacion(): void
+    {
+        $this->correoInstitucional('oficina@asobares.test');
+        config([
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp.host' => '127.0.0.1',
+            'mail.mailers.smtp.port' => 1,
+            'mail.mailers.smtp.timeout' => 2,
+        ]);
+        Exceptions::fake();
+
+        $municipio = Municipio::factory()->create();
+        $categoria = Categoria::factory()->create();
+
+        $this->post(route('afiliate.store'), [
+            'solicitante_nombre' => 'Sandra Ríos',
+            'solicitante_identificacion' => '1094.123.456',
+            'solicitante_telefono' => '3145551234',
+            'solicitante_correo' => 'sandra@ejemplo.test',
+            'solicitante_cargo' => 'Propietaria',
+            'establecimiento_nombre' => 'Bruma Gastrobar',
+            'razon_social' => 'Bruma Gastrobar S.A.S.',
+            'nit' => '901234567-8',
+            'municipio_id' => $municipio->id,
+            'direccion' => 'Calle 10 # 12-34',
+            'establecimiento_telefono' => '3145555678',
+            'establecimiento_correo' => 'hola@bruma.test',
+            'categoria_id' => $categoria->id,
+            'descripcion' => 'Gastrobar con operación nocturna y música en vivo.',
+            'acepta_datos' => '1',
+        ])->assertSessionHas('exito');
+
+        $this->assertSame(1, SolicitudAfiliacion::count());
+        Exceptions::assertReported(TransportException::class);
     }
 
     // --- Bolsa de empleo ---
@@ -433,5 +547,16 @@ class FormulariosPublicosTest extends TestCase
         ]);
 
         $this->get('/')->assertDontSee('Descuento del 12 % sobre lista de precios.');
+    }
+
+    private function correoInstitucional(string $correo): void
+    {
+        Setting::create([
+            'clave' => 'contacto_correo_destino',
+            'valor' => $correo,
+            'tipo' => 'texto',
+            'grupo' => 'contacto',
+            'etiqueta' => 'Correo que recibe los formularios',
+        ]);
     }
 }

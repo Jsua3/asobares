@@ -5,13 +5,18 @@ namespace App\Http\Controllers\Publico;
 use App\Enums\TipoMensaje;
 use App\Http\Requests\GuardarMensajeRequest;
 use App\Mail\AcuseDeRadicado;
+use App\Mail\NuevaPqr;
+use App\Mail\NuevoMensajeContacto;
 use App\Models\Mensaje;
+use App\Services\CorreosInstitucionales;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Mail;
 
 class ContactoController
 {
+    public function __construct(private readonly CorreosInstitucionales $correosInstitucionales) {}
+
     public function index(): View
     {
         return view('publico.contacto', [
@@ -36,6 +41,8 @@ class ContactoController
         $mensaje = Mensaje::create($datos);
 
         if ($mensaje->esPqr()) {
+            $this->correosInstitucionales->enviar(new NuevaPqr($mensaje), 'pqr');
+
             // El acuse no puede tumbar la petición: la PQR ya quedó radicada
             // y el ciudadano necesita su número aunque el correo saliente
             // esté caído, que es como estuvo producción desde el primer
@@ -57,6 +64,8 @@ class ContactoController
                     : "Tu PQR quedó radicada con el número {$mensaje->radicado}. No pudimos enviarte el acuse por correo: guarda este número para hacer seguimiento.")
                 ->withFragment('formulario');
         }
+
+        $this->correosInstitucionales->enviar(new NuevoMensajeContacto($mensaje), 'contacto');
 
         return redirect()
             ->route('contacto')

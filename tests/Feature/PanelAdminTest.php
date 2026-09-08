@@ -60,6 +60,7 @@ class PanelAdminTest extends TestCase
             '/admin/artistas',
             '/admin/proveedores',
             '/admin/mensajes',
+            '/admin/solicitudes-afiliacion',
             '/admin/inscripciones',
             '/admin/aliados',
             '/admin/beneficios',
@@ -101,7 +102,7 @@ class PanelAdminTest extends TestCase
     {
         $secretaria = $this->crearUsuario(User::ROL_SUBADMIN);
 
-        foreach (['/admin/asociados', '/admin/eventos', '/admin/vacantes', '/admin/mensajes'] as $ruta) {
+        foreach (['/admin/asociados', '/admin/eventos', '/admin/vacantes', '/admin/mensajes', '/admin/solicitudes-afiliacion'] as $ruta) {
             $this->actingAs($secretaria)->get($ruta)->assertSuccessful();
         }
     }

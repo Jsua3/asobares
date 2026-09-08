@@ -66,20 +66,47 @@
                 </x-publico.alerta>
             @endif
 
-            <form method="POST" action="{{ route('afiliate.store') }}" class="mt-7 space-y-5">
+            <form method="POST" action="{{ route('afiliate.store') }}" class="mt-7 space-y-8">
                 @csrf
 
-                <div class="grid gap-5 sm:grid-cols-2">
-                    <x-publico.campo nombre="nombre" etiqueta="Tu nombre" requerido />
-                    <x-publico.campo nombre="correo" etiqueta="Correo electrónico" tipo="email" requerido />
-                    <x-publico.campo nombre="telefono" etiqueta="Teléfono o WhatsApp" tipo="tel" />
-                </div>
+                <fieldset>
+                    <legend class="font-display text-lg font-semibold">Tus datos</legend>
+                    <div class="mt-4 grid gap-5 sm:grid-cols-2">
+                        <x-publico.campo nombre="solicitante_nombre" etiqueta="Nombre completo" requerido />
+                        <x-publico.campo nombre="solicitante_identificacion" etiqueta="Identificación" requerido />
+                        <x-publico.campo nombre="solicitante_telefono" etiqueta="Teléfono o WhatsApp" tipo="tel" requerido />
+                        <x-publico.campo nombre="solicitante_correo" etiqueta="Correo electrónico" tipo="email" requerido />
+                        <x-publico.campo nombre="solicitante_cargo" etiqueta="Cargo o rol" requerido placeholder="Propietario, administrador, representante legal..." />
+                    </div>
+                </fieldset>
 
-                <x-publico.campo nombre="mensaje" etiqueta="Cuéntanos de tu establecimiento" tipo="textarea" requerido
-                                 placeholder="Nombre del negocio, municipio, tipo de establecimiento y desde cuándo está abierto."
-                                 ayuda="Entre más nos cuentes, mejor preparamos la visita." />
+                <fieldset>
+                    <legend class="font-display text-lg font-semibold">Información del establecimiento</legend>
+                    <div class="mt-4 grid gap-5 sm:grid-cols-2">
+                        <x-publico.campo nombre="establecimiento_nombre" etiqueta="Nombre comercial" requerido />
+                        <x-publico.campo nombre="razon_social" etiqueta="Razón social" requerido />
+                        <x-publico.campo nombre="nit" etiqueta="NIT" requerido />
+                        <x-publico.campo nombre="municipio_id" etiqueta="Municipio" tipo="select" :opciones="$municipios" requerido />
+                        <x-publico.campo nombre="direccion" etiqueta="Dirección" requerido />
+                        <x-publico.campo nombre="establecimiento_telefono" etiqueta="Teléfono o WhatsApp del establecimiento" tipo="tel" requerido />
+                        <x-publico.campo nombre="establecimiento_correo" etiqueta="Correo del establecimiento" tipo="email" requerido />
+                        <x-publico.campo nombre="categoria_id" etiqueta="Categoría o tipo" tipo="select" :opciones="$categorias" requerido />
+                    </div>
+                </fieldset>
 
-                <x-publico.habeas-data />
+                <fieldset>
+                    <legend class="font-display text-lg font-semibold">Descripción</legend>
+                    <div class="mt-4">
+                        <x-publico.campo nombre="descripcion" etiqueta="Cuéntanos de tu establecimiento" tipo="textarea" requerido
+                                         placeholder="Tipo de ambiente, tiempo de operación, servicios principales y cualquier dato útil para preparar la visita."
+                                         ayuda="Entre más nos cuentes, mejor preparamos la visita." />
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend class="sr-only">Tratamiento de datos</legend>
+                    <x-publico.habeas-data />
+                </fieldset>
 
                 <x-publico.boton class="w-full sm:w-auto">
                     Enviar solicitud
