@@ -537,6 +537,54 @@ class BarraLateralTest extends TestCase
     }
 
     /**
+     * El aire vertical de la lista tiene que ser MAYOR que el desvanecido del
+     * aviso. Si no, en reposo la primera lámina nace dentro de la máscara y la
+     * última muere en ella: el módulo tiene canto, y un canto a medio pintar se
+     * lee como una caja cortada, que es justo lo que Sua vio el 8 sep.
+     *
+     * La cuenta se hace, no se afirma de memoria: se resuelve el `calc()` y se
+     * compara con el token. Rotura: bajar el relleno por debajo del aviso, o
+     * subir el aviso sin subir el relleno.
+     */
+    public function test_el_aire_de_la_lista_supera_al_desvanecido(): void
+    {
+        $tema = $this->tema();
+        $claro = $this->bloque($tema, '
+:root {');
+
+        $this->assertSame(
+            1,
+            preg_match('/--asb-admin-barra-aviso-alto: ([\d.]+)rem;/', $claro, $suyo),
+            'El alto del aviso ya no es un valor en rem: la cuenta no se puede hacer.'
+        );
+
+        $aviso = (float) $suyo[1];
+        $lista = $this->regla($tema, '.fi-sidebar-nav');
+
+        $this->assertSame(
+            1,
+            preg_match('/padding-block: ([^;]+);/', $lista, $relleno),
+            'La lista no declara relleno vertical.'
+        );
+
+        $crudo = trim($relleno[1]);
+
+        $aire = match (true) {
+            preg_match('/^calc\(var\(--asb-admin-barra-aviso-alto\) \+ ([\d.]+)rem\)$/', $crudo, $suma) === 1 => $aviso + (float) $suma[1],
+            preg_match('/^([\d.]+)rem$/', $crudo, $solo) === 1 => (float) $solo[1],
+            default => -1.0,
+        };
+
+        $this->assertGreaterThan(-1.0, $aire, "El relleno vertical de la lista no se deja medir: {$crudo}");
+
+        $this->assertGreaterThan(
+            $aviso,
+            $aire,
+            "El relleno vertical ({$aire}rem) no supera al desvanecido ({$aviso}rem): en reposo la máscara corta el canto del módulo."
+        );
+    }
+
+    /**
      * El módulo de JavaScript escribe el estado en `<body>` y lo alimenta el
      * scroll INTERNO de la lista, no el del documento: en escritorio la barra
      * es `lg:sticky` y no se mueve con la página. Se afirma definición y

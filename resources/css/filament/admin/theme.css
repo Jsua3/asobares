@@ -127,7 +127,7 @@
        del mínimo táctil) a 2,75rem. */
     --asb-admin-barra-fila-alto: 3rem;
     --asb-admin-barra-fila-radio: 0.625rem;
-    --asb-admin-barra-aviso-alto: 1.5rem;
+    --asb-admin-barra-aviso-alto: 0.9rem;
     /* El módulo: canto de cristal y brillo especular, los dos recursos que la
        barra de escritorio enciende cuando la píldora exterior se apaga. */
     --asb-admin-barra-modulo-canto: rgb(11 9 10 / 0.1);
@@ -567,7 +567,10 @@
         scrollbar-gutter: auto;
         position: relative;
         padding-inline: 0.75rem 0.3rem;
-        padding-block: 0.5rem;
+        /* El aire vertical iguala al desvanecido del aviso: en reposo ninguna
+           lámina nace ni muere dentro de la máscara, que es lo que las hacía
+           parecer cortadas (Sua, 8 sep). */
+        padding-block: calc(var(--asb-admin-barra-aviso-alto) + 0.35rem);
         row-gap: 0;
     }
 
@@ -1112,7 +1115,7 @@
     }
 
     .asb-dashboard .fi-wi-table .fi-ta-text {
-        padding-block: 0.5rem;
+        padding-block: calc(var(--asb-admin-barra-aviso-alto) + 0.35rem);
         font-size: 0.8125rem;
         line-height: 1.35;
     }
