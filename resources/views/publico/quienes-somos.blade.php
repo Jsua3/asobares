@@ -201,6 +201,7 @@
                 @foreach ($beneficios as $beneficio)
                     <div class="tarjeta tarjeta-hover p-5">
                         <h3 class="font-display text-base font-bold">{{ $beneficio->titulo }}</h3>
+                        <x-publico.sello-de-alcance :beneficio="$beneficio" />
                         <p class="mt-2 text-sm leading-relaxed text-tenue">{{ $beneficio->descripcion }}</p>
                     </div>
                 @endforeach

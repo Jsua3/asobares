@@ -11,7 +11,7 @@ class PaginaController
     public function quienesSomos(): View
     {
         return view('publico.quienes-somos', [
-            'beneficios' => Beneficio::orderBy('orden')->get(),
+            'beneficios' => Beneficio::with('municipio')->orderBy('orden')->get(),
             'iniciativas' => Iniciativa::publicado()->orderBy('orden')->get(),
         ]);
     }
