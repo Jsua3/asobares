@@ -41,7 +41,10 @@ class UsuarioSeeder extends Seeder
         $oficina = User::updateOrCreate(
             ['email' => 'oficina@asobaresquindio.test'],
             [
-                'name' => 'Secretaría del capítulo',
+                // Una persona y no el cargo: el chip de la barra móvil muestra
+                // nombre y rango, y «Sec. Secretaría del c…» decía dos veces lo
+                // mismo (D-M15, 6 sep).
+                'name' => 'Mariana Restrepo',
                 'password' => Hash::make(self::CLAVE_DEMO),
                 'email_verified_at' => now(),
                 'has_email_authentication' => true,

@@ -12,7 +12,12 @@ class UltimasTransacciones extends TableWidget
 {
     protected static ?int $sort = 4;
 
-    protected int|string|array $columnSpan = 'full';
+    /** @var array<string, string> Desglosado: ver `PendientesDeAprobacion`. */
+    protected int|string|array $columnSpan = [
+        'default' => 'full',
+        'md' => 'full',
+        'xl' => 'full',
+    ];
 
     public function table(Table $table): Table
     {

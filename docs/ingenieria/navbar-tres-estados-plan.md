@@ -22,7 +22,7 @@ Copiadas de la spec §3. Cada tarea las hereda.
 - Vidrio solo con `var(--asb-cromo-velo)` y `var(--asb-cromo-desenfoque)`; nunca `blur()` literal en reglas nuevas.
 - El tema se cambia solo por `$store.tema.elegir(valor)`; nunca alternar la clase `dark` a mano. `localStorage.theme` acepta `light`, `dark`, `system`.
 - La marca no se recolorea ni se recorta. Solo existe isotipo rojo (`public/img/monograma-asobares.png`, 156×108).
-- Cadenas fijadas por pruebas que leen archivos crudos y que se conservan literalmente: en `navbar.blade.php` `-my-1.5 flex shrink-0 items-center py-1.5`, `-my-1 rounded-lg px-3 py-3 text-sm`, `-my-1 rounded-lg px-3 py-3 text-sm text-tenue`, `after:absolute after:inset-x-0 after:-inset-y-1 after:content-['']`, `-m-0.5 rounded-lg p-2.5`, `rounded-lg px-3 py-3 text-sm text-tinta`, `absolute inset-x-0 top-full`, `bg-fondo`, `overflow-y-auto`, `duration-(--duracion-panel)`, `duration-(--duracion-salida)`, `ease-cajon`, `x-on:keydown.escape.window="menuMovil = false"`, `x-on:click.outside="menuMovil = false"`, `x-on:resize.window`, `transicion-desplegable`, `fila-pulsable`; en `menu-usuario.blade.php` `-m-1 flex items-center gap-2 rounded-full p-1`, `rounded-lg px-3 py-3 text-sm text-suave`, `transicion-desplegable`, `fila-pulsable`. Ninguno de los tres archivos puede contener `hover:bg-superficie-alta` ni `x-collapse`.
+- Cadenas fijadas por pruebas que leen archivos crudos y que se conservan literalmente: en `navbar.blade.php` `-my-1.5 flex shrink-0 items-center py-1.5`, `-my-1 rounded-lg px-3 py-3 text-sm`, `-my-1 rounded-lg px-3 py-3 text-sm text-tenue`, `after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-['']`, `-m-0.5 rounded-lg p-2.5`, `rounded-lg px-3 py-3 text-sm text-tinta`, `absolute inset-x-0 top-full`, `bg-fondo`, `overflow-y-auto`, `duration-(--duracion-panel)`, `duration-(--duracion-salida)`, `ease-cajon`, `x-on:keydown.escape.window="menuMovil = false"`, `x-on:click.outside="menuMovil = false"`, `x-on:resize.window`, `transicion-desplegable`, `fila-pulsable`; en `menu-usuario.blade.php` `-m-1 flex items-center gap-2 rounded-full p-1`, `rounded-lg px-3 py-3 text-sm text-suave`, `transicion-desplegable`, `fila-pulsable`. Ninguno de los tres archivos puede contener `hover:bg-superficie-alta` ni `x-collapse`.
 - Anónimo no ve `menu-cuenta`, `Cerrar sesión`, `Ir al panel del gremio` ni `Configuración del sitio`. Los popovers nuevos usan `popover-tema` y `popover-idioma` y van **antes** de `<div id="menu-movil"` en el header.
 - Sin dependencias nuevas. Sin carpetas nuevas. Sin clases Tailwind de fábrica de color (`bg-white`, `text-gray-*`, `border-white/…`); sin `outline-none` ni `focus:ring-0`.
 - Antes de confirmar cualquier PHP: `vendor/bin/pint --dirty --format agent`. Si se tocan vistas o CSS: `php artisan view:clear` y `npm run build`.
@@ -1787,7 +1787,7 @@ Sustituir desde la línea 47 (`{{-- \`menuMovil\` y no \`abierto\`: …`) hasta 
                     portador y con ella moría la duración cero de su `:active`.
                     Se nombra y no se pega porque la guardia lee este archivo
                     crudo, comentarios incluidos. --}}
-               class="pulsable cta-vivo relative rounded-lg bg-marca-500 px-4 py-1.5 text-sm font-semibold text-white after:absolute after:inset-x-0 after:-inset-y-1 after:content-[''] hover:bg-marca-600">
+               class="pulsable cta-vivo relative rounded-lg bg-marca-500 px-4 py-1.5 text-sm font-semibold text-white after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] hover:bg-marca-600">
                 Afíliate
             </a>
             @auth
@@ -2052,3 +2052,1282 @@ No se fusiona a `main`. No se despliega.
 **Marcadores.** Ninguno: cada paso trae el código.
 
 **Consistencia de nombres.** `resuelto` (T2) se lee en T5 y T2/barra-tema ✓ · `popover-tema`/`popover-idioma` (T5/T6) se buscan en T9 y T10 ✓ · `control-plegable` (T8 CSS) se aplica en T9 a `guia.index` y a `El gremio` ✓ · `modulo-principal` con `gap-1` (T9) es lo que busca la prueba de T9 y NavegacionAgrupadaTest ✓ · `logo-doble__completo`/`__isotipo` (T4) se estilizan en T8 y se buscan en T9 ✓ · `alternarAtencion`, `atender`, `soltar`, `sincronizar`, `punteroFino` (T9) coinciden con la prueba de T9 ✓ · `ease-rebote-vivo`, `--duracion-rebote`, `--asb-escala-popover`, `--asb-desplazamiento-popover` (T1) coinciden con las cadenas que exigen las pruebas de T5 y T6 ✓ · el `<x-publico.menu-grupo :class="…">` de T9 requiere el `$attributes->merge` de T9 paso 3 ✓.
+
+---
+
+# Parte II · Navbar 2.1: el móvil en dos módulos — plan de implementación
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Construir en la rama `p1-navbar-movil` la barra pública por debajo de 64rem con dos módulos de vidrio: el superior (marca, tema y cuenta, el mismo DOM que el módulo de cuenta de escritorio) y el inferior (fijo abajo, cinco pestañas con icono y rótulo, dos hojas que suben al tocar), con los estados `inicial` y `scroll` decididos por la dirección del desplazamiento, sin hamburguesa, sin panel en plano y sin barra lateral de tema.
+
+**Architecture:** Un solo `<header>` sin `transform` (el que lo hacía bloque contenedor era de una clase muerta); la `<nav class="bandeja">` de escritorio pasa a ser el módulo superior y gana un `::before` con el vidrio; un segundo `<nav id="menu-movil" class="modulo-inferior lg:hidden">` fijo al viewport pinta las cinco secciones desde los mismos arreglos y usa `menu-grupo` con `variante="pestana"`; Alpine solo calcula `data-estado` (por dirección, con ancla e histéresis) y `data-teclado`, y todo lo visual sale de dos tokens de alto que el estado reasigna. Cada tarea añade primero su guardia, la ve roja, y confirma en un commit de trabajo; al final los commits de código se funden en uno, porque partidos dejan ids duplicados o la suite roja.
+
+**Tech Stack:** Laravel 13 · Blade · Alpine 3 · Tailwind 4 (CSS-first) · blade-heroicons (viene con Filament) · PHPUnit 12 · playwright-cli sobre Chromium real (toques por CDP).
+
+**Spec:** `docs/ingenieria/navbar-tres-estados-diseno.md`, **Parte II** (aprobada por Sua el 6 sep 2026, D-M1 a D-M18 con la recomendación en cada una). El plan argumenta desde ahí; quien ejecute lee los dos. Los bloques de código que la spec ya trae **tal cual** (el `x-data` de §4.2, el marcado del inferior de §6.2, `menu-grupo` y `app.js` de §6.3, el CSS entero de §6.4 y los tokens de §5.2) no se repiten aquí: cada tarea dice qué bloque copiar y qué cambia respecto a él.
+
+## Global Constraints
+
+Copiadas de la Parte II §3 y de la Parte I §3. Cada tarea las hereda.
+
+- Todo lo que se cuenta se cuenta dentro del primer `<header>`: nueve `href`, dos `aria-current="page"`, el `href` de afiliación, el enlace encendido del calendario. El módulo inferior es descendiente del `<header>`.
+- Los tres módulos de escritorio son los tres hijos con «modulo» en la clase de la primera `<nav>`; el primer `//nav/div[gap-1]` es el bloque de escritorio. Ningún hijo del segundo `<nav>` lleva «modulo» ni «gap-1» en su clase.
+- `.cromo` no lleva `transform`, `filter`, `will-change` ni `contain`. Ningún ancestro de una hoja de vidrio lleva `backdrop-filter`, `filter`, `opacity` menor que 1 ni `view-transition-name`: el vidrio de cada módulo vive en su `::before`.
+- Toda duración y curva sale de tokens; toda geometría nueva es `--asb-*` con anulación bajo movimiento reducido; el vidrio es `var(--asb-cromo-velo)` + `var(--asb-cromo-desenfoque)`, nunca `blur()` literal; el tema se cambia solo por `$store.tema.elegir()`; la marca no se recolorea ni se recorta; anónimo no ve `menu-cuenta` ni «Cerrar sesión»; cerrar sesión es `POST` con `@csrf` y `<noscript>`; sin dependencias ni carpetas nuevas.
+- Todo el CSS móvil nuevo va en un **segundo** bloque `@media (max-width: 63.999rem)` colocado **después** del bloque `@media (hover: hover) and (pointer: fine)`, dentro de `@layer components`: `regla()` de las guardias toma la primera aparición de cada `selector {`.
+- Las utilidades de `@layer utilities` ganan a `@layer components`: los insets laterales van en `.cromo-fijo`, `<html>` pasa a `lg:scroll-pt-24`, y el reancle de la hoja de cuenta es `max-lg:static`.
+- Las guardias que leen archivos crudos leen también los comentarios: todo comentario nuevo **nombra y no pega** la cadena prohibida (`.cromo-oculto`, `menuMovil`, `innerWidth`, `clientHeight`, `reposar`, `blur(`, `filter: drop-shadow`, `view-transition-name`, `--duracion-cromo`, `--asb-desplazamiento-panel`).
+- La escala tipográfica gobierna: `--text-2xs` es 0.6875rem con `line-height: 1.65`; ninguna clase nueva lleva `leading-*`.
+- Cadenas fijadas por pruebas que se conservan letra a letra: en `navbar.blade.php` la `<nav>` (`bandeja mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-3`), el logo (`modulo modulo-logo pulsable -my-1.5 flex shrink-0 items-center py-1.5 lg:justify-self-start lg:px-3`), el principal (`modulo modulo-principal hidden min-h-11 items-center gap-1 px-2 lg:flex lg:justify-self-center`), «Mi cuenta» (`-my-1 rounded-lg px-3 py-3 text-sm text-tenue`), «Afíliate» (`after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-['']`), los literales del `x-data` (`get estado() {`, `punteroFino() {`, `sincronizar() {`, `atender() {`, `soltar() {`, `alternarAtencion() {`, `return this.atendiendo ? 'atencion' : 'scroll';`, `this.desplazado = actual > 8;`, `Math.abs(actual - this.scrollAlAtender) > 24`, `}, 280);`, `if (! $event.target.closest('a, button')) alternarAtencion()`), los cableados `x-on:scroll.window.passive="sincronizar()"`, `x-on:mouseenter="atender()"`, `x-on:mouseleave="soltar()"` y `data-estado="inicial"` servido; en `menu-grupo.blade.php` `origin-top-left`, `enter-start="opacity-0 scale-95"`, `leave-end="opacity-0 scale-95"`, `duration-(--duracion-entrada)`, `duration-(--duracion-salida)`, `fila-pulsable block rounded-lg px-3 py-3 text-sm`, `-my-1 inline-flex items-center gap-1 rounded-lg px-3 py-3 text-sm`; en `menu-usuario.blade.php` `-m-1 flex items-center gap-2 rounded-full p-1`, `rounded-lg px-3 py-3 text-sm text-suave`; en `control-tema.blade.php` `flex h-11 w-11 items-center justify-center rounded-full`; los siete cableados del desplegable en las cuatro vistas; y en `app.css` la primera regla `.bandeja {` con `gap var(--duracion-estado)`, `.logo-doble {` con `max-width var(--duracion-estado)`, `.cromo::before {` sin `content: none` fuera del bloque de 64rem, ningún `var(--duracion-rebote)`.
+- En vistas Blade están prohibidos `duration-N`, `duration-[…]`, `ease-[…]`, `ease-in` suelto, `transition-all` y cualquier flecha Unicode, también en comentarios; los portadores `pulsable`, `fila-pulsable`, `enlace-accion`, `tarjeta-pulsable` no comparten elemento con utilidades de reloj, y `fila-pulsable` tampoco con `hover:bg-*`.
+- Antes de confirmar PHP: `vendor/bin/pint --dirty --format agent`. Si se tocan vistas o CSS: `php artisan view:clear && npm run build`. Git: siempre `GIT_OPTIONAL_LOCKS=0`; mensajes en español; sin `Co-Authored-By`.
+- Cada guardia nueva se ve **roja** rompiendo el código a propósito antes de darla por buena (regla 3 del prompt maestro).
+
+---
+
+## Estructura de archivos
+
+| Archivo | Responsabilidad | Tarea |
+|---|---|---|
+| `resources/css/tokens.css` | Nueve tokens del móvil, el velo calibrado, las anulaciones; fuera `--duracion-cromo` y `--asb-desplazamiento-panel` | 1 |
+| `tests/Feature/NavbarMovilTest.php` | **`git mv` desde `MenuMovilTest.php`** y reescritura: todas las guardias de lo nuevo; crece tarea a tarea | 1–7 |
+| `tests/Feature/MovimientoTest.php`, `tests/Feature/Panel/ComponentesDelPanelTest.php` | El token de la hoja en vez del del panel; docblocks | 1, 5 |
+| `resources/js/app.js` | `posicionDelDocumento()`; `desplegable` cierra al desplazar sin robar el foco | 2 |
+| `tests/Feature/NavbarTresEstadosTest.php` | Definiciones y cableados nuevos del desplegable; precarga sin `media`; dos `<nav>`; `menuMovil` fuera; cuenta visible; vidrio en `::before` | 2, 3, 5, 6 |
+| `menu-usuario`, `control-tema`, `control-idioma` (`resources/views/components/publico/`) | Tres cableados nuevos; el chip con nombre y rango; el idioma oculto bajo 64rem | 3 |
+| `resources/views/components/publico/menu-grupo.blade.php` | Variante `pestana` con icono, hoja hacia arriba y filas de pie; tres cableados | 4 |
+| `resources/views/components/publico/navbar.blade.php` | Arreglos con `icono` y `pie`; máquina de estados por dirección; módulo de cuenta visible; fuera hamburguesa y panel; entra el `<nav>` inferior | 5 |
+| `layouts/publico.blade.php`, `hero.blade.php`, `footer.blade.php`, `barra-tema.blade.php` | `viewport-fit=cover`, `lg:scroll-pt-24`, `min-h-svh`, precarga sin `media`; `pb-28` en la portada; «Entrar a mi cuenta» en el pie; la barra lateral se borra | 5 |
+| `tests/Feature/TemaClaroOscuroTest.php`, `ObjetivoTactilTest.php` | El tema en la navbar en los dos anchos; fuera las filas de la hamburguesa y del panel | 5 |
+| `resources/css/app.css` | `.cromo` sin `transform`; apartado con `~`; vidrio de la bandeja en `::before`; el bloque móvil entero; `.hoja-flotante` por token; fuera `.cromo-oculto` y `.tema-lateral*` | 6 |
+| `database/seeders/UsuarioSeeder.php` | El usuario demo de secretaría es una persona (D-M15) | 7 |
+| `docs/ingenieria/navbar-tres-estados-diseno.md`, `material/encargo.md` §13, `material/estado.md`, `material/bitacora.md`, `docs/ingenieria/matriz-de-pruebas.md` | Notas fechadas de la Parte I; la decisión de producto; cifras medidas; cierre | 11 |
+
+---
+
+### Task 1: Tokens del móvil y la guardia que nace renombrada
+
+**Files:**
+- Modify: `resources/css/tokens.css:205` (fuera `--duracion-cromo`), `:215` (fuera `--asb-desplazamiento-panel`), `:270` (tras `--asb-escala-isotipo: 0.9;`), `:350` (`.dark`, tras `--asb-luz-ambiente`), `:360` (antes del bloque de transparencia reducida), `:360-371` y `:373-388` (dentro de los dos bloques de accesibilidad), `:448` (fuera la anulación del panel), `:467` (tras `--asb-escala-isotipo: 1;`), y el comentario de `--duracion-panel` (`:204`)
+- Rename: `tests/Feature/MenuMovilTest.php` a `tests/Feature/NavbarMovilTest.php` (con `git mv`)
+- Modify: `tests/Feature/MovimientoTest.php:28-34` (comentario), `:46`, `:98`; `tests/Feature/Panel/ComponentesDelPanelTest.php:70`
+
+**Interfaces:**
+- Produces: `--asb-alto-modulo-superior`, `--asb-alto-modulo-superior-compacto`, `--asb-alto-modulo-inferior`, `--asb-alto-modulo-inferior-compacto`, `--asb-alto-rotulo-pestana`, `--asb-desplazamiento-hoja`, `--asb-retirada-barra`, `--asb-hoja-velo`, `--asb-cromo-apoyo-inferior` (los consume el CSS de la tarea 6 y las vistas de la 4); el velo móvil de `--asb-cromo-velo` bajo 64rem; la clase `NavbarMovilTest` con sus ayudantes `regla()`, `bloque()`, `cabecera()`, `arbol()`, `usuarioCon()` (los usan las tareas 2 a 7).
+
+- [ ] **Step 1: Renombrar la guardia conservando la historia y dejarle solo el esqueleto**
+
+```bash
+GIT_OPTIONAL_LOCKS=0 git mv tests/Feature/MenuMovilTest.php tests/Feature/NavbarMovilTest.php
+```
+
+Contenido nuevo del archivo (las tres pruebas viejas se retiran con la decisión D-M11; el docblock cuenta la inversión):
+
+```php
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Asociado;
+use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
+use DOMDocument;
+use DOMXPath;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\File;
+use Spatie\Permission\Models\Role;
+use Tests\TestCase;
+
+/**
+ * La barra pública por debajo de 64rem: dos módulos de vidrio, el superior
+ * con marca, tema y cuenta, y el inferior fijo abajo con las cinco secciones
+ * y dos hojas que suben al tocar (Parte II de la spec, aprobada por Sua el
+ * 6 sep 2026).
+ *
+ * Esta clase se llamó `MenuMovilTest` y protegía LO CONTRARIO: un panel en
+ * plano bajo la cabecera, sin desplegables anidados, porque «sobra vertical
+ * y lo escaso es el número de toques» (772 px de panel medidos en 390x844).
+ * Sua decidió el 6 sep (D-M11) invertirlo: los seis destinos plegados pasan
+ * de un toque a dos a cambio de una barra siempre visible, sin hamburguesa,
+ * con los tres directos y el tema a un toque. El `git mv` conserva la
+ * historia de aquella decisión; este docblock conserva su razón para que
+ * nadie la deshaga sin saberlo.
+ *
+ * Cada prueba nombra en su docblock la rotura que la pone roja.
+ */
+class NavbarMovilTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(DatabaseSeeder::class);
+    }
+
+    /**
+     * @param  list<string>  $roles
+     */
+    private function usuarioCon(array $roles, ?Asociado $asociado = null): User
+    {
+        foreach ($roles as $rol) {
+            Role::findOrCreate($rol, 'web');
+        }
+
+        $usuario = User::factory()->create([
+            'name' => 'Lola Pantoja',
+            'asociado_id' => $asociado?->id,
+        ]);
+        $usuario->syncRoles($roles);
+
+        return $usuario->fresh();
+    }
+
+    /** El primer `<header>` de la página: donde se cuenta todo. */
+    private function cabecera(string $ruta): string
+    {
+        $html = $this->get($ruta)->assertOk()->getContent();
+        $this->assertSame(1, preg_match('/<header\b.*?<\/header>/s', $html, $trozos), "{$ruta} no tiene <header>");
+
+        return $trozos[0];
+    }
+
+    private function arbol(string $html): DOMXPath
+    {
+        $documento = new DOMDocument;
+        $anteriores = libxml_use_internal_errors(true);
+        $documento->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($anteriores);
+
+        return new DOMXPath($documento);
+    }
+
+    /** El cuerpo de la PRIMERA regla cuyo selector empieza así. */
+    private function regla(string $css, string $selector): string
+    {
+        $inicio = strpos($css, $selector.' {');
+        $this->assertNotFalse($inicio, "no existe la regla {$selector}");
+        $fin = strpos($css, '}', $inicio);
+
+        return substr($css, $inicio, $fin - $inicio);
+    }
+
+    /**
+     * El bloque n-ésimo que empieza por esa marca, entero y con sus llaves
+     * contadas: `strstr` daría desde la primera marca hasta el final del
+     * archivo, que para el segundo bloque móvil es justo lo que no sirve.
+     */
+    private function bloque(string $css, string $marca, int $ordinal = 1): string
+    {
+        $desde = 0;
+
+        for ($n = 0; $n < $ordinal; $n++) {
+            $inicio = strpos($css, $marca, $desde);
+            $this->assertNotFalse($inicio, "no existe el bloque {$ordinal} de {$marca}");
+            $desde = $inicio + strlen($marca);
+        }
+
+        $llave = strpos($css, '{', $inicio);
+        $nivel = 0;
+
+        for ($i = $llave, $largo = strlen($css); $i < $largo; $i++) {
+            if ($css[$i] === '{') {
+                $nivel++;
+            } elseif ($css[$i] === '}') {
+                $nivel--;
+
+                if ($nivel === 0) {
+                    return substr($css, $inicio, $i - $inicio + 1);
+                }
+            }
+        }
+
+        $this->fail("el bloque {$marca} no cierra");
+    }
+}
+```
+
+- [ ] **Step 2: Escribir las dos guardias de tokens**
+
+Dentro de la clase, antes de los ayudantes:
+
+```php
+    /**
+     * Roturas: borrar `--asb-retirada-barra: 0%` del bloque de movimiento
+     * reducido; anular `--asb-alto-modulo-inferior` ahí (es layout, no se
+     * anula); devolver `--duracion-cromo`; duplicar `--asb-hoja-velo` en `.dark`.
+     */
+    public function test_los_tokens_del_movil_y_su_anulacion(): void
+    {
+        $tokens = File::get(resource_path('css/tokens.css'));
+
+        foreach ([
+            '--asb-alto-modulo-superior: 3.5rem;',
+            '--asb-alto-modulo-superior-compacto: 3rem;',
+            '--asb-alto-modulo-inferior: 4.25rem;',
+            '--asb-alto-modulo-inferior-compacto: 3rem;',
+            '--asb-alto-rotulo-pestana: calc(2 * 1.65 * 0.6875rem);',
+            '--asb-desplazamiento-hoja: 6px;',
+            '--asb-retirada-barra: 100%;',
+            '--asb-hoja-velo: color-mix(in oklab, var(--asb-superficie) 84%, transparent);',
+        ] as $declaracion) {
+            $this->assertStringContainsString($declaracion, $tokens);
+        }
+
+        // Una sola receta del velo de la hoja fuera de las medias de
+        // accesibilidad: `.dark` es el propio <html> y el var() ya resuelve.
+        $this->assertSame(1, substr_count($tokens, '--asb-hoja-velo: color-mix('), 'el velo de la hoja se declara una vez');
+        $this->assertSame(2, substr_count($tokens, '--asb-cromo-apoyo-inferior:'), 'el apoyo inferior tiene sus dos recetas');
+
+        $reducido = strstr($tokens, '@media (prefers-reduced-motion: reduce)');
+        $this->assertNotFalse($reducido);
+        $this->assertStringContainsString('--asb-desplazamiento-hoja: 0px;', $reducido);
+        $this->assertStringContainsString('--asb-retirada-barra: 0%;', $reducido);
+        $this->assertStringNotContainsString('--asb-alto-modulo', $reducido, 'los altos son layout y no se anulan');
+
+        $transparencia = $this->bloque($tokens, '@media (prefers-reduced-transparency: reduce)');
+        $this->assertStringContainsString('--asb-hoja-velo: var(--asb-superficie);', $transparencia);
+
+        $contraste = $this->bloque($tokens, '@media (prefers-contrast: more)');
+        $this->assertStringContainsString('--asb-cromo-velo: var(--asb-fondo);', $contraste);
+        $this->assertStringContainsString('--asb-cromo-desenfoque: none;', $contraste);
+        $this->assertStringContainsString('--asb-hoja-velo: var(--asb-superficie);', $contraste);
+
+        // Los dos tokens que se retiran con su único consumidor. Se
+        // concatenan para que esta prueba no se delate a sí misma.
+        foreach (['--duracion-'.'cromo', '--asb-desplazamiento-'.'panel'] as $muerto) {
+            $this->assertStringNotContainsString($muerto, $tokens, "{$muerto} sigue en tokens.css sin consumidor");
+
+            foreach (File::allFiles(base_path('tests')) as $archivo) {
+                $this->assertStringNotContainsString($muerto, str_replace("'.'", '', $archivo->getContents()), "{$archivo->getFilename()} sigue afirmando {$muerto}");
+            }
+        }
+    }
+
+    /**
+     * Los rótulos de 11 px y el rango del chip van sobre el vidrio, y el
+     * único velo del sitio calibrado para texto era el del hero: el cromo al
+     * 72 / 62 % da unos 3:1 con una foto detrás. Como `VeloDelHeroTest`, se
+     * recalcula desde el archivo contra la imagen más hostil (negro bajo el
+     * tema claro, blanco bajo el oscuro), con la composición alfa que pinta
+     * el navegador (D-M18).
+     *
+     * Roturas: bajar el velo móvil claro al 72 %; devolver `text-apagado` al
+     * rango del chip.
+     */
+    public function test_el_velo_del_movil_sostiene_el_rotulo(): void
+    {
+        $tokens = File::get(resource_path('css/tokens.css'));
+        $movil = $this->bloque($tokens, '@media (max-width: 63.999rem)');
+        $raiz = $this->bloque($tokens, ':root {');
+        $oscuro = $this->bloque($tokens, '.dark {');
+
+        foreach ([
+            'claro' => [$raiz, $this->bloque($movil, ':root {'), '#000000'],
+            'oscuro' => [$oscuro, $this->bloque($movil, ':root.dark {'), '#ffffff'],
+        ] as $tema => [$paleta, $velo, $peorImagen]) {
+            $this->assertSame(1, preg_match('/--asb-cromo-velo: color-mix\(in oklab, var\(--asb-fondo\) (\d+)%, transparent\);/', $velo, $porcentaje), "el velo móvil {$tema} no reasigna --asb-cromo-velo");
+            $alfa = ((int) $porcentaje[1]) / 100;
+            $fondo = $this->hex($paleta, '--asb-fondo');
+            $compuesto = $this->componer($fondo, $alfa, $peorImagen);
+
+            foreach (['--asb-acento', '--asb-tenue'] as $texto) {
+                $contraste = $this->contraste($this->hex($paleta, $texto), $compuesto);
+                $this->assertGreaterThanOrEqual(4.5, $contraste, sprintf('%s a 11 px sobre el velo %s al %d %% da %.2f:1 contra %s', $texto, $tema, $porcentaje[1], $contraste, $peorImagen));
+            }
+        }
+    }
+
+    private function hex(string $bloque, string $propiedad): string
+    {
+        $this->assertSame(1, preg_match('/'.preg_quote($propiedad, '/').': (#[0-9a-f]{6});/', $bloque, $valor), "{$propiedad} no es un hexadecimal en ese bloque");
+
+        return $valor[1];
+    }
+
+    /** Composición alfa normal en sRGB, que es como el navegador pinta el velo. */
+    private function componer(string $velo, float $alfa, string $imagen): string
+    {
+        $v = $this->canales($velo);
+        $i = $this->canales($imagen);
+
+        return sprintf('#%02x%02x%02x', (int) round($alfa * $v[0] + (1 - $alfa) * $i[0]), (int) round($alfa * $v[1] + (1 - $alfa) * $i[1]), (int) round($alfa * $v[2] + (1 - $alfa) * $i[2]));
+    }
+
+    private function contraste(string $a, string $b): float
+    {
+        $luminancias = [$this->luminancia($a), $this->luminancia($b)];
+        rsort($luminancias);
+
+        return ($luminancias[0] + 0.05) / ($luminancias[1] + 0.05);
+    }
+
+    private function luminancia(string $hex): float
+    {
+        $lineal = array_map(static function (int $canal): float {
+            $proporcion = $canal / 255;
+
+            return $proporcion <= 0.03928 ? $proporcion / 12.92 : (($proporcion + 0.055) / 1.055) ** 2.4;
+        }, $this->canales($hex));
+
+        return 0.2126 * $lineal[0] + 0.7152 * $lineal[1] + 0.0722 * $lineal[2];
+    }
+
+    /** @return array{int, int, int} */
+    private function canales(string $hex): array
+    {
+        $limpio = ltrim($hex, '#');
+
+        return [(int) hexdec(substr($limpio, 0, 2)), (int) hexdec(substr($limpio, 2, 2)), (int) hexdec(substr($limpio, 4, 2))];
+    }
+```
+
+- [ ] **Step 3: Ver las dos rojas**
+
+Run: `php artisan test --compact --filter=NavbarMovilTest`
+Expected: las dos fallan («--asb-alto-modulo-superior» no está; «no existe el bloque 1 de @media (max-width: 63.999rem)»).
+
+- [ ] **Step 4: Los tokens**
+
+En `tokens.css`, tras `--asb-escala-isotipo: 0.9;` (línea 270), el bloque de la spec §5.2 con estos valores exactos:
+
+```css
+    /*
+     * Barra móvil en dos módulos (Parte II de la spec). Los cuatro altos son
+     * LAYOUT, como --asb-separacion-modulos: no se anulan bajo movimiento
+     * reducido (allí simplemente no existe el estado scroll). El estado
+     * `scroll` los cambia reasignando los dos primeros sobre el header.
+     */
+    --asb-alto-modulo-superior: 3.5rem; /* 56 px: lo que la cabecera mide hoy */
+    --asb-alto-modulo-superior-compacto: 3rem; /* 48 px: un control de 44 con 2 px por lado */
+    --asb-alto-modulo-inferior: 4.25rem; /* 68 px: icono de 24, 3 de aire y rótulo a dos líneas de la escala */
+    --asb-alto-modulo-inferior-compacto: 3rem; /* 48 px: icono solo, pestaña de 44 en flujo */
+    --asb-alto-rotulo-pestana: calc(2 * 1.65 * 0.6875rem); /* dos líneas de --text-2xs, sin leading suelto */
+
+    /* Movimiento: la hoja sube desde la barra (el gemelo positivo de
+       --asb-desplazamiento-popover) y la barra se retira ante el teclado.
+       Los dos se anulan abajo. */
+    --asb-desplazamiento-hoja: 6px;
+    --asb-retirada-barra: 100%;
+
+    /* Velo de las hojas, una sola receta: `.dark` es el propio <html>, así
+       que el var() de --asb-superficie ya resuelve al tema. Hasta hoy
+       .hoja-flotante lo cableaba y la transparencia reducida no lo alcanzaba. */
+    --asb-hoja-velo: color-mix(in oklab, var(--asb-superficie) 84%, transparent);
+
+    /* Apoyo de un módulo que cuelga del canto INFERIOR: la receta del cromo,
+       invertida. Dos recetas, como --asb-cromo-apoyo. */
+    --asb-cromo-apoyo-inferior:
+        0 -1px 0 rgb(11 9 10 / 0.07),
+        0 -8px 24px rgb(11 9 10 / 0.06);
+```
+
+En `.dark`, tras `--asb-luz-ambiente: rgb(238 65 55 / 0.18);` (línea 350):
+
+```css
+
+    --asb-cromo-apoyo-inferior:
+        0 -1px 0 rgb(255 255 255 / 0.1),
+        0 -8px 28px rgb(0 0 0 / 0.55);
+```
+
+Antes de `@media (prefers-reduced-transparency: reduce)` (línea 360). El porcentaje se fija con **dos puntos de margen sobre el mínimo que calcula la guardia** (la guardia imprime el contraste; si 88 / 85 no llega a 4,5:1 en alguno, se sube de dos en dos y se anota el valor final en la spec §5.2 y en el cierre):
+
+```css
+/*
+ * El velo del móvil sostiene texto de 11 px sobre fotos (los rótulos de las
+ * pestañas y el rango del chip): mínimo calculado contra la imagen más
+ * hostil, no gusto, como --asb-velo-hero. `NavbarMovilTest` lo recalcula
+ * leyendo este archivo. El desenfoque no cambia hasta medirlo con el video
+ * de la portada corriendo (D-M18).
+ */
+@media (max-width: 63.999rem) {
+    :root {
+        --asb-cromo-velo: color-mix(in oklab, var(--asb-fondo) 88%, transparent);
+    }
+
+    :root.dark {
+        --asb-cromo-velo: color-mix(in oklab, var(--asb-fondo) 85%, transparent);
+    }
+}
+
+```
+
+Dentro de `@media (prefers-reduced-transparency: reduce)`, tras `--asb-vidrio-desenfoque: none;`:
+
+```css
+        --asb-hoja-velo: var(--asb-superficie);
+```
+
+Dentro de `@media (prefers-contrast: more)`, en `:root` y en `:root.dark`, al final de cada uno:
+
+```css
+        /* Quien pide más contraste no lee 11 px a través de una foto: el
+           material se vuelve sólido, como bajo transparencia reducida. */
+        --asb-cromo-velo: var(--asb-fondo);
+        --asb-cromo-desenfoque: none;
+        --asb-hoja-velo: var(--asb-superficie);
+```
+
+Dentro de `@media (prefers-reduced-motion: reduce)`, tras `--asb-escala-isotipo: 1;` (línea 467):
+
+```css
+
+        /* Barra móvil: sube la hoja y se retira la barra, movimiento; los
+           altos son layout y se quedan. */
+        --asb-desplazamiento-hoja: 0px;
+        --asb-retirada-barra: 0%;
+```
+
+Se borran la línea 205 (`--duracion-cromo`), la 215 (`--asb-desplazamiento-panel: -4%;`) y la 448 (su anulación). El comentario de `--duracion-panel` (línea 204) pasa a `/* capas que aparecen o se retiran: el revelado de la portada, la capa del video y el módulo inferior ante el teclado */`.
+
+- [ ] **Step 5: Las tres guardias que afirmaban el token del panel**
+
+`MovimientoTest.php:46`: `'--asb-desplazamiento-panel: -4%'` pasa a `'--asb-desplazamiento-hoja: 6px'`. `:98`: `'--asb-desplazamiento-panel: 0%'` pasa a `'--asb-desplazamiento-hoja: 0px'`. `ComponentesDelPanelTest.php:70`: igual que `:98`. El comentario de `MovimientoTest.php:28-34` pasa de «tres excepciones con nombre: la apertura de la barra lateral, el asentamiento...» a «dos excepciones con nombre: el asentamiento del resorte de los popovers (spec del 3 sep 2026, D7) y el cambio de estado de la barra, un punto más lento a petición de Sua (5 sep); la barra lateral de tema y su reloj se retiraron el 6 sep con la Parte II».
+
+- [ ] **Step 6: Verde, y rojo a propósito**
+
+Run: `php artisan test --compact tests/Feature/NavbarMovilTest.php tests/Feature/MovimientoTest.php tests/Feature/Panel/ComponentesDelPanelTest.php tests/Feature/NavbarTresEstadosTest.php`
+Expected: PASS. Después, tres roturas y sus rojos: borrar `--asb-retirada-barra: 0%;` del bloque reducido (rojo en `test_los_tokens_del_movil_y_su_anulacion`); cambiar `88%` por `72%` en el velo claro (rojo en `test_el_velo_del_movil_sostiene_el_rotulo` con la cifra); devolver `--duracion-cromo: 520ms;` (rojo). Deshacer cada una.
+
+- [ ] **Step 7: Commit de trabajo**
+
+```bash
+GIT_OPTIONAL_LOCKS=0 git add resources/css/tokens.css tests/Feature/NavbarMovilTest.php tests/Feature/MovimientoTest.php tests/Feature/Panel/ComponentesDelPanelTest.php
+GIT_OPTIONAL_LOCKS=0 git commit -F <mensaje> # "WIP 1: tokens del móvil y NavbarMovilTest nace del git mv"
+```
+
+---
+
+### Task 2: El desplegable cierra al desplazar sin robar el foco
+
+**Files:**
+- Modify: `resources/js/app.js:76-77` (junto a `punteroFino`), `:106-133` (docblock y `abrir()` del desplegable), `:9-11` (comentario del store)
+- Test: `tests/Feature/NavbarTresEstadosTest.php:534-546`, `tests/Feature/NavbarMovilTest.php`
+
+**Interfaces:**
+- Produces: `posicionDelDocumento()` (función de módulo), `desplegable.scrollAlAbrir`, `desplegable.cerrarSiSeDesplaza()` (lo cablean las cuatro vistas en la tarea 3).
+
+- [ ] **Step 1: Las guardias**
+
+En `NavbarTresEstadosTest::test_los_desplegables_comparten_componente_y_se_excluyen`, la lista de definiciones (`:537`) gana `'cerrarSiSeDesplaza() {'`, y tras la aserción del `$dispatch` (`:546`):
+
+```php
+        // Abrir recuerda dónde estaba el documento, con el mismo clamp que el
+        // header: sin él, una hoja abierta con la página al final se cerraba
+        // con un tirón de 25 px que no desplazaba nada. Rotura: quitar la línea.
+        $this->assertStringContainsString('this.scrollAlAbrir = posicionDelDocumento();', $js);
+```
+
+En `NavbarMovilTest`:
+
+```php
+    /**
+     * Desplazarse ES cerrar (24 px, el umbral con el que el header suelta la
+     * atención con dedo), salvo con el foco DENTRO: quien baja con una flecha
+     * o AvPág mientras recorre la hoja está usando el teclado, y cerrarle el
+     * panel bajo el foco lo tira al body, el defecto que el 5 sep se corrigió
+     * para Escape.
+     *
+     * Roturas: quitar el `contains`; borrar el método dejando el cableado;
+     * volver a `window.scrollY` sin clamp en `posicionDelDocumento`.
+     */
+    public function test_las_hojas_cierran_al_desplazar_sin_robar_el_foco(): void
+    {
+        $js = File::get(resource_path('js/app.js'));
+
+        $this->assertMatchesRegularExpression(
+            '/cerrarSiSeDesplaza\(\) \{\s*if \(! this\.abierto \|\| this\.\$root\.contains\(document\.activeElement\)\) \{\s*return;\s*\}\s*if \(Math\.abs\(posicionDelDocumento\(\) - this\.scrollAlAbrir\) > 24\) \{\s*this\.cerrar\(\);/',
+            $js,
+            'la hoja cierra a los 24 px de desplazamiento salvo con el foco dentro'
+        );
+        $this->assertMatchesRegularExpression(
+            '/const posicionDelDocumento = \(\) => Math\.min\(Math\.max\(window\.scrollY, 0\), Math\.max\(document\.documentElement\.scrollHeight - window\.innerHeight, 0\)\);/',
+            $js,
+            'la posición se acota al documento con el alto vigente del viewport, que es con el que el navegador acota scrollY'
+        );
+    }
+```
+
+- [ ] **Step 2: Rojo**
+
+Run: `php artisan test --compact --filter="test_las_hojas_cierran_al_desplazar_sin_robar_el_foco|test_los_desplegables_comparten_componente_y_se_excluyen"`
+Expected: las dos rojas.
+
+- [ ] **Step 3: El código**
+
+Tras `const punteroFino = ...` (línea 77):
+
+```js
+// Dentro del documento: ni el rebote elástico de iOS por debajo de 0 ni el
+// de más allá del final cuentan. El navegador acota scrollY con el alto
+// VIGENTE del viewport, que en iOS crece al plegarse la barra de direcciones.
+const posicionDelDocumento = () => Math.min(Math.max(window.scrollY, 0), Math.max(document.documentElement.scrollHeight - window.innerHeight, 0));
+```
+
+En el desplegable: propiedad `scrollAlAbrir: 0,` tras `cierre: null,`; en `abrir()`, antes del `$dispatch`: `this.scrollAlAbrir = posicionDelDocumento();`; y tras `cerrar()`, el método `cerrarSiSeDesplaza()` de la spec §6.3 con su comentario. El docblock del componente (`:106-117`) deja de decir «de la barra de escritorio» («Desplegable de la barra, en los dos anchos: los dos grupos, la cuenta, el tema y el idioma en escritorio; las dos hojas del módulo inferior, la cuenta y el tema en móvil...») y el comentario del store (`:9-11`) deja de nombrar «el del menú móvil» («los controles de la barra, en escritorio y en móvil»).
+
+- [ ] **Step 4: Verde y roturas**
+
+Run: `php artisan test --compact tests/Feature/NavbarTresEstadosTest.php tests/Feature/NavbarMovilTest.php tests/Feature/NavegacionAgrupadaTest.php`
+Expected: PASS. Roturas: quitar `|| this.$root.contains(document.activeElement)` (rojo); borrar `this.scrollAlAbrir = ...` (rojo).
+
+- [ ] **Step 5: Commit de trabajo** (`WIP 2: el desplegable cierra al desplazar sin robar el foco`)
+
+---
+
+### Task 3: Las cuatro vistas del desplegable: tres cableados, el idioma oculto y el chip con nombre y rango
+
+**Files:**
+- Modify: `resources/views/components/publico/menu-grupo.blade.php:43-50`, `menu-usuario.blade.php:1-8` (docblock), `:43-72` (raíz y disparador), `control-tema.blade.php:1-20` (docblock) y `:31-38`, `control-idioma.blade.php:1-13` (docblock) y `:24-31`
+- Test: `tests/Feature/NavbarTresEstadosTest.php:596-614`, `tests/Feature/NavbarMovilTest.php`
+
+**Interfaces:**
+- Consumes: `cerrarSiSeDesplaza()` (tarea 2).
+- Produces: el chip de `menu-usuario` con `$rangoCorto` y el renglón de rango `lg:hidden`; la raíz de `control-idioma` con `max-lg:hidden`; la raíz de `menu-usuario` con `max-lg:static`.
+
+- [ ] **Step 1: Las guardias**
+
+`NavbarTresEstadosTest.php:601-609`: la lista de cableados gana tres cadenas:
+
+```php
+                'x-on:pointerdown.outside="cerrar()"',
+                'x-on:scroll.window.passive="cerrarSiSeDesplaza()"',
+                'x-on:pageshow.window="if ($event.persisted) cerrar()"',
+```
+
+y el docblock de la prueba (`:526-533`) gana: «Desde el 6 sep (Parte II) los cuatro llevan además el toque fuera por `pointerdown` (Safari no despacha `click` a `document` sobre fondo sin oyente), el cierre a los 24 px de scroll y el cierre al volver del bfcache. Rotura: quitar `x-on:pageshow.window` de control-tema.»
+
+En `NavbarMovilTest`:
+
+```php
+    /**
+     * Con sesión, «aparecerá su nombre y su rango» (Sua): el chip es el
+     * disparador de siempre, con el nombre visible en los dos anchos y un
+     * renglón de rango solo en móvil, en `text-tenue` porque 11 px en
+     * `text-apagado` sobre el vidrio no llegan a 4,5:1. El nombre accesible
+     * empieza por el texto visible (WCAG 2.5.3). Y la hoja se ancla al módulo
+     * y no al chip: anclada al chip, a 320 px desborda 4 px por la izquierda.
+     *
+     * Roturas: devolver `hidden ... lg:block` al nombre; `text-apagado` en el
+     * rango; quitar `max-lg:static` de la raíz; poner el rol antes del nombre
+     * en el `sr-only`.
+     */
+    public function test_el_chip_de_cuenta_lleva_nombre_y_rango_en_los_dos_anchos(): void
+    {
+        $vista = File::get(resource_path('views/components/publico/menu-usuario.blade.php'));
+
+        $this->assertStringContainsString('class="relative min-w-0 max-lg:static"', $vista);
+        $this->assertStringContainsString('-m-1 flex items-center gap-2 rounded-full p-1 min-w-0', $vista);
+        $this->assertStringNotContainsString('text-2xs text-apagado', $vista);
+        $this->assertStringNotContainsString('lg:block', $vista, 'el nombre ya no es solo de escritorio');
+        $this->assertStringNotContainsString('leading-', $vista, 'la escala tipográfica gobierna el chip');
+        $this->assertStringContainsString("\$rangoCorto = \$rol === 'Establecimiento afiliado' ? 'Afiliado' : \$rol;", $vista);
+
+        $html = $this->actingAs($this->usuarioCon([User::ROL_SUBADMIN]))->get('/contacto')->assertOk()->getContent();
+        $this->assertSame(1, preg_match('/<button[^>]*aria-controls="menu-cuenta"[^>]*>(.*?)<\/button>/s', $html, $chip), 'existe el disparador de cuenta');
+        $this->assertMatchesRegularExpression('/<span class="sr-only">Sec\. Lola Pantoja, Secretaría del gremio: configuración y sesión<\/span>/', $chip[1]);
+        $this->assertMatchesRegularExpression('/<span class="block truncate text-2xs text-tenue lg:hidden">\s*Secretaría del gremio\s*<\/span>/', $chip[1]);
+        $this->assertStringContainsString('>Sec.<', $chip[1]);
+    }
+
+    /**
+     * El chip de idioma se ve y no funciona a propósito (Parte I, D1); en 360
+     * px no sobra un solo control. Se esconde bajo 64rem y sigue en el DOM
+     * para las guardias. La raíz no fusiona atributos, así que va en el literal.
+     *
+     * Rotura: quitar `max-lg:hidden`.
+     */
+    public function test_el_chip_de_idioma_se_esconde_en_movil(): void
+    {
+        $this->assertStringContainsString('class="relative max-lg:hidden"', File::get(resource_path('views/components/publico/control-idioma.blade.php')));
+    }
+```
+
+- [ ] **Step 2: Rojo**
+
+Run: `php artisan test --compact --filter="test_el_chip_de_cuenta_lleva_nombre_y_rango_en_los_dos_anchos|test_el_chip_de_idioma_se_esconde_en_movil|test_los_desplegables_comparten_componente_y_se_excluyen"`
+Expected: las tres rojas.
+
+- [ ] **Step 3: El código**
+
+En las cuatro vistas, tras `x-on:focusout="if (! $el.contains($event.relatedTarget)) cerrar()"`:
+
+```blade
+     x-on:pointerdown.outside="cerrar()"
+     x-on:scroll.window.passive="cerrarSiSeDesplaza()"
+     x-on:pageshow.window="if ($event.persisted) cerrar()"
+```
+
+`control-idioma.blade.php:31`: `class="relative"` pasa a `class="relative max-lg:hidden"`, con un comentario Blade encima: «Oculto bajo 64rem (Parte II, D-M5): no funciona todavía y en 360 px no sobra un control; sigue en el DOM.»
+
+`menu-usuario.blade.php`: en el `@php`, tras `$prefijoRol`: `$rangoCorto = $rol === 'Establecimiento afiliado' ? 'Afiliado' : $rol;` (con el comentario «lo que cabe en el chip: el largo sigue en la hoja»). La raíz pasa a `class="relative min-w-0 max-lg:static"` con el comentario de la spec §6.1 (anclar la hoja al módulo). El botón y su interior, exactamente el bloque de §6.1 de la spec («Nombre y rango con sesión: el chip»). El docblock (`:1-8`) deja de decir «vive en la barra lateral (móvil)» («El tema vive en el control de tema de la barra, en los dos anchos; este menú queda solo para sesión...»). Los docblocks de `control-tema` y `control-idioma` («de la barra de escritorio») pasan a «de la barra, en los dos anchos».
+
+- [ ] **Step 4: Verde y roturas**
+
+Run: `php artisan test --compact tests/Feature/NavbarMovilTest.php tests/Feature/NavbarTresEstadosTest.php tests/Feature/TemaClaroOscuroTest.php tests/Feature/ObjetivoTactilTest.php tests/Feature/MovimientoTest.php`
+Expected: PASS (la barra lateral sigue en pie hasta la tarea 5). Roturas: quitar `x-on:pageshow.window` de control-tema (rojo en NavbarTresEstadosTest); `text-apagado` en el rango (rojo).
+
+- [ ] **Step 5: Commit de trabajo** (`WIP 3: tres cableados, el idioma oculto y el chip con rango`)
+
+---
+
+### Task 4: `menu-grupo` con variante `pestana`
+
+**Files:**
+- Modify: `resources/views/components/publico/menu-grupo.blade.php` entero (props, `@php`, raíz, botón por variante, hoja por variante, filas de pie)
+- Test: `tests/Feature/NavbarMovilTest.php`
+
+**Interfaces:**
+- Consumes: `desplegable` (tarea 2), `--asb-desplazamiento-hoja` (tarea 1).
+- Produces: `<x-publico.menu-grupo variante="pestana" :titulo :enlaces :icono :pie />` que pinta un `<button class="pestana ...">` con `aria-controls="menu-{slug}-movil"` y una hoja `#menu-{slug}-movil` con clase `hoja-flotante hoja-inferior`; la variante por defecto (`barra`) rinde letra a letra lo de hoy.
+
+- [ ] **Step 1: La guardia**
+
+```php
+    /**
+     * Un componente, dos pinturas: en escritorio el botón con galón y la hoja
+     * hacia abajo; en la pestaña el icono sobre el rótulo y la hoja hacia
+     * ARRIBA, con id propio para no pisar `menu-bolsas`. La fila de invitado
+     * viaja como prop desde los arreglos y solo se pinta sin sesión.
+     *
+     * Roturas: quitar `-movil` del id; quitar `aria-current="true"` del botón
+     * activo; pintar la fila de pie con sesión; quitar `origin-bottom` de la hoja.
+     */
+    public function test_la_pestana_de_grupo_abre_una_hoja_hacia_arriba(): void
+    {
+        $enlaces = "[['ruta' => 'empleo.index', 'texto' => 'Empleo'], ['ruta' => 'artistas.index', 'texto' => 'Artistas']]";
+        $pie = "[['ruta' => 'mi-cuenta.entrar', 'texto' => 'Entrar como afiliado', 'solo' => 'guest']]";
+
+        $pestana = Blade::render('<x-publico.menu-grupo variante="pestana" titulo="Bolsas" icono="briefcase" :enlaces="'.$enlaces.'" :pie="'.$pie.'" />');
+
+        $this->assertStringContainsString('aria-controls="menu-bolsas-movil"', $pestana);
+        $this->assertStringContainsString('id="menu-bolsas-movil"', $pestana);
+        $this->assertStringContainsString('x-ref="disparador"', $pestana);
+        $this->assertStringContainsString('x-bind:aria-expanded="abierto ? \'true\' : \'false\'"', $pestana);
+        $this->assertStringContainsString('pestana fila-pulsable flex min-h-11 w-full flex-col items-center justify-center rounded-xl px-0.5 text-center text-2xs font-medium', $pestana);
+        $this->assertStringContainsString('<span class="pestana__rotulo"><span class="text-balance">Bolsas</span></span>', $pestana);
+        $this->assertStringContainsString('hoja-flotante hoja-inferior absolute inset-x-2 bottom-full z-50 mx-auto mb-2 max-w-sm origin-bottom rounded-2xl p-2', $pestana);
+        $this->assertStringContainsString('translate-y-(--asb-desplazamiento-hoja)', $pestana);
+        $this->assertStringContainsString('ease-rebote-vivo duration-(--duracion-rebote)', $pestana);
+        $this->assertStringContainsString('role="group"', $pestana);
+        $this->assertStringContainsString('aria-label="Bolsas"', $pestana);
+        $this->assertStringContainsString('Entrar como afiliado', $pestana);
+        $this->assertStringContainsString(route('mi-cuenta.entrar'), $pestana);
+        $this->assertStringNotContainsString('aria-current', $pestana, 'ninguna sección activa: ni el botón ni las filas lo llevan');
+        $this->assertStringNotContainsString('origin-top-left', $pestana);
+        // El icono: contorno en reposo, y del vendor, no un path a mano.
+        $this->assertMatchesRegularExpression('/<button[^>]*aria-controls="menu-bolsas-movil"[^>]*>\s*<svg[^>]*class="h-6 w-6 shrink-0"/s', $pestana);
+        foreach (['role="menu"', 'aria-haspopup', 'x-collapse', 'line-clamp', 'leading-'] as $prohibido) {
+            $this->assertStringNotContainsString($prohibido, $pestana);
+        }
+
+        // Con sesión la fila de invitado no se pinta.
+        $this->actingAs($this->usuarioCon([User::ROL_ASOCIADO], Asociado::query()->firstOrFail()));
+        $this->assertStringNotContainsString('Entrar como afiliado', Blade::render('<x-publico.menu-grupo variante="pestana" titulo="Bolsas" icono="briefcase" :enlaces="'.$enlaces.'" :pie="'.$pie.'" />'));
+
+        // Y la variante por defecto rinde lo de siempre.
+        $barra = Blade::render('<x-publico.menu-grupo titulo="Bolsas" :enlaces="'.$enlaces.'" />');
+        $this->assertStringContainsString('aria-controls="menu-bolsas"', $barra);
+        $this->assertStringContainsString('origin-top-left', $barra);
+        $this->assertStringNotContainsString('pestana', $barra);
+        $this->assertStringNotContainsString('Entrar como afiliado', $barra);
+    }
+```
+
+- [ ] **Step 2: Rojo** — Run con `--filter=test_la_pestana_de_grupo_abre_una_hoja_hacia_arriba`. Expected: rojo (la variante no existe).
+
+- [ ] **Step 3: El código** — el componente entero de la spec §6.3 («`menu-grupo` con variante `pestana`»), conservando letra a letra el botón de escritorio (`menu-grupo.blade.php:55-75` de hoy), la hoja de escritorio (`:77-90`) y las filas (`:91-107`). Dos cosas que la spec deja implícitas y aquí se fijan: el `aria-current="true"` va en el botón de la pestaña solo si `$grupoActivo`; y el `@class` de la pestaña no lleva `hover:` de ningún tipo. El docblock del componente gana un párrafo: «Desde el 6 sep pinta también la pestaña del módulo inferior (Parte II §6.3): icono sobre rótulo, hoja hacia arriba con id propio, y las filas de pie que llegan desde los arreglos de `navbar.blade.php` (la navegación se declara una vez).»
+
+- [ ] **Step 4: Verde y roturas** — Run: `php artisan test --compact tests/Feature/NavbarMovilTest.php tests/Feature/NavegacionAgrupadaTest.php tests/Feature/MovimientoTest.php tests/Feature/ObjetivoTactilTest.php`. Expected: PASS. Roturas: quitar `-movil` del id (rojo); pintar el pie sin mirar `solo` (rojo con sesión).
+
+- [ ] **Step 5: Commit de trabajo** (`WIP 4: menu-grupo con variante pestana`)
+
+---
+
+### Task 5: La barra: módulo superior compartido, máquina por dirección y módulo inferior
+
+**Files:**
+- Modify: `resources/views/components/publico/navbar.blade.php` entero
+- Modify: `resources/views/components/layouts/publico.blade.php:2`, `:5`, `:49-51`, `:189`, `:196`
+- Modify: `resources/views/components/publico/hero.blade.php:41`, `footer.blade.php:26-34`
+- Delete: `resources/views/components/publico/barra-tema.blade.php`
+- Test: `tests/Feature/NavbarTresEstadosTest.php:14-17`, `:172-192`, `:371-374`, `:394`, `:418`, `:453-460`, `:505`, `:617-636`; `tests/Feature/TemaClaroOscuroTest.php:14-16`, `:85-123`; `tests/Feature/ObjetivoTactilTest.php:87-89`, `:124-133`; `tests/Feature/MovimientoTest.php:401-423`; `tests/Feature/NavbarMovilTest.php`
+
+**Interfaces:**
+- Consumes: `menu-grupo variante="pestana"` (4), el chip (3), `posicionDelDocumento` (solo por nombre: el header lleva su propia `posicion()`).
+- Produces: `<header>` con `data-estado` por dirección bajo 64rem y `data-teclado`; `<nav id="menu-movil" class="modulo-inferior lg:hidden" aria-label="Navegación principal">` (el CSS de la tarea 6 lo fija abajo).
+
+- [ ] **Step 1: Las guardias que cambian**
+
+`NavbarTresEstadosTest`:
+- `:14-17`: «La barra pública de escritorio en tres estados» pasa a «La barra pública: de escritorio en tres estados (Parte I) y, desde el 6 sep, la del móvil en dos módulos (Parte II)».
+- `:170-172`: el nombre pasa a `test_el_isotipo_existe_se_pinta_doble_y_se_precarga_en_los_dos_anchos` y la rotura a «devolver el `media` a la precarga»; `:190-192` pasa a:
+
+```php
+        $html = $this->get('/contacto')->assertOk()->getContent();
+        $this->assertStringContainsString('rel="preload" as="image" href="http://localhost:8000/img/monograma-asobares.png">', $html, 'el móvil cruza al isotipo en scroll y con sesión: se precarga en los dos anchos');
+        $this->assertStringNotContainsString('monograma-asobares.png" media=', $html);
+```
+
+- `:371-372`: las dos aserciones de `menuMovil = false` pasan a `$this->assertStringNotContainsString('menuMovil', $navbar, 'el panel murió y con él su nombre');` y el comentario «Lo que el panel móvil sigue exigiendo, literal.» a «El panel móvil se retiró el 6 sep: su nombre no vuelve.»
+- `:394`: `$this->assertSame(1, $xpath->query('//nav')->length, 'una sola <nav>');` pasa a:
+
+```php
+        // Dos <nav> desde el 6 sep (Parte II, D-M9): la primera es la bandeja,
+        // que bajo 64rem solo expone logo y cuenta; la segunda es la navegación
+        // real del teléfono. Los nombres dicen la verdad por ancho.
+        $this->assertSame(2, $xpath->query('//nav')->length, 'la bandeja y el módulo inferior');
+        $this->assertSame('menu-movil', $xpath->query('//header/nav[2]/@id')->item(0)?->nodeValue);
+        $this->assertSame('Navegación principal', $xpath->query('//header/nav[2]/@aria-label')->item(0)?->nodeValue);
+```
+
+- `:418` (docblock): `<div id="menu-movil"` pasa a `<nav id="menu-movil"`.
+- `:453-460`: pasa a:
+
+```php
+    /**
+     * La barra lateral se retiró el 6 sep (Parte II, D-M6): el tema vive en
+     * el módulo superior por control-tema. Rotura: devolver el <aside>.
+     */
+    public function test_la_barra_lateral_de_tema_se_retiro_con_la_parte_ii(): void
+    {
+        $this->assertFileDoesNotExist(resource_path('views/components/publico/barra-tema.blade.php'));
+        $this->assertStringNotContainsString('barra-tema', File::get(resource_path('views/components/layouts/publico.blade.php')));
+        $this->assertFileDoesNotExist(resource_path('views/components/publico/selector-tema.blade.php'), 'el selector huérfano se borró');
+    }
+```
+
+- `:505`: la cadena de la cuenta pasa a `modulo modulo-cuenta flex min-w-0 items-center gap-2 whitespace-nowrap lg:justify-self-end lg:px-2`.
+- `:617-627` (docblock): «Se esconde en la barra de escritorio y en el panel móvil» pasa a «Se esconde en el módulo de cuenta, que desde el 6 sep es el mismo en los dos anchos», y la rotura a «sacar el enlace del `@guest`»; `:632-636`: el `2` pasa a `1` con el mensaje «sin sesión, una vez: el módulo de cuenta es el mismo DOM en los dos anchos».
+
+`TemaClaroOscuroTest`: `:14-16` pasa a «...y el control vive en la barra de navegación, en los dos anchos (desde el 6 sep)»; `:85-95` quita «Las cadenas '>Claro<' y '>Oscuro<' las emiten dos controles a la vez...» y dice «Un solo control las emite: el popover de la barra»; `:110-123` pasa a:
+
+```php
+    /**
+     * Desde el 6 sep 2026 (Parte II, D-M6 y D-M17) el tema vive en la barra en
+     * los dos anchos: la barra lateral de móvil se retiró. Rotura: esconder
+     * el botón de tema bajo 64rem con `hidden lg:flex`.
+     */
+    public function test_el_control_de_tema_vive_en_la_navbar_en_los_dos_anchos(): void
+    {
+        $html = $this->get('/contacto')->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('tema-lateral', $html);
+        $this->assertSame(1, substr_count($html, 'id="popover-tema"'), 'un solo popover de tema en la página');
+        $this->assertSame(1, preg_match('/<button[^>]*aria-controls="popover-tema"[^>]*class="([^"]*)"/', $html, $clases));
+        $this->assertStringNotContainsString('hidden', $clases[1]);
+        $this->assertStringNotContainsString('lg:', $clases[1]);
+    }
+```
+
+`ObjetivoTactilTest`: se borran las filas `'navbar, hamburguesa'` (`:124-128`) y `'navbar, filas del menú móvil'` (`:129-133`); el docblock `:87-89` pasa a «...y las filas de los desplegables su `hover:bg-superficie-alta`...».
+
+`MovimientoTest`: `:401-404` pasa a «Eran tres (menú móvil, hamburguesa y menú de usuario); con la reagrupación fueron cinco, y desde el 6 sep son el menú de usuario y el componente de grupo, que pinta los dos grupos de escritorio y las dos hojas del móvil; la barra ya no lleva ningún `x-transition` propio»; en `:409-413` sale `'components/publico/navbar.blade.php'`.
+
+`NavbarMovilTest`, seis pruebas nuevas:
+
+```php
+    /**
+     * Roturas: mover el <nav> a `publico.blade.php` tras <main>; quitar
+     * `lg:hidden`; poner `gap-1` en `.pestanas`; quitar el `x-bind:aria-label`
+     * de la bandeja.
+     */
+    public function test_el_modulo_inferior_vive_en_el_header_y_es_el_landmark(): void
+    {
+        $xpath = $this->arbol($this->cabecera('/contacto'));
+
+        $this->assertSame(1, $xpath->query('//header/nav[@id="menu-movil" and @aria-label="Navegación principal"]')->length);
+        $this->assertSame(0, $xpath->query('//nav[1]//*[@id="menu-movil"]')->length, 'el inferior no cuelga de la bandeja');
+        $clase = $xpath->query('//header/nav[2]/@class')->item(0)?->nodeValue ?? '';
+        $this->assertStringContainsString('lg:hidden', $clase);
+        $this->assertStringContainsString('modulo-inferior', $clase);
+        $this->assertSame(0, $xpath->query('//header/nav[2]/*[contains(@class, "modulo") or contains(@class, "gap-1")]')->length, 'ningún hijo del inferior se confunde con un módulo de escritorio');
+
+        $navbar = File::get(resource_path('views/components/publico/navbar.blade.php'));
+        $this->assertStringContainsString('x-bind:aria-label="esEscritorio ? \'Navegación principal\' : \'Marca y cuenta\'"', $navbar);
+    }
+
+    /**
+     * Roturas: quitar Eventos; meter Eventos en la hoja; redeclarar la fila de
+     * invitado en el componente; quitar un `'icono'`.
+     */
+    public function test_los_cinco_destinos_en_orden_y_las_dos_hojas(): void
+    {
+        $xpath = $this->arbol($this->cabecera('/contacto'));
+        $inferior = $xpath->query('//header/nav[@id="menu-movil"]')->item(0);
+        $this->assertNotNull($inferior);
+
+        $etiquetas = [];
+        foreach ($xpath->query('.//a[contains(@class, "pestana")] | .//button[contains(@class, "pestana")]', $inferior) as $control) {
+            $etiquetas[] = trim(preg_replace('/\s+/u', ' ', $control->textContent));
+        }
+        $this->assertSame(['Directorio', 'Abre tu negocio', 'Eventos', 'Bolsas', 'El gremio'], $etiquetas);
+
+        foreach (['menu-bolsas-movil' => ['Empleo', 'Artistas', 'Proveedores'], 'menu-el-gremio-movil' => ['Quiénes somos', 'Boletín', 'Contacto']] as $hoja => $esperadas) {
+            $this->assertSame(1, $xpath->query('.//button[@type="button" and @aria-controls="'.$hoja.'"]', $inferior)->length);
+            $filas = [];
+            foreach ($xpath->query('//div[@id="'.$hoja.'"]/a') as $fila) {
+                $filas[] = trim(preg_replace('/\s+/u', ' ', $fila->textContent));
+            }
+            $this->assertSame($esperadas, array_slice($filas, 0, 3), "la hoja {$hoja} cambió de contenido");
+        }
+        $this->assertSame(1, $xpath->query('//div[@id="menu-el-gremio-movil"]/a[@href="'.route('mi-cuenta.entrar').'"]')->length, 'la entrada del afiliado es la última fila de El gremio');
+
+        $navbar = File::get(resource_path('views/components/publico/navbar.blade.php'));
+        $this->assertSame(5, substr_count($navbar, "'icono' => '"), 'los cinco controles llevan icono');
+        $this->assertSame(1, substr_count($navbar, "'texto' => 'Entrar como afiliado'"), 'la fila de invitado se declara una vez, con el resto de la navegación');
+        $this->assertStringNotContainsString("'El gremio'", File::get(resource_path('views/components/publico/menu-grupo.blade.php')), 'el componente no sabe qué grupo lleva pie');
+    }
+
+    /**
+     * Roturas: envolver una fila de hoja en un segundo `x-data="desplegable"`;
+     * mover una fila fuera de la hoja.
+     */
+    public function test_los_seis_destinos_plegados_siguen_a_dos_toques_como_maximo(): void
+    {
+        $xpath = $this->arbol($this->cabecera('/contacto'));
+
+        foreach (['empleo.index', 'artistas.index', 'proveedores.index', 'quienes-somos', 'boletin.index', 'contacto'] as $ruta) {
+            $fila = $xpath->query('//header/nav[@id="menu-movil"]//a[@href="'.route($ruta).'"]')->item(0);
+            $this->assertNotNull($fila, "el inferior dejó de enlazar a {$ruta}");
+            $this->assertSame(1, $xpath->query('count(ancestor::*[@x-data="desplegable"])', $fila), "{$ruta} está anidado en más de una hoja");
+            $this->assertMatchesRegularExpression('/^menu-(bolsas|el-gremio)-movil$/', $fila->parentNode->getAttribute('id'), "{$ruta} no es hija directa de una hoja");
+        }
+    }
+
+    /**
+     * Tres capas y sin tocar la regla de conteo: la pestaña directa de la
+     * página lleva `aria-current="page"`; la pestaña de grupo cuya sección
+     * está activa lleva `aria-current="true"` (el valor genérico que el
+     * proyecto ya usa en dos filtros) y el icono sólido; la fila de la hoja
+     * lleva el `page`. En /empleo el conjunto anunciado sigue siendo
+     * ['Empleo'] y dos, que es lo que NavegacionAgrupadaTest cuenta.
+     *
+     * Roturas: poner `page` en el botón de grupo; quitar el `true`; pintar el
+     * icono de contorno con la sección activa.
+     */
+    public function test_el_activo_se_anuncia_una_vez_por_ancho_y_el_grupo_por_su_cuenta(): void
+    {
+        $xpath = $this->arbol($this->cabecera('/empleo'));
+        $bolsas = $xpath->query('//header/nav[@id="menu-movil"]//button[@aria-controls="menu-bolsas-movil"]')->item(0);
+        $gremio = $xpath->query('//header/nav[@id="menu-movil"]//button[@aria-controls="menu-el-gremio-movil"]')->item(0);
+        $this->assertSame('true', $bolsas->getAttribute('aria-current'));
+        $this->assertStringContainsString('text-acento', $bolsas->getAttribute('class'));
+        $this->assertSame('', $gremio->getAttribute('aria-current'));
+        $this->assertStringNotContainsString('text-acento', $gremio->getAttribute('class'));
+        $this->assertSame(1, $xpath->query('//div[@id="menu-bolsas-movil"]/a[@aria-current="page"]')->length);
+
+        $xpath = $this->arbol($this->cabecera('/eventos'));
+        $eventos = $xpath->query('//header/nav[@id="menu-movil"]//a[@aria-current="page"]')->item(0);
+        $this->assertNotNull($eventos);
+        $this->assertSame(route('eventos.index'), $eventos->getAttribute('href'));
+        $this->assertStringContainsString('text-acento', $eventos->getAttribute('class'));
+        $this->assertSame(1, $xpath->query('.//*[local-name()="svg"][@fill="currentColor"]', $eventos)->length, 'la sección activa lleva el icono sólido');
+    }
+
+    /**
+     * La máquina móvil: por DIRECCIÓN y no por posición, con ancla en el
+     * extremo del recorrido (24 px para irse, 12 para volver), extremos del
+     * documento como zona muerta, saltos de más de 200 px ignorados, nada
+     * bajo movimiento reducido, y la frontera del CSS (64rem) como única
+     * frontera. Sin `reposar`: abrir una hoja no cambia el tamaño.
+     *
+     * Roturas: intercambiar 24 y 12; invertir `recorrido > 24`; borrar la rama
+     * de extremo; volver al alto del bloque contenedor inicial en el clamp;
+     * borrar la puerta de movimiento; devolver el ancho en píxeles.
+     */
+    public function test_la_maquina_movil_decide_por_direccion(): void
+    {
+        $navbar = File::get(resource_path('views/components/publico/navbar.blade.php'));
+
+        foreach ([
+            'compactar() {', 'posicion() {', 'menosMovimiento() {', 'medirTeclado() {', 'campoEnfocado() {', 'esCampo(',
+            'esEscritorio', "matchMedia('(min-width: 64rem)')", 'if (! this.esEscritorio) {',
+            'dentro <= 8', 'dentro >= tope', 'Math.abs(recorrido) > 200',
+            '(this.compacta && recorrido > 0) || (! this.compacta && recorrido < 0)',
+            'recorrido > 24', 'recorrido < -12',
+            'x-on:focusin.window="$nextTick(() => medirTeclado())"',
+            'x-on:focusout.window="if (! esCampo($event.relatedTarget)) teclado = false"',
+            'x-bind:data-teclado="teclado ? \'abierto\' : null"',
+            'x-bind:class="{ \'cromo-apoyado\': desplazado }"',
+            "this.\$dispatch('desplegable-abierto', null);",
+        ] as $literal) {
+            $this->assertStringContainsString($literal, $navbar, "el x-data del header perdió {$literal}");
+        }
+
+        $this->assertMatchesRegularExpression('/posicion\(\) \{[^}]*window\.innerHeight/', $navbar, 'el clamp usa el alto vigente del viewport');
+        $this->assertMatchesRegularExpression('/compactar\(\) \{\s*if \(this\.menosMovimiento\(\)\) \{\s*this\.compacta = false;\s*return;\s*\}/', $navbar, 'bajo movimiento reducido no hay estado scroll');
+        $this->assertMatchesRegularExpression('/menosMovimiento\(\) \{\s*return document\.documentElement\.classList\.contains\(\'sin-desplazamiento\'\);/', $navbar);
+        $this->assertMatchesRegularExpression('/medirTeclado\(\) \{[^}]*altoReferencia/', $navbar, 'el teclado se mide contra el mayor alto visto, no contra el del layout');
+
+        foreach (['menuMovil', 'x-on:resize.window', 'reposar', 'clientHeight', 'innerWidth'] as $muerto) {
+            $this->assertStringNotContainsString($muerto, $navbar, "{$muerto} volvió al header");
+        }
+    }
+
+    /**
+     * Roturas: volver a esconder el módulo de cuenta con `hidden lg:flex`;
+     * quitar el `@guest` de la fila de invitado; duplicar `control-tema`.
+     */
+    public function test_el_tema_y_la_cuenta_en_los_dos_anchos(): void
+    {
+        $html = $this->get('/contacto')->assertOk()->getContent();
+        $this->assertSame(1, substr_count($html, 'id="popover-tema"'));
+        $this->assertSame(2, substr_count($html, 'aria-label="Apariencia del sitio"'), 'el botón y el role=group del único control');
+        $this->assertStringContainsString('Entrar como afiliado', $html);
+        $this->assertStringNotContainsString('menu-cuenta', $html);
+        $this->assertStringNotContainsString('Cerrar sesión', $html);
+        $this->assertStringNotContainsString('modulo-cuenta hidden', File::get(resource_path('views/components/publico/navbar.blade.php')));
+        $this->assertStringContainsString(route('mi-cuenta.entrar'), File::get(resource_path('views/components/publico/footer.blade.php')) !== '' ? $html : '', 'el pie enlaza la entrada para todos los anchos');
+
+        $conSesion = $this->actingAs($this->usuarioCon([User::ROL_SUBADMIN]))->get('/contacto')->assertOk()->getContent();
+        $this->assertStringNotContainsString('Entrar como afiliado', $conSesion);
+        $this->assertStringContainsString('menu-cuenta', $conSesion);
+        $this->assertStringContainsString('Cerrar sesión', $conSesion);
+    }
+
+    /**
+     * Roturas: quitar `viewport-fit=cover`; volver a `scroll-pt-24` sin
+     * variante; volver a `min-h-screen`; devolver `pb-20` al hero.
+     */
+    public function test_el_layout_reserva_la_zona_segura_y_el_aire_del_movil(): void
+    {
+        $layout = File::get(resource_path('views/components/layouts/publico.blade.php'));
+        $this->assertStringContainsString('content="width=device-width, initial-scale=1, viewport-fit=cover"', $layout);
+        $this->assertStringContainsString('<html lang="es" class="lg:scroll-pt-24">', $layout);
+        $this->assertStringContainsString('<body class="min-h-svh bg-fondo text-tinta antialiased">', $layout);
+        $this->assertStringNotContainsString('min-h-screen', $layout);
+        $this->assertStringNotContainsString('barra-tema', $layout);
+
+        $hero = File::get(resource_path('views/components/publico/hero.blade.php'));
+        $this->assertStringContainsString("'flex min-h-[calc(100svh-1rem)] items-center pb-28 pt-28 sm:pt-32 lg:pb-24 lg:pt-36' => \$portada", $hero);
+        $this->assertStringNotContainsString('pb-20', $hero);
+    }
+```
+
+En la aserción del pie de `test_el_tema_y_la_cuenta_en_los_dos_anchos`, escribirla así de simple (lo de arriba tiene un ternario que sobra): `$this->assertStringContainsString('href="'.route('mi-cuenta.entrar').'"', File::get(resource_path('views/components/publico/footer.blade.php')) === '' ? '' : $html);` no; **la versión correcta** es una sola línea:
+
+```php
+        $this->assertMatchesRegularExpression('/<footer.*href="'.preg_quote(route('mi-cuenta.entrar'), '/').'"[^>]*>\s*Entrar a mi cuenta/s', $html, 'el pie enlaza la entrada en todos los anchos y sin JavaScript');
+```
+
+- [ ] **Step 2: Rojo** — Run: `php artisan test --compact tests/Feature/NavbarMovilTest.php tests/Feature/NavbarTresEstadosTest.php tests/Feature/TemaClaroOscuroTest.php`. Expected: rojas las seis nuevas y las actualizadas.
+
+- [ ] **Step 3: `navbar.blade.php`**
+
+1. Los arreglos, con `'icono'` en los cinco y `'pie'` en El gremio, exactamente como la spec §6.2 (`building-storefront`, `clipboard-document-check`, `calendar-days`, `briefcase`, `user-group`; `'pie' => [['ruta' => 'mi-cuenta.entrar', 'texto' => 'Entrar como afiliado', 'solo' => 'guest']]`). Fuera `$usuario` y `$esDelEquipo` del `@php` (solo los usaba el panel).
+2. Los comentarios Blade de arriba del header (`:46-59`): fuera los de `menuMovil` y las tres salidas; el de los tres estados gana «Bajo 64rem no hay atención: `scroll` lo decide la DIRECCIÓN del desplazamiento con ancla e histéresis (Parte II §4.2), y `data-teclado` retira el módulo inferior ante el teclado virtual».
+3. El `<header>` con el `x-data` **de la spec §4.2 entero** (con `atender()`, `soltar()` y `alternarAtencion()` copiados letra a letra de hoy) y estos atributos, en este orden:
+
+```blade
+        x-init="sincronizar()"
+        x-on:mouseenter="atender()"
+        x-on:mouseleave="soltar()"
+        x-on:scroll.window.passive="sincronizar()"
+        x-on:focusin.window="$nextTick(() => medirTeclado())"
+        x-on:focusout.window="if (! esCampo($event.relatedTarget)) teclado = false"
+        x-bind:data-estado="estado"
+        x-bind:data-teclado="teclado ? 'abierto' : null"
+        x-bind:class="{ 'cromo-apoyado': desplazado }"
+        data-estado="inicial"
+        class="cromo cromo-fijo z-40">
+```
+
+El comentario de `posicion()` no puede pegar la palabra que nombra al alto del bloque contenedor inicial (la guardia la prohíbe): «con el alto del bloque contenedor inicial el tope quedaba 80-110 px por encima del real».
+
+4. La `<nav>` gana `x-bind:aria-label="esEscritorio ? 'Navegación principal' : 'Marca y cuenta'"` antes de `aria-label="Navegación principal"` (la cadena de clases no cambia).
+5. El logo, con `@class([... , 'min-h-11', 'marca-compacta' => auth()->check()])` (spec §6.1).
+6. El módulo de cuenta: `class="modulo modulo-cuenta flex min-w-0 items-center gap-2 whitespace-nowrap lg:justify-self-end lg:px-2"`; «Mi cuenta» de invitado gana `max-lg:hidden` al FINAL de su lista (`... text-tenue hover:text-fuerte max-lg:hidden`).
+7. Fuera la hamburguesa (`:219-242`). Fuera el panel entero (`:259-363`). El `<noscript>` (`:248-257`) se queda.
+8. Tras el `<noscript>`, el `<nav id="menu-movil">` de la spec §6.2 (tres pestañas directas y los dos `menu-grupo variante="pestana"` con `:pie="$grupo['pie'] ?? []"`).
+
+`publico.blade.php`: `:2` pasa a `<html lang="es" class="lg:scroll-pt-24">`; `:5` a `content="width=device-width, initial-scale=1, viewport-fit=cover"`; `:49-51` la precarga del isotipo pierde el `media` y su comentario pasa a «El isotipo lo pinta la barra al hacer scroll en los dos anchos y con sesión en móvil: se precarga siempre, o el primer cruce parpadea»; `:189` a `<body class="min-h-svh bg-fondo text-tinta antialiased">` con un comentario encima «`svh` y no `screen`: en iOS `100vh` es el viewport grande y las páginas de un párrafo se desplazaban 80-110 px sin contenido, que la máquina por dirección leería como gesto»; fuera `:196` (`<x-publico.barra-tema />`). `git rm resources/views/components/publico/barra-tema.blade.php`. `hero.blade.php:41`: `'flex min-h-[calc(100svh-1rem)] items-center pb-28 pt-28 sm:pt-32 lg:pb-24 lg:pt-36' => $portada,` con un comentario «`pb-28`: 112 px cubren el módulo inferior de 68 más la zona segura de 34 (Parte II §6.4)». `footer.blade.php`, en la columna «El gremio», tras «Afíliate»: `<li><a href="{{ route('mi-cuenta.entrar') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Entrar a mi cuenta</a></li>`.
+
+- [ ] **Step 4: Verde**
+
+Run: `php artisan test --compact tests/Feature/NavbarMovilTest.php tests/Feature/NavbarTresEstadosTest.php tests/Feature/NavegacionAgrupadaTest.php tests/Feature/TemaClaroOscuroTest.php tests/Feature/ObjetivoTactilTest.php tests/Feature/MovimientoTest.php tests/Feature/CalendarioDeEventosTest.php tests/Feature/EscenaPublicaTest.php tests/Feature/TransicionesDeVistaTest.php tests/Feature/TipografiaTest.php tests/Feature/FormulariosPublicosTest.php`
+Expected: PASS salvo las guardias de CSS de la tarea 6, que todavía no existen. Si `TipografiaTest` u `ObjetivoTactilTest` cazan algo (un `leading-` o una cadena recortada), se arregla aquí y se anota.
+
+- [ ] **Step 5: Roturas** — quitar Eventos del arreglo (rojo en cinco destinos y en NavegacionAgrupadaTest); poner `aria-current="page"` en el botón de grupo (rojo en el activo y en NavegacionAgrupadaTest); intercambiar 24 y 12 (rojo en la máquina); volver `hidden lg:flex` en la cuenta (rojo en :505 y en el tema); devolver el `media` a la precarga (rojo).
+
+- [ ] **Step 6: Commit de trabajo** (`WIP 5: la barra en dos módulos, sin hamburguesa ni panel ni barra lateral`)
+
+---
+
+### Task 6: El CSS del móvil
+
+**Files:**
+- Modify: `resources/css/app.css:409-419` (`.cromo`), `:430-432` (apartado), `:467-482` (primer bloque móvil), `:575-597` (`.cromo::before` y fuera `.cromo-oculto`), `:759-775` (`.hoja-flotante`), `:777-859` (fuera `.tema-lateral*`), tras `:757` (el bloque móvil nuevo), `:1251-1254` (fuera la anulación de la clase de ocultación)
+- Test: `tests/Feature/NavbarTresEstadosTest.php:667-688`, `tests/Feature/NavbarMovilTest.php`
+
+**Interfaces:**
+- Consumes: los tokens (1), `data-estado`/`data-teclado`/`.marca-compacta`/`.modulo-inferior`/`.pestanas`/`.pestana__rotulo`/`.hoja-inferior` (4, 5).
+
+- [ ] **Step 1: Las guardias**
+
+`NavbarTresEstadosTest::test_el_movil_conserva_el_vidrio_de_la_barra` (`:667-688`): el docblock pasa a «El vidrio del móvil vive en el `::before` de la bandeja desde el 6 sep: un vidrio no es ancestro de otro vidrio (raíz de fondo), y las hojas que cuelgan de la bandeja tienen que desenfocar la página, no el interior de la bandeja. Rotura: devolver el `backdrop-filter` a `.bandeja`.», y el cuerpo a:
+
+```php
+        $css = File::get(resource_path('css/app.css'));
+
+        $movil = strstr($css, '@media (max-width: 63.999rem) {');
+        $this->assertNotFalse($movil, 'app.css ya no tiene el bloque de vidrio del móvil');
+        $vidrio = $this->regla($movil, '.bandeja::before');
+
+        $this->assertStringContainsString('background-color: var(--asb-cromo-velo);', $vidrio);
+        $this->assertStringContainsString('-webkit-backdrop-filter: var(--asb-cromo-desenfoque);', $vidrio);
+        $this->assertStringContainsString('backdrop-filter: var(--asb-cromo-desenfoque);', $vidrio);
+        $this->assertStringContainsString('var(--asb-cromo-apoyo)', $vidrio);
+
+        $bandeja = $this->regla($movil, '.bandeja');
+        $this->assertStringNotContainsString('backdrop-filter', $bandeja, 'la bandeja no es raíz de fondo');
+        $this->assertStringContainsString('height: var(--asb-alto-modulo-superior);', $bandeja);
+```
+
+`NavbarMovilTest`, nueve pruebas:
+
+```php
+    /**
+     * Roturas: devolver `transform: translateY(0)` a `.cromo`; devolver la
+     * clase de ocultación del cromo.
+     */
+    public function test_el_cromo_ya_no_es_bloque_contenedor(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+        $cromo = $this->regla($css, '.cromo');
+
+        foreach (['transform', 'filter', 'will-change', 'contain', 'opacity'] as $prohibido) {
+            $this->assertStringNotContainsString($prohibido, $cromo, ".cromo con {$prohibido} es bloque contenedor de todo fixed descendiente");
+        }
+        $this->assertStringContainsString('isolation: isolate;', $cromo);
+        $this->assertStringNotContainsString('.cromo-'.'oculto', $css, 'la clase de ocultación del cromo, que nadie usaba, se retiró con su transform');
+        $this->assertStringNotContainsString('.tema-lateral', $css);
+        $this->assertStringNotContainsString('view-transition-name', $css, 'un elemento con nombre de transición de vista es raíz de fondo');
+    }
+
+    /** Rotura: mover el vidrio del pseudoelemento al módulo; escribir `blur(14px)`. */
+    public function test_los_dos_modulos_son_vidrio_por_token_en_su_pseudoelemento(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+        $movil = $this->bloque($css, '@media (max-width: 63.999rem)', 2);
+
+        $vidrio = $this->regla($movil, '.modulo-inferior::before');
+        $this->assertStringContainsString('background-color: var(--asb-cromo-velo);', $vidrio);
+        $this->assertStringContainsString('-webkit-backdrop-filter: var(--asb-cromo-desenfoque);', $vidrio);
+        $this->assertStringContainsString('backdrop-filter: var(--asb-cromo-desenfoque);', $vidrio);
+        $this->assertStringContainsString('var(--asb-cromo-apoyo-inferior)', $vidrio);
+
+        $modulo = $this->regla($movil, '.modulo-inferior');
+        foreach (['backdrop-filter', 'filter:', 'blur(', 'contain:', 'height'] as $prohibido) {
+            $this->assertStringNotContainsString($prohibido, $modulo);
+        }
+        $this->assertStringContainsString('position: fixed;', $modulo);
+        $this->assertStringContainsString('bottom: 0;', $modulo);
+        $this->assertStringContainsString('padding-bottom: env(safe-area-inset-bottom, 0px);', $modulo);
+        // El inset de la zona segura no entra en ninguna propiedad transicionada.
+        $this->assertSame(1, preg_match('/transition:([^;]*);/s', $modulo, $transicion));
+        $this->assertStringNotContainsString('env(', $transicion[1]);
+        $this->assertStringNotContainsString('height', $transicion[1]);
+
+        $this->assertStringNotContainsString('blur(', $movil, 'el vidrio del móvil no lleva blur literal');
+        $this->assertStringNotContainsString('drop-'.'shadow', $movil, 'las sombras van en box-shadow: una sombra por filtro anula el vidrio de dentro');
+    }
+
+    /** Rotura: animar la altura con otro reloj; reasignar un tercer token en el estado. */
+    public function test_el_estado_cambia_dos_tokens_y_nada_mas(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+        $movil = $this->bloque($css, '@media (max-width: 63.999rem)', 2);
+
+        $estado = $this->regla($movil, '.cromo[data-estado="scroll"]');
+        $this->assertStringContainsString('--asb-alto-modulo-superior: var(--asb-alto-modulo-superior-compacto);', $estado);
+        $this->assertStringContainsString('--asb-alto-modulo-inferior: var(--asb-alto-modulo-inferior-compacto);', $estado);
+        $this->assertSame(2, substr_count($estado, ';'), 'el estado no hace nada más');
+
+        $this->assertStringContainsString('height: var(--asb-alto-modulo-inferior);', $this->regla($movil, '.pestanas'));
+        $this->assertStringContainsString('height var(--duracion-estado) var(--ease-rebote-suave)', $this->regla($movil, '.pestanas'));
+        $this->assertStringContainsString('grid-template-rows: 0fr;', $this->regla($movil, '[data-estado="scroll"] .pestana__rotulo'));
+        $this->assertSame(0, preg_match('/height var\(--duracion-(?!estado\))/', $movil), 'toda altura del móvil se anima con el reloj de estado');
+    }
+
+    /** Rotura: borrar la raya del inferior. */
+    public function test_las_dos_rayas_de_apoyo_se_encienden_juntas(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+        $antes = strstr($css, '@media (min-width: 64rem) {', true);
+        $despues = strstr($css, '@media (min-width: 64rem) {');
+
+        $this->assertStringContainsString('.cromo-apoyado::before {', $antes);
+        $this->assertStringContainsString('.cromo-apoyado .modulo-inferior::after {', $despues);
+        $this->assertStringContainsString('opacity: 1;', $this->regla($despues, '.cromo-apoyado .modulo-inferior::after'));
+    }
+
+    /** Rotura: poner `line-clamp`; quitar `overflow-wrap: anywhere`. */
+    public function test_el_rotulo_no_recorta(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+        $movil = $this->bloque($css, '@media (max-width: 63.999rem)', 2);
+
+        $this->assertStringContainsString('overflow-wrap: anywhere;', $this->regla($movil, '.pestana__rotulo > span'));
+        $this->assertStringContainsString('min-height: var(--asb-alto-rotulo-pestana);', $this->regla($movil, '.pestana__rotulo'));
+        foreach (['navbar', 'menu-grupo'] as $vista) {
+            $this->assertStringNotContainsString('line-clamp', File::get(resource_path("views/components/publico/{$vista}.blade.php")));
+        }
+    }
+
+    /** Rotura: sacar `overflow-y: auto` de la media de apaisado. */
+    public function test_la_hoja_no_bloquea_el_gesto_en_vertical(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+        $movil = $this->bloque($css, '@media (max-width: 63.999rem)', 2);
+        $apaisado = $this->bloque($movil, '@media (orientation: landscape) and (max-height: 30rem)');
+
+        $hoja = $this->regla($movil, '.hoja-inferior');
+        foreach (['overflow-y', 'overscroll-behavior', 'touch-action'] as $prohibido) {
+            $this->assertStringNotContainsString($prohibido, $hoja, 'en vertical desplazarse es cerrar');
+        }
+        $this->assertStringContainsString('touch-action: pan-y pinch-zoom;', $this->regla($apaisado, '.hoja-flotante'));
+        $this->assertStringContainsString('overscroll-behavior: contain;', $this->regla($apaisado, '.hoja-flotante'));
+
+        $primero = $this->bloque($css, '@media (max-width: 63.999rem)', 1);
+        $this->assertLessThan(strpos($css, '.hoja-inferior {'), strpos($css, '.hoja-flotante {'), 'la hoja del móvil se apoya en el material de siempre');
+        $this->assertStringContainsString('var(--asb-hoja-velo)', $this->regla($css, '.hoja-flotante'));
+        $this->assertStringNotContainsString('color-mix(', $this->regla($css, '.hoja-flotante'));
+        $this->assertStringNotContainsString('.modulo-inferior', $primero, 'el módulo inferior vive en el segundo bloque, tras el de escritorio');
+    }
+
+    /** Rotura: poner el cruce antes de `.logo-doble {`; quitar `marca-compacta`. */
+    public function test_la_marca_cruza_sin_recortarse(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+        $navbar = File::get(resource_path('views/components/publico/navbar.blade.php'));
+
+        $this->assertStringContainsString("'marca-compacta' => auth()->check()", $navbar);
+        $this->assertStringContainsString("'min-h-11',", $navbar);
+        $this->assertGreaterThan(strpos($css, '.logo-doble {'), strpos($css, '.marca-compacta .logo-doble {'), 'el cruce va DESPUÉS de la primera regla del logo, que es la que la guardia de escritorio lee');
+        $this->assertGreaterThan(strpos($css, '.logo-doble {'), strpos($css, '[data-estado="scroll"] .logo-doble,'));
+        $movil = $this->bloque($css, '@media (max-width: 63.999rem)', 2);
+        foreach (['object-fit', 'clip-path', 'mask', 'filter:'] as $prohibido) {
+            $this->assertStringNotContainsString($prohibido, $movil, 'la marca no se recorta ni se recolorea');
+        }
+
+        $this->assertStringNotContainsString('marca-compacta', $this->cabecera('/contacto'));
+        $this->assertStringContainsString('marca-compacta', $this->actingAs($this->usuarioCon([User::ROL_SUBADMIN]))->get('/contacto')->getContent());
+    }
+
+    /** Rotura: quitar `visibility: hidden` de la retirada. */
+    public function test_la_barra_se_retira_ante_el_teclado(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+        $retirada = $this->regla($this->bloque($css, '@media (max-width: 63.999rem)', 2), '.cromo[data-teclado="abierto"] .modulo-inferior');
+
+        $this->assertStringContainsString('visibility: hidden;', $retirada);
+        $this->assertStringContainsString('translate: 0 var(--asb-retirada-barra);', $retirada);
+    }
+
+    /** Rotura: devolver el `+` al selector; borrar el padding del body; quitar la media de 20rem. */
+    public function test_el_apartado_no_cuelga_del_orden_de_landmarks_ni_del_zoom(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+        $movil = $this->bloque($css, '@media (max-width: 63.999rem)', 2);
+
+        $this->assertStringContainsString('.cromo-fijo ~ main > section:first-child:not(.hero-portada) {', $css);
+        $this->assertStringNotContainsString('.cromo-fijo + ', $css);
+        $this->assertStringContainsString('padding-bottom: calc(var(--asb-alto-modulo-inferior) + env(safe-area-inset-bottom, 0px));', $this->regla($movil, 'body'));
+        $this->assertStringContainsString('padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);', $this->regla($movil, 'body'));
+        $this->assertStringContainsString('scroll-padding-top: calc(var(--asb-alto-modulo-superior)', $this->regla($movil, 'html'));
+        $this->assertStringContainsString('scroll-padding-bottom', $this->regla($movil, 'html'));
+        $this->assertStringContainsString('safe-area-inset-left', $this->regla($movil, '.cromo-fijo'));
+        $this->assertStringContainsString('position: static;', $this->regla($this->bloque($movil, '@media (max-height: 20rem)'), '.modulo-inferior'));
+    }
+```
+
+- [ ] **Step 2: Rojo** — Run: `php artisan test --compact tests/Feature/NavbarMovilTest.php tests/Feature/NavbarTresEstadosTest.php`. Expected: rojas las nueve y la del vidrio.
+
+- [ ] **Step 3: El CSS** — exactamente el de la spec §6.4 («El CSS del móvil, entero»), con estas precisiones: (1) el comentario de `.cromo` no pega la clase de ocultación; (2) el primer bloque móvil sustituye al de hoy (`:467-482`) y su comentario pasa a «El vidrio del móvil vive en el pseudoelemento de la bandeja: un vidrio no es ancestro de otro vidrio (raíz de fondo, Filter Effects 2), y las hojas que cuelgan de ella desenfocan la página y no el interior de la bandeja. El header es fijo desde la portada a pantalla completa»; (3) se borran `.cromo-oculto` (`:594-597`) y su regla en el bloque reducido (`:1251-1254`), y `.tema-lateral*` entero (`:777-859`); (4) `.hoja-flotante` pasa a `background: radial-gradient(16rem circle at 18% 0%, rgb(238 65 55 / 0.09), transparent 54%), var(--asb-hoja-velo);` con el comentario «el velo por token: sólido bajo transparencia reducida y bajo más contraste»; (5) el segundo bloque móvil va inmediatamente después del cierre de `@media (hover: hover) and (pointer: fine) { ... }` (`:757`), dentro de `@layer components`.
+
+- [ ] **Step 4: Compilar y ver verde**
+
+Run: `php artisan view:clear && npm run build` y después `php artisan test --compact tests/Feature/NavbarMovilTest.php tests/Feature/NavbarTresEstadosTest.php tests/Feature/MovimientoTest.php tests/Feature/EscenaPublicaTest.php`. Expected: build sin errores (Lightning CSS acepta las medias anidadas), PASS.
+
+- [ ] **Step 5: Roturas** — devolver `transform: translateY(0)` a `.cromo` (rojo); mover `backdrop-filter` de `.modulo-inferior::before` a `.modulo-inferior` (rojo); poner `height: calc(var(--asb-alto-modulo-inferior) + env(safe-area-inset-bottom, 0px))` en `.modulo-inferior` con su transición (rojo); mover el cruce del logo antes de `.logo-doble {` (rojo); sacar `overflow-y: auto` de la media de apaisado (rojo).
+
+- [ ] **Step 6: Commit de trabajo** (`WIP 6: el CSS del móvil`)
+
+---
+
+### Task 7: El usuario demo de secretaría es una persona (D-M15)
+
+**Files:**
+- Modify: `database/seeders/UsuarioSeeder.php:44`
+- Test: `tests/Feature/NavbarMovilTest.php`
+
+- [ ] **Step 1: La guardia**
+
+```php
+    /**
+     * El chip diría «Sec. Secretaría del c…» a 360 px con el usuario demo de
+     * la oficina (D-M15). Es dato de semilla, no de producción.
+     * Rotura: devolver «Secretaría del capítulo».
+     */
+    public function test_el_usuario_demo_de_secretaria_es_una_persona(): void
+    {
+        $sembrador = File::get(database_path('seeders/UsuarioSeeder.php'));
+
+        $this->assertStringNotContainsString('Secretaría del capítulo', $sembrador);
+        $this->assertStringContainsString("'name' => 'Mariana Restrepo',", $sembrador);
+    }
+```
+
+- [ ] **Step 2: Rojo, código, verde** — `'name' => 'Secretaría del capítulo',` pasa a `'name' => 'Mariana Restrepo',` con un comentario encima («Una persona y no el cargo: el chip de la barra móvil muestra nombre y rango, y «Sec. Secretaría del c…» decía dos veces lo mismo (D-M15, 6 sep)»). Run: `php artisan test --compact --filter=test_el_usuario_demo_de_secretaria_es_una_persona` y `grep -rn "Secretaría del capítulo" tests/ app/ resources/ docs/ingenieria/*.md` (nada más que cambiar; `manual-de-usuario.md` no la nombra).
+
+- [ ] **Step 3: Commit de trabajo** (`WIP 7: el usuario demo de secretaría es una persona`)
+
+---
+
+### Task 8: Pint, la suite entera y la pasada de mutaciones
+
+- [ ] **Step 1:** `vendor/bin/pint --dirty --format agent`.
+- [ ] **Step 2:** `php artisan view:clear && npm run build && php artisan test --compact`. Expected: 0 fallos. Anotar casos, aserciones y segundos para el cierre (cifra medida ese día).
+- [ ] **Step 3: Mutaciones**, una por guardia nueva y en este orden, cada una vista roja y deshecha antes de la siguiente: (1) `--asb-retirada-barra: 0%` fuera del bloque reducido; (2) velo claro al 72 %; (3) `contains` fuera de `cerrarSiSeDesplaza`; (4) `x-on:pageshow.window` fuera de control-tema; (5) `text-apagado` en el rango; (6) `-movil` fuera del id de la pestaña; (7) Eventos fuera del arreglo; (8) `aria-current="page"` en el botón de grupo; (9) 24 y 12 intercambiados; (10) `hidden lg:flex` de vuelta en la cuenta; (11) `media` de vuelta en la precarga; (12) `transform: translateY(0)` de vuelta en `.cromo`; (13) el vidrio de `::before` al módulo; (14) `env()` en la altura transicionada; (15) el cruce del logo antes de `.logo-doble {`; (16) `overflow-y: auto` fuera de la media de apaisado; (17) `line-clamp-2` en el rótulo; (18) `Secretaría del capítulo` de vuelta. Un guion `f5/mutar.pl` con `mutar N` / `restaurar N` y `git diff --stat` limpio al final.
+
+---
+
+### Task 9: Chromium: raíz de fondo, geometría, dirección, hojas, teclado y las cifras de `ObjetivoTactilTest`
+
+**Files:**
+- Create (scratchpad, no repositorio): `f5/verificar-movil.js` y sucesivos, con `playwright-cli open` / `run-code --filename` / `close` contra `http://localhost:8123` (el servidor de `preview` de la sesión; si no está, `preview_start`).
+- Modify: `tests/Feature/ObjetivoTactilTest.php` (las filas de la spec §8.3, con la cifra medida).
+
+- [ ] **Step 1:** Los once puntos de la spec §8.4 en este orden, cada uno con su cifra en `f5/medidas.md`: (1) `getImageData` sobre una franja de texto tras cada módulo y tras cada hoja abierta (las cuatro), en los dos temas; (2) contraste medido del rótulo activo, del de reposo y del rango sobre `/directorio` con fotos; (3) `getBoundingClientRect().bottom === window.innerHeight` del inferior a 390 y a 768 con `scrollY` 0 y 600, y `display: none` a 1280; (4) altos 56/68 y 48/48; objetivos de §8.3 con `elementFromPoint` sobre el cuadrado de 44 en `inicial` y `scroll`, a 320 y 390; «Abre tu negocio» en dos líneas sin recorte y las otras cuatro en una (`scrollWidth <= clientWidth`), también con el espaciado de texto de WCAG 1.4.12; el `<h1>` de /contacto y el primer campo de /afiliate bajo el superior; el último enlace del pie con la página al final; `/directorio?vista=mapa`; (5) dirección e histéresis desde cualquier parada: pasos de 10 px, cambia entre 24 y 32, subir 10 no devuelve y 13 sí, `scrollTo(0)` devuelve, salto de 600 no cambia, `scrollTo(scrollHeight + 50)` no cambia, `cromo-apoyado` sigue a media página, abrir una hoja no cambia el alto; (6) hojas: Bolsas abre, El gremio cierra la primera, el tema cierra la de abajo, `pointerdown` fuera cierra, arrastre de 30 px sobre la hoja cierra, Enter + Tab + flecha abajo deja el foco dentro, Escape devuelve el foco; con sesión la hoja de cuenta no desborda a 320 y «Cerrar sesión» a un toque; anónimo ve «Entrar como afiliado»; (7) teclado con `visualViewport` emulado por CDP: `data-teclado="abierto"` y `visibility: hidden`, sin parpadeo entre campos (`MutationObserver`), la casilla de habeas data no lo retira; (8) 768×1024, 844×390 y 320×180; girar de 820 a 1180 con una hoja abierta la cierra; (9) movimiento reducido (`sin-desplazamiento` puesto por `addInitScript`): `data-estado` no cambia; transparencia reducida y más contraste por CDP: `backdrop-filter: none` computado en los dos `::before`; (10) portada con el video corriendo: trazado del compositor a 390×844 (`page.tracing` o `Performance` por CDP), presupuesto 4 ms por fotograma; (11) el punto 11 (dispositivo real) queda para la S7 y se anota en el estado.
+- [ ] **Step 2:** Capturas para Sua en el scratchpad (`f5-*.png`): portada y /contacto a 390 en `inicial` y `scroll`, claro y oscuro, anónimo y con sesión; Bolsas abierta; la cuenta abierta; 768 y 844×390.
+- [ ] **Step 3:** Las filas de §8.3 entran en `ObjetivoTactilTest::cadenasMedidas()` **con la cifra medida** en su tercera columna; `php artisan test --compact tests/Feature/ObjetivoTactilTest.php`.
+- [ ] **Step 4:** Lo que no cuadre se arregla con su guardia y su rotura, y se apunta en `f5/medidas.md` para el cierre. Commit de trabajo (`WIP 9: cifras medidas en Chromium`).
+
+---
+
+### Task 10: Revisión adversaria y arreglos
+
+- [ ] **Step 1:** Con la skill de revisión de código de la sesión (`/code-review` a nivel alto sobre la rama, o `superpowers:requesting-code-review`): tres lentes como el 5 sep (Alpine, CSS, guardias) más la de iOS y Android reales. Cada hallazgo se verifica antes de tocar nada.
+- [ ] **Step 2:** Cada arreglo con su guardia vista roja. Commits de trabajo.
+
+---
+
+### Task 11: Documentación, un solo commit de código y el cierre
+
+- [ ] **Step 1: La Parte I gana sus notas fechadas** (spec Parte II §7): §1 («Un rediseño del móvil... no se tocan» gana «**6 sep:** la Parte II lo rediseña»), §3.1 («un solo `<nav>`» gana «**6 sep:** dos, D-M9»), §3.8 (los popovers antes de `<nav id="menu-movil">`), §6.4 (la barra lateral «se conserva solo por debajo de 1024 px» gana «**6 sep:** retirada, D-M6») y §8 («conserva `.cromo-oculto`, `.tema-lateral*`» gana «**6 sep:** retirados»). En la Parte II: §5.2 con el porcentaje final del velo si cambió, §8.3 con las cifras medidas, y una sección «§13. Lo que la construcción cambió» si algo de §4-§6 se apartó de lo escrito.
+- [ ] **Step 2: `material/encargo.md` §13**, una fila fechada 6 sep 2026: «**La barra móvil 2.1: dos módulos, el inferior fijo con las cinco secciones y dos hojas, sin hamburguesa ni panel en plano ni barra lateral de tema.** Los seis destinos plegados pasan de un toque a dos a cambio de una barra siempre visible; el tema ofrece Sistema también en móvil; el chip de idioma se oculta bajo 64rem hasta que exista la traducción. Dieciocho decisiones de Sua (spec Parte II §2)».
+- [ ] **Step 3: `docs/ingenieria/matriz-de-pruebas.md`**: las tres cifras móviles caducadas (cabecera 56, panel 772, 594 objetivos) se sustituyen por las medidas o se marcan como re-medidas ese día.
+- [ ] **Step 4: Un solo commit de código.** `GIT_OPTIONAL_LOCKS=0 git reset --soft <commit de la Parte II aprobada>` y un commit con vista, CSS, tokens, JS, sembrador y guardias juntos (mensaje en español con el porqué: partido, ids duplicados o suite roja); después un commit de documentación (spec, encargo, matriz) y el commit de cierre (`estado.md` con el commit nuevo, `bitacora.md` §41).
+- [ ] **Step 5: Cierre del estado:** D-34 sale de pendientes (resuelta por Sua el 6 sep) y entra en «Decisiones que rigen»; el estado dice que la rama existe, qué se midió y qué falta (dispositivo real, S7); las cifras del §5 se re-miden ese día. `estado.md` con el commit nuevo en el encabezado; `bitacora.md` §41 con lo que se hizo, lo que se midió, lo que se aprendió.
+- [ ] **Step 6:** No se fusiona ni se empuja sin que Sua lo pida: se le presentan las capturas, las cifras y las decisiones que la verificación haya dejado abiertas.
+
+## Self-review
+
+- **Cobertura de la spec:** §3.3 (tarea 6), §3.4 (6), §3.7 (5 y 6), §4.1 (5), §4.2 (5), §5.1-5.3 (1 y 6), §6.1 (3 y 5), §6.2 (5), §6.3 (2, 3 y 4), §6.4 (5 y 6), §7 (todas), §8.1 (1, 2, 3, 5, 6), §8.2 (1-7), §8.3 (9), §8.4 (9), D-M15 (7), notas de la Parte I y encargo (11). Sin huecos.
+- **Placeholders:** ninguno; los bloques de código que no se repiten remiten a secciones de la spec que los traen tal cual.
+- **Consistencia de nombres:** `posicionDelDocumento` (2, 5), `cerrarSiSeDesplaza` (2, 3), `scrollAlAbrir` (2), `menu-{slug}-movil` (4, 5), `pestana`/`pestanas`/`pestana__rotulo`/`hoja-inferior`/`modulo-inferior`/`marca-compacta` (4, 5, 6), `--asb-alto-*`/`--asb-desplazamiento-hoja`/`--asb-retirada-barra`/`--asb-hoja-velo`/`--asb-cromo-apoyo-inferior` (1, 4, 6), `data-teclado` (5, 6), `esEscritorio`/`compacta`/`altoReferencia` (5).

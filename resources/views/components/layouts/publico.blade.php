@@ -7,10 +7,10 @@
 ])
 
 <!DOCTYPE html>
-<html lang="es" class="scroll-pt-24">
+<html lang="es" class="lg:scroll-pt-24">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ $titulo ?? ajuste('sitio_nombre') }}</title>
@@ -54,9 +54,10 @@
         tiene que cambiar aquí o la precarga deja de servir para nada.
     --}}
     <link rel="preload" as="image" href="{{ asset('img/logo-asobares.png') }}" fetchpriority="high">
-    {{-- El isotipo solo lo pinta la barra de escritorio al hacer scroll; se
-         precarga solo ahí, o el cruce de logo parpadea la primera vez. --}}
-    <link rel="preload" as="image" href="{{ asset('img/monograma-asobares.png') }}" media="(min-width: 64rem)">
+    {{-- El isotipo lo pinta la barra al hacer scroll en los dos anchos, y con
+         sesión en móvil desde el primer pintado: se precarga siempre, o el
+         primer cruce parpadea (defecto medido en la bitácora). --}}
+    <link rel="preload" as="image" href="{{ asset('img/monograma-asobares.png') }}">
     {{-- El valor claro es el que corresponde al marcado servido: sin la clase
          `.dark` el CSS pinta el tema claro. El script de abajo lo corrige al
          instante según la preferencia real. --}}
@@ -194,7 +195,10 @@
     {{ Vite::fonts() }}
     @stack('cabeza')
 </head>
-<body class="min-h-screen bg-fondo text-tinta antialiased">
+{{-- `svh` y no `screen`: en iOS `100vh` es el viewport grande y las páginas
+     de un párrafo se desplazaban 80-110 px sin contenido, que la máquina por
+     dirección de la barra móvil leería como un gesto. --}}
+<body class="min-h-svh bg-fondo text-tinta antialiased">
     <a href="#contenido"
        class="pulsable sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:flex focus:min-h-11 focus:items-center focus:rounded-lg focus:bg-marca-500 focus:px-4 focus:py-2 focus:text-white">
         Saltar al contenido
@@ -202,7 +206,6 @@
 
     @unless ($sinNavegacion)
         <x-publico.navbar />
-        <x-publico.barra-tema />
     @endunless
 
     <main id="contenido">

@@ -12,8 +12,8 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * El sitio público se puede ver en claro o en oscuro, y el control vive en una
- * barra lateral fija que acompaña el scroll.
+ * El sitio público se puede ver en claro o en oscuro, y el control vive en la
+ * barra de navegación, en los dos anchos (desde el 6 sep 2026).
  */
 class TemaClaroOscuroTest extends TestCase
 {
@@ -89,9 +89,8 @@ class TemaClaroOscuroTest extends TestCase
      * dispositivo; lo que cambia es que se puede VOLVER a él tras forzar uno.
      * Anotado en encargo.md §13.
      *
-     * Las cadenas '>Claro<' y '>Oscuro<' las emiten dos controles a la vez:
-     * la barra lateral (móvil) y el popover (escritorio). '>Sistema<' solo el
-     * popover.
+     * Las tres cadenas las emite un solo control: el popover de la barra, que
+     * desde el 6 sep es el mismo en los dos anchos.
      */
     public function test_el_selector_ofrece_claro_oscuro_y_sistema(): void
     {
@@ -108,18 +107,19 @@ class TemaClaroOscuroTest extends TestCase
     }
 
     /**
-     * Desde el 3 sep 2026 el tema de escritorio vive en la barra de
-     * navegación (popover-tema) y la barra lateral se queda solo en móvil.
+     * Desde el 6 sep 2026 (Parte II, D-M6 y D-M17) el tema vive en la barra en
+     * los dos anchos: la barra lateral de móvil se retiró. Rotura: esconder
+     * el botón de tema bajo 64rem con `hidden lg:flex`.
      */
-    public function test_el_control_de_tema_vive_en_la_barra_lateral_en_movil_y_en_la_navbar_en_escritorio(): void
+    public function test_el_control_de_tema_vive_en_la_navbar_en_los_dos_anchos(): void
     {
-        $respuesta = $this->get('/contacto');
+        $html = $this->get('/contacto')->assertOk()->getContent();
 
-        $respuesta->assertOk()
-            ->assertSee('tema-lateral fixed', false)
-            ->assertSee('sm:top-1/2', false)
-            ->assertSee('sm:-translate-y-1/2 lg:hidden', false)
-            ->assertSee('id="popover-tema"', false);
+        $this->assertStringNotContainsString('tema-lateral', $html);
+        $this->assertSame(1, substr_count($html, 'id="popover-tema"'), 'un solo popover de tema en la página');
+        $this->assertSame(1, preg_match('/<button[^>]*aria-controls="popover-tema"[^>]*class="([^"]*)"/', $html, $clases));
+        $this->assertStringNotContainsString('hidden', $clases[1]);
+        $this->assertStringNotContainsString('lg:', $clases[1]);
     }
 
     // --- Quién ve qué en el desplegable de cuenta ---

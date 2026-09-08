@@ -7,8 +7,8 @@ Alpine.plugin(collapse);
  * Preferencia de tema del sitio público.
  *
  * El pintado ya lo resolvió el script síncrono del <head>; este store existe
- * solo para que los dos controles —el del desplegable de escritorio y el del
- * menú móvil— compartan estado y se marquen como activos a la vez.
+ * para que el control de tema de la barra, que es el mismo en los dos anchos,
+ * sepa qué preferencia marcar como activa y qué icono pintar.
  *
  * La clave `theme` es la misma que usa Filament, así que elegir aquí cambia
  * también el panel /admin.
@@ -76,6 +76,11 @@ Alpine.store('tema', {
 const reduceMovimiento = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const punteroFino = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
+// Dentro del documento: ni el rebote elástico de iOS por debajo de 0 ni el
+// de más allá del final cuentan. El navegador acota scrollY con el alto
+// VIGENTE del viewport, que en iOS crece al plegarse la barra de direcciones.
+const posicionDelDocumento = () => Math.min(Math.max(window.scrollY, 0), Math.max(document.documentElement.scrollHeight - window.innerHeight, 0));
+
 /*
  * Luz que sigue al puntero e inclinación mínima. Se apagan si pidieron
  * menos movimiento o si no hay puntero fino: en táctil el rastro se
@@ -105,22 +110,25 @@ Alpine.data('escena', () => ({
 }));
 
 /*
- * Desplegable de la barra de escritorio. Los dos grupos, la cuenta, el tema
- * y el idioma son el mismo «disclosure» —botón con aria-expanded y el panel
+ * Desplegable de la barra, en los dos anchos: los dos grupos, la cuenta, el
+ * tema y el idioma en escritorio; las dos hojas del módulo inferior, la
+ * cuenta y el tema en móvil. Todos son el mismo «disclosure» —botón con aria-expanded y el panel
  * que controla— y se comportan igual: con puntero fino se asoma al pasar y
  * se retira con una gracia que perdona el camino hasta el panel; con dedo y
  * con teclado, al pulsar. Abrir uno avisa a los demás y esos ceden al
  * instante, así que nunca hay dos paneles abiertos a la vez, que era como el
  * popover de tema y el de idioma se pisaban al pasar del sol al chip.
  *
- * Los cableados (pointerenter, pointerleave, click.outside, focusout, Escape y
- * el aviso) van en cada vista y no aquí: las guardias los leen crudos.
+ * Los cableados (pointerenter, pointerleave, click.outside, pointerdown fuera,
+ * focusout, Escape, el aviso, el scroll y el bfcache) van en cada vista y no
+ * aquí: las guardias los leen crudos.
  */
 const GRACIA_AL_RETIRAR_MS = 280;
 
 Alpine.data('desplegable', () => ({
     abierto: false,
     cierre: null,
+    scrollAlAbrir: 0,
 
     // La identidad es `$root` y NO `$el`: dentro de un método, `$el` es el
     // elemento de la directiva que lo llamó, o sea el botón cuando se abre
@@ -130,12 +138,28 @@ Alpine.data('desplegable', () => ({
     abrir() {
         clearTimeout(this.cierre);
         this.abierto = true;
+        this.scrollAlAbrir = posicionDelDocumento();
         this.$dispatch('desplegable-abierto', this.$root);
     },
 
     cerrar() {
         clearTimeout(this.cierre);
         this.abierto = false;
+    },
+
+    // Desplazarse es cerrar: 24 px desde que se abrió, el umbral con el que el
+    // header suelta la atención con dedo. Salvo con el foco DENTRO: quien
+    // baja con una flecha o AvPág mientras recorre la hoja está usando el
+    // teclado, no yéndose, y cerrarle el panel bajo el foco lo tira al body
+    // (el defecto que el 5 sep se corrigió para Escape).
+    cerrarSiSeDesplaza() {
+        if (! this.abierto || this.$root.contains(document.activeElement)) {
+            return;
+        }
+
+        if (Math.abs(posicionDelDocumento() - this.scrollAlAbrir) > 24) {
+            this.cerrar();
+        }
     },
 
     alternar() {

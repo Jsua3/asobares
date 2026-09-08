@@ -23,9 +23,12 @@ use App\Providers\Filament\AdminPanelProvider;
 use Database\Seeders\RolYPermisoSeeder;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
+use Filament\Support\View\ComponentAttributeBag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -431,7 +434,8 @@ class TableroTest extends TestCase
 
     /**
      * Composición visual del tablero: en `xl` (6 columnas) recaudo ocupa 4
-     * y municipios 2, en la misma fila. El resto va a todo el ancho. En
+     * y municipios 2, en la misma fila. El resto va a todo el ancho, y lo
+     * declara desglosado porque `'full'` a secas solo llega a `lg`. En
      * `md` y móvil las dos gráficas siguen en `full` para que doce
      * municipios no queden ilegibles. Esto no cubre datos ni permisos.
      *
@@ -440,8 +444,16 @@ class TableroTest extends TestCase
     private function anchosAprobadosDelTablero(): array
     {
         return [
-            PendientesDeAprobacion::class => 'full',
-            ResumenDelGremio::class => 'full',
+            PendientesDeAprobacion::class => [
+                'default' => 'full',
+                'md' => 'full',
+                'xl' => 'full',
+            ],
+            ResumenDelGremio::class => [
+                'default' => 'full',
+                'md' => 'full',
+                'xl' => 'full',
+            ],
             RecaudoMensual::class => [
                 'default' => 'full',
                 'md' => 'full',
@@ -452,8 +464,62 @@ class TableroTest extends TestCase
                 'md' => 'full',
                 'xl' => 2,
             ],
-            UltimasTransacciones::class => 'full',
+            UltimasTransacciones::class => [
+                'default' => 'full',
+                'md' => 'full',
+                'xl' => 'full',
+            ],
         ];
+    }
+
+    /**
+     * Un `columnSpan` sin desglosar no se aplica en todos los anchos: Filament
+     * lo guarda como `['lg' => …]`, y la regla base de la rejilla solo lee
+     * `--col-span-default`. Con el tablero a una columna daba igual; con la
+     * rejilla de 2 en `md` y 6 en `xl` (7 sep) el widget cae a una sola pista
+     * y queda a un sexto de fila con el resto vacío.
+     * Rotura: devolver `'full'` a secas a cualquiera de los tres.
+     */
+    public function test_cada_widget_del_tablero_declara_su_ancho_en_todos_los_anchos(): void
+    {
+        $panel = (new AdminPanelProvider($this->app))->panel(Panel::make());
+
+        foreach ($panel->getWidgets() as $claseWidget) {
+            $widget = new $claseWidget;
+            $atributos = (new ComponentAttributeBag)->gridColumn((fn () => $this->columnSpan)->call($widget));
+
+            $this->assertStringContainsString(
+                '--col-span-default',
+                (string) $atributos,
+                "{$claseWidget} no declara `--col-span-default`: la regla base de la rejilla solo lee esa variable, así que bajo `lg` el widget cae a una sola pista."
+            );
+        }
+    }
+
+    /**
+     * La vista propia del widget de pendientes es la única del tablero que no
+     * sale de una plantilla de Filament. Quien coloca cada widget en la rejilla
+     * es `x-filament-widgets::widget`, que llama a `gridColumn()` con el tramo
+     * del widget: sin ese envoltorio la vista se salta el tramo y, con la
+     * rejilla de 6 columnas del 7 sep, quedaba a un sexto de fila con el texto
+     * y el botón montados uno sobre otro.
+     * Rotura: quitar el envoltorio y dejar la tarjeta de vidrio como raíz.
+     */
+    public function test_la_vista_de_pendientes_conserva_su_sitio_en_la_rejilla(): void
+    {
+        $vista = File::get(resource_path('views/filament/widgets/pendientes-de-aprobacion.blade.php'));
+
+        $this->assertStringContainsString(
+            '<x-filament-widgets::widget>',
+            $vista,
+            'La vista no usa el envoltorio que coloca el widget en la rejilla del tablero.'
+        );
+
+        $this->assertStringContainsString(
+            'gridColumn',
+            File::get(base_path('vendor/filament/widgets/resources/views/components/widget.blade.php')),
+            'El envoltorio de Filament dejó de colocar el widget en la rejilla: revisa esta guardia contra la versión nueva.'
+        );
     }
 
     public function test_el_tablero_reparte_recaudo_y_municipios_en_escritorio(): void
