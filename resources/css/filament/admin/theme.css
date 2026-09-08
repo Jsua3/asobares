@@ -141,6 +141,11 @@
        y se apaga, en vez de una línea que corta. Lleva el rojo dentro, pero
        como resplandor tenue y no como filo. */
     --asb-admin-barra-union: rgb(238 65 55 / 0.07);
+    /* El resplandor difuso de la zona donde vive la barra. Es lo que la
+       distingue ahora que no tiene fondo propio: rojo claro en el tema claro y
+       rojo oscuro en el oscuro, como pidió Sua. Radial y no `filter: blur`,
+       que costaría una pasada de compositor por fotograma del campo. */
+    --asb-admin-barra-resplandor: rgb(238 65 55 / 0.1);
     /* La mitad neutra de la unión: es la que hace de sombra. Va en el
        pseudoelemento y no en `box-shadow` porque Filament anula la sombra del
        elemento en escritorio. */
@@ -175,6 +180,7 @@
     --asb-admin-barra-modulo-canto: rgb(255 255 255 / 0.1);
     --asb-admin-barra-punto: rgb(255 255 255 / 0.14);
     --asb-admin-barra-union: rgb(238 65 55 / 0.1);
+    --asb-admin-barra-resplandor: rgb(126 26 22 / 0.42);
     --asb-admin-barra-sombra-union: rgb(0 0 0 / 0.34);
     --asb-admin-barra-modulo-brillo: rgb(255 255 255 / 0.06);
     --asb-admin-barra-modulo-sombra: 0 12px 28px rgb(0 0 0 / 0.28);
@@ -236,10 +242,17 @@
     }
 
     /* Todo lo que no sea el campo va por encima de él. */
-    .fi-layout,
-    .fi-topbar-ctn {
+    .fi-layout {
         position: relative;
         z-index: 1;
+    }
+
+    /* Anclada arriba: sin esto se va con el desplazamiento y el título de la
+       página y el control de tema desaparecen en cuanto bajas (Sua, 7 sep). */
+    .fi-topbar-ctn {
+        position: sticky;
+        z-index: 20;
+        inset-block-start: 0;
     }
 
     .dark .fi-body {
@@ -399,11 +412,20 @@
      * panel ese velo compone casi el mismo blanco y así el contraste del
      * rótulo de grupo se sigue midiendo contra lo que de verdad hay debajo.
      */
-    /* La barra ya no pinta velo (D-L26): el campo de puntos es el fondo de toda
-       la interfaz y tiene que verse también aquí. Lo que la distingue del
-       contenido es la unión de su canto y el cristal de sus módulos. */
+    /*
+     * La barra no tiene fondo propio: el campo de puntos es el de toda la
+     * interfaz. Lo que marca su zona es un resplandor difuso, rojo claro en el
+     * tema claro y rojo oscuro en el oscuro (Sua, 7 sep). Se dibuja con un
+     * radial ancho y no con `filter: blur`, que obligaría al compositor a
+     * rehacerlo en cada fotograma del campo.
+     */
     .fi-sidebar::before {
-        display: none;
+        z-index: -1;
+        background-image: radial-gradient(
+            120% 55% at 0% 0%,
+            var(--asb-admin-barra-resplandor),
+            transparent 70%
+        );
     }
 
     /* El lienzo del campo (D-L26): uno solo, fijo, detrás de TODA la interfaz

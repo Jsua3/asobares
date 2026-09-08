@@ -159,7 +159,10 @@ class BarraLateralTest extends TestCase
         // debajo de la barra.
         $velo = $this->regla($tema, '.fi-sidebar-group::before');
         $this->assertStringContainsString('var(--asb-admin-barra-velo)', $velo, 'El velo vive en el `::before` de cada apartado.');
-        $this->assertStringContainsString('display: none;', $this->regla($tema, '.fi-sidebar::before'), 'La barra no puede pintar velo propio: taparía el campo de puntos.');
+        $suelo = $this->regla($tema, '.fi-sidebar::before');
+        $this->assertStringNotContainsString('var(--asb-admin-barra-velo)', $suelo, 'La barra no puede pintar velo propio: taparía el campo de puntos.');
+        $this->assertStringContainsString('var(--asb-admin-barra-resplandor)', $suelo, 'Sin fondo propio, lo que marca la zona de la barra es su resplandor.');
+        $this->assertStringNotContainsString('filter: blur', $suelo, 'El resplandor va con un radial: un `filter` obligaría al compositor a rehacerlo en cada fotograma del campo.');
 
         // Todo consumo del desenfoque tiene que caer dentro de la media del
         // cajón: se cuenta en el archivo entero y dentro del bloque, y los dos
@@ -450,6 +453,19 @@ class BarraLateralTest extends TestCase
         // Medido en la maqueta el 7 sep: computaba `rgba(0,0,0,0) 0 0 0 0`.
         $this->assertStringContainsString('var(--asb-admin-barra-sombra-union)', $union, 'La unión no lleva su mitad neutra, que es la que hace de sombra.');
         $this->assertStringNotContainsString('box-shadow', $barra, 'La sombra del elemento la anula Filament en escritorio: tiene que ir en la unión.');
+    }
+
+    /**
+     * La barra superior va anclada. Sin esto se va con el desplazamiento y el
+     * título de la página y el control de tema desaparecen en cuanto bajas.
+     * Rotura: devolverla a `position: relative`.
+     */
+    public function test_la_barra_superior_va_anclada(): void
+    {
+        $topbar = $this->regla($this->tema(), '.fi-topbar-ctn');
+
+        $this->assertStringContainsString('position: sticky;', $topbar, 'La barra superior no está anclada.');
+        $this->assertStringContainsString('inset-block-start: 0;', $topbar, 'La barra superior no dice a qué se ancla.');
     }
 
     /**
