@@ -498,9 +498,13 @@
      * recupera su ancho; el aire entre grupos sube de 18 a 28 px, que es lo
      * que separa sin dibujar.
      */
+    /* El relleno es asimétrico a propósito: los módulos crecen hacia la
+       derecha, donde el canal de la barra de desplazamiento ya deja aire
+       (`scrollbar-gutter: stable` de Filament), y así respiran sin acercarse
+       al filo de la izquierda, que es donde vive la luz. */
     .fi-sidebar-nav {
         position: relative;
-        padding-inline: 0.75rem;
+        padding-inline: 0.75rem 0.3rem;
         padding-block: 0.5rem;
         row-gap: 0;
     }
@@ -545,7 +549,7 @@
         position: relative;
         isolation: isolate;
         margin-block: 1.75rem 0;
-        padding: 0.35rem;
+        padding: 0.5rem 0.45rem;
         border-radius: var(--asb-admin-barra-modulo-radio);
         transition: box-shadow var(--duracion-entrada) var(--ease-color);
     }
@@ -575,6 +579,24 @@
     body[data-barra-estado="scroll"] .fi-sidebar-group::before,
     body[data-barra-estado="scroll"] .fi-sidebar-group::after {
         opacity: 1;
+    }
+
+    /*
+     * Y la barra se APAGA cuando ellos encienden. Es la regla de la bandeja de
+     * escritorio: el vidrio lo pone una cosa o la otra, nunca las dos, porque
+     * las dos a la vez son el cuadro que encierra a los módulos.
+     *
+     * La línea del límite y la sombra no se apagan: son el borde de la región,
+     * que se juzga contra 3:1 y que el filo luminiscente no alcanza (D-L10).
+     */
+    body[data-barra-estado="scroll"] .fi-sidebar::before,
+    body[data-barra-estado="scroll"] .fi-sidebar::after {
+        opacity: 0;
+    }
+
+    .fi-sidebar::before,
+    .fi-sidebar::after {
+        transition: opacity var(--duracion-entrada) var(--ease-color);
     }
 
     .fi-sidebar-group:first-child {

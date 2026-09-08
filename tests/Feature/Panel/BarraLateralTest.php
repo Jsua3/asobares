@@ -412,6 +412,34 @@ class BarraLateralTest extends TestCase
     }
 
     /**
+     * Cuando los módulos encienden, la barra se apaga. Es la regla de la barra
+     * de escritorio: en `inicial` el vidrio lo pone la bandeja y los módulos no
+     * dibujan nada; en `scroll` la bandeja se apaga y cada módulo enciende el
+     * suyo. Sin eso quedan las dos cosas a la vez, que es el «cuadro que une
+     * todos los módulos» que Sua pidió quitar el 7 sep.
+     *
+     * La LÍNEA del límite no se apaga: es el borde de la región y se juzga
+     * contra 3:1, que el filo luminiscente no alcanza (D-L10).
+     * Rotura: dejar el velo encendido en el estado scroll.
+     */
+    public function test_la_barra_se_apaga_cuando_los_modulos_encienden(): void
+    {
+        $tema = preg_replace('/\s+/', ' ', $this->tema());
+
+        $this->assertStringContainsString(
+            'body[data-barra-estado="scroll"] .fi-sidebar::before',
+            $tema,
+            'El velo de la barra no se apaga cuando los módulos encienden: quedan las dos cajas a la vez.'
+        );
+
+        $this->assertStringContainsString(
+            'border-inline-end: 1px solid var(--asb-admin-barra-borde);',
+            $tema,
+            'La línea del límite tiene que sobrevivir al apagado: es el borde de la región.'
+        );
+    }
+
+    /**
      * El módulo de JavaScript escribe el estado en `<body>` y lo alimenta el
      * scroll INTERNO de la lista, no el del documento: en escritorio la barra
      * es `lg:sticky` y no se mueve con la página. Se afirma definición y
