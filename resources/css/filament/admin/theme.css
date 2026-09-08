@@ -70,7 +70,10 @@
      */
     --asb-admin-dashboard-image: url("../../../../public/img/panel/cabecera-dashboard.png");
     --asb-admin-topbar-alto: 3.75rem;
-    --asb-admin-sidebar-ancho: 15.25rem;
+    /* 15,75 rem y no 15,25: el módulo conserva los 227 px que Sua aprobó
+       («agranda los módulos un poco a la derecha») y a la vez recupera en el
+       canto derecho el mismo aire que tiene en el izquierdo. */
+    --asb-admin-sidebar-ancho: 15.75rem;
 
     /*
      * La barra lateral (Parte III de la spec, aprobada el 7 sep 2026). Prefijo
@@ -503,7 +506,7 @@
         gap: 0.55rem;
         align-items: center;
         min-height: var(--asb-admin-barra-fila-alto);
-        padding-inline: 0.5rem;
+        padding-inline: 0.75rem;
         border-radius: var(--asb-admin-barra-fila-radio);
         color: var(--asb-admin-barra-tinta);
         font-size: 0.875rem;
@@ -566,7 +569,14 @@
         scrollbar-width: none;
         scrollbar-gutter: auto;
         position: relative;
-        padding-inline: 0.75rem 0.3rem;
+        /*
+         * SIMÉTRICO. Con 0,3 rem a la derecha contra 0,75 a la izquierda, el
+         * canto derecho del módulo se quedaba a 4,8 px del borde de la barra
+         * con un radio de 16: la curva no tenía fondo contra el que leerse y
+         * Sua vio un corte donde solo había estrechez (8 sep). El ancho de la
+         * barra absorbe la diferencia.
+         */
+        padding-inline: 0.75rem;
         /* El aire vertical iguala al desvanecido del aviso: en reposo ninguna
            lámina nace ni muere dentro de la máscara, que es lo que las hacía
            parecer cortadas (Sua, 8 sep). */

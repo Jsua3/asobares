@@ -585,6 +585,44 @@ class BarraLateralTest extends TestCase
     }
 
     /**
+     * El aire lateral de la lista tiene que ser el MISMO a los dos lados. Con
+     * 0,75 rem a la izquierda y 0,3 a la derecha, el canto derecho del módulo
+     * se quedaba a 4,8 px del borde de la barra teniendo 16 px de radio: la
+     * curva no tenía fondo contra el que leerse y Sua vio un corte donde solo
+     * había estrechez (8 sep). Lo que compensa el ancho del módulo es el ancho
+     * de la barra, no el aire de un solo canto.
+     *
+     * Rotura: dejar los dos valores distintos, o bajar el aire por debajo de
+     * 0,75 rem.
+     */
+    public function test_el_aire_lateral_de_la_lista_es_simetrico(): void
+    {
+        $lista = $this->regla($this->tema(), '.fi-sidebar-nav');
+
+        $this->assertSame(
+            1,
+            preg_match('/padding-inline: ([^;]+);/', $lista, $relleno),
+            'La lista no declara relleno lateral.'
+        );
+
+        $lados = preg_split('/\s+/', trim($relleno[1]));
+
+        $this->assertCount(
+            1,
+            $lados,
+            'El relleno lateral trae dos valores: el módulo tendría más aire a un lado que al otro y el canto corto se lee como un corte.'
+        );
+
+        $this->assertSame(1, preg_match('/^([\d.]+)rem$/', $lados[0], $suyo), "El aire lateral no se deja medir: {$lados[0]}");
+
+        $this->assertGreaterThanOrEqual(
+            0.75,
+            (float) $suyo[1],
+            'Menos de 0,75 rem de aire no dan para leer la curva de 1 rem del módulo contra el canto de la barra.'
+        );
+    }
+
+    /**
      * El módulo de JavaScript escribe el estado en `<body>` y lo alimenta el
      * scroll INTERNO de la lista, no el del documento: en escritorio la barra
      * es `lg:sticky` y no se mueve con la página. Se afirma definición y
