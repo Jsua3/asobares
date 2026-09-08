@@ -1959,6 +1959,43 @@ En el mismo mensaje pidió rehacer la parte superior del panel: el control de te
 
 ---
 
+### D-L27. El cristal de los apartados deja ver el campo
+
+**Pedido de Sua, 8 sep, con el panel ya desplegado:** «me gustaría que los módulos sean un poquito transparentes».
+
+**De dónde viene.** El velo se calibró al 88 % cuando la barra tenía fondo propio y detrás del módulo no había nada que mirar. Desde D-L26 sí lo hay: el campo de puntos. Al 88 % la lámina lo tapa casi entero y se lee como una tarjeta opaca sobre un fondo con textura, no como cristal.
+
+**Lo que cambia.** `--asb-admin-barra-velo` pasa del 88 % al **76 %** en los dos temas. `--asb-admin-barra-velo-cajon` **no se toca**: el cajón móvil y los popovers se apoyan sobre contenido que sí hay que tapar, y ese velo se calibró aparte.
+
+**Lo que NO cambia, y hay que decirlo:** no entra `backdrop-filter`. La condición 1 de D-L26 sigue en pie —cinco láminas desenfocando sobre un lienzo que se repinta es la combinación cara—, y la refracción la sigue dando el campo a la vista.
+
+**El contraste, recalculado el 8 sep** (no estimado: la cuenta la hace `MideContraste` sobre los colores del archivo). El velo apenas mueve la cuenta, porque la superficie y el fondo del panel son casi el mismo color:
+
+| Velo | Claro, rótulo de grupo | Claro, rótulo activo | Oscuro, rótulo de grupo | Oscuro, rótulo activo |
+|---|---|---|---|---|
+| 88 % (antes) | 11,27:1 | 6,35:1 | 7,68:1 | 5,20:1 |
+| **76 % (ahora)** | **11,18:1** | **6,29:1** | **7,74:1** | **5,23:1** |
+| 60 % (por saber dónde está el suelo) | 11,01:1 | 6,18:1 | 7,79:1 | 5,30:1 |
+
+Todos por encima de 4,5:1 con holgura, así que aquí manda el ojo y no la cuenta. La guardia existente sigue vigilando el rótulo activo, que es el del margen justo.
+
+### D-L28. El resplandor de la zona cubre todo el lado, no solo la esquina
+
+**Pedido de Sua, 8 sep:** «que el rojo que se ve en la esquina izquierda abarque todo el lado hasta la parte inferior».
+
+**De dónde viene.** El resplandor que marca la zona del panel es `radial-gradient(120% 55% at 0% 0%, …)`: nace en la esquina superior izquierda y se apaga a poco más de media altura. En una pantalla de 1.080 px se acaba sobre los 594, así que la mitad de abajo de la barra se queda sin la marca de su zona.
+
+**Lo que cambia.** El resplandor pasa a dos capas sobre `.fi-sidebar::before`:
+
+1. un **lavado horizontal** anclado al canto izquierdo, `linear-gradient(90deg, …, transparent 82%)`, que da la marca a **toda la altura**;
+2. el **radial de la esquina**, que se conserva porque es de donde nace la luz y sigue haciendo el punto más brillante.
+
+Las dos capas suman alfa, así que la esquina queda al doble de intensidad y el resto del lado mantiene un lavado constante hasta abajo.
+
+**Lo que NO puede pasar, y por eso hay guardia.** Sua rechazó tres veces un límite vertical: línea, filo y franja difusa de 40 px. El lavado es lo contrario de esos tres —es más fuerte en el canto izquierdo y se apaga hacia dentro, sin ningún canto en el límite con el contenido—, pero la diferencia es de dirección y una dirección se invierte con un carácter. La guardia de continuidad se amplía a `::before` y exige que el resplandor **empiece opaco en el canto izquierdo**, nunca transparente, que es como se volvería a dibujar la franja del límite.
+
+---
+
 ## Lo que la construcción cambió (Parte III, 7 y 8 sep 2026)
 
 Las dieciocho decisiones se escribieron antes de tocar código, y el código las contradijo o las amplió en siete sitios. Lo que sigue es lo que de verdad quedó.

@@ -89,7 +89,7 @@
      * se conoce: contra negro puro tras el velo de cierre de Filament da
      * 9,54:1 al rótulo y 6,33:1 al ítem activo.
      */
-    --asb-admin-barra-velo: color-mix(in oklab, var(--asb-superficie) 88%, transparent);
+    --asb-admin-barra-velo: color-mix(in oklab, var(--asb-superficie) 76%, transparent);
     --asb-admin-barra-velo-cajon: color-mix(in oklab, var(--asb-superficie) 94%, transparent);
     /* Nunca un `blur()` literal: solo así las medias pueden apagarlo. Se
        consume únicamente en la regla del cajón, que es donde hay página que
@@ -168,7 +168,7 @@
     /* La barra lateral en oscuro. El velo del cajón NO sube aquí: el velo de
        cierre de Filament ya es negro al 75 %, así que el fondo bajo el cajón
        llega casi neutralizado. */
-    --asb-admin-barra-velo: color-mix(in oklab, var(--asb-superficie) 88%, transparent);
+    --asb-admin-barra-velo: color-mix(in oklab, var(--asb-superficie) 76%, transparent);
     --asb-admin-barra-velo-cajon: color-mix(in oklab, var(--asb-superficie) 88%, transparent);
     --asb-admin-barra-luz: #7e1a16;
     --asb-admin-barra-sombra: 22px 0 48px -14px rgb(0 0 0 / 0.5);
@@ -397,11 +397,27 @@
      */
     .fi-sidebar::before {
         z-index: -1;
-        background-image: radial-gradient(
-            120% 55% at 0% 0%,
-            var(--asb-admin-barra-resplandor),
-            transparent 70%
-        );
+        /*
+         * Dos capas (D-L28). El radial marcaba la esquina y se apagaba a poco
+         * más de media altura: en 1.080 px se acababa sobre los 594 y la mitad
+         * de abajo se quedaba sin la marca de su zona. Sua lo pidió el 8 sep.
+         *
+         * El lavado va anclado al canto IZQUIERDO y se apaga hacia dentro, que
+         * es lo contrario de la franja del límite que se rechazó tres veces:
+         * aquella se encendía en el canto derecho y por eso cortaba. Hay
+         * guardia sobre la dirección.
+         */
+        background-image:
+            radial-gradient(
+                120% 55% at 0% 0%,
+                var(--asb-admin-barra-resplandor),
+                transparent 70%
+            ),
+            linear-gradient(
+                90deg,
+                var(--asb-admin-barra-resplandor),
+                transparent 82%
+            );
     }
 
     /* El lienzo del campo (D-L26): uno solo, fijo, detrás de TODA la interfaz

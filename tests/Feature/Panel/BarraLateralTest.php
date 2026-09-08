@@ -443,6 +443,26 @@ class BarraLateralTest extends TestCase
         $this->assertStringNotContainsString('border-inline-end', $barra, 'La barra vuelve a cortarse con un borde.');
         $this->assertStringNotContainsString('box-shadow', $barra, 'La sombra del elemento la anula Filament en escritorio, y además volvería a marcar el corte.');
         $this->assertStringNotContainsString('linear-gradient(to right', $capa, 'Vuelve la franja vertical que rompe la continuidad.');
+
+        // El resplandor de D-L28 sí lleva un lavado horizontal, y por eso hay
+        // que vigilar su DIRECCIÓN: anclado al canto izquierdo y apagándose
+        // hacia dentro no separa nada; al revés es la franja del límite otra vez.
+        // Se lee la dirección declarada en vez de buscar cadenas: con el
+        // paréntesis y el salto de línea, `linear-gradient(270deg` no aparece
+        // nunca tal cual y la guardia daba verde con el lavado invertido.
+        $suelo = preg_replace('/\s+/', ' ', $this->regla($tema, '.fi-sidebar::before'));
+
+        preg_match_all('/linear-gradient\(\s*([^,]+),/', $suelo, $lavados);
+
+        $this->assertNotEmpty($lavados[1], 'El resplandor perdió su lavado horizontal.');
+
+        foreach ($lavados[1] as $direccion) {
+            $this->assertSame(
+                '90deg',
+                trim($direccion),
+                "El lavado del resplandor va en «{$direccion}»: si no nace en el canto izquierdo y se apaga hacia dentro, vuelve a ser la franja del límite."
+            );
+        }
         $this->assertStringNotContainsString('--asb-admin-barra-union', $tema, 'Los tokens de la unión siguen vivos sin consumidor.');
 
         // Lo único que queda en esa capa es el resplandor de la esquina, que no
@@ -620,6 +640,64 @@ class BarraLateralTest extends TestCase
             (float) $suyo[1],
             'Menos de 0,75 rem de aire no dan para leer la curva de 1 rem del módulo contra el canto de la barra.'
         );
+    }
+
+    /**
+     * El resplandor marca la zona del panel de arriba abajo (D-L28). Con solo
+     * el radial de la esquina se apagaba a poco más de media altura: en una
+     * pantalla de 1.080 px se acababa sobre los 594 y la mitad de abajo se
+     * quedaba sin marca. Se afirman las DOS capas por separado, porque cada
+     * una hace una cosa distinta.
+     * Rotura: quitar el lavado y dejar solo el radial, o al revés.
+     */
+    public function test_el_resplandor_cubre_todo_el_lado(): void
+    {
+        $suelo = preg_replace('/\s+/', ' ', $this->regla($this->tema(), '.fi-sidebar::before'));
+
+        $this->assertStringContainsString(
+            'linear-gradient( 90deg, var(--asb-admin-barra-resplandor)',
+            $suelo,
+            'Falta el lavado que lleva el resplandor a toda la altura del lado.'
+        );
+
+        $this->assertStringContainsString(
+            'radial-gradient( 120% 55% at 0% 0%',
+            $suelo,
+            'Se perdió el radial de la esquina, que es de donde nace la luz.'
+        );
+    }
+
+    /**
+     * El cristal del apartado tiene que DEJAR VER el campo de puntos (D-L27).
+     * Al 88 % lo tapaba y la lámina se leía como tarjeta opaca sobre un fondo
+     * con textura. El velo del cajón es otro y se queda donde estaba: ese sí
+     * se apoya sobre contenido que hay que tapar.
+     * Rotura: devolver el velo del módulo por encima del 80 %.
+     */
+    public function test_el_cristal_del_apartado_deja_ver_el_campo(): void
+    {
+        $tema = $this->tema();
+
+        foreach (['claro' => '
+:root {', 'oscuro' => '
+.dark {'] as $nombre => $marca) {
+            $bloque = $this->bloque($tema, $marca);
+
+            $velo = $this->porcentaje($bloque, '--asb-admin-barra-velo', $nombre);
+            $cajon = $this->porcentaje($bloque, '--asb-admin-barra-velo-cajon', $nombre);
+
+            $this->assertLessThanOrEqual(
+                0.8,
+                $velo,
+                sprintf('El velo del módulo %s está al %d %%: tapa el campo de puntos y la lámina vuelve a ser una tarjeta.', $nombre, $velo * 100)
+            );
+
+            $this->assertGreaterThan(
+                $velo,
+                $cajon,
+                sprintf('El cajón %s no puede ser más transparente que el módulo: se apoya sobre contenido que hay que tapar.', $nombre)
+            );
+        }
     }
 
     /**
