@@ -172,11 +172,18 @@ class EmpleoController
 
         // Volver a dejar el perfil actualiza el que ya existe: una persona,
         // un registro. Antes cada reenvío creaba una fila nueva.
-        Aspirante::updateOrCreate(['correo' => $datos['correo']], $datos);
+        //
+        // Y lo devuelve a revisión, igual que editar una vacante publicada la
+        // devuelve a la cola: si no, aprobar una vez sería una llave para
+        // cambiar el perfil por cualquier otra cosa sin que nadie la mirara.
+        Aspirante::updateOrCreate(
+            ['correo' => $datos['correo']],
+            [...$datos, 'aprobado_el' => null],
+        );
 
         return redirect()
             ->route('empleo.index')
-            ->with('exito', 'Tu perfil quedó registrado. Cuando un establecimiento asociado busque tu cargo, te contactamos.')
+            ->with('exito', 'Recibimos tu perfil. La secretaría lo revisa y, cuando un establecimiento asociado busque tu cargo, te contactamos.')
             ->withFragment('perfil');
     }
 }

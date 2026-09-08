@@ -10,6 +10,7 @@ use App\Http\Controllers\Publico\EventoController;
 use App\Http\Controllers\Publico\GuiaController;
 use App\Http\Controllers\Publico\InicioController;
 use App\Http\Controllers\Publico\MiCuentaController;
+use App\Http\Controllers\Publico\MisArtistasController;
 use App\Http\Controllers\Publico\MisAspirantesController;
 use App\Http\Controllers\Publico\MisFotosController;
 use App\Http\Controllers\Publico\MisProveedoresController;
@@ -177,7 +178,13 @@ Route::middleware(['auth', 'rol.asociado'])->group(function (): void {
     // de contacto de unos y otros son la contraprestacion de la cuota, asi que
     // se entregan detras de la sesion. La cara publica de /proveedores sigue
     // existiendo, pero sin un solo contacto.
+    //
+    // Los artistas se sumaron el 8 sep por el mismo criterio, con una salvedad:
+    // su ficha publica NO se vacia. El escaparate --nombre, foto, genero,
+    // video-- es lo que el artista busca al inscribirse; lo que se muda aqui es
+    // solo el contacto.
     Route::get('/mi-cuenta/proveedores', [MisProveedoresController::class, 'index'])->name('mi-cuenta.proveedores.index');
+    Route::get('/mi-cuenta/artistas', [MisArtistasController::class, 'index'])->name('mi-cuenta.artistas.index');
     Route::get('/mi-cuenta/aspirantes', [MisAspirantesController::class, 'index'])->name('mi-cuenta.aspirantes.index');
 
     // Bolsa de empleo: el establecimiento publica y corrige lo suyo.

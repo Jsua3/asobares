@@ -34,6 +34,16 @@ class AspiranteFactory extends Factory
         return $this->state(['estado' => EstadoDeGestion::Contactado]);
     }
 
+    /**
+     * Perfil que la secretaría ya miró y dejó entrar al banco. Sin este estado
+     * el perfil existe pero ningún afiliado lo ve, que es el valor por defecto
+     * a propósito.
+     */
+    public function aprobado(): static
+    {
+        return $this->state(['aprobado_el' => now()]);
+    }
+
     /** Perfil cuyo consentimiento venció hace tiempo: la depuración debe barrerlo. */
     public function abandonado(): static
     {

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Publico;
 
 use App\Enums\CargoDelSector;
 use App\Models\Aspirante;
-use App\Enums\EstadoDeGestion;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -18,8 +17,10 @@ use Illuminate\Validation\Rule;
  * bares se pisarian el seguimiento del mismo candidato sin enterarse. El
  * establecimiento que quiera a alguien lo contacta y ya.
  *
- * Los descartados por el gremio no se muestran: descartar y seguir apareciendo
- * es no haber descartado nada.
+ * Y no se ve todo el que se registra: desde el 8 de septiembre hay que aprobar
+ * el perfil antes (`aprobado_el`). Los descartados por el gremio tampoco se
+ * muestran: descartar y seguir apareciendo es no haber descartado nada. Las dos
+ * condiciones viven juntas en `visibleParaAfiliados`.
  */
 class MisAspirantesController
 {
@@ -29,7 +30,7 @@ class MisAspirantesController
             'categoria' => ['nullable', Rule::enum(CargoDelSector::class)],
         ]);
 
-        $consulta = Aspirante::where('estado', '!=', EstadoDeGestion::Descartado);
+        $consulta = Aspirante::visibleParaAfiliados();
 
         if (filled($datos['categoria'] ?? null)) {
             $consulta->where('categoria_cargo', $datos['categoria']);

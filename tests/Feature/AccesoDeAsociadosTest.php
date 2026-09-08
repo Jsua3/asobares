@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\CargoDelSector;
 use App\Enums\EstadoDeGestion;
+use App\Models\Artista;
 use App\Models\Asociado;
 use App\Models\Aspirante;
 use App\Models\Proveedor;
@@ -51,6 +52,7 @@ class AccesoDeAsociadosTest extends TestCase
     {
         $this->get(route('mi-cuenta.proveedores.index'))->assertRedirect(route('mi-cuenta.entrar'));
         $this->get(route('mi-cuenta.aspirantes.index'))->assertRedirect(route('mi-cuenta.entrar'));
+        $this->get(route('mi-cuenta.artistas.index'))->assertRedirect(route('mi-cuenta.entrar'));
     }
 
     public function test_un_afiliado_ve_los_contactos_del_directorio(): void
@@ -70,7 +72,7 @@ class AccesoDeAsociadosTest extends TestCase
 
     public function test_un_afiliado_ve_el_banco_de_talento(): void
     {
-        Aspirante::factory()->create([
+        Aspirante::factory()->aprobado()->create([
             'nombre' => 'Camila Bartender',
             'correo' => 'camila@aspirante.test',
             'estado' => EstadoDeGestion::Nuevo,
@@ -143,8 +145,8 @@ class AccesoDeAsociadosTest extends TestCase
 
     public function test_el_banco_no_muestra_a_quien_el_gremio_descarto(): void
     {
-        Aspirante::factory()->create(['nombre' => 'Perfil Descartado', 'estado' => EstadoDeGestion::Descartado]);
-        Aspirante::factory()->create(['nombre' => 'Perfil Vigente', 'estado' => EstadoDeGestion::Nuevo]);
+        Aspirante::factory()->aprobado()->create(['nombre' => 'Perfil Descartado', 'estado' => EstadoDeGestion::Descartado]);
+        Aspirante::factory()->aprobado()->create(['nombre' => 'Perfil Vigente', 'estado' => EstadoDeGestion::Nuevo]);
 
         $this->actingAs($this->afiliado())
             ->get(route('mi-cuenta.aspirantes.index'))
@@ -153,12 +155,128 @@ class AccesoDeAsociadosTest extends TestCase
             ->assertDontSee('Perfil Descartado');
     }
 
+    /**
+     * Hasta el 8 de septiembre, quien dejaba su perfil en /empleo quedaba
+     * visible para todos los establecimientos afiliados en el mismo segundo,
+     * sin que nadie lo mirara. Son datos personales de un tercero.
+     */
+    public function test_el_banco_no_muestra_a_quien_la_secretaria_no_ha_aprobado(): void
+    {
+        Aspirante::factory()->create(['nombre' => 'Perfil Sin Revisar']);
+        Aspirante::factory()->aprobado()->create(['nombre' => 'Perfil Ya Revisado']);
+
+        $this->actingAs($this->afiliado())
+            ->get(route('mi-cuenta.aspirantes.index'))
+            ->assertOk()
+            ->assertSee('Perfil Ya Revisado')
+            ->assertDontSee('Perfil Sin Revisar');
+    }
+
+    /**
+     * Misma regla que una vacante publicada que su dueño edita: si el contenido
+     * cambia despues de aprobado, vuelve a la cola. Si no, aprobar una vez seria
+     * una llave para cambiar el perfil por cualquier otra cosa.
+     */
+    public function test_volver_a_dejar_el_perfil_lo_devuelve_a_revision(): void
+    {
+        $aspirante = Aspirante::factory()->aprobado()->create([
+            'correo' => 'reincidente@aspirante.test',
+            'nombre' => 'Nombre Aprobado',
+        ]);
+
+        $this->post(route('empleo.aspirante'), [
+            'nombre' => 'Nombre Cambiado',
+            'correo' => 'reincidente@aspirante.test',
+            'cargo_interes' => 'Chef',
+            'categoria_cargo' => CargoDelSector::Cocina->value,
+            'acepta_datos' => '1',
+        ])->assertRedirect();
+
+        $this->assertSame('Nombre Cambiado', $aspirante->fresh()->nombre);
+
+        $this->assertNull($aspirante->fresh()->aprobado_el);
+    }
+
+    // --- Artistas: el contacto tambien es contraprestacion de la cuota ---
+
+    /**
+     * La ficha del artista NO se vacia como se vacio la de proveedores, y la
+     * diferencia es deliberada: el escaparate --nombre, foto, genero, video--
+     * es lo que el artista viene a buscar al inscribirse, y sacarlo del indice
+     * le quitaria el motivo. Lo que se va detras de la sesion es el contacto,
+     * que es lo que el afiliado paga.
+     */
+    public function test_la_ficha_publica_del_artista_conserva_el_escaparate_pero_no_el_contacto(): void
+    {
+        $artista = Artista::factory()->publicado()->create([
+            'nombre' => 'Grupo Del Escaparate',
+            'slug' => 'grupo-del-escaparate',
+            'whatsapp' => '3009876543',
+            'instagram_url' => 'https://instagram.com/grupo-del-escaparate',
+        ]);
+
+        $this->get(route('artistas.show', $artista))
+            ->assertOk()
+            ->assertSee('Grupo Del Escaparate')
+            ->assertDontSee('3009876543')
+            ->assertDontSee('instagram.com/grupo-del-escaparate');
+    }
+
+    public function test_el_listado_publico_de_artistas_tampoco_entrega_contactos(): void
+    {
+        Artista::factory()->publicado()->create([
+            'nombre' => 'Duo Del Listado',
+            'slug' => 'duo-del-listado',
+            'whatsapp' => '3007654321',
+            'instagram_url' => 'https://instagram.com/duo-del-listado',
+        ]);
+
+        $this->get(route('artistas.index'))
+            ->assertOk()
+            ->assertSee('Duo Del Listado')
+            ->assertDontSee('3007654321')
+            ->assertDontSee('instagram.com/duo-del-listado');
+    }
+
+    public function test_un_afiliado_ve_los_contactos_de_los_artistas(): void
+    {
+        Artista::factory()->publicado()->create([
+            'nombre' => 'Orquesta Del Afiliado',
+            'slug' => 'orquesta-del-afiliado',
+            'whatsapp' => '3005554433',
+            'instagram_url' => 'https://instagram.com/orquesta-del-afiliado',
+        ]);
+
+        $this->actingAs($this->afiliado())
+            ->get(route('mi-cuenta.artistas.index'))
+            ->assertOk()
+            ->assertSee('Orquesta Del Afiliado')
+            ->assertSee('3005554433')
+            ->assertSee('instagram.com/orquesta-del-afiliado');
+    }
+
+    /**
+     * El directorio del afiliado no es una puerta trasera a la moderacion: lo
+     * que la secretaria no ha aprobado no se ve aqui tampoco.
+     */
+    public function test_un_artista_sin_aprobar_no_sale_en_el_directorio_del_afiliado(): void
+    {
+        Artista::factory()->pendiente()->create(['nombre' => 'Ficha Pendiente', 'slug' => 'ficha-pendiente']);
+        Artista::factory()->publicado()->create(['nombre' => 'Ficha Publicada', 'slug' => 'ficha-publicada']);
+
+        $this->actingAs($this->afiliado())
+            ->get(route('mi-cuenta.artistas.index'))
+            ->assertOk()
+            ->assertSee('Ficha Publicada')
+            ->assertDontSee('Ficha Pendiente');
+    }
+
     public function test_el_banco_filtra_por_cargo(): void
     {
         $cargos = CargoDelSector::cases();
 
-        Aspirante::factory()->create(['nombre' => 'Del Cargo Buscado', 'categoria_cargo' => $cargos[0]]);
-        Aspirante::factory()->create(['nombre' => 'De Otro Cargo', 'categoria_cargo' => $cargos[1]]);
+        Aspirante::factory()->aprobado()->create(['nombre' => 'Del Cargo Buscado', 'categoria_cargo' => $cargos[0]]);
+        Aspirante::factory()->aprobado()->create(['nombre' => 'De Otro Cargo', 'categoria_cargo' => $cargos[1]]);
 
         $this->actingAs($this->afiliado())
             ->get(route('mi-cuenta.aspirantes.index', ['categoria' => $cargos[0]->value]))

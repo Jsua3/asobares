@@ -62,18 +62,23 @@
                         El valor final depende de la duración, el montaje y el desplazamiento.
                     </p>
 
+                    {{-- El contacto es contraprestacion de la cuota, igual que el del
+                         proveedor: quien contrata musica en vivo es el establecimiento
+                         afiliado. Lo que NO se toca es el escaparate de arriba --nombre,
+                         foto, genero, video--, que es el motivo por el que el artista se
+                         inscribe. El enlace de abajo no se ramifica por sesion a proposito:
+                         `/mi-cuenta/artistas` ya manda al login a quien no la tiene. --}}
                     <div class="mt-5 space-y-2.5">
-                        @if ($enlace = enlaceWhatsapp($artista->whatsapp, "Hola {$artista->nombre}, te vi en el directorio de artistas de ASOBARES Quindío."))
-                            <x-publico.boton :href="$enlace" target="_blank" rel="noopener nofollow" class="w-full">
-                                Contactar por WhatsApp
-                            </x-publico.boton>
-                        @endif
-                        @if ($artista->instagram_url)
-                            <a href="{{ $artista->instagram_url }}" target="_blank" rel="noopener nofollow"
-                               class="pulsable block min-h-11 rounded-xl border border-linea px-4 py-2.5 text-center text-sm hover:border-marca-500/50">
-                                Instagram&nbsp;<x-publico.flecha direccion="externa" />
-                            </a>
-                        @endif
+                        <p class="text-xs leading-relaxed text-apagado">
+                            El contacto de cada artista es información privada de los afiliados.
+                        </p>
+                        <x-publico.boton :href="route('mi-cuenta.artistas.index')" class="w-full">
+                            Ver el contacto
+                        </x-publico.boton>
+                        <a href="{{ route('afiliate') }}"
+                           class="pulsable block min-h-11 rounded-xl border border-linea px-4 py-2.5 text-center text-sm hover:border-marca-500/50">
+                            Afíliate al gremio
+                        </a>
                     </div>
                 </div>
             </aside>
