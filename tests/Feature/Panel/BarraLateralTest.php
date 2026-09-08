@@ -372,18 +372,75 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * La cuenta va ARRIBA, como primera fila (corrección del 7 sep). Estuvo al
-     * pie menos de una hora: Sua la vio y no le gustó ahí, y la referencia que
-     * trajo la pone arriba con la misma forma que las demás filas.
-     * Rotura: devolver el gancho a SIDEBAR_FOOTER.
+     * La cuenta vive en el cromo superior, junto al control de tema. Pasó por
+     * el pie de la barra y por la primera fila de la lista el mismo día; Sua la
+     * quiso arriba, al lado de la configuración de claro y oscuro.
+     * Rotura: devolverla a SIDEBAR_FOOTER o a SIDEBAR_NAV_START.
      */
-    public function test_la_cuenta_va_al_principio_de_la_barra(): void
+    public function test_la_cuenta_vive_en_el_cromo_superior(): void
     {
         $proveedor = File::get(app_path('Providers/Filament/AdminPanelProvider.php'));
 
-        $this->assertStringContainsString('PanelsRenderHook::SIDEBAR_NAV_START', $proveedor, 'La cuenta no se pinta al principio de la barra.');
-        $this->assertStringNotContainsString('PanelsRenderHook::SIDEBAR_FOOTER', $proveedor, 'La cuenta sigue anclada al pie.');
-        $this->assertStringContainsString('->userMenu(false)', $proveedor, 'Con la cuenta en la barra, el menú de usuario de Filament sobra.');
+        $this->assertStringContainsString("view('filament.components.cuenta-en-la-barra')", $proveedor, 'La cuenta no se pinta en ninguna parte.');
+        $this->assertStringNotContainsString('PanelsRenderHook::SIDEBAR_FOOTER', $proveedor, 'La cuenta sigue anclada al pie de la barra.');
+        $this->assertStringNotContainsString('PanelsRenderHook::SIDEBAR_NAV_START', $proveedor, 'La cuenta sigue siendo la primera fila de la lista.');
+        $this->assertSame(2, substr_count($proveedor, 'PanelsRenderHook::TOPBAR_END'), 'El cromo superior tiene que llevar dos piezas: el control de tema y la cuenta.');
+        $this->assertStringContainsString('->userMenu(false)', $proveedor, 'Con nuestro chip arriba, el menú de usuario de Filament sobra.');
+    }
+
+    /**
+     * Los módulos, traducidos de la barra de escritorio (recordatorio de Sua el
+     * 7 sep: «se usarán módulos así como está compuesta la navBar de escritorio
+     * pero en vertical»). El grupo es el módulo, y como allí nace APAGADO: en
+     * el estado inicial el vidrio lo pone la barra y el módulo no dibuja nada.
+     * Enciende su brillo y su canto cuando la lista se ha desplazado.
+     *
+     * Pintarlos siempre fue el error de la primera pasada: se leían como cajas
+     * dentro de cajas y por eso la barra parecía apeñuscada.
+     * Rotura: encender los pseudoelementos sin el estado, o quitarlos.
+     */
+    public function test_los_modulos_nacen_apagados_y_encienden_con_el_estado(): void
+    {
+        $tema = preg_replace('/\s+/', ' ', $this->tema());
+
+        foreach (['.fi-sidebar-group::before', '.fi-sidebar-group::after'] as $capa) {
+            $this->assertStringContainsString($capa, $tema, "El módulo no tiene su {$capa}.");
+        }
+
+        $this->assertStringContainsString('opacity: 0;', $this->regla($this->tema(), '.fi-sidebar-group::before'), 'El módulo nace encendido, y tiene que nacer apagado.');
+        $this->assertStringContainsString('body[data-barra-estado="scroll"] .fi-sidebar-group::before', $tema, 'Nada enciende el módulo al desplazar la lista.');
+    }
+
+    /**
+     * El módulo de JavaScript escribe el estado en `<body>` y lo alimenta el
+     * scroll INTERNO de la lista, no el del documento: en escritorio la barra
+     * es `lg:sticky` y no se mueve con la página. Se afirma definición y
+     * llamada de cada pieza por separado.
+     * Rotura: escribir sobre el nodo de la barra, o escuchar el scroll de la
+     * ventana en vez del de la lista.
+     */
+    public function test_el_modulo_de_la_barra_escribe_el_estado_en_el_cuerpo(): void
+    {
+        $js = File::get(resource_path('js/panel-barra-lateral.js'));
+
+        foreach ([
+            'document.body.dataset.barraEstado' => 'el estado no se escribe en el cuerpo',
+            'document.body.dataset.barraBorde' => 'el aviso de borde no se escribe en el cuerpo',
+            "nav.addEventListener('scroll', sincronizar" => 'no se escucha el scroll de la lista',
+            "matchMedia('(prefers-reduced-motion: reduce)')" => 'el movimiento reducido no se consulta en vivo',
+            'livewire:navigated' => 'el estado no se rehace tras navegar',
+            'requestAnimationFrame' => 'no se espera a que Filament restaure el scroll de la lista',
+        ] as $cadena => $porque) {
+            $this->assertStringContainsString($cadena, $js, $porque);
+        }
+
+        // La mención en el comentario vale y explica el porqué; lo que no
+        // puede haber es una lectura de esa clase, que en el panel nunca está.
+        $this->assertStringNotContainsString("classList.contains('sin-desplazamiento')", $js, 'Esa clase la pone el layout público y en el panel no existe: la guarda quedaría siempre en falso.');
+
+        $proveedor = File::get(app_path('Providers/Filament/AdminPanelProvider.php'));
+        $this->assertStringContainsString("Js::make('panel-barra-lateral'", $proveedor, 'El módulo no se registra en el panel.');
+        $this->assertStringContainsString('panel-barra-lateral.js', File::get(base_path('vite.config.js')), 'El módulo no está en las entradas de Vite, así que `Vite::asset` lanzaría y el panel se quedaría sin activos.');
     }
 
     /**

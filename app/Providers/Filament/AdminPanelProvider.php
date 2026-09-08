@@ -84,13 +84,12 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::TOPBAR_END,
                 fn (): HtmlString => new HtmlString(view('filament.components.theme-switcher-topbar')->render()),
             )
-            // La cuenta, como PRIMERA FILA de la barra (D-L21, corregida el
-            // 7 sep). Bajó de la parte superior porque necesitaba el nombre y
-            // el rango que el círculo de iniciales no mostraba, y subió al
-            // principio de la lista porque al pie no se leía como parte de la
-            // navegación.
+            // La cuenta, ARRIBA y junto al control de tema (D-L21, corregida
+            // por segunda vez el 7 sep). Estuvo al pie de la barra y luego como
+            // primera fila; Sua la quiere en el cromo superior, con el nombre y
+            // el rango que el círculo de iniciales de Filament no mostraba.
             ->renderHook(
-                PanelsRenderHook::SIDEBAR_NAV_START,
+                PanelsRenderHook::TOPBAR_END,
                 fn (): HtmlString => new HtmlString(view('filament.components.cuenta-en-la-barra')->render()),
             )
             // Con la cuenta abajo, el menú de usuario de Filament sobra: dos
@@ -196,6 +195,7 @@ class AdminPanelProvider extends PanelProvider
         try {
             return [
                 Js::make('panel-graficas', Vite::asset('resources/js/panel-graficas.js'))->module(),
+                Js::make('panel-barra-lateral', Vite::asset('resources/js/panel-barra-lateral.js'))->module(),
             ];
         } catch (ViteException) {
             return [];
