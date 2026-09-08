@@ -133,6 +133,9 @@
     --asb-admin-barra-modulo-canto: rgb(11 9 10 / 0.1);
     --asb-admin-barra-modulo-brillo: rgb(255 255 255 / 0.55);
     --asb-admin-barra-modulo-radio: 1rem;
+    /* El punto del campo del fondo (D-L24). Decoración: no entra en cuentas
+       de contraste, pero sí invierte con el tema como todo lo demás. */
+    --asb-admin-barra-punto: rgb(11 9 10 / 0.16);
     --asb-admin-barra-modulo-sombra: 0 12px 28px rgb(11 9 10 / 0.06);
     --asb-admin-barra-brote: 0.35;
     --asb-admin-barra-empuje: 2px;
@@ -161,6 +164,7 @@
     --asb-admin-barra-activo-fondo: color-mix(in oklab, var(--asb-acento) 16%, transparent);
     --asb-admin-barra-hover-fondo: rgb(255 255 255 / 0.06);
     --asb-admin-barra-modulo-canto: rgb(255 255 255 / 0.1);
+    --asb-admin-barra-punto: rgb(255 255 255 / 0.14);
     --asb-admin-barra-modulo-brillo: rgb(255 255 255 / 0.06);
     --asb-admin-barra-modulo-sombra: 0 12px 28px rgb(0 0 0 / 0.28);
     --asb-admin-foco-anillo: #ffffff;
@@ -361,9 +365,28 @@
         inset: 0;
     }
 
+    /*
+     * El velo se retiró (D-L24): el fondo de la barra es el campo de puntos y
+     * la superficie lisa de debajo, no una capa que encierre a los módulos.
+     * `::before` se queda como suelo: es lo que da el «blanco» sobre el que se
+     * dibujan los puntos, y en oscuro su equivalente. Sigue siendo el velo
+     * calibrado y no `--asb-superficie` a secas, porque sobre el fondo del
+     * panel ese velo compone casi el mismo blanco y así el contraste del
+     * rótulo de grupo se sigue midiendo contra lo que de verdad hay debajo.
+     */
     .fi-sidebar::before {
-        z-index: -1;
+        z-index: -2;
         background-color: var(--asb-admin-barra-velo);
+    }
+
+    /* El lienzo del campo, por debajo de todo el contenido y sin puntero. */
+    .asb-barra-puntos {
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        width: 100%;
+        height: 100%;
     }
 
     /*
@@ -502,7 +525,12 @@
        derecha, donde el canal de la barra de desplazamiento ya deja aire
        (`scrollbar-gutter: stable` de Filament), y así respiran sin acercarse
        al filo de la izquierda, que es donde vive la luz. */
+    /* Sin barra de desplazamiento visible (D-L24). La única pista de que la
+       lista sigue pasa a ser la máscara de desvanecido, que por eso deja de
+       ser adorno y es obligatoria. */
     .fi-sidebar-nav {
+        scrollbar-width: none;
+        scrollbar-gutter: auto;
         position: relative;
         padding-inline: 0.75rem 0.3rem;
         padding-block: 0.5rem;
@@ -545,6 +573,10 @@
      * Esa es la diferencia con el intento de esta misma tarde, que los pintaba
      * siempre y por eso se leían apeñuscados.
      */
+    .fi-sidebar-nav::-webkit-scrollbar {
+        display: none;
+    }
+
     .fi-sidebar-group {
         position: relative;
         isolation: isolate;
@@ -589,7 +621,6 @@
      * La línea del límite y la sombra no se apagan: son el borde de la región,
      * que se juzga contra 3:1 y que el filo luminiscente no alcanza (D-L10).
      */
-    body[data-barra-estado="scroll"] .fi-sidebar::before,
     body[data-barra-estado="scroll"] .fi-sidebar::after {
         opacity: 0;
     }

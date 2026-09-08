@@ -427,9 +427,17 @@ class BarraLateralTest extends TestCase
         $tema = preg_replace('/\s+/', ' ', $this->tema());
 
         $this->assertStringContainsString(
+            'body[data-barra-estado="scroll"] .fi-sidebar::after',
+            $tema,
+            'El filo de la barra no se apaga cuando los módulos encienden: quedan las dos cajas a la vez.'
+        );
+
+        // El suelo NO se apaga desde D-L24: es el campo de puntos que Sua pidió
+        // como fondo, y sin él la barra se queda transparente sobre la página.
+        $this->assertStringNotContainsString(
             'body[data-barra-estado="scroll"] .fi-sidebar::before',
             $tema,
-            'El velo de la barra no se apaga cuando los módulos encienden: quedan las dos cajas a la vez.'
+            'El suelo de la barra no puede apagarse: es el fondo del campo de puntos.'
         );
 
         $this->assertStringContainsString(
@@ -437,6 +445,71 @@ class BarraLateralTest extends TestCase
             $tema,
             'La línea del límite tiene que sobrevivir al apagado: es el borde de la región.'
         );
+    }
+
+    /**
+     * El campo de puntos del fondo (D-L24). Se dibuja en un lienzo y no con
+     * nodos: con 18 px de paso, una columna de 244 por 1.000 son más de
+     * setecientos puntos. Tres condiciones de la decisión, cada una con su
+     * afirmación: colores por token (invierte con el tema), repulsión apagada
+     * bajo movimiento reducido, y lienzo sin puntero ni texto.
+     * Rotura: cablear el color, mover los puntos con movimiento reducido, o
+     * dejar que el lienzo reciba el puntero.
+     */
+    public function test_el_campo_de_puntos_respeta_las_tres_condiciones(): void
+    {
+        $js = File::get(resource_path('js/panel-barra-puntos.js'));
+        $tema = $this->tema();
+
+        $this->assertStringContainsString("getPropertyValue('--asb-admin-barra-punto')", $js, 'El color del punto no sale de un token, así que no invertiría con el tema.');
+        // Un solo color literal en el módulo, y es el respaldo por si el token
+        // faltara: dos serían paleta privada entrando por la puerta de atrás.
+        preg_match_all('/#[0-9a-fA-F]{3,8}|rgba?\(/', $js, $literales);
+        $this->assertLessThanOrEqual(1, count($literales[0]), 'El campo de puntos tiene colores cableados: '.implode(', ', $literales[0]));
+
+        $this->assertStringContainsString("matchMedia('(prefers-reduced-motion: reduce)')", $js, 'La repulsión no consulta el movimiento reducido.');
+        $this->assertStringContainsString('if (corriendo || quieto.matches)', $js, 'El bucle arranca aunque el sistema pida movimiento reducido.');
+        $this->assertStringContainsString("addEventListener('pointermove'", $js, 'El seguimiento no usa `pointermove`: con `mousemove`, en híbridos el toque deja el campo empujado.');
+
+        $lienzo = $this->regla($tema, '.asb-barra-puntos');
+        $this->assertStringContainsString('pointer-events: none;', $lienzo, 'El lienzo intercepta el puntero.');
+        $this->assertMatchesRegularExpression('/z-index: -\d;/', $lienzo, 'El lienzo tiene que ir por debajo del contenido.');
+
+        $vista = File::get(resource_path('views/filament/components/puntos-de-la-barra.blade.php'));
+        $this->assertStringContainsString('aria-hidden="true"', $vista, 'El lienzo es decoración y tiene que estar oculto a la tecnología de apoyo.');
+
+        foreach (['--asb-admin-barra-punto'] as $token) {
+            $this->assertStringContainsString($token, $this->bloque($tema, '
+:root {'), "{$token} falta en el tema claro.");
+            $this->assertStringContainsString($token, $this->bloque($tema, '
+.dark {'), "{$token} falta en el tema oscuro: el campo no invertiría.");
+        }
+    }
+
+    /**
+     * Sin barra de desplazamiento visible (D-L24), la única pista de que la
+     * lista sigue es la máscara de desvanecido. Por eso las dos cosas se
+     * afirman juntas: esconder la barra sin el aviso deja al usuario sin saber
+     * que hay más.
+     * Rotura: quitar la máscara, o devolver la barra de desplazamiento.
+     */
+    public function test_esconder_la_barra_de_scroll_obliga_al_aviso(): void
+    {
+        $tema = $this->tema();
+        $lista = $this->regla($tema, '.fi-sidebar-nav');
+
+        $this->assertStringContainsString('scrollbar-width: none;', $lista, 'La barra de desplazamiento sigue a la vista.');
+        $this->assertStringContainsString('.fi-sidebar-nav::-webkit-scrollbar', $tema, 'Falta esconderla en los navegadores de WebKit.');
+
+        $normalizado = preg_replace('/\s+/', ' ', $tema);
+
+        foreach (['arriba', 'abajo', 'ambos'] as $borde) {
+            $this->assertStringContainsString(
+                'body[data-barra-borde="'.$borde.'"] .fi-sidebar-nav',
+                $normalizado,
+                "Sin barra de desplazamiento, el aviso de borde «{$borde}» es la única pista de que hay más lista."
+            );
+        }
     }
 
     /**

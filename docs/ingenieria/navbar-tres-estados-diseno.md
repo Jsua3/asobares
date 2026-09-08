@@ -1897,3 +1897,23 @@ En el mismo mensaje pidió rehacer la parte superior del panel: el control de te
 **Los contadores entran en las filas.** El mecanismo ya existe y lo usan cuatro sitios del panel, entre ellos las fotos por aprobar y la cartera en mora. Aquí se les da estilo propio, alineados a la derecha de la fila, en rojo solo cuando urgen. Cada insignia es una consulta por carga de página: si se extienden a más destinos, hay que medirlo antes.
 
 **Lo que NO se toca.** El cristal y su velo calibrado, las dos luces, la línea del límite, el indicador del ítem activo con su brote, el anillo de foco de dos colores, los rótulos de grupo (más ligeros, pero siguen, porque veinticuatro destinos en plano no tienen dónde agarrarse), el control de tema con sus tres preferencias, y todas las guardias y tokens ya escritos.
+
+### D-L24. El fondo de la barra: campo de puntos que huyen del cursor
+
+**Pedido de Sua, 7 sep, textual:** «sigo viendo la barra para scrollear y el fondo que unifica los módulos, elimínalos y quiero que el fondo sea conformado por el blanco y unos puntos grises, puntos los cuales serán repulsivos al cursor».
+
+**Hoy.** La barra lleva velo propio en todos los estados; solo se apaga al desplazar la lista. Y el scroller enseña su barra, porque Filament reserva el canal con `scrollbar-gutter: stable`.
+
+| Opción | Coste |
+|---|---|
+| A. El velo desaparece **siempre**. El fondo de la barra pasa a ser un campo de puntos dibujado en un `<canvas>` detrás del contenido, y los puntos se apartan del puntero con caída suave. Se apaga la barra de desplazamiento y el aviso de lista cortada queda como única pista | Un lienzo y un bucle de animación nuevos. Hay que acotar el coste: el bucle solo corre con el puntero dentro y mientras los puntos vuelven a su sitio |
+| B. Puntos en CSS con `radial-gradient` repetido, sin repulsión | Cero coste y cero repulsión: es la mitad del pedido |
+| C. Un punto por elemento del DOM | Con 18 px de paso son más de mil nodos en una columna de 244: inaceptable |
+
+**Recomendación: A**, con tres condiciones que no son negociables y van escritas aquí:
+
+1. **El fondo invierte con el tema.** «Blanco con puntos grises» es la receta del tema claro; en oscuro es la superficie oscura con puntos claros. La barra dejó de tener paleta privada el 7 sep y no la recupera: los dos colores salen de tokens.
+2. **La repulsión se apaga bajo `prefers-reduced-motion`.** Queda el campo de puntos quieto. Es animación ligada al gesto, y el proyecto ya decidió que esas se apagan.
+3. **El lienzo no recibe puntero** y no lleva texto: es decoración pura, así que no entra en ninguna cuenta de contraste. Los puntos van por debajo de los módulos.
+
+**Lo que se pierde al esconder la barra de desplazamiento**, dicho claro: la única pista de que la lista sigue pasa a ser la máscara de desvanecido de D-L15. Por eso ese aviso deja de ser un adorno y se vuelve obligatorio.

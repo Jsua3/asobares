@@ -92,6 +92,12 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::TOPBAR_END,
                 fn (): HtmlString => new HtmlString(view('filament.components.cuenta-en-la-barra')->render()),
             )
+            // El campo de puntos del fondo de la barra (D-L24). Va lo primero
+            // dentro de la barra para quedar por debajo de todo lo demás.
+            ->renderHook(
+                PanelsRenderHook::SIDEBAR_START,
+                fn (): HtmlString => new HtmlString(view('filament.components.puntos-de-la-barra')->render()),
+            )
             // Con la cuenta abajo, el menú de usuario de Filament sobra: dos
             // disparadores para la misma sesión se contradicen en cuanto uno
             // cambie. Perfil, sitio y salida viven ahora en la hoja del módulo.
@@ -196,6 +202,7 @@ class AdminPanelProvider extends PanelProvider
             return [
                 Js::make('panel-graficas', Vite::asset('resources/js/panel-graficas.js'))->module(),
                 Js::make('panel-barra-lateral', Vite::asset('resources/js/panel-barra-lateral.js'))->module(),
+                Js::make('panel-barra-puntos', Vite::asset('resources/js/panel-barra-puntos.js'))->module(),
             ];
         } catch (ViteException) {
             return [];
