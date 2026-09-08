@@ -6,8 +6,9 @@
  *   3. Retroalimentación del empresario y registro de hallazgos (Semanas 7–8)
  *   4. Ampliación de alcance                         (revisión del 28 ago 2026)
  *   5. Ampliación de alcance: cifras del gremio en la portada (petición del 1 sep 2026)
+ *   6. Ampliación de alcance: beneficios por territorio y analítica (plan del 8 sep 2026)
  *
- *     node docs/ingenieria/herramientas/constancias.mjs            # los cinco
+ *     node docs/ingenieria/herramientas/constancias.mjs            # todos
  *     node docs/ingenieria/herramientas/constancias.mjs "Acta 05"  # solo el que contenga ese texto
  *
  * Los cinco son FORMATOS PARA DILIGENCIAR, no actas de hechos ya ocurridos.
@@ -549,6 +550,112 @@ ${PIE_LEGAL}
 
 /* ------------------------------------------------------------------------- */
 
+/*
+ * Se numera **07** y no 06 a propósito: el 06 está reservado para el acta de la
+ * ampliación de las bolsas del 3 de septiembre (D-26), que sigue pendiente de
+ * emitir. Un hueco en la numeración se explica en una línea; dos documentos
+ * distintos con el mismo número, no.
+ */
+const alcanceDelPlanDeTrabajo = documento({
+    referencia: 'Acta 07 · Ampliación de alcance<br>Plan de trabajo interno del 8 de septiembre de 2026<br>Fecha de emisión: 8 de septiembre de 2026',
+    titulo: 'Acta de ampliación de alcance: beneficios por territorio y analítica del sitio',
+    subtitulo: 'Decisión sobre dos peticiones del plan de trabajo interno · ASOBARES Capítulo Quindío',
+    estiloExtra: 'tbody tr { page-break-inside: avoid; }',
+    cuerpo: `
+<dl class="ficha">
+  <dt>Fecha de la sesión</dt><dd>_______________________</dd>
+  <dt>Lugar</dt><dd>_______________________</dd>
+  <dt>Modalidad</dt><dd>_______________________</dd>
+  <dt>Quién decide</dt><dd>_______________________</dd>
+</dl>
+
+<h2>1. Objeto</h2>
+<p>Dejar constancia escrita de la decisión de la dirección ejecutiva sobre <strong>dos peticiones del plan de trabajo interno del 8 de septiembre de 2026</strong> que <strong>no forman parte del alcance contratado</strong>: no figuran en el cronograma firmado ni entre los requisitos de la especificación (ERS v3.0, RF-01 a RF-62), y por tanto no se pueden construir sin una decisión expresa que las incorpore.</p>
+
+<div class="nota">
+<strong>Lo que este documento NO cubre.</strong> Las demás tareas de ese mismo plan sí caben en lo contratado y se ejecutan sin acta: el orden alfabético de la portada es un ajuste de listado; el botón de WhatsApp sale de «Ajustes del sitio», que es el RNF-09; y las bolsas exclusivas ya estaban construidas. La <strong>publicidad interna pagada</strong> tampoco entra aquí: es la petición OBS3-18 de la revisión del 28 de agosto y su decisión vive en el <strong>Acta 04</strong>, todavía sin firmar.
+</div>
+
+<h2>2. La regla que gobierna esta decisión</h2>
+<p>El alcance quedó congelado el <strong>14 de agosto de 2026</strong>. Desde entonces rige el mismo criterio: la ausencia de una funcionalidad no constituye incumplimiento mientras no figure en el cronograma firmado ni en la especificación, y <strong>toda ampliación se registra por escrito antes de codificarse</strong>. Esta acta se emite antes de la primera línea de código de las dos.</p>
+<p>La fecha límite de la práctica es el <strong>22 de septiembre de 2026</strong>, y la semana en curso ya está comprometida con las pruebas en dispositivos reales que exige el cronograma. <strong>Lo que entre aquí desplaza a otra cosa</strong>, y el punto 5 existe para dejar dicho a qué.</p>
+
+<h2>3. Lo que se somete a decisión</h2>
+<table>
+  <thead>
+    <tr>
+      <th style="width:6%">Ref.</th>
+      <th style="width:28%">Lo que se pidió</th>
+      <th style="width:36%">Qué implica construirlo</th>
+      <th style="width:10%">Antes del 22 sep</th>
+      <th style="width:10%">Fase II</th>
+      <th style="width:10%">Se descarta</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="white-space:nowrap">A-01</td>
+      <td><strong>Beneficios clasificados por territorio</strong>: distinguir los de ASOBARES Colombia, los del capítulo Quindío y los de cada municipio, en un solo módulo y no en tres.</td>
+      <td>Los beneficios existen hoy como un catálogo plano de cinco entradas, sin ninguna columna territorial. Hay que <strong>añadir el alcance y el municipio al modelo</strong> —con migración—, ofrecerlos en el formulario del panel exigiendo el municipio solo cuando el alcance sea municipal, y <strong>rehacer las tres pantallas públicas</strong> que hoy los pintan en una sola lista. El patrón ya existe en el proyecto: los aliados se clasifican así desde el 31 de agosto y se copia. Dos avisos: el módulo de beneficios <strong>no tiene hoy ninguna prueba propia</strong>, así que el trabajo incluye escribir las primeras; y la tabla de municipios trae <strong>ocho de los doce</strong> del alcance firmado, que hay que completar antes de clasificar por municipio.</td>
+      <td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td>
+    </tr>
+    <tr>
+      <td style="white-space:nowrap">A-02</td>
+      <td><strong>Analítica del sitio en el panel</strong>: visitas totales, visitantes únicos, páginas más visitadas y evolución por período; y, si cabe, clics en WhatsApp y en «Afíliate».</td>
+      <td>Sin Google Analytics ni paquetes de terceros, que es lo que el plan pide. El proyecto <strong>ya tiene un contador anónimo funcionando en producción</strong> —el de consultas de la guía normativa, que no guarda IP, ni navegador, ni sesión a propósito, y tiene una prueba que falla si alguien le mete un dato personal—: visitas, páginas más visitadas y evolución se construyen con ese mismo molde, más una gráfica en el tablero y su purga diaria. <strong>Los «visitantes únicos» son harina de otro costal</strong>: distinguir personas exige guardar IP, cookie o sesión, que es justo lo que ese diseño evita para quedar fuera de la Ley 1581, y la política de tratamiento del gremio sigue sin publicarse. Ver el punto 4.</td>
+      <td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>4. Contrapropuesta del equipo</h2>
+<p><small>Se ofrece porque hay una versión que cabe en el tiempo disponible y probablemente resuelve la necesidad real. Marcar solo si sustituye a lo pedido.</small></p>
+<table>
+  <thead>
+    <tr><th style="width:10%">Acepta</th><th style="width:14%">En vez de</th><th>Propuesta</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="casilla"></span></td>
+      <td style="white-space:nowrap">A-02</td>
+      <td><strong>Analítica anónima, sin visitantes únicos.</strong> Se cuentan las visitas por página y por día sin guardar nada de quien visita, igual que ya se cuentan las consultas de la guía. Responde «qué se mira y cuánto» y «cómo evoluciona», que es lo que sirve para decidir contenido. No responde «cuántas personas distintas», y decirlo así es preferible a publicar un número que el propio método no sostiene. Si más adelante el gremio quiere esa cifra, exige política de tratamiento publicada y una decisión aparte.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>5. Qué se desplaza</h2>
+<p><small>A diligenciar solo si alguna petición se aprueba para antes del 22 de septiembre. El tiempo no es elástico y esta casilla evita que el desplazamiento se descubra en la última semana.</small></p>
+${RENGLONES(4)}
+
+<h2>6. Observaciones de la dirección ejecutiva</h2>
+${RENGLONES(4)}
+
+<h2>7. Constancia</h2>
+<div class="nota">
+Lo marcado como <strong>Fase II</strong> queda fuera del alcance de esta práctica empresarial y no constituye incumplimiento de lo contratado. Lo marcado como <strong>antes del 22 de septiembre</strong> se incorpora al alcance y desplaza lo que se anote en el punto 5. Lo <strong>descartado</strong> no se vuelve a proponer sin una nueva acta.
+</div>
+
+<div class="firmas tres">
+  <div class="firma">
+    <div class="nombre">Natalia Gutiérrez</div>
+    <div class="cargo">Directora ejecutiva · ASOBARES Capítulo Quindío<br>Tutora empresarial · decide la ampliación</div>
+  </div>
+  <div class="firma">
+    <div class="nombre">Juan José Sua Gómez</div>
+    <div class="cargo">Practicante · Universidad Alexander von Humboldt<br>Presenta el alcance y su costo</div>
+  </div>
+  <div class="firma">
+    <div class="nombre">Ingrid Montoya Warski</div>
+    <div class="cargo">Practicante · Universidad Alexander von Humboldt<br>Presenta el alcance y su costo</div>
+  </div>
+</div>
+
+${PIE_LEGAL}
+`,
+});
+
+/* ------------------------------------------------------------------------- */
+
 const trabajos = [
     {
         html: acta,
@@ -574,6 +681,11 @@ const trabajos = [
         html: cifrasDelGremio,
         salida: join(INGENIERIA, 'constancias', 'Acta 05 - Ampliacion de alcance - cifras del gremio.pdf'),
         pie: pieConPaginacion('Acta 05 · Cifras del gremio en la portada · ASOBARES Quind&iacute;o'),
+    },
+    {
+        html: alcanceDelPlanDeTrabajo,
+        salida: join(INGENIERIA, 'constancias', 'Acta 07 - Ampliacion de alcance - beneficios por territorio y analitica.pdf'),
+        pie: pieConPaginacion('Acta 07 · Beneficios por territorio y anal&iacute;tica · ASOBARES Quind&iacute;o'),
     },
 ];
 
