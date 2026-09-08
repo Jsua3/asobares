@@ -23,6 +23,7 @@ class GenerarMaquetaDeLaBarra extends Command
 {
     protected $signature = 'maqueta:barra
         {--oscuro : Pinta la maqueta en tema oscuro}
+        {--cerrada : Sin `fi-sidebar-open`: por debajo de 64 rem, el riel de iconos}
         {--ruta=public/_medicion/barra.html : Dónde se escribe, relativo a la raíz del proyecto}';
 
     protected $description = 'Genera la maqueta de la barra lateral del panel con la hoja de estilos compilada';
@@ -144,6 +145,7 @@ class GenerarMaquetaDeLaBarra extends Command
         }
 
         $clase = $oscuro ? 'dark' : '';
+        $abierta = $this->option('cerrada') ? '' : ' fi-sidebar-open';
         $fondo = $oscuro ? 'var(--asb-admin-carbon)' : 'var(--asb-admin-fondo-claro)';
 
         return <<<HTML
@@ -153,8 +155,12 @@ class GenerarMaquetaDeLaBarra extends Command
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Maqueta de la barra lateral</title>
-        <link rel="stylesheet" href="/build/{$activos['css']}">
         <style>
+        /*
+         * ANTES de la hoja compilada a propósito: lo de aquí solo rellena lo que
+         * el panel real trae de otro sitio, y nunca puede pisar al tema. Yendo
+         * después tapaba, por ejemplo, el `display: none` del chevron en el riel.
+         */
         [x-cloak] { display: none !important; }
         body { margin: 0; min-height: 100vh; background: {$fondo}; }
         /* El topbar va FUERA de `.fi-layout` porque así lo pinta Filament:
@@ -164,28 +170,31 @@ class GenerarMaquetaDeLaBarra extends Command
         .fi-topbar-ctn { position: sticky; inset-block-start: 0; z-index: 20; }
         .fi-topbar { display: flex; align-items: center; padding-inline: 1rem; }
         .fi-logo { font-weight: 700; letter-spacing: -.02em; color: var(--asb-admin-barra-tinta); }
-        .fi-layout { display: flex; min-height: calc(100vh - var(--asb-admin-topbar-alto)); }
-                /* `flex-shrink: 0` porque en el panel el cajón es fijo y no lo encoge
-           nadie: sin esto, a 375 px la maqueta medía 246 de ancho, no 252. */
-        .fi-sidebar { display: flex; flex-direction: column; flex-shrink: 0; width: var(--asb-admin-sidebar-ancho); height: calc(100vh - var(--asb-admin-topbar-alto)); position: sticky; top: var(--asb-admin-topbar-alto); }
-        .fi-sidebar-nav { display: flex; flex-direction: column; flex-grow: 1; overflow: hidden auto; list-style: none; margin: 0; }
+        /*
+         * Aquí NO se declara el posicionamiento de la barra ni el de la lista.
+         * La hoja compilada trae el CSS de Filament, así que declararlo aquí lo
+         * tapaba: la maqueta medía su propio invento y no el panel. Es lo que
+         * escondió durante dos días que `position: relative` estaba pisando al
+         * `fixed` de Filament (D-L29).
+         */
         .fi-sidebar-group-items { list-style: none; margin: 0; padding: 0; }
         .fi-sidebar-group-btn { display: flex; align-items: center; gap: .5rem; }
         .fi-sidebar-group-label { flex: 1; }
-        .fi-icon-btn { display: grid; place-items: center; width: 2rem; height: 2rem; padding: 0; border: 0; background: none; color: inherit; cursor: pointer; }
+        .fi-icon-btn { padding: 0; border: 0; background: none; color: inherit; cursor: pointer; }
         .fi-sidebar-item-btn { display: flex; align-items: center; gap: .75rem; text-decoration: none; padding-inline: .6rem; }
         .fi-icon { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
-        .hueco { flex: 1; padding: 2rem; font-family: system-ui; color: var(--asb-admin-barra-tinta); }
+        .hueco { padding: 2rem; font-family: system-ui; color: var(--asb-admin-barra-tinta); }
         </style>
+        <link rel="stylesheet" href="/build/{$activos['css']}">
         </head>
         <body class="fi-body fi-body-has-topbar fi-body-has-navigation">
         <div class="fi-topbar-ctn"><div class="fi-topbar">
         <div class="fi-topbar-start"><span class="fi-logo">asobares</span></div>
         </div></div>
         <div class="fi-layout">
-        <aside class="fi-sidebar fi-sidebar-open"><canvas class="asb-barra-puntos" aria-hidden="true"></canvas>
+        <aside class="fi-sidebar{$abierta}"><canvas class="asb-barra-puntos" aria-hidden="true"></canvas>
         <ul class="fi-sidebar-nav">{$lista}</ul></aside>
-        <main class="hueco"><h1>Maqueta</h1><p>Solo para medir la barra lateral.</p></main>
+        <div class="fi-main-ctn" style="display: flex; opacity: 1;"><main class="fi-main hueco"><h1>Maqueta</h1><p>Solo para medir la barra lateral.</p></main></div>
         </div>
         <script>
         /*

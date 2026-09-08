@@ -159,6 +159,9 @@
        82 % del ancho de la barra. 13rem son 208 px, los mismos que daba el
        82 % sobre los 252 de la barra. */
     --asb-admin-barra-resplandor-ancho: 13rem;
+    /* El riel del teléfono (D-L29): 3,5 rem son 56 px, con margen sobre los
+       44 del mínimo táctil para que quepan las cuatro esquinas. */
+    --asb-admin-barra-riel: 3.5rem;
     --asb-admin-barra-modulo-sombra: 0 12px 28px rgb(11 9 10 / 0.06);
     --asb-admin-barra-brote: 0.35;
     --asb-admin-barra-empuje: 2px;
@@ -429,9 +432,17 @@
      * el valor computado salía en `rgba(0,0,0,0) 0 0 0 0`. La sombra de la
      * unión la dibuja el pseudoelemento, que nadie nos pisa.
      */
+    /*
+     * Sin `position` a propósito. Filament declara la barra `fixed` y solo la
+     * vuelve `lg:sticky` en escritorio; el `position: relative` que vivía aquí
+     * iba DESPUÉS en el archivo compilado —que no lleva capas— y ganaba en
+     * todas las anchuras: en el teléfono el cajón cerrado ocupaba sus 252 px en
+     * el flujo y aplastaba el contenido, y en escritorio la barra se iba con el
+     * desplazamiento. Existía para darle bloque contenedor al resplandor, que
+     * desde el 8 sep lo pinta `.fi-body::before` y ya no necesita ninguno.
+     */
     .fi-sidebar {
         --sidebar-width: var(--asb-admin-sidebar-ancho);
-        position: relative;
         background: transparent;
     }
 
@@ -600,6 +611,111 @@
             background-color: var(--asb-admin-barra-velo-cajon);
             -webkit-backdrop-filter: var(--asb-admin-barra-desenfoque);
             backdrop-filter: var(--asb-admin-barra-desenfoque);
+        }
+
+        /*
+         * EL RIEL (D-L29). La barra deja de irse y se estrecha: los iconos se
+         * quedan a la vista y los nombres vuelven al abrirla. Empieza debajo
+         * del topbar para no taparle la hamburguesa, que es lo que la abre.
+         */
+        .fi-sidebar {
+            inset-block-start: var(--asb-admin-topbar-alto);
+            height: calc(100dvh - var(--asb-admin-topbar-alto));
+            /* Filament pone `transition-all` aquí; lo único que cambia entre
+               riel y cajón es el ancho, y transicionar «todo» arrastra al
+               desenfoque y al velo en cada fotograma. */
+            transition-property: width;
+            transition-duration: var(--duracion-estado);
+            transition-timing-function: var(--ease-cajon);
+        }
+
+        .fi-sidebar:not(.fi-sidebar-open) {
+            /*
+             * Se mueve el TOKEN de Filament, no la propiedad. Su regla de ancho
+             * cuelga de `.fi-body:not(...):not(...) .fi-sidebar:not(...)` y tiene
+             * mucha más especificidad que cualquier `width` que se declare aquí:
+             * medido, el riel seguía saliendo de 252 px. Como esa regla dice
+             * `width: var(--sidebar-width)`, basta con darle otro valor al token.
+             */
+            --sidebar-width: var(--asb-admin-barra-riel);
+            /*
+             * `none` y NO `0 0`: un `translate` computado distinto de `none`
+             * convierte a la barra en bloque contenedor de todo `fixed` que
+             * cuelgue dentro, que es el pisotón que este proyecto ya pagó dos
+             * veces.
+             */
+            translate: none;
+        }
+
+        /*
+         * El nombre no se borra, se ESCONDE. Con `display: none` el enlace del
+         * riel se queda sin nombre accesible y la barra pasa a ser una lista de
+         * enlaces sin texto. Con recorte visual, el lector de pantalla y el
+         * foco lo siguen encontrando.
+         */
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-item-label,
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group-label {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+            white-space: nowrap;
+        }
+
+        /* Sin rótulo, el chevron no plega nada legible; y el logotipo no cabe
+           en 56 px, además de estar ya en el topbar. */
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group-collapse-btn,
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group-collapse-button,
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-header {
+            display: none;
+        }
+
+        /* El icono, centrado en el riel. */
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-item-btn {
+            justify-content: center;
+            padding-inline: 0;
+        }
+
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-nav {
+            padding-inline: 0.4rem;
+        }
+
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group {
+            padding-inline: 0.2rem;
+        }
+
+        /*
+         * La insignia se vuelve PUNTO. El contador no se lee en 56 px, pero la
+         * señal de que hay pendientes es lo que D-L22 le encargó al retirar la
+         * campana, y esa no se pierde.
+         */
+        .fi-sidebar:not(.fi-sidebar-open) .fi-badge {
+            position: absolute;
+            inset-block-start: 0.55rem;
+            inset-inline-end: 0.55rem;
+            width: 0.5rem;
+            min-width: 0;
+            height: 0.5rem;
+            padding: 0;
+            overflow: hidden;
+            border-radius: 999px;
+            background-color: var(--asb-admin-barra-activo);
+            color: transparent;
+            font-size: 0;
+        }
+
+        /* El contenido se aparta del riel, o queda medio tapado. */
+        .fi-main-ctn {
+            padding-inline-start: var(--asb-admin-barra-riel);
+        }
+
+    }
+
+    /* Sin movimiento, el riel no se ensancha: aparece ya ancho. */
+    @media (max-width: 63.999rem) and (prefers-reduced-motion: reduce) {
+        .fi-sidebar {
+            transition-property: none;
         }
     }
 
@@ -1834,6 +1950,20 @@
     /* Ningún bloque del informe se parte a mitad de hoja. */
     .informe-bloque {
         break-inside: avoid;
+    }
+}
+
+/*
+ * El lavado del resplandor se estrecha con la zona (D-L29): 13 rem sobre una
+ * pantalla de 375 px cubren más de la mitad, y ahí la zona es un riel de 3,5.
+ *
+ * Fuera de `@layer components` como todo lo que reasigna tokens: dentro de la
+ * capa perdería contra el `:root` sin capa de este mismo archivo.
+ */
+@media (max-width: 63.999rem) {
+    :root,
+    :root.dark {
+        --asb-admin-barra-resplandor-ancho: 6rem;
     }
 }
 

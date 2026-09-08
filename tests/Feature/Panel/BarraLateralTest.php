@@ -920,6 +920,79 @@ class BarraLateralTest extends TestCase
     }
 
     /**
+     * En el teléfono la barra es un RIEL de iconos y no un cajón que se va
+     * (D-L29). Y antes que eso: el tema no puede declarar `position` en
+     * `.fi-sidebar`.
+     *
+     * Filament la declara `fixed` y solo la vuelve `lg:sticky` en escritorio.
+     * Nuestro `position: relative` iba DESPUÉS en el archivo compilado —que no
+     * lleva capas, `lightningcss` las aplana— así que ganaba en todas las
+     * anchuras: en el teléfono el cajón cerrado ocupaba sus 252 px en el flujo
+     * y aplastaba el contenido, y en escritorio la barra se iba con el
+     * desplazamiento. Sua lo vio como «terrible» el 8 sep.
+     *
+     * Rotura: devolver `position` a la barra; quitar el ancho del riel; ocultar
+     * los rótulos con `display: none`; dejar el `translate` en cero en vez de
+     * en `none`.
+     */
+    public function test_en_el_telefono_la_barra_es_un_riel_de_iconos(): void
+    {
+        $tema = $this->tema();
+
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.fi-sidebar \{[^}]*[^-]position:/s',
+            $tema,
+            'El tema declara `position` en la barra: pisa el `fixed` de Filament en móvil y su `lg:sticky` en escritorio, y va después en el archivo compilado, que no lleva capas.'
+        );
+
+        $movil = $this->mediasDeReglas($tema, '(max-width: 63.999rem)');
+
+        $this->assertNotSame('', $movil, 'No hay bloque de móvil: el riel vive ahí.');
+
+        foreach ([
+            'var(--asb-admin-barra-riel)' => 'el riel no tiene ancho propio, así que no hay riel',
+            'translate: none;' => 'el riel no deshace el `-translate-x-full` de Filament, o lo deshace con un cero, que convierte la barra en bloque contenedor de todo `fixed`',
+            'clip-path: inset(50%)' => 'los rótulos no se esconden con recorte visual: si se ocultan de otra forma, el enlace del riel se queda sin nombre accesible',
+        ] as $cadena => $porque) {
+            $this->assertNotFalse(strpos($movil, $cadena), "En el riel, {$porque}.");
+        }
+
+        $this->assertFalse(
+            strpos($movil, 'display: none') !== false && ! str_contains($movil, 'clip-path: inset(50%)'),
+            'Los rótulos del riel no pueden ocultarse con `display: none`: se llevan por delante el nombre accesible del enlace.'
+        );
+
+        // El contenido se aparta del riel, o queda medio tapado.
+        $this->assertNotFalse(
+            strpos($movil, 'padding-inline-start: var(--asb-admin-barra-riel)'),
+            'El contenido no se aparta del riel y queda debajo de él.'
+        );
+
+        // La transición es del ANCHO y declarada a mano: `transition-all` de
+        // Filament es lo que la Parte III ya prohibió para el cajón.
+        $this->assertNotFalse(
+            strpos($movil, 'transition-property: width;'),
+            'El riel no declara qué transiciona, así que hereda el `transition-all` de Filament.'
+        );
+
+        // Y el riel mide lo bastante para el dedo.
+        $raiz = $this->bloque($tema, '
+:root {');
+
+        $this->assertSame(
+            1,
+            preg_match('/--asb-admin-barra-riel: ([\d.]+)rem;/', $raiz, $ancho),
+            'El ancho del riel no es un valor en rem: la cuenta no se puede hacer.'
+        );
+
+        $this->assertGreaterThanOrEqual(
+            2.75,
+            (float) $ancho[1],
+            'El riel mide menos de 44 px: el icono no tiene dónde recibir el dedo.'
+        );
+    }
+
+    /**
      * La maqueta con la que se mide (tarea 10 del plan). El panel exige segundo
      * factor, así que ninguna sesión automatizada lo abre: sin poder ver la
      * barra se entregaron dos regresiones visuales seguidas. La maqueta es lo
@@ -1227,6 +1300,48 @@ class BarraLateralTest extends TestCase
 
                     if ($nivel === 0) {
                         $cuerpos .= substr($limpio, $abre + 1, $j - $abre - 1)."\n";
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $cuerpos;
+    }
+
+    /**
+     * Como `medias()`, pero sin exigir que el bloque viva fuera de `@layer`:
+     * las REGLAS del riel sí van dentro de la capa, y solo las reasignaciones
+     * de token tienen que salir de ella.
+     */
+    private function mediasDeReglas(string $css, string $senal): string
+    {
+        $limpio = preg_replace('#/\*.*?\*/#s', '', $css);
+        $cuerpos = '';
+        $desde = 0;
+
+        while (($i = strpos($limpio, '@media', $desde)) !== false) {
+            $abre = strpos($limpio, '{', $i);
+            $desde = $i + 6;
+
+            if ($abre === false || ! str_contains(substr($limpio, $i, $abre - $i), $senal)) {
+                continue;
+            }
+
+            $nivel = 0;
+
+            for ($j = $abre; $j < strlen($limpio); $j++) {
+                if ($limpio[$j] === '{') {
+                    $nivel++;
+                }
+
+                if ($limpio[$j] === '}') {
+                    $nivel--;
+
+                    if ($nivel === 0) {
+                        $cuerpos .= substr($limpio, $abre + 1, $j - $abre - 1).'
+';
 
                         break;
                     }

@@ -1471,6 +1471,47 @@ La guardia que existía vigilaba un token concreto, `--asb-admin-barra-union`. L
 
 **Barrido final:** sin sondas, sin `dd(`, sin `console.log`, sin `FUGA`, y `git status` limpio salvo lo que entra en el commit.
 
+### D-L29. En el teléfono la barra es un riel de iconos
+
+**Pedido de Sua, 8 sep, con una captura del panel en un teléfono:** «la barra del panel en el móvil está terrible. Quiero que se vean los iconos a la izquierda y que al desplegarlo aparezcan los nombres correspondientes. Tiene que ser responsivo a la pantalla de un teléfono correctamente».
+
+**Primero, el defecto que hacía «terrible» la captura, y que no era de diseño.** El tema declaraba `position: relative` en `.fi-sidebar`. Filament la declara `fixed` y solo la vuelve `lg:sticky` en escritorio, y **nuestra regla va después en el archivo compilado** —que no lleva capas: `lightningcss` las aplana y manda el orden—, así que ganaba en todas las anchuras. Consecuencias, las dos comprobadas leyendo el CSS servido:
+
+1. **En el teléfono**, el cajón cerrado dejaba de estar fuera de pantalla y pasaba a ocupar sus 252 px **en el flujo**: la franja rosa vacía de la captura, con el contenido aplastado contra el canto derecho.
+2. **En escritorio**, `lg:sticky` también perdía, así que la barra se iba con el desplazamiento de la página en vez de quedarse.
+
+La regla existía para que el resplandor de `::before` tuviera bloque contenedor. Desde que el resplandor se mudó a `.fi-body::before` **no hace falta ninguna**, y se retira. Hay guardia: `.fi-sidebar` no declara `position`, y el mensaje dice por qué.
+
+**El riel.** Por debajo de 64 rem la barra deja de irse: se **estrecha**.
+
+| | Riel (cerrado) | Cajón (abierto) |
+|---|---|---|
+| Ancho | `--asb-admin-barra-riel`, 3,5 rem | `--sidebar-width`, 15,75 rem |
+| Qué se ve | solo los iconos | icono y nombre |
+| Dónde está | fijo al canto izquierdo, debajo del topbar | encima del contenido, con el velo de cierre de Filament |
+| El contenido | apartado por el ancho del riel | quieto; el cajón se le superpone |
+
+**Cuatro reglas que no se negocian:**
+
+1. **El nombre no se borra, se esconde.** Los rótulos se ocultan con recorte visual (`clip-path: inset(50%)` sobre un cuadro de 1 px), **nunca con `display: none`**: el enlace conserva su nombre accesible y el riel sigue siendo navegable a ciegas. Un riel de iconos sin nombre accesible es una lista de enlaces sin texto.
+2. **La fila del riel sigue midiendo 44 px** como mínimo, y el riel 56 px de ancho, que da margen a los cuatro cantos del cuadrado táctil.
+3. **La transición es del ancho, declarada a mano.** Filament pone `transition-all` en `.fi-sidebar`, que es justo lo que la Parte III ya prohibió para el cajón: se declara `transition-property: width` con su token de duración, y bajo movimiento reducido no hay transición.
+4. **`translate: none`, no `translate: 0 0`.** Deshacer el `-translate-x-full` de Filament con un cero deja un `translate` computado distinto de `none`, y eso convierte a la barra en bloque contenedor de todo `fixed` que cuelgue dentro. Es el mismo pisotón que este proyecto ya pagó dos veces.
+
+**Lo que el riel se lleva por delante:** la cabecera con el logotipo, que en 56 px no cabe y que ya está en el topbar; el chevron de los grupos, que sin rótulo no plega nada legible; y el contador de la insignia, que a 56 px no se lee y se convierte en **punto**, para no perder la señal de que hay pendientes que D-L22 le encargó.
+
+**Y el resplandor se estrecha con la zona:** 13 rem de lavado sobre una pantalla de 375 px cubren más de la mitad. Por debajo de 64 rem el ancho del lavado baja a 6 rem, que es lo que marca un riel de 3,5.
+
+**Lo que la construcción añadió (8 sep).** Tres cosas que no estaban en la decisión y que solo aparecieron al medir:
+
+1. **El ancho del riel se pone moviendo el token de Filament, no la propiedad.** Su regla de ancho cuelga de `.fi-body:not(…):not(…) .fi-sidebar:not(.fi-sidebar-open)` y tiene mucha más especificidad que cualquier `width` declarado aquí: medido, el riel seguía saliendo de 252 px. Como esa regla dice `width: var(--sidebar-width)`, basta con darle otro valor al token dentro de la media.
+2. **La reasignación del lavado salió de `@layer components`.** Las REGLAS del riel sí viven dentro de la capa; los tokens no pueden, porque el `:root` sin capa de este mismo archivo les gana. Es la misma trampa de D-L17, ahora en una media de anchura.
+3. **La maqueta mintió tres veces y por eso no se veía el defecto.** Declaraba `position: sticky` sobre `.fi-sidebar` —tapando el `fixed` de Filament, que es justo lo que fallaba—, ponía su `<style>` DESPUÉS de la hoja compilada —tapando el `display: none` del chevron— y no reproducía el `opacity: 1` que el blade le pone al contenido con Alpine, así que medía un contenido invisible. Las tres corregidas: la maqueta ya no posiciona nada, su estilo va **antes** de la hoja, y trae `.fi-main-ctn` con el estilo en línea del blade. Tiene también `--cerrada`, que es como se mira el riel.
+
+**Medido después, en la maqueta servida por HTTP.** A 375 px: riel de **56 px**, `fixed`, empezando en `y = 60` bajo el topbar; las 22 filas a **48 px**; ninguna desborda el riel; los iconos centrados; el chevron y la cabecera fuera; el contenido empezando en **56**; y el nombre accesible intacto (`Asociados`, `Eventos y capacitaciones`…). Abierto: **252 px**, `fixed`, `z-index: 30`, velo al 94 % con `blur(18px) saturate(1.3)`, rótulos visibles y ninguno recortado. A 1.280 px: `position: sticky` —**recuperado**, llevaba dos días en `relative`—, 252 px, contenido en 252 y sin relleno de riel.
+
+---
+
 ---
 
 ## La medición de la barra ya construida, 8 sep 2026 (tarea 10)
