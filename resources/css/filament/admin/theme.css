@@ -607,7 +607,13 @@
      * en claro).
      */
     @media (max-width: 63.999rem) {
-        .fi-sidebar::before {
+        /*
+         * Solo cuando está ABIERTA. El velo existe porque debajo del cajón pasa
+         * contenido variable que hay que tapar; el riel no tapa nada, solo está
+         * a un lado, y pintarlo dejaba a los módulos pegados sobre una barra
+         * blanca en vez de flotando sobre el campo (Sua, 8 sep).
+         */
+        .fi-sidebar.fi-sidebar-open::before {
             background-color: var(--asb-admin-barra-velo-cajon);
             -webkit-backdrop-filter: var(--asb-admin-barra-desenfoque);
             backdrop-filter: var(--asb-admin-barra-desenfoque);
@@ -679,6 +685,16 @@
 
         .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-nav {
             padding-inline: 0.4rem;
+        }
+
+        /*
+         * Sin suelo debajo, el cristal se aclara: en el teléfono el módulo tiene
+         * el campo de puntos justo detrás y no una barra blanca. Recalculado el
+         * 8 sep: el rótulo de grupo da 11,08:1 en claro y 7,74:1 en oscuro; el
+         * del ítem activo, 6,23:1 y 5,23:1.
+         */
+        .fi-sidebar {
+            --asb-admin-barra-velo: color-mix(in oklab, var(--asb-superficie) 66%, transparent);
         }
 
         .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group {

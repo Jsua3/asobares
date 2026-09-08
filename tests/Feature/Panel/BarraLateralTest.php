@@ -968,6 +968,37 @@ class BarraLateralTest extends TestCase
             'El contenido no se aparta del riel y queda debajo de él.'
         );
 
+        /*
+         * El riel NO tiene suelo. El velo del cajón existe porque debajo del
+         * cajón pasa contenido variable que hay que tapar (D-L18); el riel no
+         * tapa nada, solo está a un lado. Pintándolo, los módulos quedaban
+         * pegados sobre una barra blanca en vez de flotar sobre el campo, que
+         * es lo que Sua vio el 8 sep.
+         *
+         * Se afirma que el velo y el desenfoque cuelgan del estado ABIERTO.
+         */
+        foreach (['background-color: var(--asb-admin-barra-velo-cajon)', 'backdrop-filter: var(--asb-admin-barra-desenfoque)'] as $material) {
+            $desde = strpos($movil, $material);
+
+            $this->assertNotFalse($desde, "El cajón perdió su {$material}: debajo pasa contenido y hay que taparlo.");
+
+            $regla = substr($movil, 0, $desde);
+            $abre = strrpos($regla, '{');
+            $selector = trim(substr($regla, strrpos(substr($regla, 0, $abre), '}') + 1, $abre - strrpos(substr($regla, 0, $abre), '}') - 1));
+
+            $this->assertStringContainsString(
+                '.fi-sidebar-open',
+                $selector,
+                "El material del cajón se pinta también en el riel («{$selector}»): los módulos dejan de flotar y quedan sobre una barra blanca."
+            );
+        }
+
+        // Y el cristal de los apartados es más transparente en el teléfono.
+        $this->assertNotFalse(
+            strpos($movil, '--asb-admin-barra-velo:'),
+            'El cristal del apartado no se aclara en el teléfono, que es lo que Sua pidió al quitarle el suelo al riel.'
+        );
+
         // La transición es del ANCHO y declarada a mano: `transition-all` de
         // Filament es lo que la Parte III ya prohibió para el cajón.
         $this->assertNotFalse(

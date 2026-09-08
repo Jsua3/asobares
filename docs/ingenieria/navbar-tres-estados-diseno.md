@@ -1502,6 +1502,12 @@ La regla existía para que el resplandor de `::before` tuviera bloque contenedor
 
 **Y el resplandor se estrecha con la zona:** 13 rem de lavado sobre una pantalla de 375 px cubren más de la mitad. Por debajo de 64 rem el ancho del lavado baja a 6 rem, que es lo que marca un riel de 3,5.
 
+**Corregido el mismo día: el riel no tiene suelo.** Sua lo vio construido: «deja solo los módulos y quita la barra blanca de fondo que los agrupa para que así se les vea libertad, y a los módulos entrégales un poco de transparencia». Medido en la maqueta, ese blanco no era de la barra —que computa `rgba(0,0,0,0)`— sino de **`.fi-sidebar::before`, que pintaba el velo del CAJÓN al 94 % también cuando la barra está cerrada**. El velo del cajón tiene su razón (D-L18: debajo pasa contenido variable y hay que taparlo) y esa razón **no existe en el riel**, que no tapa nada: solo está a un lado.
+
+Así que el suelo se ata al estado. Abierta, velo y desenfoque como estaban. Cerrada, **nada**: los módulos flotan sobre el campo de puntos y el resplandor, que es exactamente el idioma del escritorio —«la barra no tiene fondo propio»— llevado al teléfono.
+
+Y el cristal de los apartados baja del 76 % al **66 %** por debajo de 64 rem, que es la transparencia que Sua pidió. Recalculado el 8 sep con `MideContraste`: el rótulo de grupo da **11,08:1** en claro y **7,74:1** en oscuro; el del ítem activo, **6,23:1** y **5,23:1**. Contra los 11,18 / 6,29 y 7,74 / 5,23 que daba al 76 %, la cuenta apenas se mueve, porque la superficie y el fondo del panel son casi el mismo color: aquí manda el ojo.
+
 **Lo que la construcción añadió (8 sep).** Tres cosas que no estaban en la decisión y que solo aparecieron al medir:
 
 1. **El ancho del riel se pone moviendo el token de Filament, no la propiedad.** Su regla de ancho cuelga de `.fi-body:not(…):not(…) .fi-sidebar:not(.fi-sidebar-open)` y tiene mucha más especificidad que cualquier `width` declarado aquí: medido, el riel seguía saliendo de 252 px. Como esa regla dice `width: var(--sidebar-width)`, basta con darle otro valor al token dentro de la media.
