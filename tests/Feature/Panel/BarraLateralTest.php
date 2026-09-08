@@ -192,8 +192,10 @@ class BarraLateralTest extends TestCase
         // sombra y el degradado que la unen al contenido.
         $this->assertStringNotContainsString('border-inline-end', $elemento, 'La barra no puede separarse con un canto: se une con la sombra de su pseudoelemento.');
 
+        // Lo único que dibuja `::after` es el resplandor de la esquina: desde
+        // que Sua pidió continuidad, ahí no va nada que separe.
         $capa = $this->regla($tema, '.fi-sidebar::after');
-        $this->assertStringContainsString('var(--asb-admin-barra-union)', $capa, 'La unión va en `::after`, encima del velo.');
+        $this->assertStringContainsString('var(--asb-admin-barra-halo)', $capa, 'Se perdió el resplandor de la esquina, que es de donde nace la luz.');
     }
 
     /**
@@ -425,34 +427,27 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * El límite es una UNIÓN, no una línea (D-L25). Hasta hoy la barra se
-     * cortaba con un borde de un píxel y un filo rojo; Sua pidió que se una al
-     * contenido con una sombra. Se puede porque desde D-L24 la región ya se
-     * distingue por su fondo de puntos, que es lo que antes sostenía la línea.
-     * Rotura: devolver el `border-inline-end` de un píxel.
+     * Nada separa la barra del contenido. El límite pasó por tres formas y las
+     * tres eran la misma: una línea de un píxel, un filo rojo y una franja
+     * difusa de 40 px. Difusa o no, se leía como un corte vertical, y Sua lo
+     * rechazó las tres veces. Lo que marca la zona es el resplandor; lo que la
+     * ordena son los cristales de sus apartados.
+     * Rotura: devolver el borde, el filo o la franja.
      */
-    public function test_el_limite_de_la_barra_es_una_union_y_no_una_linea(): void
+    public function test_nada_corta_la_barra_del_contenido(): void
     {
         $tema = $this->tema();
         $barra = $this->regla($tema, '.fi-sidebar');
+        $capa = $this->regla($tema, '.fi-sidebar::after');
 
-        $this->assertStringNotContainsString('border-inline-end: 1px', $barra, 'La barra vuelve a cortarse con una línea dura.');
+        $this->assertStringNotContainsString('border-inline-end', $barra, 'La barra vuelve a cortarse con un borde.');
+        $this->assertStringNotContainsString('box-shadow', $barra, 'La sombra del elemento la anula Filament en escritorio, y además volvería a marcar el corte.');
+        $this->assertStringNotContainsString('linear-gradient(to right', $capa, 'Vuelve la franja vertical que rompe la continuidad.');
+        $this->assertStringNotContainsString('--asb-admin-barra-union', $tema, 'Los tokens de la unión siguen vivos sin consumidor.');
 
-        $union = $this->regla($tema, '.fi-sidebar::after');
-
-        $this->assertStringContainsString('linear-gradient', $union, 'La unión no tiene degradado: una sombra sola contra un fondo del mismo tono no une nada.');
-        $this->assertStringContainsString('var(--asb-admin-barra-union)', $union, 'La unión no sale de su token.');
-        $this->assertStringContainsString(
-            'calc(-1 * var(--asb-admin-barra-union-ancho))',
-            $union,
-            'La unión no se sale del canto: sin desbordar hacia el contenido, vuelve a ser un corte.'
-        );
-        // La sombra va DENTRO de la unión y no en `box-shadow` del elemento:
-        // Filament aplica `lg:shadow-none` desde una capa que gana, así que una
-        // sombra declarada en el elemento se anula en escritorio sin avisar.
-        // Medido en la maqueta el 7 sep: computaba `rgba(0,0,0,0) 0 0 0 0`.
-        $this->assertStringContainsString('var(--asb-admin-barra-sombra-union)', $union, 'La unión no lleva su mitad neutra, que es la que hace de sombra.');
-        $this->assertStringNotContainsString('box-shadow', $barra, 'La sombra del elemento la anula Filament en escritorio: tiene que ir en la unión.');
+        // Lo único que queda en esa capa es el resplandor de la esquina, que no
+        // separa nada: nace arriba a la izquierda y se apaga hacia dentro.
+        $this->assertStringContainsString('radial-gradient', $capa, 'Se perdió el resplandor de la esquina, que es de donde nace la luz.');
     }
 
     /**

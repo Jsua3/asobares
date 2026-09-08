@@ -1934,6 +1934,8 @@ En el mismo mensaje pidió rehacer la parte superior del panel: el control de te
 
 **Lo que se conserva:** el rojo sigue vivo en la unión, pero como resplandor tenue dentro del degradado y no como filo de un píxel. Y el estado `scroll` deja de apagar nada del canto: no queda canto que apagar.
 
+**Corregido el mismo día: la unión también se va.** Sua la vio construida y la rechazó con la misma razón que a la línea: «elimina esa línea roja que no permite la continuidad de la interfaz». Y tenía razón. El límite pasó por tres formas —línea de un píxel, filo rojo y franja difusa de 40 px— y las tres eran la misma cosa: un corte vertical, más o menos borroso. Con el campo de puntos de D-L26 gobernando el fondo entero, **nada separa la barra del contenido**: la zona la marca su resplandor y el orden lo ponen los cristales de cada apartado. Los tokens de la unión se retiran con su consumidor.
+
 ### D-L26. El campo de puntos gobierna toda la interfaz, y cada apartado gana su cristal
 
 **Pedido de Sua, 7 sep:** «quiero que el fondo responsivo sea para toda la interfaz, no solo para la barra de navegación lateral, y para cada apartado de la barra de navegación lateral asígnale el módulo de cristal respectivo a cada uno».

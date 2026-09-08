@@ -133,23 +133,14 @@
     --asb-admin-barra-modulo-canto: rgb(11 9 10 / 0.1);
     --asb-admin-barra-modulo-brillo: rgb(255 255 255 / 0.55);
     --asb-admin-barra-modulo-radio: 1rem;
-    --asb-admin-barra-union-ancho: 1.25rem;
     /* El punto del campo del fondo (D-L24). Decoración: no entra en cuentas
        de contraste, pero sí invierte con el tema como todo lo demás. */
     --asb-admin-barra-punto: rgb(11 9 10 / 0.16);
-    /* La unión con el contenido (D-L25): un degradado ancho que sale del canto
-       y se apaga, en vez de una línea que corta. Lleva el rojo dentro, pero
-       como resplandor tenue y no como filo. */
-    --asb-admin-barra-union: rgb(238 65 55 / 0.07);
     /* El resplandor difuso de la zona donde vive la barra. Es lo que la
        distingue ahora que no tiene fondo propio: rojo claro en el tema claro y
        rojo oscuro en el oscuro, como pidió Sua. Radial y no `filter: blur`,
        que costaría una pasada de compositor por fotograma del campo. */
     --asb-admin-barra-resplandor: rgb(238 65 55 / 0.1);
-    /* La mitad neutra de la unión: es la que hace de sombra. Va en el
-       pseudoelemento y no en `box-shadow` porque Filament anula la sombra del
-       elemento en escritorio. */
-    --asb-admin-barra-sombra-union: rgb(58 13 16 / 0.1);
     --asb-admin-barra-modulo-sombra: 0 12px 28px rgb(11 9 10 / 0.06);
     --asb-admin-barra-brote: 0.35;
     --asb-admin-barra-empuje: 2px;
@@ -179,9 +170,7 @@
     --asb-admin-barra-hover-fondo: rgb(255 255 255 / 0.06);
     --asb-admin-barra-modulo-canto: rgb(255 255 255 / 0.1);
     --asb-admin-barra-punto: rgb(255 255 255 / 0.14);
-    --asb-admin-barra-union: rgb(238 65 55 / 0.1);
     --asb-admin-barra-resplandor: rgb(126 26 22 / 0.42);
-    --asb-admin-barra-sombra-union: rgb(0 0 0 / 0.34);
     --asb-admin-barra-modulo-brillo: rgb(255 255 255 / 0.06);
     --asb-admin-barra-modulo-sombra: 0 12px 28px rgb(0 0 0 / 0.28);
     --asb-admin-foco-anillo: #ffffff;
@@ -440,21 +429,21 @@
     }
 
     /*
-     * La unión con el contenido (D-L25). No es un filo de un píxel que corta,
-     * sino un degradado ancho que SALE del canto hacia el contenido y se
-     * apaga: por eso el `inset` lo desborda por la derecha. El rojo sigue
-     * dentro, como resplandor, que es lo que Sua pidió conservar.
+     * Nada separa la barra del contenido (Sua, 7 sep: «elimina esa línea roja
+     * que no permite la continuidad de la interfaz»).
      *
-     * El resplandor de la esquina superior se queda: es de donde nace la luz.
+     * Pasó por tres formas y las tres eran la misma cosa: primero una línea de
+     * un píxel, luego un filo rojo, luego una franja difusa de 40 px. Difusa o
+     * no, seguía leyéndose como un corte vertical. Lo que marca la zona de la
+     * barra es su resplandor, y lo que la ordena son los cristales de sus
+     * apartados; el fondo es continuo por debajo de todo.
+     *
+     * Aquí solo queda el resplandor de la esquina superior, que es de donde
+     * nace la luz y no separa nada.
      */
     .fi-sidebar::after {
-        inset: 0 calc(-1 * var(--asb-admin-barra-union-ancho)) 0 auto;
-        width: calc(var(--asb-admin-barra-union-ancho) * 2);
         z-index: 0;
-        background-image:
-            linear-gradient(to right, var(--asb-admin-barra-sombra-union), transparent),
-            linear-gradient(to right, var(--asb-admin-barra-union), transparent),
-            radial-gradient(18rem 16rem at 24% 0%, var(--asb-admin-barra-halo), transparent 66%);
+        background-image: radial-gradient(18rem 16rem at 24% 0%, var(--asb-admin-barra-halo), transparent 66%);
     }
 
     /*
