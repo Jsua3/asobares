@@ -70,6 +70,15 @@
      */
     --asb-admin-dashboard-image: url("../../../../public/img/panel/cabecera-dashboard.png");
     --asb-admin-topbar-alto: 3.75rem;
+    /*
+     * El desenfoque del cromo superior, en token y no literal. Estaba escrito
+     * a mano en cuatro sitios, así que `prefers-reduced-transparency` no podía
+     * apagarlo: es el mismo defecto que D-L17 anotó para la barra, y estaba
+     * vivo aquí. El de reposo y el de la barra afirmada se distinguen solo en
+     * la saturación, pero son dos estados y por eso son dos tokens.
+     */
+    --asb-admin-topbar-desenfoque: blur(16px) saturate(145%);
+    --asb-admin-topbar-desenfoque-firme: blur(16px) saturate(130%);
     /* 15,75 rem y no 15,25: el módulo conserva los 227 px que Sua aprobó
        («agranda los módulos un poco a la derecha») y a la vez recupera en el
        canto derecho el mismo aire que tiene en el izquierdo. */
@@ -284,8 +293,8 @@
             radial-gradient(26rem circle at 18% 0%, rgb(238 65 55 / 0.06), transparent 68%);
         border-bottom: 1px solid rgb(58 13 16 / 0.08);
         box-shadow: 0 1px 0 rgb(255 255 255 / 0.7);
-        -webkit-backdrop-filter: blur(16px) saturate(145%);
-        backdrop-filter: blur(16px) saturate(145%);
+        -webkit-backdrop-filter: var(--asb-admin-topbar-desenfoque);
+        backdrop-filter: var(--asb-admin-topbar-desenfoque);
         transition:
             background 220ms var(--ease-color),
             border-color 220ms var(--ease-color),
@@ -307,8 +316,8 @@
             radial-gradient(28rem circle at 18% 0%, rgb(238 65 55 / 0.075), transparent 68%);
         border-bottom-color: rgb(58 13 16 / 0.14);
         box-shadow: 0 10px 28px rgb(58 13 16 / 0.1);
-        -webkit-backdrop-filter: blur(16px) saturate(130%);
-        backdrop-filter: blur(16px) saturate(130%);
+        -webkit-backdrop-filter: var(--asb-admin-topbar-desenfoque-firme);
+        backdrop-filter: var(--asb-admin-topbar-desenfoque-firme);
     }
 
     .dark .fi-topbar-ctn.asb-topbar--scrolled .fi-topbar {
@@ -1783,5 +1792,116 @@
     /* Ningún bloque del informe se parte a mitad de hoja. */
     .informe-bloque {
         break-inside: avoid;
+    }
+}
+
+/* ===== Las cuatro señales del sistema (D-L17, tarea 8 del plan) =====
+ *
+ * Van FUERA de `@layer components` a propósito: reasignan tokens, y el
+ * `:root` de este archivo también vive fuera de capa. Dentro de la capa la
+ * reasignación perdería contra él y la señal no llegaría —que es exactamente
+ * el defecto que este archivo ya pagó una vez con `--asb-vidrio-desenfoque`.
+ */
+
+/*
+ * 1. Movimiento reducido. Muere lo que se mueve en el espacio: el brote del
+ * indicador, el empuje de la fila al pasar el cursor y el desplazamiento del
+ * cajón. NO mueren los fundidos de color y opacidad, ni el plegado del grupo,
+ * que es layout y es lo que dice si un apartado está abierto.
+ *
+ * El estado `scroll` lo apaga el módulo de JavaScript, que consulta la media
+ * en vivo; aquí se apaga además su efecto visible, para que la señal valga
+ * aunque el módulo no haya arrancado todavía.
+ */
+@media (prefers-reduced-motion: reduce) {
+    :root,
+    :root.dark {
+        --asb-admin-barra-brote: 1;
+        --asb-admin-barra-empuje: 0px;
+    }
+
+    .fi-sidebar .fi-sidebar-item-btn[aria-current='page']::before,
+    .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn::before {
+        animation: none;
+    }
+
+    body[data-barra-estado='scroll'] .fi-sidebar-group {
+        box-shadow: none;
+    }
+}
+
+/*
+ * 2. Transparencia reducida. El material deja de ser translúcido y sigue
+ * siendo material: velo sólido y desenfoque apagado. Las dos luces —el halo
+ * del ítem activo y el resplandor de la zona— quedan intactas, y por eso se
+ * pintan encima del velo desde el primer día.
+ *
+ * El token compartido `--asb-vidrio-desenfoque` ya se apaga arriba, en su
+ * propio bloque; este apaga el de la barra, que es otro.
+ */
+@media (prefers-reduced-transparency: reduce) {
+    :root,
+    :root.dark {
+        --asb-admin-barra-velo: var(--asb-superficie);
+        --asb-admin-barra-velo-cajon: var(--asb-superficie);
+        --asb-admin-barra-desenfoque: none;
+        --asb-admin-topbar-desenfoque: none;
+        --asb-admin-topbar-desenfoque-firme: none;
+    }
+}
+
+/*
+ * 3. Más contraste. Velo sólido también, y el filo deja de ser luz para
+ * volverse línea: por eso existe como token aparte de `--asb-admin-barra-luz`.
+ * El canto del módulo se apoya en la línea fuerte, que es luminancia y no
+ * color, y el rótulo tenue sube a la tinta.
+ */
+@media (prefers-contrast: more) {
+    :root,
+    :root.dark {
+        --asb-admin-barra-velo: var(--asb-superficie);
+        --asb-admin-barra-velo-cajon: var(--asb-superficie);
+        --asb-admin-barra-desenfoque: none;
+        --asb-admin-topbar-desenfoque: none;
+        --asb-admin-topbar-desenfoque-firme: none;
+        --asb-admin-barra-filo: var(--asb-linea-fuerte);
+        --asb-admin-barra-modulo-canto: var(--asb-linea-fuerte);
+        --asb-admin-barra-tenue: var(--asb-tinta);
+    }
+}
+
+/*
+ * 4. Contraste forzado. El navegador descarta `box-shadow` y sustituye los
+ * colores por los del sistema, así que el indicador del ítem activo
+ * desaparecería: se repinta con `outline` y `border`, que sí sobreviven, y
+ * las dos luces se apagan para no dejar cajas de color sin sentido.
+ *
+ * El campo de puntos también se apaga: es un lienzo, el sistema no lo repinta
+ * y quedaría como una mancha ajena a la paleta forzada.
+ */
+@media (forced-colors: active) {
+    .fi-sidebar::before,
+    .fi-sidebar::after,
+    .asb-barra-puntos {
+        display: none;
+    }
+
+    .fi-sidebar .fi-sidebar-item-btn[aria-current='page']::before,
+    .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn::before {
+        box-shadow: none;
+        border-inline-start: 3px solid CanvasText;
+        background-color: CanvasText;
+    }
+
+    .fi-sidebar .fi-sidebar-item-btn[aria-current='page'],
+    .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+        outline: 2px solid CanvasText;
+        outline-offset: -2px;
+    }
+
+    .fi-sidebar-group::after {
+        box-shadow: none;
+        outline: 1px solid CanvasText;
+        outline-offset: -1px;
     }
 }

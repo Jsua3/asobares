@@ -668,6 +668,70 @@ class BarraLateralTest extends TestCase
     }
 
     /**
+     * Las cuatro señales del sistema llegan a la barra (D-L17). Se afirman las
+     * cuatro por separado, con los tokens que cada una reasigna, porque cada
+     * una responde a una necesidad distinta y borrar una no rompe a las otras.
+     *
+     * Y se afirma lo que de verdad las hace funcionar: que viven FUERA de
+     * `@layer components`. Dentro de la capa la reasignación pierde contra el
+     * `:root` sin capa de este mismo archivo y la señal no llega. Es el defecto
+     * que este archivo ya pagó una vez con `--asb-vidrio-desenfoque`, y una
+     * guardia que solo mirase que el bloque existe lo habría dado por bueno.
+     *
+     * Rotura: borrar un bloque; meter uno dentro de la capa; dejar un `blur()`
+     * literal donde la media no lo alcanza.
+     */
+    public function test_las_cuatro_senales_alcanzan_a_la_barra(): void
+    {
+        $tema = $this->tema();
+
+        $senales = [
+            '(prefers-reduced-motion: reduce)' => ['--asb-admin-barra-brote', '--asb-admin-barra-empuje'],
+            '(prefers-reduced-transparency: reduce)' => ['--asb-admin-barra-velo', '--asb-admin-barra-desenfoque'],
+            '(prefers-contrast: more)' => ['--asb-admin-barra-velo', '--asb-admin-barra-filo'],
+            '(forced-colors: active)' => [],
+        ];
+
+        foreach ($senales as $senal => $tokens) {
+            $bloque = $this->medias($tema, $senal);
+
+            $this->assertNotSame('', $bloque, "La barra no responde a {$senal}.");
+
+            foreach ($tokens as $token) {
+                $this->assertStringContainsString(
+                    $token.':',
+                    $bloque,
+                    "Bajo {$senal} nadie reasigna {$token}, así que la señal no cambia nada."
+                );
+            }
+        }
+
+        // Contraste forzado: el indicador se repinta con lo que sobrevive.
+        $forzado = $this->medias($tema, '(forced-colors: active)');
+
+        foreach (['outline:', 'CanvasText'] as $recurso) {
+            $this->assertStringContainsString(
+                $recurso,
+                preg_replace('/\s+/', ' ', $forzado),
+                'Bajo contraste forzado el indicador se queda sin repintar: el navegador descarta la sombra.'
+            );
+        }
+
+        // El desenfoque nunca es literal EN EL CONSUMO: si lo fuera, ninguna
+        // media podría apagarlo. Se quitan todas las declaraciones de token,
+        // que son justo donde el `blur()` sí tiene que estar escrito; lo que
+        // quede es un literal en una regla, que es el defecto.
+        $consumos = preg_replace('/--[a-z-]+:[^;]*;/', '', preg_replace('#/\*.*?\*/#s', '', $tema));
+
+        // `assertFalse` sobre `str_contains` y no `assertStringNotContainsString`:
+        // aquel vuelca el archivo entero en el mensaje de fallo y lo deja ilegible.
+        $this->assertFalse(
+            str_contains($consumos, 'blur('),
+            'Hay un blur() literal en el tema del panel: ninguna media puede apagar lo que no es token.'
+        );
+    }
+
+    /**
      * El cristal del apartado tiene que DEJAR VER el campo de puntos (D-L27).
      * Al 88 % lo tapaba y la lámina se leía como tarjeta opaca sobre un fondo
      * con textura. El velo del cajón es otro y se queda donde estaba: ese sí
@@ -825,6 +889,77 @@ class BarraLateralTest extends TestCase
      * el archivo usa listas (`.fi-sidebar::before, .fi-sidebar::after`) y
      * quedarse con la primera coincidencia leería el bloque equivocado.
      */
+    /**
+     * El cuerpo de los bloques `@media` cuya condición contiene `$senal`, y
+     * SOLO los que viven fuera de `@layer`: un bloque dentro de la capa no
+     * reasigna nada, porque el `:root` sin capa de este archivo le gana.
+     */
+    private function medias(string $css, string $senal): string
+    {
+        $limpio = preg_replace('#/\*.*?\*/#s', '', $css);
+        $cuerpos = '';
+        $capa = null;
+        $profundidad = 0;
+
+        for ($i = 0; $i < strlen($limpio); $i++) {
+            if ($limpio[$i] === '{') {
+                $profundidad++;
+
+                continue;
+            }
+
+            if ($limpio[$i] === '}') {
+                $profundidad--;
+
+                if ($capa !== null && $profundidad < $capa) {
+                    $capa = null;
+                }
+
+                continue;
+            }
+
+            if ($limpio[$i] !== '@') {
+                continue;
+            }
+
+            if ($capa === null && str_starts_with(substr($limpio, $i, 6), '@layer')) {
+                $capa = $profundidad + 1;
+
+                continue;
+            }
+
+            if ($capa !== null || ! str_starts_with(substr($limpio, $i, 6), '@media')) {
+                continue;
+            }
+
+            $abre = strpos($limpio, '{', $i);
+
+            if ($abre === false || ! str_contains(substr($limpio, $i, $abre - $i), $senal)) {
+                continue;
+            }
+
+            $nivel = 0;
+
+            for ($j = $abre; $j < strlen($limpio); $j++) {
+                if ($limpio[$j] === '{') {
+                    $nivel++;
+                }
+
+                if ($limpio[$j] === '}') {
+                    $nivel--;
+
+                    if ($nivel === 0) {
+                        $cuerpos .= substr($limpio, $abre + 1, $j - $abre - 1)."\n";
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $cuerpos;
+    }
+
     private function regla(string $css, string $selector): string
     {
         // Sin comentarios: si no, el bloque de comentario que precede a una
