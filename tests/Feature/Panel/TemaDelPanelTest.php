@@ -129,8 +129,13 @@ class TemaDelPanelTest extends TestCase
     {
         $tema = File::get(resource_path('css/filament/admin/theme.css'));
 
-        $this->assertStringContainsString('.fi-main-ctn {', $tema);
-        $this->assertStringContainsString('.dark .fi-main-ctn {', $tema);
+        // Desde el 8 sep el fondo no lo pinta el contenido sino el cuerpo, con el
+        // campo de puntos encima: `.fi-main-ctn` quedó transparente para no
+        // taparlo. Lo que hay que seguir exigiendo es que el fondo exista en los
+        // dos temas, y ahora vive aquí.
+        $this->assertStringContainsString('.fi-body {', $tema);
+        $this->assertStringContainsString('.dark .fi-body {', $tema);
+        $this->assertMatchesRegularExpression('/\.fi-main-ctn \{[^}]*background: transparent;/s', $tema, 'El contenido volvió a pintar fondo propio y taparía el campo de puntos.');
         $this->assertStringNotContainsString('.fi-body::before', $tema);
     }
 

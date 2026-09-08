@@ -132,6 +132,10 @@
        barra de escritorio enciende cuando la píldora exterior se apaga. */
     --asb-admin-barra-modulo-canto: rgb(11 9 10 / 0.1);
     --asb-admin-barra-modulo-brillo: rgb(255 255 255 / 0.55);
+    /* Realce plano de la lamina. En claro no hace falta: el cristal ya se
+       separa del fondo. En oscuro el velo componia un tono a tres niveles del
+       fondo, o sea ninguno, y las laminas se leian como agujeros. */
+    --asb-admin-barra-modulo-realce: transparent;
     --asb-admin-barra-modulo-radio: 1rem;
     /* El punto del campo del fondo (D-L24). Decoración: no entra en cuentas
        de contraste, pero sí invierte con el tema como todo lo demás. */
@@ -170,8 +174,9 @@
     --asb-admin-barra-hover-fondo: rgb(255 255 255 / 0.06);
     --asb-admin-barra-modulo-canto: rgb(255 255 255 / 0.1);
     --asb-admin-barra-punto: rgb(255 255 255 / 0.14);
-    --asb-admin-barra-resplandor: rgb(126 26 22 / 0.42);
+    --asb-admin-barra-resplandor: rgb(126 26 22 / 0.14);
     --asb-admin-barra-modulo-brillo: rgb(255 255 255 / 0.06);
+    --asb-admin-barra-modulo-realce: rgb(255 255 255 / 0.055);
     --asb-admin-barra-modulo-sombra: 0 12px 28px rgb(0 0 0 / 0.28);
     --asb-admin-foco-anillo: #ffffff;
     --asb-admin-foco-halo: #0b090a;
@@ -263,32 +268,11 @@
         isolation: isolate;
     }
 
-    .fi-main-ctn::before {
-        position: fixed;
-        inset: var(--asb-admin-topbar-alto) 0 0 var(--asb-admin-sidebar-ancho);
-        z-index: 0;
-        pointer-events: none;
-        content: "";
-        background:
-            linear-gradient(115deg, transparent 0 34%, rgb(238 65 55 / 0.012) 48%, transparent 64%),
-            radial-gradient(24rem 16rem at 92% 18%, rgb(238 65 55 / 0.024), transparent 70%);
-        opacity: 0.54;
-    }
-
-    .dark .fi-main-ctn {
-        background:
-            radial-gradient(58rem 34rem at 12% -4%, rgb(255 255 255 / 0.045), transparent 66%),
-            radial-gradient(40rem 26rem at 82% 2%, rgb(238 65 55 / 0.105), transparent 74%),
-            radial-gradient(30rem 20rem at 38% 48%, rgb(238 65 55 / 0.045), transparent 76%),
-            linear-gradient(180deg, rgb(18 14 15) 0%, var(--asb-admin-carbon) 54%, rgb(18 16 17) 100%);
-    }
-
-    .dark .fi-main-ctn::before {
-        background:
-            linear-gradient(115deg, transparent 0 36%, rgb(238 65 55 / 0.075) 50%, transparent 66%),
-            radial-gradient(24rem 16rem at 92% 18%, rgb(238 65 55 / 0.1), transparent 72%);
-        opacity: 0.48;
-    }
+    /*
+     * El contenido no pinta ningún velo propio (8 sep). Aquí vivían dos
+     * degradados rojos que en oscuro enturbiaban el campo de puntos y en claro
+     * lo apagaban. El fondo es uno solo y es el campo.
+     */
 
     .fi-topbar {
         min-height: var(--asb-admin-topbar-alto);
@@ -659,7 +643,9 @@
     .fi-sidebar-group::before {
         opacity: 1;
         background-color: var(--asb-admin-barra-velo);
-        background-image: linear-gradient(180deg, var(--asb-admin-barra-modulo-brillo), transparent 5rem);
+        background-image:
+            linear-gradient(180deg, var(--asb-admin-barra-modulo-brillo), transparent 5rem),
+            linear-gradient(var(--asb-admin-barra-modulo-realce), var(--asb-admin-barra-modulo-realce));
     }
 
     .fi-sidebar-group::after {
@@ -1233,11 +1219,6 @@
     }
 
     @media (max-width: 40rem) {
-        .fi-main-ctn::before {
-            inset-inline-start: 0;
-            opacity: 0.45;
-        }
-
         .fi-topbar {
             min-height: 3.45rem;
             padding-inline: 0.75rem;
@@ -1314,9 +1295,6 @@
     }
 
     @media (min-width: 40rem) and (max-width: 64rem) {
-        .fi-main-ctn::before {
-            inset-inline-start: 0;
-        }
 
         .asb-dashboard .fi-page-header-main-ctn > .fi-header {
             min-height: 8.25rem;
