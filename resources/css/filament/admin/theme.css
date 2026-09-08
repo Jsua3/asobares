@@ -402,8 +402,14 @@
             radial-gradient(18rem 16rem at 24% 0%, var(--asb-admin-barra-halo), transparent 66%);
     }
 
-    /* El contenido, por encima de las dos capas de material. */
-    .fi-sidebar > * {
+    /*
+     * El contenido, por encima de las dos capas de material. El lienzo del
+     * campo de puntos se excluye a mano: es hijo de la barra, empata en
+     * especificidad con esta regla y va antes en el archivo, así que sin el
+     * `:not()` esta le quitaba el `position: absolute`, lo dejaba en el flujo
+     * con alto completo y empujaba la lista fuera de la vista. Pasó el 7 sep.
+     */
+    .fi-sidebar > *:not(.asb-barra-puntos) {
         position: relative;
         z-index: 1;
     }

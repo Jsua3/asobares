@@ -473,6 +473,16 @@ class BarraLateralTest extends TestCase
 
         $lienzo = $this->regla($tema, '.asb-barra-puntos');
         $this->assertStringContainsString('pointer-events: none;', $lienzo, 'El lienzo intercepta el puntero.');
+        $this->assertStringContainsString('position: absolute;', $lienzo, 'El lienzo tiene que estar fuera del flujo.');
+
+        // La regla de los hijos de la barra empata en especificidad con la del
+        // lienzo y va después: sin el `:not()` le quita el `position: absolute`
+        // y el lienzo empuja la lista fuera de la vista. Pasó el 7 sep.
+        $this->assertStringContainsString(
+            '.fi-sidebar > *:not(.asb-barra-puntos)',
+            $tema,
+            'La regla de los hijos de la barra no excluye al lienzo, así que lo devuelve al flujo.'
+        );
         $this->assertMatchesRegularExpression('/z-index: -\d;/', $lienzo, 'El lienzo tiene que ir por debajo del contenido.');
 
         $vista = File::get(resource_path('views/filament/components/puntos-de-la-barra.blade.php'));
