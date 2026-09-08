@@ -1560,6 +1560,17 @@ Al desplazar el riel, cada icono **se retrasa respecto al dedo y llega con muell
 
 **Lo que NO cambia:** el escritorio entero; el cajón abierto con sus nombres; el campo de puntos; el resplandor; y el objetivo táctil de 48 px, que sigue siendo el suelo.
 
+#### Lo que la construcción cambió (8 sep)
+
+1. **La primera reacción del resorte se pinta en el mismo gesto**, no en el fotograma siguiente. Se escribió así al descubrir que no había forma de verlo —`requestAnimationFrame` no corre con el panel del navegador oculto— y resultó ser además lo correcto: la respuesta sale con la mano y no detrás de ella. El bucle se queda con el regreso.
+2. **`ARRASTRE` se calibró midiendo, no a ojo.** Con 0,55 un desplazamiento de 24 px por fotograma —un pase normal del pulgar— ya saturaba el tope y todos los iconos se quedaban en 14: la respuesta al gesto se perdía justo donde importa. Con **0,35** el rango útil cubre de 5 a 40 px por fotograma. Medido: un gesto de 5 px da −1,7 / −2,4 / −3,0 px en la primera fila, la de en medio y la última, que es el escalonado que se buscaba.
+3. **El orden del archivo compilado no es el nuestro, y esto costó dos vueltas.** `lightningcss` aplana las capas, agrupa las medias y mueve reglas, así que dos reglas de la misma especificidad **no** se resuelven como están escritas. Pasó dos veces seguidas: el `display: none` de escritorio salió después del de móvil y lo anulaba, y `position: relative` de `.asb-barra-cuenta` le ganaba a `position: absolute` de `.asb-cuenta-al-pie`. Se arregló **sin depender del orden**: el apagado de escritorio vive en su propia media de `min-width`, y las reglas del teléfono llevan `.fi-sidebar` delante para ganar por especificidad. Es una regla general de este archivo desde hoy.
+4. **La maqueta mintió tres veces más** y por eso el defecto del `position` llevaba dos días invisible: declaraba `position: sticky` sobre `.fi-sidebar` —tapando justo lo que fallaba—, ponía su `<style>` **después** de la hoja compilada —tapando el `display: none` del chevron— y no reproducía el `opacity: 1` que el blade le da al contenido con Alpine, así que medía un contenido invisible. Las tres corregidas. Pinta ya el cromo entero, la cuenta al pie y carga el módulo del resorte.
+
+**Medido en la maqueta a 375 px:** logotipo a **5 px** del centro de la pantalla; riel de **64**, módulo de **48**, aire de **8** a cada lado; cuenta al pie **absoluta**, `z-index: 10`, 64×64, pegada al canto; lista reservando **68 px**, con el último destino acabando en 722 y la cuenta empezando en 748 —alcanzable—; y la copia de la cuenta del cromo en `display: none`.
+
+**Lo que falta y no puede medirse aquí:** el tacto del resorte en un teléfono de verdad. Dos constantes lo gobiernan, `ARRASTRE` y `AMORTIGUACION`, y se ajustan en una línea cada una.
+
 ---
 
 ---

@@ -1151,6 +1151,57 @@ class BarraLateralTest extends TestCase
     }
 
     /**
+     * El resorte de los iconos del riel (D-L30): lo que se mueve responde al
+     * GESTO y no a un reloj. Una transición CSS no puede hacerlo, porque no
+     * sabe a qué velocidad va la mano; hace falta integrar.
+     *
+     * Se afirman las cuatro reglas de la decisión, cada una por separado,
+     * porque cada una responde a un peligro distinto:
+     *
+     * - Solo `translate`: cualquier otra propiedad mide la página por fotograma.
+     * - El bucle se para solo y no arranca bajo movimiento reducido.
+     * - Lo que se mueve no recibe el dedo: un destino que huye del pulgar es
+     *   peor que un destino quieto.
+     * - Solo por debajo de 64 rem.
+     *
+     * Rotura: mover `top` o `margin`; dejar el `requestAnimationFrame` eterno;
+     * quitar la consulta de movimiento reducido; quitar el bloqueo del puntero.
+     */
+    public function test_el_resorte_del_riel_responde_al_gesto_y_se_para_solo(): void
+    {
+        $js = File::get(resource_path('js/panel-barra-resorte.js'));
+
+        foreach ([
+            "matchMedia('(prefers-reduced-motion: reduce)')" => 'el movimiento reducido no se consulta, así que el resorte corre igual para quien pidió que no',
+            "matchMedia('(max-width: 63.999rem)')" => 'el resorte no se limita al teléfono, donde vive el riel',
+            "nav.addEventListener('scroll'" => 'el resorte no escucha el desplazamiento de la lista, así que no responde a nada',
+            'pointerEvents' => 'lo que se mueve sigue recibiendo el dedo: un destino que huye del pulgar es peor que uno quieto',
+            'corriendo = false' => 'el bucle no se para nunca',
+        ] as $cadena => $porque) {
+            $this->assertNotFalse(strpos($js, $cadena), "En el resorte del riel, {$porque}.");
+        }
+
+        // Solo `translate`. Se comprueba que ninguna otra propiedad de
+        // disposición se escriba desde el bucle.
+        foreach (['style.top', 'style.height', 'style.margin', 'style.width'] as $prohibida) {
+            $this->assertFalse(
+                strpos($js, $prohibida) !== false,
+                "El resorte escribe `{$prohibida}`: eso mide la página en cada fotograma."
+            );
+        }
+
+        $this->assertNotFalse(strpos($js, 'style.translate'), 'El resorte no mueve con `translate`, que es lo único que va solo al compositor.');
+
+        // Y tiene que estar cableado: en vite y en los activos del panel, o no
+        // llega al navegador y la guardia anterior vigila un archivo muerto.
+        $vite = File::get(base_path('vite.config.js'));
+        $this->assertNotFalse(strpos($vite, 'panel-barra-resorte.js'), 'El resorte no entra en la compilación.');
+
+        $proveedor = File::get(app_path('Providers/Filament/AdminPanelProvider.php'));
+        $this->assertNotFalse(strpos($proveedor, 'panel-barra-resorte'), 'El resorte no se registra como activo del panel.');
+    }
+
+    /**
      * La maqueta con la que se mide (tarea 10 del plan). El panel exige segundo
      * factor, así que ninguna sesión automatizada lo abre: sin poder ver la
      * barra se entregaron dos regresiones visuales seguidas. La maqueta es lo

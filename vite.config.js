@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/css/filament/admin/theme.css', 'resources/js/panel-graficas.js', 'resources/js/panel-barra-lateral.js', 'resources/js/panel-barra-puntos.js'],
+            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/css/filament/admin/theme.css', 'resources/js/panel-graficas.js', 'resources/js/panel-barra-lateral.js', 'resources/js/panel-barra-puntos.js', 'resources/js/panel-barra-resorte.js'],
             refresh: true,
             fonts: [
                 // Poppins es la tipografía principal del manual de marca de

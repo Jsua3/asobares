@@ -212,6 +212,7 @@ class AdminPanelProvider extends PanelProvider
                 Js::make('panel-graficas', Vite::asset('resources/js/panel-graficas.js'))->module(),
                 Js::make('panel-barra-lateral', Vite::asset('resources/js/panel-barra-lateral.js'))->module(),
                 Js::make('panel-barra-puntos', Vite::asset('resources/js/panel-barra-puntos.js'))->module(),
+                Js::make('panel-barra-resorte', Vite::asset('resources/js/panel-barra-resorte.js'))->module(),
             ];
         } catch (ViteException) {
             return [];

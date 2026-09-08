@@ -78,7 +78,7 @@ class GenerarMaquetaDeLaBarra extends Command
      * Las rutas compiladas, resueltas por el manifiesto: si se escribieran a
      * mano, la maqueta medirá una hoja vieja sin avisar.
      *
-     * @return array{css: string, puntos: string, barra: string}|null
+     * @return array{css: string, puntos: string, barra: string, resorte: string}|null
      */
     private function activosCompilados(): ?array
     {
@@ -105,18 +105,19 @@ class GenerarMaquetaDeLaBarra extends Command
         $css = $buscar('filament/admin/theme.css');
         $puntos = $buscar('panel-barra-puntos.js');
         $barra = $buscar('panel-barra-lateral.js');
+        $resorte = $buscar('panel-barra-resorte.js');
 
-        if ($css === null || $puntos === null || $barra === null) {
+        if ($css === null || $puntos === null || $barra === null || $resorte === null) {
             $this->error('El manifiesto no trae el tema del panel o los módulos de la barra.');
 
             return null;
         }
 
-        return ['css' => $css, 'puntos' => $puntos, 'barra' => $barra];
+        return ['css' => $css, 'puntos' => $puntos, 'barra' => $barra, 'resorte' => $resorte];
     }
 
     /**
-     * @param  array{css: string, puntos: string, barra: string}  $activos
+     * @param  array{css: string, puntos: string, barra: string, resorte: string}  $activos
      */
     private function pagina(array $activos, bool $oscuro): string
     {
@@ -212,6 +213,7 @@ class GenerarMaquetaDeLaBarra extends Command
         </script>
         <script type="module" src="/build/{$activos['puntos']}"></script>
         <script type="module" src="/build/{$activos['barra']}"></script>
+        <script type="module" src="/build/{$activos['resorte']}"></script>
         </body>
         </html>
         HTML;
