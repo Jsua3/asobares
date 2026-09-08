@@ -42,7 +42,15 @@ let piezas = [];
 let previo = 0;
 let corriendo = false;
 
-const encontrar = () => [...document.querySelectorAll('.fi-sidebar-item-btn')];
+/*
+ * Lo que se mueve son los MÓDULOS, no lo que hay dentro. Se movían las filas y
+ * Sua lo vio enseguida: el indicador rojo del apartado activo se quedaba
+ * quieto mientras su fila se desplazaba, porque el indicador lo pinta el
+ * módulo y la fila iba por su cuenta. Un módulo es un grupo o, para los
+ * destinos sin grupo como «Tablero», el ítem suelto que Filament pinta
+ * directamente en la lista.
+ */
+const encontrar = () => [...document.querySelectorAll('.fi-sidebar-group, .fi-sidebar-nav > .fi-sidebar-item')];
 
 const soltarPunteros = (bloqueado) => {
     for (const pieza of piezas) {

@@ -1571,6 +1571,20 @@ Al desplazar el riel, cada icono **se retrasa respecto al dedo y llega con muell
 
 **Lo que falta y no puede medirse aquí:** el tacto del resorte en un teléfono de verdad. Dos constantes lo gobiernan, `ARRASTRE` y `AMORTIGUACION`, y se ajustan en una línea cada una.
 
+#### Siete correcciones de Sua, el mismo día
+
+Vio la primera versión en el teléfono y nombró siete cosas. Las siete, y lo que se hizo:
+
+1. **El logotipo se veía pequeño.** Su tope en el teléfono era de 6,5 rem, heredado de cuando compartía fila con la cuenta. En el centro del cromo hay sitio de sobra —a 375 px, 44 de hamburguesa y 44 de tema dejan 287—, así que sube a **10 rem**.
+2. **El menú de la cuenta no se podía abrir con la barra cerrada.** No era que no respondiera: la hoja colgaba del chip **hacia abajo y hacia la izquierda**, que es correcto en el cromo y absurdo al pie de una barra de 64 px, así que se abría fuera de la pantalla. Ahora abre **hacia arriba y hacia dentro**.
+3. **Había un corte entre el cromo y el cajón.** Dos alturas para lo mismo: una media de 40 rem dejaba el cromo en 3,45 rem mientras la barra empieza en `--asb-admin-topbar-alto` (3,75). Cinco píxeles por los que se veía el contenido colarse. **El alto del cromo pasa a ser uno solo, el del token.**
+4. **Los módulos seguían pegados al canto.** Y era cierto para uno: **«Tablero» no tiene grupo**, y Filament pinta los destinos sin grupo sueltos en la lista, fuera de todo `.fi-sidebar-group`. No recibía ni cristal ni aire mientras los demás flotaban. Ahora es un módulo más.
+5. **El resorte movía lo de dentro y no los módulos.** Sua lo diagnosticó con precisión: el indicador rojo del apartado activo se quedaba quieto mientras su fila se desplazaba, **porque el indicador lo pinta el módulo y la fila iba por su cuenta**. Lo que se mueve pasa a ser el módulo —grupo o ítem suelto— y no el botón.
+6. **El cajón abierto era un cuadrado blanco sin gracia.** Pasa a ser una **lámina de cristal**: separada del borde, con el radio y el canto de los módulos, desenfoque, y el velo bajado de 94 a **84 %**. Ese 84 es el SUELO medido sobre el peor fondo posible —contenido negro con el velo de cierre de Filament encima—: ahí el rótulo del ítem activo da 4,61:1, y al 80 % cae a 4,23 y ya no pasa. Debajo hay página de verdad y no una superficie conocida, y por eso este velo no se calibra como el del módulo.
+7. **El `bg-white` de Filament** —que la barra lleva por debajo de `lg`— se apaga con un selector que gana por especificidad, no por orden.
+
+**Medido después, a 375 px:** riel 64, módulo 48 y **8 px de aire también para el ítem suelto**, con su cristal al 66 % y su radio de 16; el resorte moviendo **seis módulos** −3,5 px con un gesto de 10, y las filas a cero.
+
 ---
 
 ---

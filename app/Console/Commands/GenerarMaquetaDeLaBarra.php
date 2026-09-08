@@ -121,8 +121,15 @@ class GenerarMaquetaDeLaBarra extends Command
      */
     private function pagina(array $activos, bool $oscuro): string
     {
-        $lista = '';
-        $primero = true;
+        /*
+         * «Tablero» va SUELTO, sin grupo, porque así lo pinta Filament: un
+         * `.fi-sidebar-item` directo en la lista. Sin él la maqueta no reproducía
+         * el defecto que Sua vio el 8 sep, con ese destino pegado al canto y sin
+         * cristal mientras los demás flotaban.
+         */
+        $lista = '<li class="fi-sidebar-item fi-active"><a class="fi-sidebar-item-btn" href="#" aria-current="page">'
+            .$this->icono().'<span class="fi-sidebar-item-label">Tablero</span></a></li>';
+        $primero = false;
 
         foreach (self::GRUPOS as $rotulo => $destinos) {
             $filas = '';

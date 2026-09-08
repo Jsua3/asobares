@@ -621,11 +621,54 @@
          * contenido variable que hay que tapar; el riel no tapa nada, solo está
          * a un lado, y pintarlo dejaba a los módulos pegados sobre una barra
          * blanca en vez de flotando sobre el campo (Sua, 8 sep).
+         *
+         * Y el cajón es una LÁMINA, no un cuadrado blanco: separada del borde,
+         * con el radio de los módulos, su canto y su desenfoque. El velo baja
+         * de 94 a 84 %, que es el suelo medido: por debajo, el rótulo del ítem
+         * activo cae de 4,5:1 sobre el peor fondo posible (contenido negro con
+         * el velo de cierre de Filament encima).
          */
         .fi-sidebar.fi-sidebar-open::before {
+            inset: var(--asb-admin-barra-riel-aire);
+            border-radius: var(--asb-admin-barra-modulo-radio);
             background-color: var(--asb-admin-barra-velo-cajon);
+            box-shadow: inset 0 0 0 1px var(--asb-admin-barra-modulo-canto);
             -webkit-backdrop-filter: var(--asb-admin-barra-desenfoque);
             backdrop-filter: var(--asb-admin-barra-desenfoque);
+        }
+
+        /* Sin fondo propio del elemento: Filament le da `bg-white` por debajo de
+           `lg` y eso es el cuadrado blanco. Con `.fi-layout` delante para que el
+           orden del archivo compilado no tenga voto. */
+        .fi-layout .fi-sidebar,
+        .fi-layout .fi-sidebar-header {
+            background: transparent;
+            box-shadow: none;
+        }
+
+        /*
+         * Los ítems SIN grupo —«Tablero»— los pinta Filament sueltos en la
+         * lista, no dentro de un `.fi-sidebar-group`, así que no recibían ni el
+         * cristal ni el aire y quedaban pegados al canto. Aquí son un módulo
+         * más.
+         */
+        .fi-sidebar-nav > .fi-sidebar-item {
+            position: relative;
+            isolation: isolate;
+            margin-block: 0 1.75rem;
+            padding: 0.5rem 0.45rem;
+            border-radius: var(--asb-admin-barra-modulo-radio);
+        }
+
+        .fi-sidebar-nav > .fi-sidebar-item::before {
+            content: '';
+            pointer-events: none;
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            border-radius: inherit;
+            background-color: var(--asb-admin-barra-velo);
+            box-shadow: inset 0 0 0 1px var(--asb-admin-barra-modulo-canto);
         }
 
         /*
@@ -771,6 +814,20 @@
            razón: sin él lo pisa el `padding-block` de la regla base. */
         .fi-sidebar .fi-sidebar-nav {
             padding-block-end: var(--asb-admin-barra-cuenta-alto);
+        }
+
+        /*
+         * La hoja de la cuenta abre HACIA ARRIBA y hacia DENTRO. Colgaba del
+         * chip hacia abajo y hacia la izquierda, que es correcto en el cromo y
+         * absurdo al pie de una barra de 64 px: se iba fuera de la pantalla, y
+         * por eso Sua no podía abrirla con el menú cerrado.
+         */
+        .fi-sidebar .asb-cuenta-al-pie .asb-barra-hoja {
+            inset-block-start: auto;
+            inset-block-end: calc(100% + 0.4rem);
+            inset-inline-start: 0;
+            inset-inline-end: auto;
+            z-index: 50;
         }
 
         /* En el riel se ve solo el avatar; con la barra abierta, el chip entero. */
@@ -1548,13 +1605,14 @@
     }
 
     @media (max-width: 40rem) {
+        /*
+         * El alto del cromo es UNO SOLO, el del token. Aquí había 3,45rem
+         * mientras la barra lateral empieza en `--asb-admin-topbar-alto`
+         * (3,75): cinco píxeles de diferencia por los que se veía el contenido
+         * entre el cromo y el cajón. Ese era el «corte entre menús» del 8 sep.
+         */
         .fi-topbar {
-            min-height: 3.45rem;
             padding-inline: 0.75rem;
-        }
-
-        .fi-topbar-ctn.asb-topbar--scrolled .fi-topbar {
-            min-height: 3.45rem;
         }
 
         .fi-topbar-start {
@@ -1562,9 +1620,11 @@
             margin-inline: 0.25rem 0.4rem;
         }
 
+        /* Más grande: a 6,5rem se leía pequeño, y en el centro del cromo hay
+           sitio de sobra —a 375 px, 44 de hamburguesa y 44 de tema dejan 287. */
         .fi-topbar .fi-logo {
             width: auto;
-            max-width: 6.5rem;
+            max-width: 10rem;
             object-fit: contain;
         }
 
@@ -2097,6 +2157,15 @@
     :root,
     :root.dark {
         --asb-admin-barra-resplandor-ancho: 6rem;
+        /*
+         * El cajón del teléfono deja de ser un cuadrado blanco y pasa a ser
+         * cristal: 84 % en vez de 94. Es el SUELO medido el 8 sep sobre el peor
+         * fondo posible —contenido negro con el velo de cierre de Filament
+         * encima—: ahí el rótulo del ítem activo da 4,61:1, y al 80 % cae a
+         * 4,23 y ya no pasa. Debajo hay página de verdad, no una superficie
+         * conocida, y por eso este velo no se calibra como el del módulo.
+         */
+        --asb-admin-barra-velo-cajon: color-mix(in oklab, var(--asb-superficie) 84%, transparent);
     }
 }
 

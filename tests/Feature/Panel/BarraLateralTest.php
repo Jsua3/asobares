@@ -1176,6 +1176,7 @@ class BarraLateralTest extends TestCase
             "matchMedia('(max-width: 63.999rem)')" => 'el resorte no se limita al teléfono, donde vive el riel',
             "nav.addEventListener('scroll'" => 'el resorte no escucha el desplazamiento de la lista, así que no responde a nada',
             'pointerEvents' => 'lo que se mueve sigue recibiendo el dedo: un destino que huye del pulgar es peor que uno quieto',
+            '.fi-sidebar-group, .fi-sidebar-nav > .fi-sidebar-item' => 'el resorte mueve las filas y no los módulos: el indicador del apartado activo lo pinta el módulo, así que se quedaría quieto mientras su fila se desplaza',
             'corriendo = false' => 'el bucle no se para nunca',
         ] as $cadena => $porque) {
             $this->assertNotFalse(strpos($js, $cadena), "En el resorte del riel, {$porque}.");
@@ -1199,6 +1200,78 @@ class BarraLateralTest extends TestCase
 
         $proveedor = File::get(app_path('Providers/Filament/AdminPanelProvider.php'));
         $this->assertNotFalse(strpos($proveedor, 'panel-barra-resorte'), 'El resorte no se registra como activo del panel.');
+    }
+
+    /**
+     * El cajón del teléfono es una LÁMINA de cristal, no un cuadrado blanco
+     * (Sua, 8 sep). Y los ítems sin grupo —«Tablero»— son un módulo más:
+     * Filament los pinta sueltos en la lista y por eso quedaban pegados al
+     * canto, sin cristal y sin aire.
+     *
+     * El velo del cajón baja al 84 %, que es el SUELO medido sobre el peor
+     * fondo posible: contenido negro con el velo de cierre de Filament encima.
+     * Ahí el rótulo del ítem activo da 4,61:1; al 80 % cae a 4,23 y ya no pasa.
+     *
+     * Rotura: devolver el velo al 94 o bajarlo del 84; quitarle el radio o el
+     * aire al cajón; dejar los ítems sueltos sin cristal.
+     */
+    public function test_el_cajon_del_telefono_es_una_lamina_y_los_items_sueltos_tambien(): void
+    {
+        $tema = $this->tema();
+        $movil = $this->mediasDeReglas($tema, '(max-width: 63.999rem)');
+
+        foreach ([
+            'inset: var(--asb-admin-barra-riel-aire)' => 'el cajón sigue pegado al borde en vez de flotar',
+            'border-radius: var(--asb-admin-barra-modulo-radio)' => 'el cajón no tiene el radio de los módulos',
+            '.fi-sidebar-nav > .fi-sidebar-item' => 'los ítems sin grupo no reciben el trato de módulo',
+            'background: transparent' => 'la barra conserva el `bg-white` que Filament le da por debajo de `lg`, que es el cuadrado blanco',
+        ] as $cadena => $porque) {
+            $this->assertNotFalse(strpos($movil, $cadena), "En el teléfono, {$porque}.");
+        }
+
+        // El velo del cajón, con su suelo medido.
+        $reasignados = $this->medias($tema, '(max-width: 63.999rem)');
+
+        $this->assertSame(
+            1,
+            preg_match('/--asb-admin-barra-velo-cajon: color-mix\(in oklab, var\(--asb-superficie\) (\d+)%/', $reasignados, $velo),
+            'El velo del cajón no se reasigna en el teléfono, así que sigue siendo el cuadrado opaco.'
+        );
+
+        $this->assertGreaterThanOrEqual(
+            84,
+            (int) $velo[1],
+            "El velo del cajón está al {$velo[1]} %: por debajo del 84 el rótulo del ítem activo cae de 4,5:1 sobre el peor fondo posible."
+        );
+
+        $this->assertLessThan(
+            94,
+            (int) $velo[1],
+            'El velo del cajón volvió a ser opaco: Sua lo quiere con transparencia bastante para separarlo del fondo.'
+        );
+    }
+
+    /**
+     * La hoja de la cuenta, al pie de la barra, abre HACIA ARRIBA y hacia
+     * dentro. Colgaba del chip hacia abajo y hacia la izquierda —correcto en el
+     * cromo, absurdo al pie de una barra de 64 px— y se iba fuera de la
+     * pantalla: por eso Sua no podía abrir su menú con la barra cerrada.
+     *
+     * Rotura: devolverla hacia abajo.
+     */
+    public function test_la_hoja_de_la_cuenta_del_pie_abre_hacia_arriba(): void
+    {
+        $movil = $this->mediasDeReglas($this->tema(), '(max-width: 63.999rem)');
+
+        $desde = strpos($movil, '.fi-sidebar .asb-cuenta-al-pie .asb-barra-hoja');
+
+        $this->assertNotFalse($desde, 'La hoja de la cuenta del pie no se recoloca, así que se abre fuera de la pantalla.');
+
+        $regla = substr($movil, $desde, strpos($movil, '}', $desde) - $desde);
+
+        foreach (['inset-block-start: auto', 'inset-block-end: calc(100% + 0.4rem)', 'inset-inline-start: 0'] as $pieza) {
+            $this->assertNotFalse(strpos($regla, $pieza), "A la hoja del pie le falta «{$pieza}»: se abre fuera de la pantalla y no hay forma de tocarla.");
+        }
     }
 
     /**
