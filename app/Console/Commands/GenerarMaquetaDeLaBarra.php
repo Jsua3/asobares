@@ -157,10 +157,17 @@ class GenerarMaquetaDeLaBarra extends Command
         <style>
         [x-cloak] { display: none !important; }
         body { margin: 0; min-height: 100vh; background: {$fondo}; }
-        .fi-layout { display: flex; min-height: 100vh; }
+        /* El topbar va FUERA de `.fi-layout` porque así lo pinta Filament:
+           hermano anterior e hijo directo de `.fi-body`. Cruza el ancho entero
+           por encima de la barra, y por eso el resplandor no puede ser de la
+           barra. */
+        .fi-topbar-ctn { position: sticky; inset-block-start: 0; z-index: 20; }
+        .fi-topbar { display: flex; align-items: center; padding-inline: 1rem; }
+        .fi-logo { font-weight: 700; letter-spacing: -.02em; color: var(--asb-admin-barra-tinta); }
+        .fi-layout { display: flex; min-height: calc(100vh - var(--asb-admin-topbar-alto)); }
                 /* `flex-shrink: 0` porque en el panel el cajón es fijo y no lo encoge
            nadie: sin esto, a 375 px la maqueta medía 246 de ancho, no 252. */
-        .fi-sidebar { display: flex; flex-direction: column; flex-shrink: 0; width: var(--asb-admin-sidebar-ancho); height: 100vh; position: sticky; top: 0; }
+        .fi-sidebar { display: flex; flex-direction: column; flex-shrink: 0; width: var(--asb-admin-sidebar-ancho); height: calc(100vh - var(--asb-admin-topbar-alto)); position: sticky; top: var(--asb-admin-topbar-alto); }
         .fi-sidebar-nav { display: flex; flex-direction: column; flex-grow: 1; overflow: hidden auto; list-style: none; margin: 0; }
         .fi-sidebar-group-items { list-style: none; margin: 0; padding: 0; }
         .fi-sidebar-group-btn { display: flex; align-items: center; gap: .5rem; }
@@ -171,7 +178,10 @@ class GenerarMaquetaDeLaBarra extends Command
         .hueco { flex: 1; padding: 2rem; font-family: system-ui; color: var(--asb-admin-barra-tinta); }
         </style>
         </head>
-        <body>
+        <body class="fi-body fi-body-has-topbar fi-body-has-navigation">
+        <div class="fi-topbar-ctn"><div class="fi-topbar">
+        <div class="fi-topbar-start"><span class="fi-logo">asobares</span></div>
+        </div></div>
         <div class="fi-layout">
         <aside class="fi-sidebar fi-sidebar-open"><canvas class="asb-barra-puntos" aria-hidden="true"></canvas>
         <ul class="fi-sidebar-nav">{$lista}</ul></aside>

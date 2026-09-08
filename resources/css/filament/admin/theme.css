@@ -154,6 +154,11 @@
        rojo oscuro en el oscuro, como pidió Sua. Radial y no `filter: blur`,
        que costaría una pasada de compositor por fotograma del campo. */
     --asb-admin-barra-resplandor: rgb(238 65 55 / 0.1);
+    /* En longitud y no en porcentaje: el resplandor lo pinta una capa de
+       PÁGINA, y un 82 % del ancho de la página no es el mismo lavado que un
+       82 % del ancho de la barra. 13rem son 208 px, los mismos que daba el
+       82 % sobre los 252 de la barra. */
+    --asb-admin-barra-resplandor-ancho: 13rem;
     --asb-admin-barra-modulo-sombra: 0 12px 28px rgb(11 9 10 / 0.06);
     --asb-admin-barra-brote: 0.35;
     --asb-admin-barra-empuje: 2px;
@@ -236,6 +241,36 @@
             transform var(--duracion-boton) var(--ease-out);
     }
 
+    /*
+     * El resplandor de la zona, en UNA capa de página (corrección de D-L28,
+     * 8 sep). Vivía en `.fi-sidebar::before` y ahí nacía en el canto inferior
+     * del topbar, porque Filament pinta el topbar FUERA de `.fi-layout`, como
+     * hermano anterior e hijo directo de `.fi-body`: cruza el ancho entero por
+     * encima de la barra. Sua vio ese nacimiento como un corte.
+     *
+     * Fija y de alto completo, cubre topbar y barra por construcción. El
+     * topbar es blanco al 78 % con desenfoque, así que la deja pasar
+     * suavizada, que es la transición que faltaba.
+     */
+    .fi-body::before {
+        content: '';
+        pointer-events: none;
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background-image:
+            radial-gradient(
+                120% 55% at 0% 0%,
+                var(--asb-admin-barra-resplandor),
+                transparent 70%
+            ),
+            linear-gradient(
+                90deg,
+                var(--asb-admin-barra-resplandor),
+                transparent var(--asb-admin-barra-resplandor-ancho)
+            );
+    }
+
     .fi-body {
         position: relative;
         z-index: 0;
@@ -282,9 +317,21 @@
      * lo apagaban. El fondo es uno solo y es el campo.
      */
 
+    /*
+     * El lavado del resplandor va TAMBIÉN aquí, y arriba del todo en la pila.
+     * La capa de página ya pasa por detrás, pero el blanco al 78 % del topbar
+     * la diluye lo bastante como para que se vea un escalón justo debajo del
+     * logotipo: es lo que Sua señaló el 8 sep. Con el mismo token y el mismo
+     * ancho que la capa de página, las dos no pueden separarse.
+     */
     .fi-topbar {
         min-height: var(--asb-admin-topbar-alto);
         background:
+            linear-gradient(
+                90deg,
+                var(--asb-admin-barra-resplandor),
+                transparent var(--asb-admin-barra-resplandor-ancho)
+            ),
             linear-gradient(90deg, rgb(255 255 255 / 0.78), rgb(250 247 246 / 0.7)),
             radial-gradient(26rem circle at 18% 0%, rgb(238 65 55 / 0.06), transparent 68%);
         border-bottom: 1px solid rgb(58 13 16 / 0.08);
@@ -300,6 +347,11 @@
 
     .dark .fi-topbar {
         background:
+            linear-gradient(
+                90deg,
+                var(--asb-admin-barra-resplandor),
+                transparent var(--asb-admin-barra-resplandor-ancho)
+            ),
             linear-gradient(90deg, rgb(22 18 19 / 0.78), rgb(15 12 13 / 0.72)),
             radial-gradient(26rem circle at 18% 0%, rgb(238 65 55 / 0.075), transparent 68%);
         border-bottom-color: rgb(255 255 255 / 0.08);
@@ -308,6 +360,11 @@
 
     .fi-topbar-ctn.asb-topbar--scrolled .fi-topbar {
         background:
+            linear-gradient(
+                90deg,
+                var(--asb-admin-barra-resplandor),
+                transparent var(--asb-admin-barra-resplandor-ancho)
+            ),
             linear-gradient(90deg, rgb(255 255 255 / 0.94), rgb(250 247 246 / 0.9)),
             radial-gradient(28rem circle at 18% 0%, rgb(238 65 55 / 0.075), transparent 68%);
         border-bottom-color: rgb(58 13 16 / 0.14);
@@ -318,6 +375,11 @@
 
     .dark .fi-topbar-ctn.asb-topbar--scrolled .fi-topbar {
         background:
+            linear-gradient(
+                90deg,
+                var(--asb-admin-barra-resplandor),
+                transparent var(--asb-admin-barra-resplandor-ancho)
+            ),
             linear-gradient(90deg, rgb(22 18 19 / 0.96), rgb(15 12 13 / 0.93)),
             radial-gradient(28rem circle at 18% 0%, rgb(238 65 55 / 0.1), transparent 68%);
         border-bottom-color: rgb(255 255 255 / 0.12);
@@ -400,29 +462,13 @@
      * radial ancho y no con `filter: blur`, que obligaría al compositor a
      * rehacerlo en cada fotograma del campo.
      */
+    /*
+     * La barra ya no pinta el resplandor: lo pinta la página, unas líneas más
+     * abajo. Aquí queda el suelo del cajón, que solo existe por debajo de
+     * 64 rem y se declara en su media.
+     */
     .fi-sidebar::before {
         z-index: -1;
-        /*
-         * Dos capas (D-L28). El radial marcaba la esquina y se apagaba a poco
-         * más de media altura: en 1.080 px se acababa sobre los 594 y la mitad
-         * de abajo se quedaba sin la marca de su zona. Sua lo pidió el 8 sep.
-         *
-         * El lavado va anclado al canto IZQUIERDO y se apaga hacia dentro, que
-         * es lo contrario de la franja del límite que se rechazó tres veces:
-         * aquella se encendía en el canto derecho y por eso cortaba. Hay
-         * guardia sobre la dirección.
-         */
-        background-image:
-            radial-gradient(
-                120% 55% at 0% 0%,
-                var(--asb-admin-barra-resplandor),
-                transparent 70%
-            ),
-            linear-gradient(
-                90deg,
-                var(--asb-admin-barra-resplandor),
-                transparent 82%
-            );
     }
 
     /* El lienzo del campo (D-L26): uno solo, fijo, detrás de TODA la interfaz

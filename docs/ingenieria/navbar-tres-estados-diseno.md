@@ -2041,6 +2041,12 @@ Las dos capas suman alfa, así que la esquina queda al doble de intensidad y el 
 
 **Lo que NO puede pasar, y por eso hay guardia.** Sua rechazó tres veces un límite vertical: línea, filo y franja difusa de 40 px. El lavado es lo contrario de esos tres —es más fuerte en el canto izquierdo y se apaga hacia dentro, sin ningún canto en el límite con el contenido—, pero la diferencia es de dirección y una dirección se invierte con un carácter. La guardia de continuidad se amplía a `::before` y exige que el resplandor **empiece opaco en el canto izquierdo**, nunca transparente, que es como se volvería a dibujar la franja del límite.
 
+**Corregido el mismo día: el resplandor deja de ser de la barra y pasa a ser de la página.** Sua vio un corte horizontal justo debajo del logotipo —«noto un corte arriba con lo rojo que colocamos ahí, complétalo hasta arriba»— y la causa es estructural, escrita en el blade de Filament: **el topbar no vive dentro de `.fi-layout`**, sino como hermano anterior, hijo directo de `.fi-body`. Cruza el ancho entero por encima de la barra. El resplandor vivía en `.fi-sidebar::before`, que empieza justo debajo, así que el rojo nacía en el canto inferior del topbar: eso es exactamente un corte.
+
+Pintar el mismo lavado también en el topbar habría sido emparejar dos capas distintas y confiar en que no se separen nunca. Lo que se hace es **una sola capa**: el resplandor se muda a `.fi-body::before`, fija, de alto completo y anclada al canto izquierdo, detrás de todo. Cubre topbar y barra **por construcción, no por coincidencia**, y el topbar —blanco al 78 % con desenfoque— lo deja pasar suavizado, que es justo la transición que faltaba.
+
+El ancho del lavado pasa a token, `--asb-admin-barra-resplandor-ancho`: la capa nueva mide lo que mide la página, no lo que mide la barra, y un porcentaje sobre el ancho de la página no es el mismo lavado.
+
 ---
 
 ## Lo que la construcción cambió (Parte III, 7 y 8 sep 2026)

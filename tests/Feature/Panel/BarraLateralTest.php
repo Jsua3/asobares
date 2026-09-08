@@ -161,8 +161,12 @@ class BarraLateralTest extends TestCase
         $this->assertStringContainsString('var(--asb-admin-barra-velo)', $velo, 'El velo vive en el `::before` de cada apartado.');
         $suelo = $this->regla($tema, '.fi-sidebar::before');
         $this->assertStringNotContainsString('var(--asb-admin-barra-velo)', $suelo, 'La barra no puede pintar velo propio: taparía el campo de puntos.');
-        $this->assertStringContainsString('var(--asb-admin-barra-resplandor)', $suelo, 'Sin fondo propio, lo que marca la zona de la barra es su resplandor.');
-        $this->assertStringNotContainsString('filter: blur', $suelo, 'El resplandor va con un radial: un `filter` obligaría al compositor a rehacerlo en cada fotograma del campo.');
+
+        // El resplandor lo pinta la PÁGINA desde el 8 sep, no la barra: en la
+        // barra nacía debajo del topbar y se leía como un corte.
+        $pagina = $this->regla($tema, '.fi-body::before');
+        $this->assertStringContainsString('var(--asb-admin-barra-resplandor)', $pagina, 'Sin fondo propio, lo que marca la zona de la barra es su resplandor.');
+        $this->assertStringNotContainsString('filter: blur', $pagina, 'El resplandor va con un radial: un `filter` obligaría al compositor a rehacerlo en cada fotograma del campo.');
 
         // Todo consumo del desenfoque tiene que caer dentro de la media del
         // cajón: se cuenta en el archivo entero y dentro del bloque, y los dos
@@ -447,10 +451,11 @@ class BarraLateralTest extends TestCase
         // El resplandor de D-L28 sí lleva un lavado horizontal, y por eso hay
         // que vigilar su DIRECCIÓN: anclado al canto izquierdo y apagándose
         // hacia dentro no separa nada; al revés es la franja del límite otra vez.
+        // Desde el 8 sep la capa es de página, `.fi-body::before`, no de la barra.
         // Se lee la dirección declarada en vez de buscar cadenas: con el
         // paréntesis y el salto de línea, `linear-gradient(270deg` no aparece
         // nunca tal cual y la guardia daba verde con el lavado invertido.
-        $suelo = preg_replace('/\s+/', ' ', $this->regla($tema, '.fi-sidebar::before'));
+        $suelo = preg_replace('/\s+/', ' ', $this->regla($tema, '.fi-body::before'));
 
         preg_match_all('/linear-gradient\(\s*([^,]+),/', $suelo, $lavados);
 
@@ -652,7 +657,8 @@ class BarraLateralTest extends TestCase
      */
     public function test_el_resplandor_cubre_todo_el_lado(): void
     {
-        $suelo = preg_replace('/\s+/', ' ', $this->regla($this->tema(), '.fi-sidebar::before'));
+        $tema = $this->tema();
+        $suelo = preg_replace('/\s+/', ' ', $this->regla($tema, '.fi-body::before'));
 
         $this->assertStringContainsString(
             'linear-gradient( 90deg, var(--asb-admin-barra-resplandor)',
@@ -665,6 +671,64 @@ class BarraLateralTest extends TestCase
             $suelo,
             'Se perdió el radial de la esquina, que es de donde nace la luz.'
         );
+
+        /*
+         * Y lo que de verdad quita el corte: la capa es de la PÁGINA, no de la
+         * barra. El topbar de Filament no vive dentro de `.fi-layout`, sino
+         * como hermano anterior e hijo directo de `.fi-body`, así que cruza el
+         * ancho entero por encima de la barra. Un resplandor que empiece donde
+         * empieza la barra nace debajo del topbar, y eso se ve como un corte.
+         */
+        $this->assertStringContainsString('position: fixed;', $suelo, 'El resplandor dejó de ser una capa fija: vuelve a empezar donde empiece su elemento.');
+        $this->assertStringContainsString('inset: 0;', $suelo, 'El resplandor no cubre la pantalla entera, así que no llega hasta arriba.');
+
+        $enLaBarra = preg_replace('/\s+/', ' ', $this->regla($tema, '.fi-sidebar::before'));
+
+        $this->assertStringNotContainsString(
+            'var(--asb-admin-barra-resplandor)',
+            $enLaBarra,
+            'El resplandor volvió a la barra: ahí nace debajo del topbar y Sua ve el corte otra vez.'
+        );
+
+        // El ancho del lavado es una longitud y no un porcentaje: la capa mide
+        // lo que mide la página, y un 82 % de la página no es el mismo lavado.
+        $this->assertStringContainsString(
+            'transparent var(--asb-admin-barra-resplandor-ancho)',
+            $suelo,
+            'El lavado se apaga por porcentaje: sobre una capa de página eso lo estira hasta el otro extremo.'
+        );
+
+        /*
+         * El topbar lo lleva TAMBIÉN, en sus CUATRO estados. La capa de página
+         * ya pasa por detrás, pero el blanco al 78 % del topbar la diluía lo
+         * bastante como para dejar un escalón justo debajo del logotipo. Se
+         * afirman los cuatro por separado: el estado afirmado redeclara
+         * `background` entero, así que olvidarlo apaga el rojo al desplazar y
+         * eso solo se ve moviendo la página.
+         */
+        $normalizado = preg_replace('/\s+/', ' ', $this->tema());
+
+        foreach ([
+            '.fi-topbar {' => 'el topbar en reposo',
+            '.dark .fi-topbar {' => 'el topbar oscuro',
+            '.fi-topbar-ctn.asb-topbar--scrolled .fi-topbar {' => 'el topbar afirmado',
+            '.dark .fi-topbar-ctn.asb-topbar--scrolled .fi-topbar {' => 'el topbar afirmado oscuro',
+        ] as $selector => $cual) {
+            $desde = strpos($normalizado, $selector);
+            $this->assertNotFalse($desde, "No existe la regla de {$cual}.");
+
+            $cuerpo = substr($normalizado, $desde, strpos($normalizado, '}', $desde) - $desde);
+
+            $this->assertNotFalse(
+                strpos($cuerpo, 'var(--asb-admin-barra-resplandor)'),
+                "A {$cual} le falta el lavado del resplandor: el rojo se corta justo debajo del logotipo."
+            );
+
+            $this->assertNotFalse(
+                strpos($cuerpo, 'var(--asb-admin-barra-resplandor-ancho)'),
+                "El lavado de {$cual} no usa el ancho compartido, así que puede separarse del de la página."
+            );
+        }
     }
 
     /**
