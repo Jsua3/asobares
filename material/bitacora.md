@@ -2084,3 +2084,15 @@ El panel exige segundo factor, así que ninguna sesión automatizada lo abre. Tr
 ### 44.4 Cómo quedó
 
 La barra no tiene fondo propio: el fondo es un campo de puntos que huyen del cursor, dibujado en un lienzo fijo detrás de toda la interfaz, con su color en tokens (invierte con el tema) y la repulsión apagada bajo movimiento reducido. Cada apartado es una lámina de cristal. La zona del panel la marca un resplandor rojo, claro en el tema claro y oscuro en el oscuro. La fila mide 48 px, contra los 43,5 medidos al empezar, que no pasaban el mínimo táctil en ninguno de los 24 destinos. El foco salió de la media de puntero, donde estaba atrapado. La cuenta vive arriba con nombre y rango, la campana se retiró y el control de tema tiene ya las tres preferencias del sitio público.
+
+### 44.5 Los dos cortes que no eran el mismo corte (8 sep)
+
+Sua miró la barra en oscuro y dijo dos veces que los módulos se veían cortados. Eran dos cosas distintas y ninguna era la que parecía.
+
+El primero sí era un recorte: la máscara de desvanecido que avisa de que hay más lista medía 1,5 rem y la lista solo tenía 0,5 rem de aire vertical, así que en reposo el canto de la primera y de la última lámina nacía dentro del desvanecido. Con el vidrio suelto no se notaba; desde que el módulo tiene borde, un borde a medio pintar se lee como una caja cortada. El aviso baja a 0,9 rem y el relleno pasa a `calc(aviso + 0,35 rem)`.
+
+El segundo no era un recorte en absoluto, y por eso conviene que quede escrito: **el módulo acababa en 239,2 px y lo único que recorta cortaba en 244**. Lo que había era estrechez. El relleno de la lista era asimétrico —0,75 rem a la izquierda, 0,3 a la derecha— desde que Sua pidió agrandar los módulos hacia la derecha: se le quitó al aire de ese canto en vez de al ancho de la barra. Con 16 px de radio y 4,8 px de aire, la curva del canto derecho no tenía fondo contra el que leerse. La barra sube de 15,25 a 15,75 rem, el relleno vuelve a ser simétrico y el módulo queda en 228 px, un poco más ancho de los 227,2 que tenía.
+
+Dos lecciones. Una: **medir antes de arreglar**, porque el arreglo obvio —ensanchar el recorte— no habría tocado la causa. Otra: **la maqueta solo reprodujo el segundo defecto cuando se le puso el marcado real del grupo**, con su botón de plegado; la maqueta aproximada dio verde sobre algo que en el panel se veía mal. Una maqueta vale lo que se parece.
+
+Con eso Sua dijo «empuja». Suite completa como portón: 1.091 casos, 1.080 pasan, 11 omitidas, 0 fallos, 4.920 aserciones en 605 s. Veinte commits de una vez, y comprobado por contenido servido y no por hash: el CSS del panel en producción trae `--asb-admin-sidebar-ancho:15.75rem` y el relleno simétrico. Sale D-37.

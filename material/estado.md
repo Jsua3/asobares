@@ -29,11 +29,11 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 | | |
 |---|---|
 | Fecha | Lunes 8 de septiembre de 2026 (Bogotá), madrugada; sesión con Sua que empezó la noche del 5 |
-| **Dónde vive este archivo** | **En `main`**; medido sobre `2b2f826`, la punta de `p3-barra-lateral` recién fusionada, y este archivo entra en el commit de cierre. **Sin empujar**: el push despliega y esa decisión es de Sua |
-| `main` | `2b2f826` más este commit de estado · el 7 sep entraron `p1-navbar-movil` (la barra móvil 2.1), `p2-panel-ingrid` (el panel de Ingrid) y el arreglo del widget de pendientes; el 8 entra `p3-barra-lateral` (la barra lateral del panel). **Los commits de la barra lateral no están desplegados** |
-| Rama de trabajo | `p3-barra-lateral`, fusionada en `main` el 8 sep y conservada como historia. Le quedan cuatro tareas del plan: las señales del sistema, la guardia de contrato sobre el vendor, la medición en Chromium con la maqueta y la revisión adversaria |
-| Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5). Suite completa del 8 sep: **1.089 casos · 1.078 pasan · 11 omitidas · 0 fallos · 4.907 aserciones**. La barra lateral se mide en una maqueta propia, porque el segundo factor impide que una sesión automatizada abra el panel |
-| Producción | `https://asobares-production-0jhdcz.laravel.cloud`. Sirve la barra móvil 2.1, el panel de Ingrid y el arreglo del widget desde el 7 sep. **La barra lateral nueva NO está desplegada**: se empuja cuando Sua lo pida |
+| **Dónde vive este archivo** | **En `main`**; medido sobre `c6deb12`, y este archivo entra en el commit de cierre. **Empujado y desplegado** el 8 sep, con Sua diciéndolo («excelente, empuja»): resuelve D-37 |
+| `main` | `c6deb12` más este commit de estado · el 7 sep entraron `p1-navbar-movil` (la barra móvil 2.1), `p2-panel-ingrid` (el panel de Ingrid) y el arreglo del widget de pendientes; el 8 entra `p3-barra-lateral` (la barra lateral del panel), **veinte commits empujados de una vez** |
+| Rama de trabajo | Ninguna abierta: `p3-barra-lateral` se fusionó en `main` el 8 sep, se conserva como historia y **ya está desplegada**. Le quedan cuatro tareas del plan, que ahora se harán sobre lo que está sirviendo: las señales del sistema, la guardia de contrato sobre el vendor, la medición en Chromium con la maqueta y la revisión adversaria |
+| Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5). Suite completa del 8 sep, corrida como portón antes del despliegue: **1.091 casos · 1.080 pasan · 11 omitidas · 0 fallos · 4.920 aserciones** en 605 s. La barra lateral se mide en una maqueta propia, porque el segundo factor impide que una sesión automatizada abra el panel |
+| Producción | `https://asobares-production-0jhdcz.laravel.cloud`. Sirve la barra móvil 2.1, el panel de Ingrid y el arreglo del widget desde el 7 sep, y **la barra lateral nueva desde el 8**. Comprobado por contenido servido y no por hash, que Cloud compila sus propios activos: el CSS del panel en producción trae `--asb-admin-sidebar-ancho:15.75rem` |
 
 ## 1. Qué se exige y cuándo
 
@@ -139,11 +139,10 @@ De catorce, **doce cerrados y dos vivos** (10 y 11); ninguno se cierra escribien
 
 ## 3. Registro único de decisiones pendientes
 
-Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen» de `encargo.md` (el 3 sep salieron D-22 y las tres de la rama B; el 5 sep sale D-30; el 6 sep sale D-34, las dieciocho de la barra móvil; el 7 sep salen D-35, fusionar y empujar, y las dieciocho de la barra lateral). **Las D-01, D-04 a D-12 y D-20 caben en una sola reunión con Natalia con esta tabla impresa; D-30 la resolvió Sua el 5 sep, la B fusionada y desplegada, y sale de aquí.**
+Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen» de `encargo.md` (el 3 sep salieron D-22 y las tres de la rama B; el 5 sep sale D-30; el 6 sep sale D-34, las dieciocho de la barra móvil; el 7 sep salen D-35, fusionar y empujar, y las dieciocho de la barra lateral; el 8 sale **D-37**, que Sua respondió empujando la barra lateral a producción tras verla en claro y en oscuro). **Las D-01, D-04 a D-12 y D-20 caben en una sola reunión con Natalia con esta tabla impresa; D-30 la resolvió Sua el 5 sep, la B fusionada y desplegada, y sale de aquí.**
 
 | ID | Decisión | Dueño | Pedida | Respondida |
 |---|---|---|---|---|
-| **D-37** | **¿Se empuja la barra lateral del panel?** Está fusionada en `main` pero sin desplegar. Antes conviene mirarla en claro y en oscuro, y medir el campo de puntos en marcha (el navegador de la sesión no pinta fotogramas con la ventana detrás). | Sua | 8 sep | — |
 | **D-31** | **`prefers-reduced-transparency` en un equipo real** antes de la demo: Playwright acepta la emulación y no la aplica. | Sua | 5 sep | — |
 | **D-32** | **Idiomas como subsistema propio**: `lang/`, middleware de locale, traducir vistas y volver multilingüe la tabla de ajustes. **Ampliación de alcance: acta antes de codificar.** El chip de la B es su sitio reservado y no funciona a propósito | Natalia + Sua | 3 sep | — |
 | **D-33** | **Qué cede en la barra entre 1024 y ~1130 px de ancho** (iPad mini y los iPad de 10 pulgadas antiguos, en horizontal): en `inicial` y `atención` los tres módulos suman 1.102 px y la píldora mide 968. Con el logo protegido, a 1024 en inicial la píldora desborda 124 px a la derecha y el documento gana 107 px de desplazamiento horizontal (medido el 5 sep); en scroll cabe (727 px). Opciones: isotipo también en inicial por debajo de ~1150 px, o esconder el texto de «Mi cuenta» en esa franja; ninguna se toma sin Sua. Ya desbordaba antes de la rejilla, **y ahora está en producción** | Sua | 5 sep | — |
@@ -219,7 +218,7 @@ Sobre **`8e53813` (`main` tras la fusión, con la portada de la P2)**, 5 de sept
 ## 6. Lo siguiente, en orden
 
 1. **Confirmar que el documento de práctica se envió** el 4 sep (Sua). Si no, es 0.0 y hay que hablar con el docente.
-2. **Terminar las cuatro tareas que le quedan a la barra lateral**: las cuatro señales del sistema, la guardia de contrato sobre el vendor de Filament, la medición completa en Chromium con la maqueta y la revisión adversaria. Y decidir si se empuja (D-37), sabiendo que el push despliega.
+2. **Terminar las cuatro tareas que le quedan a la barra lateral**, ahora sobre lo que ya está sirviendo: las cuatro señales del sistema, la guardia de contrato sobre el vendor de Filament, la medición completa en Chromium con la maqueta y la revisión adversaria. Y la medición que solo puede hacer Sua: **el coste del campo de puntos en marcha**, porque el navegador de la sesión no pinta fotogramas con la ventana detrás.
 3. **Ver la barra móvil en un teléfono real** (Android y un iPhone): Safari de iOS, la barra de direcciones que crece y encoge, el rebote elástico, el teclado y la transparencia reducida son lo único que Chromium no enseña, y es lo que exige la S7 del cronograma. Si algo cede, se corrige sobre `main` y se vuelve a empujar.
 4. **Enseñar a la dirección la barra desplegada** (D-30 ya ejecutada por Sua) y cerrar el Acta 06 (D-26) con el cambio de barra. Antes, si se puede, **D-31**: transparencia reducida en un equipo real y un iPad de verdad; y **D-33**: qué cede entre 1024 y 1130 px, que ya está en producción.
 5. **Lo que queda de la fusión:** correr `ContenidoOficialSeeder` una vez en producción **con visto bueno aparte, porque toca datos** (sin él la portada usa los textos de respaldo del rótulo y la frase corta no se pinta); confirmar con Ingrid dónde va el rótulo del video y los dos portadores claros; corregir el documento de práctica, que describe la barra A; y decidir con ella si se reescribe `239eda0` para quitar el `Co-Authored-By`.
