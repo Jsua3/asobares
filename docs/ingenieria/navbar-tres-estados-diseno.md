@@ -1917,3 +1917,19 @@ En el mismo mensaje pidió rehacer la parte superior del panel: el control de te
 3. **El lienzo no recibe puntero** y no lleva texto: es decoración pura, así que no entra en ninguna cuenta de contraste. Los puntos van por debajo de los módulos.
 
 **Lo que se pierde al esconder la barra de desplazamiento**, dicho claro: la única pista de que la lista sigue pasa a ser la máscara de desvanecido de D-L15. Por eso ese aviso deja de ser un adorno y se vuelve obligatorio.
+
+### D-L25. El límite deja de ser una línea y pasa a ser una unión
+
+**Pedido de Sua, 7 sep:** «cambia la línea roja que está limitando la barra con el resto de la interfaz y hazlo tipo una sombra que va uniendo la barra con el resto».
+
+**Qué decía D-L10 y por qué cambia.** Aquella decisión puso una línea de luminancia más una sombra, con este argumento: el filo rojo da 2,60:1 en claro y 1,93:1 en oscuro, y un borde de región se juzga contra 3:1. El argumento era correcto **cuando la barra no tenía fondo propio**. Desde D-L24 lo tiene: el campo de puntos distingue la región por textura y por superficie, no por su canto. Con eso, la línea dura deja de ser lo que sostiene el límite y pasa a ser solo un corte.
+
+| Opción | Coste |
+|---|---|
+| A. Fuera la línea y fuera el filo rojo. El límite lo hace una **unión**: un degradado ancho que sale del canto de la barra hacia el contenido y se apaga, más una sombra proyectada suave | Se pierde el corte nítido: en pantallas de brillo bajo la frontera queda insinuada. A cambio es lo que Sua pidió y lo que el campo de puntos ya permite |
+| B. Conservar la línea y añadir la sombra | Es lo de hoy más maquillaje: la línea roja seguiría ahí |
+| C. Solo sombra proyectada, sin degradado | Una sombra sola contra un fondo casi del mismo tono no une nada: se ve como suciedad en el canto |
+
+**Recomendación: A.** Porque la región ya se distingue por su fondo, y el encargo pide que la barra se una al contenido en vez de cortarlo.
+
+**Lo que se conserva:** el rojo sigue vivo en la unión, pero como resplandor tenue dentro del degradado y no como filo de un píxel. Y el estado `scroll` deja de apagar nada del canto: no queda canto que apagar.

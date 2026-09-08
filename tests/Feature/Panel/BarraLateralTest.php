@@ -180,10 +180,13 @@ class BarraLateralTest extends TestCase
         $tema = $this->tema();
         $elemento = $this->regla($tema, '.fi-sidebar');
 
-        $this->assertStringContainsString('var(--asb-admin-barra-borde)', $elemento, 'La línea que separa la barra del contenido sale del token de borde, derivado de la luminancia.');
+        // D-L25 sustituyó la línea por la unión: lo que separa ya no es un
+        // canto, sino el fondo propio de la barra (el campo de puntos) más la
+        // sombra y el degradado que la unen al contenido.
+        $this->assertStringNotContainsString('border-inline-end', $elemento, 'La barra no puede separarse con un canto: se une con la sombra de su pseudoelemento.');
 
         $capa = $this->regla($tema, '.fi-sidebar::after');
-        $this->assertStringContainsString('var(--asb-admin-barra-filo)', $capa, 'El filo luminiscente va en `::after`, encima del velo.');
+        $this->assertStringContainsString('var(--asb-admin-barra-union)', $capa, 'La unión va en `::after`, encima del velo.');
     }
 
     /**
@@ -412,39 +415,34 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * Cuando los módulos encienden, la barra se apaga. Es la regla de la barra
-     * de escritorio: en `inicial` el vidrio lo pone la bandeja y los módulos no
-     * dibujan nada; en `scroll` la bandeja se apaga y cada módulo enciende el
-     * suyo. Sin eso quedan las dos cosas a la vez, que es el «cuadro que une
-     * todos los módulos» que Sua pidió quitar el 7 sep.
-     *
-     * La LÍNEA del límite no se apaga: es el borde de la región y se juzga
-     * contra 3:1, que el filo luminiscente no alcanza (D-L10).
-     * Rotura: dejar el velo encendido en el estado scroll.
+     * El límite es una UNIÓN, no una línea (D-L25). Hasta hoy la barra se
+     * cortaba con un borde de un píxel y un filo rojo; Sua pidió que se una al
+     * contenido con una sombra. Se puede porque desde D-L24 la región ya se
+     * distingue por su fondo de puntos, que es lo que antes sostenía la línea.
+     * Rotura: devolver el `border-inline-end` de un píxel.
      */
-    public function test_la_barra_se_apaga_cuando_los_modulos_encienden(): void
+    public function test_el_limite_de_la_barra_es_una_union_y_no_una_linea(): void
     {
-        $tema = preg_replace('/\s+/', ' ', $this->tema());
+        $tema = $this->tema();
+        $barra = $this->regla($tema, '.fi-sidebar');
 
+        $this->assertStringNotContainsString('border-inline-end: 1px', $barra, 'La barra vuelve a cortarse con una línea dura.');
+
+        $union = $this->regla($tema, '.fi-sidebar::after');
+
+        $this->assertStringContainsString('linear-gradient', $union, 'La unión no tiene degradado: una sombra sola contra un fondo del mismo tono no une nada.');
+        $this->assertStringContainsString('var(--asb-admin-barra-union)', $union, 'La unión no sale de su token.');
         $this->assertStringContainsString(
-            'body[data-barra-estado="scroll"] .fi-sidebar::after',
-            $tema,
-            'El filo de la barra no se apaga cuando los módulos encienden: quedan las dos cajas a la vez.'
+            'calc(-1 * var(--asb-admin-barra-union-ancho))',
+            $union,
+            'La unión no se sale del canto: sin desbordar hacia el contenido, vuelve a ser un corte.'
         );
-
-        // El suelo NO se apaga desde D-L24: es el campo de puntos que Sua pidió
-        // como fondo, y sin él la barra se queda transparente sobre la página.
-        $this->assertStringNotContainsString(
-            'body[data-barra-estado="scroll"] .fi-sidebar::before',
-            $tema,
-            'El suelo de la barra no puede apagarse: es el fondo del campo de puntos.'
-        );
-
-        $this->assertStringContainsString(
-            'border-inline-end: 1px solid var(--asb-admin-barra-borde);',
-            $tema,
-            'La línea del límite tiene que sobrevivir al apagado: es el borde de la región.'
-        );
+        // La sombra va DENTRO de la unión y no en `box-shadow` del elemento:
+        // Filament aplica `lg:shadow-none` desde una capa que gana, así que una
+        // sombra declarada en el elemento se anula en escritorio sin avisar.
+        // Medido en la maqueta el 7 sep: computaba `rgba(0,0,0,0) 0 0 0 0`.
+        $this->assertStringContainsString('var(--asb-admin-barra-sombra-union)', $union, 'La unión no lleva su mitad neutra, que es la que hace de sombra.');
+        $this->assertStringNotContainsString('box-shadow', $barra, 'La sombra del elemento la anula Filament en escritorio: tiene que ir en la unión.');
     }
 
     /**

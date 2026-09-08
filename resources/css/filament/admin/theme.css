@@ -106,7 +106,7 @@
     --asb-admin-barra-borde: var(--asb-linea-fuerte);
     /* La otra mitad del límite. Proyectada, no interior: la interior la tapa el
        velo y deja de separar nada. */
-    --asb-admin-barra-sombra: 18px 0 44px rgb(58 13 16 / 0.1);
+    --asb-admin-barra-sombra: 22px 0 48px -18px rgb(58 13 16 / 0.22);
 
     /* La TINTA va con la aritmética, aunque contradiga a la luz. Recalculado el
        7 sep sobre el fondo activo con el halo encima (#f8d9d7 en claro): el
@@ -133,9 +133,18 @@
     --asb-admin-barra-modulo-canto: rgb(11 9 10 / 0.1);
     --asb-admin-barra-modulo-brillo: rgb(255 255 255 / 0.55);
     --asb-admin-barra-modulo-radio: 1rem;
+    --asb-admin-barra-union-ancho: 1.25rem;
     /* El punto del campo del fondo (D-L24). Decoración: no entra en cuentas
        de contraste, pero sí invierte con el tema como todo lo demás. */
     --asb-admin-barra-punto: rgb(11 9 10 / 0.16);
+    /* La unión con el contenido (D-L25): un degradado ancho que sale del canto
+       y se apaga, en vez de una línea que corta. Lleva el rojo dentro, pero
+       como resplandor tenue y no como filo. */
+    --asb-admin-barra-union: rgb(238 65 55 / 0.07);
+    /* La mitad neutra de la unión: es la que hace de sombra. Va en el
+       pseudoelemento y no en `box-shadow` porque Filament anula la sombra del
+       elemento en escritorio. */
+    --asb-admin-barra-sombra-union: rgb(58 13 16 / 0.1);
     --asb-admin-barra-modulo-sombra: 0 12px 28px rgb(11 9 10 / 0.06);
     --asb-admin-barra-brote: 0.35;
     --asb-admin-barra-empuje: 2px;
@@ -159,12 +168,14 @@
     --asb-admin-barra-velo: color-mix(in oklab, var(--asb-superficie) 88%, transparent);
     --asb-admin-barra-velo-cajon: color-mix(in oklab, var(--asb-superficie) 88%, transparent);
     --asb-admin-barra-luz: #7e1a16;
-    --asb-admin-barra-sombra: 18px 0 44px rgb(0 0 0 / 0.32);
+    --asb-admin-barra-sombra: 22px 0 48px -14px rgb(0 0 0 / 0.5);
     --asb-admin-barra-activo: var(--asb-acento);
     --asb-admin-barra-activo-fondo: color-mix(in oklab, var(--asb-acento) 16%, transparent);
     --asb-admin-barra-hover-fondo: rgb(255 255 255 / 0.06);
     --asb-admin-barra-modulo-canto: rgb(255 255 255 / 0.1);
     --asb-admin-barra-punto: rgb(255 255 255 / 0.14);
+    --asb-admin-barra-union: rgb(238 65 55 / 0.1);
+    --asb-admin-barra-sombra-union: rgb(0 0 0 / 0.34);
     --asb-admin-barra-modulo-brillo: rgb(255 255 255 / 0.06);
     --asb-admin-barra-modulo-sombra: 0 12px 28px rgb(0 0 0 / 0.28);
     --asb-admin-foco-anillo: #ffffff;
@@ -346,12 +357,17 @@
      * el rojo claro contra la página clara da 2,60:1 y el oscuro contra la
      * oscura 1,93:1, y un borde de región se juzga contra 3:1.
      */
+    /*
+     * Sin `box-shadow` en el elemento a propósito: Filament le aplica
+     * `lg:shadow-none` desde una capa que gana, así que una sombra declarada
+     * aquí se anula en escritorio sin avisar. Medido el 7 sep en la maqueta:
+     * el valor computado salía en `rgba(0,0,0,0) 0 0 0 0`. La sombra de la
+     * unión la dibuja el pseudoelemento, que nadie nos pisa.
+     */
     .fi-sidebar {
         --sidebar-width: var(--asb-admin-sidebar-ancho);
         position: relative;
         background: transparent;
-        border-inline-end: 1px solid var(--asb-admin-barra-borde);
-        box-shadow: var(--asb-admin-barra-sombra);
     }
 
     /* El velo. Va detrás de todo el contenido de la barra y por eso el
@@ -390,15 +406,20 @@
     }
 
     /*
-     * El filo luminiscente, encima del velo desde el primer día: bajo
-     * transparencia reducida el velo se vuelve opaco y la luz tiene que
-     * sobrevivir. Es un degradado de un píxel en el canto interior, más el
-     * resplandor de la esquina superior, que es de donde nace la luz.
+     * La unión con el contenido (D-L25). No es un filo de un píxel que corta,
+     * sino un degradado ancho que SALE del canto hacia el contenido y se
+     * apaga: por eso el `inset` lo desborda por la derecha. El rojo sigue
+     * dentro, como resplandor, que es lo que Sua pidió conservar.
+     *
+     * El resplandor de la esquina superior se queda: es de donde nace la luz.
      */
     .fi-sidebar::after {
+        inset: 0 calc(-1 * var(--asb-admin-barra-union-ancho)) 0 auto;
+        width: calc(var(--asb-admin-barra-union-ancho) * 2);
         z-index: 0;
         background-image:
-            linear-gradient(to left, var(--asb-admin-barra-filo), transparent 1px),
+            linear-gradient(to right, var(--asb-admin-barra-sombra-union), transparent),
+            linear-gradient(to right, var(--asb-admin-barra-union), transparent),
             radial-gradient(18rem 16rem at 24% 0%, var(--asb-admin-barra-halo), transparent 66%);
     }
 
@@ -627,10 +648,6 @@
      * La línea del límite y la sombra no se apagan: son el borde de la región,
      * que se juzga contra 3:1 y que el filo luminiscente no alcanza (D-L10).
      */
-    body[data-barra-estado="scroll"] .fi-sidebar::after {
-        opacity: 0;
-    }
-
     .fi-sidebar::before,
     .fi-sidebar::after {
         transition: opacity var(--duracion-entrada) var(--ease-color);
