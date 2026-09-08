@@ -92,10 +92,10 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::TOPBAR_END,
                 fn (): HtmlString => new HtmlString(view('filament.components.cuenta-en-la-barra')->render()),
             )
-            // El campo de puntos del fondo de la barra (D-L24). Va lo primero
-            // dentro de la barra para quedar por debajo de todo lo demás.
+            // El campo de puntos del fondo de TODA la interfaz (D-L24, ampliado
+            // en D-L26). Va lo primero del cuerpo, fijo y por debajo de todo.
             ->renderHook(
-                PanelsRenderHook::SIDEBAR_START,
+                PanelsRenderHook::BODY_START,
                 fn (): HtmlString => new HtmlString(view('filament.components.puntos-de-la-barra')->render()),
             )
             // Con la cuenta abajo, el menú de usuario de Filament sobra: dos

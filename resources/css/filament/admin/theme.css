@@ -230,8 +230,16 @@
 
     .fi-body {
         position: relative;
+        z-index: 0;
         background-color: var(--asb-admin-fondo-claro);
         overflow-x: clip;
+    }
+
+    /* Todo lo que no sea el campo va por encima de él. */
+    .fi-layout,
+    .fi-topbar-ctn {
+        position: relative;
+        z-index: 1;
     }
 
     .dark .fi-body {
@@ -242,13 +250,14 @@
         position: relative;
     }
 
+    /*
+     * El fondo del contenido deja de pintar sus cuatro degradados (D-L26): eran
+     * opacos y tapaban el campo de puntos, que ahora es el fondo de toda la
+     * interfaz. Queda la superficie plana y el campo debajo.
+     */
     .fi-main-ctn {
         position: relative;
-        background:
-            radial-gradient(54rem 32rem at 13% -4%, rgb(255 255 255 / 0.96), transparent 66%),
-            radial-gradient(34rem 22rem at 78% 2%, rgb(238 65 55 / 0.025), transparent 74%),
-            radial-gradient(28rem 18rem at 38% 48%, rgb(58 13 16 / 0.012), transparent 78%),
-            linear-gradient(180deg, rgb(253 252 251) 0%, var(--asb-admin-fondo-claro) 48%, rgb(244 242 241) 100%);
+        background: transparent;
         isolation: isolate;
     }
 
@@ -390,19 +399,22 @@
      * panel ese velo compone casi el mismo blanco y así el contraste del
      * rótulo de grupo se sigue midiendo contra lo que de verdad hay debajo.
      */
+    /* La barra ya no pinta velo (D-L26): el campo de puntos es el fondo de toda
+       la interfaz y tiene que verse también aquí. Lo que la distingue del
+       contenido es la unión de su canto y el cristal de sus módulos. */
     .fi-sidebar::before {
-        z-index: -2;
-        background-color: var(--asb-admin-barra-velo);
+        display: none;
     }
 
-    /* El lienzo del campo, por debajo de todo el contenido y sin puntero. */
+    /* El lienzo del campo (D-L26): uno solo, fijo, detrás de TODA la interfaz
+       y sin puntero. Es hijo del cuerpo, así que no depende de ninguna zona. */
     .asb-barra-puntos {
         pointer-events: none;
-        position: absolute;
+        position: fixed;
         inset: 0;
-        z-index: -1;
-        width: 100%;
-        height: 100%;
+        z-index: 0;
+        width: 100vw;
+        height: 100dvh;
     }
 
     /*
@@ -627,17 +639,26 @@
         transition: opacity var(--duracion-entrada) var(--ease-color);
     }
 
+    /*
+     * El cristal de cada apartado, permanente desde D-L26. Antes encendía solo
+     * al desplazar, y la razón era buena: sin nada detrás, un cristal
+     * permanente se lee como caja. Con el campo de puntos hay qué refractar,
+     * así que la lámina se lee como lámina.
+     */
     .fi-sidebar-group::before {
+        opacity: 1;
+        background-color: var(--asb-admin-barra-velo);
         background-image: linear-gradient(180deg, var(--asb-admin-barra-modulo-brillo), transparent 5rem);
     }
 
     .fi-sidebar-group::after {
+        opacity: 1;
         box-shadow: inset 0 0 0 1px var(--asb-admin-barra-modulo-canto);
     }
 
-    body[data-barra-estado="scroll"] .fi-sidebar-group::before,
-    body[data-barra-estado="scroll"] .fi-sidebar-group::after {
-        opacity: 1;
+    /* Al desplazar, el cristal se afirma: gana la sombra que lo despega. */
+    body[data-barra-estado="scroll"] .fi-sidebar-group {
+        box-shadow: var(--asb-admin-barra-modulo-sombra);
     }
 
     /*

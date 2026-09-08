@@ -1,9 +1,10 @@
 /**
- * El campo de puntos del fondo de la barra lateral (D-L24).
+ * El campo de puntos del fondo de TODA la interfaz (D-L24, ampliado en D-L26).
  *
- * Sua lo pidió el 7 sep: fondo de puntos que se apartan del cursor. Se dibuja
- * en un `<canvas>` y no con mil nodos, porque con 18 px de paso una columna de
- * 244 px de ancho por 1.000 de alto son más de setecientos puntos.
+ * Sua lo pidió el 7 sep: fondo de puntos que se apartan del cursor, primero en
+ * la barra y después en el panel entero. Se dibuja en un `<canvas>` y no con
+ * nodos, porque con 18 px de paso una pantalla de 1.920 por 1.080 son más de
+ * seis mil puntos.
  *
  * Tres reglas que vienen de la decisión y no se tocan sin cambiarla:
  *
@@ -143,12 +144,11 @@ const montar = () => {
     sembrar();
     pintar();
 
-    const barra = lienzo.closest('.fi-sidebar');
-
+    // Escucha en el documento: el campo es de toda la interfaz, no de una zona.
     // `pointermove` y no `mousemove`: en híbridos el toque sintetiza mouse y
     // dejaría el campo empujado donde el dedo levantó.
-    barra?.addEventListener('pointermove', seguir);
-    barra?.addEventListener('pointerleave', soltar);
+    document.addEventListener('pointermove', seguir, { passive: true });
+    document.addEventListener('pointerleave', soltar);
 
     new ResizeObserver(() => {
         sembrar();

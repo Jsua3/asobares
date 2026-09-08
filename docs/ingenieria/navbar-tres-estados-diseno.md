@@ -1933,3 +1933,24 @@ En el mismo mensaje pidió rehacer la parte superior del panel: el control de te
 **Recomendación: A.** Porque la región ya se distingue por su fondo, y el encargo pide que la barra se una al contenido en vez de cortarlo.
 
 **Lo que se conserva:** el rojo sigue vivo en la unión, pero como resplandor tenue dentro del degradado y no como filo de un píxel. Y el estado `scroll` deja de apagar nada del canto: no queda canto que apagar.
+
+### D-L26. El campo de puntos gobierna toda la interfaz, y cada apartado gana su cristal
+
+**Pedido de Sua, 7 sep:** «quiero que el fondo responsivo sea para toda la interfaz, no solo para la barra de navegación lateral, y para cada apartado de la barra de navegación lateral asígnale el módulo de cristal respectivo a cada uno».
+
+**Lo que cambia, y por qué encaja ahora.** Hasta D-L24 los módulos encendían su vidrio solo al desplazar la lista, y la razón era buena: sin nada detrás, un cristal permanente se lee como caja. Con el campo de puntos **sí hay algo detrás**, así que el cristal por fin tiene qué refractar y deja de ser una caja para ser una lámina.
+
+| Opción | Coste |
+|---|---|
+| A. Un solo lienzo fijo detrás de TODA la interfaz, y cada grupo de la barra con su cristal permanente | El fondo del contenido tiene que dejar de taparlo: hoy `.fi-main-ctn` pinta cuatro degradados opacos. Y el cristal permanente en cinco módulos sobre un lienzo que se repinta es la combinación cara: hay que medirla antes de dejarla |
+| B. Un lienzo por zona (barra, contenido, cromo) | Tres bucles y tres pinceles para un solo efecto continuo, y las juntas se notan al mover el puntero entre zonas |
+| C. Dejar el campo solo en la barra | Es lo de hoy y no es lo que se pide |
+
+**Recomendación: A**, con dos condiciones medidas y no supuestas:
+
+1. **El desenfoque de los módulos se mide antes de quedarse.** Cinco láminas con `backdrop-filter` sobre un lienzo que se repinta cada fotograma es justo lo que hace tartamudear a una GPU integrada. Si la medición sale mal, el cristal se queda en velo y canto, sin desenfoque, y se dice por escrito.
+2. **El lienzo es uno y va detrás de todo**, con `position: fixed`, sin puntero y fuera del árbol de accesibilidad. La repulsión escucha en el documento, no en la barra.
+
+**Lo que se pierde:** los degradados del fondo del contenido, que hoy tapan cualquier cosa que se pinte debajo. El fondo pasa a ser la superficie plana más los puntos.
+
+**Cómo quedó, y qué falta medir (7 sep).** El cristal de los apartados se construyó **sin `backdrop-filter`**: es velo, canto y brillo especular sobre el campo de puntos, que ya da la refracción a la vista. Así la combinación cara de la condición 1 no llega a existir, y por eso el desenfoque no se midió: no hay ninguno que medir. Lo que sí queda pendiente es el coste del propio campo con el puntero en movimiento, medido en una máquina real: el panel de la sesión no pinta fotogramas cuando la ventana no está delante, así que la medición de `requestAnimationFrame` no se pudo tomar aquí y la toma Sua.

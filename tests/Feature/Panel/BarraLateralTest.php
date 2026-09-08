@@ -154,8 +154,12 @@ class BarraLateralTest extends TestCase
         $this->assertStringNotContainsString('filter:', $elemento, 'Ningún filtro en el elemento, por la misma razón.');
         $this->assertMatchesRegularExpression('/background:\s*transparent;/', $elemento, 'Filament da fondo opaco propio a la barra bajo `lg`: hay que ponerlo transparente explícitamente o el cajón queda opaco bajo el velo.');
 
-        $velo = $this->regla($tema, '.fi-sidebar::before');
-        $this->assertStringContainsString('var(--asb-admin-barra-velo)', $velo, 'El velo vive en `::before`.');
+        // Desde D-L26 el velo no lo pinta la barra sino cada apartado: el campo
+        // de puntos es el fondo de toda la interfaz y tiene que verse también
+        // debajo de la barra.
+        $velo = $this->regla($tema, '.fi-sidebar-group::before');
+        $this->assertStringContainsString('var(--asb-admin-barra-velo)', $velo, 'El velo vive en el `::before` de cada apartado.');
+        $this->assertStringContainsString('display: none;', $this->regla($tema, '.fi-sidebar::before'), 'La barra no puede pintar velo propio: taparía el campo de puntos.');
 
         // Todo consumo del desenfoque tiene que caer dentro de la media del
         // cajón: se cuenta en el archivo entero y dentro del bloque, y los dos
@@ -410,8 +414,11 @@ class BarraLateralTest extends TestCase
             $this->assertStringContainsString($capa, $tema, "El módulo no tiene su {$capa}.");
         }
 
-        $this->assertStringContainsString('opacity: 0;', $this->regla($this->tema(), '.fi-sidebar-group::before'), 'El módulo nace encendido, y tiene que nacer apagado.');
-        $this->assertStringContainsString('body[data-barra-estado="scroll"] .fi-sidebar-group::before', $tema, 'Nada enciende el módulo al desplazar la lista.');
+        // D-L26: el cristal es permanente, porque con el campo de puntos detrás
+        // ya hay algo que refractar y la lámina deja de leerse como caja. Lo que
+        // añade el desplazamiento es la sombra que la despega.
+        $this->assertStringContainsString('opacity: 1;', $this->regla($this->tema(), '.fi-sidebar-group::before'), 'El cristal del apartado tiene que estar puesto, no esperando al scroll.');
+        $this->assertStringContainsString('body[data-barra-estado="scroll"] .fi-sidebar-group', $tema, 'El desplazamiento ya no afirma el cristal con su sombra.');
     }
 
     /**
@@ -471,17 +478,15 @@ class BarraLateralTest extends TestCase
 
         $lienzo = $this->regla($tema, '.asb-barra-puntos');
         $this->assertStringContainsString('pointer-events: none;', $lienzo, 'El lienzo intercepta el puntero.');
-        $this->assertStringContainsString('position: absolute;', $lienzo, 'El lienzo tiene que estar fuera del flujo.');
-
-        // La regla de los hijos de la barra empata en especificidad con la del
-        // lienzo y va después: sin el `:not()` le quita el `position: absolute`
-        // y el lienzo empuja la lista fuera de la vista. Pasó el 7 sep.
-        $this->assertStringContainsString(
-            '.fi-sidebar > *:not(.asb-barra-puntos)',
-            $tema,
-            'La regla de los hijos de la barra no excluye al lienzo, así que lo devuelve al flujo.'
-        );
-        $this->assertMatchesRegularExpression('/z-index: -\d;/', $lienzo, 'El lienzo tiene que ir por debajo del contenido.');
+        // Fijo desde D-L26: el campo es de toda la interfaz, no de una zona, y
+        // no puede desplazarse con nada. En flujo empujaría el contenido, que
+        // es lo que pasó el 7 sep cuando una regla le quitó la posición.
+        $this->assertStringContainsString('position: fixed;', $lienzo, 'El lienzo tiene que estar fuera del flujo y fijo al viewport.');
+        $this->assertStringContainsString('100dvh', $lienzo, 'El lienzo tiene que cubrir el alto del viewport.');
+        // El lienzo va en z-index 0 y todo lo demás en 1: con negativo se colaba
+        // por detrás del fondo del cuerpo y no se veía.
+        $this->assertStringContainsString('z-index: 0;', $lienzo, 'El lienzo tiene que quedar sobre el fondo del cuerpo.');
+        $this->assertStringContainsString('z-index: 1;', $this->regla($tema, '.fi-layout'), 'El contenido tiene que ir por encima del campo.');
 
         $vista = File::get(resource_path('views/filament/components/puntos-de-la-barra.blade.php'));
         $this->assertStringContainsString('aria-hidden="true"', $vista, 'El lienzo es decoración y tiene que estar oculto a la tecnología de apoyo.');
