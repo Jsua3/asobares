@@ -521,7 +521,12 @@ class MovimientoTest extends TestCase
         $this->assertStringContainsString('Enviar solicitud', $primaria);
         $this->assertStringContainsString('<button', $primaria);
         $this->assertStringContainsString('type="submit"', $primaria);
-        $this->assertStringContainsString('bg-marca-500', $primaria);
+        // `bg-accion` y ya no `bg-marca-500`: Pub Red puro con rótulo blanco
+        // daba 3,86:1, por debajo del 4,5:1 de RNF-12. El relleno de los
+        // botones pasó a marca 600 el 9 sep 2026, y quien lo vigila es
+        // `ContrasteDelBotonTest`. Aquí solo se afirma que el componente
+        // sigue emitiendo el relleno de acción.
+        $this->assertStringContainsString('bg-accion', $primaria);
         $this->assertStringContainsString('pulsable', $primaria);
 
         $contorno = Blade::render(
@@ -531,7 +536,7 @@ class MovimientoTest extends TestCase
         $this->assertStringContainsString('<a', $contorno);
         $this->assertStringContainsString('href="/directorio"', $contorno);
         $this->assertStringContainsString('border-linea-fuerte', $contorno);
-        $this->assertStringNotContainsString('bg-marca-500', $contorno);
+        $this->assertStringNotContainsString('bg-accion', $contorno);
 
         // El contorno sobre fondo oscuro (la portada a pantalla completa):
         // tinta sobre video negro era un botón invisible. Rotura: quitar la
@@ -548,7 +553,7 @@ class MovimientoTest extends TestCase
         $this->assertStringNotContainsString('text-tinta', $claro);
         $this->assertStringNotContainsString('border-linea-fuerte', $claro);
         $this->assertStringNotContainsString('-white', $claro);
-        $this->assertStringNotContainsString('bg-marca-500', $claro);
+        $this->assertStringNotContainsString('bg-accion', $claro);
 
         $css = File::get(resource_path('css/app.css'));
         $this->assertMatchesRegularExpression('/\.contorno-claro \{\s*color: white;\s*border-color: rgb\(255 255 255 \/ 0\.4\);/', $css, 'el portador del contorno claro vive en app.css');
@@ -579,7 +584,7 @@ class MovimientoTest extends TestCase
 
         $this->assertStringContainsString('w-full', $html);
         $this->assertStringContainsString('sm:w-auto', $html);
-        $this->assertStringContainsString('bg-marca-500', $html);
+        $this->assertStringContainsString('bg-accion', $html);
     }
 
     /**

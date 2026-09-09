@@ -348,7 +348,7 @@
                     portador y con ella moría la duración cero de su `:active`.
                     Se nombra y no se pega porque la guardia lee este archivo
                     crudo, comentarios incluidos. --}}
-               class="pulsable cta-vivo relative rounded-lg bg-marca-500 px-4 py-1.5 text-sm font-semibold text-white after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] hover:bg-marca-600">
+               class="pulsable cta-vivo relative rounded-lg bg-accion px-4 py-1.5 text-sm font-semibold text-white after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] hover:bg-accion-fuerte">
                 Afíliate
             </a>
             @endguest

@@ -80,7 +80,7 @@
              casar por prefijo. --}}
         <span class="sr-only">@if ($prefijoRol){{ $prefijoRol }} @endif{{ $usuario->name }}@if ($rol), {{ $rol }}@endif: configuración y sesión</span>
         <span aria-hidden="true"
-              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-marca-500 text-xs font-bold tracking-wide text-white">
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accion text-xs font-bold tracking-wide text-white">
             {{ $iniciales }}
         </span>
         {{-- Se trunca por CSS y nunca en el servidor (cortar el nombre daría

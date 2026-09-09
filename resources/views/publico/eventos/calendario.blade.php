@@ -113,7 +113,7 @@
                                     @if ($dia->isToday()) aria-current="date" @endif>
                                     <span @class([
                                         'inline-flex h-6 w-6 items-center justify-center rounded-full text-xs',
-                                        'bg-marca-500 font-semibold text-white' => $dia->isToday(),
+                                        'bg-accion font-semibold text-white' => $dia->isToday(),
                                         'text-tinta' => ! $dia->isToday() && $dia->month === $mes->month,
                                         'text-apagado' => ! $dia->isToday() && $dia->month !== $mes->month,
                                     ])>{{ $dia->day }}</span>

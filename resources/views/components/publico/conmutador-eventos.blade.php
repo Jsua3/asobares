@@ -59,7 +59,7 @@
         <a href="{{ $segmento['url'] }}"
            @class([
                'pulsable inline-flex min-h-11 items-center rounded-lg px-5 text-sm',
-               'bg-marca-500 font-medium text-white' => $activo === $clave,
+               'bg-accion font-medium text-white' => $activo === $clave,
                'text-tenue hover:text-fuerte' => $activo !== $clave,
            ])
            {{-- El nombre de transición viaja con la pastilla roja, así que al

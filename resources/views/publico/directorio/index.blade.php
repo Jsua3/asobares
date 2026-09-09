@@ -94,7 +94,7 @@
                         <a href="{{ request()->fullUrlWithQuery(['vista' => $clave, 'page' => null]) }}"
                            @class([
                                'pulsable inline-flex min-h-11 items-center rounded-lg px-4 text-sm',
-                               'bg-marca-500 font-medium text-white' => $vista === $clave,
+                               'bg-accion font-medium text-white' => $vista === $clave,
                                'text-tenue hover:text-fuerte' => $vista !== $clave,
                            ])
                            @if ($vista === $clave) aria-current="true" @endif>

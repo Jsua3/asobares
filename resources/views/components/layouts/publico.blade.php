@@ -216,7 +216,7 @@
      dirección de la barra móvil leería como un gesto. --}}
 <body class="min-h-svh bg-fondo text-tinta antialiased">
     <a href="#contenido"
-       class="pulsable sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:flex focus:min-h-11 focus:items-center focus:rounded-lg focus:bg-marca-500 focus:px-4 focus:py-2 focus:text-white">
+       class="pulsable sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:flex focus:min-h-11 focus:items-center focus:rounded-lg focus:bg-accion focus:px-4 focus:py-2 focus:text-white">
         Saltar al contenido
     </a>
 

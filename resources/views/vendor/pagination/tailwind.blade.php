@@ -31,7 +31,7 @@
      */
     $enlace = "{$pastilla} pulsable bg-superficie text-tenue hover:bg-superficie-alta hover:text-fuerte";
     $inerte = "{$pastilla} bg-superficie text-apagado cursor-not-allowed";
-    $actual = "{$pastilla} bg-marca-500 text-white";
+    $actual = "{$pastilla} bg-accion text-white";
 @endphp
 
 @if ($paginator->hasPages())

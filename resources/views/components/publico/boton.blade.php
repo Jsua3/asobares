@@ -31,7 +31,7 @@
         // portador `.contorno-claro` de app.css y no en utilidades: el blanco
         // fijo no sigue al tema y la guardia de tema lo prohíbe aquí.
         'contorno-claro' => 'border contorno-claro',
-        default => 'cta-vivo bg-marca-500 text-white hover:bg-marca-600',
+        default => 'cta-vivo bg-accion text-white hover:bg-accion-fuerte',
     };
 @endphp
 
