@@ -5,10 +5,19 @@
 
     <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
 
-        {{-- Filtros --}}
+        {{-- Filtros. Sin fichas publicadas no hay nada que filtrar y la caja
+             sobra: prometía cortar algo cuando no hay nada que cortar. La
+             condición mira las OPCIONES y no las fichas de la página, para que
+             el formulario siga en pie cuando un filtro deja la lista vacía, que
+             es cuando hace falta para volver atrás. --}}
+        @if (filled($tipos) || $generos->isNotEmpty())
         <form method="GET" action="{{ route('artistas.index') }}" class="revelar tarjeta grid gap-4 p-5 sm:grid-cols-3" data-revelar>
+            {{-- Los tipos los arma el controlador con los que de verdad tienen
+                 ficha publicada. Antes se recorría el enum entero desde aquí, y
+                 el desplegable de al lado —que sí se deriva— dejaba el defecto a
+                 la vista dentro del mismo formulario. --}}
             <x-publico.campo nombre="tipo" etiqueta="Tipo" tipo="select" :valor="$filtros['tipo'] ?? null"
-                             :opciones="['' => 'Todos'] + collect(\App\Enums\TipoArtista::cases())->mapWithKeys(fn ($t) => [$t->value => $t->getLabel()])->all()" />
+                             :opciones="['' => 'Todos'] + collect($tipos)->mapWithKeys(fn ($t) => [$t->value => $t->getLabel()])->all()" />
 
             <x-publico.campo nombre="genero" etiqueta="Género musical" tipo="select" :valor="$filtros['genero'] ?? null"
                              :opciones="['' => 'Todos los géneros'] + $generos->mapWithKeys(fn ($g) => [$g => $g])->all()" />
@@ -23,11 +32,23 @@
                 @endif
             </div>
         </form>
+        @endif
 
         @if ($artistas->isEmpty())
             <div class="revelar tarjeta mt-8 p-12 text-center" data-revelar>
-                <p class="font-display text-lg font-semibold">No hay artistas con ese filtro</p>
-                <p class="mt-2 text-sm text-tenue">Prueba con otro género o tipo.</p>
+                {{-- Los dos casos son distintos y decían lo mismo. Sin ninguna
+                     ficha publicada —el estado de producción hoy— el aviso
+                     hablaba de «ese filtro» sin que hubiera filtro, y mandaba a
+                     probar otro género cuando no hay ninguno que funcione. --}}
+                @if (array_filter($filtros ?? []))
+                    <p class="font-display text-lg font-semibold">No hay artistas con ese filtro</p>
+                    <p class="mt-2 text-sm text-tenue">Prueba con otro género o tipo.</p>
+                @else
+                    <p class="font-display text-lg font-semibold">Todavía no hay artistas publicados</p>
+                    <p class="mt-2 text-sm text-tenue">
+                        Si eres músico, DJ o artista del Quindío, inscríbete y la secretaría revisa tu ficha.
+                    </p>
+                @endif
             </div>
         @else
             <div class="revelar mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-revelar>
