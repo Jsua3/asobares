@@ -521,12 +521,13 @@ class MovimientoTest extends TestCase
         $this->assertStringContainsString('Enviar solicitud', $primaria);
         $this->assertStringContainsString('<button', $primaria);
         $this->assertStringContainsString('type="submit"', $primaria);
-        // `bg-accion` y ya no `bg-marca-500`: Pub Red puro con rótulo blanco
-        // daba 3,86:1, por debajo del 4,5:1 de RNF-12. El relleno de los
-        // botones pasó a marca 600 el 9 sep 2026, y quien lo vigila es
-        // `ContrasteDelBotonTest`. Aquí solo se afirma que el componente
-        // sigue emitiendo el relleno de acción.
-        $this->assertStringContainsString('bg-accion', $primaria);
+        // `cta-vivo` y ya no una utilidad de fondo. Dos cambios del 9 sep 2026
+        // pasaron por aquí: Pub Red puro con rótulo blanco daba 3,86:1 y el
+        // relleno se fue a marca 600 (`ContrasteDelBotonTest`), y después ese
+        // relleno salió del marcado entero para poder vidriarse al pulsar
+        // (`VidriadoDelBotonTest`). Aquí solo se afirma que el componente
+        // sigue emitiendo el portador del botón lleno.
+        $this->assertStringContainsString('cta-vivo', $primaria);
         $this->assertStringContainsString('pulsable', $primaria);
 
         $contorno = Blade::render(
@@ -536,7 +537,7 @@ class MovimientoTest extends TestCase
         $this->assertStringContainsString('<a', $contorno);
         $this->assertStringContainsString('href="/directorio"', $contorno);
         $this->assertStringContainsString('border-linea-fuerte', $contorno);
-        $this->assertStringNotContainsString('bg-accion', $contorno);
+        $this->assertStringNotContainsString('cta-vivo', $contorno);
 
         // El contorno sobre fondo oscuro (la portada a pantalla completa):
         // tinta sobre video negro era un botón invisible. Rotura: quitar la
@@ -553,7 +554,7 @@ class MovimientoTest extends TestCase
         $this->assertStringNotContainsString('text-tinta', $claro);
         $this->assertStringNotContainsString('border-linea-fuerte', $claro);
         $this->assertStringNotContainsString('-white', $claro);
-        $this->assertStringNotContainsString('bg-accion', $claro);
+        $this->assertStringNotContainsString('cta-vivo', $claro);
 
         $css = File::get(resource_path('css/app.css'));
         $this->assertMatchesRegularExpression('/\.contorno-claro \{\s*color: white;\s*border-color: rgb\(255 255 255 \/ 0\.4\);/', $css, 'el portador del contorno claro vive en app.css');
@@ -584,7 +585,7 @@ class MovimientoTest extends TestCase
 
         $this->assertStringContainsString('w-full', $html);
         $this->assertStringContainsString('sm:w-auto', $html);
-        $this->assertStringContainsString('bg-accion', $html);
+        $this->assertStringContainsString('cta-vivo', $html);
     }
 
     /**

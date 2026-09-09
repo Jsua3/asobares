@@ -1292,14 +1292,101 @@
         transition: transform var(--duracion-entrada) var(--ease-out);
     }
 
+    /*
+     * El botón lleno de la marca: «Afíliate», «Enviar solicitud», «Explora la
+     * noche». Al pulsarlo se VIDRIA — el relleno se retira y deja ver lo que
+     * hay detrás, desenfocado y con la saturación subida.
+     *
+     * El relleno vive AQUÍ y ya no en una utilidad `bg-*` del marcado, por la
+     * misma razón por la que `.contorno-claro` vive aquí desde el 31 de agosto:
+     * en Tailwind 4 una utilidad de `@layer utilities` gana siempre a
+     * `@layer components`, así que un `bg-accion` en la plantilla pisaría este
+     * fondo y el vidriado no se vería nunca.
+     *
+     * La asimetría es el truco entero: la vuelta tarda 280 ms y la ida 90. Un
+     * líquido al que apartas huye deprisa y regresa despacio; con las dos
+     * duraciones iguales esto parpadea.
+     *
+     * El relleno va en una CAPA propia y no en el fondo del botón, y el cambio
+     * de estado es un `background-color` de toda la vida.
+     *
+     * El primer intento derivaba fondo, tinta y filo de una propiedad
+     * registrada (`@property --vidriado`) con `color-mix(... calc(var() *
+     * 100%) ...)`. Compila, pero **Lightning CSS lo pliega**: en el CSS
+     * servido el `color-mix` salía convertido en su primer color a secas, de
+     * modo que el rótulo se quedaba pintado con la tinta del estado pulsado
+     * SIEMPRE --rojo oscuro sobre rojo, 1,89:1-- y el filo del canto igual.
+     * Se vio comprobando el archivo construido, no el fuente.
+     *
+     * Esto no usa `color-mix`, ni `calc()` dentro de un color, ni propiedades
+     * registradas: dos capas y transiciones de las que el navegador lleva
+     * animando quince años.
+     */
     .cta-vivo {
+        position: relative;
+        isolation: isolate;
+        color: #fff;
+        background-color: transparent;
+        -webkit-backdrop-filter: blur(0) saturate(100%);
+        backdrop-filter: blur(0) saturate(100%);
         box-shadow: 0 0 0 0 transparent;
         transition:
             transform var(--duracion-instante) var(--ease-out),
-            color var(--duracion-boton) var(--ease-color),
-            background-color var(--duracion-boton) var(--ease-color),
-            border-color var(--duracion-boton) var(--ease-color),
+            backdrop-filter var(--duracion-vidriado-vuelta) var(--ease-out),
             box-shadow var(--duracion-boton) var(--ease-out);
+    }
+
+    /*
+     * La capa que se retira. `z-index: -1` con `isolation: isolate` en el
+     * portador la deja bajo el rótulo y dentro del botón, sin escaparse al
+     * contexto de apilamiento de la página.
+     *
+     * Va detrás del elemento, así que NO forma parte del fondo que
+     * `backdrop-filter` desenfoca: lo que se desenfoca es la página, y este
+     * tinte se pinta encima. Ese orden es lo que hace el sándwich de cristal.
+     */
+    .cta-vivo::before {
+        content: '';
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        background-color: var(--asb-accion);
+        box-shadow: inset 0 0 0 1px transparent;
+        transition:
+            background-color var(--duracion-vidriado-vuelta) var(--ease-color),
+            box-shadow var(--duracion-vidriado-vuelta) var(--ease-color);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .cta-vivo:hover::before {
+            background-color: var(--asb-accion-fuerte);
+        }
+    }
+
+    /*
+     * Se vidria al pulsar, y la ida es más rápida que la vuelta: 90 ms para
+     * retirarse y 280 para volver. Un líquido al que apartas huye deprisa y
+     * regresa despacio; con las dos duraciones iguales esto parpadea.
+     *
+     * La duración de `transform` la sigue mandando `.pulsable:active`, que la
+     * pone a 0 ms: cada regla nombra sus propiedades y no se pisan.
+     */
+    .cta-vivo:active {
+        -webkit-backdrop-filter: blur(var(--asb-desenfoque-vidriado)) saturate(190%);
+        backdrop-filter: blur(var(--asb-desenfoque-vidriado)) saturate(190%);
+        transition-duration:
+            var(--duracion-instante),
+            var(--duracion-vidriado-ida),
+            var(--duracion-boton);
+    }
+
+    .cta-vivo:active::before {
+        background-color: var(--asb-vidrio-boton);
+        /* Sólido no se ve el canto; cristal sin filo no se lee como material. */
+        box-shadow: inset 0 0 0 1px var(--asb-filo-vidriado);
+        transition-duration: var(--duracion-vidriado-ida);
     }
 
     .video-marquesina {

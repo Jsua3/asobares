@@ -31,7 +31,12 @@
         // portador `.contorno-claro` de app.css y no en utilidades: el blanco
         // fijo no sigue al tema y la guardia de tema lo prohíbe aquí.
         'contorno-claro' => 'border contorno-claro',
-        default => 'cta-vivo bg-accion text-white hover:bg-accion-fuerte',
+        // El relleno, el hover y la tinta viven en `.cta-vivo` (app.css) y ya no
+        // en utilidades, por lo mismo que `contorno-claro`: al pulsar el botón
+        // se vidria —el relleno se retira y deja ver lo de detrás— y eso pide un
+        // fondo que dependa del estado. Una utilidad `bg-*` de
+        // `@layer utilities` gana siempre a `@layer components` y lo pisaría.
+        default => 'cta-vivo text-white',
     };
 @endphp
 

@@ -348,7 +348,12 @@
                     portador y con ella moría la duración cero de su `:active`.
                     Se nombra y no se pega porque la guardia lee este archivo
                     crudo, comentarios incluidos. --}}
-               class="pulsable cta-vivo relative rounded-lg bg-accion px-4 py-1.5 text-sm font-semibold text-white after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] hover:bg-accion-fuerte">
+               {{-- Sin `bg-*` ni `hover:bg-*`: el relleno lo pone `.cta-vivo`
+                    en app.css, porque al pulsar se vidria y el fondo depende de
+                    `--vidriado`. Una utilidad los pisaría. `relative` tampoco
+                    hace falta ya —el portador lo declara— pero se queda porque
+                    el ::after del área pulsable lo necesitaba antes que él. --}}
+               class="pulsable cta-vivo relative rounded-lg px-4 py-1.5 text-sm font-semibold after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-['']">
                 Afíliate
             </a>
             @endguest
