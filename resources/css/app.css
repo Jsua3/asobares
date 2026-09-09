@@ -1194,6 +1194,36 @@
         background-size: 14px 14px;
     }
 
+    /*
+     * El hueco de una foto que todavía no existe.
+     *
+     * Repite en CSS el dibujo que `GeneradorImagen` compone en PHP para las
+     * portadas del demo: diagonales grises y el monograma centrado. El gris es
+     * el MISMO --#747474-- y por el mismo motivo: da 3,7:1 tanto sobre la
+     * superficie del tema claro como sobre la del oscuro, así que una sola
+     * receta sirve para los dos y el hueco nunca desaparece ni deslumbra.
+     *
+     * Se dibuja con gradientes y no con un archivo porque aquí el tamaño es
+     * variable --un banner de hero y una tarjeta cuadrada usan el mismo
+     * portador-- y un PNG estirado enseñaría las diagonales deformadas.
+     */
+    .hueco-foto {
+        display: grid;
+        place-items: center;
+        background-color: var(--asb-superficie-alta);
+        background-image: repeating-linear-gradient(
+            135deg,
+            rgb(116 116 116 / 0.32) 0 2px,
+            transparent 2px 14px
+        );
+    }
+
+    .hueco-foto__marca {
+        width: clamp(3rem, 14%, 7rem);
+        height: auto;
+        opacity: 0.55;
+    }
+
     /* Antetitulo en versalitas muy espaciadas, como en las piezas del gremio. */
     .antetitulo {
         font-weight: 500;

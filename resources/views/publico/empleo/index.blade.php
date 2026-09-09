@@ -2,6 +2,11 @@
                    :descripcion="ajuste('seo_empleo_descripcion', 'Vacantes de bartender, chef, mesero y administrador en bares y gastrobares del Quindío. Publican solo los establecimientos asociados.')">
 
     <x-publico.hero :titulo="ajuste('empleo_titulo')" :subtitulo="ajuste('empleo_intro')" compacto atmosfera>
+        {{-- Hueco de foto de cabecera: marcador hoy, `empleo_foto` cuando llegue. --}}
+        <x-slot:medio>
+            <x-publico.hueco-foto :foto="ajuste('empleo_foto', null)" />
+        </x-slot:medio>
+
         <div class="mt-7 flex flex-col gap-3 sm:flex-row">
             <x-publico.boton href="#perfil">
                 {{ ajuste('empleo_cta_perfil', 'Déjanos tu perfil') }}

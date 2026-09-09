@@ -1,7 +1,12 @@
 <x-layouts.publico :titulo="ajuste('seo_proveedores_titulo', ajuste('proveedores_titulo').' — ASOBARES Quindío')"
                    :descripcion="ajuste('seo_proveedores_descripcion', 'Bolsa de proveedores verificados para bares y gastrobares del Quindío: un beneficio para los establecimientos afiliados a ASOBARES.')">
 
-    <x-publico.hero :titulo="ajuste('proveedores_titulo')" :subtitulo="ajuste('proveedores_intro')" compacto atmosfera />
+    {{-- Hueco de foto de cabecera: marcador hoy, `proveedores_foto` cuando llegue. --}}
+    <x-publico.hero :titulo="ajuste('proveedores_titulo')" :subtitulo="ajuste('proveedores_intro')" compacto atmosfera>
+        <x-slot:medio>
+            <x-publico.hueco-foto :foto="ajuste('proveedores_foto', null)" />
+        </x-slot:medio>
+    </x-publico.hero>
 
     <div class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
 
