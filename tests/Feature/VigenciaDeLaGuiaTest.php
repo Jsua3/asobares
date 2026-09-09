@@ -296,6 +296,11 @@ class VigenciaDeLaGuiaTest extends TestCase
      */
     public function test_la_guia_de_un_municipio_apagado_no_se_indexa(): void
     {
+        // Con el sitio ABIERTO, por lo mismo que en `CalendarioDeEventosTest`:
+        // desde el 9 sep 2026 el sitio entero nace `noindex` mientras no haya
+        // dominio propio (D-08), y esta prueba mide la regla POR PÁGINA.
+        config(['sitio.indexable' => true]);
+
         $vivo = Municipio::factory()->create();
         $apagado = Municipio::factory()->create();
 
