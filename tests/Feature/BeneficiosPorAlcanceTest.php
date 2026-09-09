@@ -72,6 +72,46 @@ class BeneficiosPorAlcanceTest extends TestCase
         );
     }
 
+    /**
+     * El sello puede cambiar de forma —el 9 de septiembre de 2026 dejó de ser
+     * una píldora con borde y pasó a `antetitulo`, la convención del sitio para
+     * rótulos pequeños— pero no puede salirse del sistema de color por su
+     * cuenta. Esta guarda fija que siga usando `text-apagado`, que es el token
+     * del texto tenue de todo el sitio.
+     *
+     * ⚠️ **Y `text-apagado` no cumple hoy en tema oscuro.** Medido en Chromium
+     * el 9 de septiembre de 2026 sobre la portada, con los fondos que resuelven
+     * a un color sólido: en claro el sello da **7,66:1** y ninguno de los 17
+     * elementos medibles baja de 6,94; en oscuro el sello da **4,32:1** y
+     * **quince de esos diecisiete quedan por debajo del 4,5:1** que exige
+     * RNF-12 para texto normal. El sello no es la causa ni la excepción: da
+     * exactamente lo mismo que el resto del texto tenue.
+     *
+     * Por eso esta prueba afirma sobre el TOKEN y no sobre un número: cambiar el
+     * color aquí escondería el problema en un componente en vez de arreglarlo
+     * donde vive, que es la definición del token en `resources/css/app.css`.
+     * Eso es una decisión de la capa visual y cruza todas las páginas, así que
+     * queda reportado, no parcheado desde aquí.
+     *
+     * (El 4,53:1 que cita el expediente del 8 de septiembre se midió contra el
+     * fondo de una tarjeta, no contra el de la página.)
+     */
+    public function test_el_sello_conserva_el_token_de_color_que_se_midio(): void
+    {
+        $beneficio = Beneficio::factory()->create(['alcance' => Alcance::Departamental]);
+
+        $contenido = $this->get(route('afiliate'))->assertOk()->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/class="[^"]*'.self::SELLO.'[^"]*text-apagado[^"]*"/u',
+            $contenido,
+            'El sello de alcance perdió `text-apagado`, que es el token cuyo contraste (4,53:1) se midió. '
+            .'Si se cambia el color hay que volver a medirlo, no suponerlo.'
+        );
+
+        $this->assertNotNull($beneficio->etiquetaDeAlcance());
+    }
+
     public function test_un_beneficio_nacional_se_anuncia_como_de_asobares_colombia(): void
     {
         Beneficio::factory()->create(['titulo' => 'Convenio Nacional', 'alcance' => Alcance::Nacional]);
