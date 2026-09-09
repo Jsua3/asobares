@@ -123,6 +123,21 @@
          x-show="abierto"
          x-cloak
          @if ($esPestana)
+             {{-- Se cierra con el dedo (9 sep 2026). La referencia es lo que
+                  enciende el arrastre: en escritorio no se declara y todos los
+                  métodos de `app.js` quedan inertes.
+
+                  El clic va en fase de CAPTURA para poder tragárselo antes de
+                  que llegue a la fila: soltar encima de un enlace después de
+                  empujar la hoja no puede navegar. --}}
+             x-ref="hoja"
+             x-on:pointerdown="tomarLaHoja($event)"
+             x-on:pointermove="moverLaHoja($event)"
+             x-on:pointerup="soltarLaHoja($event)"
+             x-on:pointercancel="soltarLaHoja($event)"
+             x-on:click.capture="tragarElClicDelArrastre($event)"
+         @endif
+         @if ($esPestana)
              {{-- Sube desde la barra con el resorte vivo de los popovers y sale
                   por el cajón: la receta de #popover-tema con el signo del
                   desplazamiento invertido. Cuelga del módulo inferior, que es

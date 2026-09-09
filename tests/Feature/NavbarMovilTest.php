@@ -555,17 +555,52 @@ class NavbarMovilTest extends TestCase
         }
     }
 
-    /** Rotura: sacar `overflow-y: auto` de la media de apaisado. */
-    public function test_la_hoja_no_bloquea_el_gesto_en_vertical(): void
+    /**
+     * En vertical la hoja SE ARRASTRA, y para eso tiene que quedarse el gesto.
+     *
+     * ⚠️ Esta prueba afirmaba lo contrario hasta el 9 de septiembre de 2026.
+     * El contrato de entonces era «en vertical desplazarse es cerrar»: un gesto
+     * vertical que empezaba sobre la hoja desplazaba la página, y ese
+     * desplazamiento la cerraba de rebote. Por eso `touch-action` estaba
+     * PROHIBIDO aquí.
+     *
+     * El contrato nuevo es manipulación directa: la hoja sigue al dedo 1:1,
+     * resiste con goma hacia arriba y al soltar proyecta el momento para
+     * decidir si se va. El navegador solo cede un gesto vertical con
+     * `touch-action: none`, así que lo que antes se prohibía ahora se exige.
+     *
+     * Lo que NO cambia, y se sigue comprobando: en vertical la hoja no es
+     * contenedor de scroll, y el cierre por desplazamiento de la PÁGINA sigue
+     * existiendo para los gestos que empiezan fuera de ella.
+     *
+     * Roturas: quitar `touch-action: none` de `.hoja-inferior` (la hoja deja de
+     * poder arrastrarse y el navegador se lleva el gesto); sacar
+     * `overflow-y: auto` de la media de apaisado; borrar `cerrarSiSeDesplaza`.
+     */
+    public function test_la_hoja_se_queda_el_gesto_vertical_para_poder_arrastrarse(): void
     {
         $css = File::get(resource_path('css/app.css'));
         $movil = $this->bloque($css, '@media (max-width: 63.999rem)', 2);
         $apaisado = $this->bloque($movil, '@media (orientation: landscape) and (max-height: 30rem)');
 
         $hoja = $this->regla($movil, '.hoja-inferior');
-        foreach (['overflow-y', 'overscroll-behavior', 'touch-action'] as $prohibido) {
-            $this->assertStringNotContainsString($prohibido, $hoja, 'en vertical desplazarse es cerrar');
+
+        $this->assertStringContainsString(
+            'touch-action: none;',
+            $hoja,
+            'Sin esto el navegador se queda el gesto vertical y la hoja no se puede arrastrar.'
+        );
+
+        // Sigue sin ser contenedor de scroll en vertical: lo que se mueve es la
+        // hoja entera, no su contenido.
+        foreach (['overflow-y', 'overscroll-behavior'] as $prohibido) {
+            $this->assertStringNotContainsString($prohibido, $hoja, 'en vertical la hoja no desplaza por dentro');
         }
+
+        // Y el cierre por desplazamiento de la página no se ha perdido: es lo
+        // que cubre los gestos que empiezan fuera de la hoja.
+        $this->assertStringContainsString('cerrarSiSeDesplaza() {', File::get(resource_path('js/app.js')));
+
         $this->assertStringContainsString('touch-action: pan-y pinch-zoom;', $this->regla($apaisado, '.hoja-flotante'));
         $this->assertStringContainsString('overscroll-behavior: contain;', $this->regla($apaisado, '.hoja-flotante'));
 

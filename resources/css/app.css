@@ -963,10 +963,27 @@
                 opacity var(--duracion-salida) var(--ease-color);
         }
 
-        /* La hoja que sube: solo el resplandor al canto que mira a la barra. En
-           vertical NO es contenedor de scroll: desplazarse es cerrar. */
+        /*
+         * La hoja que sube: solo el resplandor al canto que mira a la barra. En
+         * vertical NO es contenedor de scroll.
+         *
+         * `touch-action: none` desde el 9 sep 2026, y cambia una decisión
+         * anterior. Antes, un gesto vertical que empezaba sobre la hoja
+         * desplazaba la página y eso la cerraba de rebote. Ahora la hoja SE
+         * ARRASTRA: sigue al dedo, resiste con goma hacia arriba y al soltar
+         * proyecta el momento para decidir si se va. Para eso tiene que quedarse
+         * el gesto, y el navegador solo lo cede con `none`.
+         *
+         * No se pierde el cierre por desplazamiento: `cerrarSiSeDesplaza()`
+         * sigue cerrando cuando la página se mueve por un gesto hecho FUERA de
+         * la hoja, que es de donde viene casi siempre.
+         *
+         * En apaisado no aplica: allí la hoja sí desplaza por dentro y su
+         * `touch-action: pan-y pinch-zoom` está más abajo, en su propia media.
+         */
         .hoja-inferior {
             background-image: radial-gradient(16rem circle at 18% 100%, rgb(238 65 55 / 0.09), transparent 54%);
+            touch-action: none;
         }
 
         /* Apartado para lo fijo abajo (el pie es hermano de main) y para la
