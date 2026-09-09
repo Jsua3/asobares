@@ -284,6 +284,33 @@ class SolicitudAfiliacionTest extends TestCase
         Mail::assertSent(BienvenidaAsociado::class, fn (BienvenidaAsociado $correo): bool => $correo->hasTo('sandra@ejemplo.test'));
     }
 
+    public function test_no_se_puede_aprobar_desde_edicion_ordinaria(): void
+    {
+        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
+
+        $solicitud = SolicitudAfiliacion::factory()->create([
+            'municipio_id' => $this->municipio->id,
+            'categoria_id' => $this->categoria->id,
+            'estado' => EstadoSolicitudAfiliacion::Pendiente,
+        ]);
+
+        Livewire::test(EditSolicitudAfiliacion::class, ['record' => $solicitud->getRouteKey()])
+            ->fillForm([
+                'estado' => EstadoSolicitudAfiliacion::Aprobada->value,
+            ])
+            ->call('save')
+            ->assertHasErrors(['data.estado']);
+
+        $solicitud = $solicitud->fresh();
+
+        $this->assertSame(EstadoSolicitudAfiliacion::Pendiente, $solicitud->estado);
+        $this->assertNull($solicitud->asociado_id);
+        $this->assertNull($solicitud->user_id);
+        $this->assertNull($solicitud->aprobado_at);
+        $this->assertSame(0, Asociado::count());
+        $this->assertSame(1, User::count());
+    }
+
     public function test_aprobar_dos_veces_no_crea_duplicados(): void
     {
         Mail::fake();

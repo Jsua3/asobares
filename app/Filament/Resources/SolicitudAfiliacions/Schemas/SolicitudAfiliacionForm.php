@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SolicitudAfiliacions\Schemas;
 
 use App\Enums\EstadoSolicitudAfiliacion;
+use App\Models\SolicitudAfiliacion;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -59,9 +60,10 @@ class SolicitudAfiliacionForm
                     ->schema([
                         Select::make('estado')
                             ->label('Estado')
-                            ->options(EstadoSolicitudAfiliacion::class)
+                            ->options(fn (?SolicitudAfiliacion $record): array => self::estadosEditables($record))
                             ->required()
-                            ->native(false),
+                            ->native(false)
+                            ->disabled(fn (?SolicitudAfiliacion $record): bool => self::estaResuelta($record)),
                         DateTimePicker::make('visita_programada_at')
                             ->label('Visita programada')
                             ->native(false),
@@ -99,5 +101,31 @@ class SolicitudAfiliacionForm
                             ->disabled(),
                     ]),
             ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function estadosEditables(?SolicitudAfiliacion $record): array
+    {
+        return collect(EstadoSolicitudAfiliacion::cases())
+            ->filter(fn (EstadoSolicitudAfiliacion $estado): bool => ! self::esEstadoFinal($estado)
+                || $record?->estado === $estado)
+            ->mapWithKeys(fn (EstadoSolicitudAfiliacion $estado): array => [$estado->value => $estado->getLabel()])
+            ->all();
+    }
+
+    private static function estaResuelta(?SolicitudAfiliacion $record): bool
+    {
+        return $record instanceof SolicitudAfiliacion
+            && self::esEstadoFinal($record->estado);
+    }
+
+    private static function esEstadoFinal(EstadoSolicitudAfiliacion $estado): bool
+    {
+        return in_array($estado, [
+            EstadoSolicitudAfiliacion::Aprobada,
+            EstadoSolicitudAfiliacion::Rechazada,
+        ], true);
     }
 }
