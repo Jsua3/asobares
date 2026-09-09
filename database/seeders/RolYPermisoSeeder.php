@@ -16,11 +16,18 @@ use Spatie\Permission\PermissionRegistrar;
  */
 class RolYPermisoSeeder extends Seeder
 {
-    /** Contenido sujeto al flujo de aprobación: tiene permiso `publicar_`. */
+    /** Contenido sujeto al flujo EsPublicable: tiene permiso `publicar_`. */
     public const array PUBLICABLES = [
         'asociado', 'evento', 'noticia', 'requisito', 'iniciativa',
-        'vacante', 'artista', 'proveedor', 'aliado', 'publicidad',
+        'vacante', 'artista', 'proveedor', 'aliado',
     ];
+
+    /**
+     * Pauta interna: flujo propio (pago → aprobación) fuera de EsPublicable.
+     * Comparte los cinco permisos CRUD+publicar, pero no entra en la cola
+     * genérica ni en FlujoDeAprobacionObserver.
+     */
+    public const array PAUTA_INTERNA = ['publicidad'];
 
     /** Catálogos sin flujo editorial: quedan vivos al guardarlos. */
     public const array CATALOGOS = ['beneficio', 'municipio', 'categoria'];
@@ -41,7 +48,7 @@ class RolYPermisoSeeder extends Seeder
 
         $permisos = [];
 
-        foreach (self::PUBLICABLES as $recurso) {
+        foreach (array_merge(self::PUBLICABLES, self::PAUTA_INTERNA) as $recurso) {
             foreach (['ver', 'crear', 'editar', 'eliminar', 'publicar'] as $accion) {
                 $permisos[] = "{$accion}_{$recurso}";
             }
