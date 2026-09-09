@@ -19,7 +19,10 @@ use App\Pagos\ResultadoDePago;
 use App\Services\RegistroDePagos;
 use Database\Seeders\RolYPermisoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\URL;
 use InvalidArgumentException;
 use RuntimeException;
 use Tests\TestCase;
@@ -430,6 +433,162 @@ class FlujoDePagoTest extends TestCase
             'BOLD_SANDBOX debe fallar cerrado: sin la variable no hay modo pruebas, '
             .'porque el modo pruebas es lo único que permite firmar con llave vacía.'
         );
+    }
+
+    public function test_bold_crea_un_link_con_payload_compatible_con_api_link_de_pagos(): void
+    {
+        URL::forceRootUrl('https://asobares.test');
+        URL::forceScheme('https');
+
+        $transaccion = Transaccion::create([
+            'referencia' => Transaccion::generarReferencia(),
+            'concepto' => ConceptoTransaccion::Mensualidad,
+            'monto' => 150000,
+            'moneda' => 'COP',
+            'estado' => EstadoTransaccion::Pendiente,
+            'metodo' => MetodoPago::Otro,
+        ]);
+
+        Http::fake([
+            'https://integrations.api.bold.co/online/link/v1' => Http::response([
+                'payload' => [
+                    'payment_link' => 'LNK_H7S4xxx',
+                    'url' => 'https://checkout.bold.co/LNK_H7S4xxx',
+                ],
+                'errors' => [],
+            ]),
+        ]);
+
+        $url = (new PasarelaBold(
+            'llave-api-de-prueba',
+            'secreto-webhook-de-prueba',
+            'https://integrations.api.bold.co',
+            false
+        ))->crearEnlaceDePago($transaccion);
+
+        $this->assertSame('https://checkout.bold.co/LNK_H7S4xxx', $url);
+
+        Http::assertSentCount(1);
+
+        $solicitud = Http::recorded()->first()[0];
+        $datos = $solicitud->data();
+
+        $this->assertSame('POST', $solicitud->method());
+        $this->assertSame('https://integrations.api.bold.co/online/link/v1', $solicitud->url());
+        $this->assertSame(['x-api-key llave-api-de-prueba'], $solicitud->header('Authorization'));
+        $this->assertSame('CLOSE', $datos['amount_type']);
+        $this->assertSame('COP', $datos['amount']['currency']);
+        $this->assertSame(150000, $datos['amount']['total_amount']);
+        $this->assertSame(0, $datos['amount']['tip_amount']);
+        $this->assertSame('Mensualidad', $datos['description']);
+        $this->assertSame($transaccion->referencia, $datos['reference']);
+        $this->assertSame(route('pago.retorno', ['transaccion' => $transaccion->referencia]), $datos['callback_url']);
+        $this->assertStringStartsWith('https://', $datos['callback_url']);
+        $this->assertSame(['PSE', 'CREDIT_CARD'], $datos['payment_methods']);
+        $this->assertIsInt($datos['expiration_date']);
+
+        $payload = $transaccion->fresh()->payload;
+
+        $this->assertSame('LNK_H7S4xxx', $payload['bold_payment_link']);
+        $this->assertSame('https://checkout.bold.co/LNK_H7S4xxx', $payload['bold_checkout_url']);
+        $this->assertSame('LNK_H7S4xxx', $payload['bold_link']['payment_link']);
+        $this->assertSame($transaccion->referencia, $transaccion->fresh()->referencia);
+    }
+
+    public function test_bold_en_sandbox_local_permite_crear_link_sin_secret_de_webhook(): void
+    {
+        Http::fake([
+            'https://integrations.api.bold.co/online/link/v1' => Http::response([
+                'payload' => [
+                    'payment_link' => 'LNK_SANDBOX',
+                    'url' => 'https://checkout.bold.co/LNK_SANDBOX',
+                ],
+                'errors' => [],
+            ]),
+        ]);
+
+        $transaccion = Transaccion::create([
+            'referencia' => Transaccion::generarReferencia(),
+            'concepto' => ConceptoTransaccion::Evento,
+            'monto' => 30000,
+            'moneda' => 'COP',
+            'estado' => EstadoTransaccion::Pendiente,
+            'metodo' => MetodoPago::Otro,
+        ]);
+
+        $url = (new PasarelaBold('llave-api-de-prueba', '', 'https://integrations.api.bold.co', true))
+            ->crearEnlaceDePago($transaccion);
+
+        $this->assertSame('https://checkout.bold.co/LNK_SANDBOX', $url);
+    }
+
+    public function test_un_error_de_bold_no_aprueba_la_transaccion(): void
+    {
+        Http::fake([
+            'https://integrations.api.bold.co/online/link/v1' => Http::response(['errors' => ['Servicio no disponible']], 500),
+        ]);
+
+        $transaccion = Transaccion::create([
+            'referencia' => Transaccion::generarReferencia(),
+            'concepto' => ConceptoTransaccion::Mensualidad,
+            'monto' => 150000,
+            'moneda' => 'COP',
+            'estado' => EstadoTransaccion::Pendiente,
+            'metodo' => MetodoPago::Otro,
+        ]);
+
+        try {
+            (new PasarelaBold(
+                'llave-api-de-prueba',
+                'secreto-webhook-de-prueba',
+                'https://integrations.api.bold.co',
+                false
+            ))->crearEnlaceDePago($transaccion);
+
+            $this->fail('Bold debía rechazar la creación del enlace.');
+        } catch (RequestException) {
+            $this->assertSame(EstadoTransaccion::Pendiente, $transaccion->fresh()->estado);
+            $this->assertNull($transaccion->fresh()->payload);
+        }
+    }
+
+    public function test_el_webhook_de_bold_interpreta_card_web_como_tarjeta(): void
+    {
+        $transaccion = Transaccion::create([
+            'referencia' => Transaccion::generarReferencia(),
+            'concepto' => ConceptoTransaccion::Mensualidad,
+            'monto' => 150000,
+            'moneda' => 'COP',
+            'estado' => EstadoTransaccion::Pendiente,
+            'metodo' => MetodoPago::Otro,
+        ]);
+
+        $cuerpo = json_encode([
+            'id' => 'EVT_123',
+            'type' => 'SALE_APPROVED',
+            'data' => [
+                'payment_id' => 'PAY_456',
+                'bold_code' => 'BOLD_789',
+                'payment_method' => 'CARD_WEB',
+                'amount' => ['total' => 150000, 'currency' => 'COP'],
+                'metadata' => ['reference' => $transaccion->referencia],
+            ],
+        ]);
+
+        $resultado = (new PasarelaBold('llave-api', 'secreto-webhook', 'https://integrations.api.bold.co', false))
+            ->interpretarConfirmacion(Request::create('/webhooks/bold', 'POST', [], [], [], [
+                'CONTENT_TYPE' => 'application/json',
+            ], $cuerpo));
+
+        $this->assertNotNull($resultado);
+        $this->assertSame($transaccion->referencia, $resultado->referencia);
+        $this->assertSame(EstadoTransaccion::Aprobada, $resultado->estado);
+        $this->assertSame(MetodoPago::Tarjeta, $resultado->metodo);
+        $this->assertSame(150000.0, $resultado->monto);
+        $this->assertSame('COP', $resultado->moneda);
+        $this->assertSame('EVT_123', $resultado->payload['evento_id']);
+        $this->assertSame('PAY_456', $resultado->payload['payment_id']);
+        $this->assertSame('BOLD_789', $resultado->payload['bold_code']);
     }
 
     // --- Cerrojo del driver de pagos ---

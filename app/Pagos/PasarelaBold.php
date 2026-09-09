@@ -30,9 +30,15 @@ class PasarelaBold implements PasarelaDePago
      */
     public function crearEnlaceDePago(Transaccion $transaccion): string
     {
-        if ($this->apiKey === '' || $this->secret === '') {
+        if ($this->apiKey === '') {
             throw new RuntimeException(
-                'Bold está seleccionado como pasarela pero faltan BOLD_API_KEY y BOLD_SECRET en el .env.'
+                'Bold está seleccionado como pasarela pero falta BOLD_API_KEY en el .env.'
+            );
+        }
+
+        if ($this->secret === '' && ! ($this->sandbox && app()->environment('local', 'testing'))) {
+            throw new RuntimeException(
+                'Bold está seleccionado como pasarela pero falta BOLD_SECRET en el .env.'
             );
         }
 
@@ -45,6 +51,7 @@ class PasarelaBold implements PasarelaDePago
                 'amount_type' => 'CLOSE',
                 'amount' => [
                     'currency' => $transaccion->moneda,
+                    'tip_amount' => 0,
                     'total_amount' => (int) round((float) $transaccion->monto),
                 ],
                 'description' => $transaccion->concepto->getLabel(),
@@ -56,14 +63,19 @@ class PasarelaBold implements PasarelaDePago
 
         $respuesta->throw();
 
-        $url = $respuesta->json('payload.url');
+        $payload = $respuesta->json('payload');
+        $url = data_get($payload, 'url');
 
         if (! is_string($url) || $url === '') {
             throw new RuntimeException('Bold no devolvió una URL de pago utilizable.');
         }
 
+        $paymentLink = data_get($payload, 'payment_link');
+
         $transaccion->update(['payload' => array_merge($transaccion->payload ?? [], [
-            'bold_link' => $respuesta->json('payload'),
+            'bold_checkout_url' => $url,
+            'bold_link' => $payload,
+            'bold_payment_link' => is_string($paymentLink) && $paymentLink !== '' ? $paymentLink : null,
         ])]);
 
         return $url;
@@ -117,7 +129,7 @@ class PasarelaBold implements PasarelaDePago
 
         $metodo = match (strtoupper((string) data_get($datos, 'data.payment_method', ''))) {
             'PSE' => MetodoPago::Pse,
-            'CREDIT_CARD', 'DEBIT_CARD' => MetodoPago::Tarjeta,
+            'CARD', 'CARD_WEB', 'CREDIT_CARD', 'DEBIT_CARD' => MetodoPago::Tarjeta,
             default => MetodoPago::Otro,
         };
 
@@ -132,7 +144,14 @@ class PasarelaBold implements PasarelaDePago
             referencia: $referencia,
             estado: $estado,
             metodo: $metodo,
-            payload: ['pasarela' => 'bold', 'sandbox' => $this->sandbox, 'evento' => $datos],
+            payload: [
+                'pasarela' => 'bold',
+                'sandbox' => $this->sandbox,
+                'evento_id' => data_get($datos, 'id'),
+                'payment_id' => data_get($datos, 'data.payment_id'),
+                'bold_code' => data_get($datos, 'data.bold_code'),
+                'evento' => $datos,
+            ],
             monto: is_numeric($montoNotificado) ? (float) $montoNotificado : null,
             moneda: is_string($moneda = data_get($datos, 'data.amount.currency')) ? $moneda : null,
         );
