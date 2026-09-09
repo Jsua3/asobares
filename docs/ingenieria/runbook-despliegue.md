@@ -179,23 +179,43 @@ cloud instance:list --json
 ```
 
 Se lee `"usesScheduler"`. Medido el 9 de septiembre de 2026 en `production`: **`false`**. Las
-purgas llevaban sin correr desde el primer despliegue.
+purgas no habían corrido una sola vez desde el primer despliegue.
 
-**Cómo se enciende.** Por el panel, abriendo la tarjeta **App cluster** y activando el
-programador; o de una vez, que es más rápido y deja rastro en la terminal:
-
-```sh
-cloud instance:update App --uses-scheduler=true
-```
-
-⚠️ **Lo que pasa esa misma madrugada.** A las 03:30, 03:45 y 03:50 se ejecutan las tres purgas
-por primera vez, y **borran de verdad** todo lo que ya cumplió su plazo de retención. Es lo que
-tiene que pasar —y lo que la política publicada lleva prometiendo desde agosto— pero conviene
-saberlo antes y no descubrirlo. Para ver qué se llevarían por delante, sin borrar nada:
+⚠️ **Antes de encenderlo, mirar qué se llevaría la primera pasada.** A las 03:30, 03:45 y 03:50
+de la madrugada siguiente se ejecutan las tres purgas y **borran de verdad** lo que ya cumplió
+su plazo. Es lo que tiene que pasar —y lo que la política publicada lleva prometiendo desde
+agosto— pero se mira antes, no se descubre después:
 
 ```sh
-cloud command:run -n "php artisan bolsas:depurar --pretend"
+cloud command:run -n --cmd "php artisan bolsas:depurar --pretend"
+cloud command:run -n --cmd "php artisan mensajes:depurar --pretend"
+cloud command:run -n --cmd "php artisan inscripciones:depurar --pretend"
 ```
+
+> **El comando va en `--cmd`, no como argumento suelto.** `cloud command:run -n "php artisan …"`
+> —que es lo que decía este runbook hasta el 9 de septiembre de 2026— responde
+> `{"error":true,"message":"cmd is required. Provide --cmd option."}`. Se descubrió usándolo.
+
+**Cómo se enciende.** Por el panel, abriendo la tarjeta **App cluster** del diagrama de
+*Environment* y activando el programador; o de una vez, que es más rápido y deja rastro:
+
+```sh
+cloud instance:update App --uses-scheduler=true --force
+```
+
+**Comprobación inmediata de que el proceso vivo ve las tareas**, sin esperar a la madrugada:
+
+```sh
+cloud command:run -n --cmd "php artisan schedule:list --no-ansi"
+```
+
+Tienen que salir las tres con su `Next Due`.
+
+> ✅ **Encendido el 9 de septiembre de 2026, 13:52 UTC.** `usesScheduler` pasó a `true` y
+> `schedule:list` en producción devolvió las tres tareas. Los tres simulacros previos dieron
+> **0, 0 y 0**: la primera pasada no borra nada, porque el sitio lleva menos de un mes en
+> internet y ningún plazo de retención ha vencido todavía. La prueba de que corrieron se ve en
+> la **Bitácora** a partir del 10 de septiembre.
 
 **La comprobación de que quedó funcionando**, a las 24 horas: entrar al panel → **Bitácora** y
 buscar `Depuración de datos`. Los tres comandos escriben ahí cada vez que borran algo. *Ojo con

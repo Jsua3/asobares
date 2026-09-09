@@ -2313,3 +2313,20 @@ Lo que sí se comprobó contra un servidor corriendo, porque el sitio público s
 Cinco commits en `p1-auditoria-y-metricas`, ninguno empujado. Suite completa: **1.209 casos, 1.198 pasan, 11 omitidas, 0 fallos, 5.394 aserciones en 353 s** — de 1.147 a 1.209, sesenta y dos casos nuevos, todos vistos rojos antes y mutados después.
 
 El manual sube a 1.3 con lo que faltaba contar, y con un aviso en rojo arriba del todo: **sus once capturas son del 18 de agosto y el panel se rehizo el 7 y el 8 de septiembre**. Capacitar en la semana 8 sobre ese manual garantizaba que la secretaría no supiera que hay que aprobar los perfiles del banco, y que buscara en pantalla cosas que ya no están.
+
+### 47.10 Post scriptum: el Scheduler estaba apagado, y ahora se sabe con un número
+
+Unas horas después del cierre, Sua preguntó dónde se activaba. La ruta que esta misma sesión había escrito en el runbook —«Environment → Resources»— **estaba mal**: esa pestaña no existe en Laravel Cloud. Se salió de la duda con el CLI en vez de con más memoria:
+
+```
+cloud instance:list --json  →  "usesScheduler": false
+```
+
+**No es un recurso del entorno: es una propiedad de la instancia**, la tarjeta *App cluster* del diagrama. Y ese `false` convierte el hallazgo de la mañana en un hecho medido: las tres purgas de datos personales **no habían corrido una sola vez** desde el primer despliegue del 28 de agosto, mientras `/politica-de-datos` le prometía al titular que el borrado era automático.
+
+Se encendió con permiso de Sua, y en el orden que el propio runbook pedía: **primero los tres simulacros** —`0`, `0` y `0`, porque el sitio lleva menos de un mes y ningún plazo ha vencido—, después `instance:update App --uses-scheduler=true`, y por último `schedule:list` contra producción, que devolvió las tres tareas con su `Next Due`.
+
+Dos lecciones, y la segunda es la que vale:
+
+1. **`cloud command:run` quiere el comando en `--cmd`, no como argumento suelto.** La forma que el runbook llevaba escrita responde `{"error":true,"message":"cmd is required"}`. Se descubrió usándolo, que es la única manera de descubrir eso.
+2. **Un runbook que nadie ha ejecutado es una hipótesis.** Las dos correcciones de hoy —la ruta del panel y la firma del comando— llevaban ahí desde que se escribieron, con toda la confianza del mundo y sin que nadie las hubiera pasado por una terminal. La regla del proyecto de no citar cifras sin medirlas el mismo día vale igual para los procedimientos: **un paso que no se ha corrido no está verificado, por bien redactado que esté.**
