@@ -7,6 +7,7 @@ use App\Models\Asociado;
 use App\Models\Noticia;
 use App\Models\User;
 use App\Models\Vacante;
+use App\Panel\ColaDePendientes;
 use Database\Seeders\RolYPermisoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
@@ -99,7 +100,23 @@ class FlujoDeAprobacionTest extends TestCase
         $this->assertSame(EstadoPublicacion::Publicado, $asociado->fresh()->estado);
     }
 
-    public function test_enviar_a_revision_notifica_a_la_direccion(): void
+    /**
+     * ⚠️ Estas tres pruebas cambiaron de instrumento el 9 de septiembre de 2026,
+     * y no de intención.
+     *
+     * Afirmaban sobre `notifications()`, o sea sobre la campana del panel. Y la
+     * campana **se retiró el 7 de septiembre** (D-L22): `databaseNotifications()`
+     * quedó comentado en `AdminPanelProvider` porque la banda «Te está esperando»
+     * del tablero cuenta mejor lo mismo. Nadie retiró a quien escribía en ella,
+     * así que estas cuatro aserciones llevaban dos días en verde sobre algo que
+     * ningún usuario podía ver. Falso verde número trece.
+     *
+     * La intención --quien puede aprobar se entera, quien lo redactó no-- sigue
+     * intacta y ahora se afirma sobre la **cola de pendientes**, que es lo que de
+     * verdad se pinta. `Panel\AvisosQueSeVenTest` vigila que las dos mitades no
+     * se vuelvan a separar.
+     */
+    public function test_enviar_a_revision_le_aparece_a_la_direccion_en_su_cola(): void
     {
         $direccion = $this->crearUsuario(User::ROL_SUPER_ADMIN);
         $subadmin = $this->crearUsuario(User::ROL_SUBADMIN);
@@ -109,8 +126,8 @@ class FlujoDeAprobacionTest extends TestCase
 
         $this->assertSame(
             1,
-            $direccion->notifications()->count(),
-            'La dirección debe recibir una notificación de base de datos por cada envío a revisión.'
+            app(ColaDePendientes::class)->total($direccion),
+            'Lo enviado a revisión tiene que aparecerle a quien lo puede aprobar.'
         );
     }
 
@@ -134,8 +151,10 @@ class FlujoDeAprobacionTest extends TestCase
         Auth::login($duenio->fresh());
         Vacante::factory()->for($asociado)->pendiente()->create();
 
-        $this->assertSame(1, $secretaria->notifications()->count(), 'La secretaría modera las bolsas: tiene que enterarse.');
-        $this->assertSame(1, $direccion->notifications()->count());
+        $cola = app(ColaDePendientes::class);
+
+        $this->assertSame(1, $cola->total($secretaria), 'La secretaría modera las bolsas: tiene que verla en su cola.');
+        $this->assertSame(1, $cola->total($direccion));
     }
 
     public function test_una_noticia_pendiente_solo_avisa_a_la_direccion(): void
@@ -151,7 +170,13 @@ class FlujoDeAprobacionTest extends TestCase
             'estado' => EstadoPublicacion::Publicado,
         ]);
 
-        $this->assertSame(1, $direccion->notifications()->count());
-        $this->assertSame(0, $secretaria->notifications()->count(), 'Nadie se avisa a sí mismo de lo que acaba de redactar.');
+        $cola = app(ColaDePendientes::class);
+
+        $this->assertSame(1, $cola->total($direccion));
+        $this->assertSame(
+            0,
+            $cola->total($secretaria),
+            'La secretaría no puede publicar noticias, así que esa no es una tarea suya.'
+        );
     }
 }

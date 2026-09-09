@@ -4,9 +4,6 @@ namespace App\Support;
 
 use App\Mail\MensajeRecibido;
 use App\Models\Mensaje;
-use App\Models\User;
-use Filament\Notifications\Actions\Action;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Mail;
 
 /**
@@ -23,9 +20,17 @@ use Illuminate\Support\Facades\Mail;
  * proyecto**: se podía cambiar, guardar y ver el aviso verde sin que cambiara
  * nada. Esta clase es lo que faltaba para que ese campo signifique algo.
  *
- * Avisa por dos caminos a propósito, porque uno de los dos está roto: el correo
- * saliente no existe todavía (D-07, sin SMTP) y la notificación del panel sí
- * funciona hoy. El día que haya SMTP no hay que tocar nada.
+ * Avisa por **correo y nada más**, y eso tiene su historia. La primera versión de
+ * esta clase mandaba además una notificación de base con `sendToDatabase()`, que
+ * es lo que uno escribiría mirando `FlujoDeAprobacionObserver`. Al compilar salió
+ * que **la campana del panel está retirada desde el 7 de septiembre** (D-L22,
+ * `AdminPanelProvider`): `databaseNotifications()` está comentado. O sea que esa
+ * notificación se habría escrito en una tabla que ninguna pantalla lee — el mismo
+ * defecto que esta sesión vino a arreglar, recién estrenado.
+ *
+ * Lo que sí se ve, y por eso es lo que se usa: el **contador del menú** en
+ * `MensajeResource` y la tarjeta de bandeja del tablero. Es exactamente el
+ * mecanismo que D-L22 dejó dicho que sustituía a la campana.
  *
  * Vive en `Support/` y no en un observer para que el aviso salga **solo desde
  * los formularios públicos**: un observer también dispararía con las semillas,
@@ -38,7 +43,6 @@ final class AvisoDeMensajeAlGremio
 
     public static function enviar(Mensaje $mensaje): void
     {
-        self::notificarEnElPanel($mensaje);
         self::escribirAlBuzon($mensaje);
     }
 
@@ -62,46 +66,5 @@ final class AvisoDeMensajeAlGremio
         }
 
         rescue(fn () => Mail::to($destino)->send(new MensajeRecibido($mensaje)));
-    }
-
-    /**
-     * Notificación en el panel para quien atiende la bandeja.
-     *
-     * Se pregunta por la policy y no por un rol fijo, igual que hace
-     * `FlujoDeAprobacionObserver`: si mañana se crea un rol nuevo que atienda
-     * PQR, se entera solo.
-     *
-     * Va en `rescue()` por lo mismo que el correo: una notificación que falla
-     * --la tabla llena, un usuario corrupto-- no puede dejar sin radicado a
-     * quien acaba de poner una queja.
-     */
-    private static function notificarEnElPanel(Mensaje $mensaje): void
-    {
-        rescue(function () use ($mensaje): void {
-            $cuerpo = $mensaje->esPqr()
-                ? "Radicado {$mensaje->radicado}. La ley da quince días hábiles: vence el "
-                    .$mensaje->venceEl()?->translatedFormat('j \d\e F').'.'
-                : "Llegó por el formulario de {$mensaje->tipo->getLabel()}.";
-
-            $destinatarios = User::query()
-                ->whereHas('roles')
-                ->get()
-                ->filter(fn (User $usuario): bool => $usuario->can('viewAny', Mensaje::class));
-
-            foreach ($destinatarios as $destinatario) {
-                Notification::make()
-                    ->title($mensaje->esPqr() ? 'Entró una PQR' : 'Entró un mensaje')
-                    ->body($cuerpo)
-                    ->icon('heroicon-o-inbox-arrow-down')
-                    ->iconColor($mensaje->esPqr() ? 'danger' : 'info')
-                    ->actions([
-                        Action::make('abrir')
-                            ->label('Abrir la bandeja')
-                            ->url(route('filament.admin.resources.mensajes.index'))
-                            ->markAsRead(),
-                    ])
-                    ->sendToDatabase($destinatario);
-            }
-        });
     }
 }

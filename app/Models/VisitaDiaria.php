@@ -22,7 +22,7 @@ class VisitaDiaria extends Model
 {
     protected $table = 'visitas_diarias';
 
-    protected $fillable = ['ruta', 'dia', 'total'];
+    protected $fillable = ['ruta', 'dia', 'total', 'entradas'];
 
     /**
      * `dia` NO se castea a fecha a propósito. Con el casteo, Eloquent la
@@ -38,6 +38,7 @@ class VisitaDiaria extends Model
     {
         return [
             'total' => 'integer',
+            'entradas' => 'integer',
         ];
     }
 
@@ -51,19 +52,31 @@ class VisitaDiaria extends Model
      * peticiones que no encuentran fila e intentan crearla a la vez. La segunda
      * choca contra el índice único y suma, que es exactamente lo que quería
      * hacer.
+     *
+     * `$esEntrada` distingue la LLEGADA al sitio del resto de la navegación
+     * (Acta 08, A-03). Las dos cifras se escriben juntas y en la misma fila
+     * porque son el mismo cubo visto con dos preguntas: cuánto se mira, y cuánta
+     * gente entra. Quién decide si es entrada es el middleware, que es el único
+     * que ve la petición.
      */
-    public static function registrar(string $ruta): void
+    public static function registrar(string $ruta, bool $esEntrada = false): void
     {
         $dia = now()->toDateString();
+        $sumas = $esEntrada ? ['total' => 1, 'entradas' => 1] : ['total' => 1];
 
-        if (static::query()->where('ruta', $ruta)->where('dia', $dia)->increment('total') > 0) {
+        if (static::query()->where('ruta', $ruta)->where('dia', $dia)->incrementEach($sumas) > 0) {
             return;
         }
 
         try {
-            static::query()->create(['ruta' => $ruta, 'dia' => $dia, 'total' => 1]);
+            static::query()->create([
+                'ruta' => $ruta,
+                'dia' => $dia,
+                'total' => 1,
+                'entradas' => $esEntrada ? 1 : 0,
+            ]);
         } catch (UniqueConstraintViolationException) {
-            static::query()->where('ruta', $ruta)->where('dia', $dia)->increment('total');
+            static::query()->where('ruta', $ruta)->where('dia', $dia)->incrementEach($sumas);
         }
     }
 }

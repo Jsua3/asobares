@@ -92,6 +92,43 @@ class ContarVisitaDelSitio
             return;
         }
 
-        VisitaDiaria::registrar($ruta);
+        VisitaDiaria::registrar($ruta, $this->esUnaLlegadaAlSitio($request));
+    }
+
+    /**
+     * Si esta petición es alguien ENTRANDO al sitio, y no navegando por dentro
+     * (Acta 08, A-03).
+     *
+     * La pregunta la contesta el `Referer`: si no viene de nuestro propio host,
+     * la página es la primera de una visita. Sin procedencia --alguien que
+     * escribe la dirección, la trae en marcadores o llega desde WhatsApp-- es lo
+     * más entrada que hay.
+     *
+     * ⚠️ **El encabezado se mira y no se guarda.** Es el mismo trato que recibe
+     * el agente de usuario unas líneas más arriba, y por el mismo motivo: una URL
+     * de procedencia puede traer términos de búsqueda, identificadores de campaña
+     * o el perfil desde el que se hizo clic. Aquí solo se responde sí o no.
+     *
+     * Lo que esto NO mide, y hay que decirlo cada vez que se cite la cifra: no
+     * son personas distintas. Dos visitas de la misma persona en dos días cuentan
+     * dos. Contar personas exige IP, cookie o sesión, que es justo lo que este
+     * diseño evita (Acta 07, A-02, y D-19 sin resolver).
+     *
+     * Sabemos que sobrecuenta un poco: un navegador que borre el `Referer` --modo
+     * privado estricto, alguna extensión-- hace que su navegación interna parezca
+     * una llegada. Se acepta a propósito. La alternativa es una cookie, y una
+     * cookie es exactamente la línea que este módulo no cruza; el sesgo va hacia
+     * arriba, es pequeño y es estable, así que la comparación entre semanas
+     * --que es para lo que sirve la cifra-- se sostiene igual.
+     */
+    private function esUnaLlegadaAlSitio(Request $request): bool
+    {
+        $procedencia = $request->headers->get('referer');
+
+        if (! is_string($procedencia) || $procedencia === '') {
+            return true;
+        }
+
+        return parse_url($procedencia, PHP_URL_HOST) !== $request->getHost();
     }
 }

@@ -246,7 +246,10 @@ class AnaliticaDelSitioTest extends TestCase
         sort($columnas);
 
         $this->assertSame(
-            ['created_at', 'dia', 'id', 'ruta', 'total', 'updated_at'],
+            // `entradas` entró el 9 sep 2026 (Acta 08, A-03) y es otro contador,
+            // no un dato de nadie: el `Referer` que decide si suma se mira y no
+            // se guarda, igual que el navegador.
+            ['created_at', 'dia', 'entradas', 'id', 'ruta', 'total', 'updated_at'],
             $columnas,
             'La tabla de visitas ganó una columna. Si guarda IP, navegador o sesión deja de ser un agregado y entra en la Ley 1581.'
         );

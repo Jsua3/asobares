@@ -5,9 +5,6 @@ namespace App\Observers;
 use App\Enums\EstadoPublicacion;
 use App\Models\User;
 use App\Models\Vacante;
-use Filament\Actions\Action;
-use Filament\Facades\Filament;
-use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
@@ -72,76 +69,32 @@ class FlujoDeAprobacionObserver
             || $original === EstadoPublicacion::Publicado->value;
     }
 
-    public function saved(Model $modelo): void
-    {
-        if ($modelo->estado !== EstadoPublicacion::PendienteAprobacion) {
-            return;
-        }
-
-        // La notificación existe porque alguien envió algo a revisión: si no
-        // hay sesión (semillas, consola, jobs) no hay a quién avisarle de qué.
-        if (! Auth::user() instanceof User) {
-            return;
-        }
-
-        // Tras un INSERT, `wasChanged` siempre es falso porque el original ya
-        // se sincronizó; hay que mirar `wasRecentlyCreated` aparte.
-        if (! $modelo->wasRecentlyCreated && ! $modelo->wasChanged('estado')) {
-            return;
-        }
-
-        $this->avisarAQuienAprueba($modelo);
-    }
-
-    /**
-     * Notificación de base de datos para quien pueda aprobar ESTE modelo.
+    /*
+     * Aquí vivía `saved()`, que por cada registro enviado a revisión consultaba
+     * todos los usuarios con rol, le preguntaba a la policy por cada uno y le
+     * guardaba una notificación de base de datos.
      *
-     * Se pregunta por la policy y no por un rol fijo: así las bolsas avisan a
-     * la secretaría —que sí las aprueba— y el resto del contenido sigue
-     * avisando solo a la dirección, sin ninguna lógica especial por recurso.
+     * Se retiró el 9 de septiembre de 2026, y el motivo no es de estilo: **la
+     * campana del panel se había apagado dos días antes** (D-L22, 7 sep). Sus
+     * dos líneas quedaron comentadas en `AdminPanelProvider` con el argumento de
+     * que la banda «Te está esperando» del tablero cuenta mejor lo mismo, pero
+     * nadie retiró a quien escribía en ella. Resultado: consultas y filas nuevas
+     * en cada guardado de contenido, sin una sola pantalla que las leyera.
+     *
+     * Y cuatro aserciones de `FlujoDeAprobacionTest` en verde sobre ese aviso
+     * invisible, que es lo que lo mantuvo escondido: la suite decía que
+     * funcionaba y el usuario no podía verlo. Falso verde número trece de este
+     * proyecto, encontrado al construir el aviso de PQR del Acta 08 —que iba a
+     * repetir el mismo error—.
+     *
+     * Quien puede aprobar sigue enterándose, por donde D-L22 dijo que se
+     * enteraría: la **cola de pendientes** del tablero (`ColaDePendientes`), que
+     * pregunta a las mismas policies, se pinta de verdad y ya tenía sus propias
+     * pruebas. Las de `FlujoDeAprobacionTest` afirman ahora sobre ella.
+     *
+     * `Panel\AvisosQueSeVenTest` vigila que las dos mitades no se vuelvan a
+     * separar: o hay campana y hay quien escriba, o no hay ninguna de las dos.
+     * Si el gremio pide avisos de verdad —correo, campana o lo que sea—, es un
+     * frente propio con su decisión, tal como dejó dicho D-L22.
      */
-    private function avisarAQuienAprueba(Model $modelo): void
-    {
-        $autor = Auth::user();
-        $nombreDelAutor = $autor?->name ?? 'El sistema';
-        $etiqueta = $modelo->nombre ?? $modelo->titulo ?? $modelo->cargo ?? $modelo->entidad ?? "#{$modelo->getKey()}";
-        $tipo = class_basename($modelo);
-
-        $revisores = User::query()
-            ->whereHas('roles')
-            ->get()
-            ->filter(fn (User $revisor): bool => $revisor->can('publicar', $modelo))
-            // Quien lo envió no se avisa a sí mismo.
-            ->reject(fn (User $revisor): bool => $revisor->is($autor));
-
-        foreach ($revisores as $revisor) {
-            Notification::make()
-                ->title('Contenido pendiente de aprobación')
-                ->body("{$nombreDelAutor} envió «{$etiqueta}» ({$tipo}) para revisión.")
-                ->icon('heroicon-o-clock')
-                ->iconColor('warning')
-                ->actions([
-                    Action::make('revisar')
-                        ->label('Revisar')
-                        ->url($this->urlDeRevision($modelo))
-                        ->markAsRead(),
-                ])
-                ->sendToDatabase($revisor);
-        }
-    }
-
-    private function urlDeRevision(Model $modelo): string
-    {
-        $recurso = Filament::getModelResource($modelo::class);
-
-        if ($recurso === null) {
-            return url('/admin');
-        }
-
-        // Las vacantes ya no se editan desde el panel: se moderan desde el
-        // listado, así que ahí es donde tiene que aterrizar el revisor.
-        return $recurso::hasPage('edit')
-            ? $recurso::getUrl('edit', ['record' => $modelo])
-            : $recurso::getUrl('index');
-    }
 }
