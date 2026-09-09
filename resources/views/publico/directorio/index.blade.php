@@ -74,6 +74,10 @@
             </div>
         </form>
 
+        @if ($publicidadDirectorio)
+            <x-publico.publicidad :publicidad="$publicidadDirectorio" class="mt-6" />
+        @endif
+
         <div id="resultados">
             {{-- Cambio de vista --}}
             <div class="mt-6 flex flex-wrap items-center justify-between gap-4">

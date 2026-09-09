@@ -248,6 +248,12 @@
         </div>
     </section>
 
+    @if ($publicidadInicio)
+        <section class="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+            <x-publico.publicidad :publicidad="$publicidadInicio" />
+        </section>
+    @endif
+
     {{-- Franja audiovisual: lista para enlazar los videos reales sin tocar backend. --}}
     <section class="revelar luz-ambiente border-y border-linea bg-superficie" data-revelar aria-labelledby="videos-portada">
         <div class="mx-auto grid max-w-7xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-12 lg:px-8">

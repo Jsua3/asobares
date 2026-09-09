@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Publico;
 
+use App\Enums\UbicacionPublicidad;
 use App\Models\Asociado;
 use App\Models\Categoria;
 use App\Models\Municipio;
+use App\Models\Publicidad;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -53,6 +55,7 @@ class DirectorioController
             'municipios' => Municipio::orderBy('nombre')->get(),
             'categorias' => Categoria::orderBy('nombre')->get(),
             'filtros' => $datos,
+            'publicidadDirectorio' => Publicidad::publicaEn(UbicacionPublicidad::Directorio)->first(),
             'vista' => $vista,
         ]);
     }
