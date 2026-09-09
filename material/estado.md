@@ -31,7 +31,7 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 | Fecha | Martes 8 de septiembre de 2026 (Bogotá), noche |
 | **Dónde vive este archivo** | En la rama `p1-cierre-bolsas`; medido sobre `fc2142f`, y este archivo entra en el commit de cierre |
 | `main` | `9eb93bd` (local) · ⚠️ **`origin/main` sigue en `0594058`**: el commit del expediente de la tarde **no se ha empujado** |
-| Rama de trabajo | **`p1-cierre-bolsas`, cinco commits sobre `main` y ninguno empujado.** Se abrió porque el plan de trabajo del 8 sep pide rama propia y nada de empujar a `main` directamente. Trae las cuatro entregas del plan más el Acta 07 |
+| Rama de trabajo | **`p1-cierre-bolsas`, siete commits sobre `main` y ✅ empujada** (`origin/p1-cierre-bolsas` en `b593e27`, 8 sep noche, con Sua diciéndolo). Se abrió porque el plan de trabajo del 8 sep pide rama propia y nada de empujar a `main` directamente. Trae las cuatro entregas del plan, el Acta 07 y el expediente. **No está fusionada ni desplegada**: sirve para que Ingrid la revise |
 | Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5). Suite completa sobre `fc2142f`, el 8 sep por la noche: **1.147 casos · 1.136 pasan · 11 omitidas · 0 fallos · 5.204 aserciones** en 335 s. El árbol se contó el mismo día (§5) |
 | Producción | `https://asobares-production-0jhdcz.laravel.cloud` · **sirve `0594058`**, es decir el panel en el teléfono y nada de lo de esta tarde y noche. Lo último comprobado por contenido servido: `--asb-admin-barra-riel:4rem` y `@media (width<=63.999rem){.fi-sidebar.fi-sidebar-open:before{content:none}}` |
 | **Expediente** | Al día, incluido lo de hoy: esta foto, **§45 y §46 de `bitacora.md`**, cuatro líneas nuevas en **`encargo.md` §13**, el **Acta 07** emitida y la **matriz de trazabilidad** actualizada tras dos semanas parada (decía 820 casos y `main` en `4f15d24`) |
@@ -101,8 +101,8 @@ De catorce, **doce cerrados y dos vivos** (10 y 11); ninguno se cierra escribien
 |---|---|
 | Sitio | ✅ **200** sobre PostgreSQL 17.11, 39 migraciones, sirviendo `main` |
 | Despliegue de hoy | ✅ Los seis commits del teléfono están en producción; comprobado por contenido servido (§0) |
-| **Rama `p1-cierre-bolsas`** | ⚠️ **Cinco commits sin empujar**, con las cuatro entregas del plan de trabajo y el Acta 07. Nada de esto está en producción. Trae **tres migraciones** (`aprobado_el` en aspirantes, alcance en beneficios, `visitas_diarias`), así que desplegarla exige `migrate` |
-| **`main` local** | ⚠️ `9eb93bd`, el commit del expediente de la tarde, **tampoco empujado** |
+| **Rama `p1-cierre-bolsas`** | ✅ **Empujada el 8 sep**, siete commits, lista para revisión (`https://github.com/Jsua3/asobares/pull/new/p1-cierre-bolsas`). ⚠️ **Sin fusionar y sin desplegar.** Trae **tres migraciones** (`aprobado_el` en aspirantes, alcance en beneficios, `visitas_diarias`), así que desplegarla exige `migrate` |
+| **`main`** | ⚠️ `origin/main` sigue en `0594058`; el commit del expediente de la tarde (`9eb93bd`) viaja dentro de la rama pero **`main` remoto no se ha movido**, que es lo que pide el plan |
 | Video del hero en producción | ✅ Versionado en `public/videos/`; `VideoDelHeroTest` vigila el índice de git |
 | Cuenta de Laravel Cloud | ✅ Existe, con medio de pago del gremio. ⚠️ Organización `juan-sua`: facturación y Natalia como miembro (D-12) |
 | Correo saliente (SMTP) | ❌ **Sin contratar: bloque de arriba** |
@@ -230,7 +230,7 @@ Todas medidas el **8 de septiembre de 2026 sobre `fc2142f`** (la rama), salvo la
 
 ## 6. Lo siguiente, en orden
 
-1. **Decidir qué pasa con `p1-cierre-bolsas`.** Son cinco commits con la suite en verde y nada empujado: hay que elegir si se publica la rama para que Ingrid la revise —que es lo que pide su plan—, si se fusiona a `main`, y si se despliega. Ojo al desplegarla: trae **tres migraciones** y, en cuanto entre, **el banco de talento se ve vacío hasta que la secretaría apruebe los perfiles** (D-40). Y `main` local tampoco está empujado.
+1. **Que Ingrid revise `p1-cierre-bolsas`**, que ya está publicada. Después hay que decidir si se fusiona a `main` y si se despliega. Ojo al desplegarla: trae **tres migraciones** y, en cuanto entre, **el banco de talento se ve vacío hasta que la secretaría apruebe los perfiles** (D-40).
 2. **Confirmar que el documento de práctica se envió** el 4 sep (Sua). Si no, es 0.0 y hay que hablar con el docente.
 3. **Pedirle a Ingrid la lista de la auditoría** (D-38): sin los 2 FAIL y los 3 NOT TESTED, el bloque de QA del plan no se puede cerrar.
 4. **Ver las dos superficies nuevas en un teléfono real** (Android y un iPhone), que es lo que exige la S7 y lo que ya no puede esperar: la barra pública del teléfono —Safari de iOS, la barra de direcciones que crece y encoge, el rebote elástico, el teclado, la transparencia reducida— y el **riel del panel**, sobre todo el tacto del resorte. Si algo cede, se corrige sobre `main` y se vuelve a empujar.
