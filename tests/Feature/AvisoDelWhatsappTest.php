@@ -77,7 +77,16 @@ class AvisoDelWhatsappTest extends TestCase
 
         $hallazgos = [];
 
-        foreach (File::allFiles(resource_path('views/publico')) as $archivo) {
+        // Los dos árboles: las páginas y los componentes. Hasta el 8 de
+        // septiembre esto solo miraba `views/publico`, así que el WhatsApp del
+        // pie --y el del botón flotante, que nació ese día-- quedaban fuera de
+        // la guardia sin que se notara.
+        $vistas = [
+            ...File::allFiles(resource_path('views/publico')),
+            ...File::allFiles(resource_path('views/components')),
+        ];
+
+        foreach ($vistas as $archivo) {
             $contenido = $archivo->getContents();
             $ruta = str_replace(base_path().DIRECTORY_SEPARATOR, '', $archivo->getPathname());
 

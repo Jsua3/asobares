@@ -1407,6 +1407,51 @@
             translate: var(--asb-avance-flecha) 0;
         }
     }
+
+    /*
+     * Botón flotante de WhatsApp.
+     *
+     * Dos medias que NO se solapan, en vez de una base con anulación: en el CSS
+     * compilado de este proyecto el orden no es nuestro --lightningcss aplana
+     * las capas, agrupa las medias y mueve reglas--, así que dos reglas de la
+     * misma especificidad no se resuelven como están escritas (bitácora §45).
+     */
+    .asb-whatsapp-flotante {
+        position: fixed;
+        right: 1rem;
+        z-index: 30;
+    }
+
+    @media (min-width: 64rem) {
+        .asb-whatsapp-flotante {
+            right: 1.5rem;
+            bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+        }
+    }
+
+    @media (max-width: 63.999rem) {
+        /*
+         * En el teléfono la barra de pestañas es fija y ocupa el borde
+         * inferior: a 1 rem del borde, el botón se sienta encima de ella. El
+         * apartado se lee del token, no de un número, para que el día que la
+         * barra cambie de alto el botón se mueva solo.
+         *
+         * A propósito con el alto EN REPOSO y no con el compacto: ese token se
+         * reasigna en `.cromo[data-estado="scroll"]`, que este botón no tiene
+         * como ancestro, y perseguir el estado lo dejaría dando saltos al
+         * desplazar. Quieto es mejor que exacto.
+         */
+        .asb-whatsapp-flotante {
+            bottom: calc(var(--asb-alto-modulo-inferior) + env(safe-area-inset-bottom, 0px) + 0.75rem);
+        }
+
+        /* Se retira con la barra cuando sube el teclado virtual; si no, se
+           queda flotando sobre el campo que la persona está escribiendo. */
+        .cromo[data-teclado="abierto"] ~ .asb-whatsapp-flotante {
+            visibility: hidden;
+            opacity: 0;
+        }
+    }
 }
 
 /*

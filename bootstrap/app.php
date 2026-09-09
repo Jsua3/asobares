@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\AsegurarRolAsociado;
 use App\Http\Middleware\CabecerasDeSeguridad;
+use App\Http\Middleware\ContarVisitaDelSitio;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -27,6 +28,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // sesión que alguien tuviera abierta con la clave vieja. Lo fija
         // `InvalidacionDeSesionTest`, que se comprobó en rojo sin esta línea.
         $middleware->web(append: [AuthenticateSession::class]);
+
+        // En `web` y no global: cuenta páginas servidas, no descargas ni
+        // webhooks. Qué queda dentro del sitio y qué no lo decide el propio
+        // middleware por el nombre de la ruta, porque el panel comparte grupo.
+        $middleware->web(append: [ContarVisitaDelSitio::class]);
 
         // El hosting de producción todavía no está decidido. Cuando se elija,
         // TRUSTED_PROXIES debe listar las IPs del balanceador (o `*` si el

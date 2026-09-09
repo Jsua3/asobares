@@ -2110,3 +2110,110 @@ Con la barra ya desplegada y dos peticiones más de Sua atendidas —el cristal 
 **La revisión adversaria** sacó los dos últimos. **Cinco tokens declarados sin ningún consumidor, con dos guardias verdes encima de uno de ellos**: `--asb-admin-barra-filo` existía para volverse línea bajo más contraste y hacía dos días que nadie lo pintaba, desde que Sua rechazó el filo rojo. La guardia que había vigilaba un token concreto; la nueva generaliza a los cuarenta y dos y nació roja señalando los cinco. Y **el comando de la maqueta escribía una página servible dentro de `public/`**: en producción eso es publicar el marcado del panel sin que nadie lo pida, así que ahora se niega, y se niega antes de tocar el disco.
 
 La lección común a los cuatro: **ninguno lo destapó mirar la pantalla**. Los destapó escribir la guardia que faltaba y verla roja. Es lo contrario del día anterior, donde lo que faltaba era mirar.
+
+## 45. EL PANEL EN EL TELÉFONO: UN RIEL DE ICONOS Y NINGÚN SUELO (8 sep 2026)
+
+_Esta entrada se escribió después de los hechos, la tarde del 8 de septiembre. La sesión que hizo el trabajo empujó y desplegó seis commits —`f7a9171`, `2165244`, `5fdbedc`, `4cc25d2`, `3b4d60a` y `0594058`— sin reescribir `estado.md` ni anexar aquí, así que se reconstruyó leyendo los seis y la spec, que sí quedó al día antes del código. La lección de expediente va en el §45.6._
+
+### 45.1 El defecto que no era de diseño, y que también le costaba el `sticky` al escritorio
+
+Sua mandó una captura del panel en un teléfono: «la barra del panel en el móvil está terrible. Quiero que se vean los iconos a la izquierda y que al desplegarlo aparezcan los nombres correspondientes». Lo primero que salió no era de diseño.
+
+**El tema declaraba `position: relative` en `.fi-sidebar`.** Filament la declara `fixed` y solo la vuelve `lg:sticky` en escritorio, y nuestra regla va después en el archivo compilado —que no lleva capas: `lightningcss` las aplana y manda el orden—, así que ganaba en todas las anchuras. En el teléfono, el cajón cerrado dejaba de estar fuera de pantalla y ocupaba sus 252 px **en el flujo**: la franja vacía de la captura, con el contenido aplastado contra el canto derecho. Y en escritorio `lg:sticky` también perdía, así que **la barra llevaba dos días yéndose con el desplazamiento de la página** y nadie lo había dicho. La regla existía para darle bloque contenedor al resplandor; desde que lo pinta `.fi-body::before` no hace falta ninguna. Fuera, con guardia que afirma que `.fi-sidebar` no declara `position` y dice por qué en el mensaje.
+
+### 45.2 El riel (D-L29)
+
+Por debajo de 64 rem la barra deja de irse: se estrecha. Cerrada, solo los iconos; abierta, icono y nombre superpuestos al contenido. Cuatro reglas que no se negocian, cada una con su mutación vista roja:
+
+1. **El nombre no se borra, se esconde.** Recorte visual sobre un cuadro de 1 px, nunca `display: none`: un riel de iconos sin nombre accesible es una lista de enlaces sin texto.
+2. **La fila sigue midiendo 44 px** como mínimo.
+3. **La transición es del ancho, declarada a mano.** Filament pone `transition-all`, que la Parte III ya había prohibido para el cajón.
+4. **`translate: none`, no `translate: 0 0`.** Deshacer el `-translate-x-full` de Filament con un cero deja un `translate` computado distinto de `none`, y eso convierte la barra en bloque contenedor de todo `fixed` que cuelgue dentro. Es el mismo pisotón que este proyecto ya pagó dos veces.
+
+Tres cosas aparecieron solo al medir. **El ancho del riel se pone moviendo el token de Filament, no la propiedad**: su regla de ancho tiene mucha más especificidad que cualquier `width` declarado aquí y el riel seguía saliendo de 252 px; como esa regla dice `width: var(--sidebar-width)`, basta con darle otro valor al token dentro de la media. **La reasignación del lavado salió de `@layer components`**, porque las reglas sí viven dentro de la capa y los tokens no pueden: el `:root` sin capa del mismo archivo les gana. Y **la maqueta mintió tres veces**, que es por lo que el defecto del `position` llevaba dos días invisible: declaraba `position: sticky` sobre `.fi-sidebar` —tapando justo lo que fallaba—, ponía su `<style>` después de la hoja compilada —tapando el `display: none` del chevron— y no reproducía el `opacity: 1` que el blade le da al contenido, así que medía un contenido invisible.
+
+**Y el riel se quedó sin suelo el mismo día.** Sua lo vio construido: «deja solo los módulos y quita la barra blanca de fondo que los agrupa para que así se les vea libertad, y a los módulos entrégales un poco de transparencia». Medido en la maqueta antes de tocar nada, ese blanco **no era de la barra** —que computa `rgba(0,0,0,0)`— sino de `.fi-sidebar::before`, que pintaba el velo del **cajón** al 94 % también con la barra cerrada. El velo del cajón tiene su razón (D-L18: debajo pasa contenido variable y hay que taparlo) y esa razón no existe en el riel, que no tapa nada: solo está a un lado. El suelo se ató al estado, y el cristal de los apartados bajó del 76 al 66 % por debajo de 64 rem, recalculado con `MideContraste`: rótulo de grupo 11,08:1 en claro y 7,74:1 en oscuro, ítem activo 6,23:1 y 5,23:1.
+
+### 45.3 D-L30: cromo centrado, perfil anclado, aire y un resorte ligado al gesto
+
+Sua pidió cuatro cosas más viendo el teléfono, y una quinta que resolvió al preguntarle: **el cambio es solo del teléfono**; en escritorio no se toca nada, porque lo que hay está aprobado y desplegado.
+
+El **cromo** deja la hamburguesa donde estaba, centra el logotipo por rejilla `1fr auto 1fr` —no por `justify-content`, que con dos costados de anchura distinta descentra a ojo— y manda el control de tema a la derecha. El **perfil** baja al pie de la barra y **flota sobre la lista**: si fuera su último hermano, la lista terminaría encima y no habría nada pasando por debajo, que es lo que se pidió. La lista reserva su alto o el último destino quedaría inalcanzable. La cuenta se pinta en **dos ganchos**, con dos cuidados: el identificador de la hoja se compone según dónde se pinte —dos copias con el mismo id dejan un `aria-controls` apuntando a dos sitios— y la copia que no toca se apaga con `display: none`, que es lo único que la saca del orden de tabulación. El **riel sube de 3,5 a 4 rem** porque el aire sale de algún sitio: con 3,5 y 0,5 a cada lado el módulo caería a 40 px y se rompería el mínimo táctil; con 4 quedan 48.
+
+El **resorte** es lo único verdaderamente nuevo. Al desplazar el riel, cada icono se retrasa respecto al dedo y llega con muelle, tanto más cuanto más rápido el gesto. No es una transición: una curva CSS no sabe a qué velocidad va la mano. Es una integración con tensión y amortiguación, y por eso responde. Cuatro reglas afirmadas por separado en la guardia: solo `translate` —cualquier otra propiedad mide la página por fotograma—, el bucle se para solo, lo que se mueve no recibe el dedo mientras se mueve —un destino que huye del pulgar es peor que uno quieto— y solo por debajo de 64 rem.
+
+**La guardia cazó de entrada lo que este proyecto ya pagó una vez:** el módulo no estaba cableado ni en `vite.config.js` ni en los activos del panel, así que no habría llegado nunca al navegador y las demás afirmaciones habrían vigilado un archivo muerto.
+
+Dos cosas salieron de medir y no de suponer. **La primera reacción se pinta en el mismo gesto** y no en el fotograma siguiente: se escribió así al descubrir que no había forma de verlo —`requestAnimationFrame` no corre con el panel del navegador oculto— y resultó ser además lo correcto, porque la respuesta sale con la mano y no detrás de ella; el bucle se queda con el regreso. Y **`ARRASTRE` se calibró midiendo**: con 0,55 un desplazamiento de 24 px por fotograma —un pase normal del pulgar— ya saturaba el tope y todos los iconos se quedaban en 14, justo donde importa; con **0,35** el rango útil cubre de 5 a 40 px por fotograma.
+
+**Y la lección que costó dos vueltas y quedó escrita en el código: en el CSS compilado de este proyecto el orden no es nuestro.** `lightningcss` aplana las capas, agrupa las medias y mueve reglas, así que dos reglas de la misma especificidad **no** se resuelven como están escritas. Pasó dos veces seguidas: el `display: none` de escritorio salía después del de móvil y lo anulaba, y `position: relative` de `.asb-barra-cuenta` le ganaba a `position: absolute` de `.asb-cuenta-al-pie`. Se arregló sin depender del orden: el apagado de escritorio vive en su propia media de `min-width`, y las reglas del teléfono llevan `.fi-sidebar` delante para ganar por especificidad.
+
+### 45.4 Las siete correcciones de Sua
+
+Vio la primera versión en el teléfono y nombró siete cosas. Tres merecen quedar escritas.
+
+**«Tablero» no tiene grupo.** Los módulos seguían pegados al canto, y era cierto para uno solo: Filament pinta los destinos sin grupo **sueltos en la lista**, fuera de todo `.fi-sidebar-group`, así que no recibía ni cristal ni aire mientras los demás flotaban. Ahora es un módulo más.
+
+**El resorte movía lo de dentro y no los módulos.** Sua lo diagnosticó con precisión: el indicador rojo del apartado activo se quedaba quieto mientras su fila se desplazaba, **porque el indicador lo pinta el módulo y la fila iba por su cuenta**. Lo que se mueve pasa a ser el módulo.
+
+**Había un corte entre el cromo y el cajón**, y eran dos alturas para lo mismo: una media de 40 rem dejaba el cromo en 3,45 rem mientras la barra empieza en `--asb-admin-topbar-alto` (3,75). Cinco píxeles por los que se veía colarse el contenido. El alto del cromo pasa a ser uno solo, el del token.
+
+Las otras cuatro: el logotipo sube de 6,5 a 10 rem —su tope venía de cuando compartía fila con la cuenta, y en el centro del cromo hay sitio de sobra—; el menú de la cuenta abre **hacia arriba y hacia dentro**, porque colgar hacia abajo y a la izquierda es correcto en el cromo y absurdo al pie de una barra de 64 px, así que se abría fuera de la pantalla; el `bg-white` que Filament le da a la barra por debajo de `lg` se apaga con un selector que gana **por especificidad, no por orden**; y el cajón, que va aparte.
+
+### 45.5 El cajón tampoco tiene suelo
+
+Sua lo rechazó dos veces y la segunda tenía razón. El primer intento lo volvió una lámina de cristal —separada del borde, con radio, canto y el velo bajado de 94 a 84 %— y **seguía siendo una barra detrás de los módulos**. La corrección definitiva es que no hay suelo ninguno: `content: none` en su `::before`, igual que en el riel, y entre los módulos se ve la página atenuada.
+
+Eso mueve la carga del contraste. Sin suelo detrás, lo que sostiene la lectura es el cristal de cada módulo, y ese sí sube **dentro del cajón**, del 66 % del riel al **84 %**. La diferencia tiene una razón física: en el riel, detrás del módulo hay campo de puntos sobre la superficie del panel, que es un color conocido; dentro del cajón hay **página**, y la página puede ser cualquier cosa. Medido sobre los dos extremos, con el velo de cierre de Filament en medio: al 66 %, sobre página negra, el rótulo del ítem activo da **3,03:1 y no pasa**; al 84 % da 4,61 sobre negra y 5,49 sobre blanca, y en oscuro 5,30 y 4,78. **Ese 84 es el suelo medido, no una preferencia.**
+
+Y una nota sobre las guardias que conviene no perder: **la del riel afirmaba que el velo del cajón colgaba del estado abierto**, que era verdad cuando se escribió. Al quedarse el cajón sin suelo dejó de colgar de ningún estado, así que la guardia se reescribió para afirmar lo que hoy es cierto —que la barra no pinta suelo ni cerrada ni abierta— y el velo del cajón sigue existiendo solo para la cuenta anclada, que sí tapa porque por debajo pasan los iconos. Por eso `Panel/BarraLateralTest` baja de 302 aserciones a 298 con un caso más: no se perdió cobertura, se dejó de afirmar algo que había dejado de ser verdad.
+
+### 45.6 Lo que quedó, y una lección de expediente
+
+Suite completa la tarde del 8 sep, sobre `0594058` y ya desplegado: **1.105 casos, 1.094 pasan, 11 omitidas, 0 fallos, 5.048 aserciones en 317 s**. Producción comprobada por contenido servido y no por hash: el CSS del panel trae `--asb-admin-barra-riel:4rem` y, dentro de `@media (width<=63.999rem)`, `.fi-sidebar.fi-sidebar-open:before{content:none}`, que es el último commit. Lo único abierto es **el tacto del resorte en un teléfono de verdad**, que no se mide aquí; lo gobiernan `ARRASTRE` y `AMORTIGUACION` y se ajustan en una línea cada una.
+
+Y la lección que no es técnica. **Los seis commits se empujaron y se desplegaron sin reescribir `estado.md` ni anexar esta entrada.** El estado se quedó seis commits atrás apuntando a un árbol que ya no era el desplegado, y el §3 del prompt maestro existe exactamente para eso: la sesión siguiente lo detectó comparando el encabezado con `HEAD`, y recuperar el día costó leer los seis commits, la spec y volver a medirlo todo. Lo que **no** se perdió fue el diseño, porque D-L29 y D-L30 sí se escribieron antes del código. Se perdió la foto. Barato de arreglar esta vez; caro el día que la sesión que llegue no se dé cuenta.
+
+## 46. EL PLAN DE TRABAJO DE INGRID, MEDIDO CONTRA EL CÓDIGO (8 sep 2026)
+
+### 46.1 La mitad del encargo ya estaba hecha
+
+Sua trajo un documento de reparto que Ingrid escribió el 8 de septiembre y que le asigna cinco frentes: bolsas exclusivas, beneficios por territorio, WhatsApp y orden alfabético, analítica, y el QA de sus módulos. Antes de escribir una línea se midieron los cinco contra el repositorio, con cuatro reconocimientos en paralelo. **Tres de los cinco estaban total o casi totalmente construidos.**
+
+Las **bolsas** se hicieron el 4 de septiembre en `f2092c5`: registro público naciendo pendiente, aprobación y devolución con motivo en el panel, `/mi-cuenta/proveedores` y `/mi-cuenta/aspirantes` detrás de la sesión. El **orden alfabético** de la portada existe desde antes, con `Collator('es_CO')` porque SQLite ordena por bytes, y con cuatro pruebas que lo vigilan. Del **WhatsApp** existían el ajuste, el ayudante que normaliza el número y cero números escritos a mano en Blade: el RNF-09 ya se cumplía y lo único que faltaba era el botón.
+
+Y una parte del documento **pedía revertir una decisión escrita**: «en Empleo, el contenido interno de la bolsa queda restringido a usuarios asociados». La bolsa de empleo no se cierra, lo decidió Ingrid misma el 4 de septiembre —«quien busca trabajo tiene que poder ver la vacante para postularse»—, está en `encargo.md` §13 y tiene prueba que lo afirma. Sua resolvió dejarla pública.
+
+**La lección de reparto, que es la que vale para la próxima:** medir el encargo contra el código antes de aceptarlo. De nueve tareas, dos estaban hechas, una casi, dos eran ampliación de alcance sin acta y una revertía una decisión registrada. Aceptarlo entero habría significado rehacer trabajo y romper lo que ya funcionaba.
+
+### 46.2 Lo que sí faltaba, y el documento no nombraba
+
+Dos huecos reales, ninguno mencionado como tal en el plan.
+
+**Las fichas públicas de artistas seguían dando WhatsApp e Instagram** mientras las de proveedores ya no daban nada. O el criterio del 3 de septiembre vale para las tres bolsas o no vale. Se movió el contacto detrás de la sesión **sin vaciar la ficha**: nombre, foto, género y video siguen públicos, porque el escaparate es lo que el artista viene a buscar. Es el patrón de los convenios: página pública, una línea que dice que el detalle es de los afiliados, y el dato real dentro de `/mi-cuenta`.
+
+**El banco de talento no tenía puerta.** Quien dejaba su perfil en `/empleo` quedaba visible en el mismo segundo para todos los establecimientos afiliados: nombre, teléfono y correo de un tercero, a un público cerrado, sin que nadie los mirara. Ahora hay `aprobado_el`, y nace en null para todos —incluidos los siete de la D-27, que aceptaron con otra política—. Sua eligió esa opción sabiendo el costo: el banco se ve vacío hasta que la secretaría apruebe uno por uno.
+
+### 46.3 Dos ampliaciones, y el acta antes del código
+
+Beneficios por territorio y analítica no figuran en ningún RF de la ERS v3, así que son ampliación. Se emitió el **Acta 07** —numerada 07 y no 06 porque el 06 sigue reservado para la ampliación de las bolsas (D-26)— con el costo medido y no estimado a ojo, y con una contrapropuesta que es la parte que importa: **analítica anónima sin visitantes únicos**, porque distinguir personas exige IP, cookie o sesión, que es justo lo que el diseño evita para no entrar en la Ley 1581. Sua aprobó todo lo relativo a firmas y se construyeron las dos.
+
+En **beneficios**, la decisión que gobierna el resto es que `alcance` nace nullable y sin valor por defecto: los cinco sembrados salen del catálogo oficial y ese documento no dice de quién es cada uno, así que clasificarlos de oficio habría sido publicar una afirmación que nadie hizo. Hay guardia contra eso. En **analítica**, la vuelta de tuerca es que no hay una fila por visita sino un contador por ruta y día: la tabla crece con el calendario y no con el tráfico, y desaparece la hora exacta de cada visita, que era la última traza que quedaba.
+
+### 46.4 Tres falsos verdes cazados al romper las guardias, y uno que no era nuestro
+
+**Cuarenta y dos casos nuevos** —la suite pasó de 1.105 a 1.147 en la sesión—, todos vistos rojos antes del código y rotos después uno por uno. Tres pasaban por el motivo equivocado y solo se supo al mutarlos.
+
+1. **«El panel no cuenta como visita del sitio» pasaba porque Filament no usa el grupo `web`**, no porque el filtro funcionara: el contador no llega ahí. Se conserva la prueba —fija el resultado— y se añade la del portal del afiliado, que sí pasa por `web` y ejerce el filtro de verdad.
+2. **«Una respuesta que no es 200 no cuenta» pasaba por la rama de "ruta sin nombre"**, no por la comprobación del código. Se partió en dos, y la segunda usa una ficha de artista en borrador: ruta con nombre que responde 404.
+3. **Dos pruebas del sello de alcance afirmaban sobre texto que la página ya traía por otro lado**: el sitio entero se llama «ASOBARES Quindío» y `/afiliate` lista todos los municipios en su formulario, así que un `assertSee` pasaba aunque el sello dijera cualquier cosa. Ahora se afirma sobre el contenido del sello con una expresión regular.
+
+Y una trampa que no era de nadie de la casa: **`dia` con casteo a fecha se guarda como «2026-09-08 00:00:00» en SQLite y como «2026-09-08» en PostgreSQL**, la misma fila con dos formas según el motor y las comparaciones de la ventana dependiendo de eso. Cuando una columna es la clave de un cubo y no un instante, se trata como la cadena que es.
+
+**Y una lectura del navegador que parecía un defecto y no lo era:** midiendo el botón flotante, las cuatro esquinas de su caja devolvían «tapada» con `elementFromPoint`. El botón es un círculo: las esquinas del rectángulo caen fuera de él. Los cinco puntos sobre el círculo devuelven el botón. Es la tercera vez que este proyecto anota una lectura de `elementFromPoint` que hay que interpretar antes de creer.
+
+### 46.5 Cómo quedó
+
+Cinco commits en la rama `p1-cierre-bolsas`, ninguno empujado. Suite completa sobre `fc2142f`: **1.147 casos, 1.136 pasan, 11 omitidas, 0 fallos, 5.204 aserciones en 335 s**. El botón de WhatsApp y el sello de alcance se vieron en el navegador a 375 y a 1.280 px; la analítica se comprobó contra el servidor de desarrollo y no solo en pruebas.
+
+Queda **un solo bloque del plan sin tocar: el QA**, y está bloqueado por lo mismo desde el principio: el documento dice que la auditoría funcional dio 44 PASS, 2 FAIL, 1 BLOCKED y 3 NOT TESTED, **y no dice cuáles**. Los 2 FAIL son lo más accionable de todo el plan y no están descritos en ninguna parte.

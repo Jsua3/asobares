@@ -25,6 +25,7 @@
                         {{-- Marca de agua: numera visualmente, no aporta nada al lector de pantalla. --}}
                         <span aria-hidden="true" class="font-display text-3xl font-bold text-marca-500/30">0{{ $indice + 1 }}</span>
                         <h3 class="mt-2 font-display text-lg font-semibold">{{ $beneficio->titulo }}</h3>
+                        <x-publico.sello-de-alcance :beneficio="$beneficio" />
                         <p class="mt-2 text-sm leading-relaxed text-tenue">{{ $beneficio->descripcion }}</p>
                     </div>
                 @endforeach

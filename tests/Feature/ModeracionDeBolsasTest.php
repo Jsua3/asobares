@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\EstadoDeGestion;
 use App\Enums\EstadoPublicacion;
 use App\Filament\Resources\Artistas\Pages\ListArtistas;
+use App\Filament\Resources\Aspirantes\Pages\ListAspirantes;
 use App\Filament\Resources\Postulaciones\Pages\ListPostulaciones;
 use App\Filament\Resources\Proveedors\Pages\ListProveedors;
 use App\Filament\Resources\Vacantes\Pages\ListVacantes;
@@ -25,6 +26,7 @@ use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class ModeracionDeBolsasTest extends TestCase
@@ -404,5 +406,62 @@ class ModeracionDeBolsasTest extends TestCase
         Aspirante::factory()->create(['nombre' => 'Duván Marín']);
 
         $this->get('/admin/aspirantes')->assertSuccessful()->assertSee('Duván Marín');
+    }
+
+    /**
+     * La puerta del banco de talento. Sin esta acción la columna `aprobado_el`
+     * no la pondría nadie nunca y el directorio del afiliado se quedaría vacío
+     * para siempre, que es un modo de fallo silencioso: la pantalla existe,
+     * responde 200 y no enseña a nadie.
+     */
+    public function test_la_secretaria_aprueba_un_perfil_del_banco(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $aspirante = Aspirante::factory()->create();
+
+        Livewire::test(ListAspirantes::class)
+            ->callAction(TestAction::make('aprobar')->table($aspirante))
+            ->assertHasNoErrors();
+
+        $this->assertNotNull($aspirante->fresh()->aprobado_el);
+    }
+
+    public function test_la_secretaria_retira_del_banco_un_perfil_que_ya_habia_aprobado(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $aspirante = Aspirante::factory()->aprobado()->create();
+
+        Livewire::test(ListAspirantes::class)
+            ->callAction(TestAction::make('retirar')->table($aspirante))
+            ->assertHasNoErrors();
+
+        $this->assertNull($aspirante->fresh()->aprobado_el);
+    }
+
+    /**
+     * El asociado no tiene panel, pero el que sí lo tiene y no puede editar
+     * aspirantes tampoco debe poder aprobarlos: la interfaz esconde y la policy
+     * impide, como en el resto de las bolsas.
+     */
+    public function test_quien_no_edita_aspirantes_no_ve_la_accion_de_aprobar(): void
+    {
+        $usuario = $this->crearUsuario(User::ROL_SUBADMIN);
+
+        // Hoy los dos roles del panel pueden editar aspirantes --es una bandeja
+        // de secretaria--, asi que la unica forma de ejercer esta guardia es
+        // quitarle el permiso al rol. Lo que se vigila aqui es que la accion le
+        // pregunte a la policy; del reparto de permisos se ocupa
+        // PermisosDeBolsaTest.
+        $usuario->roles->first()->revokePermissionTo('editar_aspirante');
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        $this->actingAs($usuario->fresh());
+
+        $aspirante = Aspirante::factory()->create();
+
+        Livewire::test(ListAspirantes::class)
+            ->assertActionHidden(TestAction::make('aprobar')->table($aspirante));
     }
 }

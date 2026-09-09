@@ -19,7 +19,9 @@ class AfiliacionController
     public function index(): View
     {
         return view('publico.afiliate', [
-            'beneficios' => Beneficio::orderBy('orden')->get(),
+            // `with` y no lazy: el sello de alcance del beneficio municipal
+            // pide su municipio, y sin esto son tantas consultas como filas.
+            'beneficios' => Beneficio::with('municipio')->orderBy('orden')->get(),
             'municipios' => Municipio::orderBy('nombre')->pluck('nombre', 'id')->all(),
             'categorias' => Categoria::orderBy('nombre')->pluck('nombre', 'id')->all(),
         ]);

@@ -31,6 +31,9 @@
             <x-publico.boton variante="contorno" :href="route('mi-cuenta.proveedores.index')">
                 Proveedores
             </x-publico.boton>
+            <x-publico.boton variante="contorno" :href="route('mi-cuenta.artistas.index')">
+                Artistas
+            </x-publico.boton>
             <x-publico.boton variante="contorno" :href="route('mi-cuenta.aspirantes.index')">
                 Banco de talento
             </x-publico.boton>

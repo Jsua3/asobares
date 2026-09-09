@@ -55,7 +55,7 @@ class InicioController
                     ->take(6)
                     ->get()
             ),
-            'beneficios' => Beneficio::orderBy('orden')->get(),
+            'beneficios' => Beneficio::with('municipio')->orderBy('orden')->get(),
             'aliadosInstitucionales' => $aliados->where('tipo', TipoAliado::Institucional)->values(),
             'aliadosComerciales' => $aliados->where('tipo', TipoAliado::Comercial)->values(),
             'proximosEventos' => Evento::publicado()->proximo()->take(3)->get(),

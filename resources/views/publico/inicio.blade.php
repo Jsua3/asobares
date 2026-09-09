@@ -411,6 +411,7 @@
                                 <x-dynamic-component :component="$beneficio->icono" class="h-5 w-5" />
                             </span>
                             <h3 class="mt-4 font-display text-lg font-semibold">{{ $beneficio->titulo }}</h3>
+                            <x-publico.sello-de-alcance :beneficio="$beneficio" />
                         </div>
                         <p class="text-sm text-tenue sm:col-span-2 lg:col-span-1 lg:pt-1">{{ $beneficio->descripcion }}</p>
                     </li>

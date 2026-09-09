@@ -216,6 +216,14 @@
         <x-publico.footer />
     @endunless
 
+    {{-- Después del pie y no entre el cromo y `main`: el apartado de las demás
+         páginas cuelga del selector de hermanos `header + aside + main`, y un
+         elemento en medio lo rompería sin decir nada. --}}
+    {{-- Después del pie y no entre el cromo y `main`: el apartado de las demás
+         páginas cuelga del selector de hermanos `header + aside + main`, y un
+         elemento en medio lo rompería sin decir nada. --}}
+    <x-publico.whatsapp-flotante />
+
     @stack('scripts')
 </body>
 </html>
