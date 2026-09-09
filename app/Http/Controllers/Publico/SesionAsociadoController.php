@@ -33,7 +33,7 @@ class SesionAsociadoController
 
     public function mostrarFormulario(): View|RedirectResponse
     {
-        if (Auth::user() instanceof User && Auth::user()->esAsociado()) {
+        if (Auth::user() instanceof User && Auth::user()->esAsociado() && Auth::user()->asociado_id !== null) {
             return redirect()->route('mi-cuenta.index');
         }
 
@@ -92,12 +92,14 @@ class SesionAsociadoController
 
         $usuario = Auth::user();
 
-        if ($usuario instanceof User && $usuario->esAsociado()) {
+        if ($usuario instanceof User && $usuario->esAsociado() && $usuario->asociado_id !== null) {
             return true;
         }
 
         // El panel y /mi-cuenta comparten guard. La pantalla ya avisa que el
         // equipo del gremio entra por /admin, así que el aviso no se pierde.
+        // Lo mismo aplica a un rol asociado sin ficha vinculada: las
+        // credenciales pueden ser correctas, pero aquí no hay portal que abrir.
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

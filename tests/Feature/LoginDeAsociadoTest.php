@@ -75,6 +75,24 @@ class LoginDeAsociadoTest extends TestCase
         $this->assertAuthenticatedAs($socio);
     }
 
+    public function test_un_asociado_sin_ficha_no_completa_el_login(): void
+    {
+        $huerfano = User::factory()->create([
+            'email' => 'huerfano@asobares.test',
+            'password' => Hash::make(self::CLAVE),
+            'asociado_id' => null,
+        ]);
+        $huerfano->syncRoles([User::ROL_ASOCIADO]);
+
+        $this->intentar($huerfano->email, self::CLAVE)
+            ->assertSessionHasErrors(['email' => self::MENSAJE_ESPERADO]);
+
+        $this->assertGuest();
+
+        $this->get(route('mi-cuenta.index'))
+            ->assertRedirect(route('mi-cuenta.entrar'));
+    }
+
     /**
      * El fondo del asunto: la respuesta a una contraseña de administrador
      * CORRECTA tiene que ser indistinguible de la respuesta a una incorrecta.
