@@ -28,13 +28,13 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 
 | | |
 |---|---|
-| Fecha | Martes 8 de septiembre de 2026 (Bogotá), noche |
-| **Dónde vive este archivo** | En `main`; medido sobre `fc2142f`, y este archivo entra en el commit de cierre |
-| `main` | `9a6fef6` **en local**, con la rama ya fusionada por avance rápido · ⚠️ **`origin/main` sigue en `0594058` y no se ha empujado, a propósito**: en este proyecto **el push a `main` despliega solo** —a los 68 s, con `migrate --force` dentro (bitácora §41, runbook §5)—, así que empujarlo es publicar. Sua pidió fusionar **sin desplegar** |
-| Rama de trabajo | **`p1-cierre-bolsas`, siete commits sobre `main` y ✅ empujada** (`origin/p1-cierre-bolsas` en `b593e27`, 8 sep noche, con Sua diciéndolo). Se abrió porque el plan de trabajo del 8 sep pide rama propia y nada de empujar a `main` directamente. Trae las cuatro entregas del plan, el Acta 07 y el expediente. **No está fusionada ni desplegada**: sirve para que Ingrid la revise |
-| Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5). Suite completa sobre `fc2142f`, el 8 sep por la noche: **1.147 casos · 1.136 pasan · 11 omitidas · 0 fallos · 5.204 aserciones** en 335 s. El árbol se contó el mismo día (§5) |
-| Producción | `https://asobares-production-0jhdcz.laravel.cloud` · **sirve `0594058`**, es decir el panel en el teléfono y nada de lo de esta tarde y noche. Lo último comprobado por contenido servido: `--asb-admin-barra-riel:4rem` y `@media (width<=63.999rem){.fi-sidebar.fi-sidebar-open:before{content:none}}` |
-| **Expediente** | Al día, incluido lo de hoy: esta foto, **§45 y §46 de `bitacora.md`**, cuatro líneas nuevas en **`encargo.md` §13**, el **Acta 07** emitida y la **matriz de trazabilidad** actualizada tras dos semanas parada (decía 820 casos y `main` en `4f15d24`) |
+| Fecha | Miércoles 9 de septiembre de 2026 (Bogotá), madrugada |
+| **Dónde vive este archivo** | En `p1-auditoria-y-metricas`; medido sobre `759b43a`, y este archivo entra en el commit de cierre |
+| `main` | `75b7646` **en local**, con `p1-cierre-bolsas` ya fusionada por avance rápido · ⚠️ **`origin/main` sigue en `0594058` y no se ha empujado, a propósito**: en este proyecto **el push a `main` despliega solo** —a los 68 s, con `migrate --force` dentro (bitácora §41, runbook §5)—, así que empujarlo es publicar |
+| Rama de trabajo | **`p1-auditoria-y-metricas`, cinco commits sobre `main`. ⚠️ Sin empujar y sin fusionar.** Trae los nueve arreglos de la auditoría del 9 sep, el **Acta 08** y el expediente. **Una migración**: `entradas` en `visitas_diarias` |
+| Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5). Suite completa sobre este árbol, el 9 sep de madrugada: **1.209 casos · 1.198 pasan · 11 omitidas · 0 fallos · 5.394 aserciones** en 353 s. El árbol se contó el mismo día (§5) |
+| Producción | `https://asobares-production-0jhdcz.laravel.cloud` · **sirve `0594058`**: el panel en el teléfono y nada de lo del 8 ni del 9. Comprobado el 9 sep: las catorce rutas públicas responden 200 entre 0,75 y 1,23 s, el sitemap sale en `https` y las cookies van `secure` |
+| **Expediente** | Al día: esta foto, **§45, §46 y §47 de `bitacora.md`**, **once líneas nuevas** en `encargo.md` §13, el **Acta 08** emitida, el **runbook §5.1** nuevo y el **manual en 1.3**. ⚠️ La **matriz de trazabilidad** se quedó en las cifras del 8 sep: hay que rehacerla antes de citarla |
 
 ## 1. Qué se exige y cuándo
 
@@ -108,7 +108,8 @@ De catorce, **doce cerrados y dos vivos** (10 y 11); ninguno se cierra escribien
 | Correo saliente (SMTP) | ❌ **Sin contratar: bloque de arriba** |
 | Bucket | ❌ Sin crear; condiciona fotos sin moderar y formatos oficiales (D-13) |
 | Dominio propio | ❌ Semana 8 (D-09) |
-| Indexación | ⚠️ `Allow: /`; decidir `noindex` (D-08) |
+| Indexación | ✅ **Resuelta el 9 sep** (D-08 cerrada, `encargo.md` §13). `SITIO_INDEXABLE`, cerrada de fábrica, gobierna a la vez `robots.txt` y la etiqueta del layout. Se abre el día del dominio propio poniéndola en `true` y redesplegando. ⚠️ **Todavía no está en producción**: vive en la rama |
+| **Scheduler (tareas diarias)** | 🚨 **Sin activar, y es lo primero de la lista.** Las tres purgas de datos personales no corren en producción hasta que se le añada un *Scheduler* al entorno en Cloud. Runbook §5.1 (nuevo). `CalendarioDeTareasTest` vigila el lado del código; el del entorno no lo puede ver una prueba |
 | Rendimiento contra la URL | ⚠️ Solo portada: **2,97 s en frío** (5 sep). Sin volver a medir desde entonces |
 | Dispositivos reales (RNF-01, RNF-07) | ❌ **Sin hacer, y es la semana (S7).** Hay dos superficies que solo cierra un aparato: la barra pública del teléfono y el riel del panel |
 | Repositorio | ⚠️ `Jsua3/asobares`, público. **Cero PR y cero CI.** `INGRIDMONWARTSKI` con `write`, sin segundo administrador (D-12) |
@@ -125,7 +126,9 @@ De catorce, **doce cerrados y dos vivos** (10 y 11); ninguno se cierra escribien
 | Base de establecimientos (`.xlsx`) | ✅ **Fuera del árbol** desde el 3 sep; `DatosInternosDelAsociadoTest` en verde |
 | Política de tratamiento de datos | ❌ D-19; bloquea al banco de talento |
 | `material/nuevomaterial/` | ✅ En `.gitignore` |
-| Retención automática | ✅ Tres purgas diarias |
+| Retención automática | ⚠️ **El código está y el disparador no.** Tres purgas diarias escritas, configuradas y probadas —y desde el 9 sep con guardia propia (`CalendarioDeTareasTest`)—, pero **en producción no las llama nadie** hasta que se active el Scheduler (D-42). Mientras tanto, `/politica-de-datos` le promete al titular un borrado automático que no está ocurriendo |
+| Banco de talento: quién lo aprueba | ✅ Desde el 9 sep queda **en la bitácora, con nombre y hora**. Era la única decisión del panel sobre datos personales sin rastro: aprobar entrega nombre, teléfono y correo a todos los afiliados, y retirar borraba la única huella |
+| Sobrescritura de perfiles ajenos | ✅ **Cerrada el 9 sep.** Un perfil aprobado ya no se toca desde el formulario público: la clave de aquel `updateOrCreate` era un correo tecleado por un anónimo, y con él cualquiera podía reescribir un perfil ajeno o sacarlo del banco |
 
 ### 2.5 Académico
 
@@ -160,7 +163,8 @@ Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen�
 | D-05 | **Texto propio de «Quiénes somos»**; nombres y cargos | Natalia + Nacional | 5 ago / 28 ago | — |
 | D-06 | **Logos** institucionales y de aliados en buena resolución | Natalia | 31 ago | — |
 | D-07 | **SMTP con el correo del gremio** (bloque de arriba) | Natalia + Sua (A) · Nacional (B, C) | 15 ago / 30 ago / 1 sep | — |
-| D-08 | **Indexación antes del lanzamiento** | Natalia + equipo | 30 ago | — |
+| **D-42** | **Activar el Scheduler en Laravel Cloud.** No es una decisión: es un clic que solo puede dar una persona, y sin él las tres purgas de datos personales no corren nunca mientras la política publicada promete que sí. Runbook §5.1 | Sua | 9 sep | — |
+| **D-43** | **¿Vuelve la campana del panel?** El 7 sep se apagó (D-L22) y el 9 se retiró a quien escribía en ella, que llevaba dos días guardando avisos invisibles. Hoy se avisa por contador de menú y tablero. Si el gremio quiere avisos de verdad —campana, correo o los dos—, es un frente propio con su decisión, tal como dejó dicho D-L22 | Sua + Natalia | 9 sep | — |
 | D-09 | **Dominio propio** | Natalia | 5 ago / 28 ago | — |
 | D-10 | **Pasarela**: «solo Bold» por escrito; PSE o QR; documentos de Bold | Natalia + contadora | 28 ago | — |
 | D-11 | **Cartera**: Excel real de la contadora; Drive o carga manual | Luisa + Natalia | 28 ago | — |
@@ -179,6 +183,8 @@ Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen�
 
 No se «arregla de paso»:
 
+- **De la auditoría del 9 sep, lo que se dejó dicho y no cerrado:** las **once capturas del manual** son del 18 de agosto y el panel se rehizo el 7 y el 8 de septiembre, así que enseñan una pantalla que ya no existe — el texto sí está al día, y solo Sua o Ingrid pueden rehacerlas porque el segundo factor no deja entrar a una sesión automatizada (§11 del manual trae el guion). La **matriz de trazabilidad** se quedó en las cifras del 8 sep. Y el conteo de entradas **empieza el 9 de septiembre**: las filas anteriores llevan cero porque el dato no se recogía, no porque no hubiera visitas, y eso hay que decirlo la primera vez que se enseñe la gráfica.
+- **Los tres widgets del flujo no se han visto con ojos.** Se entró al panel de verdad —el código del segundo factor sale en `storage/logs/laravel.log` con el correo local— y ahí se acabó: el navegador de esta máquina no compone con la ventana detrás, `IntersectionObserver` no dispara y los nueve widgets diferidos se quedan en «Cargando…». Hay pruebas de renderizado completo, que es el sustituto honesto, no el equivalente.
 - **Del panel en el teléfono (8 sep):** el tacto del resorte solo lo cierra un aparato de verdad; se ajusta con `ARRASTRE` y `AMORTIGUACION`, una línea cada una.
 - **Del plan de trabajo (8 sep, noche):** las dos gráficas de analítica **no se han visto con ojos**, porque el segundo factor impide que una sesión automatizada abra el panel —mismo hueco que la barra lateral, y sin maqueta esta vez—; el filtro `filament.` del contador de visitas es seguro que hoy no puede dispararse, y queda dicho en el código para que nadie lo lea como algo respaldado por una prueba; y el sello de alcance **etiqueta cada beneficio pero no los agrupa** en las tres pantallas, que es lo mínimo que distingue sin rehacer tres vistas.
 - **De la barra pública B, anotado por su revisión final:** la transición de `gap` aporta poco y cuesta un reflow por fotograma durante 620 ms; `backdrop-filter` no se transiciona (aparece de golpe); el brillo de los tres módulos se mueve al unísono (así lo manda la spec; el comentario del marcado dice otra cosa); `$rol`/`$prefijoRol` son dos `match` que recalculan lo mismo.
@@ -200,22 +206,26 @@ Todas medidas el **8 de septiembre de 2026 sobre `fc2142f`** (la rama), salvo la
 
 | Cifra | Valor | Comando |
 |---|---|---|
-| Confirmaciones | **395** (380 de Sua, 15 de Ingrid) | `git rev-list --count HEAD` · `git shortlog -sn HEAD` |
-| Migraciones | **42** | `Get-ChildItem database/migrations -File` |
+| Confirmaciones | **402** | `git rev-list --count HEAD` |
+| Migraciones | **43** (entra `entradas` en `visitas_diarias`) | `Get-ChildItem database/migrations -File` |
 | Modelos | **22** | `Get-ChildItem app/Models/*.php` |
 | Sembradores | 21 (+ `Support/`) | `Get-ChildItem database/seeders/*.php` |
-| Archivos de prueba | **90** | `Get-ChildItem tests -Recurse -Filter *Test.php` |
-| Métodos de prueba | **876** | `Select-String '^\s*public function test_'` |
-| Vistas Blade | **77** | `Get-ChildItem resources/views -Recurse -Filter *.blade.php` |
+| Fábricas | **17** (entra `MensajeFactory`) | `Get-ChildItem database/factories/*.php` |
+| Archivos de prueba | **97** | `Get-ChildItem tests -Recurse -Filter *Test.php` |
+| Métodos de prueba | **933** | `Select-String '^\s*public function test_'` |
+| Vistas Blade | **78** | `Get-ChildItem resources/views -Recurse -Filter *.blade.php` |
 | Componentes públicos | **21** | `Get-ChildItem resources/views/components/publico/*.blade.php` |
-| Panel | 19 recursos · 6 páginas · 20 policies · **7 widgets** | `Get-ChildItem app/Filament/…` |
+| Panel | 19 recursos · 6 páginas · 20 policies · **9 widgets** | `Get-ChildItem app/Filament/…` |
 | Comandos de Artisan propios | 6 | `Get-ChildItem app/Console/Commands` |
-| Enums | **17** (entra `Alcance`) | `Get-ChildItem app/Enums` |
+| Enums | **17** | `Get-ChildItem app/Enums` |
 | Controladores públicos | **18** | `Get-ChildItem app/Http/Controllers/Publico/*.php` |
-| Middleware propio | **3** (entra `ContarVisitaDelSitio`) | `Get-ChildItem app/Http/Middleware` |
+| Middleware propio | **3** | `Get-ChildItem app/Http/Middleware` |
+| Archivos de configuración | **17** (entra `sitio.php`) | `Get-ChildItem config/*.php` |
 | Rutas GET propias | **89** | `php artisan route:list --method=GET --except-vendor --json` |
-| Ajustes que siembra `SettingSeeder` | **126**; en producción **109** (esa segunda es del 3 sep: el sembrador no se ha vuelto a correr allí) | reflexión sobre `SettingSeeder::ajustes()` |
-| **Suite completa** | **1.147 casos · 1.136 pasan · 11 omitidas · 0 fallos · 5.204 aserciones** · 335 s (8 sep, noche, sobre `fc2142f`) | `php artisan test --compact` |
+| Ajustes que siembra `SettingSeeder` | **124** (bajan dos: `hero_subtitulo` y `cifra_afiliados`, jubilados por no leerlos nadie); en producción **109**, del 3 sep | reflexión sobre `SettingSeeder::ajustes()` |
+| **Suite completa** | **1.209 casos · 1.198 pasan · 11 omitidas · 0 fallos · 5.394 aserciones** · 353 s (9 sep, madrugada, sobre `759b43a`) | `php artisan test --compact` |
+| Clases nuevas de la auditoría | `CalendarioDeTareasTest` 6 · `AjustesQueSirvenParaAlgoTest` 4 · `IndexacionDelSitioTest` 6 · `AvisoDeMensajeAlGremioTest` 15 · `FlujoDeEntradasAlSitioTest` 15 · `Panel\BitacoraTest` 3 · `Panel\AvisosQueSeVenTest` 1 | `php artisan test --compact --filter=` |
+| Comprobado contra servidor corriendo (9 sep) | `noindex, nofollow` en la portada servida · `Disallow: /` en el `robots.txt` servido · 5 vacantes en el sitemap · **0** visitas contadas para `sitemap`, `robots` y `guia.formato` | `curl` + `php artisan tinker` sobre `artisan serve` |
 | Suite sobre el árbol desplegado (`0594058`) | 1.105 casos · 1.094 pasan · 11 omitidas · 0 fallos · 5.048 aserciones · 317 s (8 sep, tarde) | `php artisan test --compact` |
 | Clases nuevas del plan de trabajo | `AccesoDeAsociadosTest` 16 · `ModeracionDeBolsasTest` 27 · `BotonFlotanteDeWhatsappTest` 9 · `BeneficiosPorAlcanceTest` 10 · `AnaliticaDelSitioTest` 14 | `php artisan test --compact --filter=` |
 | Botón de WhatsApp, medido en Chromium (8 sep) | 56×56 px · a 375: acaba en 732 con la barra de pestañas empezando en 744, **12 px de holgura y sin solaparse** · a 1.280: 24 px del borde · los cinco puntos del círculo devuelven el botón (las esquinas del rectángulo caen fuera del círculo, que no es defecto) | `javascript_tool` sobre el servidor local |
@@ -230,7 +240,9 @@ Todas medidas el **8 de septiembre de 2026 sobre `fc2142f`** (la rama), salvo la
 
 ## 6. Lo siguiente, en orden
 
-1. **Empujar `main` cuando se quiera desplegar, y no antes.** La rama está publicada para que Ingrid la revise y `main` ya la tiene fusionada en local; lo único que falta es un `git push`, **que despliega solo**. Trae **tres migraciones**, y en cuanto entre: **el banco de talento se ve vacío** hasta que la secretaría apruebe los perfiles (D-40) y **los contactos de artistas desaparecen de la parte pública**. Ninguna es un problema; las tres se notan.
+0. 🚨 **ACTIVAR EL SCHEDULER EN EL PANEL DE LARAVEL CLOUD.** Es un clic humano, no lo puede hacer una sesión ni una prueba, y sin él **los datos personales no se borran nunca** — mientras `/politica-de-datos` le promete por escrito al titular que sí, y el manual se lo promete al gremio. Environment → Resources → añadir *Scheduler*. Se verifica con `cloud environment:show -n` y, a las 24 horas, buscando `Depuración de datos` en la Bitácora del panel. El paso entero está en el **runbook §5.1**. Esto es de hoy y no puede esperar a la reunión.
+
+1. **Empujar `main` cuando se quiera desplegar, y no antes.** Hay **dos ramas sin fusionar**: `p1-cierre-bolsas` (ya en `main` local) y `p1-auditoria-y-metricas` (los nueve arreglos del 9 sep). Juntas traen **cuatro migraciones** y, en cuanto entren, tres cosas que se notan y ninguna es un problema: **el banco de talento se ve vacío** hasta que la secretaría apruebe los perfiles (D-40), **los contactos de artistas desaparecen de la parte pública**, y **el sitio deja de ser indexable** hasta que se ponga `SITIO_INDEXABLE=true` el día del dominio propio.
 2. **Confirmar que el documento de práctica se envió** el 4 sep (Sua). Si no, es 0.0 y hay que hablar con el docente.
 3. **Pedirle a Ingrid la lista de la auditoría** (D-38): sin los 2 FAIL y los 3 NOT TESTED, el bloque de QA del plan no se puede cerrar.
 4. **Ver las dos superficies nuevas en un teléfono real** (Android y un iPhone), que es lo que exige la S7 y lo que ya no puede esperar: la barra pública del teléfono —Safari de iOS, la barra de direcciones que crece y encoge, el rebote elástico, el teclado, la transparencia reducida— y el **riel del panel**, sobre todo el tacto del resorte. Si algo cede, se corrige sobre `main` y se vuelve a empujar.
