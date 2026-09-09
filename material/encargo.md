@@ -351,6 +351,7 @@ Cada una costó al menos una ronda. Dos o tres líneas por trampa; el detalle y 
 - **`now()->subMonths(6)` un 30 de agosto da el 2 de marzo, no el 28 de febrero.** `startOfMonth()` primero; `subMonthsNoOverflow()` donde el límite no sea inicio de mes. Toda prueba que dependa de `now()` fija la fecha en días que desbordan.
 - **Un plazo de retención en cero convierte la purga en «borra todo»**, y a cero se llega solo (variable vacía, `config:cache` viejo). Los comandos abortan si el plazo no es un entero ≥ 1.
 - Al reconstruir una tabla en una migración, **nombrar los índices**: `Schema::rename()` no los renombra y el `down()` revienta. En SQLite se reconstruye, no se altera.
+- **Una columna `date` con casteo a fecha se guarda distinto según el motor.** Eloquent la serializa con el formato de fecha y hora del modelo, y SQLite —que no impone tipos— guarda `2026-09-08 00:00:00` donde PostgreSQL guarda `2026-09-08`: la misma fila con dos formas, y las comparaciones de ventana dependiendo de eso. Cuando la columna es la **clave de un cubo** y no un instante —el día de un contador—, se deja sin castear y se trata como la cadena `Y-m-d` que es. (bitácora §46)
 
 **Pagos y CSV (§15, §8, §9)**
 - La firma de Bold es HMAC-SHA256 **del cuerpo en Base64**, comparada en hexadecimal; la prueba congela cuerpo y firma literales.
