@@ -166,25 +166,41 @@ usuario** le dice a la oficina. Un despliegue sin scheduler convierte las dos fr
 y deja al gremio acumulando datos personales sin caducidad, que es exactamente lo que la Ley
 1581 no permite.
 
-**Qué hay que hacer, una sola vez por entorno:** añadir un **Scheduler** al entorno en el panel
-de Laravel Cloud (Environment → Resources). Cloud ejecuta entonces `php artisan schedule:run`
-cada minuto, que es lo que dispara las tres.
+**No es un recurso del entorno: es una propiedad de la INSTANCIA.** Buscarlo como recurso
+aparte —«Environment → Resources»— es perder el rato, porque esa pestaña no existe. Vive en el
+cómputo, o sea la tarjeta **App cluster** del diagrama de Environment; el campo se llama
+`usesScheduler`. Con él encendido, Cloud ejecuta `php artisan schedule:run` cada minuto, que es
+lo que dispara las tres purgas.
 
-**Cómo se comprueba que quedó puesto:**
+**Cómo se comprueba en qué estado está**, que es lo primero y no cuesta nada:
 
 ```sh
-cloud environment:show -n
+cloud instance:list --json
 ```
 
-Tiene que aparecer el recurso Scheduler. A las 24 horas, la comprobación real: entrar al panel
-→ **Bitácora** y buscar `Depuración de datos`. Los tres comandos escriben ahí cada vez que
-borran algo. *Ojo con leer mal el silencio:* si no había nada que borrar tampoco escriben, así
-que la ausencia de entradas no prueba que esté roto — pero su presencia sí prueba que funciona.
-Para forzar una comprobación inmediata sin borrar nada:
+Se lee `"usesScheduler"`. Medido el 9 de septiembre de 2026 en `production`: **`false`**. Las
+purgas llevaban sin correr desde el primer despliegue.
+
+**Cómo se enciende.** Por el panel, abriendo la tarjeta **App cluster** y activando el
+programador; o de una vez, que es más rápido y deja rastro en la terminal:
+
+```sh
+cloud instance:update App --uses-scheduler=true
+```
+
+⚠️ **Lo que pasa esa misma madrugada.** A las 03:30, 03:45 y 03:50 se ejecutan las tres purgas
+por primera vez, y **borran de verdad** todo lo que ya cumplió su plazo de retención. Es lo que
+tiene que pasar —y lo que la política publicada lleva prometiendo desde agosto— pero conviene
+saberlo antes y no descubrirlo. Para ver qué se llevarían por delante, sin borrar nada:
 
 ```sh
 cloud command:run -n "php artisan bolsas:depurar --pretend"
 ```
+
+**La comprobación de que quedó funcionando**, a las 24 horas: entrar al panel → **Bitácora** y
+buscar `Depuración de datos`. Los tres comandos escriben ahí cada vez que borran algo. *Ojo con
+leer mal el silencio:* si no había nada que borrar tampoco escriben, así que la ausencia de
+entradas no prueba que esté roto — pero su presencia sí prueba que funciona.
 
 **Lo que vigila la suite:** `tests/Feature/CalendarioDeTareasTest.php` falla si alguien quita
 una de las tres tareas o le cambia la frecuencia. Lo que **no** puede vigilar —y por eso vive
