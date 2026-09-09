@@ -9,6 +9,7 @@ use App\Mail\NuevaPqr;
 use App\Mail\NuevoMensajeContacto;
 use App\Models\Mensaje;
 use App\Services\CorreosInstitucionales;
+use App\Support\AvisoDeMensajeAlGremio;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Mail;
@@ -39,6 +40,11 @@ class ContactoController
         }
 
         $mensaje = Mensaje::create($datos);
+
+        // Al gremio también hay que avisarle (Acta 08, A-04). Antes solo se
+        // avisaba a quien escribía: la queja se guardaba y el plazo legal de
+        // quince días hábiles empezaba a correr sin que nadie lo supiera.
+        AvisoDeMensajeAlGremio::enviar($mensaje);
 
         if ($mensaje->esPqr()) {
             $this->correosInstitucionales->enviar(new NuevaPqr($mensaje), 'pqr');

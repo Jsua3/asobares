@@ -146,6 +146,86 @@ Por qué cada uno:
   eventos, logos de aliados y fotos de artistas.
 - `migrate --force` — sin `--force` se queda pidiendo confirmación a nadie.
 
+### 5.1 ⚠️ EL SCHEDULER NO VIENE DE FÁBRICA ⚠️
+
+**Sin este paso los datos personales no se borran nunca.** Es un recurso aparte del entorno,
+no una consecuencia de desplegar, y ni el comando de construcción ni el de despliegue lo
+encienden.
+
+`routes/console.php` programa tres purgas diarias:
+
+| Hora | Comando | Qué borra | Plazo |
+|---|---|---|---|
+| 03:30 | `bolsas:depurar` | Postulaciones y perfiles del banco de talento | 6 / 12 meses |
+| 03:45 | `mensajes:depurar` | Mensajes de contacto y PQR | 12 / 24 meses |
+| 03:50 | `inscripciones:depurar` | Inscripciones a eventos | 24 meses |
+
+Esas tres son el mecanismo con el que se cumple lo que **`/politica-de-datos` le promete por
+escrito al titular** —«Pasado cada plazo, el borrado es automático»— y lo que el **manual de
+usuario** le dice a la oficina. Un despliegue sin scheduler convierte las dos frases en falsas
+y deja al gremio acumulando datos personales sin caducidad, que es exactamente lo que la Ley
+1581 no permite.
+
+**No es un recurso del entorno: es una propiedad de la INSTANCIA.** Buscarlo como recurso
+aparte —«Environment → Resources»— es perder el rato, porque esa pestaña no existe. Vive en el
+cómputo, o sea la tarjeta **App cluster** del diagrama de Environment; el campo se llama
+`usesScheduler`. Con él encendido, Cloud ejecuta `php artisan schedule:run` cada minuto, que es
+lo que dispara las tres purgas.
+
+**Cómo se comprueba en qué estado está**, que es lo primero y no cuesta nada:
+
+```sh
+cloud instance:list --json
+```
+
+Se lee `"usesScheduler"`. Medido el 9 de septiembre de 2026 en `production`: **`false`**. Las
+purgas no habían corrido una sola vez desde el primer despliegue.
+
+⚠️ **Antes de encenderlo, mirar qué se llevaría la primera pasada.** A las 03:30, 03:45 y 03:50
+de la madrugada siguiente se ejecutan las tres purgas y **borran de verdad** lo que ya cumplió
+su plazo. Es lo que tiene que pasar —y lo que la política publicada lleva prometiendo desde
+agosto— pero se mira antes, no se descubre después:
+
+```sh
+cloud command:run -n --cmd "php artisan bolsas:depurar --pretend"
+cloud command:run -n --cmd "php artisan mensajes:depurar --pretend"
+cloud command:run -n --cmd "php artisan inscripciones:depurar --pretend"
+```
+
+> **El comando va en `--cmd`, no como argumento suelto.** `cloud command:run -n "php artisan …"`
+> —que es lo que decía este runbook hasta el 9 de septiembre de 2026— responde
+> `{"error":true,"message":"cmd is required. Provide --cmd option."}`. Se descubrió usándolo.
+
+**Cómo se enciende.** Por el panel, abriendo la tarjeta **App cluster** del diagrama de
+*Environment* y activando el programador; o de una vez, que es más rápido y deja rastro:
+
+```sh
+cloud instance:update App --uses-scheduler=true --force
+```
+
+**Comprobación inmediata de que el proceso vivo ve las tareas**, sin esperar a la madrugada:
+
+```sh
+cloud command:run -n --cmd "php artisan schedule:list --no-ansi"
+```
+
+Tienen que salir las tres con su `Next Due`.
+
+> ✅ **Encendido el 9 de septiembre de 2026, 13:52 UTC.** `usesScheduler` pasó a `true` y
+> `schedule:list` en producción devolvió las tres tareas. Los tres simulacros previos dieron
+> **0, 0 y 0**: la primera pasada no borra nada, porque el sitio lleva menos de un mes en
+> internet y ningún plazo de retención ha vencido todavía. La prueba de que corrieron se ve en
+> la **Bitácora** a partir del 10 de septiembre.
+
+**La comprobación de que quedó funcionando**, a las 24 horas: entrar al panel → **Bitácora** y
+buscar `Depuración de datos`. Los tres comandos escriben ahí cada vez que borran algo. *Ojo con
+leer mal el silencio:* si no había nada que borrar tampoco escriben, así que la ausencia de
+entradas no prueba que esté roto — pero su presencia sí prueba que funciona.
+
+**Lo que vigila la suite:** `tests/Feature/CalendarioDeTareasTest.php` falla si alguien quita
+una de las tres tareas o le cambia la frecuencia. Lo que **no** puede vigilar —y por eso vive
+aquí— es si el entorno remoto tiene quien las llame.
+
 ---
 
 ## 6. Las variables del entorno

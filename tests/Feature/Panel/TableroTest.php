@@ -9,9 +9,11 @@ use App\Enums\EstadoTransaccion;
 use App\Enums\MetodoPago;
 use App\Enums\TipoMensaje;
 use App\Filament\Widgets\AsociadosPorMunicipio;
+use App\Filament\Widgets\EntradasAlSitio;
 use App\Filament\Widgets\InscripcionesDelMes;
 use App\Filament\Widgets\PaginasMasVisitadas;
 use App\Filament\Widgets\PendientesDeAprobacion;
+use App\Filament\Widgets\PorDondeEntranAlSitio;
 use App\Filament\Widgets\RecaudoMensual;
 use App\Filament\Widgets\ResumenDelGremio;
 use App\Filament\Widgets\UltimasTransacciones;
@@ -414,11 +416,15 @@ class TableroTest extends TestCase
                 RecaudoMensual::class,
                 AsociadosPorMunicipio::class,
                 UltimasTransacciones::class,
+                // Las tres del flujo del sitio (Acta 08, A-03, 9 sep 2026):
+                // los números, la curva y por dónde entra la gente.
+                EntradasAlSitio::class,
                 VisitasDelSitio::class,
+                PorDondeEntranAlSitio::class,
                 PaginasMasVisitadas::class,
             ],
             $widgets,
-            'El tablero debe traer exactamente estos siete widgets: ni de menos, ni con ninguna gráfica del observatorio colada por discoverWidgets().'
+            'El tablero debe traer exactamente estos nueve widgets: ni de menos, ni con ninguna gráfica del observatorio colada por discoverWidgets().'
         );
 
         foreach ($widgets as $widget) {
@@ -473,17 +479,35 @@ class TableroTest extends TestCase
                 'md' => 'full',
                 'xl' => 'full',
             ],
-            // La banda de analítica repite el reparto de la de recaudo: 4 + 2
-            // completan las seis columnas de `xl`.
+            /*
+             * La banda del flujo del sitio, rehecha el 9 de septiembre de 2026
+             * con el Acta 08 (A-03): tres números a lo ancho, debajo la curva de
+             * treinta días también a lo ancho --dos series no caben legibles en
+             * cuatro columnas-- y al pie las dos listas ordenadas, 3 + 2 = 6.
+             *
+             * Las dos van juntas a propósito: una dice por dónde ENTRA la gente y
+             * la otra qué MIRA una vez dentro, y leerlas al lado es la mitad de
+             * lo que hace útil la cifra.
+             */
+            EntradasAlSitio::class => [
+                'default' => 'full',
+                'md' => 'full',
+                'xl' => 'full',
+            ],
             VisitasDelSitio::class => [
                 'default' => 'full',
                 'md' => 'full',
-                'xl' => 4,
+                'xl' => 'full',
+            ],
+            PorDondeEntranAlSitio::class => [
+                'default' => 'full',
+                'md' => 'full',
+                'xl' => 3,
             ],
             PaginasMasVisitadas::class => [
                 'default' => 'full',
                 'md' => 'full',
-                'xl' => 2,
+                'xl' => 3,
             ],
         ];
     }

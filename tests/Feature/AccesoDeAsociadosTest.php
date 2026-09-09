@@ -177,24 +177,123 @@ class AccesoDeAsociadosTest extends TestCase
      * cambia despues de aprobado, vuelve a la cola. Si no, aprobar una vez seria
      * una llave para cambiar el perfil por cualquier otra cosa.
      */
-    public function test_volver_a_dejar_el_perfil_lo_devuelve_a_revision(): void
+    /**
+     * ⚠️ Esta prueba cambió de contenido el 9 de septiembre de 2026, y conviene
+     * saber por qué.
+     *
+     * Antes afirmaba que volver a enviar el formulario sobrescribía el perfil y
+     * lo devolvía a revisión. La intención era buena --que aprobar una vez no
+     * fuera una llave para cambiar el perfil por cualquier otra cosa sin que
+     * nadie lo mirara-- pero el mecanismo abría un agujero: la clave de
+     * `updateOrCreate` es un CORREO QUE TECLEA UN ANÓNIMO, sin verificación
+     * ninguna. Con eso, quien conociera el correo de alguien del banco podía
+     * reescribirle nombre, teléfono y cargo --desviando a los establecimientos
+     * hacia otro número-- y, peor, sacarlo del banco con solo enviar el
+     * formulario, porque cada envío ponía `aprobado_el` en nulo. A seis envíos
+     * por minuto, vaciar el banco entero era cuestión de rato.
+     *
+     * La regla nueva cumple la misma intención y cierra el agujero: **un perfil
+     * ya aprobado no se toca desde el formulario público**. Ni se sobrescribe ni
+     * se desaprueba. Para cambiarlo hay que escribirle al gremio, y la
+     * secretaría lo edita desde el panel.
+     */
+    public function test_un_perfil_ya_aprobado_no_se_puede_sobrescribir_desde_el_formulario(): void
     {
         $aspirante = Aspirante::factory()->aprobado()->create([
-            'correo' => 'reincidente@aspirante.test',
-            'nombre' => 'Nombre Aprobado',
+            'correo' => 'aprobada@aspirante.test',
+            'nombre' => 'Nombre Real',
+            'telefono' => '3001112233',
         ]);
 
         $this->post(route('empleo.aspirante'), [
-            'nombre' => 'Nombre Cambiado',
-            'correo' => 'reincidente@aspirante.test',
+            'nombre' => 'Nombre Suplantado',
+            'correo' => 'aprobada@aspirante.test',
+            'telefono' => '3009998877',
             'cargo_interes' => 'Chef',
             'categoria_cargo' => CargoDelSector::Cocina->value,
             'acepta_datos' => '1',
         ])->assertRedirect();
 
-        $this->assertSame('Nombre Cambiado', $aspirante->fresh()->nombre);
+        $fresco = $aspirante->fresh();
 
-        $this->assertNull($aspirante->fresh()->aprobado_el);
+        $this->assertSame('Nombre Real', $fresco->nombre, 'Un tercero no reescribe el perfil de nadie.');
+        $this->assertSame('3001112233', $fresco->telefono, 'Ni le cambia el teléfono por el suyo.');
+        $this->assertSame(1, Aspirante::count(), 'Tampoco se cuela un duplicado por la puerta de atrás.');
+    }
+
+    /**
+     * El daño más barato del agujero anterior: no hacía falta ni suplantar a
+     * nadie, bastaba con enviar el formulario con el correo de la víctima para
+     * que `aprobado_el` volviera a nulo y su perfil desapareciera del banco.
+     */
+    public function test_un_tercero_no_puede_sacar_del_banco_a_un_perfil_aprobado(): void
+    {
+        $aspirante = Aspirante::factory()->aprobado()->create(['correo' => 'aprobada@aspirante.test']);
+
+        $this->post(route('empleo.aspirante'), [
+            'nombre' => 'Quien Sea',
+            'correo' => 'aprobada@aspirante.test',
+            'cargo_interes' => 'Chef',
+            'categoria_cargo' => CargoDelSector::Cocina->value,
+            'acepta_datos' => '1',
+        ])->assertRedirect();
+
+        $this->assertNotNull(
+            $aspirante->fresh()->aprobado_el,
+            'Nadie saca a otro del banco de talento enviando un formulario público.'
+        );
+    }
+
+    /**
+     * Corregir lo propio antes de que la secretaría lo mire sigue funcionando:
+     * un perfil todavía sin aprobar no lo ve nadie más que la oficina, así que
+     * dejarlo actualizable es la conveniencia de quien se equivocó tecleando y
+     * no una llave sobre datos de nadie.
+     */
+    public function test_corregir_un_perfil_todavia_sin_aprobar_sigue_funcionando(): void
+    {
+        $aspirante = Aspirante::factory()->create([
+            'correo' => 'pendiente@aspirante.test',
+            'nombre' => 'Nombre Con Herrata',
+            'aprobado_el' => null,
+        ]);
+
+        $this->post(route('empleo.aspirante'), [
+            'nombre' => 'Nombre Corregido',
+            'correo' => 'pendiente@aspirante.test',
+            'cargo_interes' => 'Chef',
+            'categoria_cargo' => CargoDelSector::Cocina->value,
+            'acepta_datos' => '1',
+        ])->assertRedirect();
+
+        $this->assertSame('Nombre Corregido', $aspirante->fresh()->nombre);
+        $this->assertSame(1, Aspirante::count(), 'Sigue siendo una persona, un registro.');
+    }
+
+    /**
+     * El aviso tiene que ser el MISMO se conozca o no el correo. Si dijera
+     * «ya tenías un perfil» a unos y «recibimos el tuyo» a otros, el formulario
+     * se convertiría en un buscador: cualquiera podría averiguar, correo a
+     * correo, quién está inscrito en el banco de talento. Eso es justo el dato
+     * personal que este módulo existe para proteger.
+     */
+    public function test_el_aviso_no_delata_si_el_correo_ya_estaba_en_el_banco(): void
+    {
+        Aspirante::factory()->aprobado()->create(['correo' => 'conocida@aspirante.test']);
+
+        $envio = fn (string $correo) => $this->post(route('empleo.aspirante'), [
+            'nombre' => 'Alguien',
+            'correo' => $correo,
+            'cargo_interes' => 'Chef',
+            'categoria_cargo' => CargoDelSector::Cocina->value,
+            'acepta_datos' => '1',
+        ])->getSession()->get('exito');
+
+        $this->assertSame(
+            $envio('desconocida@aspirante.test'),
+            $envio('conocida@aspirante.test'),
+            'El formulario no puede servir para averiguar quién está en el banco.'
+        );
     }
 
     // --- Artistas: el contacto tambien es contraprestacion de la cuota ---

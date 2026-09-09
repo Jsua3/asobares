@@ -3,8 +3,10 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Widgets\AsociadosPorMunicipio;
+use App\Filament\Widgets\EntradasAlSitio;
 use App\Filament\Widgets\PaginasMasVisitadas;
 use App\Filament\Widgets\PendientesDeAprobacion;
+use App\Filament\Widgets\PorDondeEntranAlSitio;
 use App\Filament\Widgets\RecaudoMensual;
 use App\Filament\Widgets\ResumenDelGremio;
 use App\Filament\Widgets\UltimasTransacciones;
@@ -173,7 +175,12 @@ class AdminPanelProvider extends PanelProvider
                 RecaudoMensual::class,
                 AsociadosPorMunicipio::class,
                 UltimasTransacciones::class,
+                // El flujo del sitio, de arriba abajo: primero los tres números
+                // (Acta 08, A-03), luego la curva de 30 días, luego por dónde
+                // entran y qué se mira una vez dentro.
+                EntradasAlSitio::class,
                 VisitasDelSitio::class,
+                PorDondeEntranAlSitio::class,
                 PaginasMasVisitadas::class,
             ])
             ->assets($this->assetsDelPanel())

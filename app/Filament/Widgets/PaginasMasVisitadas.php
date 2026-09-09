@@ -28,7 +28,7 @@ class PaginasMasVisitadas extends ChartWidget
     protected int|string|array $columnSpan = [
         'default' => 'full',
         'md' => 'full',
-        'xl' => 2,
+        'xl' => 3,
     ];
 
     private const int DIAS = 30;

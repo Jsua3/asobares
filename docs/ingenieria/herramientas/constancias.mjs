@@ -7,6 +7,7 @@
  *   4. Ampliación de alcance                         (revisión del 28 ago 2026)
  *   5. Ampliación de alcance: cifras del gremio en la portada (petición del 1 sep 2026)
  *   6. Ampliación de alcance: beneficios por territorio y analítica (plan del 8 sep 2026)
+ *   7. Ampliación de alcance: flujo de entradas y aviso de PQR    (petición del 9 sep 2026)
  *
  *     node docs/ingenieria/herramientas/constancias.mjs            # todos
  *     node docs/ingenieria/herramientas/constancias.mjs "Acta 05"  # solo el que contenga ese texto
@@ -656,6 +657,106 @@ ${PIE_LEGAL}
 
 /* ------------------------------------------------------------------------- */
 
+const flujoYAvisos = documento({
+    referencia: 'Acta 08 · Ampliación de alcance<br>Petición de la dirección del 9 de septiembre de 2026<br>Fecha de emisión: 9 de septiembre de 2026',
+    titulo: 'Acta de ampliación de alcance: flujo de entradas al sitio y aviso de PQR',
+    subtitulo: 'Decisión sobre dos peticiones posteriores al Acta 07 · ASOBARES Capítulo Quindío',
+    estiloExtra: 'tbody tr { page-break-inside: avoid; }',
+    cuerpo: `
+<dl class="ficha">
+  <dt>Fecha de la sesión</dt><dd>_______________________</dd>
+  <dt>Lugar</dt><dd>_______________________</dd>
+  <dt>Modalidad</dt><dd>_______________________</dd>
+  <dt>Quién decide</dt><dd>_______________________</dd>
+</dl>
+
+<h2>1. Objeto</h2>
+<p>Dejar constancia escrita de la decisión de la dirección ejecutiva sobre <strong>dos peticiones posteriores al Acta 07</strong> que <strong>no forman parte del alcance contratado</strong>: no figuran en el cronograma firmado ni entre los requisitos de la especificación (ERS v3.0, RF-01 a RF-62). La primera la formuló la dirección —«métricas de la página: flujo de personas que entran a la página»—; la segunda la detectó una auditoría del equipo el 9 de septiembre de 2026 y se somete a decisión porque construirla es ampliar, no corregir.</p>
+
+<div class="nota">
+<strong>Por qué esta acta y no una corrección más.</strong> La auditoría del 9 de septiembre encontró nueve defectos de lo <em>ya contratado</em> —el sitemap sin las vacantes, la analítica contando descargas, un perfil del banco de talento sobrescribible por un tercero, entre otros—. Esos <strong>se arreglan sin acta</strong>, porque arreglar lo contratado es la obligación, no una ampliación. Aquí solo entra lo que añade función nueva.
+</div>
+
+<h2>2. La regla que gobierna esta decisión</h2>
+<p>El alcance quedó congelado el <strong>14 de agosto de 2026</strong>. Rige el mismo criterio del Acta 07: la ausencia de una funcionalidad no constituye incumplimiento mientras no figure en el cronograma firmado ni en la especificación, y <strong>toda ampliación se registra por escrito antes de codificarse</strong>. Esta acta se emite antes de la primera línea de código de las dos.</p>
+<p>La fecha límite es el <strong>22 de septiembre de 2026</strong>. El punto 5 existe para dejar dicho qué se desplaza.</p>
+
+<h2>3. Lo que se somete a decisión</h2>
+<table>
+  <thead>
+    <tr>
+      <th style="width:6%">Ref.</th>
+      <th style="width:28%">Lo que se pidió</th>
+      <th style="width:36%">Qué implica construirlo</th>
+      <th style="width:10%">Antes del 22 sep</th>
+      <th style="width:10%">Fase II</th>
+      <th style="width:10%">Se descarta</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="white-space:nowrap">A-03</td>
+      <td><strong>Flujo de personas que entran a la página</strong>: cuánta gente llega al sitio, por dónde entra y cómo evoluciona.</td>
+      <td>El Acta 07 dejó construido un contador anónimo de <strong>páginas servidas</strong> por ruta y día. Eso responde «qué se mira y cuánto», pero no «cuánta gente entra»: quien abre cuatro fichas cuenta cuatro. Lo que falta es distinguir la <strong>llegada</strong> —la primera página de una visita— del resto de la navegación. Se hace mirando el <code>Referer</code> de la petición: si no viene de nuestro propio dominio, es alguien que entra. <strong>Ese encabezado se mira y no se guarda</strong>, exactamente el trato que ya se le da al navegador para descartar rastreadores. Implica una columna nueva en el contador, ampliar el middleware, dos gráficas y una tarjeta en el tablero. <strong>No es lo mismo que «visitantes únicos»</strong>: dos visitas de la misma persona en dos días cuentan dos. Ver el punto 4.</td>
+      <td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td>
+    </tr>
+    <tr>
+      <td style="white-space:nowrap">A-04</td>
+      <td><strong>Aviso al gremio cuando entra una PQR o un mensaje</strong>, y control del plazo legal de respuesta.</td>
+      <td>Hoy el formulario de contacto guarda el mensaje, y si es PQR le manda el acuse <strong>al ciudadano</strong>. Al gremio no le avisa nadie: la única señal es una tarjeta del tablero que exige que alguien entre al panel y mire. La PQR tiene <strong>plazo legal de respuesta de quince días hábiles</strong> (Ley 1755 de 2015) y el sistema no lleva ese reloj. Implica: notificación en el panel a quien atiende la bandeja, correo al buzón del gremio —el ajuste <code>contacto_correo_destino</code> ya existe en el panel y hoy no lo lee nadie—, y un contador de días hábiles que marque en rojo la PQR próxima a vencer. <strong>El correo depende del SMTP, que sigue sin contratar (D-07)</strong>: mientras tanto el aviso del panel funciona y el correo se reporta como fallido, igual que el resto de envíos.</td>
+      <td><span class="casilla"></span></td><td><span class="casilla"></span></td><td><span class="casilla"></span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>4. Contrapropuesta del equipo</h2>
+<p><small>Se ofrece porque hay una versión que cabe en el tiempo disponible y probablemente resuelve la necesidad real. Marcar solo si sustituye a lo pedido.</small></p>
+<table>
+  <thead>
+    <tr><th style="width:10%">Acepta</th><th style="width:14%">En vez de</th><th>Propuesta</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="casilla"></span></td>
+      <td style="white-space:nowrap">A-03</td>
+      <td><strong>Entradas al sitio, no personas distintas.</strong> Se cuenta cuántas <em>llegadas</em> recibe el sitio cada día y por qué página entran, sin guardar IP, cookie ni sesión. Responde «cuánta gente entra», «por dónde» y «va subiendo o bajando», que es lo que sirve para decidir dónde poner el esfuerzo. <strong>No responde «cuántas personas distintas»</strong>, y decirlo así es preferible a publicar un número que el método no sostiene. Esa cifra sigue exigiendo política de tratamiento publicada y una decisión aparte, tal como quedó en el Acta 07.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>5. Qué se desplaza</h2>
+<p><small>A diligenciar solo si alguna petición se aprueba para antes del 22 de septiembre.</small></p>
+${RENGLONES(4)}
+
+<h2>6. Observaciones de la dirección ejecutiva</h2>
+${RENGLONES(4)}
+
+<h2>7. Constancia</h2>
+<div class="nota">
+Lo marcado como <strong>Fase II</strong> queda fuera del alcance de esta práctica empresarial y no constituye incumplimiento de lo contratado. Lo marcado como <strong>antes del 22 de septiembre</strong> se incorpora al alcance y desplaza lo que se anote en el punto 5. Lo <strong>descartado</strong> no se vuelve a proponer sin una nueva acta.
+</div>
+
+<div class="firmas tres">
+  <div class="firma">
+    <div class="nombre">Natalia Gutiérrez</div>
+    <div class="cargo">Directora ejecutiva · ASOBARES Capítulo Quindío<br>Tutora empresarial · decide la ampliación</div>
+  </div>
+  <div class="firma">
+    <div class="nombre">Juan José Sua Gómez</div>
+    <div class="cargo">Practicante · Universidad Alexander von Humboldt<br>Presenta el alcance y su costo</div>
+  </div>
+  <div class="firma">
+    <div class="nombre">Ingrid Montoya Warski</div>
+    <div class="cargo">Practicante · Universidad Alexander von Humboldt<br>Presenta el alcance y su costo</div>
+  </div>
+</div>
+
+${PIE_LEGAL}
+`,
+});
+
+/* ------------------------------------------------------------------------- */
+
 const trabajos = [
     {
         html: acta,
@@ -686,6 +787,11 @@ const trabajos = [
         html: alcanceDelPlanDeTrabajo,
         salida: join(INGENIERIA, 'constancias', 'Acta 07 - Ampliacion de alcance - beneficios por territorio y analitica.pdf'),
         pie: pieConPaginacion('Acta 07 · Beneficios por territorio y anal&iacute;tica · ASOBARES Quind&iacute;o'),
+    },
+    {
+        html: flujoYAvisos,
+        salida: join(INGENIERIA, 'constancias', 'Acta 08 - Ampliacion de alcance - flujo de entradas y aviso de PQR.pdf'),
+        pie: pieConPaginacion('Acta 08 · Flujo de entradas y aviso de PQR · ASOBARES Quind&iacute;o'),
     },
 ];
 

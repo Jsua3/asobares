@@ -21,16 +21,22 @@ use Illuminate\Support\Facades\Auth;
  */
 class VisitasDelSitio extends ChartWidget
 {
-    protected ?string $heading = 'Visitas del sitio, últimos 30 días';
+    protected ?string $heading = 'Flujo del sitio, últimos 30 días';
 
-    protected ?string $description = 'Páginas servidas, no personas: quien abre cuatro fichas cuenta cuatro. No incluye el panel, el portal del afiliado ni los rastreadores.';
+    protected ?string $description = 'Entradas son llegadas al sitio; páginas servidas es todo lo que se abre. Ninguna de las dos cuenta personas distintas: quien vuelve mañana cuenta otra vez. No incluye el panel, el portal del afiliado ni los rastreadores.';
 
     protected static ?int $sort = 5;
 
+    /**
+     * A todo lo ancho desde el 9 de septiembre de 2026: con dos series --entradas
+     * y páginas servidas-- y treinta puntos, cuatro de las seis columnas dejaban
+     * las líneas demasiado juntas para leer la comparación, que es justo para lo
+     * que existe la gráfica.
+     */
     protected int|string|array $columnSpan = [
         'default' => 'full',
         'md' => 'full',
-        'xl' => 4,
+        'xl' => 'full',
     ];
 
     private const int DIAS = 30;
@@ -44,27 +50,52 @@ class VisitasDelSitio extends ChartWidget
         // `match` por driver aquí sería un sitio más donde acordarse de pgsql.
         $porDia = VisitaDiaria::query()
             ->where('dia', '>=', $desde->toDateString())
-            ->selectRaw('dia, sum(total) as total')
+            ->selectRaw('dia, sum(total) as total, sum(entradas) as entradas')
             ->groupBy('dia')
             ->get()
-            ->mapWithKeys(fn ($fila): array => [substr((string) $fila->dia, 0, 10) => (int) $fila->total]);
+            ->mapWithKeys(fn ($fila): array => [substr((string) $fila->dia, 0, 10) => [
+                'total' => (int) $fila->total,
+                'entradas' => (int) $fila->entradas,
+            ]]);
 
         $etiquetas = [];
-        $valores = [];
+        $entradas = [];
+        $paginas = [];
 
         foreach (range(self::DIAS - 1, 0) as $atras) {
             $fecha = now()->subDays($atras);
+            $delDia = $porDia[$fecha->toDateString()] ?? ['total' => 0, 'entradas' => 0];
+
             $etiquetas[] = $fecha->translatedFormat('d M');
-            $valores[] = $porDia[$fecha->toDateString()] ?? 0;
+            $entradas[] = $delDia['entradas'];
+            $paginas[] = $delDia['total'];
         }
 
+        /*
+         * Dos series y no una (Acta 08, A-03). Juntas cuentan lo que ninguna
+         * cuenta sola: si suben las entradas y no las páginas, llega más gente y
+         * se va enseguida; si suben las páginas y no las entradas, la misma gente
+         * mira más. Esa comparación es el «flujo» que pidió la dirección.
+         *
+         * Las entradas van PRIMERO porque son la cifra que se pidió; las páginas
+         * servidas quedan de contexto.
+         */
         return [
-            'datasets' => [[
-                'label' => 'Páginas servidas',
-                'data' => $valores,
-                'fill' => true,
-                'tension' => 0.3,
-            ]],
+            'datasets' => [
+                [
+                    'label' => 'Entradas al sitio',
+                    'data' => $entradas,
+                    'fill' => true,
+                    'tension' => 0.3,
+                ],
+                [
+                    'label' => 'Páginas servidas',
+                    'data' => $paginas,
+                    'fill' => false,
+                    'tension' => 0.3,
+                    'borderDash' => [4, 4],
+                ],
+            ],
             'labels' => $etiquetas,
         ];
     }
@@ -77,7 +108,9 @@ class VisitasDelSitio extends ChartWidget
     protected function getOptions(): array
     {
         return [
-            'plugins' => ['legend' => ['display' => false]],
+            // La leyenda vuelve: con dos series, esconderla deja al lector
+            // adivinando cuál línea es cuál.
+            'plugins' => ['legend' => ['display' => true, 'labels' => ['usePointStyle' => true]]],
             'scales' => [
                 'y' => ['beginAtZero' => true, 'ticks' => RanuraDeTema::vacia(), 'grid' => RanuraDeTema::vacia()],
                 'x' => ['ticks' => RanuraDeTema::vacia(), 'grid' => ['display' => false]],

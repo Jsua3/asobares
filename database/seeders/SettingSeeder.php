@@ -12,8 +12,37 @@ use Illuminate\Database\Seeder;
  */
 class SettingSeeder extends Seeder
 {
+    /**
+     * Ajustes que existieron, ya no los lee nadie, y hay que quitar de la base.
+     *
+     * Retirar una clave de `ajustes()` no la borra de `settings`, y el panel arma
+     * su formulario **desde la base**: sin esta lista, un ajuste jubilado le
+     * seguiría apareciendo a la oficina en producción, ofreciéndose para editar y
+     * sin cambiar nada al guardarse.
+     *
+     * Explícita y no «todo lo que no esté en `ajustes()`» a propósito: un borrado
+     * por diferencia sobre datos reales es un modo de fallo demasiado caro para
+     * ahorrarse tres líneas.
+     *
+     * @var list<string>
+     */
+    private const JUBILADOS = [
+        // 9 sep 2026. `hero_resumen_corto` hace ese trabajo desde el rediseño del
+        // hero; este párrafo se quedó sembrado y ninguna vista lo pintaba.
+        'hero_subtitulo',
+
+        // 9 sep 2026. Ninguna vista lo pintaba, así que el sitio nunca dijo «60»
+        // --el expediente afirmaba que sí (D-18)--. Y publicar una cifra de
+        // afiliados que la base no sostiene (48 filas) va contra la regla de que
+        // en producción solo entra lo que salga de un documento oficial. El día
+        // que el gremio fije la cifra, entra con su fuente y su vista.
+        'cifra_afiliados',
+    ];
+
     public function run(): void
     {
+        Setting::query()->whereIn('clave', self::JUBILADOS)->delete();
+
         foreach ($this->ajustes() as $ajuste) {
             // Las cifras del gremio las escribe la oficina, no este archivo:
             // se crean si faltan y no se vuelven a tocar. Con `updateOrCreate`
@@ -42,7 +71,6 @@ class SettingSeeder extends Seeder
 
             // --- Inicio ---
             $this->texto('hero_titulo', 'La noche construye territorio', 'inicio', 'Título del hero'),
-            $this->largo('hero_subtitulo', 'Somos el gremio que se sienta en la mesa con las instituciones y el que te explica, paso a paso, cómo abrir tu establecimiento sin que te lo cierren. Trabajamos por la dignificación de la vida nocturna del Quindío.', 'inicio', 'Subtítulo del hero'),
             $this->texto('hero_frase_corta', 'Gremio, ciudad y noche en una sola voz.', 'inicio', 'Frase corta del hero'),
             $this->texto('hero_resumen_corto', 'Representamos la vida nocturna del Quindío con criterio, cultura y territorio.', 'inicio', 'Resumen corto del hero'),
             $this->texto('hero_video_rotulo', 'Video institucional', 'inicio', 'Rótulo del video del hero'),
@@ -125,7 +153,6 @@ class SettingSeeder extends Seeder
             $this->texto('cifra_informalidad_detalle', 'de informalidad: el reto que el gremio quiere cerrar', 'cifras', 'Detalle de informalidad'),
             $this->texto('cifra_jovenes', '35,28 %', 'cifras', 'Trabajadores de 28 años o menos'),
             $this->texto('cifra_jovenes_detalle', 'de los trabajadores tiene 28 años o menos', 'cifras', 'Detalle de juventud'),
-            $this->texto('cifra_afiliados', '60', 'cifras', 'Establecimientos afiliados'),
 
             // --- El gremio en cifras (D-25, Acta 05): las teclea la oficina ---
             $this->texto(CifrasDelGremio::CLAVE_TITULO, 'El gremio en cifras', 'inicio', 'Portada · título de la franja de cifras del gremio'),

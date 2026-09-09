@@ -170,20 +170,62 @@ class EmpleoController
     {
         $datos = $request->datosDelAspirante();
 
-        // Volver a dejar el perfil actualiza el que ya existe: una persona,
-        // un registro. Antes cada reenvío creaba una fila nueva.
-        //
-        // Y lo devuelve a revisión, igual que editar una vacante publicada la
-        // devuelve a la cola: si no, aprobar una vez sería una llave para
-        // cambiar el perfil por cualquier otra cosa sin que nadie la mirara.
-        Aspirante::updateOrCreate(
-            ['correo' => $datos['correo']],
-            [...$datos, 'aprobado_el' => null],
-        );
+        $this->guardarPerfil($datos);
 
+        // El aviso es el MISMO se conociera o no el correo. Uno distinto para
+        // cada caso convertiría este formulario en un buscador: cualquiera
+        // podría averiguar, correo a correo, quién está inscrito en el banco.
         return redirect()
             ->route('empleo.index')
-            ->with('exito', 'Recibimos tu perfil. La secretaría lo revisa y, cuando un establecimiento asociado busque tu cargo, te contactamos.')
+            ->with('exito', 'Recibimos tu perfil. La secretaría lo revisa y, cuando un establecimiento asociado busque tu cargo, te contactamos. Si ya nos habías dejado tus datos, escríbenos desde Contacto para cambiarlos.')
             ->withFragment('perfil');
+    }
+
+    /**
+     * Una persona, un registro, y nadie toca el registro de otro.
+     *
+     * La clave natural de este formulario es un correo **que teclea un anónimo**:
+     * no hay verificación, ni sesión, ni nada que pruebe que quien lo escribe es
+     * su dueño. Un `updateOrCreate` a secas sobre esa clave --que es lo que había
+     * hasta el 9 de septiembre de 2026-- dejaba que cualquiera reescribiera el
+     * perfil ajeno (desviando a los establecimientos hacia otro teléfono) y, con
+     * `aprobado_el => null` en el mismo movimiento, que lo sacara del banco sin
+     * más trámite que enviar el formulario con el correo de la víctima.
+     *
+     * La regla, entonces, se parte en dos según si alguien ya lo miró:
+     *
+     * - **Sin aprobar** (o inexistente): se guarda. Un perfil pendiente no lo ve
+     *   nadie salvo la oficina, así que dejarlo actualizable es la conveniencia
+     *   de quien se equivocó tecleando y no una llave sobre los datos de nadie.
+     * - **Ya aprobado**: no se toca. Cambiarlo pasa por escribirle al gremio y
+     *   por el panel, que es donde hay una identidad detrás de cada acción.
+     *
+     * Se resuelve dentro de una transacción con bloqueo de fila porque el
+     * «buscar y luego decidir» no es atómico: dos envíos simultáneos con el
+     * mismo correo pasarían los dos por el `null` y el segundo chocaría contra
+     * el índice único. Es el mismo cuidado que ya se le puso a `postular()`.
+     *
+     * @param  array<string, mixed>  $datos
+     */
+    private function guardarPerfil(array $datos): void
+    {
+        DB::transaction(function () use ($datos): void {
+            $existente = Aspirante::query()
+                ->where('correo', $datos['correo'])
+                ->lockForUpdate()
+                ->first();
+
+            if ($existente === null) {
+                Aspirante::create([...$datos, 'aprobado_el' => null]);
+
+                return;
+            }
+
+            if ($existente->estaAprobado()) {
+                return;
+            }
+
+            $existente->update([...$datos, 'aprobado_el' => null]);
+        });
     }
 }

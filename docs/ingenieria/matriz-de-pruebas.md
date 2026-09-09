@@ -2,7 +2,7 @@
 
 **Versión:** 1.0 · **Fecha:** 18 de agosto de 2026 · **Elaboró:** Juan José Sua Gómez (práctica empresarial, Universidad Alexander von Humboldt)
 **Línea base de requisitos:** ERS v3.0 (RF-01 a RF-62, RNF-01 a RNF-14) · **Espejo técnico:** product backlog v2 (14 épicas, 53 historias de usuario)
-**Estado del repositorio:** rama `p1-cierre-bolsas` en `fc2142f` · repositorio `Jsua3/asobares`
+**Estado del repositorio:** rama `p1-auditoria-y-metricas` en `4080312` · repositorio `Jsua3/asobares`
 
 ---
 
@@ -27,18 +27,20 @@ No se confunde con la suite automatizada: la suite es el **instrumento**, esta m
 
 | Métrica | Valor |
 |---|---|
-| Archivos de prueba | 90 |
-| **Métodos de prueba** | **876** |
-| **Casos ejecutados** | **1.147** (los métodos con proveedor de datos expanden a varios casos cada uno) |
-| Resultado de la última ejecución **verificada** | 1.136 pasan · 11 omitidas · **0 fallos** |
-| Aserciones | **5.204** |
-| Duración de la suite completa | 335 s |
+| Archivos de prueba | 97 |
+| **Métodos de prueba** | **933** |
+| **Casos ejecutados** | **1.209** (los métodos con proveedor de datos expanden a varios casos cada uno) |
+| Resultado de la última ejecución **verificada** | 1.198 pasan · 11 omitidas · **0 fallos** |
+| Aserciones | **5.394** |
+| Duración de la suite completa | 353 s |
 | Requisitos funcionales V1 con cobertura total o parcial | 52 de 53 |
 | Requisitos no funcionales con cobertura total o parcial | 11 de 14 |
 
 > **Cómo se cuenta la fila de arriba.** Se cuentan **filas** de la tabla de la §3 (una fila que agrupa varios RF, como «RF-03, RF-04», cuenta una sola vez). La §3 tiene 58 filas; se excluyen las 5 marcadas ➖ —fuera del alcance V1 por decisión de la ERS v3: RF-55, RF-58, RF-59, RF-61 y RF-62—, lo que deja **53 filas en alcance V1**. De esas, cuentan como cobertura total o parcial las marcadas ✅ o ⚠️ (**52**); la única ❌ es RF-05, cuya columna Prueba está vacía. Reconstruible fila por fila leyendo la §3, o contando los símbolos de la columna Estado sobre las líneas que empiezan por `| RF-`.
 
-> ✅ **Última ejecución — 8 de septiembre de 2026.** Sobre la rama `p1-cierre-bolsas` en `fc2142f`, con `php artisan test --compact` y PHP 8.5.9 con `intl` y `gd`: **1.147 casos · 1.136 pasan · 11 omitidas · 0 fallos · 5.204 aserciones · 335 s**. Es la corrida que respalda la tabla de arriba. Los casos nuevos respecto al 25 de agosto cubren la capa visual entera —barra pública de escritorio y de teléfono, panel y su barra lateral— y las cuatro entregas del plan de trabajo del 8 de septiembre, que están en «Decisiones y ampliaciones posteriores a la ERS v3», al final de la §3.
+> ✅ **Última ejecución — 9 de septiembre de 2026.** Sobre la rama `p1-auditoria-y-metricas` en `4080312`, con `php artisan test --compact` y PHP 8.5.9 con `intl` y `gd`: **1.209 casos · 1.198 pasan · 11 omitidas · 0 fallos · 5.394 aserciones · 353 s**. Es la corrida que respalda la tabla de arriba. Los **62 casos nuevos** respecto al 8 de septiembre salen de la auditoría de extremo a extremo de ese día: no cubren requisitos nuevos —salvo los dos del Acta 08— sino **huecos entre lo construido y lo prometido**, y están al final de la §3. Entre ellos, las tres guardias que este proyecto no tenía: que las purgas de datos personales sigan teniendo quien las dispare, que ningún ajuste del panel deje de cambiar algo, y que nadie escriba avisos que ninguna pantalla enseña.
+>
+> ✅ **Ejecución anterior — 8 de septiembre de 2026.** Sobre la rama `p1-cierre-bolsas` en `fc2142f`, con `php artisan test --compact` y PHP 8.5.9 con `intl` y `gd`: **1.147 casos · 1.136 pasan · 11 omitidas · 0 fallos · 5.204 aserciones · 335 s**. Es la corrida que respalda la tabla de arriba. Los casos nuevos respecto al 25 de agosto cubren la capa visual entera —barra pública de escritorio y de teléfono, panel y su barra lateral— y las cuatro entregas del plan de trabajo del 8 de septiembre, que están en «Decisiones y ampliaciones posteriores a la ERS v3», al final de la §3.
 >
 > ✅ **Última ejecución — 25 de agosto de 2026.** Sobre el árbol de trabajo, con `php artisan test --compact` y PHP 8.5.9 con `intl` y `gd`: **820 casos · 809 pasan · 11 omitidas · 0 fallos · 2.904 aserciones · 348 s**. Es la revisión final de RF-60: cinco pruebas de `VigenciaDeLaGuiaTest` que podían pasar sin ejercer lo que decían proteger —una fecha bomba, una bitácora que solo leía su propia configuración, un scope cuyas dos negaciones las cumplía un conjunto vacío— quedaron corregidas con reloj fijo, un `update()` real contra `Activity` y un control positivo; el caso nuevo (+1) cubre el `noindex` de un municipio cuya guía entera caducó.
 >
@@ -205,7 +207,24 @@ Van aparte de los RF a propósito. **Nada de esto es un requisito contratado**: 
 | Aprobación en el banco de talento | Decisión del 8 sep · `encargo.md` §9 · D-27 | Un perfil registrado en `/empleo` no se ve hasta que la secretaría lo aprueba, y volver a enviarlo lo devuelve a revisión | `AccesoDeAsociadosTest::test_el_banco_no_muestra_a_quien_la_secretaria_no_ha_aprobado` · `::test_volver_a_dejar_el_perfil_lo_devuelve_a_revision` · `ModeracionDeBolsasTest` (3 casos) | ✅ |
 | Botón de WhatsApp | Plan de trabajo del 8 sep · RNF-09 | Botón público con el número saliendo de Ajustes, que se apaga si el ajuste se vacía y se aparta de la barra inferior del teléfono | `BotonFlotanteDeWhatsappTest` (9 casos) | ✅ |
 | **A-01** Beneficios por territorio | **Acta 07**, 8 sep | Alcance nacional, departamental o municipal en un solo módulo; el municipal exige municipio y el resto lo suelta; sin clasificar no se anuncia nada | `BeneficiosPorAlcanceTest` (10 casos) | ✅ |
-| **A-02** Analítica del sitio | **Acta 07**, 8 sep, con la contrapropuesta | Conteo anónimo por ruta y día, sin IP, navegador ni sesión; sin visitantes únicos por decisión; dos gráficas tras el permiso de dirección | `AnaliticaDelSitioTest` (14 casos) | ✅ |
+| **A-02** Analítica del sitio | **Acta 07**, 8 sep, con la contrapropuesta | Conteo anónimo por ruta y día, sin IP, navegador ni sesión; sin visitantes únicos por decisión; dos gráficas tras el permiso de dirección. **Corregido el 9 sep:** contaba descargas, `robots.txt` y `sitemap.xml` contra su propio contrato; ahora mide por tipo de contenido | `AnaliticaDelSitioTest` (18 casos) | ✅ |
+| **A-03** Flujo de entradas | **Acta 08**, 9 sep, con la contrapropuesta | Llegadas al sitio distinguidas de la navegación interna por el `Referer`, que se mira y no se guarda; por dónde entran; comparación con el periodo anterior sin inventar porcentajes contra cero; y cada pieza dice que no son personas distintas | `FlujoDeEntradasAlSitioTest` (15 casos) | ✅ |
+| **A-04** Aviso de mensaje y plazo de PQR | **Acta 08**, 9 sep | El gremio se entera de que entró algo, por el contador del menú y por el buzón que dice el ajuste; el plazo de quince días hábiles de la Ley 1755 se ve en la bandeja, con la palabra «Vencida» y no solo con color (RNF-12) | `AvisoDeMensajeAlGremioTest` (15 casos) | ✅ El correo no sale hasta que haya SMTP (D-07); el contador sí funciona hoy |
+
+### Los huecos que cerró la auditoría del 9 de septiembre
+
+No son requisitos nuevos: son **piezas contratadas que no hacían su trabajo porque les faltaba la de al lado**. Cada una tenía su promesa escrita en algún documento y ninguna prueba que la vigilara.
+
+| Qué no funcionaba | Contra qué promesa | Prueba que lo vigila ahora |
+|---|---|---|
+| Las tres purgas de datos personales **no tenían quien las llamara en producción**, y borrarlas del calendario dejaba la suite en verde | `/politica-de-datos`: «Pasado cada plazo, el borrado es automático» · RNF-04 · Ley 1581 | `CalendarioDeTareasTest` (6) + runbook §5.1 para el lado del entorno, que ninguna prueba puede ver |
+| La ficha de la vacante traía JSON-LD `JobPosting` y **su URL no entraba al sitemap** | RNF-06 · EP-06, prioridad n.º 1 del cliente | `SitioPublicoTest` (2 casos nuevos) |
+| Cualquiera podía **reescribir un perfil ajeno del banco de talento y sacarlo del banco**, porque la clave era un correo tecleado por un anónimo | `encargo.md` §9 · D-27 | `AccesoDeAsociadosTest` (4 casos nuevos, uno contra la enumeración de correos) |
+| Aprobar o retirar un perfil del banco **no dejaba rastro de quién**, siendo la decisión de exponer teléfono y correo de una persona | RF-39 · `encargo.md` §9 | `ModeracionDeBolsasTest` (3) · `Panel\BitacoraTest` (3) |
+| Dos ajustes del panel **no los leía ninguna vista**, y uno de ellos desmentía una línea del expediente | RNF-09 | `AjustesQueSirvenParaAlgoTest` (4) |
+| El sitio **se dejaba indexar en un host desechable**, con la canónica apuntando ahí | RNF-06 · D-08 | `IndexacionDelSitioTest` (6) |
+| `FlujoDeAprobacionObserver` **escribía avisos que ninguna pantalla enseña** desde que se apagó la campana (D-L22), con cuatro aserciones en verde encima | — (falso verde n.º 13) | `Panel\AvisosQueSeVenTest` (1) |
+| `iniciativa` **nunca estuvo traducida** en la bitácora: se leía «actualizó un registro Vibrarte» | RF-39 | `Panel\BitacoraTest` |
 
 ---
 

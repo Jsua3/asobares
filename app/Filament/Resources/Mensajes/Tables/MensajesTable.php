@@ -13,8 +13,10 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class MensajesTable
 {
@@ -51,11 +53,56 @@ class MensajesTable
                     ->since()
                     ->sortable()
                     ->visibleFrom('lg'),
+
+                /*
+                 * El plazo legal de la PQR, donde se trabaja (Acta 08, A-04).
+                 *
+                 * Antes del 9 de septiembre de 2026 el sistema sabía radicar una
+                 * PQR y no sabía que tenía término: la secretaría abría la
+                 * bandeja y no había forma de distinguir la del martes de la de
+                 * hace tres semanas sin abrirlas una por una.
+                 *
+                 * La palabra «Vencida» va escrita y no solo en rojo: RNF-12
+                 * exige que lo urgente se marque con algo más que color.
+                 */
+                TextColumn::make('vence')
+                    ->label('Plazo de ley')
+                    ->state(fn (Mensaje $registro): string => match (true) {
+                        ! $registro->esPqr() => '—',
+                        $registro->venceEl() === null => 'Respondida',
+                        $registro->plazoVencido() => 'Vencida',
+                        default => $registro->venceEl()->translatedFormat('j M'),
+                    })
+                    ->badge()
+                    ->color(fn (Mensaje $registro): string => match (true) {
+                        ! $registro->esPqr() || $registro->venceEl() === null => 'gray',
+                        $registro->plazoVencido() => 'danger',
+                        $registro->venceEl()->diffInWeekdays(now()) <= 3 => 'warning',
+                        default => 'success',
+                    })
+                    ->tooltip(fn (Mensaje $registro): ?string => $registro->esPqr()
+                        ? 'Quince días hábiles desde que se radicó (Ley 1755 de 2015). Los festivos no se descuentan, así que la fecha real es igual o posterior.'
+                        : null)
+                    ->visibleFrom('md'),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('tipo')->label('Tipo')->options(TipoMensaje::class),
                 SelectFilter::make('estado')->label('Estado')->options(EstadoMensaje::class),
+
+                /*
+                 * Se filtra por una lista de claves y no por una condición SQL
+                 * porque el cálculo de días hábiles no se puede expresar en una
+                 * consulta portable entre SQLite y PostgreSQL. La bandeja son
+                 * decenas de filas; el día que sean millones, la fecha de
+                 * vencimiento se guarda en una columna al radicar.
+                 */
+                Filter::make('plazo_vencido')
+                    ->label('PQR pasadas de plazo')
+                    ->query(fn (Builder $query): Builder => $query->whereIn(
+                        'id',
+                        Mensaje::pqrVencidas()->modelKeys()
+                    )),
             ])
             ->recordActions([
                 ViewAction::make()->label('Ver'),

@@ -303,7 +303,9 @@ class ConfiguracionDeDespliegueTest extends TestCase
             'TRUSTED_PROXIES' => ['TRUSTED_PROXIES'],
             'SESSION_SECURE_COOKIE' => ['SESSION_SECURE_COOKIE'],
             'VALOR_MENSUALIDAD' => ['VALOR_MENSUALIDAD'],
-            'VALOR_AFILIACION' => ['VALOR_AFILIACION'],
+            // `VALOR_AFILIACION` salió el 9 sep 2026: esta lista es de «variables
+            // que el código lee», y esa no la leía nadie. Ver `config/pagos.php`.
+            'SITIO_INDEXABLE' => ['SITIO_INDEXABLE'],
             'SEED_GALERIA' => ['SEED_GALERIA'],
             'QUEUE_CONVERSIONS_BY_DEFAULT' => ['QUEUE_CONVERSIONS_BY_DEFAULT'],
             'MEDIA_DISK' => ['MEDIA_DISK'],

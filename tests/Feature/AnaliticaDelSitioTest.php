@@ -2,16 +2,24 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ConceptoTransaccion;
+use App\Enums\EstadoTransaccion;
+use App\Enums\MetodoPago;
 use App\Filament\Widgets\PaginasMasVisitadas;
 use App\Filament\Widgets\VisitasDelSitio;
 use App\Models\Artista;
 use App\Models\Asociado;
+use App\Models\Municipio;
+use App\Models\RequisitoApertura;
+use App\Models\Transaccion;
 use App\Models\User;
 use App\Models\VisitaDiaria;
 use Database\Seeders\RolYPermisoSeeder;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -98,6 +106,89 @@ class AnaliticaDelSitioTest extends TestCase
         $this->assertSame(0, VisitaDiaria::count());
     }
 
+    /**
+     * El contrato de este middleware, escrito en `bootstrap/app.php`, dice
+     * «cuenta páginas servidas, **no descargas** ni webhooks». Descargar un
+     * formato de la guía es una descarga, va por el grupo `web`, tiene nombre de
+     * ruta y responde 200: cumplía las cuatro condiciones del filtro viejo y se
+     * contaba como si fuera una página. Encima ya se registra aparte en
+     * `consultas_guia`, así que quedaba contada dos veces en dos sistemas.
+     */
+    public function test_descargar_un_formato_de_la_guia_no_cuenta_como_pagina_servida(): void
+    {
+        $requisito = $this->requisitoConFormato();
+
+        $this->get(route('guia.formato', $requisito))->assertOk();
+
+        $this->assertSame(
+            0,
+            VisitaDiaria::count(),
+            'Una descarga no es una página servida: lo dice el contrato del middleware.'
+        );
+    }
+
+    /**
+     * `robots.txt` y `sitemap.xml` son rutas con nombre, en el grupo `web`, que
+     * responden 200 a un GET. Los pedían casi solo rastreadores, y el filtro por
+     * agente de usuario solo atrapa a los conocidos: los demás acababan entre las
+     * ocho barras de «Secciones más visitadas» que lee la dirección.
+     *
+     * @param  string  $ruta  nombre de la ruta que no es una página
+     */
+    #[DataProvider('rutasQueNoSonPaginas')]
+    public function test_lo_que_no_es_una_pagina_no_cuenta(string $ruta): void
+    {
+        $this->get(route($ruta))->assertOk();
+
+        $this->assertSame(0, VisitaDiaria::count(), "«{$ruta}» no es una página del sitio.");
+    }
+
+    /** @return array<string, array{0: string}> */
+    public static function rutasQueNoSonPaginas(): array
+    {
+        return [
+            'robots.txt' => ['robots'],
+            'sitemap.xml' => ['sitemap'],
+        ];
+    }
+
+    /** Un requisito publicado con su formato puesto en el disco privado. */
+    private function requisitoConFormato(): RequisitoApertura
+    {
+        Storage::fake('local');
+        Storage::disk('local')->put('formatos/formato.pdf', 'PDF');
+
+        return RequisitoApertura::factory()
+            ->for(Municipio::factory())
+            ->publicado()
+            ->create(['adjunto' => 'formatos/formato.pdf', 'adjunto_nombre' => 'Formato']);
+    }
+
+    /**
+     * Las páginas de la pasarela no son el sitio público, y el propio sitio ya lo
+     * dice: `robots.txt` lista `/pago/` y `/pago-simulado` entre las zonas
+     * privadas, junto al panel y al portal del afiliado. Contarlas mezcla el
+     * tráfico de un cobro con el interés por el contenido.
+     */
+    public function test_las_paginas_de_la_pasarela_no_cuentan_como_visita_del_sitio(): void
+    {
+        $transaccion = Transaccion::create([
+            'referencia' => Transaccion::generarReferencia(),
+            'concepto' => ConceptoTransaccion::Mensualidad,
+            'asociado_id' => Asociado::factory()->create()->id,
+            'monto' => 50000,
+            'moneda' => 'COP',
+            'estado' => EstadoTransaccion::Pendiente,
+            'metodo' => MetodoPago::Pse,
+        ]);
+
+        // La página firmada del detalle del cobro, que es la que responde 200:
+        // `pago.retorno` solo redirige hacia ella y una redirección no se cuenta.
+        $this->get($transaccion->urlDeEstado())->assertOk();
+
+        $this->assertSame(0, VisitaDiaria::count(), 'La pasarela es zona privada, y robots.txt ya lo declara.');
+    }
+
     public function test_una_peticion_que_no_es_get_no_cuenta(): void
     {
         $this->post(route('contacto.store'), []);
@@ -155,7 +246,10 @@ class AnaliticaDelSitioTest extends TestCase
         sort($columnas);
 
         $this->assertSame(
-            ['created_at', 'dia', 'id', 'ruta', 'total', 'updated_at'],
+            // `entradas` entró el 9 sep 2026 (Acta 08, A-03) y es otro contador,
+            // no un dato de nadie: el `Referer` que decide si suma se mira y no
+            // se guarda, igual que el navegador.
+            ['created_at', 'dia', 'entradas', 'id', 'ruta', 'total', 'updated_at'],
             $columnas,
             'La tabla de visitas ganó una columna. Si guarda IP, navegador o sesión deja de ser un agregado y entra en la Ley 1581.'
         );

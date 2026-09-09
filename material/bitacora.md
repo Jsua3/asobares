@@ -2217,3 +2217,134 @@ Y una trampa que no era de nadie de la casa: **`dia` con casteo a fecha se guard
 Cinco commits en la rama `p1-cierre-bolsas`, ninguno empujado. Suite completa sobre `fc2142f`: **1.147 casos, 1.136 pasan, 11 omitidas, 0 fallos, 5.204 aserciones en 335 s**. El botón de WhatsApp y el sello de alcance se vieron en el navegador a 375 y a 1.280 px; la analítica se comprobó contra el servidor de desarrollo y no solo en pruebas.
 
 Queda **un solo bloque del plan sin tocar: el QA**, y está bloqueado por lo mismo desde el principio: el documento dice que la auditoría funcional dio 44 PASS, 2 FAIL, 1 BLOCKED y 3 NOT TESTED, **y no dice cuáles**. Los 2 FAIL son lo más accionable de todo el plan y no están descritos en ninguna parte.
+
+---
+
+## §47 — La auditoría de extremo a extremo, y las nueve cosas que no hacían su trabajo (9 de septiembre de 2026)
+
+Sua pidió un análisis del programa entero: no errores de código, sino **cosas que sirven para algo y no lo cumplen porque les falta la pieza de al lado**. Y contrastarlo contra los documentos que dicen qué debía tener la plataforma. Salieron nueve, más una petición nueva de la dirección. Todo se arregló el mismo día, en la rama `p1-auditoria-y-metricas`.
+
+### 47.1 Lo que enseñó la auditoría, que es lo que conviene no olvidar
+
+**El expediente de este proyecto describe con precisión lo que el código hace, y no describe lo que el código NO hace.** Los nueve hallazgos son de la segunda clase, y ninguno se veía leyendo el estado: hay que ir a mirar el código y contrastarlo contra lo que otro documento promete.
+
+Los tres patrones que se repitieron:
+
+1. **Una mitad construida y la otra no.** Las purgas escritas, configuradas, probadas y sin nadie que las llame en producción. El JSON-LD `JobPosting` de la vacante sin la URL en el sitemap. El ajuste `contacto_correo_destino` en el panel sin una línea que lo lea.
+2. **Un contrato escrito que el código contradice.** `bootstrap/app.php` dice que la analítica «cuenta páginas servidas, no descargas», y contaba descargas.
+3. **Una decisión que se aplicó a medias.** La campana del panel se apagó el 7 de septiembre y nadie retiró a quien escribía en ella.
+
+Y la lección de método: **las cifras del expediente hay que medirlas también contra el navegador**. `estado.md` afirmaba «el sitio dice 60» sobre la cifra de afiliados. El sitio no decía nada: `cifra_afiliados` estaba sembrada y ninguna vista la pintaba. D-18 llevaba dos semanas persiguiendo un número que no se publicaba en ninguna parte.
+
+### 47.2 Lo que se descartó midiendo, y por qué importa
+
+Dos sospechas se cayeron al comprobarlas, y las dos habrían costado una tarde de trabajo inútil:
+
+- **`TRUSTED_PROXIES` se lee con `env()` fuera de `config/`**, y con `config:cache` —que el despliegue ejecuta— eso suele devolver `null`. El runbook lo llama «bloqueante». Se midió contra producción en vez de razonarlo: el sitemap servido sale en `https` y las cookies van `secure`. Cloud inyecta las variables como variables de entorno reales. No hay problema.
+- **Las cuatro cifras de la portada** (12,65 %, $2.104.124, 72,82 %, 35,28 %) parecían contradecir el «franja vacía de fábrica» del estado. Son **dos franjas distintas**: la visible es la del Observatorio de la Nacional, con fuente en `NoticiaSeeder`; la del Acta 05 es `gremio_cifra_*` y sigue vacía y oculta, como debe.
+
+### 47.3 El hallazgo más caro: las purgas sin quien las dispare
+
+Tres comandos de depuración de datos personales, programados a diario en `routes/console.php`, con su configuración, sus seis variables declaradas en `.env.staging.example` y **tres archivos de prueba** que verifican que borran bien. Ninguna prueba miraba si alguien los **llama**.
+
+Y el runbook de despliegue —quince secciones— **no menciona el planificador ni una vez**. En Laravel Cloud el Scheduler es un recurso que se añade al entorno y no viene de fábrica. Se buscó «scheduler», «schedule:run», «cron» y «tarea programada» en todo `docs/`, `material/` y los dos `.env`: cero resultados fuera de un plan de agosto.
+
+Lo que cuelga de eso son dos promesas escritas:
+
+- `/politica-de-datos`, línea 143, al titular: «Pasado cada plazo, el borrado es automático».
+- El manual de usuario, al gremio: «se borran solos… el sistema la cumple sin que nadie tenga que acordarse».
+
+Se cerró por los dos lados. `CalendarioDeTareasTest` (6 casos) falla si alguien quita una tarea o le cambia la frecuencia —comprobado en rojo dos veces: comentando las tres y bajando una a semanal—, y el runbook gana un **§5.1** con el paso, el comando de verificación y el aviso de que el silencio de la bitácora no prueba nada mientras su presencia sí.
+
+**Lo que sigue abierto, y solo lo cierra una persona: activar el Scheduler en el panel de Cloud.** Una prueba no puede saber si el entorno remoto tiene quien llame a sus tareas.
+
+### 47.4 El agujero de seguridad del banco de talento
+
+`Aspirante::updateOrCreate(['correo' => …], [...$datos, 'aprobado_el' => null])`. La clave es un correo **que teclea un anónimo en un formulario público**, sin verificación de titularidad ni de correo.
+
+Con eso, quien conociera el correo de alguien del banco podía reescribirle el perfil entero —cambiar el teléfono desvía a los establecimientos hacia otro número— y, con la misma llamada, **sacarlo del banco**, porque cada envío ponía `aprobado_el` en nulo. A seis envíos por minuto, vaciar el banco era cuestión de rato.
+
+Lo llamativo es que **había una prueba afirmando ese comportamiento**: `test_volver_a_dejar_el_perfil_lo_devuelve_a_revision`. Su intención era buena —aprobar una vez no puede ser una llave— y el mecanismo era el agujero. Se reescribió, no se borró, y el docblock cuenta por qué.
+
+La regla nueva cumple la misma intención más estricto: sin aprobar se actualiza (un perfil pendiente no lo ve nadie más que la oficina), aprobado no se toca. Y el aviso es **idéntico** se conozca o no el correo, con su prueba: uno distinto para cada caso convertiría el formulario en un buscador de quién está inscrito en el banco.
+
+### 47.5 Las guardias nuevas encontraron tres defectos que la auditoría no vio
+
+Esto es lo que más rendimiento dio, y conviene repetirlo: **una guardia bien escrita encuentra lo que el lector no**.
+
+1. **`Panel\BitacoraTest`** —la página Bitácora no tenía ni una prueba— exige que todo modelo que escribe actividad esté traducido. Destapó que **`iniciativa` nunca lo estuvo**: publicar «Vibrarte» se leía como «Natalia actualizó **un registro** Vibrarte». Defecto desde que el módulo existe.
+2. **`Panel\TableroTest`**, la guardia del `columnSpan` desglosado que se escribió el 7 de septiembre, atrapó el mismo error en el widget nuevo antes de que llegara a ninguna pantalla.
+3. Y el más gordo: al construir el aviso de PQR se iba a mandar una notificación de base de datos, copiando lo que hacía `FlujoDeAprobacionObserver`. Al compilar salió que **la campana del panel está apagada desde el 7 de septiembre** (D-L22, `databaseNotifications()` comentado) y que **nadie había retirado a quien escribía en ella**: consultas a todos los usuarios y filas nuevas en cada guardado de contenido, sin una sola pantalla que las leyera. Con **cuatro aserciones de `FlujoDeAprobacionTest` en verde** encima.
+
+Ese tercero es el **falso verde número trece** del proyecto, y el primero que no lo escribió el autor de un plan sino que lo dejó una decisión aplicada a medias. Se retiró el envío, las cuatro aserciones pasan a afirmar sobre la **cola de pendientes** —que es lo que D-L22 dijo que lo sustituía y lo que de verdad se pinta— y `Panel\AvisosQueSeVenTest` vigila la pareja: o hay campana y hay quien escriba, o no hay ninguna de las dos.
+
+### 47.6 La indexación no estaba pendiente: estaba pasando
+
+D-08 llevaba semanas anotada como «decidir `noindex` antes del lanzamiento». Leerla así escondía lo importante. El sitio servía `Allow: /`, publicaba su sitemap y —lo que de verdad hace daño— clavaba `<link rel="canonical">` resolviendo al host temporal de Cloud. Todos los días le decía a Google que la versión autorizada de cada página del gremio vive en una dirección desechable, a una semana de que llegue el dominio propio.
+
+Se gobierna con `SITIO_INDEXABLE`, **cerrada por defecto**: salir del índice cuesta semanas y entrar cuesta un despliegue.
+
+Efecto colateral que hubo que atender: dos pruebas antiguas —`CalendarioDeEventosTest` y `VigenciaDeLaGuiaTest`— medían la regla `noindex` **por página** y se cayeron porque ahora el sitio entero nace cerrado. Se aislaron abriendo la llave dentro de la prueba, que es lo que de verdad querían medir.
+
+### 47.7 Lo que pidió la dirección: «flujo de personas que entran a la página»
+
+Chocaba de frente con el A-02 del Acta 07, aprobado el día anterior: analítica anónima y **sin visitantes únicos**, porque contar personas exige IP, cookie o sesión y la política de tratamiento sigue sin publicarse (D-19). Esa decisión no se revierte sin Sua, así que se le puso delante: entradas anónimas ampliando el Acta 07, visitantes únicos de verdad revirtiéndola, o solo desplegar lo ya construido. Eligió la primera.
+
+**Acta 08 emitida antes de la primera línea de código**, como manda la regla 1, con A-03 (flujo de entradas) y A-04 (aviso de PQR).
+
+La entrada se reconoce por el `Referer`: si no viene de nuestro host, la página es la primera de una visita. El encabezado **se mira y no se guarda**, que es el trato que ya recibía el navegador para descartar rastreadores. Tres piezas en el tablero: los números con la comparación contra la semana anterior —y sin inventarse un porcentaje contra cero, que es lo que pasa siempre la primera semana de una métrica nueva—, la curva de treinta días con las dos series juntas, y por dónde entra la gente al lado de qué mira una vez dentro.
+
+Cada pieza dice que **no son personas distintas**, y hay una prueba que lo exige. Una cifra de tráfico sin esa frase se lee como visitantes únicos, que es exactamente lo que no es.
+
+Se acepta a sabiendas que un navegador que borre la procedencia sobrecuenta un poco. La alternativa es una cookie, y la cookie es la línea que este módulo no cruza; el sesgo va hacia arriba, es pequeño y es estable, así que la comparación entre semanas —que es para lo que sirve la cifra— se sostiene igual.
+
+### 47.8 Lo que no se pudo ver con ojos, otra vez
+
+Se entró al panel de verdad: contraseña, código del segundo factor leído de `storage/logs/laravel.log` —el correo local va al registro— y sesión abierta en el tablero. **Y ahí se acabó.** El navegador de esta máquina no compone fotogramas con la ventana detrás, así que `IntersectionObserver` no dispara nunca y los nueve widgets diferidos se quedaron en «Cargando…». Forzar la carga a mano tampoco: sin composición, Alpine no llega a inicializar.
+
+El sustituto honesto son pruebas de **renderizado completo** de los tres widgets, que `getData()` no da: un widget con los números correctos y un error de plantilla pasa la prueba de datos y revienta en el tablero.
+
+Lo que sí se comprobó contra un servidor corriendo, porque el sitio público se pinta en el servidor: `noindex` en la portada servida, `Disallow: /` en el `robots.txt` servido, cinco vacantes en el sitemap, y cero cuentas para `sitemap`, `robots` y `guia.formato` en la tabla de visitas.
+
+**Sigue abierto que Sua e Ingrid miren el panel con ojos.** Es la misma deuda del 7 y el 8 de septiembre, y ahora hay tres widgets más que nadie ha visto.
+
+### 47.9 Cómo quedó
+
+Cinco commits en `p1-auditoria-y-metricas`, ninguno empujado. Suite completa: **1.209 casos, 1.198 pasan, 11 omitidas, 0 fallos, 5.394 aserciones en 353 s** — de 1.147 a 1.209, sesenta y dos casos nuevos, todos vistos rojos antes y mutados después.
+
+El manual sube a 1.3 con lo que faltaba contar, y con un aviso en rojo arriba del todo: **sus once capturas son del 18 de agosto y el panel se rehizo el 7 y el 8 de septiembre**. Capacitar en la semana 8 sobre ese manual garantizaba que la secretaría no supiera que hay que aprobar los perfiles del banco, y que buscara en pantalla cosas que ya no están.
+
+### 47.10 Post scriptum: el Scheduler estaba apagado, y ahora se sabe con un número
+
+Unas horas después del cierre, Sua preguntó dónde se activaba. La ruta que esta misma sesión había escrito en el runbook —«Environment → Resources»— **estaba mal**: esa pestaña no existe en Laravel Cloud. Se salió de la duda con el CLI en vez de con más memoria:
+
+```
+cloud instance:list --json  →  "usesScheduler": false
+```
+
+**No es un recurso del entorno: es una propiedad de la instancia**, la tarjeta *App cluster* del diagrama. Y ese `false` convierte el hallazgo de la mañana en un hecho medido: las tres purgas de datos personales **no habían corrido una sola vez** desde el primer despliegue del 28 de agosto, mientras `/politica-de-datos` le prometía al titular que el borrado era automático.
+
+Se encendió con permiso de Sua, y en el orden que el propio runbook pedía: **primero los tres simulacros** —`0`, `0` y `0`, porque el sitio lleva menos de un mes y ningún plazo ha vencido—, después `instance:update App --uses-scheduler=true`, y por último `schedule:list` contra producción, que devolvió las tres tareas con su `Next Due`.
+
+Dos lecciones, y la segunda es la que vale:
+
+1. **`cloud command:run` quiere el comando en `--cmd`, no como argumento suelto.** La forma que el runbook llevaba escrita responde `{"error":true,"message":"cmd is required"}`. Se descubrió usándolo, que es la única manera de descubrir eso.
+2. **Un runbook que nadie ha ejecutado es una hipótesis.** Las dos correcciones de hoy —la ruta del panel y la firma del comando— llevaban ahí desde que se escribieron, con toda la confianza del mundo y sin que nadie las hubiera pasado por una terminal. La regla del proyecto de no citar cifras sin medirlas el mismo día vale igual para los procedimientos: **un paso que no se ha corrido no está verificado, por bien redactado que esté.**
+
+### 47.11 Desplegado: dieciocho commits de una vez, y la analítica midiéndose a sí misma
+
+Sua dijo «despliega la rama», y la rama arrastraba más de lo que sonaba: `origin/main` llevaba desde el 8 de septiembre en `0594058`, así que empujar no publicaba ocho commits sino **dieciocho** —`p1-cierre-bolsas` entera, que se había publicado *para que Ingrid la revisara*, más la auditoría del 9—. Ochenta archivos, cuatro migraciones. Eso se dijo antes de empujar, no después.
+
+Suite completa como última puerta —1.209 casos, 1.198 pasan, 0 fallos— y `git push origin main`. El despliegue tardó **1 min 13 s** y las cuatro migraciones entraron en el lote 2.
+
+**La verificación fue por contenido servido, no por el mensaje de éxito**, que es la regla de la casa desde §29: `Disallow: /` en el `robots.txt` real, `noindex, nofollow` en la portada real, siete rutas públicas en 200.
+
+Y entonces la analítica se midió a sí misma, que es la parte que vale la pena contar. Primer intento: `visitas=0` después de siete peticiones. No era un fallo — **el agente de usuario de `curl` está en la lista de rastreadores del propio middleware**, así que se descartó solo. Repetido con un agente de navegador y tres peticiones deliberadas, producción devolvió:
+
+```
+3 páginas servidas / 2 entradas
+```
+
+La portada sin procedencia contó llegada. La guía con `Referer` de Google contó llegada. `/empleo` con procedencia nuestra contó página **y no** llegada. `sitemap.xml` y `robots.txt` no contaron nada. Es la definición entera del módulo, comprobada en el sitio de verdad con tráfico de verdad, unas horas después de escribirla.
+
+**Lo que queda dicho y no hecho:** el sembrador de contenido oficial no corre en el despliegue, así que las dos claves jubiladas hoy —`hero_subtitulo` y `cifra_afiliados`— **le siguen apareciendo a la oficina en el panel**. La limpieza existe y vive en `SettingSeeder`; hace falta correrlo una vez, y eso toca datos, así que pide visto bueno aparte.

@@ -285,6 +285,14 @@ class CalendarioDeEventosTest extends TestCase
      */
     public function test_un_mes_sin_datos_se_navega_pero_no_se_indexa(): void
     {
+        // Con el sitio ABIERTO, que es cuando esta regla significa algo. Desde
+        // el 9 sep 2026 el sitio entero nace `noindex` mientras no haya dominio
+        // propio (D-08, `config/sitio.php`), y con esa llave cerrada todas las
+        // páginas llevan la etiqueta y la distinción de aquí no se puede medir.
+        // Lo que se prueba es la regla POR PÁGINA: un mes con datos se indexa y
+        // uno vacío no, cuando el sitio deja indexar.
+        config(['sitio.indexable' => true]);
+
         Evento::factory()->publicado()
             ->elDia(Carbon::create(2026, 9, 9))
             ->create(['titulo' => 'Unico foro publicado', 'slug' => 'unico-foro-publicado']);

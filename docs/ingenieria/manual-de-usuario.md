@@ -1,11 +1,27 @@
 # Manual de usuario — Panel de administración
 ## Plataforma Web ASOBARES Capítulo Quindío
 
-**Versión:** 1.2 · **Fecha:** 19 de agosto de 2026
+**Versión:** 1.3 · **Fecha:** 9 de septiembre de 2026
 **Dirigido a:** dirección ejecutiva, secretaría y practicantes del capítulo
 **No necesita conocimientos técnicos.** Si sabe usar el correo, sabe usar esto.
 
-> 📸 **Las once imágenes de este manual son capturas del panel real**, tomadas el 18 de agosto de 2026 sobre la base de datos de demostración, en tema claro y a 1440 px de ancho. Ninguna contiene datos personales de una persona real: todos los establecimientos y nombres que aparecen son ficticios.
+> 🚨 **LAS ONCE CAPTURAS ESTÁN CADUCADAS Y HAY QUE VOLVER A TOMARLAS ANTES DE LA CAPACITACIÓN.**
+>
+> Son del **18 de agosto**, y entre el 7 y el 8 de septiembre el panel se rehízo entero: identidad visual, tablero, tablas, la barra lateral de escritorio —que pasó de franja burdeos a láminas de cristal sobre un campo de puntos— y, en el teléfono, un riel de iconos que antes no existía. Las capturas enseñan un panel que ya no está.
+>
+> Una captura vieja es peor que ninguna: el lector busca en pantalla algo que no va a encontrar y concluye que se equivocó él. **Solo Sua o Ingrid pueden rehacerlas**, porque el segundo factor impide que una sesión automatizada abra el panel. Once imágenes, tema claro, 1440 px, base de demostración: media hora.
+>
+> El texto de este manual **sí está al día** al 9 de septiembre de 2026.
+
+> 📸 Ninguna imagen contiene datos personales de una persona real: todos los establecimientos y nombres que aparecen son ficticios.
+
+> **Qué cambió en la versión 1.3** (9 de septiembre de 2026), todo del 8 y el 9 de septiembre:
+>
+> - **§6** — el banco de talento ahora **hay que aprobarlo perfil por perfil**, y si nadie lo hace el módulo se ve vacío. Es lo más importante de esta revisión.
+> - **§6** — la ficha pública del artista conserva el escaparate y pierde el contacto.
+> - **§6** — el borrado automático de datos personales depende de un recurso del hosting que hay que activar una vez; cómo comprobarlo.
+> - **§7** — el reloj de los quince días hábiles de la PQR, y quién se entera de que entró un mensaje.
+> - **§8 bis** — nueva: las métricas de flujo del sitio que pidió la dirección.
 
 ---
 
@@ -145,6 +161,27 @@ Las vacantes, los artistas y los proveedores **no los crea el gremio**: los publ
 - **Bolsas → Artistas** y **→ Proveedores.** Entran por un formulario público. Al aprobar, el sistema avisa por correo a quien se inscribió.
 - **Bandejas → Postulaciones.** Los candidatos a las vacantes. Aquí solo se consultan: **quien gestiona los candidatos es el establecimiento dueño de la vacante**, no el gremio.
 
+### ⚠️ El banco de talento hay que aprobarlo, uno por uno
+
+**Esto es nuevo desde el 8 de septiembre de 2026 y es lo que más se nota si nadie lo hace.**
+
+Cualquiera puede dejar su hoja de vida en `/empleo`. Antes, ese perfil quedaba visible **al instante** para todos los establecimientos afiliados: nombre, teléfono y correo de una persona, publicados sin que nadie los mirara. Ahora no. Un perfil nace **sin aprobar** y no lo ve nadie hasta que ustedes digan que sí.
+
+En **Bolsas → Banco de talento**:
+
+1. El filtro **«Sin aprobar»** deja a la vista lo que está esperando.
+2. Se abre el perfil con **«Ver perfil»** y se lee lo que dejó la persona.
+3. **«Aprobar»** lo pone a disposición de los afiliados. El aviso lo dice con todas las letras: *«Los establecimientos afiliados verán su nombre, su teléfono y su correo»*.
+4. **«Retirar del banco»** deshace lo anterior sin borrar el perfil.
+
+> **Si nadie aprueba, el directorio de talento del afiliado se ve vacío**, y no está roto: está esperándolos. Es el modo de fallo más silencioso del panel, porque la pantalla responde y no enseña a nadie.
+
+> 🕮 **Aprobar y retirar quedan en la Bitácora, con nombre y hora.** Es la decisión de mostrar o esconder los datos de contacto de una persona, así que tiene que poder auditarse. Ninguna otra acción de este módulo se registra: la bitácora anota la decisión, no el expediente.
+
+### La ficha del artista, por partes
+
+Desde el 8 de septiembre, la ficha pública de un artista **conserva el escaparate** —nombre, foto, género, vídeo— y **pierde el contacto**. El teléfono y el correo se ven en `/mi-cuenta/artistas`, o sea solo con sesión de afiliado. Lo mismo pasa con los proveedores: `/proveedores` sigue siendo pública y no muestra ni un contacto.
+
 ![Aprobación en lote: seleccione las vacantes y abra las acciones](capturas/08-vacantes-aprobacion-en-lote.png)
 
 *Aprobación en lote: seleccione las vacantes y abra las acciones.*
@@ -152,6 +189,8 @@ Las vacantes, los artistas y los proveedores **no los crea el gremio**: los publ
 > **Ni la secretaría ni la dirección editan la vacante de un establecimiento.** Aprobarla o devolverla, sí. Cambiarle el texto, no. El contenido es del asociado.
 
 > 🔒 **Los datos personales de las bolsas se borran solos.** Las postulaciones y los perfiles del banco de talento se eliminan automáticamente al vencer el plazo de conservación. Es una obligación de la Ley 1581 de 2012 y el sistema la cumple sin que nadie tenga que acordarse. Cada borrado queda anotado en la Bitácora.
+>
+> ⚠️ **Eso exige una cosa del lado del servidor, y hay que comprobarla una vez.** El borrado lo hacen tres tareas que corren de madrugada, y en el hosting eso es un recurso que se activa aparte —no viene puesto de fábrica—. Está explicado en `runbook-despliegue.md` §5.1. Para verificar que funciona: entrar a **Configuración → Bitácora** y buscar `Depuración de datos`. Ojo con leer mal el silencio: si no había nada que borrar tampoco escribe, así que la ausencia no prueba que esté roto, pero su presencia sí prueba que funciona.
 
 ---
 
@@ -162,6 +201,27 @@ Las vacantes, los artistas y los proveedores **no los crea el gremio**: los publ
 Las **PQR reciben un radicado automático** con formato `PQR-2026-0001`, consecutivo y sin saltos, y el remitente recibe acuse por correo. Eso importa porque las PQR tienen plazos legales de respuesta y el radicado es la prueba de la fecha.
 
 Al responder, use **«Marcar respondido»**: pide una nota que queda como constancia de qué se contestó y cuándo.
+
+### El reloj de la PQR
+
+**Nuevo desde el 9 de septiembre de 2026.** La ley da **quince días hábiles** para responder una PQR (Ley 1755 de 2015), y ahora el panel lleva esa cuenta:
+
+- La columna **«Plazo de ley»** dice la fecha de vencimiento de cada PQR. Verde si sobra tiempo, **ámbar cuando quedan tres días hábiles o menos**, y **«Vencida»** escrito —no solo en rojo— cuando ya pasó.
+- El filtro **«PQR pasadas de plazo»** las junta todas. Es el primer clic de un lunes.
+- El **número junto a «Mensajes y PQR» en el menú** cuenta lo que espera respuesta, y se pone rojo si alguna ya venció. Así se ve sin entrar a la bandeja.
+
+> Los festivos colombianos **no se descuentan** de esa cuenta, porque el sistema no tiene el calendario de festivos. El error va a favor: la fecha que muestra es igual o anterior a la legal, nunca posterior. Para una respuesta formal ante la SIC, cuente los días con el calendario en la mano.
+
+### Quién se entera de que llegó algo
+
+**También nuevo del 9 de septiembre.** Antes, un mensaje entraba y no avisaba a nadie: había que abrir el panel y mirar. Ahora:
+
+- El **contador del menú** lo anuncia en cuanto se entra al panel, a lo que sea.
+- Sale un **correo al buzón del gremio**, al que diga **Configuración → Ajustes del sitio → Contacto → «Correo que recibe los formularios»**. Cambiar ahí la dirección cambia de verdad a dónde llega el aviso.
+
+> ⚠️ **Ese correo no está saliendo todavía.** Falta contratar el servicio de correo saliente. Mientras tanto el contador del menú sí funciona, y el aviso queda anotado como fallido en el registro. El día que se configure el correo, empieza a salir sin tocar nada.
+>
+> El aviso **no copia el texto del mensaje ni el teléfono de quien escribe**, a propósito: sacar esos datos hacia un buzón de correo los pondría fuera del sistema que sabe borrarlos cuando vence su plazo. El contenido se lee aquí, en el panel.
 
 ![Bandeja de mensajes con el panel de filtros abierto](capturas/09-mensajes-filtro-por-tipo.png)
 
@@ -191,6 +251,27 @@ Cargada la cartera, el asociado entra a `/mi-cuenta`, ve **«Debes 3 meses · $1
 ### Consultar los pagos
 
 **Gremio → Transacciones**, en solo lectura: referencia, fecha, valor y estado. No se editan a mano a propósito — un pago es un hecho, no un dato editable.
+
+---
+
+## 8 bis. Las métricas del sitio
+
+*(Solo dirección.)*
+
+En el **Tablero**, debajo de lo operativo, hay cuatro piezas que responden cuánta gente usa el sitio. Se pidieron el 9 de septiembre de 2026 y están amparadas por el **Acta 07** y el **Acta 08**.
+
+**Lo primero, porque de aquí salen todos los malentendidos: esto no cuenta personas.** El sitio no guarda IP, ni cookie, ni sesión de quien visita —esa fue una decisión escrita, para no entrar en el terreno de la Ley 1581 sin la política de tratamiento publicada—. Lo que se cuenta es:
+
+| Pieza | Qué responde |
+|---|---|
+| **Flujo del sitio** (tres números) | Cuánta gente entró esta semana, si eso sube o baja respecto a la anterior, y cuántas páginas mira cada quien |
+| **Flujo del sitio, 30 días** (curva) | Dos líneas: **entradas** (llegadas al sitio) y **páginas servidas** (todo lo que se abre). Si suben las entradas y no las páginas, llega más gente y se va enseguida. Si suben las páginas y no las entradas, la misma gente mira más |
+| **Por dónde entran** | La primera página de cada visita, ordenada. Es la que dice dónde poner el esfuerzo: si la mayoría llega por la guía normativa, el producto insignia es la guía |
+| **Secciones más visitadas** | Qué se mira una vez dentro. Agrupa por sección, no por dirección: todas las fichas del directorio cuentan juntas |
+
+> **«Entradas» no es «visitantes únicos».** Alguien que entra hoy y vuelve mañana cuenta dos. Si a la dirección le hace falta el número de personas distintas, es una decisión aparte: exige identificar a quien visita y publicar antes la política de tratamiento de datos.
+
+> Lo que **no** se cuenta, para que nadie lea de más: el panel, el portal del afiliado, las páginas de pago, los rastreadores de los buscadores, las descargas de formatos y todo lo que no sea una página. Y el conteo empezó el **9 de septiembre de 2026**: antes de esa fecha las entradas figuran en cero porque el dato no se recogía, no porque no hubiera visitas.
 
 ---
 
@@ -236,9 +317,17 @@ Arriba a la derecha. Su elección se recuerda y vale también para el sitio púb
 2. **Complementar con vídeo** si se prefiere: un recorrido de 10 minutos que siga las secciones 2, 3, 5 y 8 cubre el 90 % del uso diario.
 3. **Verificar contra la realidad de la capacitación:** el criterio contractual no es que el manual exista, sino que **al terminar la sesión el personal publique un asociado, un evento y una noticia sin ayuda**. Lo que falle en esa prueba es lo que hay que reescribir aquí. Mientras esa sesión no ocurra, este manual está probado contra el software pero no contra sus lectores. El formato para dejar constancia de esa sesión es `constancias/Acta 02 - Constancia de capacitacion.pdf`.
 
-> ⚠️ **Si el panel cambia, estas capturas mienten.** Son fotografías de una versión concreta (`main` en `4f15d24`). Cualquier cambio de interfaz obliga a repetir la que corresponda; una captura vieja en un manual es peor que ninguna, porque el lector busca en pantalla algo que ya no está.
+> 🚨 **Las once capturas están caducadas desde el 7 y 8 de septiembre de 2026, y esta es la tarea que bloquea dar el manual por terminado.**
 >
-> El trabajo de interfaz del 19 de agosto **no las invalida**: toca `resources/css/app.css` y las vistas de `resources/views/publico/`, y ninguna de las dos cosas se carga en `/admin`. Lo único que cambió del panel es el fichero del logotipo, y son los mismos píxeles.
+> Eran fotografías de `main` en `4f15d24`. El trabajo de interfaz del 19 de agosto no las invalidaba —tocaba solo el sitio público— pero el del **7 y 8 de septiembre sí**: el panel se rehízo entero (identidad, tablero, tablas, barra lateral de escritorio, riel del teléfono). Las once enseñan una pantalla que ya no existe.
+>
+> **Cómo rehacerlas**, y solo puede hacerlo una persona porque el segundo factor no deja entrar a una sesión automatizada:
+>
+> 1. `php artisan migrate:fresh --seed` en local, para tener la base de demostración.
+> 2. Entrar a `/admin` con `direccion@asobaresquindio.test` · `Asobares2026*`. El código del segundo factor sale en `storage/logs/laravel.log`.
+> 3. Tema claro, ventana a 1440 px, y repetir las once de `capturas/` con el mismo encuadre y el mismo nombre de archivo.
+> 4. Añadir una duodécima de **Bolsas → Banco de talento con el filtro «Sin aprobar»**, que es la pantalla nueva que más falta hace en la §6.
+> 5. Regenerar el PDF: `node docs/ingenieria/herramientas/manual-a-pdf.mjs`.
 
 ---
 
