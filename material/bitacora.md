@@ -2061,4 +2061,52 @@ El rojo se partió en dos oficios. El que **alumbra**, el filo y el halo, sigue 
 
 ### 43.3 Lo que midió Sua, y lo que falta medir
 
-El segundo factor impide que una sesión automatizada abra el panel, así que las cifras de partida las tomó Sua en su propio navegador con un guion pegado en la consola. Dieron tres cosas duras: los **24 ítems miden 43,5 px** y ninguno pasa la comprobación de las cuatro esquinas del cuadrado de 44; la lista tiene **1.651 px de contenido en 913 de hueco**, es decir que **se corta el 45 %**, que es justo lo que justifica el aviso de borde; y el fondo computa transparente porque la franja burdeos la pinta un `background-image`. La ventana medía 201 px de ancho, así que lo medido fue el cajón: falta la misma medición maximizada, que es donde se juzga el cristal pintado.
+El segundo factor impide que una sesión automatizada abra el panel, así que las cifras de partida las tomó Sua en su propio navegador con un guion pegado en la consola. Dieron tres cosas duras: los **24 ítems miden 43,5 px** y ninguno pasa la comprobación de las cuatro esquinas del cuadrado de 44; la lista tiene **1.651 px de contenido en 913 de hueco**, es decir que **se corta el 45 %**, que es justo lo que justifica el aviso de borde; y el fondo computa transparente porque la franja burdeos la pinta un `background-image`. La primera medición se tomó a 201 px de ancho, así que fue el cajón; Sua repitió con la ventana maximizada, a 1.084 x 1.083, y ahí la barra computó **`position: sticky`**. Eso convierte en hecho medido lo que hasta entonces era una lectura del vendor: en escritorio la barra va en flujo y pegada, detrás de ella no pasa contenido, y el `blur(14px)` que lleva hoy es coste sin imagen. Con la ventana grande la lista se corta el 38 % en vez del 45 %, porque el recorte depende del alto y no del ancho: está cortada siempre.
+
+## 44. LA BARRA LATERAL DEL PANEL: CRISTAL, LUZ Y UN CAMPO DE PUNTOS (7-8 sep 2026)
+
+### 44.1 Dieciocho decisiones y un taller de cinco miradas
+
+Sua pidió rehacer el menú de la izquierda, «muy semejante a la navBar de escritorio pero vertical», con resorte al desplazarse y cristal con detalles luminiscentes en rojo. El diseño se hizo antes de escribir una línea: cinco miradas independientes sobre el mismo encargo, cada una criticada por un adversario que verificó contra el repositorio, y una síntesis que resolvió las cinco contradicciones entre ellas. Cuarenta y dos decisiones fundidas en dieciocho, aprobadas en bloque.
+
+Tres hechos comprobados a mano cambiaron el encargo tal como se imaginó: en escritorio la barra es `lg:sticky` y detrás no pasa contenido, así que el `blur(14px)` que llevaba no desenfocaba nada; su cabecera con el logotipo es `lg:hidden`; y una guardia verde ya prohibía el sitio donde una de las miradas quería pintar el campo ambiental.
+
+### 44.2 Lo que costó llegar: siete correcciones y dos regresiones
+
+La construcción no fue en línea recta y conviene que quede escrito. **Los módulos con vidrio permanente sobre un fondo liso se leen como cajas dentro de cajas**: la fila se quedaba en 210 px útiles de 244 y Sua lo llamó «apeñuscado». Se aplanó todo, y entonces faltaban los módulos que el encargo pedía. Volvieron apagados, encendiendo por estado, y por fin permanentes cuando hubo un campo de puntos detrás que refractar. **La cuenta del usuario pasó por tres sitios el mismo día.** Y **el límite pasó por tres formas** —línea, filo y franja difusa— hasta que quedó claro que ninguna servía: con el fondo continuo, nada separa la barra del contenido.
+
+Dos regresiones visuales se entregaron sin verlas, y esa es la lección del día. La segunda rompió la barra entera: el lienzo del campo perdía su posición absoluta porque `.fi-sidebar > *` empata en especificidad con su regla y va después, caía al flujo con alto completo y empujaba la lista fuera de la vista.
+
+### 44.3 La maqueta, que debió existir desde el principio
+
+El panel exige segundo factor, así que ninguna sesión automatizada lo abre. Tras la segunda regresión se construyó una maqueta que reproduce el marcado de la barra con el tema compilado y se sirve por HTTP. Se ganó el sueldo dos veces: la primera vez que se abrió reprodujo el aviso que la spec ya tenía anotado (sin `fi-sidebar-open`, Filament deja la barra fuera de pantalla), y después cazó un falso verde propio: la guardia afirmaba que la barra tenía sombra y el navegador computaba `rgba(0,0,0,0) 0 0 0 0`, porque Filament le aplica `lg:shadow-none` desde una capa que gana. Estar escrita no es aplicarse.
+
+### 44.4 Cómo quedó
+
+La barra no tiene fondo propio: el fondo es un campo de puntos que huyen del cursor, dibujado en un lienzo fijo detrás de toda la interfaz, con su color en tokens (invierte con el tema) y la repulsión apagada bajo movimiento reducido. Cada apartado es una lámina de cristal. La zona del panel la marca un resplandor rojo, claro en el tema claro y oscuro en el oscuro. La fila mide 48 px, contra los 43,5 medidos al empezar, que no pasaban el mínimo táctil en ninguno de los 24 destinos. El foco salió de la media de puntero, donde estaba atrapado. La cuenta vive arriba con nombre y rango, la campana se retiró y el control de tema tiene ya las tres preferencias del sitio público.
+
+### 44.5 Los dos cortes que no eran el mismo corte (8 sep)
+
+Sua miró la barra en oscuro y dijo dos veces que los módulos se veían cortados. Eran dos cosas distintas y ninguna era la que parecía.
+
+El primero sí era un recorte: la máscara de desvanecido que avisa de que hay más lista medía 1,5 rem y la lista solo tenía 0,5 rem de aire vertical, así que en reposo el canto de la primera y de la última lámina nacía dentro del desvanecido. Con el vidrio suelto no se notaba; desde que el módulo tiene borde, un borde a medio pintar se lee como una caja cortada. El aviso baja a 0,9 rem y el relleno pasa a `calc(aviso + 0,35 rem)`.
+
+El segundo no era un recorte en absoluto, y por eso conviene que quede escrito: **el módulo acababa en 239,2 px y lo único que recorta cortaba en 244**. Lo que había era estrechez. El relleno de la lista era asimétrico —0,75 rem a la izquierda, 0,3 a la derecha— desde que Sua pidió agrandar los módulos hacia la derecha: se le quitó al aire de ese canto en vez de al ancho de la barra. Con 16 px de radio y 4,8 px de aire, la curva del canto derecho no tenía fondo contra el que leerse. La barra sube de 15,25 a 15,75 rem, el relleno vuelve a ser simétrico y el módulo queda en 228 px, un poco más ancho de los 227,2 que tenía.
+
+Dos lecciones. Una: **medir antes de arreglar**, porque el arreglo obvio —ensanchar el recorte— no habría tocado la causa. Otra: **la maqueta solo reprodujo el segundo defecto cuando se le puso el marcado real del grupo**, con su botón de plegado; la maqueta aproximada dio verde sobre algo que en el panel se veía mal. Una maqueta vale lo que se parece.
+
+Con eso Sua dijo «empuja». Suite completa como portón: 1.091 casos, 1.080 pasan, 11 omitidas, 0 fallos, 4.920 aserciones en 605 s. Veinte commits de una vez, y comprobado por contenido servido y no por hash: el CSS del panel en producción trae `--asb-admin-sidebar-ancho:15.75rem` y el relleno simétrico. Sale D-37.
+
+### 44.6 Las cuatro tareas que faltaban, y los cuatro defectos que destaparon (8 sep 2026)
+
+Con la barra ya desplegada y dos peticiones más de Sua atendidas —el cristal de los apartados deja ver el campo, y el resplandor cubre todo el lado en vez de apagarse a media altura— se cerraron las cuatro tareas que le quedaban al plan. Lo interesante no son las tareas: son los cuatro defectos que ninguna de ellas iba buscando.
+
+**Las cuatro señales del sistema (D-L17)** llegan por fin a la barra, en cuatro bloques fuera de `@layer components` a propósito: reasignan tokens, y el `:root` de ese archivo también vive fuera de capa, así que dentro de la capa la reasignación perdería. La guardia afirma las tres cosas —que los bloques existen, que cada uno reasigna lo suyo, y que **ninguno cae dentro de una capa**— y se vio roja con las tres mutaciones. Al ponerla se destapó el primero: **el desenfoque del cromo superior estaba escrito a mano en cuatro declaraciones**, así que `prefers-reduced-transparency` no podía apagarlo. Es exactamente el defecto que D-L17 había anotado para la barra, vivo en el sitio de al lado.
+
+**La guardia de contrato con el vendor** afirma once cadenas de Filament con su porqué en el mensaje, y el hecho del panel real. Es la única prueba de la clase que se rompe sola, sin que nadie toque nuestro código: cuando Filament suba de versión.
+
+**La maqueta pasó a ser un comando**, `php artisan maqueta:barra`, porque llevaba dos días generándose con guiones de un solo uso. Con ella se midió la barra construida: 252 px de ancho, las 22 filas a 48 px pasando las cuatro esquinas del cuadrado táctil, ningún rótulo recortado, la sombra del módulo aplicándose de verdad y los rótulos computando exactamente los colores que la guardia de contraste supone. Y enseñó dos lecturas que **parecen defectos y no lo son**: `elementFromPoint` devuelve `null` fuera del viewport, así que medir el objetivo táctil sin desplazar la lista inventa catorce fallos; y leer `box-shadow` justo tras cambiar de estado devuelve el valor interpolado en t = 0, que se lee igual que una sombra anulada.
+
+**La revisión adversaria** sacó los dos últimos. **Cinco tokens declarados sin ningún consumidor, con dos guardias verdes encima de uno de ellos**: `--asb-admin-barra-filo` existía para volverse línea bajo más contraste y hacía dos días que nadie lo pintaba, desde que Sua rechazó el filo rojo. La guardia que había vigilaba un token concreto; la nueva generaliza a los cuarenta y dos y nació roja señalando los cinco. Y **el comando de la maqueta escribía una página servible dentro de `public/`**: en producción eso es publicar el marcado del panel sin que nadie lo pida, así que ahora se niega, y se niega antes de tocar el disco.
+
+La lección común a los cuatro: **ninguno lo destapó mirar la pantalla**. Los destapó escribir la guardia que faltaba y verla roja. Es lo contrario del día anterior, donde lo que faltaba era mirar.

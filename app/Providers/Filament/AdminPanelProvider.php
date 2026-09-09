@@ -84,6 +84,33 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::TOPBAR_END,
                 fn (): HtmlString => new HtmlString(view('filament.components.theme-switcher-topbar')->render()),
             )
+            // La cuenta, ARRIBA y junto al control de tema (D-L21, corregida
+            // por segunda vez el 7 sep). Estuvo al pie de la barra y luego como
+            // primera fila; Sua la quiere en el cromo superior, con el nombre y
+            // el rango que el círculo de iniciales de Filament no mostraba.
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_END,
+                fn (): HtmlString => new HtmlString(view('filament.components.cuenta-en-la-barra', ['donde' => 'cromo'])->render()),
+            )
+            // Y la MISMA cuenta al pie de la barra, que es donde la quiso Sua en
+            // el teléfono (D-L30): anclada abajo a la izquierda y con los iconos
+            // pasando por debajo. Las dos copias existen a la vez en el marcado y
+            // el CSS apaga con `display: none` la que no toca, que es lo único
+            // que la saca del orden de tabulación.
+            ->renderHook(
+                PanelsRenderHook::SIDEBAR_FOOTER,
+                fn (): HtmlString => new HtmlString(view('filament.components.cuenta-en-la-barra', ['donde' => 'pie'])->render()),
+            )
+            // El campo de puntos del fondo de TODA la interfaz (D-L24, ampliado
+            // en D-L26). Va lo primero del cuerpo, fijo y por debajo de todo.
+            ->renderHook(
+                PanelsRenderHook::BODY_START,
+                fn (): HtmlString => new HtmlString(view('filament.components.puntos-de-la-barra')->render()),
+            )
+            // Con la cuenta abajo, el menú de usuario de Filament sobra: dos
+            // disparadores para la misma sesión se contradicen en cuanto uno
+            // cambie. Perfil, sitio y salida viven ahora en la hoja del módulo.
+            ->userMenu(false)
             // Pub Red, exacto según el manual de marca de Asobares Colombia.
             ->colors([
                 'primary' => Color::hex('#EE4137'),
@@ -109,8 +136,13 @@ class AdminPanelProvider extends PanelProvider
                 ],
                 isRequired: true,
             )
-            ->databaseNotifications()
-            ->databaseNotificationsPolling('30s')
+            // La campana se retira (D-L22, 7 sep): lo que anunciaba lo cuenta
+            // mejor la banda «Te está esperando» del tablero, que además dice
+            // qué hay que aprobar y desde cuándo espera. Si el gremio pide
+            // avisos de verdad, es un frente propio con su decisión.
+            //
+            // ->databaseNotifications()
+            // ->databaseNotificationsPolling('30s')
             // Sin icono de grupo a propósito: Filament no admite iconos en el
             // grupo y en sus items a la vez, y el icono por recurso orienta más.
             ->navigationGroups([
@@ -178,6 +210,9 @@ class AdminPanelProvider extends PanelProvider
         try {
             return [
                 Js::make('panel-graficas', Vite::asset('resources/js/panel-graficas.js'))->module(),
+                Js::make('panel-barra-lateral', Vite::asset('resources/js/panel-barra-lateral.js'))->module(),
+                Js::make('panel-barra-puntos', Vite::asset('resources/js/panel-barra-puntos.js'))->module(),
+                Js::make('panel-barra-resorte', Vite::asset('resources/js/panel-barra-resorte.js'))->module(),
             ];
         } catch (ViteException) {
             return [];

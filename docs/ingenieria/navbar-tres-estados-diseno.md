@@ -1457,22 +1457,188 @@ Cómo se hizo: cinco miradas independientes sobre el mismo encargo (movimiento, 
 
 **Qué NO es.** No es la navBar de escritorio girada noventa grados. La navBar pública se retrae porque le roba alto a la lectura; esta barra no le roba nada al contenido, que va a su lado, así que no se retrae, no se compacta y no se va. Su cabecera con el logotipo no existe en escritorio (Filament la marca `lg:hidden` cuando hay topbar), así que no hay logotipo que condensar. Y detrás de ella, en escritorio, no pasa nada: solo el color plano de `.fi-body`. No es tampoco un carril de iconos: el plegado de escritorio está apagado y encenderlo es otro encargo. Lo único que de verdad se desplaza aquí es su propia lista, y ahí es donde tiene que estar todo lo que se mueve.
 
+## La revisión adversaria, 8 sep 2026 (tarea 11)
+
+Hecha por ángulos sobre lo construido, verificando cada sospecha contra el repositorio. Dos hallazgos confirmados, los dos arreglados con la guardia vista roja antes del arreglo.
+
+**1. Cinco tokens declarados y sin ningún consumidor, y dos guardias verdes encima de uno de ellos.** `--asb-admin-barra-filo` existía —según D-L9 y D-L17— para volverse línea bajo más contraste, y dos pruebas afirmaban que estaba declarado y que la señal lo reasignaba. Hacía dos días que **nadie lo consumía**: perdió su consumidor cuando Sua rechazó el filo rojo y pidió continuidad. Lo mismo `--asb-admin-barra-sombra`, la otra mitad de aquel límite. Y tres más de la paleta borgoña vieja del panel: `--asb-admin-rojo`, `--asb-admin-borgona`, `--asb-admin-borgona-profundo`. Los cinco fuera.
+
+La guardia que existía vigilaba un token concreto, `--asb-admin-barra-union`. La nueva **generaliza a los cuarenta y dos**: ninguno se declara sin que alguien lo consuma, contando el consumo por `var()` en CSS y por `getPropertyValue` en JavaScript, que es como el campo de puntos lee su color.
+
+**Corrección a D-L9 y D-L17, entonces:** el filo ya no existe como token. Bajo más contraste, lo que se vuelve línea es `--asb-admin-barra-modulo-canto`, que es el canto que de verdad se pinta.
+
+**2. El comando de la maqueta escribía dentro de `public/`, y eso queda servido.** En una máquina de trabajo es lo que se quiere; en producción es publicar una página que nadie pidió con el marcado del panel dentro. El comando se niega ahora en producción, y se niega **antes** de tocar el disco.
+
+**Barrido final:** sin sondas, sin `dd(`, sin `console.log`, sin `FUGA`, y `git status` limpio salvo lo que entra en el commit.
+
+### D-L29. En el teléfono la barra es un riel de iconos
+
+**Pedido de Sua, 8 sep, con una captura del panel en un teléfono:** «la barra del panel en el móvil está terrible. Quiero que se vean los iconos a la izquierda y que al desplegarlo aparezcan los nombres correspondientes. Tiene que ser responsivo a la pantalla de un teléfono correctamente».
+
+**Primero, el defecto que hacía «terrible» la captura, y que no era de diseño.** El tema declaraba `position: relative` en `.fi-sidebar`. Filament la declara `fixed` y solo la vuelve `lg:sticky` en escritorio, y **nuestra regla va después en el archivo compilado** —que no lleva capas: `lightningcss` las aplana y manda el orden—, así que ganaba en todas las anchuras. Consecuencias, las dos comprobadas leyendo el CSS servido:
+
+1. **En el teléfono**, el cajón cerrado dejaba de estar fuera de pantalla y pasaba a ocupar sus 252 px **en el flujo**: la franja rosa vacía de la captura, con el contenido aplastado contra el canto derecho.
+2. **En escritorio**, `lg:sticky` también perdía, así que la barra se iba con el desplazamiento de la página en vez de quedarse.
+
+La regla existía para que el resplandor de `::before` tuviera bloque contenedor. Desde que el resplandor se mudó a `.fi-body::before` **no hace falta ninguna**, y se retira. Hay guardia: `.fi-sidebar` no declara `position`, y el mensaje dice por qué.
+
+**El riel.** Por debajo de 64 rem la barra deja de irse: se **estrecha**.
+
+| | Riel (cerrado) | Cajón (abierto) |
+|---|---|---|
+| Ancho | `--asb-admin-barra-riel`, 3,5 rem | `--sidebar-width`, 15,75 rem |
+| Qué se ve | solo los iconos | icono y nombre |
+| Dónde está | fijo al canto izquierdo, debajo del topbar | encima del contenido, con el velo de cierre de Filament |
+| El contenido | apartado por el ancho del riel | quieto; el cajón se le superpone |
+
+**Cuatro reglas que no se negocian:**
+
+1. **El nombre no se borra, se esconde.** Los rótulos se ocultan con recorte visual (`clip-path: inset(50%)` sobre un cuadro de 1 px), **nunca con `display: none`**: el enlace conserva su nombre accesible y el riel sigue siendo navegable a ciegas. Un riel de iconos sin nombre accesible es una lista de enlaces sin texto.
+2. **La fila del riel sigue midiendo 44 px** como mínimo, y el riel 56 px de ancho, que da margen a los cuatro cantos del cuadrado táctil.
+3. **La transición es del ancho, declarada a mano.** Filament pone `transition-all` en `.fi-sidebar`, que es justo lo que la Parte III ya prohibió para el cajón: se declara `transition-property: width` con su token de duración, y bajo movimiento reducido no hay transición.
+4. **`translate: none`, no `translate: 0 0`.** Deshacer el `-translate-x-full` de Filament con un cero deja un `translate` computado distinto de `none`, y eso convierte a la barra en bloque contenedor de todo `fixed` que cuelgue dentro. Es el mismo pisotón que este proyecto ya pagó dos veces.
+
+**Lo que el riel se lleva por delante:** la cabecera con el logotipo, que en 56 px no cabe y que ya está en el topbar; el chevron de los grupos, que sin rótulo no plega nada legible; y el contador de la insignia, que a 56 px no se lee y se convierte en **punto**, para no perder la señal de que hay pendientes que D-L22 le encargó.
+
+**Y el resplandor se estrecha con la zona:** 13 rem de lavado sobre una pantalla de 375 px cubren más de la mitad. Por debajo de 64 rem el ancho del lavado baja a 6 rem, que es lo que marca un riel de 3,5.
+
+**Corregido el mismo día: el riel no tiene suelo.** Sua lo vio construido: «deja solo los módulos y quita la barra blanca de fondo que los agrupa para que así se les vea libertad, y a los módulos entrégales un poco de transparencia». Medido en la maqueta, ese blanco no era de la barra —que computa `rgba(0,0,0,0)`— sino de **`.fi-sidebar::before`, que pintaba el velo del CAJÓN al 94 % también cuando la barra está cerrada**. El velo del cajón tiene su razón (D-L18: debajo pasa contenido variable y hay que taparlo) y esa razón **no existe en el riel**, que no tapa nada: solo está a un lado.
+
+Así que el suelo se ata al estado. Abierta, velo y desenfoque como estaban. Cerrada, **nada**: los módulos flotan sobre el campo de puntos y el resplandor, que es exactamente el idioma del escritorio —«la barra no tiene fondo propio»— llevado al teléfono.
+
+Y el cristal de los apartados baja del 76 % al **66 %** por debajo de 64 rem, que es la transparencia que Sua pidió. Recalculado el 8 sep con `MideContraste`: el rótulo de grupo da **11,08:1** en claro y **7,74:1** en oscuro; el del ítem activo, **6,23:1** y **5,23:1**. Contra los 11,18 / 6,29 y 7,74 / 5,23 que daba al 76 %, la cuenta apenas se mueve, porque la superficie y el fondo del panel son casi el mismo color: aquí manda el ojo.
+
+**Lo que la construcción añadió (8 sep).** Tres cosas que no estaban en la decisión y que solo aparecieron al medir:
+
+1. **El ancho del riel se pone moviendo el token de Filament, no la propiedad.** Su regla de ancho cuelga de `.fi-body:not(…):not(…) .fi-sidebar:not(.fi-sidebar-open)` y tiene mucha más especificidad que cualquier `width` declarado aquí: medido, el riel seguía saliendo de 252 px. Como esa regla dice `width: var(--sidebar-width)`, basta con darle otro valor al token dentro de la media.
+2. **La reasignación del lavado salió de `@layer components`.** Las REGLAS del riel sí viven dentro de la capa; los tokens no pueden, porque el `:root` sin capa de este mismo archivo les gana. Es la misma trampa de D-L17, ahora en una media de anchura.
+3. **La maqueta mintió tres veces y por eso no se veía el defecto.** Declaraba `position: sticky` sobre `.fi-sidebar` —tapando el `fixed` de Filament, que es justo lo que fallaba—, ponía su `<style>` DESPUÉS de la hoja compilada —tapando el `display: none` del chevron— y no reproducía el `opacity: 1` que el blade le pone al contenido con Alpine, así que medía un contenido invisible. Las tres corregidas: la maqueta ya no posiciona nada, su estilo va **antes** de la hoja, y trae `.fi-main-ctn` con el estilo en línea del blade. Tiene también `--cerrada`, que es como se mira el riel.
+
+**Medido después, en la maqueta servida por HTTP.** A 375 px: riel de **56 px**, `fixed`, empezando en `y = 60` bajo el topbar; las 22 filas a **48 px**; ninguna desborda el riel; los iconos centrados; el chevron y la cabecera fuera; el contenido empezando en **56**; y el nombre accesible intacto (`Asociados`, `Eventos y capacitaciones`…). Abierto: **252 px**, `fixed`, `z-index: 30`, velo al 94 % con `blur(18px) saturate(1.3)`, rótulos visibles y ninguno recortado. A 1.280 px: `position: sticky` —**recuperado**, llevaba dos días en `relative`—, 252 px, contenido en 252 y sin relleno de riel.
+
+---
+
+### D-L30. El teléfono, rehecho: cromo, perfil anclado, riel con aire y resorte al gesto
+
+**Pedido de Sua, 8 sep, viendo el panel en un teléfono.** Cuatro cosas, y una quinta que resolvió al preguntarle: **el cambio es solo del teléfono**. En escritorio no se toca nada, porque lo que hay está aprobado y desplegado.
+
+**Qué skill se usó, y qué no.** Sua propuso una de diseño de Apple. **No existe** entre las suyas ni entre las que puede añadir; se dijo en vez de improvisar una. Se usó `ui-ux-pro-max`, que trae su guía pero no su buscador, y de ella salen cuatro exigencias que se aplican aquí: objetivo táctil de 44 px, nombre accesible en botones de solo icono, escala de `z-index` declarada, y `prefers-reduced-motion` respetado. Los principios de la escuela de Apple que Sua quería —deferencia, manipulación directa, muelles con masa— ya son el idioma de este proyecto: están en `--ease-rebote-suave` y `--ease-rebote-vivo` desde la Parte I.
+
+#### 1. El cromo superior
+
+Hamburguesa a la izquierda **donde está**, logotipo **centrado**, control de tema a la derecha. La cuenta se va de ahí.
+
+El centrado es por rejilla `1fr auto 1fr` y no por `justify-content`, que es lo mismo que hace la barra pública de escritorio: con dos costados de anchura distinta, centrar el contenedor deja el logotipo descentrado a ojo, y el ojo lo nota.
+
+#### 2. El perfil, anclado al pie de la barra
+
+Baja a la barra lateral, **abajo a la izquierda y anclado**, visible en cualquier momento. Los iconos que se desplazan **pasan por debajo**, no chocan con él.
+
+Eso obliga a que el perfil **flote sobre la lista**, no que sea su último elemento: si fuera un hermano al pie, la lista terminaría encima y no habría nada que pasara por debajo. Va absoluto sobre el canto inferior, con el cristal de la casa —velo y desenfoque— para que lo que pasa debajo se intuya y no estorbe. La lista gana relleno inferior igual a su alto, o el último destino quedaría inalcanzable.
+
+En el riel se ve **solo el avatar**; con la barra abierta, avatar, nombre y rango, que es el chip que ya existe. **El del cromo y el de la barra son el mismo componente en dos ganchos**, y el que no toca se apaga con `display: none` y no solo se esconde: si no, quedaría un duplicado invisible recibiendo tabulación, que es un incumplimiento que este proyecto ya arregló una vez en el cajón.
+
+#### 3. El riel gana aire, y por eso crece
+
+Los módulos dejan de estar pegados al canto. Pero el aire sale de algún sitio: con el riel en 56 px y 8 px a cada lado, el módulo cae a 40 y **el objetivo táctil se rompe**. Así que el riel **sube a 4 rem (64 px)**: 8 px de aire a cada lado, módulo de 48, fila de 48. Es la cuenta que hace que el aire no se pague con el dedo.
+
+#### 4. El resorte va en los iconos, ligado al gesto
+
+Al desplazar el riel, cada icono **se retrasa respecto al dedo y llega con muelle**, y tanto más cuanto más rápido el gesto. Es manipulación directa: el movimiento responde a lo que hace la mano, no a un reloj.
+
+| Opción | Coste |
+|---|---|
+| A. Un desfase por ícono, integrado con muelle, escalonado por posición | 22 nodos con `translate` por fotograma. Solo compositor, sin disposición ni pintura. El bucle corre mientras algo se mueve y se para solo, como el campo de puntos |
+| B. El desfase por módulo, cinco nodos | Más barato y se lee como cinco bloques rebotando, no como una lista con inercia. No es lo que se pidió |
+| C. Una transición CSS por ícono | No puede depender de la velocidad del gesto: es un reloj, no una respuesta |
+
+**Recomendación: A**, con tres condiciones que no se negocian:
+
+1. **`translate` y nada más.** Ni `top`, ni `margin`, ni `height`: cualquiera de esos mide la página en cada fotograma.
+2. **El bucle se para solo** cuando todo está en su sitio, y no arranca bajo `prefers-reduced-motion`. Mismo contrato que el campo de puntos.
+3. **Nada de lo que se mueve recibe el dedo mientras se mueve** más de 4 px: un destino que huye del pulgar es peor que un destino quieto.
+
+**Lo que NO cambia:** el escritorio entero; el cajón abierto con sus nombres; el campo de puntos; el resplandor; y el objetivo táctil de 48 px, que sigue siendo el suelo.
+
+#### Lo que la construcción cambió (8 sep)
+
+1. **La primera reacción del resorte se pinta en el mismo gesto**, no en el fotograma siguiente. Se escribió así al descubrir que no había forma de verlo —`requestAnimationFrame` no corre con el panel del navegador oculto— y resultó ser además lo correcto: la respuesta sale con la mano y no detrás de ella. El bucle se queda con el regreso.
+2. **`ARRASTRE` se calibró midiendo, no a ojo.** Con 0,55 un desplazamiento de 24 px por fotograma —un pase normal del pulgar— ya saturaba el tope y todos los iconos se quedaban en 14: la respuesta al gesto se perdía justo donde importa. Con **0,35** el rango útil cubre de 5 a 40 px por fotograma. Medido: un gesto de 5 px da −1,7 / −2,4 / −3,0 px en la primera fila, la de en medio y la última, que es el escalonado que se buscaba.
+3. **El orden del archivo compilado no es el nuestro, y esto costó dos vueltas.** `lightningcss` aplana las capas, agrupa las medias y mueve reglas, así que dos reglas de la misma especificidad **no** se resuelven como están escritas. Pasó dos veces seguidas: el `display: none` de escritorio salió después del de móvil y lo anulaba, y `position: relative` de `.asb-barra-cuenta` le ganaba a `position: absolute` de `.asb-cuenta-al-pie`. Se arregló **sin depender del orden**: el apagado de escritorio vive en su propia media de `min-width`, y las reglas del teléfono llevan `.fi-sidebar` delante para ganar por especificidad. Es una regla general de este archivo desde hoy.
+4. **La maqueta mintió tres veces más** y por eso el defecto del `position` llevaba dos días invisible: declaraba `position: sticky` sobre `.fi-sidebar` —tapando justo lo que fallaba—, ponía su `<style>` **después** de la hoja compilada —tapando el `display: none` del chevron— y no reproducía el `opacity: 1` que el blade le da al contenido con Alpine, así que medía un contenido invisible. Las tres corregidas. Pinta ya el cromo entero, la cuenta al pie y carga el módulo del resorte.
+
+**Medido en la maqueta a 375 px:** logotipo a **5 px** del centro de la pantalla; riel de **64**, módulo de **48**, aire de **8** a cada lado; cuenta al pie **absoluta**, `z-index: 10`, 64×64, pegada al canto; lista reservando **68 px**, con el último destino acabando en 722 y la cuenta empezando en 748 —alcanzable—; y la copia de la cuenta del cromo en `display: none`.
+
+**Lo que falta y no puede medirse aquí:** el tacto del resorte en un teléfono de verdad. Dos constantes lo gobiernan, `ARRASTRE` y `AMORTIGUACION`, y se ajustan en una línea cada una.
+
+#### Siete correcciones de Sua, el mismo día
+
+Vio la primera versión en el teléfono y nombró siete cosas. Las siete, y lo que se hizo:
+
+1. **El logotipo se veía pequeño.** Su tope en el teléfono era de 6,5 rem, heredado de cuando compartía fila con la cuenta. En el centro del cromo hay sitio de sobra —a 375 px, 44 de hamburguesa y 44 de tema dejan 287—, así que sube a **10 rem**.
+2. **El menú de la cuenta no se podía abrir con la barra cerrada.** No era que no respondiera: la hoja colgaba del chip **hacia abajo y hacia la izquierda**, que es correcto en el cromo y absurdo al pie de una barra de 64 px, así que se abría fuera de la pantalla. Ahora abre **hacia arriba y hacia dentro**.
+3. **Había un corte entre el cromo y el cajón.** Dos alturas para lo mismo: una media de 40 rem dejaba el cromo en 3,45 rem mientras la barra empieza en `--asb-admin-topbar-alto` (3,75). Cinco píxeles por los que se veía el contenido colarse. **El alto del cromo pasa a ser uno solo, el del token.**
+4. **Los módulos seguían pegados al canto.** Y era cierto para uno: **«Tablero» no tiene grupo**, y Filament pinta los destinos sin grupo sueltos en la lista, fuera de todo `.fi-sidebar-group`. No recibía ni cristal ni aire mientras los demás flotaban. Ahora es un módulo más.
+5. **El resorte movía lo de dentro y no los módulos.** Sua lo diagnosticó con precisión: el indicador rojo del apartado activo se quedaba quieto mientras su fila se desplazaba, **porque el indicador lo pinta el módulo y la fila iba por su cuenta**. Lo que se mueve pasa a ser el módulo —grupo o ítem suelto— y no el botón.
+6. **El cajón abierto era un cuadrado blanco sin gracia.** Se intentó primero volverlo una lámina de cristal —separada del borde, con radio, canto y el velo bajado de 94 a 84 %— y **Sua lo rechazó otra vez, con razón**: seguía siendo una barra detrás de los módulos. La corrección definitiva es que **el cajón no tiene suelo ninguno**, igual que el riel: `content: none` en su `::before`, y entre los módulos se ve la página atenuada.
+
+   Eso mueve la carga del contraste: sin suelo detrás, lo que sostiene la lectura es el cristal de cada módulo, y ese sí sube **dentro del cajón**, del 66 % del riel al **84 %**. La diferencia tiene una razón física: en el riel, detrás del módulo hay campo de puntos sobre la superficie del panel, que es un color conocido; dentro del cajón hay **página**, y la página puede ser cualquier cosa. Medido el 8 sep sobre los dos extremos, con el velo de cierre de Filament en medio: al 66 %, sobre página negra, el rótulo del ítem activo da **3,03:1** y no pasa; al 84 % da 4,61 sobre negra y 5,49 sobre blanca, y en oscuro 5,30 y 4,78.
+
+7. **El `bg-white` de Filament** —que la barra lleva por debajo de `lg`— se apaga con un selector que gana por especificidad, no por orden.
+
+**Medido después, a 375 px:** riel 64, módulo 48 y **8 px de aire también para el ítem suelto**, con su cristal al 66 % y su radio de 16; el resorte moviendo **seis módulos** −3,5 px con un gesto de 10, y las filas a cero.
+
+---
+
+---
+
+## La medición de la barra ya construida, 8 sep 2026 (tarea 10)
+
+Tomada en Chromium sobre la maqueta que genera `php artisan maqueta:barra`, servida por HTTP. **Ninguna cifra sale de una suma.** Antes de medir nada se confirmó dentro de la página lo que la propia spec exige: la barra lleva `fi-sidebar-open`, empieza en `x = 0` y mide lo que dice su token.
+
+| Qué | Cuánto | Cómo |
+|---|---|---|
+| Ancho de la barra | **252 px**, `x = 0`, `fi-sidebar-open` puesta | `getBoundingClientRect` |
+| Alto de fila, el mínimo de las 22 | **48 px** en escritorio y a 375 px de ancho | `getBoundingClientRect` sobre las 22 |
+| Objetivo táctil | **Las 22 filas pasan las cuatro esquinas** del cuadrado de 44 px | `elementFromPoint` en las cuatro esquinas, desplazando la lista para que cada fila entre en el viewport |
+| Rótulos recortados | **Ninguno**, ni en escritorio ni a 375 px | `scrollWidth` contra `clientWidth` |
+| Desborde de la lista | **750 px** más de contenido que de hueco | `scrollHeight - clientHeight` |
+| Sombra del módulo en `scroll` | `rgba(11, 9, 10, 0.06) 0 12px 28px` — **se aplica** | Computada con la transición apagada |
+| Canto de cristal | `rgba(11, 9, 10, 0.1) 0 0 0 1px inset`, en el pseudoelemento | `getComputedStyle(g, '::after')` |
+| Brote del indicador | `barra-brota`, **520 ms** | `getAnimations()` sobre el ítem activo |
+| Cajón a 375 px | 252 px de ancho, velo al **94 %**, `blur(18px) saturate(1.3)` | Computadas |
+| Rótulo de grupo | `rgb(61, 57, 59)` | Computada |
+| Rótulo del ítem activo | `rgb(151, 29, 24)` | Computada |
+| Las cuatro señales | Las cuatro condiciones existen en el CSSOM compilado y **ninguna cae dentro de una capa**; las de Filament sí caen dentro, así que las nuestras ganan | Recorrido de `document.styleSheets` |
+
+**Dos cosas que la medición enseñó y que no eran defectos.** `elementFromPoint` devuelve `null` para todo lo que cae fuera del viewport, así que medir el objetivo táctil sin desplazar la lista da catorce filas «rotas» que están perfectamente bien. Y leer `box-shadow` justo después de cambiar el estado devuelve `rgba(0, 0, 0, 0) 0 0 0 0`: es el valor interpolado en t = 0 de la transición, no una sombra anulada. La primera vez pareció el mismo defecto que `lg:shadow-none`; no lo era.
+
+**Un defecto de fidelidad de la maqueta, arreglado.** A 375 px la barra medía 246 px y no 252, porque el `aside` era un ítem flex que encogía. En el panel el cajón es fijo y no lo encoge nadie: la maqueta lleva ya `flex-shrink: 0`.
+
+**Lo que esta medición NO puede dar, y por qué:**
+
+- **La costura con el topbar.** La maqueta no lo pinta y el panel exige segundo factor. Lo que sí se sabe, de la consola del panel real: `.fi-topbar-ctn` computa `position: sticky` con `z-index: 20`.
+- **Las cuatro señales aplicadas de verdad.** El navegador de la sesión no emula movimiento reducido, transparencia reducida ni más contraste. Lo verificado es que los cuatro bloques llegan al CSSOM fuera de capa y que `matchMedia` soporta las cuatro condiciones; que **apliquen** hay que verlo en un equipo con la preferencia puesta (D-31 ya lo pide).
+- **El coste del campo de puntos en marcha.** Con la ventana detrás el navegador no pinta fotogramas y `requestAnimationFrame` no corre. Lo mide Sua.
+
+---
+
 ## Cifras de partida, medidas el 7 sep 2026
 
-Las midió Sua en su propio navegador, con el panel abierto y la sesión iniciada, porque el segundo factor impide que una sesión automatizada llegue a `/admin`. La ventana medía **201 x 987**, es decir, **por debajo de 64 rem: lo medido es el CAJÓN**, no la barra de escritorio. Las cifras que no dependen del ancho valen para las dos, y las que sí lo hacen quedan señaladas.
+Las midió Sua en su propio navegador, con el panel abierto y la sesión iniciada, porque el segundo factor impide que una sesión automatizada llegue a `/admin`. Se tomaron **dos veces**: a **201 x 987**, por debajo de 64 rem, que es el **cajón**; y a **1.084 x 1.083**, por encima, que es la **barra de escritorio**. Las dos coinciden en todo salvo en la posición y en cuánto se corta la lista.
 
 | Qué | Medido | Lectura |
 |---|---|---|
-| Ancho de la barra | 244 px (15,25 rem) | Coincide con `--asb-admin-sidebar-ancho`. Vale en los dos anchos |
-| Posición | `fixed` | Es el cajón. En escritorio Filament la deja `lg:sticky` y en flujo (D-L1) |
+| Ancho de la barra | 244 px (15,25 rem) al empezar; **252 px (15,75 rem)** desde el 8 sep, para devolverle aire simétrico al módulo | Coincide con `--asb-admin-sidebar-ancho`. Vale en los dos anchos |
+| Posición | `fixed` en el cajón, **`sticky` a 1.084 px** | **Medido, no deducido: en escritorio la barra va en flujo y pegada, así que detrás de ella no pasa contenido.** Es el hecho que sostiene D-L1 y el que convierte el `blur(14px)` de hoy en coste sin imagen |
 | Desenfoque | `blur(14px)` | Aquí SÍ desenfoca, porque bajo el cajón pasa contenido. En escritorio es el que no se ve |
 | Fondo computado | `rgba(0, 0, 0, 0)` | El degradado va en `background-image`, así que el color computa transparente: la franja burdeos que se ve la pinta el degradado, no el color |
 | Ítems | 24, todos de **43,5 px** | **Ninguno llega a 44**: faltan 0,5 px, y la comprobación de las cuatro esquinas del cuadrado da `false` en los 24. Es el defecto de partida que D-L12 y la retícula corrigen |
-| Lista | 1.651 px de contenido en 913 de hueco | **Se corta el 45 %**: la lista desborda casi el doble de lo que cabe, que es exactamente lo que justifica el aviso de borde de D-L15 y que el estado lo mande el scroll interno (D-L3) |
+| Lista | 1.651 px de contenido en 913 de hueco (cajón) y en **1.019 (escritorio)** | **Se corta el 45 % y el 38 %**. El recorte no depende del ancho sino del alto de la ventana, así que la lista está cortada siempre: es lo que justifica el aviso de borde de D-L15 y que el estado lo mande el scroll interno (D-L3). Los 24 ítems suman 1.044 px; el resto hasta 1.651 son los rótulos de grupo y los huecos |
 | Rótulo de grupo | 11,52 px, `rgb(191, 165, 166)` | Es `#bfa5a6`. Sobre el burdeos de hoy da 7,77:1, así que hoy sobra contraste; el cristal es lo que lo pone en juego y por eso D-L11 recalcula el velo |
 | Ítem activo | 43,5 px de alto, blanco sobre `rgba(238, 65, 55, 0.16)`, con filo rojo de 3 px hacia dentro | El filo interior de 3 px ya existe y es el germen del indicador de D-L7 |
 
-Falta una medición equivalente **con la ventana maximizada**, que es donde la barra es `lg:sticky` y donde se juzga el cristal pintado de D-L1. Se toma antes de dar la barra por cerrada.
+Las dos mediciones están tomadas, así que no queda nada por medir antes de construir. Lo que sigue sin medirse es lo de después: el cristal nuevo, que se juzga contra estas mismas cifras.
 
 
 ## Contradicciones entre miradas, resueltas
@@ -1797,3 +1963,226 @@ El segundo factor es obligatorio, así que ninguna sesión automatizada abre `/a
 **Capa 5. Sua, a mano, una vez.** Lo que ninguna capa puede decir: si el cristal parece cristal sobre el tablero real, si el resorte se siente como lo pidió, si el viaje entre dos páginas del panel no salta, y si el botón atrás deja la barra donde debe. Con una lista corta de observaciones escritas, en claro y en oscuro, y en el teléfono antes de la demo.
 
 **Regla que gobierna las cinco:** cada guardia se ve roja por rotura deliberada antes de escribir el código que la pone verde, y se muta **por comportamiento**: cada cableado, cada `aria-*` y cada constante por separado, cada uno poniendo roja su propia afirmación y solo la suya. Afirmar que una función está definida no vale; hay que afirmar también que se llama.
+
+
+---
+
+## Ampliación del 7 sep: los módulos y la parte superior
+
+**Por qué existe esta sección.** Con las tareas 1 a 5 construidas, Sua miró el panel y dijo dos cosas: que **no se aprecian los módulos** que presenta la barra de escritorio, y que **lo único que cambió fue el color**. Tiene razón, y la Parte III lo explica sin querer: sus dieciocho decisiones son todas de material, de movimiento y de señal, y ninguna toca la ESTRUCTURA. La barra sigue siendo una superficie plana con una lista encima.
+
+En el mismo mensaje pidió rehacer la parte superior del panel: el control de tema, la campana de notificaciones («su funcionalidad es muy poca») y la cuenta del usuario, «asemejándola a la que hay actualmente en la navBar de escritorio».
+
+**Esto es ampliación de alcance sobre la Parte III aprobada**, así que fue por escrito antes de codificarse. Cinco decisiones, D-L19 a D-L23, **aprobadas por Sua el 7 sep 2026** («apruebo») con la recomendación de cada una.
+
+**Lo que la barra de escritorio hace y esta no.** La bandeja es una píldora exterior que contiene tres módulos: logo, principal y cuenta. En `inicial` el vidrio lo pone la píldora y los módulos están apagados; en `scroll` y en `atención` la píldora se apaga y **cada módulo enciende el suyo**, con brillo especular en un pseudoelemento y canto de cristal en el otro. Eso es lo que se lee como «módulos», y es lo que aquí no existe.
+
+### D-L19. ¿Qué es un módulo en una barra vertical?
+
+**Hoy.** Un solo plano: cristal, y encima cinco grupos que solo se distinguen por su rótulo en mayúsculas y por el aire entre ellos.
+
+| Opción | Coste |
+|---|---|
+| A. **Cada grupo de navegación es un módulo**: cinco cristales apilados con su canto y su brillo, el rótulo dentro como título del módulo | Cinco módulos es mucho módulo para 244 px de ancho, y el aire entre ellos come alto en una lista que ya se corta el 38 % |
+| B. **Tres módulos por función, como en escritorio**: marca arriba, navegación en medio (con los cinco grupos dentro, como están), cuenta abajo | Es la traducción literal de la barra de escritorio girada. Obliga a decidir D-L21 (la cuenta baja de la parte superior) para que el tercer módulo exista |
+| C. **Dos módulos**: navegación y cuenta, sin módulo de marca, porque con topbar Filament esconde la cabecera de la barra en escritorio | Menos fiel al original, pero es lo que de verdad se ve en escritorio |
+
+**Recomendación: B**, con el módulo de marca visible solo en el cajón, que es donde Filament pinta la cabecera. Porque los módulos de la barra de escritorio son **funcionales y no decorativos**: agrupan por papel, no por sección, y eso es lo que hace que se lean como piezas y no como cajas.
+
+### D-L20. ¿Cuándo enciende cada módulo su vidrio, si aquí no hay estado de atención?
+
+**Hoy.** Nada enciende nada.
+
+| Opción | Coste |
+|---|---|
+| A. El módulo de navegación enciende su canto **siempre**, y el de cuenta también; el brillo especular solo aparece al recibir puntero o foco dentro | Se pierde el contraste entre «apagado» y «encendido» que en escritorio marca el cambio de estado |
+| B. Los módulos nacen apagados y encienden en `data-barra-estado="scroll"`, es decir cuando la lista se ha desplazado, calcando el reparto de la barra de escritorio | El encendido depende de que el usuario desplace la lista, y quien no la desplace nunca ve los módulos |
+| C. El módulo de **navegación** enciende con el desplazamiento (es el que se desplaza) y el de **cuenta** está encendido siempre (es el ancla que no se mueve) | Dos conductas distintas que hay que justificar, y es justo lo que las hace legibles |
+
+**Recomendación: C.** Porque en escritorio el encendido significa «esta pieza se separó de la página», y aquí la única que se separa es la lista. La cuenta no se desplaza nunca: encenderla siempre la convierte en el suelo de la barra.
+
+### D-L21. ¿Dónde vive la cuenta del usuario?
+
+**Hoy.** En la parte superior, a la derecha: un círculo con las iniciales que abre un menú con Perfil, tres iconos de tema y Salir. El nombre no se ve por ninguna parte.
+
+| Opción | Coste |
+|---|---|
+| A. **Baja al pie de la barra lateral** como tercer módulo, con avatar, nombre y rango, igual que el chip de escritorio, y abre su hoja hacia arriba | Es un gancho (`SIDEBAR_FOOTER`) y una vista propia. Deja la parte superior con muy poco dentro, lo que obliga a decidir qué queda arriba. En el cajón hay que comprobar que la hoja cabe |
+| B. **Se queda arriba** pero se rehace como el chip de escritorio: avatar, nombre y rango | No añade módulo ninguno a la barra, así que la queja de Sua queda a medias |
+| C. En los dos sitios | Dos disparadores para la misma sesión: se contradicen en cuanto uno cambie |
+
+**Recomendación: A.** Porque resuelve las dos quejas con un solo movimiento: la barra gana el módulo que le faltaba y la cuenta gana el nombre y el rango que hoy no muestra. Y porque el pie de la barra es donde el ojo ya busca la sesión en un panel.
+
+### D-L22. La campana de notificaciones
+
+**Hoy.** Filament la pinta con `databaseNotifications()` y sondeo cada 30 s. Sua dice que su funcionalidad es muy poca, y es cierto: el tablero ya tiene la banda «Te está esperando» con lo que hay que aprobar, que es la misma información mejor contada.
+
+| Opción | Coste |
+|---|---|
+| A. **Se retira del cromo** y la información queda donde ya está, en la banda del tablero | Hay que comprobar que ninguna parte del panel dependa de ella para avisar de algo que no salga en la banda |
+| B. Se queda y se le da contenido real | Es un frente propio: decidir qué notifica, quién lo emite y cuándo se marca leído. No es una tarde |
+| C. Se queda como está | Ocupa el sitio del cromo que estamos rehaciendo y no dice nada |
+
+**Recomendación: A**, con B anotada como frente aparte si el gremio pide avisos de verdad. Porque un adorno que no informa compite por la atención con lo que sí informa.
+
+### D-L23. ¿Qué queda en la parte superior, y con qué aspecto?
+
+**Hoy.** Campana, círculo de iniciales y un segmentado de dos botones para claro y oscuro, que no existe en el sitio público.
+
+| Opción | Coste |
+|---|---|
+| A. Queda el **control de tema con la misma forma que en el sitio**: un botón redondo de 44 px con sol o luna que abre un popover con las tres preferencias (claro, oscuro y sistema), con `aria-expanded` y `aria-controls`, sin `role="menu"` | Hay que reescribir el conmutador que entró con el panel de Ingrid. Gana coherencia con el sitio y pierde la comodidad de un clic |
+| B. Se conserva el segmentado de dos botones | El sistema deja de ser elegible desde el cromo, y hoy lo es desde el menú de usuario, que en la opción A de D-L21 se va abajo |
+| C. El control de tema también baja al pie de la barra | La parte superior se queda vacía y el tema deja de estar donde el ojo lo busca |
+
+**Recomendación: A.** Porque el encargo es que el panel se parezca al sitio, y el control de tema del sitio es un popover de tres opciones, no un interruptor de dos. La parte superior queda con el título de la página a la izquierda y el control de tema a la derecha, que es lo que un panel necesita arriba.
+
+**Lo que no cambia en esta ampliación:** el ancho de la barra, el orden de los grupos, los destinos, el idioma de los rótulos y el logotipo. Y sigue fuera de alcance el carril de iconos plegable.
+
+
+---
+
+## Corrección del 7 sep: la barra se aplana
+
+**Qué pasó.** Con D-L19 a D-L23 construidas, Sua abrió el panel y dijo dos cosas: que todo está **muy apeñuscado**, y que el perfil del usuario al pie **no le gusta**. Trajo además una referencia, la barra lateral de Roblox, y pidió opinión.
+
+**Lo que la referencia hace, mecánicamente.** No tiene módulos: ni cantos, ni cristal, ni cajas. Es el fondo de la página, más oscuro, y encima una lista. La única caja es la tarjeta de suscripción del final, y es caja precisamente porque no es navegación. No tiene rótulos de grupo: trece destinos con la misma forma. Las filas miden unos 48 px con mucho aire lateral y la activa es una pastilla llena de ancho completo. Los contadores viven dentro de las filas, así que no hay campana compitiendo. Y el perfil está **arriba, como primera fila**.
+
+**Por qué la nuestra se ve apretada, con números.** La fila quedó con 210 px útiles de los 244 de la barra: los 34 que faltan se los comieron el margen del módulo, su relleno y su canto. Y los cantos meten una caja dentro de otra dentro de otra: barra, módulo y fila. Eso es lo que se lee como amontonado, y viene directamente de D-L19.
+
+**Lo que se revierte, y por qué.** Las tres eran recomendación de esta sesión, Sua las aprobó sobre el papel y en pantalla no funcionaron. Se dice aquí para que no se vuelvan a proponer sin leer esto:
+
+- **D-L19 queda sin efecto.** Los módulos dejan de ser cajas con vidrio propio. El ritmo lo hace el aire, no el canto. Los tokens `--asb-admin-barra-modulo-*` no se borran: pasan a alimentar solo la hoja de la cuenta y el popover del tema, que son capas flotantes y sí deben tener canto.
+- **D-L20 queda sin objeto.** Si no hay módulo que encender, el estado del desplazamiento no enciende nada: pasa a alimentar **solo** el aviso de lista cortada de D-L15.
+- **D-L21 cambia de sitio, no de contenido.** La cuenta sube a la primera fila, con la misma composición (avatar, nombre y rango) y la misma hoja, que ahora abre hacia abajo.
+
+**Lo que entra, con sus valores.** La barra es **una sola superficie de cristal**: velo, línea de límite, filo luminiscente y resplandor de esquina, y nada más. El aire entre grupos sube de 18 a 28 px por encima del rótulo, el rótulo gana 8 px por debajo, y entre filas entran 2 px. La fila sube de 2,75rem a **3rem**, con el icono a 20 px y 12 px de separación con el texto.
+
+**El coste, medido antes de escribirlo.** Con la fila a 48 px la lista pasa de 1.216 a 1.312 px y, en una ventana de 1.019 de hueco, se corta el 22 % en vez del 16 %: de un vistazo caben 20 filas de 24 en vez de 22. Por eso el aviso de lista cortada (D-L15) deja de ser conveniente y pasa a ser necesario.
+
+**Los contadores entran en las filas.** El mecanismo ya existe y lo usan cuatro sitios del panel, entre ellos las fotos por aprobar y la cartera en mora. Aquí se les da estilo propio, alineados a la derecha de la fila, en rojo solo cuando urgen. Cada insignia es una consulta por carga de página: si se extienden a más destinos, hay que medirlo antes.
+
+**Lo que NO se toca.** El cristal y su velo calibrado, las dos luces, la línea del límite, el indicador del ítem activo con su brote, el anillo de foco de dos colores, los rótulos de grupo (más ligeros, pero siguen, porque veinticuatro destinos en plano no tienen dónde agarrarse), el control de tema con sus tres preferencias, y todas las guardias y tokens ya escritos.
+
+### D-L24. El fondo de la barra: campo de puntos que huyen del cursor
+
+**Pedido de Sua, 7 sep, textual:** «sigo viendo la barra para scrollear y el fondo que unifica los módulos, elimínalos y quiero que el fondo sea conformado por el blanco y unos puntos grises, puntos los cuales serán repulsivos al cursor».
+
+**Hoy.** La barra lleva velo propio en todos los estados; solo se apaga al desplazar la lista. Y el scroller enseña su barra, porque Filament reserva el canal con `scrollbar-gutter: stable`.
+
+| Opción | Coste |
+|---|---|
+| A. El velo desaparece **siempre**. El fondo de la barra pasa a ser un campo de puntos dibujado en un `<canvas>` detrás del contenido, y los puntos se apartan del puntero con caída suave. Se apaga la barra de desplazamiento y el aviso de lista cortada queda como única pista | Un lienzo y un bucle de animación nuevos. Hay que acotar el coste: el bucle solo corre con el puntero dentro y mientras los puntos vuelven a su sitio |
+| B. Puntos en CSS con `radial-gradient` repetido, sin repulsión | Cero coste y cero repulsión: es la mitad del pedido |
+| C. Un punto por elemento del DOM | Con 18 px de paso son más de mil nodos en una columna de 244: inaceptable |
+
+**Recomendación: A**, con tres condiciones que no son negociables y van escritas aquí:
+
+1. **El fondo invierte con el tema.** «Blanco con puntos grises» es la receta del tema claro; en oscuro es la superficie oscura con puntos claros. La barra dejó de tener paleta privada el 7 sep y no la recupera: los dos colores salen de tokens.
+2. **La repulsión se apaga bajo `prefers-reduced-motion`.** Queda el campo de puntos quieto. Es animación ligada al gesto, y el proyecto ya decidió que esas se apagan.
+3. **El lienzo no recibe puntero** y no lleva texto: es decoración pura, así que no entra en ninguna cuenta de contraste. Los puntos van por debajo de los módulos.
+
+**Lo que se pierde al esconder la barra de desplazamiento**, dicho claro: la única pista de que la lista sigue pasa a ser la máscara de desvanecido de D-L15. Por eso ese aviso deja de ser un adorno y se vuelve obligatorio.
+
+### D-L25. El límite deja de ser una línea y pasa a ser una unión
+
+**Pedido de Sua, 7 sep:** «cambia la línea roja que está limitando la barra con el resto de la interfaz y hazlo tipo una sombra que va uniendo la barra con el resto».
+
+**Qué decía D-L10 y por qué cambia.** Aquella decisión puso una línea de luminancia más una sombra, con este argumento: el filo rojo da 2,60:1 en claro y 1,93:1 en oscuro, y un borde de región se juzga contra 3:1. El argumento era correcto **cuando la barra no tenía fondo propio**. Desde D-L24 lo tiene: el campo de puntos distingue la región por textura y por superficie, no por su canto. Con eso, la línea dura deja de ser lo que sostiene el límite y pasa a ser solo un corte.
+
+| Opción | Coste |
+|---|---|
+| A. Fuera la línea y fuera el filo rojo. El límite lo hace una **unión**: un degradado ancho que sale del canto de la barra hacia el contenido y se apaga, más una sombra proyectada suave | Se pierde el corte nítido: en pantallas de brillo bajo la frontera queda insinuada. A cambio es lo que Sua pidió y lo que el campo de puntos ya permite |
+| B. Conservar la línea y añadir la sombra | Es lo de hoy más maquillaje: la línea roja seguiría ahí |
+| C. Solo sombra proyectada, sin degradado | Una sombra sola contra un fondo casi del mismo tono no une nada: se ve como suciedad en el canto |
+
+**Recomendación: A.** Porque la región ya se distingue por su fondo, y el encargo pide que la barra se una al contenido en vez de cortarlo.
+
+**Lo que se conserva:** el rojo sigue vivo en la unión, pero como resplandor tenue dentro del degradado y no como filo de un píxel. Y el estado `scroll` deja de apagar nada del canto: no queda canto que apagar.
+
+**Corregido el mismo día: la unión también se va.** Sua la vio construida y la rechazó con la misma razón que a la línea: «elimina esa línea roja que no permite la continuidad de la interfaz». Y tenía razón. El límite pasó por tres formas —línea de un píxel, filo rojo y franja difusa de 40 px— y las tres eran la misma cosa: un corte vertical, más o menos borroso. Con el campo de puntos de D-L26 gobernando el fondo entero, **nada separa la barra del contenido**: la zona la marca su resplandor y el orden lo ponen los cristales de cada apartado. Los tokens de la unión se retiran con su consumidor.
+
+### D-L26. El campo de puntos gobierna toda la interfaz, y cada apartado gana su cristal
+
+**Pedido de Sua, 7 sep:** «quiero que el fondo responsivo sea para toda la interfaz, no solo para la barra de navegación lateral, y para cada apartado de la barra de navegación lateral asígnale el módulo de cristal respectivo a cada uno».
+
+**Lo que cambia, y por qué encaja ahora.** Hasta D-L24 los módulos encendían su vidrio solo al desplazar la lista, y la razón era buena: sin nada detrás, un cristal permanente se lee como caja. Con el campo de puntos **sí hay algo detrás**, así que el cristal por fin tiene qué refractar y deja de ser una caja para ser una lámina.
+
+| Opción | Coste |
+|---|---|
+| A. Un solo lienzo fijo detrás de TODA la interfaz, y cada grupo de la barra con su cristal permanente | El fondo del contenido tiene que dejar de taparlo: hoy `.fi-main-ctn` pinta cuatro degradados opacos. Y el cristal permanente en cinco módulos sobre un lienzo que se repinta es la combinación cara: hay que medirla antes de dejarla |
+| B. Un lienzo por zona (barra, contenido, cromo) | Tres bucles y tres pinceles para un solo efecto continuo, y las juntas se notan al mover el puntero entre zonas |
+| C. Dejar el campo solo en la barra | Es lo de hoy y no es lo que se pide |
+
+**Recomendación: A**, con dos condiciones medidas y no supuestas:
+
+1. **El desenfoque de los módulos se mide antes de quedarse.** Cinco láminas con `backdrop-filter` sobre un lienzo que se repinta cada fotograma es justo lo que hace tartamudear a una GPU integrada. Si la medición sale mal, el cristal se queda en velo y canto, sin desenfoque, y se dice por escrito.
+2. **El lienzo es uno y va detrás de todo**, con `position: fixed`, sin puntero y fuera del árbol de accesibilidad. La repulsión escucha en el documento, no en la barra.
+
+**Lo que se pierde:** los degradados del fondo del contenido, que hoy tapan cualquier cosa que se pinte debajo. El fondo pasa a ser la superficie plana más los puntos.
+
+**Cómo quedó, y qué falta medir (7 sep).** El cristal de los apartados se construyó **sin `backdrop-filter`**: es velo, canto y brillo especular sobre el campo de puntos, que ya da la refracción a la vista. Así la combinación cara de la condición 1 no llega a existir, y por eso el desenfoque no se midió: no hay ninguno que medir. Lo que sí queda pendiente es el coste del propio campo con el puntero en movimiento, medido en una máquina real: el panel de la sesión no pinta fotogramas cuando la ventana no está delante, así que la medición de `requestAnimationFrame` no se pudo tomar aquí y la toma Sua.
+
+---
+
+### D-L27. El cristal de los apartados deja ver el campo
+
+**Pedido de Sua, 8 sep, con el panel ya desplegado:** «me gustaría que los módulos sean un poquito transparentes».
+
+**De dónde viene.** El velo se calibró al 88 % cuando la barra tenía fondo propio y detrás del módulo no había nada que mirar. Desde D-L26 sí lo hay: el campo de puntos. Al 88 % la lámina lo tapa casi entero y se lee como una tarjeta opaca sobre un fondo con textura, no como cristal.
+
+**Lo que cambia.** `--asb-admin-barra-velo` pasa del 88 % al **76 %** en los dos temas. `--asb-admin-barra-velo-cajon` **no se toca**: el cajón móvil y los popovers se apoyan sobre contenido que sí hay que tapar, y ese velo se calibró aparte.
+
+**Lo que NO cambia, y hay que decirlo:** no entra `backdrop-filter`. La condición 1 de D-L26 sigue en pie —cinco láminas desenfocando sobre un lienzo que se repinta es la combinación cara—, y la refracción la sigue dando el campo a la vista.
+
+**El contraste, recalculado el 8 sep** (no estimado: la cuenta la hace `MideContraste` sobre los colores del archivo). El velo apenas mueve la cuenta, porque la superficie y el fondo del panel son casi el mismo color:
+
+| Velo | Claro, rótulo de grupo | Claro, rótulo activo | Oscuro, rótulo de grupo | Oscuro, rótulo activo |
+|---|---|---|---|---|
+| 88 % (antes) | 11,27:1 | 6,35:1 | 7,68:1 | 5,20:1 |
+| **76 % (ahora)** | **11,18:1** | **6,29:1** | **7,74:1** | **5,23:1** |
+| 60 % (por saber dónde está el suelo) | 11,01:1 | 6,18:1 | 7,79:1 | 5,30:1 |
+
+Todos por encima de 4,5:1 con holgura, así que aquí manda el ojo y no la cuenta. La guardia existente sigue vigilando el rótulo activo, que es el del margen justo.
+
+### D-L28. El resplandor de la zona cubre todo el lado, no solo la esquina
+
+**Pedido de Sua, 8 sep:** «que el rojo que se ve en la esquina izquierda abarque todo el lado hasta la parte inferior».
+
+**De dónde viene.** El resplandor que marca la zona del panel es `radial-gradient(120% 55% at 0% 0%, …)`: nace en la esquina superior izquierda y se apaga a poco más de media altura. En una pantalla de 1.080 px se acaba sobre los 594, así que la mitad de abajo de la barra se queda sin la marca de su zona.
+
+**Lo que cambia.** El resplandor pasa a dos capas sobre `.fi-sidebar::before`:
+
+1. un **lavado horizontal** anclado al canto izquierdo, `linear-gradient(90deg, …, transparent 82%)`, que da la marca a **toda la altura**;
+2. el **radial de la esquina**, que se conserva porque es de donde nace la luz y sigue haciendo el punto más brillante.
+
+Las dos capas suman alfa, así que la esquina queda al doble de intensidad y el resto del lado mantiene un lavado constante hasta abajo.
+
+**Lo que NO puede pasar, y por eso hay guardia.** Sua rechazó tres veces un límite vertical: línea, filo y franja difusa de 40 px. El lavado es lo contrario de esos tres —es más fuerte en el canto izquierdo y se apaga hacia dentro, sin ningún canto en el límite con el contenido—, pero la diferencia es de dirección y una dirección se invierte con un carácter. La guardia de continuidad se amplía a `::before` y exige que el resplandor **empiece opaco en el canto izquierdo**, nunca transparente, que es como se volvería a dibujar la franja del límite.
+
+**Corregido el mismo día: el resplandor deja de ser de la barra y pasa a ser de la página.** Sua vio un corte horizontal justo debajo del logotipo —«noto un corte arriba con lo rojo que colocamos ahí, complétalo hasta arriba»— y la causa es estructural, escrita en el blade de Filament: **el topbar no vive dentro de `.fi-layout`**, sino como hermano anterior, hijo directo de `.fi-body`. Cruza el ancho entero por encima de la barra. El resplandor vivía en `.fi-sidebar::before`, que empieza justo debajo, así que el rojo nacía en el canto inferior del topbar: eso es exactamente un corte.
+
+Pintar el mismo lavado también en el topbar habría sido emparejar dos capas distintas y confiar en que no se separen nunca. Lo que se hace es **una sola capa**: el resplandor se muda a `.fi-body::before`, fija, de alto completo y anclada al canto izquierdo, detrás de todo. Cubre topbar y barra **por construcción, no por coincidencia**, y el topbar —blanco al 78 % con desenfoque— lo deja pasar suavizado, que es justo la transición que faltaba.
+
+El ancho del lavado pasa a token, `--asb-admin-barra-resplandor-ancho`: la capa nueva mide lo que mide la página, no lo que mide la barra, y un porcentaje sobre el ancho de la página no es el mismo lavado.
+
+---
+
+## Lo que la construcción cambió (Parte III, 7 y 8 sep 2026)
+
+Las dieciocho decisiones se escribieron antes de tocar código, y el código las contradijo o las amplió en siete sitios. Lo que sigue es lo que de verdad quedó.
+
+1. **El velo no es lo que sostiene el contraste, y el rótulo de grupo tampoco es el que manda.** La spec calibró el velo contra el rótulo de grupo. Recalculado el 7 sep: sobre el cristal del panel da 11,27:1 en claro y 7,68:1 en oscuro, y ni bajando el velo al 40 % baja de 10:1, porque la superficie y el fondo del panel son casi el mismo color. El que tiene el margen justo es el **rótulo del ítem activo** sobre el tinte con el halo encima: 6,35:1 y 5,20:1. La guardia se reescribió para vigilar ese, que es el que puede romperse.
+2. **La aritmética corrigió a la spec en el rojo del rótulo activo.** El documento decía que `--asb-acento` no llegaba a 4,5:1 en claro. Da 4,93:1 y sí llega. Se usa `--asb-acento-fuerte` igual, por margen (6,35:1), no por obligación.
+3. **Los módulos con vidrio propio y permanente no funcionan sobre un fondo liso.** D-L19 los pintaba siempre y se leían como cajas dentro de cajas: la fila se quedaba en 210 px útiles de 244. Se aplanó todo (corrección del 7 sep) y luego volvieron, primero apagados y encendidos por estado, y por fin **permanentes pero sobre el campo de puntos** (D-L26), que es lo que les da algo que refractar.
+4. **La cuenta pasó por tres sitios el mismo día**: pie de la barra (D-L21), primera fila de la lista, y por fin el cromo superior junto al control de tema, que es donde Sua la quiso.
+5. **El límite pasó por tres formas y ninguna sobrevivió**: línea de un píxel (D-L10), filo rojo, y franja difusa de 40 px (D-L25). Las tres se leían como un corte vertical. Con el campo de puntos gobernando el fondo, **nada separa la barra del contenido**.
+6. **Filament anula la sombra del elemento en escritorio.** `.fi-sidebar` recibe `lg:shadow-none` desde una capa que gana, así que una sombra declarada en el elemento computa `rgba(0,0,0,0) 0 0 0 0`. Lo cazó la maqueta, no una guardia: la guardia afirmaba que la sombra estaba escrita, y estarlo no es aplicarse.
+7. **El lienzo del campo se coló en el flujo** porque `.fi-sidebar > *` empata en especificidad con su regla y va después: le quitaba el `position: absolute`, empujaba la lista fuera de la vista y rompía la barra entera. Hay `:not()` y guardia.
+8. **El aviso de lista cortada recortaba el módulo.** La máscara de desvanecido (D-L15) tenía 1,5 rem y la lista solo 0,5 rem de aire vertical, así que en reposo el canto de la primera y la última lámina nacía dentro del desvanecido. Con vidrio suelto no se notaba; con el módulo bordeado de D-L26, un canto a medio pintar se lee como una caja cortada, y Sua lo vio el 8 sep. El aviso baja a 0,9 rem y el relleno pasa a `calc(aviso + 0,35 rem)`: lo que se desvanece es lista, nunca el borde de un módulo quieto. Medido en la maqueta: relleno 20 px contra 14,4 de máscara, primera lámina a 24 px del canto. La guardia hace la cuenta y se vio roja con las dos mutaciones (relleno por debajo del aviso, y relleno exactamente igual).
+9. **Y el canto derecho no estaba cortado: estaba estrecho.** El relleno de la lista era asimétrico (0,75 rem a la izquierda, 0,3 a la derecha) desde que Sua pidió «agrandar los módulos un poco a la derecha». Con 16 px de radio y 4,8 px de aire, la curva del canto derecho no tenía fondo contra el que leerse y se veía como un corte, mientras el izquierdo con 12 px se veía entero. Lo que compensa el ancho del módulo es el ancho de la barra, no el aire de un canto: `--asb-admin-sidebar-ancho` sube de 15,25 a 15,75 rem y el relleno vuelve a ser simétrico. Medido: barra 252 px, módulo 228 (antes 227,2, así que no se pierde nada), 12 px de aire a cada lado, fila todavía de 48 px. Y la maqueta reprodujo el defecto solo cuando se le puso el marcado real del grupo, con su botón de plegado.
+10. **El desenfoque literal que D-L17 anotó para la barra estaba vivo en el cromo superior.** La guardia de la tarea 8 exige que ningún `blur()` quede escrito en una regla, porque una media no puede apagar lo que no es token; al ponerla se puso roja señalando `.fi-topbar` y `.fi-topbar-ctn.asb-topbar--scrolled .fi-topbar`, que lo llevaban a mano en cuatro declaraciones. Salen dos tokens, `--asb-admin-topbar-desenfoque` y su gemelo `-firme` (se distinguen solo en la saturación, 145 % contra 130 %, pero son dos estados), y las dos señales que apagan transparencia los apagan también. No estaba en el encargo de la barra: lo destapó su guardia.
+
+**Lo que la maqueta enseñó, y por qué existe.** El panel exige segundo factor, así que ninguna sesión automatizada lo abre. Se construyó una maqueta que reproduce el marcado de la barra con el tema compilado y se sirve por HTTP: sin ella se entregaron dos regresiones visuales seguidas. La primera vez que se abrió reprodujo el aviso que la propia spec anotaba: sin `fi-sidebar-open`, Filament deja la barra fuera de pantalla.
+
+**Lo que queda pendiente de las doce tareas del plan:** las cuatro señales del sistema (tarea 8), la guardia de contrato sobre el vendor (tarea 9), la medición completa en Chromium con la maqueta (tarea 10) y la revisión adversaria (tarea 11). Y una medición que solo puede hacer Sua: el coste del campo de puntos en marcha, porque el navegador de la sesión no pinta fotogramas con la ventana detrás.

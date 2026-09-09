@@ -129,9 +129,22 @@ class TemaDelPanelTest extends TestCase
     {
         $tema = File::get(resource_path('css/filament/admin/theme.css'));
 
-        $this->assertStringContainsString('.fi-main-ctn {', $tema);
-        $this->assertStringContainsString('.dark .fi-main-ctn {', $tema);
-        $this->assertStringNotContainsString('.fi-body::before', $tema);
+        // Desde el 8 sep el fondo no lo pinta el contenido sino el cuerpo, con el
+        // campo de puntos encima: `.fi-main-ctn` quedó transparente para no
+        // taparlo. Lo que hay que seguir exigiendo es que el fondo exista en los
+        // dos temas, y ahora vive aquí.
+        $this->assertStringContainsString('.fi-body {', $tema);
+        $this->assertStringContainsString('.dark .fi-body {', $tema);
+        $this->assertMatchesRegularExpression('/\.fi-main-ctn \{[^}]*background: transparent;/s', $tema, 'El contenido volvió a pintar fondo propio y taparía el campo de puntos.');
+        /*
+         * `.fi-body::before` existe desde el 8 sep y pinta el resplandor de la
+         * zona del panel, que antes vivía en la barra y por eso nacía debajo
+         * del topbar. Lo que sigue prohibido es que esa capa pinte un fondo
+         * OPACO: taparía el campo de puntos, que es justo el defecto que este
+         * caso vigila.
+         */
+        $this->assertMatchesRegularExpression('/\.fi-body::before \{[^}]*position: fixed;/s', $tema, 'La capa del resplandor dejó de ser fija: volvería a empezar donde empiece su elemento.');
+        $this->assertDoesNotMatchRegularExpression('/\.fi-body::before \{[^}]*background-color:/s', $tema, 'La capa del resplandor pinta fondo opaco y taparía el campo de puntos.');
     }
 
     public function test_la_topbar_reacciona_al_scroll_sin_un_script_adicional(): void

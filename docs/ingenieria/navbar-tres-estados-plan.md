@@ -3331,3 +3331,108 @@ Run: `php artisan view:clear && npm run build` y después `php artisan test --co
 - **Cobertura de la spec:** §3.3 (tarea 6), §3.4 (6), §3.7 (5 y 6), §4.1 (5), §4.2 (5), §5.1-5.3 (1 y 6), §6.1 (3 y 5), §6.2 (5), §6.3 (2, 3 y 4), §6.4 (5 y 6), §7 (todas), §8.1 (1, 2, 3, 5, 6), §8.2 (1-7), §8.3 (9), §8.4 (9), D-M15 (7), notas de la Parte I y encargo (11). Sin huecos.
 - **Placeholders:** ninguno; los bloques de código que no se repiten remiten a secciones de la spec que los traen tal cual.
 - **Consistencia de nombres:** `posicionDelDocumento` (2, 5), `cerrarSiSeDesplaza` (2, 3), `scrollAlAbrir` (2), `menu-{slug}-movil` (4, 5), `pestana`/`pestanas`/`pestana__rotulo`/`hoja-inferior`/`modulo-inferior`/`marca-compacta` (4, 5, 6), `--asb-alto-*`/`--asb-desplazamiento-hoja`/`--asb-retirada-barra`/`--asb-hoja-velo`/`--asb-cromo-apoyo-inferior` (1, 4, 6), `data-teclado` (5, 6), `esEscritorio`/`compacta`/`altoReferencia` (5).
+
+
+---
+
+# Parte III · La barra lateral del panel — plan de implementación
+
+**7 de septiembre de 2026** · derivado de la Parte III de `navbar-tres-estados-diseno.md`, aprobada por Sua ese día («apruebo todo»). Rama `p3-barra-lateral`, abierta sobre `main` en `4053f6b`. Se construye en doce tareas; **ninguna escribe código antes de ver roja su guardia**.
+
+## Global Constraints
+
+- **El vocabulario.** Prefijo `--asb-admin-barra-` para todo token nuevo, declarado **una sola vez** en el `:root` y el `.dark` de `theme.css` y reasignado en las medias del mismo archivo. Nunca en `tokens.css`, que es del sitio público. Nunca un `blur()` literal: siempre un token, para que las medias puedan apagarlo.
+- **El material.** El velo y el desenfoque viven en `.fi-sidebar::before`; el filo y la sombra que responden al estado, en `.fi-sidebar::after`. El elemento no lleva ningún filtro. `background: transparent` explícito sobre el elemento, o el cajón queda opaco (riesgo 3).
+- **Las dos luces se pintan encima del velo** desde la primera línea, porque bajo transparencia reducida el velo se vuelve opaco y las luces tienen que sobrevivir.
+- **El estado vive en `<body>`**: `data-barra-estado="inicial | scroll"` y `data-barra-borde="ninguno | arriba | abajo | ambos"`. Los escribe `resources/js/panel-barra-lateral.js`, registrado con `->module()`. Sobre el nodo de la barra no, porque el morph de Livewire los borra (riesgo 6).
+- **Ningún color literal** en un selector que empiece por `.fi-sidebar`, incluido el bloque de puntero fino de `theme.css:673-696`, que es donde vive la mitad de la paleta privada.
+- **Ninguna vista del vendor se publica.** Todo cabe en CSS del tema, el módulo y, si hiciera falta un nodo, un gancho con su constante.
+- **Cadenas que las guardias fijan letra a letra** y que no se tocan sin actualizar la guardia: `x-collapse.duration.200ms`, `fi-sidebar-open`, `fi-sidebar-nav`, `fi-sidebar-group`, `fi-sidebar-item-btn`, `aria-current="page"`.
+- **Cifras.** Ninguna de la spec entra en el CSS sin recalcularse el día que se escribe, con `MideContraste` sobre los hexadecimales del archivo y con el halo compuesto encima. Las geometrías se miden en Chromium sobre la maqueta de la tarea 10.
+- **Antes de empezar cada sesión:** `GIT_OPTIONAL_LOCKS=0 git status`, `git log --oneline -5` y el commit del encabezado de `material/estado.md`, por si hay otra sesión en el mismo directorio.
+
+### Task 1: Los tokens de la barra y la guardia que los vigila
+
+**Qué.** Declarar los diecinueve tokens de la Parte III en `theme.css`, con su valor claro y su valor oscuro, y arreglar de paso la redeclaración de `--asb-vidrio-desenfoque` de `:48` y `:79` que hoy deja sin efecto la transparencia reducida en el panel claro (riesgo 8).
+
+**Guardia primero.** `tests/Feature/Panel/BarraLateralTest.php`, caso `test_los_tokens_de_la_barra_se_declaran_una_sola_vez_fuera_de_las_medias`: lee `theme.css`, exige los diecinueve nombres, y para cada uno exige **exactamente una** declaración fuera de todo bloque `@media`. Segundo caso, `test_ningun_token_del_panel_se_declara_dos_veces`, que barre todos los `--asb-` del archivo y falla con el nombre repetido: **nace roja por el defecto vivo de `--asb-vidrio-desenfoque`**.
+
+**Rotura que la pone roja.** Borrar un token de la lista; declarar uno dos veces; y para la segunda, el defecto ya existente.
+
+### Task 2: El cristal, el límite y las dos luces
+
+**Qué.** Sustituir el degradado burdeos por el material de D-L1, D-L2, D-L10 y D-L11: velo y desenfoque en `::before` (el desenfoque **solo** dentro de la media del cajón), filo y sombra en `::after`, línea de límite derivada de `--asb-linea-fuerte`, y `background: transparent` explícito en el elemento.
+
+**Guardia primero.** `test_el_material_de_la_barra_vive_en_los_pseudoelementos`: no hay `backdrop-filter` en la regla del elemento y sí en la del pseudoelemento; el `backdrop-filter` del cajón está dentro de una media de ancho máximo; el elemento declara `background: transparent`. Y `test_el_velo_de_la_barra_sostiene_el_rotulo_de_grupo`: extrae los porcentajes del archivo con expresión regular, compone con `MideContraste` sobre el peor fondo y con el halo encima, y exige 4,5:1 al rótulo de grupo en los dos temas y en el cajón.
+
+**Rotura.** Mover el `backdrop-filter` al elemento; bajar el velo hasta que el contraste no llegue.
+
+### Task 3: Se acabó la paleta privada
+
+**Qué.** Reescribir `theme.css:227-320` y `:673-696` para que todo color salga de los tokens de la barra. Es el bloque de hover el que no se puede olvidar: ahí viven `rgb(255 255 255)`, `rgb(255 255 255 / 0.06)`, `#ff8a82` y `#ff7168`.
+
+**Guardia primero.** `test_ningun_selector_de_la_barra_lleva_un_color_literal`: recorre **todas** las reglas cuyo selector contenga `.fi-sidebar`, en todo el archivo, y falla si aparece un `#rrggbb`, un `rgb(`, un `rgba(` o un `hsl(` que no sea `var(`. El mensaje nombra el selector y el color.
+
+**Rotura.** Devolver `#ff7168` a la regla del rótulo activo.
+
+### Task 4: El ítem activo: indicador, halo y peso
+
+**Qué.** D-L7 y D-L12. El indicador pasa de `inset box-shadow` a un pseudoelemento absoluto sobre `.fi-sidebar-item-btn`: 3 px por 20 px, radio completo, centrado, dibujado junto con el halo por el mismo pseudoelemento. El rótulo activo toma `--asb-admin-barra-activo`, que es `--asb-acento-fuerte` en claro y `--asb-acento` en oscuro, con la nota del porqué al lado.
+
+**Guardia primero.** `test_el_item_activo_se_distingue_por_algo_mas_que_color`: la regla de `aria-current="page"` cambia al menos una propiedad que no sea color ni fondo; el indicador no se dibuja con `box-shadow`; y bajo `forced-colors` hay una regla que lo repinta con `outline` o `border`. Más el contraste del rótulo activo en los dos temas por aritmética.
+
+**Rotura.** Volver al `inset box-shadow`; igualar los dos temas en el color del rótulo activo (el claro cae por debajo de 4,5:1 y la guardia lo dice con el número).
+
+### Task 5: Geometría, foco y toque
+
+**Qué.** D-L16. La fila sube a `2.75rem`, el radio baja a `0.625rem`, el `:focus-visible` sale del bloque de puntero fino y estrena el anillo de dos colores, el hover se convierte en un `translate` de 2 px atado a `pointerenter` y el `:active` usa el encogimiento de forma ancha, nunca el de control de 44 px.
+
+**Guardia primero.** `test_el_foco_de_la_barra_no_depende_del_puntero`: el `:focus-visible` de `.fi-sidebar` **no** está dentro de `@media (hover: hover) and (pointer: fine)`. `test_la_fila_de_la_barra_no_baja_de_44_px`: la fila declara `2.75rem` o más. Y ampliar la guardia de hover táctil de `MovimientoTest` para que vigile también `translate`, no solo `transform`.
+
+**Rotura.** Devolver el `:focus-visible` a la media; bajar la fila a `2.72rem`.
+
+### Task 6: El módulo del estado
+
+**Qué.** `resources/js/panel-barra-lateral.js`, registrado con `->module()` dentro del `try/catch (ViteException)` que ya protege a artisan. Escribe los dos atributos en `<body>` desde el scroll interno de `.fi-sidebar-nav`, los reescribe en `livewire:navigated` **después** del `requestAnimationFrame` en el que el store de Filament restaura el `scrollTop`, consulta `matchMedia('(prefers-reduced-motion: reduce)')` en vivo y escucha su `change` (nunca la clase `sin-desplazamiento`, que en el panel no existe: riesgo 7), y despliega el grupo que contiene la página actual si está plegado (D-L14).
+
+**Guardia primero.** `test_el_modulo_de_la_barra_se_registra_como_modulo` y `test_el_estado_de_la_barra_se_escribe_en_el_cuerpo`: leen el JS crudo y afirman definición **y** llamada de cada pieza, por separado, una mutación por cableado. Más el caso de PHPUnit sobre el HTML servido que exige un solo `aria-current="page"` por ruta y el `fi-active` en el grupo de la página.
+
+**Rotura.** Quitar `->module()`; escribir sobre el nodo de la barra; quitar el desplegado del grupo activo.
+
+### Task 7: El resorte, donde la Parte III lo puso
+
+**Qué.** D-L5, D-L6, D-L13 y D-L15. Cuatro sitios y ni uno más: el filete del canto que oculta lista entra con `--ease-rebote-vivo`; el indicador **llega** brotando con `scaleY` desde `--asb-admin-barra-brote` con `--ease-rebote-vivo` en `--duracion-rebote`; la flecha del grupo rota con resorte; y el cajón entra con `--ease-rebote-suave`. El alto del grupo **no** rebota: se le pisa el reloj y la curva a `x-collapse` con un `!important` acotado y comentado.
+
+**Guardia primero.** `test_el_resorte_de_la_barra_esta_en_los_cuatro_sitios_aprobados`: cada uno consume el token de resorte que le toca, y **ninguna regla de alto de grupo consume un resorte**. `test_todo_important_fuera_de_impresion_esta_permitido`: lista de selectores permitidos, cada uno con su comentario (nace verde con el de impresión que ya existe, y roja al añadir uno sin permiso).
+
+**Rotura.** Poner el resorte en el alto del grupo; añadir un `!important` fuera de la lista.
+
+### Task 8: Las cuatro señales del sistema
+
+**Qué.** D-L17. Movimiento reducido: sin estado `scroll`, sin brote, sin empuje, sin desplazamiento del cajón; sobreviven fundidos y plegado. Transparencia reducida y más contraste: velo opaco, desenfoque `none`, luces intactas por encima; bajo más contraste el filo se vuelve línea. Contraste forzado: las luces se apagan y el indicador se repinta con `outline` y `border`.
+
+**Guardia primero.** `test_las_cuatro_senales_alcanzan_a_la_barra`: existen los cuatro bloques y cada uno reasigna los tokens que le tocan; el desenfoque nunca es literal; y bajo transparencia reducida el velo pasa a un color sólido. Con la comprobación dentro de la página cuando se mida (riesgo 9: Playwright acepta la emulación y no la aplica).
+
+**Rotura.** Borrar un bloque; dejar un `blur()` literal.
+
+### Task 9: La guardia de contrato sobre el vendor
+
+**Qué.** `test_el_contrato_con_filament_sigue_en_pie`: afirma una por una, con el porqué en el mensaje, las cadenas del vendor de las que depende el tema, y que `isSidebarCollapsibleOnDesktop()` sigue siendo falso en el panel real. Es lo único que se rompe solo cuando Filament suba de versión.
+
+**Rotura.** Copiar el archivo del vendor a un temporal, borrarle una cadena y apuntar la guardia a la copia. **Tres mutaciones distintas**, no una.
+
+### Task 10: La maqueta y la medición en Chromium
+
+**Qué.** Un comando local genera `public/_medicion/barra-lateral.html` con los mismos componentes que pinta el panel, y `playwright-cli` la abre por `file://`. La maqueta no se versiona y se regenera en cada verificación. Lleva las cuatro piezas sin las cuales no mide nada: el `<style>` de `x-cloak`, Alpine, un `$store.sidebar` de mentira y la hoja compilada resuelta por `manifest.json`.
+
+**Se mide:** las cuatro esquinas del cuadrado de 44 px con `elementFromPoint`, incluidas las de los controles vecinos; la costura con el topbar (riesgo 4, que puede abrir una decisión de Sua); el contraste real por `getImageData` con franja blanca y negra bajo el cajón; la curva y la duración reales con `getAnimations()`; el estado tras un scroll programado del nav; y que ningún rótulo se recorta. Antes de medir: confirmar dentro de la página que la barra tiene 244 px y `x = 0`, y que la señal emulada de turno da `matches`.
+
+**Guardia.** Una prueba ejecuta el comando y exige que la salida traiga `fi-sidebar-nav`, cinco `fi-sidebar-group` y la barra visible a 390 px.
+
+### Task 11: Revisión adversaria y arreglos
+
+Varios lectores independientes sobre el diff, cada uno con su ángulo, verificando contra el repositorio. Los hallazgos confirmados se arreglan con guardia vista roja antes del arreglo. Barrer `git status` en busca de sondas al terminar.
+
+### Task 12: Documentación, un commit de código y el cierre
+
+La Parte III gana su sección «lo que la construcción cambió» con lo que el navegador desmintió. `material/estado.md` se reescribe, la bitácora suma su apartado, la matriz de pruebas suma la clase nueva con su cuenta medida ese día. Un solo commit de código, uno de documentación y uno de cierre. **No se empuja sin que Sua lo pida**, porque el push despliega, y antes Sua mira la barra con sus ojos (capa 5).

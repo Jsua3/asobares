@@ -49,9 +49,6 @@
     --asb-vidrio-sombra:
         0 1px 2px rgb(11 9 10 / 0.05),
         0 8px 24px rgb(11 9 10 / 0.06);
-    --asb-admin-rojo: #ee4137;
-    --asb-admin-borgona: #291012;
-    --asb-admin-borgona-profundo: #171012;
     --asb-admin-carbon: #0b090a;
     --asb-admin-fondo-claro: #f7f6f5;
     --asb-admin-card: rgb(255 255 255 / 0.86);
@@ -70,7 +67,118 @@
      */
     --asb-admin-dashboard-image: url("../../../../public/img/panel/cabecera-dashboard.png");
     --asb-admin-topbar-alto: 3.75rem;
-    --asb-admin-sidebar-ancho: 15.25rem;
+    /*
+     * El desenfoque del cromo superior, en token y no literal. Estaba escrito
+     * a mano en cuatro sitios, así que `prefers-reduced-transparency` no podía
+     * apagarlo: es el mismo defecto que D-L17 anotó para la barra, y estaba
+     * vivo aquí. El de reposo y el de la barra afirmada se distinguen solo en
+     * la saturación, pero son dos estados y por eso son dos tokens.
+     */
+    --asb-admin-topbar-desenfoque: blur(16px) saturate(145%);
+    --asb-admin-topbar-desenfoque-firme: blur(16px) saturate(130%);
+    /* 15,75 rem y no 15,25: el módulo conserva los 227 px que Sua aprobó
+       («agranda los módulos un poco a la derecha») y a la vez recupera en el
+       canto derecho el mismo aire que tiene en el izquierdo. */
+    --asb-admin-sidebar-ancho: 15.75rem;
+
+    /*
+     * La barra lateral (Parte III de la spec, aprobada el 7 sep 2026). Prefijo
+     * propio para que nunca se confundan con los de las dos barras públicas, y
+     * declarados aquí una sola vez: un token declarado dos veces deja sin
+     * efecto a la media que lo reasigna, que es el defecto que
+     * `--asb-vidrio-desenfoque` arrastraba en este mismo archivo.
+     *
+     * El velo se calibró el 7 sep con `MideContraste` sobre la superficie y el
+     * fondo del panel, con el halo compuesto encima en su punto más intenso:
+     * el rótulo de grupo (11,52 px, texto pequeño) da 11,27:1 en claro y
+     * 7,68:1 en oscuro. El del cajón sube porque debajo pasa contenido que no
+     * se conoce: contra negro puro tras el velo de cierre de Filament da
+     * 9,54:1 al rótulo y 6,33:1 al ítem activo.
+     */
+    --asb-admin-barra-velo: color-mix(in oklab, var(--asb-superficie) 76%, transparent);
+    --asb-admin-barra-velo-cajon: color-mix(in oklab, var(--asb-superficie) 94%, transparent);
+    /* Nunca un `blur()` literal: solo así las medias pueden apagarlo. Se
+       consume únicamente en la regla del cajón, que es donde hay página que
+       refractar; en escritorio la barra es `lg:sticky` y detrás no pasa nada. */
+    --asb-admin-barra-desenfoque: blur(18px) saturate(130%);
+
+    /*
+     * Los dos oficios del rojo (D-L9). La LUZ va en la dirección que pidió
+     * Sua: rojo claro en el tema claro, rojo oscuro en el oscuro. Nunca es
+     * valor de `color`: solo alimenta filo, halo y resplandor.
+     */
+    --asb-admin-barra-luz: #ff6a5e;
+    --asb-admin-barra-halo: color-mix(in oklab, var(--asb-admin-barra-luz) 12%, transparent);
+    /* El límite de la región lo hace la luminancia, no el color. El filo rojo
+       que llevaba este sitio se retiró el 8 sep con su token: dejó de tener
+       consumidor cuando Sua pidió continuidad, y un token huérfano sostiene
+       guardias verdes sobre algo que no pinta nada. */
+    --asb-admin-barra-borde: var(--asb-linea-fuerte);
+    /* La otra mitad del límite. Proyectada, no interior: la interior la tapa el
+       velo y deja de separar nada. */
+
+    /* La TINTA va con la aritmética, aunque contradiga a la luz. Recalculado el
+       7 sep sobre el fondo activo con el halo encima (#f8d9d7 en claro): el
+       rojo de marca #ee4137 da 2,92:1 y queda descartado; `--asb-acento`
+       (#b71f18) da 4,93:1 y pasaría por poco; `--asb-acento-fuerte` (#971d18)
+       da 6,35:1 y es el que se usa, por margen, no por obligación. La spec
+       decía que el acento normal no llegaba: la cuenta dice que sí, y queda
+       corregido aquí. La asimetría con el tema oscuro parece un descuido y no
+       lo es: allí el halo oscurece y el acento normal sube a 5,20:1. */
+    --asb-admin-barra-tinta: var(--asb-tinta);
+    --asb-admin-barra-tenue: var(--asb-tenue);
+    --asb-admin-barra-activo: var(--asb-acento-fuerte);
+    --asb-admin-barra-activo-fondo: color-mix(in oklab, var(--asb-acento) 10%, transparent);
+    --asb-admin-barra-hover-fondo: color-mix(in oklab, var(--asb-acento) 7%, transparent);
+
+    /* Geometría y movimiento: no dependen del tema. La fila sube de 2,72rem
+       (43,52 px medidos el 7 sep en el panel de Sua, medio píxel por debajo
+       del mínimo táctil) a 2,75rem. */
+    --asb-admin-barra-fila-alto: 3rem;
+    --asb-admin-barra-fila-radio: 0.625rem;
+    --asb-admin-barra-aviso-alto: 0.9rem;
+    /* El módulo: canto de cristal y brillo especular, los dos recursos que la
+       barra de escritorio enciende cuando la píldora exterior se apaga. */
+    --asb-admin-barra-modulo-canto: rgb(11 9 10 / 0.1);
+    --asb-admin-barra-modulo-brillo: rgb(255 255 255 / 0.55);
+    /* Realce plano de la lamina. En claro no hace falta: el cristal ya se
+       separa del fondo. En oscuro el velo componia un tono a tres niveles del
+       fondo, o sea ninguno, y las laminas se leian como agujeros. */
+    --asb-admin-barra-modulo-realce: transparent;
+    --asb-admin-barra-modulo-radio: 1rem;
+    /* El punto del campo del fondo (D-L24). Decoración: no entra en cuentas
+       de contraste, pero sí invierte con el tema como todo lo demás. */
+    --asb-admin-barra-punto: rgb(11 9 10 / 0.16);
+    /* El resplandor difuso de la zona donde vive la barra. Es lo que la
+       distingue ahora que no tiene fondo propio: rojo claro en el tema claro y
+       rojo oscuro en el oscuro, como pidió Sua. Radial y no `filter: blur`,
+       que costaría una pasada de compositor por fotograma del campo. */
+    --asb-admin-barra-resplandor: rgb(238 65 55 / 0.1);
+    /* En longitud y no en porcentaje: el resplandor lo pinta una capa de
+       PÁGINA, y un 82 % del ancho de la página no es el mismo lavado que un
+       82 % del ancho de la barra. 13rem son 208 px, los mismos que daba el
+       82 % sobre los 252 de la barra. */
+    --asb-admin-barra-resplandor-ancho: 13rem;
+    /* El riel del teléfono (D-L29): 3,5 rem son 56 px, con margen sobre los
+       44 del mínimo táctil para que quepan las cuatro esquinas. */
+    /*
+     * 4 rem y no 3,5: los módulos dejan de estar pegados al canto (Sua, 8 sep)
+     * y ese aire sale de algún sitio. Con 3,5 y 0,5 de aire a cada lado el
+     * módulo caería a 40 px y se rompería el mínimo táctil; con 4 quedan 48.
+     * El aire no se paga con el dedo.
+     */
+    --asb-admin-barra-riel: 4rem;
+    --asb-admin-barra-riel-aire: 0.5rem;
+    /* Lo que la cuenta anclada ocupa al pie, y lo que la lista le reserva. */
+    --asb-admin-barra-cuenta-alto: 4.25rem;
+    --asb-admin-barra-modulo-sombra: 0 12px 28px rgb(11 9 10 / 0.06);
+    --asb-admin-barra-brote: 0.35;
+    --asb-admin-barra-empuje: 2px;
+
+    /* Anillo de foco de dos colores: uno solo desaparece sobre el fondo
+       variable del cajón. */
+    --asb-admin-foco-anillo: #0b090a;
+    --asb-admin-foco-halo: #ffffff;
 }
 
 .dark {
@@ -79,6 +187,24 @@
     --asb-vidrio-desenfoque: blur(12px);
     --asb-vidrio-sombra: none;
     --asb-admin-card: rgb(24 22 23 / 0.88);
+
+    /* La barra lateral en oscuro. El velo del cajón NO sube aquí: el velo de
+       cierre de Filament ya es negro al 75 %, así que el fondo bajo el cajón
+       llega casi neutralizado. */
+    --asb-admin-barra-velo: color-mix(in oklab, var(--asb-superficie) 76%, transparent);
+    --asb-admin-barra-velo-cajon: color-mix(in oklab, var(--asb-superficie) 88%, transparent);
+    --asb-admin-barra-luz: #7e1a16;
+    --asb-admin-barra-activo: var(--asb-acento);
+    --asb-admin-barra-activo-fondo: color-mix(in oklab, var(--asb-acento) 16%, transparent);
+    --asb-admin-barra-hover-fondo: rgb(255 255 255 / 0.06);
+    --asb-admin-barra-modulo-canto: rgb(255 255 255 / 0.1);
+    --asb-admin-barra-punto: rgb(255 255 255 / 0.14);
+    --asb-admin-barra-resplandor: rgb(126 26 22 / 0.14);
+    --asb-admin-barra-modulo-brillo: rgb(255 255 255 / 0.06);
+    --asb-admin-barra-modulo-realce: rgb(255 255 255 / 0.055);
+    --asb-admin-barra-modulo-sombra: 0 12px 28px rgb(0 0 0 / 0.28);
+    --asb-admin-foco-anillo: #ffffff;
+    --asb-admin-foco-halo: #0b090a;
     --asb-admin-card-borde: rgb(255 255 255 / 0.09);
     --asb-admin-card-sombra:
         inset 0 1px 0 rgb(255 255 255 / 0.04),
@@ -87,6 +213,20 @@
     --asb-admin-dashboard-sombra:
         inset 0 1px 0 rgb(255 255 255 / 0.035),
         0 22px 54px rgb(0 0 0 / 0.32);
+}
+
+/*
+ * Transparencia reducida: `tokens.css` ya apaga `--asb-vidrio-desenfoque`, pero
+ * este archivo lo redeclara después con la misma especificidad, así que la
+ * anulación no llegaba al panel y el vidrio de ModerarFotos y del widget de
+ * pendientes seguía desenfocando para quien pidió que no (7 sep 2026). Va
+ * fuera de capa, como el `:root` de arriba, para que alcance al token.
+ */
+@media (prefers-reduced-transparency: reduce) {
+    :root,
+    :root.dark {
+        --asb-vidrio-desenfoque: none;
+    }
 }
 
 @layer components {
@@ -113,10 +253,55 @@
             transform var(--duracion-boton) var(--ease-out);
     }
 
+    /*
+     * El resplandor de la zona, en UNA capa de página (corrección de D-L28,
+     * 8 sep). Vivía en `.fi-sidebar::before` y ahí nacía en el canto inferior
+     * del topbar, porque Filament pinta el topbar FUERA de `.fi-layout`, como
+     * hermano anterior e hijo directo de `.fi-body`: cruza el ancho entero por
+     * encima de la barra. Sua vio ese nacimiento como un corte.
+     *
+     * Fija y de alto completo, cubre topbar y barra por construcción. El
+     * topbar es blanco al 78 % con desenfoque, así que la deja pasar
+     * suavizada, que es la transición que faltaba.
+     */
+    .fi-body::before {
+        content: '';
+        pointer-events: none;
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background-image:
+            radial-gradient(
+                120% 55% at 0% 0%,
+                var(--asb-admin-barra-resplandor),
+                transparent 70%
+            ),
+            linear-gradient(
+                90deg,
+                var(--asb-admin-barra-resplandor),
+                transparent var(--asb-admin-barra-resplandor-ancho)
+            );
+    }
+
     .fi-body {
         position: relative;
+        z-index: 0;
         background-color: var(--asb-admin-fondo-claro);
         overflow-x: clip;
+    }
+
+    /* Todo lo que no sea el campo va por encima de él. */
+    .fi-layout {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Anclada arriba: sin esto se va con el desplazamiento y el título de la
+       página y el control de tema desaparecen en cuanto bajas (Sua, 7 sep). */
+    .fi-topbar-ctn {
+        position: sticky;
+        z-index: 20;
+        inset-block-start: 0;
     }
 
     .dark .fi-body {
@@ -127,52 +312,44 @@
         position: relative;
     }
 
+    /*
+     * El fondo del contenido deja de pintar sus cuatro degradados (D-L26): eran
+     * opacos y tapaban el campo de puntos, que ahora es el fondo de toda la
+     * interfaz. Queda la superficie plana y el campo debajo.
+     */
     .fi-main-ctn {
         position: relative;
-        background:
-            radial-gradient(54rem 32rem at 13% -4%, rgb(255 255 255 / 0.96), transparent 66%),
-            radial-gradient(34rem 22rem at 78% 2%, rgb(238 65 55 / 0.025), transparent 74%),
-            radial-gradient(28rem 18rem at 38% 48%, rgb(58 13 16 / 0.012), transparent 78%),
-            linear-gradient(180deg, rgb(253 252 251) 0%, var(--asb-admin-fondo-claro) 48%, rgb(244 242 241) 100%);
+        background: transparent;
         isolation: isolate;
     }
 
-    .fi-main-ctn::before {
-        position: fixed;
-        inset: var(--asb-admin-topbar-alto) 0 0 var(--asb-admin-sidebar-ancho);
-        z-index: 0;
-        pointer-events: none;
-        content: "";
-        background:
-            linear-gradient(115deg, transparent 0 34%, rgb(238 65 55 / 0.012) 48%, transparent 64%),
-            radial-gradient(24rem 16rem at 92% 18%, rgb(238 65 55 / 0.024), transparent 70%);
-        opacity: 0.54;
-    }
+    /*
+     * El contenido no pinta ningún velo propio (8 sep). Aquí vivían dos
+     * degradados rojos que en oscuro enturbiaban el campo de puntos y en claro
+     * lo apagaban. El fondo es uno solo y es el campo.
+     */
 
-    .dark .fi-main-ctn {
-        background:
-            radial-gradient(58rem 34rem at 12% -4%, rgb(255 255 255 / 0.045), transparent 66%),
-            radial-gradient(40rem 26rem at 82% 2%, rgb(238 65 55 / 0.105), transparent 74%),
-            radial-gradient(30rem 20rem at 38% 48%, rgb(238 65 55 / 0.045), transparent 76%),
-            linear-gradient(180deg, rgb(18 14 15) 0%, var(--asb-admin-carbon) 54%, rgb(18 16 17) 100%);
-    }
-
-    .dark .fi-main-ctn::before {
-        background:
-            linear-gradient(115deg, transparent 0 36%, rgb(238 65 55 / 0.075) 50%, transparent 66%),
-            radial-gradient(24rem 16rem at 92% 18%, rgb(238 65 55 / 0.1), transparent 72%);
-        opacity: 0.48;
-    }
-
+    /*
+     * El lavado del resplandor va TAMBIÉN aquí, y arriba del todo en la pila.
+     * La capa de página ya pasa por detrás, pero el blanco al 78 % del topbar
+     * la diluye lo bastante como para que se vea un escalón justo debajo del
+     * logotipo: es lo que Sua señaló el 8 sep. Con el mismo token y el mismo
+     * ancho que la capa de página, las dos no pueden separarse.
+     */
     .fi-topbar {
         min-height: var(--asb-admin-topbar-alto);
         background:
+            linear-gradient(
+                90deg,
+                var(--asb-admin-barra-resplandor),
+                transparent var(--asb-admin-barra-resplandor-ancho)
+            ),
             linear-gradient(90deg, rgb(255 255 255 / 0.78), rgb(250 247 246 / 0.7)),
             radial-gradient(26rem circle at 18% 0%, rgb(238 65 55 / 0.06), transparent 68%);
         border-bottom: 1px solid rgb(58 13 16 / 0.08);
         box-shadow: 0 1px 0 rgb(255 255 255 / 0.7);
-        -webkit-backdrop-filter: blur(16px) saturate(145%);
-        backdrop-filter: blur(16px) saturate(145%);
+        -webkit-backdrop-filter: var(--asb-admin-topbar-desenfoque);
+        backdrop-filter: var(--asb-admin-topbar-desenfoque);
         transition:
             background 220ms var(--ease-color),
             border-color 220ms var(--ease-color),
@@ -182,6 +359,11 @@
 
     .dark .fi-topbar {
         background:
+            linear-gradient(
+                90deg,
+                var(--asb-admin-barra-resplandor),
+                transparent var(--asb-admin-barra-resplandor-ancho)
+            ),
             linear-gradient(90deg, rgb(22 18 19 / 0.78), rgb(15 12 13 / 0.72)),
             radial-gradient(26rem circle at 18% 0%, rgb(238 65 55 / 0.075), transparent 68%);
         border-bottom-color: rgb(255 255 255 / 0.08);
@@ -190,16 +372,26 @@
 
     .fi-topbar-ctn.asb-topbar--scrolled .fi-topbar {
         background:
+            linear-gradient(
+                90deg,
+                var(--asb-admin-barra-resplandor),
+                transparent var(--asb-admin-barra-resplandor-ancho)
+            ),
             linear-gradient(90deg, rgb(255 255 255 / 0.94), rgb(250 247 246 / 0.9)),
             radial-gradient(28rem circle at 18% 0%, rgb(238 65 55 / 0.075), transparent 68%);
         border-bottom-color: rgb(58 13 16 / 0.14);
         box-shadow: 0 10px 28px rgb(58 13 16 / 0.1);
-        -webkit-backdrop-filter: blur(16px) saturate(130%);
-        backdrop-filter: blur(16px) saturate(130%);
+        -webkit-backdrop-filter: var(--asb-admin-topbar-desenfoque-firme);
+        backdrop-filter: var(--asb-admin-topbar-desenfoque-firme);
     }
 
     .dark .fi-topbar-ctn.asb-topbar--scrolled .fi-topbar {
         background:
+            linear-gradient(
+                90deg,
+                var(--asb-admin-barra-resplandor),
+                transparent var(--asb-admin-barra-resplandor-ancho)
+            ),
             linear-gradient(90deg, rgb(22 18 19 / 0.96), rgb(15 12 13 / 0.93)),
             radial-gradient(28rem circle at 18% 0%, rgb(238 65 55 / 0.1), transparent 68%);
         border-bottom-color: rgb(255 255 255 / 0.12);
@@ -224,43 +416,689 @@
         transform: scale(0.9);
     }
 
+    /*
+     * El cristal de la barra (D-L1, D-L2 y D-L10).
+     *
+     * Aquí no hay filtro ninguno: un `backdrop-filter` en el elemento lo vuelve
+     * raíz de fondo (Filter Effects 2) y deja sin página que desenfocar a todo
+     * lo que anide dentro, empezando por el halo del ítem activo. El material
+     * va en los dos pseudoelementos: `::before` lleva el velo (y el desenfoque
+     * solo en el cajón), `::after` lleva el filo luminiscente.
+     *
+     * `background: transparent` es explícito y no un olvido: Filament da a la
+     * barra `bg-white` y `dark:bg-gray-900` propios y solo los quita en `lg`.
+     * Sin esta línea, el cajón queda opaco por debajo del velo.
+     *
+     * El límite de la región lo hacen la LÍNEA y la SOMBRA, que son luminancia.
+     * El filo rojo va encima como segunda capa y no como único canto: medido,
+     * el rojo claro contra la página clara da 2,60:1 y el oscuro contra la
+     * oscura 1,93:1, y un borde de región se juzga contra 3:1.
+     */
+    /*
+     * Sin `box-shadow` en el elemento a propósito: Filament le aplica
+     * `lg:shadow-none` desde una capa que gana, así que una sombra declarada
+     * aquí se anula en escritorio sin avisar. Medido el 7 sep en la maqueta:
+     * el valor computado salía en `rgba(0,0,0,0) 0 0 0 0`. La sombra de la
+     * unión la dibuja el pseudoelemento, que nadie nos pisa.
+     */
+    /*
+     * Sin `position` a propósito. Filament declara la barra `fixed` y solo la
+     * vuelve `lg:sticky` en escritorio; el `position: relative` que vivía aquí
+     * iba DESPUÉS en el archivo compilado —que no lleva capas— y ganaba en
+     * todas las anchuras: en el teléfono el cajón cerrado ocupaba sus 252 px en
+     * el flujo y aplastaba el contenido, y en escritorio la barra se iba con el
+     * desplazamiento. Existía para darle bloque contenedor al resplandor, que
+     * desde el 8 sep lo pinta `.fi-body::before` y ya no necesita ninguno.
+     */
     .fi-sidebar {
         --sidebar-width: var(--asb-admin-sidebar-ancho);
-        background:
-            radial-gradient(18rem 16rem at 24% 0%, rgb(238 65 55 / 0.09), transparent 66%),
-            linear-gradient(180deg, #3b1113 0%, #291012 54%, #171012 100%);
-        border-inline-end: 1px solid rgb(255 255 255 / 0.09);
-        box-shadow:
-            inset -1px 0 0 rgb(255 255 255 / 0.035),
-            18px 0 44px rgb(58 13 16 / 0.16);
-        -webkit-backdrop-filter: blur(14px);
-        backdrop-filter: blur(14px);
+        background: transparent;
     }
 
-    .dark .fi-sidebar {
-        background:
-            radial-gradient(18rem 16rem at 24% 0%, rgb(238 65 55 / 0.1), transparent 66%),
-            linear-gradient(180deg, #3b1113 0%, #291012 54%, #171012 100%);
-        border-inline-end-color: rgb(255 255 255 / 0.08);
-        box-shadow:
-            inset -1px 0 0 rgb(255 255 255 / 0.035),
-            18px 0 44px rgb(0 0 0 / 0.32);
+    /* El velo. Va detrás de todo el contenido de la barra y por eso el
+       pseudoelemento no recibe puntero. En escritorio es solo velo; el
+       desenfoque se le añade en la media del cajón. */
+    .fi-sidebar::before,
+    .fi-sidebar::after {
+        content: '';
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
     }
 
+    /*
+     * El velo se retiró (D-L24): el fondo de la barra es el campo de puntos y
+     * la superficie lisa de debajo, no una capa que encierre a los módulos.
+     * `::before` se queda como suelo: es lo que da el «blanco» sobre el que se
+     * dibujan los puntos, y en oscuro su equivalente. Sigue siendo el velo
+     * calibrado y no `--asb-superficie` a secas, porque sobre el fondo del
+     * panel ese velo compone casi el mismo blanco y así el contraste del
+     * rótulo de grupo se sigue midiendo contra lo que de verdad hay debajo.
+     */
+    /*
+     * La barra no tiene fondo propio: el campo de puntos es el de toda la
+     * interfaz. Lo que marca su zona es un resplandor difuso, rojo claro en el
+     * tema claro y rojo oscuro en el oscuro (Sua, 7 sep). Se dibuja con un
+     * radial ancho y no con `filter: blur`, que obligaría al compositor a
+     * rehacerlo en cada fotograma del campo.
+     */
+    /*
+     * La barra ya no pinta el resplandor: lo pinta la página, unas líneas más
+     * abajo. Aquí queda el suelo del cajón, que solo existe por debajo de
+     * 64 rem y se declara en su media.
+     */
+    .fi-sidebar::before {
+        z-index: -1;
+    }
+
+    /* El lienzo del campo (D-L26): uno solo, fijo, detrás de TODA la interfaz
+       y sin puntero. Es hijo del cuerpo, así que no depende de ninguna zona. */
+    .asb-barra-puntos {
+        pointer-events: none;
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        width: 100vw;
+        height: 100dvh;
+    }
+
+    /*
+     * Nada separa la barra del contenido (Sua, 7 sep: «elimina esa línea roja
+     * que no permite la continuidad de la interfaz»).
+     *
+     * Pasó por tres formas y las tres eran la misma cosa: primero una línea de
+     * un píxel, luego un filo rojo, luego una franja difusa de 40 px. Difusa o
+     * no, seguía leyéndose como un corte vertical. Lo que marca la zona de la
+     * barra es su resplandor, y lo que la ordena son los cristales de sus
+     * apartados; el fondo es continuo por debajo de todo.
+     *
+     * Aquí solo queda el resplandor de la esquina superior, que es de donde
+     * nace la luz y no separa nada.
+     */
+    .fi-sidebar::after {
+        z-index: 0;
+        background-image: radial-gradient(18rem 16rem at 24% 0%, var(--asb-admin-barra-halo), transparent 66%);
+    }
+
+    /*
+     * El contenido, por encima de las dos capas de material. El lienzo del
+     * campo de puntos se excluye a mano: es hijo de la barra, empata en
+     * especificidad con esta regla y va antes en el archivo, así que sin el
+     * `:not()` esta le quitaba el `position: absolute`, lo dejaba en el flujo
+     * con alto completo y empujaba la lista fuera de la vista. Pasó el 7 sep.
+     */
+    .fi-sidebar > *:not(.asb-barra-puntos) {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* El chip del módulo de cuenta: avatar, nombre y rango, como el de la
+       barra pública de escritorio. El disparador entero es el objetivo, así
+       que su alto sale del mismo token que las filas de navegación. */
+    .asb-barra-chip {
+        display: flex;
+        gap: 0.55rem;
+        align-items: center;
+        max-width: 15rem;
+        min-height: var(--asb-admin-barra-fila-alto);
+        padding: 0.35rem 0.5rem;
+        border-radius: var(--asb-admin-barra-fila-radio);
+        color: var(--asb-admin-barra-tinta);
+        transition:
+            background-color var(--duracion-boton) var(--ease-color),
+            translate var(--duracion-boton) var(--ease-out);
+    }
+
+    .asb-barra-chip .text-2xs {
+        color: var(--asb-admin-barra-tenue);
+    }
+
+    /* El avatar es marca: no crece ni encoge. */
+    .asb-barra-avatar {
+        display: grid;
+        flex-shrink: 0;
+        place-items: center;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 999px;
+        background-color: var(--asb-admin-barra-activo-fondo);
+        color: var(--asb-admin-barra-activo);
+        font-size: 0.75rem;
+        font-weight: 650;
+    }
+
+    /* La hoja abre hacia arriba, porque el módulo es el suelo de la barra. */
+    /* La hoja cuelga del chip, como el popover del tema que tiene al lado. */
+    .asb-barra-hoja {
+        position: absolute;
+        inset-inline-end: 0;
+        inset-block-start: calc(100% + 0.4rem);
+        z-index: 40;
+        display: flex;
+        min-width: 13rem;
+        flex-direction: column;
+        gap: 0.15rem;
+        padding: 0.3rem;
+        border-radius: var(--asb-admin-barra-modulo-radio);
+        background-color: var(--asb-admin-barra-velo-cajon);
+        box-shadow:
+            inset 0 0 0 1px var(--asb-admin-barra-modulo-canto),
+            var(--asb-admin-barra-modulo-sombra);
+        -webkit-backdrop-filter: var(--asb-vidrio-desenfoque);
+        backdrop-filter: var(--asb-vidrio-desenfoque);
+    }
+
+    .asb-barra-fila {
+        display: flex;
+        gap: 0.55rem;
+        align-items: center;
+        min-height: var(--asb-admin-barra-fila-alto);
+        padding-inline: 0.75rem;
+        border-radius: var(--asb-admin-barra-fila-radio);
+        color: var(--asb-admin-barra-tinta);
+        font-size: 0.875rem;
+        text-align: start;
+        transition: background-color var(--duracion-boton) var(--ease-color);
+    }
+
+    .asb-barra-chip:focus-visible,
+    .asb-barra-fila:focus-visible {
+        outline: 2px solid var(--asb-admin-foco-anillo);
+        outline-offset: 2px;
+        box-shadow: 0 0 0 4px var(--asb-admin-foco-halo);
+    }
+
+    /*
+     * Por debajo de 64 rem la barra es un cajón que entra sobre el contenido:
+     * ahí SÍ pasa página por debajo y el cristal se gana el sueldo. Es el único
+     * sitio donde se consume el desenfoque, y el velo sube porque el fondo no
+     * se conoce de antemano (el velo de cierre de Filament solo llega al 50 %
+     * en claro).
+     */
+    @media (max-width: 63.999rem) {
+        /*
+         * Solo cuando está ABIERTA. El velo existe porque debajo del cajón pasa
+         * contenido variable que hay que tapar; el riel no tapa nada, solo está
+         * a un lado, y pintarlo dejaba a los módulos pegados sobre una barra
+         * blanca en vez de flotando sobre el campo (Sua, 8 sep).
+         *
+         * Y el cajón es una LÁMINA, no un cuadrado blanco: separada del borde,
+         * con el radio de los módulos, su canto y su desenfoque. El velo baja
+         * de 94 a 84 %, que es el suelo medido: por debajo, el rótulo del ítem
+         * activo cae de 4,5:1 sobre el peor fondo posible (contenido negro con
+         * el velo de cierre de Filament encima).
+         */
+        /*
+         * El cajón TAMPOCO tiene suelo (Sua, 8 sep, por segunda vez y con
+         * razón): los módulos quedan libres, igual que en el riel, y entre
+         * ellos se ve la página atenuada. Aquí no queda nada.
+         *
+         * Lo que sostiene la lectura es entonces el cristal de cada módulo, y
+         * por eso ese sí sube: ver más abajo.
+         */
+        .fi-sidebar.fi-sidebar-open::before {
+            content: none;
+        }
+
+        /* Sin fondo propio del elemento: Filament le da `bg-white` por debajo de
+           `lg` y eso es el cuadrado blanco. Con `.fi-layout` delante para que el
+           orden del archivo compilado no tenga voto. */
+        .fi-layout .fi-sidebar,
+        .fi-layout .fi-sidebar-header {
+            background: transparent;
+            box-shadow: none;
+        }
+
+        /*
+         * Los ítems SIN grupo —«Tablero»— los pinta Filament sueltos en la
+         * lista, no dentro de un `.fi-sidebar-group`, así que no recibían ni el
+         * cristal ni el aire y quedaban pegados al canto. Aquí son un módulo
+         * más.
+         */
+        .fi-sidebar-nav > .fi-sidebar-item {
+            position: relative;
+            isolation: isolate;
+            margin-block: 0 1.75rem;
+            padding: 0.5rem 0.45rem;
+            border-radius: var(--asb-admin-barra-modulo-radio);
+        }
+
+        .fi-sidebar-nav > .fi-sidebar-item::before {
+            content: '';
+            pointer-events: none;
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            border-radius: inherit;
+            background-color: var(--asb-admin-barra-velo);
+            box-shadow: inset 0 0 0 1px var(--asb-admin-barra-modulo-canto);
+        }
+
+        /*
+         * EL RIEL (D-L29). La barra deja de irse y se estrecha: los iconos se
+         * quedan a la vista y los nombres vuelven al abrirla. Empieza debajo
+         * del topbar para no taparle la hamburguesa, que es lo que la abre.
+         */
+        .fi-sidebar {
+            inset-block-start: var(--asb-admin-topbar-alto);
+            height: calc(100dvh - var(--asb-admin-topbar-alto));
+            /* Filament pone `transition-all` aquí; lo único que cambia entre
+               riel y cajón es el ancho, y transicionar «todo» arrastra al
+               desenfoque y al velo en cada fotograma. */
+            transition-property: width;
+            transition-duration: var(--duracion-estado);
+            transition-timing-function: var(--ease-cajon);
+        }
+
+        .fi-sidebar:not(.fi-sidebar-open) {
+            /*
+             * Se mueve el TOKEN de Filament, no la propiedad. Su regla de ancho
+             * cuelga de `.fi-body:not(...):not(...) .fi-sidebar:not(...)` y tiene
+             * mucha más especificidad que cualquier `width` que se declare aquí:
+             * medido, el riel seguía saliendo de 252 px. Como esa regla dice
+             * `width: var(--sidebar-width)`, basta con darle otro valor al token.
+             */
+            --sidebar-width: var(--asb-admin-barra-riel);
+            /*
+             * `none` y NO `0 0`: un `translate` computado distinto de `none`
+             * convierte a la barra en bloque contenedor de todo `fixed` que
+             * cuelgue dentro, que es el pisotón que este proyecto ya pagó dos
+             * veces.
+             */
+            translate: none;
+        }
+
+        /*
+         * El nombre no se borra, se ESCONDE. Con `display: none` el enlace del
+         * riel se queda sin nombre accesible y la barra pasa a ser una lista de
+         * enlaces sin texto. Con recorte visual, el lector de pantalla y el
+         * foco lo siguen encontrando.
+         */
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-item-label,
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group-label {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+            white-space: nowrap;
+        }
+
+        /* Sin rótulo, el chevron no plega nada legible; y el logotipo no cabe
+           en 56 px, además de estar ya en el topbar. */
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group-collapse-btn,
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group-collapse-button,
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-header {
+            display: none;
+        }
+
+        /* El icono, centrado en el riel. */
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-item-btn {
+            justify-content: center;
+            padding-inline: 0;
+        }
+
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-nav {
+            padding-inline: var(--asb-admin-barra-riel-aire);
+        }
+
+        /*
+         * EL CROMO DEL TELÉFONO (D-L30). Hamburguesa donde estaba, logotipo al
+         * centro, control de tema a la derecha.
+         *
+         * El centrado saca al logotipo del reparto de espacio en vez de repartir
+         * huecos: así no depende de cuántos hijos tenga el cromo, que Filament
+         * cambia entre versiones. Y centra de verdad, porque los dos costados
+         * miden lo mismo: 44 px de botón a cada lado.
+         */
+        .fi-topbar {
+            position: relative;
+        }
+
+        .fi-topbar-start {
+            position: absolute;
+            inset-inline: 0;
+            justify-content: center;
+            margin-inline: 0;
+            /* El hueco centrado cruza todo el cromo, así que no puede comerse
+               los toques de la hamburguesa ni los del tema. */
+            pointer-events: none;
+        }
+
+        .fi-topbar-start > * {
+            pointer-events: auto;
+        }
+
+        .asb-panel-tema {
+            margin-inline-start: auto;
+        }
+
+        /* La cuenta cambia de sitio: se va del cromo y aparece al pie. */
+        .fi-topbar .asb-barra-cuenta {
+            display: none;
+        }
+
+        /*
+         * Con `.fi-sidebar` delante, y no a secas. Suelto, `.asb-cuenta-al-pie`
+         * empata en especificidad con `.asb-barra-cuenta`, que declara
+         * `position: relative`, y la pelea la decide el orden del archivo
+         * COMPILADO, que no es el nuestro: `lightningcss` agrupa y mueve.
+         * Medido el 8 sep: salía `relative` y la cuenta no flotaba. Con un
+         * selector más específico el orden deja de tener voto.
+         */
+        .fi-sidebar .asb-cuenta-al-pie {
+            /*
+             * FLOTA sobre la lista, no es su último elemento: si fuera un
+             * hermano al pie, la lista terminaría encima y no habría nada que
+             * pasara por debajo, que es lo que Sua pidió.
+             */
+            display: block;
+            position: absolute;
+            inset-block-end: var(--asb-admin-barra-riel-aire);
+            inset-inline: var(--asb-admin-barra-riel-aire);
+            z-index: 10;
+            margin-inline-end: 0;
+            padding: 0;
+            /*
+             * Una lámina más, no una barra: mismo radio y mismo canto que los
+             * módulos, y separada del borde por el mismo aire. El velo es el del
+             * cajón y no el del módulo porque este sí tapa: por debajo pasan los
+             * iconos, y tienen que desaparecer, no transparentarse a medias.
+             */
+            border-radius: var(--asb-admin-barra-modulo-radio);
+            background-color: var(--asb-admin-barra-velo-cajon);
+            box-shadow: inset 0 0 0 1px var(--asb-admin-barra-modulo-canto);
+            -webkit-backdrop-filter: var(--asb-admin-barra-desenfoque);
+            backdrop-filter: var(--asb-admin-barra-desenfoque);
+        }
+
+        /* Y la lista le reserva su alto, o el último destino queda debajo de
+           ella y no se puede tocar. Con `.fi-sidebar` delante por la misma
+           razón: sin él lo pisa el `padding-block` de la regla base. */
+        .fi-sidebar .fi-sidebar-nav {
+            padding-block-end: var(--asb-admin-barra-cuenta-alto);
+        }
+
+        /*
+         * La hoja de la cuenta abre HACIA ARRIBA y hacia DENTRO. Colgaba del
+         * chip hacia abajo y hacia la izquierda, que es correcto en el cromo y
+         * absurdo al pie de una barra de 64 px: se iba fuera de la pantalla, y
+         * por eso Sua no podía abrirla con el menú cerrado.
+         */
+        .fi-sidebar .asb-cuenta-al-pie .asb-barra-hoja {
+            inset-block-start: auto;
+            inset-block-end: calc(100% + 0.4rem);
+            inset-inline-start: 0;
+            inset-inline-end: auto;
+            z-index: 50;
+        }
+
+        /*
+         * El cristal del módulo, DENTRO del cajón, al 84 % y no al 66 del riel.
+         * No es un capricho: en el riel, detrás del módulo hay campo de puntos
+         * sobre la superficie del panel, que es un color conocido; dentro del
+         * cajón hay PÁGINA, y la página puede ser cualquier cosa.
+         *
+         * Medido el 8 sep sobre los dos extremos, con el velo de cierre de
+         * Filament en medio: al 66 %, sobre página negra, el rótulo del ítem
+         * activo da 3,03:1 y no pasa. Al 84 % da 4,61 sobre negra y 5,49 sobre
+         * blanca, y en oscuro 5,30 y 4,78. Ese 84 es el suelo, no una
+         * preferencia.
+         */
+        .fi-sidebar.fi-sidebar-open {
+            --asb-admin-barra-velo: color-mix(in oklab, var(--asb-superficie) 84%, transparent);
+        }
+
+        /* En el riel se ve solo el avatar; con la barra abierta, el chip entero. */
+        .fi-sidebar:not(.fi-sidebar-open) .asb-cuenta-al-pie .asb-barra-chip {
+            justify-content: center;
+            max-width: none;
+        }
+
+        .fi-sidebar:not(.fi-sidebar-open) .asb-cuenta-al-pie .asb-barra-chip > span:not(.asb-barra-avatar):not(.sr-only),
+        .fi-sidebar:not(.fi-sidebar-open) .asb-cuenta-al-pie .asb-barra-chip > svg {
+            display: none;
+        }
+
+        /*
+         * Sin suelo debajo, el cristal se aclara: en el teléfono el módulo tiene
+         * el campo de puntos justo detrás y no una barra blanca. Recalculado el
+         * 8 sep: el rótulo de grupo da 11,08:1 en claro y 7,74:1 en oscuro; el
+         * del ítem activo, 6,23:1 y 5,23:1.
+         */
+        .fi-sidebar {
+            --asb-admin-barra-velo: color-mix(in oklab, var(--asb-superficie) 66%, transparent);
+        }
+
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group {
+            padding-inline: 0.2rem;
+        }
+
+        /*
+         * La insignia se vuelve PUNTO. El contador no se lee en 56 px, pero la
+         * señal de que hay pendientes es lo que D-L22 le encargó al retirar la
+         * campana, y esa no se pierde.
+         */
+        .fi-sidebar:not(.fi-sidebar-open) .fi-badge {
+            position: absolute;
+            inset-block-start: 0.55rem;
+            inset-inline-end: 0.55rem;
+            width: 0.5rem;
+            min-width: 0;
+            height: 0.5rem;
+            padding: 0;
+            overflow: hidden;
+            border-radius: 999px;
+            background-color: var(--asb-admin-barra-activo);
+            color: transparent;
+            font-size: 0;
+        }
+
+        /* El contenido se aparta del riel, o queda medio tapado. */
+        .fi-main-ctn {
+            padding-inline-start: var(--asb-admin-barra-riel);
+        }
+
+    }
+
+    /* Sin movimiento, el riel no se ensancha: aparece ya ancho. */
+    @media (max-width: 63.999rem) and (prefers-reduced-motion: reduce) {
+        .fi-sidebar {
+            transition-property: none;
+        }
+    }
+
+    /* Solo se ve en el cajón: con topbar, Filament marca esta cabecera
+       `lg:hidden`, así que en escritorio estas reglas no pintan nada. */
     .fi-sidebar-header {
         min-height: 4.65rem;
         padding-block: 0.85rem;
-        border-bottom: 1px solid rgb(255 255 255 / 0.08);
-        background: linear-gradient(180deg, rgb(255 255 255 / 0.055), transparent);
+        border-bottom: 1px solid var(--asb-admin-barra-borde);
+        background: transparent;
     }
 
     .fi-sidebar-header .fi-logo {
         max-height: 2rem;
-        filter: drop-shadow(0 8px 18px rgb(0 0 0 / 0.16));
     }
 
+    /*
+     * La barra es UNA superficie (corrección del 7 sep). Los módulos con canto
+     * propio duraron una tarde: encajaban una caja dentro de otra dentro de
+     * otra y dejaban la fila en 210 px útiles de 244. El ritmo lo hace el aire.
+     *
+     * El relleno lateral es de la barra y no del módulo, así que la fila
+     * recupera su ancho; el aire entre grupos sube de 18 a 28 px, que es lo
+     * que separa sin dibujar.
+     */
+    /* El relleno es asimétrico a propósito: los módulos crecen hacia la
+       derecha, donde el canal de la barra de desplazamiento ya deja aire
+       (`scrollbar-gutter: stable` de Filament), y así respiran sin acercarse
+       al filo de la izquierda, que es donde vive la luz. */
+    /* Sin barra de desplazamiento visible (D-L24). La única pista de que la
+       lista sigue pasa a ser la máscara de desvanecido, que por eso deja de
+       ser adorno y es obligatoria. */
     .fi-sidebar-nav {
+        scrollbar-width: none;
+        scrollbar-gutter: auto;
+        position: relative;
+        /*
+         * SIMÉTRICO. Con 0,3 rem a la derecha contra 0,75 a la izquierda, el
+         * canto derecho del módulo se quedaba a 4,8 px del borde de la barra
+         * con un radio de 16: la curva no tenía fondo contra el que leerse y
+         * Sua vio un corte donde solo había estrechez (8 sep). El ancho de la
+         * barra absorbe la diferencia.
+         */
         padding-inline: 0.75rem;
+        /* El aire vertical iguala al desvanecido del aviso: en reposo ninguna
+           lámina nace ni muere dentro de la máscara, que es lo que las hacía
+           parecer cortadas (Sua, 8 sep). */
+        padding-block: calc(var(--asb-admin-barra-aviso-alto) + 0.35rem);
+        row-gap: 0;
+    }
+
+    /*
+     * El aviso de que hay más lista (D-L15). La lista se corta siempre: 1.312 px
+     * de contenido en 1.019 de hueco, medido el 7 sep. Es una máscara de
+     * desvanecido en el canto que oculta lista, gobernada por `data-barra-borde`,
+     * y es el único sitio de esta barra donde el resorte no mueve nada que el
+     * usuario esté a punto de pulsar.
+     */
+    body[data-barra-borde="arriba"] .fi-sidebar-nav,
+    body[data-barra-borde="ambos"] .fi-sidebar-nav {
+        mask-image: linear-gradient(180deg, transparent, black var(--asb-admin-barra-aviso-alto));
+    }
+
+    body[data-barra-borde="abajo"] .fi-sidebar-nav {
+        mask-image: linear-gradient(0deg, transparent, black var(--asb-admin-barra-aviso-alto));
+    }
+
+    body[data-barra-borde="ambos"] .fi-sidebar-nav {
+        mask-image: linear-gradient(
+            180deg,
+            transparent,
+            black var(--asb-admin-barra-aviso-alto),
+            black calc(100% - var(--asb-admin-barra-aviso-alto)),
+            transparent
+        );
+    }
+
+    /*
+     * El grupo ES el módulo (la barra vertical traduce la composición de la de
+     * escritorio). Y como allí, el módulo nace APAGADO: en el estado inicial el
+     * vidrio lo pone la barra entera y el módulo no dibuja nada, así que no hay
+     * caja dentro de caja. Enciende su brillo y su canto cuando la lista se ha
+     * desplazado, que es cuando la pieza se ha separado de su sitio.
+     *
+     * Esa es la diferencia con el intento de esta misma tarde, que los pintaba
+     * siempre y por eso se leían apeñuscados.
+     */
+    .fi-sidebar-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .fi-sidebar-group {
+        position: relative;
+        isolation: isolate;
+        margin-block: 1.75rem 0;
+        padding: 0.5rem 0.45rem;
+        border-radius: var(--asb-admin-barra-modulo-radio);
+        transition: box-shadow var(--duracion-entrada) var(--ease-color);
+    }
+
+    /* Brillo especular en uno, canto de cristal en el otro: los dos recursos
+       de la barra de escritorio, con sus mismos nombres de token. */
+    .fi-sidebar-group::before,
+    .fi-sidebar-group::after {
+        content: '';
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity var(--duracion-entrada) var(--ease-color);
+    }
+
+    /*
+     * El cristal de cada apartado, permanente desde D-L26. Antes encendía solo
+     * al desplazar, y la razón era buena: sin nada detrás, un cristal
+     * permanente se lee como caja. Con el campo de puntos hay qué refractar,
+     * así que la lámina se lee como lámina.
+     */
+    .fi-sidebar-group::before {
+        opacity: 1;
+        background-color: var(--asb-admin-barra-velo);
+        background-image:
+            linear-gradient(180deg, var(--asb-admin-barra-modulo-brillo), transparent 5rem),
+            linear-gradient(var(--asb-admin-barra-modulo-realce), var(--asb-admin-barra-modulo-realce));
+    }
+
+    .fi-sidebar-group::after {
+        opacity: 1;
+        box-shadow: inset 0 0 0 1px var(--asb-admin-barra-modulo-canto);
+    }
+
+    /* Al desplazar, el cristal se afirma: gana la sombra que lo despega. */
+    body[data-barra-estado="scroll"] .fi-sidebar-group {
+        box-shadow: var(--asb-admin-barra-modulo-sombra);
+    }
+
+    /*
+     * Y la barra se APAGA cuando ellos encienden. Es la regla de la bandeja de
+     * escritorio: el vidrio lo pone una cosa o la otra, nunca las dos, porque
+     * las dos a la vez son el cuadro que encierra a los módulos.
+     *
+     * La línea del límite y la sombra no se apagan: son el borde de la región,
+     * que se juzga contra 3:1 y que el filo luminiscente no alcanza (D-L10).
+     */
+    .fi-sidebar::before,
+    .fi-sidebar::after {
+        transition: opacity var(--duracion-entrada) var(--ease-color);
+    }
+
+    .fi-sidebar-group:first-child {
+        margin-block-start: 0.25rem;
+    }
+
+    .fi-sidebar-group-label {
+        margin-block-end: 0.5rem;
+        padding-inline: 0.6rem;
+    }
+
+    /* Aire entre filas, que hoy no había ninguno. */
+    .fi-sidebar-item + .fi-sidebar-item {
+        margin-block-start: 2px;
+    }
+
+    /*
+     * La cuenta vive en el cromo superior, junto al control de tema. Estuvo al
+     * pie de la barra y luego como primera fila de la lista; Sua la quiso
+     * arriba. Es el mismo chip de la barra pública de escritorio: avatar,
+     * nombre y rango.
+     */
+    .asb-barra-cuenta {
+        position: relative;
+        margin-inline-end: 0.35rem;
+    }
+
+    /*
+     * La cuenta se pinta en DOS ganchos y solo una está viva a la vez. Se apaga
+     * con `display: none` y no escondiéndola: una copia invisible pero presente
+     * sigue recibiendo tabulación, y entonces hay dos disparadores para la
+     * misma sesión, que es lo que este panel ya evitó retirando el menú de
+     * usuario de Filament.
+     *
+     * Va en su PROPIA media de escritorio y no como regla suelta. Suelta, tiene
+     * la misma especificidad que la del teléfono y la pelea la decide el orden
+     * del archivo compilado —y ese orden no es el nuestro: `lightningcss`
+     * agrupa las medias y mueve reglas. Medido el 8 sep: la regla de escritorio
+     * salía DESPUÉS de la del teléfono y la anulaba. Con dos medias que se
+     * excluyen, el orden deja de importar.
+     */
+    @media (min-width: 64rem) {
+        .asb-cuenta-al-pie {
+            display: none;
+        }
     }
 
     .fi-sidebar-group {
@@ -268,49 +1106,109 @@
     }
 
     .fi-sidebar-group-label {
-        color: #bfa5a6;
+        color: var(--asb-admin-barra-tenue);
         font-size: 0.72rem;
         font-weight: 650;
         letter-spacing: 0.04em;
         text-transform: uppercase;
     }
 
+    /* La fila sube de 2,72rem a 2,75rem: los 43,52 px de antes quedaban medio
+       píxel por debajo del mínimo táctil, medido el 7 sep en las 24 filas. El
+       radio baja para que el indicador de 3 px no lo recorte la curva. */
     .fi-sidebar .fi-sidebar-item-btn {
-        min-height: 2.72rem;
-        border-radius: 0.9rem;
-        color: #f3e9e9;
+        position: relative;
+        min-height: var(--asb-admin-barra-fila-alto);
+        border-radius: var(--asb-admin-barra-fila-radio);
+        color: var(--asb-admin-barra-tinta);
         transition:
-            color 160ms var(--ease-color),
-            background-color 160ms var(--ease-color),
-            box-shadow 160ms var(--ease-color),
-            transform 160ms var(--ease-out);
+            color var(--duracion-boton) var(--ease-color),
+            background-color var(--duracion-boton) var(--ease-color),
+            translate var(--duracion-boton) var(--ease-out);
     }
 
+    /* El icono y el rótulo de grupo comparten papel y ahora comparten token:
+       eran dos hexadecimales distintos para lo mismo y nadie recordaba por qué. */
     .fi-sidebar .fi-sidebar-item-btn > .fi-icon,
     .fi-sidebar .fi-sidebar-group-collapse-btn,
     .fi-sidebar .fi-sidebar-group-collapse-button {
-        color: #d8babb;
+        color: var(--asb-admin-barra-tenue);
+    }
+
+    .fi-sidebar .fi-sidebar-item-btn > .fi-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+
+    /* La insignia de la fila: el contador vive DENTRO de la navegación, que es
+       lo que sustituye de verdad a la campana retirada (D-L22). */
+    .fi-sidebar .fi-sidebar-item-badge-ctn {
+        margin-inline-start: auto;
+    }
+
+    .fi-sidebar .fi-badge {
+        min-width: 1.5rem;
+        border-radius: 999px;
+        background-color: var(--asb-admin-barra-activo-fondo);
+        color: var(--asb-admin-barra-activo);
+        font-size: 0.7rem;
+        font-weight: 650;
     }
 
     .fi-sidebar .fi-sidebar-item-label {
-        color: #f3e9e9;
+        color: var(--asb-admin-barra-tinta);
         font-weight: 600;
     }
 
+    /*
+     * El ítem activo. El color no es su único canal: lo marcan además el
+     * indicador de forma fija de aquí abajo y el peso del rótulo. El fondo
+     * teñido no cuenta como canal, da 1,21:1 contra la barra y es decoración.
+     */
     .fi-sidebar .fi-sidebar-item-btn[aria-current="page"],
     .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
-        color: rgb(255 255 255);
-        background: rgb(238 65 55 / 0.16);
-        box-shadow:
-            inset 3px 0 0 #ee4137,
-            inset 0 1px 0 rgb(255 255 255 / 0.08),
-            0 10px 22px rgb(11 9 10 / 0.12);
+        color: var(--asb-admin-barra-activo);
+        background-color: var(--asb-admin-barra-activo-fondo);
+        font-weight: 650;
+    }
+
+    /*
+     * El indicador y su halo, dibujados por el mismo pseudoelemento para que no
+     * puedan separarse: el halo es lo que se calibró junto al velo, y subirlo
+     * por su cuenta rompe el umbral del rótulo activo.
+     *
+     * Pseudoelemento y no `inset box-shadow`: en contraste forzado el navegador
+     * descarta las sombras y el indicador desaparecía. `scaleY` desde el token
+     * de brote es el resorte de la llegada (D-L6): puro compositor, sin medir
+     * nada, y llega igual en navegación SPA que en carga completa.
+     */
+    .fi-sidebar .fi-sidebar-item-btn[aria-current="page"]::before,
+    .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn::before {
+        content: '';
+        pointer-events: none;
+        position: absolute;
+        inset-inline-start: 0;
+        inset-block-start: 50%;
+        width: 3px;
+        height: 20px;
+        border-radius: 999px;
+        background-color: var(--asb-admin-barra-activo);
+        box-shadow: 0 0 12px 2px var(--asb-admin-barra-halo);
+        translate: 0 -50%;
+        scale: 1 var(--asb-admin-barra-brote);
+        animation: barra-brota var(--duracion-rebote) var(--ease-rebote-vivo) forwards;
+    }
+
+    @keyframes barra-brota {
+        to {
+            scale: 1 1;
+        }
     }
 
     .fi-sidebar .fi-sidebar-item-btn[aria-current="page"] > .fi-icon,
     .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon,
     .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-sidebar-item-label {
-        color: #ff7168;
+        color: var(--asb-admin-barra-activo);
     }
 
     .fi-main {
@@ -619,7 +1517,7 @@
     }
 
     .asb-dashboard .fi-wi-table .fi-ta-text {
-        padding-block: 0.5rem;
+        padding-block: calc(var(--asb-admin-barra-aviso-alto) + 0.35rem);
         font-size: 0.8125rem;
         line-height: 1.35;
     }
@@ -670,45 +1568,70 @@
             border-color: rgb(238 65 55 / 0.2);
         }
 
-        .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover,
-        .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:focus-visible {
-            color: rgb(255 255 255);
-            background-color: rgb(255 255 255 / 0.06);
-            transform: none;
+        /*
+         * El hover de la fila. Aquí dentro va solo el hover, que es gesto de
+         * puntero: el foco salió de esta media (más abajo), porque en un
+         * portátil táctil o en una tableta con teclado esta media no aplica y
+         * la barra se navegaba sin ningún indicador de foco, con el contorno
+         * nativo ya quitado por Filament.
+         *
+         * El empuje es `translate` y no `transform`: en Tailwind 4 son
+         * propiedades distintas, y el `transform: none` de antes ni siquiera
+         * neutralizaba nada porque no había transform que neutralizar.
+         */
+        .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover {
+            color: var(--asb-admin-barra-activo);
+            background-color: var(--asb-admin-barra-hover-fondo);
+            translate: var(--asb-admin-barra-empuje) 0;
         }
 
         .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover > .fi-icon,
         .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover > .fi-sidebar-item-label,
         .fi-sidebar .fi-sidebar-group-collapse-btn:hover,
         .fi-sidebar .fi-sidebar-group-collapse-button:hover {
-            color: #ff8a82;
+            color: var(--asb-admin-barra-activo);
+        }
+
+        .asb-panel-tema__disparador:hover,
+        .asb-panel-tema__opcion:hover,
+        .asb-barra-chip:hover,
+        .asb-barra-fila:hover {
+            background-color: var(--asb-admin-barra-hover-fondo);
+            color: var(--asb-admin-barra-activo);
         }
 
         .fi-sidebar .fi-sidebar-item-btn[aria-current="page"]:hover,
         .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn:hover {
-            background-color: rgb(238 65 55 / 0.18);
-        }
-
-        .fi-sidebar .fi-sidebar-item-btn[aria-current="page"]:hover > .fi-icon,
-        .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn:hover > .fi-icon,
-        .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn:hover > .fi-sidebar-item-label {
-            color: #ff7168;
+            background-color: var(--asb-admin-barra-activo-fondo);
         }
     }
 
+    /*
+     * El foco, FUERA de toda media de puntero: quien tabula necesita saber
+     * dónde está, tenga ratón o no. Anillo de dos colores porque en el cajón el
+     * fondo efectivo varía con la página de debajo y un solo anillo puede
+     * desaparecer sobre él; el halo es la segunda mitad y también lo dibuja
+     * `outline`, no `box-shadow`, para que el contraste forzado no lo descarte.
+     */
+    .fi-sidebar .fi-sidebar-item-btn:focus-visible,
+    .fi-sidebar .fi-sidebar-group-collapse-btn:focus-visible,
+    .fi-sidebar .fi-sidebar-group-collapse-button:focus-visible {
+        outline: 2px solid var(--asb-admin-foco-anillo);
+        outline-offset: 2px;
+        box-shadow: 0 0 0 4px var(--asb-admin-foco-halo);
+        /* Nada se mueve al recibir foco: el foco es lectura, no gesto. */
+        translate: 0 0;
+    }
+
     @media (max-width: 40rem) {
-        .fi-main-ctn::before {
-            inset-inline-start: 0;
-            opacity: 0.45;
-        }
-
+        /*
+         * El alto del cromo es UNO SOLO, el del token. Aquí había 3,45rem
+         * mientras la barra lateral empieza en `--asb-admin-topbar-alto`
+         * (3,75): cinco píxeles de diferencia por los que se veía el contenido
+         * entre el cromo y el cajón. Ese era el «corte entre menús» del 8 sep.
+         */
         .fi-topbar {
-            min-height: 3.45rem;
             padding-inline: 0.75rem;
-        }
-
-        .fi-topbar-ctn.asb-topbar--scrolled .fi-topbar {
-            min-height: 3.45rem;
         }
 
         .fi-topbar-start {
@@ -716,9 +1639,11 @@
             margin-inline: 0.25rem 0.4rem;
         }
 
+        /* Más grande: a 6,5rem se leía pequeño, y en el centro del cromo hay
+           sitio de sobra —a 375 px, 44 de hamburguesa y 44 de tema dejan 287. */
         .fi-topbar .fi-logo {
             width: auto;
-            max-width: 6.5rem;
+            max-width: 10rem;
             object-fit: contain;
         }
 
@@ -726,7 +1651,7 @@
             gap: 0.5rem;
         }
 
-        .asb-panel-theme-switcher {
+        .asb-panel-tema {
             margin-inline-end: 0;
         }
 
@@ -778,9 +1703,6 @@
     }
 
     @media (min-width: 40rem) and (max-width: 64rem) {
-        .fi-main-ctn::before {
-            inset-inline-start: 0;
-        }
 
         .asb-dashboard .fi-page-header-main-ctn > .fi-header {
             min-height: 8.25rem;
@@ -792,67 +1714,84 @@
         }
     }
 
-    .asb-panel-theme-switcher {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.18rem;
-        padding: 0.22rem;
+    /*
+     * El control de tema, con la misma forma que el del sitio (D-L23): un
+     * disparador redondo de 44 px y un popover con las tres preferencias. El
+     * segmentado de dos botones que había aquí no ofrecía «el del sistema», y
+     * el menú de usuario donde vivía esa tercera opción se retiró al bajar la
+     * cuenta al pie de la barra (D-L21).
+     */
+    .asb-panel-tema {
+        position: relative;
         margin-inline-end: 0.45rem;
-        border: 1px solid rgb(15 23 42 / 0.1);
-        border-radius: 999px;
-        background:
-            radial-gradient(circle at 20% 0%, rgb(238 65 55 / 0.14), transparent 42%),
-            rgb(255 255 255 / 0.76);
-        box-shadow:
-            0 1px 2px rgb(11 9 10 / 0.06),
-            0 10px 28px rgb(238 65 55 / 0.08);
-        backdrop-filter: blur(14px);
     }
 
-    .dark .asb-panel-theme-switcher {
-        border-color: rgb(255 255 255 / 0.1);
-        background:
-            radial-gradient(circle at 80% 0%, rgb(238 65 55 / 0.2), transparent 44%),
-            rgb(255 255 255 / 0.055);
-        box-shadow: 0 12px 36px rgb(238 65 55 / 0.08);
-    }
-
-    .asb-panel-theme-switcher__button {
+    .asb-panel-tema__disparador {
         display: grid;
-        box-sizing: border-box;
-        width: 2rem;
-        height: 2rem;
-        flex-shrink: 0;
+        width: 2.75rem;
+        height: 2.75rem;
         place-items: center;
-        padding: 0;
-        border: 0;
         border-radius: 999px;
-        color: rgb(82 82 91);
-        line-height: 1;
+        color: var(--asb-admin-barra-tenue);
         transition:
-            color 180ms ease,
-            background-color 180ms ease,
-            box-shadow 180ms ease;
+            color var(--duracion-boton) var(--ease-color),
+            background-color var(--duracion-boton) var(--ease-color);
     }
 
-    .dark .asb-panel-theme-switcher__button {
-        color: rgb(212 212 216);
+    .asb-panel-tema__icono {
+        width: 1.25rem;
+        height: 1.25rem;
     }
 
-    .asb-panel-theme-switcher__button.is-active {
-        color: rgb(255 255 255);
-        background-color: rgb(238 65 55);
-        box-shadow: 0 8px 18px rgb(238 65 55 / 0.28);
+    /* El popover SÍ desenfoca: flota sobre la página y debajo pasa contenido.
+       Usa el desenfoque del vidrio del panel, que ya se apaga bajo
+       transparencia reducida, y no el de la barra, que es solo del cajón. */
+    .asb-panel-tema__popover {
+        position: absolute;
+        inset-inline-end: 0;
+        inset-block-start: calc(100% + 0.4rem);
+        z-index: 40;
+        display: flex;
+        min-width: 12rem;
+        flex-direction: column;
+        gap: 0.15rem;
+        padding: 0.3rem;
+        border-radius: var(--asb-admin-barra-modulo-radio);
+        background-color: var(--asb-admin-barra-velo-cajon);
+        box-shadow:
+            inset 0 0 0 1px var(--asb-admin-barra-modulo-canto),
+            var(--asb-admin-barra-modulo-sombra);
+        -webkit-backdrop-filter: var(--asb-vidrio-desenfoque);
+        backdrop-filter: var(--asb-vidrio-desenfoque);
     }
 
-    .dark .asb-panel-theme-switcher__button.is-active {
-        color: rgb(255 255 255);
-        background-color: rgb(238 65 55 / 0.92);
+    .asb-panel-tema__opcion {
+        display: flex;
+        gap: 0.55rem;
+        align-items: center;
+        min-height: var(--asb-admin-barra-fila-alto);
+        padding-inline: 0.55rem;
+        border-radius: var(--asb-admin-barra-fila-radio);
+        color: var(--asb-admin-barra-tinta);
+        font-size: 0.875rem;
+        text-align: start;
+        transition: background-color var(--duracion-boton) var(--ease-color);
     }
 
-    .asb-panel-theme-switcher__icon {
-        width: 1.05rem;
-        height: 1.05rem;
+    /* La preferencia vigente no se marca solo con color: lleva el mismo canto
+       que el módulo, que es forma y sobrevive al contraste forzado. */
+    .asb-panel-tema__opcion[aria-current="true"] {
+        color: var(--asb-admin-barra-activo);
+        background-color: var(--asb-admin-barra-activo-fondo);
+        box-shadow: inset 0 0 0 1px var(--asb-admin-barra-modulo-canto);
+        font-weight: 650;
+    }
+
+    .asb-panel-tema__disparador:focus-visible,
+    .asb-panel-tema__opcion:focus-visible {
+        outline: 2px solid var(--asb-admin-foco-anillo);
+        outline-offset: 2px;
+        box-shadow: 0 0 0 4px var(--asb-admin-foco-halo);
     }
 
     @media (hover: hover) and (pointer: fine) {
@@ -861,9 +1800,6 @@
             transform: translateY(var(--asb-levante));
         }
 
-        .asb-panel-theme-switcher__button:hover {
-            box-shadow: 0 6px 14px rgb(238 65 55 / 0.16);
-        }
     }
 
     /*
@@ -1182,7 +2118,8 @@
 @media (prefers-reduced-motion: reduce) {
     .fi-topbar,
     .fi-topbar .fi-logo,
-    .asb-panel-theme-switcher__button {
+    .asb-panel-tema__disparador,
+    .asb-panel-tema__opcion {
         transition-duration: 0.01ms;
     }
 }
@@ -1225,5 +2162,138 @@
     /* Ningún bloque del informe se parte a mitad de hoja. */
     .informe-bloque {
         break-inside: avoid;
+    }
+}
+
+/*
+ * El lavado del resplandor se estrecha con la zona (D-L29): 13 rem sobre una
+ * pantalla de 375 px cubren más de la mitad, y ahí la zona es un riel de 3,5.
+ *
+ * Fuera de `@layer components` como todo lo que reasigna tokens: dentro de la
+ * capa perdería contra el `:root` sin capa de este mismo archivo.
+ */
+@media (max-width: 63.999rem) {
+    :root,
+    :root.dark {
+        --asb-admin-barra-resplandor-ancho: 6rem;
+        /*
+         * El cajón del teléfono deja de ser un cuadrado blanco y pasa a ser
+         * cristal: 84 % en vez de 94. Es el SUELO medido el 8 sep sobre el peor
+         * fondo posible —contenido negro con el velo de cierre de Filament
+         * encima—: ahí el rótulo del ítem activo da 4,61:1, y al 80 % cae a
+         * 4,23 y ya no pasa. Debajo hay página de verdad, no una superficie
+         * conocida, y por eso este velo no se calibra como el del módulo.
+         */
+        --asb-admin-barra-velo-cajon: color-mix(in oklab, var(--asb-superficie) 84%, transparent);
+    }
+}
+
+/* ===== Las cuatro señales del sistema (D-L17, tarea 8 del plan) =====
+ *
+ * Van FUERA de `@layer components` a propósito: reasignan tokens, y el
+ * `:root` de este archivo también vive fuera de capa. Dentro de la capa la
+ * reasignación perdería contra él y la señal no llegaría —que es exactamente
+ * el defecto que este archivo ya pagó una vez con `--asb-vidrio-desenfoque`.
+ */
+
+/*
+ * 1. Movimiento reducido. Muere lo que se mueve en el espacio: el brote del
+ * indicador, el empuje de la fila al pasar el cursor y el desplazamiento del
+ * cajón. NO mueren los fundidos de color y opacidad, ni el plegado del grupo,
+ * que es layout y es lo que dice si un apartado está abierto.
+ *
+ * El estado `scroll` lo apaga el módulo de JavaScript, que consulta la media
+ * en vivo; aquí se apaga además su efecto visible, para que la señal valga
+ * aunque el módulo no haya arrancado todavía.
+ */
+@media (prefers-reduced-motion: reduce) {
+    :root,
+    :root.dark {
+        --asb-admin-barra-brote: 1;
+        --asb-admin-barra-empuje: 0px;
+    }
+
+    .fi-sidebar .fi-sidebar-item-btn[aria-current='page']::before,
+    .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn::before {
+        animation: none;
+    }
+
+    body[data-barra-estado='scroll'] .fi-sidebar-group {
+        box-shadow: none;
+    }
+}
+
+/*
+ * 2. Transparencia reducida. El material deja de ser translúcido y sigue
+ * siendo material: velo sólido y desenfoque apagado. Las dos luces —el halo
+ * del ítem activo y el resplandor de la zona— quedan intactas, y por eso se
+ * pintan encima del velo desde el primer día.
+ *
+ * El token compartido `--asb-vidrio-desenfoque` ya se apaga arriba, en su
+ * propio bloque; este apaga el de la barra, que es otro.
+ */
+@media (prefers-reduced-transparency: reduce) {
+    :root,
+    :root.dark {
+        --asb-admin-barra-velo: var(--asb-superficie);
+        --asb-admin-barra-velo-cajon: var(--asb-superficie);
+        --asb-admin-barra-desenfoque: none;
+        --asb-admin-topbar-desenfoque: none;
+        --asb-admin-topbar-desenfoque-firme: none;
+    }
+}
+
+/*
+ * 3. Más contraste. Velo sólido también, y el filo deja de ser luz para
+ * volverse línea: por eso existe como token aparte de `--asb-admin-barra-luz`.
+ * El canto del módulo se apoya en la línea fuerte, que es luminancia y no
+ * color, y el rótulo tenue sube a la tinta.
+ */
+@media (prefers-contrast: more) {
+    :root,
+    :root.dark {
+        --asb-admin-barra-velo: var(--asb-superficie);
+        --asb-admin-barra-velo-cajon: var(--asb-superficie);
+        --asb-admin-barra-desenfoque: none;
+        --asb-admin-topbar-desenfoque: none;
+        --asb-admin-topbar-desenfoque-firme: none;
+        --asb-admin-barra-modulo-canto: var(--asb-linea-fuerte);
+        --asb-admin-barra-tenue: var(--asb-tinta);
+    }
+}
+
+/*
+ * 4. Contraste forzado. El navegador descarta `box-shadow` y sustituye los
+ * colores por los del sistema, así que el indicador del ítem activo
+ * desaparecería: se repinta con `outline` y `border`, que sí sobreviven, y
+ * las dos luces se apagan para no dejar cajas de color sin sentido.
+ *
+ * El campo de puntos también se apaga: es un lienzo, el sistema no lo repinta
+ * y quedaría como una mancha ajena a la paleta forzada.
+ */
+@media (forced-colors: active) {
+    .fi-sidebar::before,
+    .fi-sidebar::after,
+    .asb-barra-puntos {
+        display: none;
+    }
+
+    .fi-sidebar .fi-sidebar-item-btn[aria-current='page']::before,
+    .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn::before {
+        box-shadow: none;
+        border-inline-start: 3px solid CanvasText;
+        background-color: CanvasText;
+    }
+
+    .fi-sidebar .fi-sidebar-item-btn[aria-current='page'],
+    .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+        outline: 2px solid CanvasText;
+        outline-offset: -2px;
+    }
+
+    .fi-sidebar-group::after {
+        box-shadow: none;
+        outline: 1px solid CanvasText;
+        outline-offset: -1px;
     }
 }
