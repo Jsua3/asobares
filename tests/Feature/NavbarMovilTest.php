@@ -256,8 +256,14 @@ class NavbarMovilTest extends TestCase
         $this->assertStringContainsString(route('mi-cuenta.entrar'), $pestana);
         $this->assertStringNotContainsString('aria-current', $pestana, 'ninguna sección activa: ni el botón ni las filas lo llevan');
         $this->assertStringNotContainsString('origin-top-left', $pestana);
-        // El icono: contorno en reposo, y del vendor, no un path a mano.
-        $this->assertMatchesRegularExpression('/<button[^>]*aria-controls="menu-bolsas-movil"[^>]*>\s*<svg[^>]*class="h-6 w-6 shrink-0"/s', $pestana);
+        // El icono: contorno en reposo, y del vendor, no un path a mano. Desde
+        // el 9 sep 2026 va dentro de `.pestana__icono`, que es de quien cuelga
+        // la gota de la pestaña activa; la gota es opcional aquí porque en esta
+        // comprobación no hay ninguna sección activa.
+        $this->assertMatchesRegularExpression(
+            '/<button[^>]*aria-controls="menu-bolsas-movil"[^>]*>\s*<span class="pestana__icono">\s*(?:<span class="pestana__gota"[^>]*><\/span>\s*)?<svg[^>]*class="h-6 w-6 shrink-0"/s',
+            $pestana
+        );
         foreach (['role="menu"', 'aria-haspopup', 'x-collapse', 'line-clamp', 'leading-'] as $prohibido) {
             $this->assertStringNotContainsString($prohibido, $pestana);
         }
@@ -514,13 +520,72 @@ class NavbarMovilTest extends TestCase
             'El único nombre permitido vive en la gota.'
         );
 
-        foreach (['.cromo', '.bandeja', '.modulo-inferior', '.pestanas', '.pestana', '.hoja-flotante'] as $contenedor) {
+        foreach (['.cromo', '.bandeja', '.modulo-inferior', '.pestanas', '.pestana', '.pestana__icono', '.hoja-flotante'] as $contenedor) {
             $this->assertStringNotContainsString(
                 $propiedad,
                 $this->regla($css, $contenedor),
                 "`{$contenedor}` tiene descendientes con `backdrop-filter`: con nombre los deja sin fondo que desenfocar."
             );
         }
+    }
+
+    /**
+     * La gota cuelga del ICONO, no de la pestaña. Esto lo destapó Sua mirando
+     * la barra el 9 sep 2026: «el cuadro rojo deja un cacho de icono por
+     * fuera».
+     *
+     * Y no era por poco. Medido: el contenido de la pestaña --icono de 24,
+     * hueco de 3 y rótulo de dos líneas de 36,3-- suma 63,3 px dentro de una
+     * caja de 68, así que la holgura total son 4,7 px. La gota nacía con un
+     * margen de 4,8 por lado, o sea MÁS PEQUEÑA que su propio contenido: el
+     * icono se salía 2,5 px por arriba y el rótulo 2,4 por abajo.
+     *
+     * Colgada del icono el margen es suyo, y además el estado compacto deja de
+     * necesitar regla aparte: la gota sigue al icono sin saber si hay rótulo.
+     *
+     * El signo del `inset` es lo que separa las dos formas, y por eso es lo que
+     * se vigila: NEGATIVO crece hacia fuera desde el icono; positivo encoge
+     * hacia dentro de lo que la contenga, que es exactamente el defecto.
+     *
+     * Roturas: devolver el `inset` a un valor positivo; quitarle
+     * `position: relative` a `.pestana__icono` (la gota se iría a buscar el
+     * primer ancestro posicionado, que es la pestaña, y volvería el recorte).
+     */
+    public function test_la_gota_abraza_al_icono_y_no_encoge_dentro_de_la_pestana(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+        $movil = $this->bloque($css, '@media (max-width: 63.999rem)', 2);
+
+        $this->assertStringContainsString(
+            'position: relative;',
+            $this->regla($movil, '.pestana__icono'),
+            'Sin ancestro posicionado la gota se cuelga de la pestaña y vuelve a recortar el icono.'
+        );
+
+        $inset = $this->regla($movil, '.pestana__gota');
+
+        $this->assertSame(
+            1,
+            preg_match('/inset:\s*(-?[\d.]+)rem\s+(-?[\d.]+)rem;/', $inset, $lados),
+            'No se pudo leer el `inset` de la gota.'
+        );
+
+        foreach ([[$lados[1], 'vertical'], [$lados[2], 'horizontal']] as [$valor, $eje]) {
+            $this->assertLessThan(
+                0,
+                (float) $valor,
+                "El `inset` {$eje} de la gota es positivo: la encoge dentro de su caja en vez de abrazar al icono, y el icono vuelve a salirse."
+            );
+        }
+
+        // Y ya no hay regla aparte para el compacto: sobra desde que cuelga
+        // del icono, y volver a escribirla es la señal de que alguien la
+        // recolgó de la pestaña y está parcheando el estado plegado a mano.
+        $this->assertStringNotContainsString(
+            '[data-estado="scroll"] .pestana__gota',
+            $css,
+            'El compacto no necesita regla propia: la gota sigue al icono y el icono ya se recoloca solo.'
+        );
     }
 
     /**

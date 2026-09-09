@@ -89,13 +89,16 @@
                     'text-acento' => $grupoActivo,
                     'text-suave' => ! $grupoActivo,
                 ])>
-            {{-- La misma gota que los enlaces directos de `navbar.blade.php`:
-                 la pinta la pestaña activa y ninguna otra, de modo que su
-                 nombre de transición es único en el documento. --}}
-            @if ($grupoActivo)
-                <span class="pestana__gota" aria-hidden="true"></span>
-            @endif
-            <x-dynamic-component :component="'heroicon-'.($grupoActivo ? 's' : 'o').'-'.$icono" class="h-6 w-6 shrink-0" aria-hidden="true" />
+            {{-- La misma gota que los enlaces directos de `navbar.blade.php`,
+                 colgada del icono por el mismo motivo: la pinta la pestaña
+                 activa y ninguna otra, de modo que su nombre de transición es
+                 único en el documento. --}}
+            <span class="pestana__icono">
+                @if ($grupoActivo)
+                    <span class="pestana__gota" aria-hidden="true"></span>
+                @endif
+                <x-dynamic-component :component="'heroicon-'.($grupoActivo ? 's' : 'o').'-'.$icono" class="h-6 w-6 shrink-0" aria-hidden="true" />
+            </span>
             <span class="pestana__rotulo"><span class="text-balance">{{ $titulo }}</span></span>
         </button>
     @else

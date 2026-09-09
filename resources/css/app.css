@@ -958,20 +958,45 @@
          * `z-index: -1` con `isolation` en la pestaña la deja bajo el icono y
          * el rótulo pero sobre el fondo del acuse de pulsación.
          */
+        /*
+         * La gota cuelga del ICONO y no de la pestaña.
+         *
+         * Colgada de la pestaña quedaba mal, y no por poco: el contenido
+         * --icono de 24, hueco de 3 y el rótulo de dos líneas de 36,3-- suma
+         * 63,3 px dentro de una caja de 68, así que la holgura total son 4,7 px
+         * y el margen de 4,8 por lado con el que nació la dejaba MÁS PEQUEÑA
+         * que su contenido: medido, el icono se salía 2,5 px por arriba y el
+         * rótulo 2,4 por abajo. Agrandarla hasta rodearlo la habría dejado
+         * pegada al canto de la barra.
+         *
+         * Colgada del icono, el margen es suyo y sobra en los dos estados: la
+         * gota no sabe si hay rótulo debajo ni le importa, así que el estado
+         * compacto no necesita ninguna regla aparte.
+         */
+        .pestana__icono {
+            position: relative;
+            display: grid;
+            place-items: center;
+        }
+
+        /*
+         * El aire vertical está TASADO y la cifra manda sobre el gusto: entre
+         * el canto de la pestaña y el icono hay 2,3 px, y entre el icono y el
+         * rótulo hay 3. Pasarse de ahí saca la gota por encima de la barra --el
+         * módulo no recorta a propósito, para que las hojas puedan colgar-- o
+         * la mete debajo del texto. Así que 2 px arriba y abajo, y el aire que
+         * falta se compensa a lo ancho, que es donde sí sobra: el icono no
+         * llena su caja por los lados y la píldora puede respirar hasta 40 px.
+         */
         .pestana__gota {
             pointer-events: none;
             position: absolute;
-            inset: 0.3rem 0.2rem;
+            inset: -0.125rem -0.5rem;
             z-index: -1;
-            border-radius: 0.9rem;
+            border-radius: 999px;
             background-color: rgb(238 65 55 / 0.14);
             border: 1px solid rgb(238 65 55 / 0.3);
             view-transition-name: pestana-activa;
-        }
-
-        /* Compacta no hay rótulo, así que la gota se ajusta al icono solo. */
-        [data-estado="scroll"] .pestana__gota {
-            inset: 0.25rem 0.2rem;
         }
 
         /* El rótulo pliega por pista de rejilla, nunca por `height`. El texto no
