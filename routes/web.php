@@ -40,7 +40,10 @@ Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/robots.txt', function (): Response {
     $lineas = [
         'User-agent: *',
-        'Allow: /',
+        // Mientras no haya dominio propio, el sitio no se deja indexar (D-08):
+        // lo que se indexe hoy queda apuntando al host temporal de Cloud.
+        // `config/sitio.php` explica por qué el valor por defecto es cerrado.
+        config('sitio.indexable') ? 'Allow: /' : 'Disallow: /',
         '',
         '# Zonas privadas: panel del gremio, cuenta del afiliado y pasarela de pago.',
         'Disallow: /admin',

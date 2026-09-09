@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Mensajes;
 
+use App\Enums\EstadoMensaje;
 use App\Filament\Resources\Mensajes\Pages\EditMensaje;
 use App\Filament\Resources\Mensajes\Pages\ListMensajes;
 use App\Filament\Resources\Mensajes\Schemas\MensajeForm;
@@ -36,6 +37,30 @@ class MensajeResource extends Resource
     public static function table(Table $table): Table
     {
         return MensajesTable::configure($table);
+    }
+
+    /**
+     * Cuántos mensajes esperan respuesta, en el menú (Acta 08, A-04).
+     *
+     * Antes del 9 de septiembre de 2026 la única señal de que había algo en la
+     * bandeja era una tarjeta del tablero: quien entraba al panel a publicar una
+     * noticia no se enteraba de que había una PQR corriendo su plazo legal.
+     */
+    public static function getNavigationBadge(): ?string
+    {
+        $sinResponder = Mensaje::query()->where('estado', '!=', EstadoMensaje::Respondido)->count();
+
+        return $sinResponder > 0 ? (string) $sinResponder : null;
+    }
+
+    /**
+     * Rojo cuando alguna PQR ya se pasó de los quince días hábiles de ley; ámbar
+     * mientras solo haya cosas por atender. La diferencia importa: una es «hay
+     * trabajo» y la otra es «se incumplió un término».
+     */
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return Mensaje::pqrVencidas()->isNotEmpty() ? 'danger' : 'warning';
     }
 
     public static function getRelations(): array

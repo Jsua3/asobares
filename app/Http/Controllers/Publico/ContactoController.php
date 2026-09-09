@@ -6,6 +6,7 @@ use App\Enums\TipoMensaje;
 use App\Http\Requests\GuardarMensajeRequest;
 use App\Mail\AcuseDeRadicado;
 use App\Models\Mensaje;
+use App\Support\AvisoDeMensajeAlGremio;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Mail;
@@ -34,6 +35,11 @@ class ContactoController
         }
 
         $mensaje = Mensaje::create($datos);
+
+        // Al gremio también hay que avisarle (Acta 08, A-04). Antes solo se
+        // avisaba a quien escribía: la queja se guardaba y el plazo legal de
+        // quince días hábiles empezaba a correr sin que nadie lo supiera.
+        AvisoDeMensajeAlGremio::enviar($mensaje);
 
         if ($mensaje->esPqr()) {
             // El acuse no puede tumbar la petición: la PQR ya quedó radicada

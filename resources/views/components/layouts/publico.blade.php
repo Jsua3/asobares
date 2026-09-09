@@ -9,6 +9,22 @@
     <meta name="description" content="{{ $descripcion ?? ajuste('sitio_descripcion') }}">
     <link rel="canonical" href="{{ url()->current() }}">
 
+    {{--
+        Mientras no haya dominio propio, nada de esto se indexa (D-08).
+
+        Va junto a la canónica a propósito, porque el par es el problema: la
+        canónica de arriba resuelve al host temporal de Cloud, así que sin esta
+        línea el sitio le está diciendo a Google que la versión autorizada de
+        cada página del gremio vive en una dirección desechable.
+
+        Algunas páginas empujan su propio `robots` en la pila `cabeza` --la guía
+        de un municipio caducado, un mes vacío del calendario--. Que aparezcan
+        las dos no es un problema: los buscadores toman la unión más restrictiva.
+    --}}
+    @unless (config('sitio.indexable'))
+        <meta name="robots" content="noindex, nofollow">
+    @endunless
+
     {{-- Open Graph --}}
     <meta property="og:type" content="{{ $ogTipo ?? 'website' }}">
     <meta property="og:site_name" content="{{ ajuste('sitio_nombre') }}">

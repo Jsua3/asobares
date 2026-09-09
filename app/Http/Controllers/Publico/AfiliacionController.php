@@ -6,6 +6,7 @@ use App\Enums\TipoMensaje;
 use App\Http\Requests\GuardarMensajeRequest;
 use App\Models\Beneficio;
 use App\Models\Mensaje;
+use App\Support\AvisoDeMensajeAlGremio;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 
@@ -26,6 +27,10 @@ class AfiliacionController
             ...$request->datosDelMensaje(),
             'tipo' => TipoMensaje::Afiliacion,
         ]);
+
+        // Una solicitud de afiliación es un cliente llamando a la puerta: si
+        // nadie se entera hasta que alguien abra el panel, se pierde (Acta 08).
+        AvisoDeMensajeAlGremio::enviar($mensaje);
 
         return redirect()
             ->route('afiliate')
