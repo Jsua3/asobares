@@ -188,6 +188,60 @@ class SitioPublicoTest extends TestCase
         $respuesta->assertDontSee(route('eventos.calendario.hoy').'<', escape: false);
     }
 
+    /**
+     * La ficha de la vacante trae JSON-LD `JobPosting` completo desde que se
+     * construyó el módulo, que es el marcado con el que una oferta entra en
+     * Google Jobs. Sin la URL en el mapa del sitio ese marcado casi no puede
+     * hacer su trabajo: Google tiene que descubrir la dirección primero.
+     *
+     * Era el único detalle público que faltaba --asociados, eventos, noticias y
+     * artistas sí estaban-- y justamente en el módulo que el cliente puso de
+     * primero.
+     */
+    public function test_el_sitemap_lista_las_vacantes_publicadas(): void
+    {
+        $vacante = Vacante::factory()->create([
+            'estado' => EstadoPublicacion::Publicado,
+            'cerrada_at' => null,
+            'fecha_limite' => now()->addMonth(),
+        ]);
+
+        $this->get('/sitemap.xml')
+            ->assertSuccessful()
+            ->assertSee(route('empleo.show', $vacante), escape: false);
+    }
+
+    /**
+     * Anunciarle a Google una oferta que ya no se puede atender es peor que no
+     * anunciarla: el visitante llega a una vacante muerta. Mismo criterio que
+     * la guía normativa, que entra al mapa con `vigente()`.
+     */
+    public function test_el_sitemap_no_lista_una_vacante_cerrada_ni_una_vencida(): void
+    {
+        $cerrada = Vacante::factory()->create([
+            'estado' => EstadoPublicacion::Publicado,
+            'cerrada_at' => now()->subDay(),
+        ]);
+
+        $vencida = Vacante::factory()->create([
+            'estado' => EstadoPublicacion::Publicado,
+            'cerrada_at' => null,
+            'fecha_limite' => now()->subDay(),
+        ]);
+
+        $borrador = Vacante::factory()->create([
+            'estado' => EstadoPublicacion::Borrador,
+            'cerrada_at' => null,
+            'fecha_limite' => now()->addMonth(),
+        ]);
+
+        $respuesta = $this->get('/sitemap.xml')->assertSuccessful();
+
+        $respuesta->assertDontSee(route('empleo.show', $cerrada), escape: false);
+        $respuesta->assertDontSee(route('empleo.show', $vencida), escape: false);
+        $respuesta->assertDontSee(route('empleo.show', $borrador), escape: false);
+    }
+
     public function test_una_pagina_inexistente_devuelve_404_con_la_marca(): void
     {
         $this->get('/directorio/no-existe-este-bar')

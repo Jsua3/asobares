@@ -7,6 +7,7 @@ use App\Models\Asociado;
 use App\Models\Evento;
 use App\Models\Municipio;
 use App\Models\Noticia;
+use App\Models\Vacante;
 use Illuminate\Http\Response;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
@@ -93,6 +94,24 @@ class SitemapController
 
         Artista::publicado()->get()->each(fn (Artista $a) => $mapa->add(
             Url::create(route('artistas.show', $a))->setLastModificationDate($a->updated_at)->setPriority(0.5)
+        ));
+
+        /*
+         * Las vacantes van con `vigente()` además de `publicado()`, por el mismo
+         * motivo que la guía normativa: anunciarle a Google una oferta cerrada o
+         * vencida manda al visitante a una vacante muerta.
+         *
+         * Prioridad alta y frecuencia diaria porque es el módulo que más rota:
+         * una oferta vive semanas, no años. La ficha ya trae JSON-LD `JobPosting`
+         * desde que se construyó el módulo, y ese marcado --el que mete una oferta
+         * en Google Jobs-- apenas servía sin la URL en el mapa. Faltaba desde el
+         * principio y era el único detalle público que no estaba aquí.
+         */
+        Vacante::publicado()->vigente()->get()->each(fn (Vacante $v) => $mapa->add(
+            Url::create(route('empleo.show', $v))
+                ->setLastModificationDate($v->updated_at)
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY)
+                ->setPriority(0.7)
         ));
     }
 }

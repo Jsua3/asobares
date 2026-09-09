@@ -45,12 +45,24 @@ class Bitacora extends Page implements HasTable
         'restored' => 'restauró',
     ];
 
-    /** Nombre del tipo de contenido tal como lo llama el gremio. */
-    private const array TIPOS = [
+    /**
+     * Nombre del tipo de contenido tal como lo llama el gremio.
+     *
+     * Es público para que `Panel\BitacoraTest` pueda comprobar que ningún modelo
+     * que escribe en la bitácora se quede fuera: sin esa guarda, añadir
+     * `LogsActivity` a un modelo nuevo y olvidarse de esta tabla deja a la
+     * oficina leyendo «actualizó un registro», que no informa de nada.
+     */
+    public const array TIPOS = [
+        'aspirante' => 'el perfil de',
         'asociado' => 'el asociado',
         'evento' => 'el evento',
         'noticia' => 'la entrada del boletín',
         'requisito' => 'el requisito',
+        // Faltaba desde que el módulo existe: la guarda de `Panel\BitacoraTest`
+        // lo destapó el 9 de septiembre de 2026. Sin esta línea, publicar
+        // «Vibrarte» se leía como «Natalia actualizó un registro Vibrarte».
+        'iniciativa' => 'la iniciativa',
         'vacante' => 'la vacante',
         'artista' => 'el artista',
         'proveedor' => 'el proveedor',
@@ -118,10 +130,26 @@ class Bitacora extends Page implements HasTable
             ->emptyStateDescription('Aquí quedará registrado cada cambio que se haga desde el panel.');
     }
 
+    /**
+     * Los registros que se explican solos y no caben en «quién + verbo + tipo».
+     *
+     * El banco de talento es el caso: entrar y salir son el mismo evento técnico
+     * (`updated`) y significan lo contrario --uno entrega el teléfono y el correo
+     * de una persona a todos los afiliados, el otro se los quita--. Con la frase
+     * genérica las dos filas se leen idénticas, que es tanto como no registrar
+     * nada. Estos modelos escriben su propia descripción y aquí se respeta.
+     */
+    private const array DESCRIPCION_PROPIA = ['aspirante'];
+
     /** Arma «Natalia actualizó el asociado La Cava del Yipao». */
     private function frase(Activity $registro): string
     {
         $quien = $registro->causer?->name ?? 'El sistema';
+
+        if (in_array($registro->log_name, self::DESCRIPCION_PROPIA, strict: true)) {
+            return trim("{$quien} — {$registro->description}");
+        }
+
         $verbo = self::VERBOS[$registro->event] ?? $registro->event;
         $tipo = self::TIPOS[$registro->log_name] ?? 'un registro';
         $etiqueta = $this->etiquetaDelSujeto($registro);

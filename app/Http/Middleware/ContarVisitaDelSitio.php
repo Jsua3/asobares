@@ -26,15 +26,40 @@ class ContarVisitaDelSitio
     private const RASTREADORES = '/(bot|crawler|spider|crawling|slurp|bingpreview|facebookexternalhit|headlesschrome|lighthouse|curl|wget|python-requests)/i';
 
     /**
-     * Lo que no es el sitio público: el panel y el portal del afiliado.
+     * Lo que no es el sitio público: el panel, el portal del afiliado y la
+     * pasarela de pago.
      *
      * `mi-cuenta.` es el que trabaja: esas rutas sí pasan por el grupo `web`.
      * `filament.` no llega nunca hoy --el panel arma su propia pila de
      * middleware en `AdminPanelProvider` y no usa este grupo-- y se queda como
      * seguro para el día que eso cambie. Queda dicho para que nadie lea la
      * prueba del panel como si este filtro fuera lo que la hace pasar.
+     *
+     * `pago.` entró el 9 sep 2026: las pantallas del cobro son zona privada y el
+     * propio sitio ya lo declaraba --`robots.txt` lista `/pago/` y
+     * `/pago-simulado` junto al panel y a `/mi-cuenta`--. Contarlas mezclaba el
+     * tráfico de una pasarela con el interés por el contenido.
      */
-    private const FUERA_DEL_SITIO = ['filament.', 'mi-cuenta.'];
+    private const FUERA_DEL_SITIO = ['filament.', 'mi-cuenta.', 'pago.'];
+
+    /**
+     * Lo que se cuenta es una PÁGINA, y una página es `text/html`.
+     *
+     * El filtro anterior era por nombre de ruta, y por eso dejaba pasar tres
+     * cosas que no son páginas y sí cumplían sus cuatro condiciones --GET, 200,
+     * con nombre, fuera de los prefijos excluidos--: la descarga de un formato
+     * de la guía (un PDF, y encima ya contado en `consultas_guia`), `robots.txt`
+     * y `sitemap.xml`. Las dos últimas las piden casi solo rastreadores, y el
+     * filtro por agente de usuario solo atrapa a los conocidos.
+     *
+     * Mirar el tipo de contenido en vez de mantener una lista de excepciones
+     * hace que esto no se vuelva a desalinear: una página nueva se cuenta sola,
+     * y una descarga, un canal RSS o un JSON nuevos quedan fuera sin que nadie
+     * tenga que acordarse. Es además lo que el contrato de este middleware dice
+     * literalmente en `bootstrap/app.php`: «cuenta páginas servidas, no
+     * descargas ni webhooks».
+     */
+    private const TIPO_DE_UNA_PAGINA = 'text/html';
 
     public function handle(Request $request, Closure $siguiente): Response
     {
@@ -48,6 +73,10 @@ class ContarVisitaDelSitio
     private function contar(Request $request, Response $respuesta): void
     {
         if (! $request->isMethod('GET') || $respuesta->getStatusCode() !== 200) {
+            return;
+        }
+
+        if (! str_starts_with((string) $respuesta->headers->get('Content-Type'), self::TIPO_DE_UNA_PAGINA)) {
             return;
         }
 

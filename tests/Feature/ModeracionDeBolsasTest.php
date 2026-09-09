@@ -26,6 +26,7 @@ use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -425,6 +426,76 @@ class ModeracionDeBolsasTest extends TestCase
             ->assertHasNoErrors();
 
         $this->assertNotNull($aspirante->fresh()->aprobado_el);
+    }
+
+    /**
+     * Aprobar un perfil del banco **expone el nombre, el teléfono y el correo de
+     * una persona a todos los establecimientos afiliados** --lo dice el propio
+     * modal de confirmación--. Es la decisión más sensible del panel en materia
+     * de datos personales, y era la única de su clase sin rastro: trece modelos
+     * alimentaban la bitácora y `Aspirante` no. `aprobado_el` guardaba CUÁNDO,
+     * nunca QUIÉN, y retirar el perfil ponía esa columna en nulo, borrando la
+     * única huella que quedaba.
+     *
+     * RF-39 exige bitácora de actividad, y `encargo.md` §9 gobierna esto.
+     */
+    public function test_aprobar_un_perfil_del_banco_queda_en_la_bitacora_con_su_autor(): void
+    {
+        $secretaria = $this->crearUsuario(User::ROL_SUBADMIN);
+        $this->actingAs($secretaria);
+
+        $aspirante = Aspirante::factory()->create();
+
+        Livewire::test(ListAspirantes::class)
+            ->callAction(TestAction::make('aprobar')->table($aspirante))
+            ->assertHasNoErrors();
+
+        $entrada = Activity::query()->where('log_name', 'aspirante')->latest('id')->first();
+
+        $this->assertNotNull($entrada, 'Aprobar un perfil del banco tiene que dejar rastro.');
+        $this->assertTrue($entrada->causer?->is($secretaria), 'Y el rastro tiene que decir quién lo hizo.');
+    }
+
+    /**
+     * Retirar también, y por el mismo motivo: es la acción que devuelve a
+     * alguien a la invisibilidad y la que borraba `aprobado_el`.
+     */
+    public function test_retirar_un_perfil_del_banco_queda_en_la_bitacora(): void
+    {
+        $secretaria = $this->crearUsuario(User::ROL_SUBADMIN);
+        $this->actingAs($secretaria);
+
+        $aspirante = Aspirante::factory()->aprobado()->create();
+        Activity::query()->delete();
+
+        Livewire::test(ListAspirantes::class)
+            ->callAction(TestAction::make('retirar')->table($aspirante))
+            ->assertHasNoErrors();
+
+        $this->assertSame(
+            1,
+            Activity::query()->where('log_name', 'aspirante')->count(),
+            'Sacar a alguien del banco tiene que quedar anotado.'
+        );
+    }
+
+    /**
+     * La bitácora la lee la oficina, no un programador: tiene que decir qué
+     * pasó en castellano y no `updated`.
+     */
+    public function test_la_bitacora_del_banco_se_lee_en_castellano(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $aspirante = Aspirante::factory()->create(['nombre' => 'Camila Restrepo']);
+
+        Livewire::test(ListAspirantes::class)
+            ->callAction(TestAction::make('aprobar')->table($aspirante));
+
+        $descripcion = (string) Activity::query()->where('log_name', 'aspirante')->latest('id')->value('description');
+
+        $this->assertStringContainsString('Camila Restrepo', $descripcion);
+        $this->assertStringContainsString('banco de talento', $descripcion);
     }
 
     public function test_la_secretaria_retira_del_banco_un_perfil_que_ya_habia_aprobado(): void

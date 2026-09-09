@@ -146,6 +146,50 @@ Por qué cada uno:
   eventos, logos de aliados y fotos de artistas.
 - `migrate --force` — sin `--force` se queda pidiendo confirmación a nadie.
 
+### 5.1 ⚠️ EL SCHEDULER NO VIENE DE FÁBRICA ⚠️
+
+**Sin este paso los datos personales no se borran nunca.** Es un recurso aparte del entorno,
+no una consecuencia de desplegar, y ni el comando de construcción ni el de despliegue lo
+encienden.
+
+`routes/console.php` programa tres purgas diarias:
+
+| Hora | Comando | Qué borra | Plazo |
+|---|---|---|---|
+| 03:30 | `bolsas:depurar` | Postulaciones y perfiles del banco de talento | 6 / 12 meses |
+| 03:45 | `mensajes:depurar` | Mensajes de contacto y PQR | 12 / 24 meses |
+| 03:50 | `inscripciones:depurar` | Inscripciones a eventos | 24 meses |
+
+Esas tres son el mecanismo con el que se cumple lo que **`/politica-de-datos` le promete por
+escrito al titular** —«Pasado cada plazo, el borrado es automático»— y lo que el **manual de
+usuario** le dice a la oficina. Un despliegue sin scheduler convierte las dos frases en falsas
+y deja al gremio acumulando datos personales sin caducidad, que es exactamente lo que la Ley
+1581 no permite.
+
+**Qué hay que hacer, una sola vez por entorno:** añadir un **Scheduler** al entorno en el panel
+de Laravel Cloud (Environment → Resources). Cloud ejecuta entonces `php artisan schedule:run`
+cada minuto, que es lo que dispara las tres.
+
+**Cómo se comprueba que quedó puesto:**
+
+```sh
+cloud environment:show -n
+```
+
+Tiene que aparecer el recurso Scheduler. A las 24 horas, la comprobación real: entrar al panel
+→ **Bitácora** y buscar `Depuración de datos`. Los tres comandos escriben ahí cada vez que
+borran algo. *Ojo con leer mal el silencio:* si no había nada que borrar tampoco escriben, así
+que la ausencia de entradas no prueba que esté roto — pero su presencia sí prueba que funciona.
+Para forzar una comprobación inmediata sin borrar nada:
+
+```sh
+cloud command:run -n "php artisan bolsas:depurar --pretend"
+```
+
+**Lo que vigila la suite:** `tests/Feature/CalendarioDeTareasTest.php` falla si alguien quita
+una de las tres tareas o le cambia la frecuencia. Lo que **no** puede vigilar —y por eso vive
+aquí— es si el entorno remoto tiene quien las llame.
+
 ---
 
 ## 6. Las variables del entorno

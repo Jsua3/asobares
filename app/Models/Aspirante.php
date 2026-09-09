@@ -8,6 +8,8 @@ use Database\Factories\AspiranteFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 /**
  * Banco de talento del gremio: bartender, chef, mesero, administrador...
@@ -19,6 +21,8 @@ class Aspirante extends Model
 {
     /** @use HasFactory<AspiranteFactory> */
     use HasFactory;
+
+    use LogsActivity;
 
     protected $table = 'aspirantes';
 
@@ -38,6 +42,35 @@ class Aspirante extends Model
     public function estaAprobado(): bool
     {
         return $this->aprobado_el !== null;
+    }
+
+    /**
+     * RF-39. Aprobar un perfil **entrega el nombre, el teléfono y el correo de
+     * una persona a todos los establecimientos afiliados**; retirarlo se los
+     * quita. Son las dos decisiones más sensibles del panel en materia de datos
+     * personales y hasta el 9 de septiembre de 2026 no dejaban rastro ninguno:
+     * `aprobado_el` guardaba cuándo, nunca quién, y retirar ponía esa columna en
+     * nulo, borrando la única huella.
+     *
+     * Se registra **solo `aprobado_el`** y no el resto de columnas: el nombre, el
+     * teléfono, el correo y la experiencia son los datos personales que este
+     * módulo existe para custodiar, y copiarlos a la tabla de actividad --que no
+     * tiene purga-- los haría sobrevivir a la depuración de `bolsas:depurar`. La
+     * bitácora anota la decisión, no el expediente.
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['aprobado_el'])
+            ->logOnlyDirty()
+            // Sin esto, cada edición del perfil desde el panel --un cambio de
+            // estado de gestión, una nota-- dejaría una entrada vacía en la
+            // bitácora que dice «actualizó» sin haber cambiado la visibilidad.
+            ->dontLogEmptyChanges()
+            ->useLogName('aspirante')
+            ->setDescriptionForEvent(fn (string $evento): string => $this->estaAprobado()
+                ? "Perfil de {$this->nombre}: entra al banco de talento y queda visible para los afiliados"
+                : "Perfil de {$this->nombre}: sale del banco de talento y deja de verse");
     }
 
     /**
