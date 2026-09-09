@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\CargoDelSolicitante;
 use App\Enums\EstadoSolicitudAfiliacion;
 use App\Filament\Resources\SolicitudAfiliacions\Pages\EditSolicitudAfiliacion;
 use App\Filament\Resources\SolicitudAfiliacions\Pages\ListSolicitudAfiliacions;
@@ -26,6 +27,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Permission\Models\Role;
 use Symfony\Component\Mailer\Exception\TransportException;
 use Tests\TestCase;
@@ -54,7 +56,7 @@ class SolicitudAfiliacionTest extends TestCase
             'solicitante_identificacion' => '1094.123.456',
             'solicitante_telefono' => '3145551234',
             'solicitante_correo' => 'sandra@ejemplo.test',
-            'solicitante_cargo' => 'Propietaria',
+            'solicitante_cargo_opcion' => CargoDelSolicitante::Propietario->value,
             'establecimiento_nombre' => 'Bruma Gastrobar',
             'razon_social' => 'Bruma Gastrobar S.A.S.',
             'nit' => '901234567-8',
@@ -84,7 +86,10 @@ class SolicitudAfiliacionTest extends TestCase
             ->assertSuccessful()
             ->assertSee('Tus datos')
             ->assertSee('Información del establecimiento')
-            ->assertSee('Tratamiento de datos');
+            ->assertSee('Tratamiento de datos')
+            ->assertSee('Cargo o rol')
+            ->assertSee('Propietario/a')
+            ->assertSee('Especifique el cargo o rol', escape: false);
     }
 
     public function test_solicitud_valida_se_persiste_como_solicitud_de_afiliacion(): void
@@ -106,6 +111,7 @@ class SolicitudAfiliacionTest extends TestCase
         $solicitud = SolicitudAfiliacion::firstOrFail();
 
         $this->assertSame('Sandra Ríos', $solicitud->solicitante_nombre);
+        $this->assertSame(CargoDelSolicitante::Propietario->value, $solicitud->solicitante_cargo);
         $this->assertSame('Bruma Gastrobar', $solicitud->establecimiento_nombre);
         $this->assertSame($this->municipio->id, $solicitud->municipio_id);
         $this->assertSame($this->categoria->id, $solicitud->categoria_id);
@@ -155,6 +161,79 @@ class SolicitudAfiliacionTest extends TestCase
         ]))->assertStatus(422);
 
         $this->assertSame(0, SolicitudAfiliacion::count());
+    }
+
+    /** @return array<string, array{0: CargoDelSolicitante}> */
+    public static function cargosEstandarProvider(): array
+    {
+        return collect(CargoDelSolicitante::cases())
+            ->reject(fn (CargoDelSolicitante $cargo): bool => $cargo->esOtro())
+            ->mapWithKeys(fn (CargoDelSolicitante $cargo): array => [$cargo->value => [$cargo]])
+            ->all();
+    }
+
+    #[DataProvider('cargosEstandarProvider')]
+    public function test_acepta_cada_cargo_estandar(CargoDelSolicitante $cargo): void
+    {
+        Mail::fake();
+
+        $this->post(route('afiliate.store'), $this->datosValidos([
+            'solicitante_cargo_opcion' => $cargo->value,
+            'solicitante_correo' => 'cargo-'.str_replace(['/', ' '], '-', strtolower($cargo->value)).'@ejemplo.test',
+            'establecimiento_correo' => 'bar-'.str_replace(['/', ' '], '-', strtolower($cargo->value)).'@bruma.test',
+            'nit' => '901'.substr(md5($cargo->value), 0, 7).'-1',
+        ]))->assertRedirect(route('afiliate').'#formulario');
+
+        $this->assertSame($cargo->value, SolicitudAfiliacion::latest('id')->firstOrFail()->solicitante_cargo);
+    }
+
+    public function test_otro_exige_especificacion(): void
+    {
+        $this->post(route('afiliate.store'), $this->datosValidos([
+            'solicitante_cargo_opcion' => CargoDelSolicitante::Otro->value,
+            'solicitante_cargo_otro' => '',
+        ]))->assertSessionHasErrors('solicitante_cargo_otro');
+
+        $this->assertSame(0, SolicitudAfiliacion::count());
+    }
+
+    public function test_otro_guarda_el_texto_especificado(): void
+    {
+        Mail::fake();
+
+        $this->post(route('afiliate.store'), $this->datosValidos([
+            'solicitante_cargo_opcion' => CargoDelSolicitante::Otro->value,
+            'solicitante_cargo_otro' => 'Coordinador operativo',
+        ]))->assertRedirect(route('afiliate').'#formulario');
+
+        $solicitud = SolicitudAfiliacion::firstOrFail();
+
+        $this->assertSame('Coordinador operativo', $solicitud->solicitante_cargo);
+        $this->assertNotSame(CargoDelSolicitante::Otro->value, $solicitud->solicitante_cargo);
+    }
+
+    public function test_opcion_manipulada_es_rechazada(): void
+    {
+        $this->post(route('afiliate.store'), $this->datosValidos([
+            'solicitante_cargo_opcion' => 'Director creativo',
+        ]))->assertSessionHasErrors('solicitante_cargo_opcion');
+
+        $this->assertSame(0, SolicitudAfiliacion::count());
+    }
+
+    public function test_solicitudes_historicas_con_cargo_libre_siguen_legibles_en_admin(): void
+    {
+        $solicitud = SolicitudAfiliacion::factory()->create([
+            'solicitante_cargo' => 'Propietaria',
+            'municipio_id' => $this->municipio->id,
+            'categoria_id' => $this->categoria->id,
+        ]);
+
+        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(EditSolicitudAfiliacion::class, ['record' => $solicitud->getRouteKey()])
+            ->assertSuccessful()
+            ->assertFormSet(['solicitante_cargo' => 'Propietaria']);
     }
 
     public function test_throttle_del_formulario_sigue_activo(): void

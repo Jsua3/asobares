@@ -115,7 +115,7 @@ class AvisoDeMensajeAlGremioTest extends TestCase
             'solicitante_identificacion' => '1094.123.456',
             'solicitante_telefono' => '3145551234',
             'solicitante_correo' => 'sandra@ejemplo.test',
-            'solicitante_cargo' => 'Propietaria',
+            'solicitante_cargo_opcion' => 'Propietario/a',
             'establecimiento_nombre' => 'Bruma Gastrobar',
             'razon_social' => 'Bruma Gastrobar S.A.S.',
             'nit' => '901234567-8',

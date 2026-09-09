@@ -77,7 +77,7 @@
                         <x-publico.campo nombre="solicitante_identificacion" etiqueta="Identificación" requerido />
                         <x-publico.campo nombre="solicitante_telefono" etiqueta="Teléfono o WhatsApp" tipo="tel" requerido />
                         <x-publico.campo nombre="solicitante_correo" etiqueta="Correo electrónico" tipo="email" requerido />
-                        <x-publico.campo nombre="solicitante_cargo" etiqueta="Cargo o rol" requerido placeholder="Propietario, administrador, representante legal..." />
+                        <x-publico.cargo-solicitante-afiliacion />
                     </div>
                 </fieldset>
 
