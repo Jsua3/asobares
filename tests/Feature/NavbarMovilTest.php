@@ -466,7 +466,91 @@ class NavbarMovilTest extends TestCase
         $this->assertStringContainsString('isolation: isolate;', $cromo);
         $this->assertStringNotContainsString('.cromo-'.'oculto', $css, 'la clase de ocultación del cromo, que nadie usaba, se retiró con su transform');
         $this->assertStringNotContainsString('.tema-lateral', $css);
-        $this->assertStringNotContainsString('view-transition-'.'name', $css, 'un elemento con nombre de transición de vista es raíz de fondo');
+    }
+
+    /**
+     * Un nombre de transición de vista en el cromo, y solo donde no puede hacer
+     * daño.
+     *
+     * Esta prueba sustituye a la prohibición en bloque que vivía dentro de
+     * `test_el_cromo_ya_no_es_bloque_contenedor` desde el 6 de septiembre. Aquel
+     * contrato era «`view-transition-name` no aparece en app.css», y la razón
+     * era buena: un elemento con nombre es raíz de fondo (View Transitions 1,
+     * §2.1.1), así que ponerlo en un módulo dejaría a las hojas que cuelgan de
+     * él sin página que desenfocar.
+     *
+     * Lo que la prohibición no distinguía es **de quién** es raíz de fondo: de
+     * sus DESCENDIENTES. Sobre una hoja vacía no hay descendientes a los que
+     * quitarles nada. Por eso la gota de la pestaña activa sí puede llevar
+     * nombre --y lo necesita: este sitio recarga la página entera en cada
+     * navegación, y emparejar el elemento entre los dos documentos es la única
+     * forma de que la gota viaje de una pestaña a otra--.
+     *
+     * Comprobado en el navegador el 9 sep 2026 con la hoja de «Bolsas» abierta:
+     * la gota tiene 0 descendientes, 0 elementos con `backdrop-filter` dentro,
+     * no contiene a la hoja, y la hoja conserva su `blur(20px) saturate(1.8)`.
+     *
+     * Así que lo que se vigila ya no es la palabra sino el invariante:
+     * **ningún elemento con nombre puede tener descendientes**, y ninguno de
+     * los contenedores del cromo puede llevarlo.
+     *
+     * Roturas: poner el nombre en `.pestana`, `.pestanas`, `.modulo-inferior`,
+     * `.cromo` o `.bandeja`; meterle un hijo a la gota en el Blade.
+     */
+    public function test_solo_una_hoja_sin_hijos_lleva_nombre_de_transicion(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+        $propiedad = 'view-transition-'.'name';
+
+        $this->assertSame(
+            1,
+            substr_count($css, $propiedad.':'),
+            "En app.css solo puede haber UN `{$propiedad}`, y es el de la gota de la pestaña activa."
+        );
+
+        $this->assertStringContainsString(
+            $propiedad.': pestana-activa;',
+            $this->regla($css, '.pestana__gota'),
+            'El único nombre permitido vive en la gota.'
+        );
+
+        foreach (['.cromo', '.bandeja', '.modulo-inferior', '.pestanas', '.pestana', '.hoja-flotante'] as $contenedor) {
+            $this->assertStringNotContainsString(
+                $propiedad,
+                $this->regla($css, $contenedor),
+                "`{$contenedor}` tiene descendientes con `backdrop-filter`: con nombre los deja sin fondo que desenfocar."
+            );
+        }
+    }
+
+    /**
+     * La gota se pinta vacía y solo en la pestaña activa.
+     *
+     * Vacía, porque su nombre la convierte en raíz de fondo y cualquier hijo
+     * que llegara con `backdrop-filter` se quedaría sin página que desenfocar.
+     * Y una sola, porque dos elementos con el mismo nombre en un documento
+     * anulan la transición entera --no la de la gota: la de toda la página--.
+     */
+    public function test_la_gota_va_vacia_y_solo_en_la_pestana_activa(): void
+    {
+        foreach (['navbar', 'menu-grupo'] as $vista) {
+            $html = File::get(resource_path("views/components/publico/{$vista}.blade.php"));
+
+            $this->assertStringContainsString(
+                '<span class="pestana__gota" aria-hidden="true"></span>',
+                $html,
+                "En «{$vista}» la gota dejó de ser un elemento vacío y decorativo."
+            );
+        }
+
+        // Y en una página real solo hay una, con la sección activa marcada.
+        $html = $this->get(route('guia.index'))->assertOk()->getContent();
+
+        $this->assertSame(
+            1,
+            substr_count($html, 'pestana__gota'),
+            'Hay más de una gota en la página: dos nombres iguales anulan la transición de vista entera.'
+        );
     }
 
     /** Rotura: mover el vidrio del pseudoelemento al módulo; escribir `blur(14px)`. */

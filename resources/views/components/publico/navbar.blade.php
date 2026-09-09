@@ -405,6 +405,12 @@
                        'text-acento' => $actual,
                        'text-suave' => ! $actual,
                    ])>
+                    {{-- La gota: el único objeto de la barra que se mueve. Solo
+                         la pinta la pestaña activa, así que en el documento hay
+                         siempre una y su nombre de transición no se duplica. --}}
+                    @if ($actual)
+                        <span class="pestana__gota" aria-hidden="true"></span>
+                    @endif
                     <x-dynamic-component :component="'heroicon-'.($actual ? 's' : 'o').'-'.$enlace['icono']"
                                          class="h-6 w-6 shrink-0" aria-hidden="true" />
                     <span class="pestana__rotulo"><span class="text-balance">{{ $enlace['texto'] }}</span></span>

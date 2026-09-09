@@ -930,7 +930,48 @@
         }
 
         .pestana {
+            position: relative;
+            isolation: isolate;
             row-gap: 0.1875rem;
+        }
+
+        /*
+         * La gota de la pestaña activa: lo que convierte cinco botones sueltos
+         * en un solo objeto.
+         *
+         * Y VIAJA. Este sitio recarga la página entera en cada navegación, así
+         * que no hay estado de cliente que animar: la única forma de que la
+         * gota se mueva de una pestaña a otra es que las transiciones de vista
+         * la emparejen entre el documento que se va y el que llega. Por eso
+         * lleva nombre, y por eso solo la pinta la pestaña activa — dos
+         * elementos con el mismo nombre en un documento anulan la transición
+         * entera, y en este árbol es imposible que haya dos: la activa la
+         * decide el servidor y es una.
+         *
+         * ⚠️ El nombre va en ESTE hijo y nunca en `.pestana`, `.pestanas` ni el
+         * módulo. Un elemento con `view-transition-name` es raíz de fondo (View
+         * Transitions 1, §2.1.1), y ponerlo más arriba dejaría a las hojas que
+         * cuelgan de la barra sin página que desenfocar. La gota no tiene
+         * descendientes, así que ahí no rompe nada. La hoja es HERMANA de la
+         * pestaña, no hija, y no la alcanza.
+         *
+         * `z-index: -1` con `isolation` en la pestaña la deja bajo el icono y
+         * el rótulo pero sobre el fondo del acuse de pulsación.
+         */
+        .pestana__gota {
+            pointer-events: none;
+            position: absolute;
+            inset: 0.3rem 0.2rem;
+            z-index: -1;
+            border-radius: 0.9rem;
+            background-color: rgb(238 65 55 / 0.14);
+            border: 1px solid rgb(238 65 55 / 0.3);
+            view-transition-name: pestana-activa;
+        }
+
+        /* Compacta no hay rótulo, así que la gota se ajusta al icono solo. */
+        [data-estado="scroll"] .pestana__gota {
+            inset: 0.25rem 0.2rem;
         }
 
         /* El rótulo pliega por pista de rejilla, nunca por `height`. El texto no
@@ -1632,6 +1673,36 @@
 ::view-transition-new(root) {
     animation-duration: 180ms;
     animation-timing-function: var(--ease-out);
+}
+
+/*
+ * El viaje de la gota entre pestañas.
+ *
+ * El navegador empareja la gota del documento que se va con la del que llega
+ * --mismo `view-transition-name`-- y anima la diferencia de posición y de
+ * tamaño. Es lo más cerca que se puede estar de un resorte en una navegación
+ * de documento a documento, donde no hay JavaScript vivo que interpole nada.
+ *
+ * Va con la curva del rebote suave y no con la del cajón: la gota es lo único
+ * de la barra que se mueve por sí solo, y un sobreimpulso del 4,6 % es lo que
+ * la hace parecer líquido en vez de una caja que se desliza. La duración es la
+ * del asentamiento del resorte, no la de la raíz: el fondo cruza en 180 ms y
+ * la gota sigue viajando, que es exactamente el efecto que se busca.
+ *
+ * El grupo lleva también el par old/new a `opacity: 1`: por defecto el
+ * navegador funde el viejo con el nuevo y, siendo el mismo objeto, ese fundido
+ * solo lo hace parpadear a mitad del recorrido.
+ */
+::view-transition-group(pestana-activa) {
+    animation-duration: var(--duracion-rebote);
+    animation-timing-function: var(--ease-rebote-suave);
+}
+
+::view-transition-old(pestana-activa),
+::view-transition-new(pestana-activa) {
+    animation: none;
+    mix-blend-mode: normal;
+    opacity: 1;
 }
 
 /*
