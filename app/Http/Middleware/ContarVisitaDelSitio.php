@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use App\Models\VisitaDiaria;
 use Closure;
+use Filament\Facades\Filament;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
@@ -92,7 +94,36 @@ class ContarVisitaDelSitio
             return;
         }
 
+        if ($this->esElGremioMirandoSuPropioSitio($request)) {
+            return;
+        }
+
         VisitaDiaria::registrar($ruta, $this->esUnaLlegadaAlSitio($request));
+    }
+
+    /**
+     * La dirección y la secretaría revisando su propio sitio no son tráfico.
+     *
+     * Este filtro no miraba quién pedía la página, solo qué ruta era, así que el
+     * equipo del gremio —que entra a diario y recarga la portada cada vez que
+     * cambia un texto— contaba como público. Con el tráfico que el sitio tiene
+     * hoy, eso convierte la gráfica en un espejo: la dirección leería su propia
+     * navegación como interés de la gente.
+     *
+     * El criterio es **quién puede entrar al panel** y no **quién tiene
+     * sesión**: un afiliado sí es público —es a quien el sitio sirve— y se
+     * sigue contando. Se pregunta con `canAccessPanel`, que es exactamente la
+     * misma pregunta que decide quién ve `/admin`, para que no existan dos
+     * definiciones distintas de «el gremio» que puedan separarse con el tiempo.
+     *
+     * La sesión se MIRA y no se guarda, igual que el navegador y la procedencia.
+     * La tabla sigue sin saber quién visitó nada.
+     */
+    private function esElGremioMirandoSuPropioSitio(Request $request): bool
+    {
+        $usuario = $request->user();
+
+        return $usuario instanceof User && $usuario->canAccessPanel(Filament::getPanel('admin'));
     }
 
     /**

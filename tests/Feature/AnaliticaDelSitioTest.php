@@ -189,6 +189,60 @@ class AnaliticaDelSitioTest extends TestCase
         $this->assertSame(0, VisitaDiaria::count(), 'La pasarela es zona privada, y robots.txt ya lo declara.');
     }
 
+    /**
+     * El gremio mirando su propio sitio no es tráfico del sitio.
+     *
+     * El middleware no miraba quién pedía la página, solo qué ruta era. Así que
+     * la dirección y la secretaría, que entran a diario y revisan la portada
+     * cada vez que cambian un texto, contaban como público. Con el tráfico real
+     * que tiene el sitio hoy —tres páginas servidas en producción el 9 de
+     * septiembre, y eran de esta sesión— el equipo del gremio sería la mayoría
+     * de la gráfica, y la dirección estaría leyendo su propia navegación como
+     * interés de la gente.
+     *
+     * El criterio es «quién puede entrar al panel», no «quién tiene sesión»:
+     * un afiliado **sí** es público —es a quien el sitio sirve— y se sigue
+     * contando. Lo dice `canAccessPanel`, que es la misma pregunta que decide
+     * quién ve `/admin`, para que no haya dos definiciones de «el gremio».
+     *
+     * La sesión se MIRA y no se guarda, igual que el navegador y la procedencia:
+     * la tabla sigue sin saber quién visitó nada.
+     */
+    public function test_el_equipo_del_gremio_no_cuenta_como_visita_del_sitio(): void
+    {
+        foreach ([User::ROL_SUPER_ADMIN, User::ROL_SUBADMIN] as $rol) {
+            $usuario = User::factory()->create();
+            $usuario->syncRoles([$rol]);
+
+            $this->actingAs($usuario->fresh())->get(route('inicio'))->assertOk();
+        }
+
+        $this->assertSame(
+            0,
+            VisitaDiaria::count(),
+            'La dirección y la secretaría revisando el sitio no son visitas del sitio.'
+        );
+    }
+
+    /** Un afiliado sí es público: el sitio existe para él. */
+    public function test_un_afiliado_navegando_el_sitio_publico_si_cuenta(): void
+    {
+        $asociado = User::factory()->create(['asociado_id' => Asociado::factory()->publicado()->create()->id]);
+        $asociado->syncRoles([User::ROL_ASOCIADO]);
+
+        $this->actingAs($asociado->fresh())->get(route('inicio'))->assertOk();
+
+        $this->assertSame(1, (int) VisitaDiaria::where('ruta', 'inicio')->value('total'));
+    }
+
+    /** Y quien no ha iniciado sesión, por supuesto. */
+    public function test_un_visitante_anonimo_sigue_contando(): void
+    {
+        $this->get(route('inicio'))->assertOk();
+
+        $this->assertSame(1, (int) VisitaDiaria::where('ruta', 'inicio')->value('total'));
+    }
+
     public function test_una_peticion_que_no_es_get_no_cuenta(): void
     {
         $this->post(route('contacto.store'), []);
