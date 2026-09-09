@@ -2330,3 +2330,21 @@ Dos lecciones, y la segunda es la que vale:
 
 1. **`cloud command:run` quiere el comando en `--cmd`, no como argumento suelto.** La forma que el runbook llevaba escrita responde `{"error":true,"message":"cmd is required"}`. Se descubrió usándolo, que es la única manera de descubrir eso.
 2. **Un runbook que nadie ha ejecutado es una hipótesis.** Las dos correcciones de hoy —la ruta del panel y la firma del comando— llevaban ahí desde que se escribieron, con toda la confianza del mundo y sin que nadie las hubiera pasado por una terminal. La regla del proyecto de no citar cifras sin medirlas el mismo día vale igual para los procedimientos: **un paso que no se ha corrido no está verificado, por bien redactado que esté.**
+
+### 47.11 Desplegado: dieciocho commits de una vez, y la analítica midiéndose a sí misma
+
+Sua dijo «despliega la rama», y la rama arrastraba más de lo que sonaba: `origin/main` llevaba desde el 8 de septiembre en `0594058`, así que empujar no publicaba ocho commits sino **dieciocho** —`p1-cierre-bolsas` entera, que se había publicado *para que Ingrid la revisara*, más la auditoría del 9—. Ochenta archivos, cuatro migraciones. Eso se dijo antes de empujar, no después.
+
+Suite completa como última puerta —1.209 casos, 1.198 pasan, 0 fallos— y `git push origin main`. El despliegue tardó **1 min 13 s** y las cuatro migraciones entraron en el lote 2.
+
+**La verificación fue por contenido servido, no por el mensaje de éxito**, que es la regla de la casa desde §29: `Disallow: /` en el `robots.txt` real, `noindex, nofollow` en la portada real, siete rutas públicas en 200.
+
+Y entonces la analítica se midió a sí misma, que es la parte que vale la pena contar. Primer intento: `visitas=0` después de siete peticiones. No era un fallo — **el agente de usuario de `curl` está en la lista de rastreadores del propio middleware**, así que se descartó solo. Repetido con un agente de navegador y tres peticiones deliberadas, producción devolvió:
+
+```
+3 páginas servidas / 2 entradas
+```
+
+La portada sin procedencia contó llegada. La guía con `Referer` de Google contó llegada. `/empleo` con procedencia nuestra contó página **y no** llegada. `sitemap.xml` y `robots.txt` no contaron nada. Es la definición entera del módulo, comprobada en el sitio de verdad con tráfico de verdad, unas horas después de escribirla.
+
+**Lo que queda dicho y no hecho:** el sembrador de contenido oficial no corre en el despliegue, así que las dos claves jubiladas hoy —`hero_subtitulo` y `cifra_afiliados`— **le siguen apareciendo a la oficina en el panel**. La limpieza existe y vive en `SettingSeeder`; hace falta correrlo una vez, y eso toca datos, así que pide visto bueno aparte.
