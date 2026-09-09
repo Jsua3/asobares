@@ -68,6 +68,18 @@ class Bitacora extends Page implements HasTable
         'proveedor' => 'el proveedor',
         'aliado' => 'el aliado',
         'beneficio' => 'el beneficio',
+        /*
+         * Los dos módulos nuevos de Ingrid, traducidos aquí el 9 sep 2026 porque
+         * la guarda de `Panel\BitacoraTest` los destapó al correr la regresión:
+         * sin estas líneas la oficina leía «Natalia actualizó **un registro**
+         * Banner del Congreso» y «aprobó **un registro** Bar La Estación».
+         *
+         * Son dos entradas de un array y nada más: no tocan la lógica de
+         * Publicidad ni la de Afiliación. Van aquí y no en sus módulos porque
+         * este mapa es de la Bitácora, que es transversal.
+         */
+        'publicidad' => 'la publicidad',
+        'solicitud_afiliacion' => 'la solicitud de afiliación de',
         'municipio' => 'el municipio',
         'categoria' => 'la categoría',
         'usuario' => 'el usuario',
