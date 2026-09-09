@@ -28,13 +28,13 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 
 | | |
 |---|---|
-| Fecha | Martes 8 de septiembre de 2026 (Bogotá), tarde |
-| **Dónde vive este archivo** | **En `main`**; medido sobre `0594058`, y este archivo entra en el commit de cierre |
-| `main` | `0594058` · **empujado**: `origin/main` está en el mismo commit, sin nada por delante ni por detrás. El 8 sep entraron **seis commits del panel en el teléfono** (`f7a9171` → `0594058`), directos a `main` y sin rama de por medio, encima de la barra lateral de escritorio de la madrugada |
-| Rama de trabajo | **Ninguna abierta.** `p3-barra-lateral` se fusionó el 8 sep de madrugada y se conserva como historia; el trabajo del teléfono fue después y directo sobre `main` |
-| Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5). Suite completa sobre `0594058`, el 8 sep: **1.105 casos · 1.094 pasan · 11 omitidas · 0 fallos · 5.048 aserciones** en 317 s. El árbol se contó el mismo día (§5). La barra del panel se mide en su maqueta (`php artisan maqueta:barra`), porque el segundo factor impide que una sesión automatizada abra el panel |
-| Producción | `https://asobares-production-0jhdcz.laravel.cloud` · **sirve los seis commits del teléfono**. Comprobado por contenido servido y no por hash, que Cloud compila sus propios activos: el CSS del panel trae `--asb-admin-barra-riel:4rem` (el riel de D-L30) y `@media (width<=63.999rem){.fi-sidebar.fi-sidebar-open:before{content:none}}` (el cajón sin suelo, que es el último commit), además del `--asb-admin-sidebar-ancho:15.75rem` de la barra de escritorio |
-| **Expediente** | Al día. El trabajo del teléfono se había empujado y desplegado sin reescribir este archivo —seis commits— y se recuperó la tarde del 8 sep: esta foto, la entrada **§45 de `bitacora.md`** y la línea fechada de **`encargo.md` §13** con D-L29 y D-L30. La spec ya estaba al día antes del código (`docs/ingenieria/navbar-tres-estados-diseno.md`) |
+| Fecha | Martes 8 de septiembre de 2026 (Bogotá), noche |
+| **Dónde vive este archivo** | En la rama `p1-cierre-bolsas`; medido sobre `fc2142f`, y este archivo entra en el commit de cierre |
+| `main` | `9eb93bd` (local) · ⚠️ **`origin/main` sigue en `0594058`**: el commit del expediente de la tarde **no se ha empujado** |
+| Rama de trabajo | **`p1-cierre-bolsas`, cinco commits sobre `main` y ninguno empujado.** Se abrió porque el plan de trabajo del 8 sep pide rama propia y nada de empujar a `main` directamente. Trae las cuatro entregas del plan más el Acta 07 |
+| Quién midió | Sesión local de Claude Code con Sua, en la máquina de Sua (PHP 8.5). Suite completa sobre `fc2142f`, el 8 sep por la noche: **1.147 casos · 1.136 pasan · 11 omitidas · 0 fallos · 5.204 aserciones** en 335 s. El árbol se contó el mismo día (§5) |
+| Producción | `https://asobares-production-0jhdcz.laravel.cloud` · **sirve `0594058`**, es decir el panel en el teléfono y nada de lo de esta tarde y noche. Lo último comprobado por contenido servido: `--asb-admin-barra-riel:4rem` y `@media (width<=63.999rem){.fi-sidebar.fi-sidebar-open:before{content:none}}` |
+| **Expediente** | Al día, incluido lo de hoy: esta foto, **§45 y §46 de `bitacora.md`**, cuatro líneas nuevas en **`encargo.md` §13**, el **Acta 07** emitida y la **matriz de trazabilidad** actualizada tras dos semanas parada (decía 820 casos y `main` en `4f15d24`) |
 
 ## 1. Qué se exige y cuándo
 
@@ -73,6 +73,8 @@ De catorce, **doce cerrados y dos vivos** (10 y 11); ninguno se cierra escribien
 
 **8 sep (tarde): el panel en el teléfono es un riel de iconos, y ni el riel ni el cajón tienen suelo.** Seis commits directos a `main`, ya desplegados. Sua mandó una captura —«la barra del panel en el móvil está terrible»— y lo primero que salió no era de diseño: **el tema declaraba `position: relative` en `.fi-sidebar`**, y como el CSS compilado no lleva capas (lightningcss las aplana), esa regla le ganaba al `fixed` de Filament en todas las anchuras. En el teléfono el cajón cerrado dejaba de estar fuera de pantalla y ocupaba sus 252 px en el flujo —la franja vacía de la captura—; **en escritorio la barra llevaba dos días perdiendo su `lg:sticky`** y se iba con el desplazamiento. Se retiró con guardia. Encima de eso, **D-L29** (el riel: por debajo de 64 rem la barra se estrecha en vez de irse, con los nombres escondidos por recorte visual y no por `display: none`, que dejaría enlaces sin nombre accesible) y **D-L30** en dos partes (cromo con el logotipo centrado por rejilla, perfil anclado al pie flotando sobre la lista y pintado en dos ganchos con la copia sobrante apagada por `display: none`, riel de 4 rem para que el aire no se pague con el dedo, y un resorte por icono integrado con muelle que responde a la velocidad del gesto). Después, **las siete correcciones que Sua nombró viendo el teléfono**: el logotipo de 6,5 a 10 rem, el menú de la cuenta abriendo hacia arriba y hacia dentro, el corte de cinco píxeles entre cromo y cajón, «Tablero» —que no tiene grupo y Filament pinta suelto— convertido en módulo, el resorte moviendo el módulo y no la fila, y el cajón que dejó de ser un cuadrado blanco. **Ese último Sua lo rechazó dos veces y la segunda tenía razón**: volverlo lámina de cristal seguía siendo una barra detrás de los módulos, así que el cajón se quedó **sin suelo ninguno**, igual que el riel, y entre los módulos se ve la página atenuada. Eso movió la carga del contraste al cristal de cada módulo, que dentro del cajón sube al **84 %** —al 66 % del riel, sobre página negra, el rótulo del ítem activo da 3,03:1 y no pasa— porque detrás del módulo del riel hay un color conocido y detrás del cajón hay página, que puede ser cualquier cosa. **Abierto: el tacto del resorte en un teléfono de verdad**, que no se puede medir aquí; lo gobiernan `ARRASTRE` y `AMORTIGUACION` y se ajustan en una línea cada una.
 
+**8 sep (noche): el plan de trabajo de Ingrid, medido contra el código y ejecutado en rama propia.** Ingrid mandó un documento que reparte cinco frentes a Sua. Medidos contra el repositorio antes de tocar nada, **tres estaban total o casi totalmente construidos** —las bolsas desde el 4 sep, el orden alfabético de la portada desde antes y con pruebas, y del WhatsApp existían el ajuste, el ayudante y cero números cableados—, y una parte pedía **revertir una decisión escrita** (cerrar `/empleo`, que Ingrid misma descartó el 4 sep). Sua resolvió dejarla pública. Lo que sí faltaba, y el plan no nombraba, eran dos huecos: **los contactos de artistas seguían públicos** mientras los de proveedores ya no, y **el banco de talento no tenía puerta** —quien dejaba su perfil en `/empleo` era visible al instante para todos los afiliados sin que nadie lo mirara—. Los dos cerrados. Beneficios por territorio y analítica no figuran en ningún RF, así que salieron por **Acta 07**, emitida antes del código y aprobada por Sua, con contrapropuesta aceptada en analítica: **anónima y sin visitantes únicos**. Cuarenta y dos casos nuevos, todos vistos rojos antes y rotos después; **tres pasaban por el motivo equivocado** y se arreglaron al mutarlos (bitácora §46). **Nada de esto está en producción**: vive en `p1-cierre-bolsas` sin empujar.
+
 **Lo que este tramo enseñó y conviene no volver a pagar:** en el CSS compilado de este proyecto **el orden no es nuestro** —lightningcss aplana capas, agrupa medias y mueve reglas, así que dos reglas de la misma especificidad no se resuelven como están escritas—; pasó dos veces seguidas y se arregló sin depender del orden. Y **la maqueta mintió tres veces**, que es por lo que el defecto del `position` llevó dos días invisible: declaraba `position` sobre la barra, ponía su `<style>` después de la hoja compilada y no reproducía el `opacity: 1` que el blade le da al contenido. Las tres corregidas; la maqueta pinta ya el cromo entero, el ítem suelto, la cuenta al pie y la cabecera del cajón, y trae `--cerrada` para mirar el riel.
 
 ### 2.2 Contenido
@@ -85,7 +87,7 @@ De catorce, **doce cerrados y dos vivos** (10 y 11); ninguno se cierra escribien
 | Guía normativa | ⚠️ **1 municipio de 12** (Armenia) | D-21; formatos oficiales por entidad sin llegar |
 | Portada | ✅ Todo texto editable | Las 19 fotos autorizadas sin colocar |
 | Aliados | ✅ 23 del catálogo oficial | Logos (D-06); cuáles aplican al Quindío (D-18) |
-| Beneficios e iniciativas | ✅ 5 y 5, de documento oficial | — |
+| Beneficios e iniciativas | ✅ 5 y 5, de documento oficial | **Clasificarlos por alcance** (D-39): el código está en la rama y nacen sin clasificar a propósito |
 | «Quiénes somos» | ⚠️ Texto provisional | D-05, D-18 |
 | Directorio | ⚠️ **0 fichas publicadas** en producción (correcto). La base del gremio vive en `D:/Sua_Files/material-asobares/` (48 y 41 filas), **fuera del árbol** | Importar con `asociados:importar` desde allí; autorización de cada titular |
 | Boletín laboral (Ley 2466 de 2025) | ❌ Sin publicar | D-18 |
@@ -99,6 +101,8 @@ De catorce, **doce cerrados y dos vivos** (10 y 11); ninguno se cierra escribien
 |---|---|
 | Sitio | ✅ **200** sobre PostgreSQL 17.11, 39 migraciones, sirviendo `main` |
 | Despliegue de hoy | ✅ Los seis commits del teléfono están en producción; comprobado por contenido servido (§0) |
+| **Rama `p1-cierre-bolsas`** | ⚠️ **Cinco commits sin empujar**, con las cuatro entregas del plan de trabajo y el Acta 07. Nada de esto está en producción. Trae **tres migraciones** (`aprobado_el` en aspirantes, alcance en beneficios, `visitas_diarias`), así que desplegarla exige `migrate` |
+| **`main` local** | ⚠️ `9eb93bd`, el commit del expediente de la tarde, **tampoco empujado** |
 | Video del hero en producción | ✅ Versionado en `public/videos/`; `VideoDelHeroTest` vigila el índice de git |
 | Cuenta de Laravel Cloud | ✅ Existe, con medio de pago del gremio. ⚠️ Organización `juan-sua`: facturación y Natalia como miembro (D-12) |
 | Correo saliente (SMTP) | ❌ **Sin contratar: bloque de arriba** |
@@ -139,6 +143,10 @@ Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen�
 
 | ID | Decisión | Dueño | Pedida | Respondida |
 |---|---|---|---|---|
+| **D-38** | **La lista real de la auditoría funcional.** El plan del 8 sep dice que dio 44 PASS, **2 FAIL**, 1 BLOCKED y 3 NOT TESTED, y **no dice cuáles**. Los 2 FAIL son lo más accionable del documento y no se pueden cerrar a ciegas. Bloquea el único bloque del plan sin tocar | Ingrid | 8 sep | — |
+| **D-39** | **Clasificar los cinco beneficios por alcance.** El código está y el panel lo permite en un minuto, pero de quién es cada beneficio lo dice un documento del gremio, no el sistema: nacen sin clasificar a propósito y sin clasificar no se anuncian | Natalia | 8 sep | — |
+| **D-40** | **Aprobar los perfiles del banco de talento** antes de que alguien lo enseñe: desde hoy nacen pendientes y los que ya existían también, así que el directorio del afiliado sale vacío hasta que la secretaría los apruebe uno por uno | Natalia + secretaría | 8 sep | — |
+| **D-41** | **El reparto que propone el plan de trabajo invierte el registrado** (20 ago: Sua lleva plataforma, panel, cartera, pagos, observatorio, infraestructura y suite; Ingrid, módulos públicos y contenido). El plan le da a Ingrid Bold, SMTP, afiliación e infraestructura, y a Sua los módulos públicos. Es la D-16 abierta: conviene que quede dicho y no asumido | Sua + Ingrid | 8 sep | — |
 | **D-31** | **`prefers-reduced-transparency` en un equipo real** antes de la demo: Playwright acepta la emulación y no la aplica. | Sua | 5 sep | — |
 | **D-32** | **Idiomas como subsistema propio**: `lang/`, middleware de locale, traducir vistas y volver multilingüe la tabla de ajustes. **Ampliación de alcance: acta antes de codificar.** El chip de la B es su sitio reservado y no funciona a propósito | Natalia + Sua | 3 sep | — |
 | **D-33** | **Qué cede en la barra entre 1024 y ~1130 px de ancho** (iPad mini y los iPad de 10 pulgadas antiguos, en horizontal): en `inicial` y `atención` los tres módulos suman 1.102 px y la píldora mide 968. Con el logo protegido, a 1024 en inicial la píldora desborda 124 px a la derecha y el documento gana 107 px de desplazamiento horizontal (medido el 5 sep); en scroll cabe (727 px). Opciones: isotipo también en inicial por debajo de ~1150 px, o esconder el texto de «Mi cuenta» en esa franja; ninguna se toma sin Sua. Ya desbordaba antes de la rejilla, **y ahora está en producción** | Sua | 5 sep | — |
@@ -172,6 +180,7 @@ Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen�
 No se «arregla de paso»:
 
 - **Del panel en el teléfono (8 sep):** el tacto del resorte solo lo cierra un aparato de verdad; se ajusta con `ARRASTRE` y `AMORTIGUACION`, una línea cada una.
+- **Del plan de trabajo (8 sep, noche):** las dos gráficas de analítica **no se han visto con ojos**, porque el segundo factor impide que una sesión automatizada abra el panel —mismo hueco que la barra lateral, y sin maqueta esta vez—; el filtro `filament.` del contador de visitas es seguro que hoy no puede dispararse, y queda dicho en el código para que nadie lo lea como algo respaldado por una prueba; y el sello de alcance **etiqueta cada beneficio pero no los agrupa** en las tres pantallas, que es lo mínimo que distingue sin rehacer tres vistas.
 - **De la barra pública B, anotado por su revisión final:** la transición de `gap` aporta poco y cuesta un reflow por fotograma durante 620 ms; `backdrop-filter` no se transiciona (aparece de golpe); el brillo de los tres módulos se mueve al unísono (así lo manda la spec; el comentario del marcado dice otra cosa); `$rol`/`$prefijoRol` son dos `match` que recalculan lo mismo.
 - **De la fusión con la portada de la P2 (5 sep):** el rótulo del video va al pie del hero por decisión de la sesión, no de Ingrid; el commit `239eda0` de Ingrid entró en `main` con un `Co-Authored-By: Claude Opus 5` que el resto de la historia no lleva (reescribirlo exigía forzar su rama publicada y no se hizo sin preguntar); `.cromo-fijo` aparta 7rem la primera sección de las demás páginas con un selector de hermanos (`header + aside + main`) que depende del orden del layout.
 - **De la barra B, visto el 5 sep al medir la rejilla:** la franja 1024–1130 px en inicial y atención (D-33). No se toca sin decidir qué cede.
@@ -187,25 +196,31 @@ No se «arregla de paso»:
 
 ## 5. Cifras medidas del árbol
 
-Todas medidas el **8 de septiembre de 2026 sobre `0594058`**, salvo las que llevan otra fecha en su fila. **Vuelve a medirlas antes de citarlas** en un documento.
+Todas medidas el **8 de septiembre de 2026 sobre `fc2142f`** (la rama), salvo las que llevan otra fecha en su fila. **Vuelve a medirlas antes de citarlas** en un documento.
 
 | Cifra | Valor | Comando |
 |---|---|---|
-| Confirmaciones | **389** (374 de Sua, 15 de Ingrid) | `git rev-list --count HEAD` · `git shortlog -sn HEAD` |
-| Migraciones | 39 | `Get-ChildItem database/migrations -File` |
-| Modelos | 21 | `Get-ChildItem app/Models/*.php` |
+| Confirmaciones | **395** (380 de Sua, 15 de Ingrid) | `git rev-list --count HEAD` · `git shortlog -sn HEAD` |
+| Migraciones | **42** | `Get-ChildItem database/migrations -File` |
+| Modelos | **22** | `Get-ChildItem app/Models/*.php` |
 | Sembradores | 21 (+ `Support/`) | `Get-ChildItem database/seeders/*.php` |
-| Archivos de prueba | **87** | `Get-ChildItem tests -Recurse -Filter *Test.php` |
-| Vistas Blade | **74** | `Get-ChildItem resources/views -Recurse -Filter *.blade.php` |
-| Componentes públicos | **19** | `Get-ChildItem resources/views/components/publico/*.blade.php` |
-| Panel | 19 recursos · 6 páginas · 20 policies · 5 widgets | `Get-ChildItem app/Filament/…` |
-| Comandos de Artisan propios | **6** (entra `GenerarMaquetaDeLaBarra`) | `Get-ChildItem app/Console/Commands` |
-| Enums | 16 | `Get-ChildItem app/Enums` |
-| Controladores públicos | 17 | `Get-ChildItem app/Http/Controllers/Publico/*.php` |
-| Rutas GET propias | 88 | `php artisan route:list --method=GET --except-vendor --json` |
+| Archivos de prueba | **90** | `Get-ChildItem tests -Recurse -Filter *Test.php` |
+| Métodos de prueba | **876** | `Select-String '^\s*public function test_'` |
+| Vistas Blade | **77** | `Get-ChildItem resources/views -Recurse -Filter *.blade.php` |
+| Componentes públicos | **21** | `Get-ChildItem resources/views/components/publico/*.blade.php` |
+| Panel | 19 recursos · 6 páginas · 20 policies · **7 widgets** | `Get-ChildItem app/Filament/…` |
+| Comandos de Artisan propios | 6 | `Get-ChildItem app/Console/Commands` |
+| Enums | **17** (entra `Alcance`) | `Get-ChildItem app/Enums` |
+| Controladores públicos | **18** | `Get-ChildItem app/Http/Controllers/Publico/*.php` |
+| Middleware propio | **3** (entra `ContarVisitaDelSitio`) | `Get-ChildItem app/Http/Middleware` |
+| Rutas GET propias | **89** | `php artisan route:list --method=GET --except-vendor --json` |
 | Ajustes que siembra `SettingSeeder` | **126**; en producción **109** (esa segunda es del 3 sep: el sembrador no se ha vuelto a correr allí) | reflexión sobre `SettingSeeder::ajustes()` |
-| **Suite completa** | **1.105 casos · 1.094 pasan · 11 omitidas · 0 fallos · 5.048 aserciones** · 317 s (8 sep, tarde, sobre `0594058`, el árbol que está desplegado) | `php artisan test --compact` |
-| Suite del 8 sep, madrugada (antes del trabajo del teléfono) | 1.098 casos · 1.087 pasan · 11 omitidas · 0 fallos · 4.976 aserciones · 548 s | `php artisan test --compact` |
+| **Suite completa** | **1.147 casos · 1.136 pasan · 11 omitidas · 0 fallos · 5.204 aserciones** · 335 s (8 sep, noche, sobre `fc2142f`) | `php artisan test --compact` |
+| Suite sobre el árbol desplegado (`0594058`) | 1.105 casos · 1.094 pasan · 11 omitidas · 0 fallos · 5.048 aserciones · 317 s (8 sep, tarde) | `php artisan test --compact` |
+| Clases nuevas del plan de trabajo | `AccesoDeAsociadosTest` 16 · `ModeracionDeBolsasTest` 27 · `BotonFlotanteDeWhatsappTest` 9 · `BeneficiosPorAlcanceTest` 10 · `AnaliticaDelSitioTest` 14 | `php artisan test --compact --filter=` |
+| Botón de WhatsApp, medido en Chromium (8 sep) | 56×56 px · a 375: acaba en 732 con la barra de pestañas empezando en 744, **12 px de holgura y sin solaparse** · a 1.280: 24 px del borde · los cinco puntos del círculo devuelven el botón (las esquinas del rectángulo caen fuera del círculo, que no es defecto) | `javascript_tool` sobre el servidor local |
+| Sello de alcance, medido en Chromium (8 sep) | los tres sellos dicen «ASOBARES Colombia», «ASOBARES Quindío» y «Armenia» · contraste **4,53:1** sobre el fondo de la página, el mismo que da `text-apagado` en el resto del sitio | `javascript_tool` con los tres alcances puestos |
+| Analítica, comprobada contra el servidor de desarrollo (8 sep) | dos visitas a `/contacto`, una a `/`, una a `/directorio`, el 404 sin dejar fila · columnas exactamente `id, ruta, dia, total, created_at, updated_at` | navegación real + `php artisan tinker` |
 | **Panel en el teléfono, medido en la maqueta a 375 px (8 sep)** | riel **64** px · módulo **48** · aire **8** a cada lado, también para el ítem suelto · logotipo a **5 px** del centro de la pantalla · cuenta al pie absoluta, `z-index: 10`, 64×64 · lista reservando **68 px**, último destino acabando en 722 y la cuenta empezando en 748 · cristal del módulo al **66 %** en el riel y al **84 %** dentro del cajón · el resorte moviendo **seis módulos** −3,5 px con un gesto de 10, y las filas a cero | `php artisan maqueta:barra` + `playwright-cli` |
 | **Contraste del rótulo del ítem activo dentro del cajón (8 sep)** | al 66 % sobre página negra **3,03:1 — no pasa**; al 84 %, **4,61** sobre negra y **5,49** sobre blanca, y en oscuro **5,30** y **4,78**. Ese 84 es el suelo medido, no una preferencia | `MideContraste`, con el velo de cierre de Filament en medio |
 | Barra pública móvil 2.1, medida en Chromium (6 sep) | inicial: bandeja 56 · fila de pestañas 68 · pestañas 79,6×68 y 75,6×68 · scroll: 48 y 48 con los rótulos plegados · objetivos de 44 en las cuatro esquinas · sin desbordar a 360, 320 ni 768 · el cambio de estado cae entre 30 y 40 px bajando y subir 13 devuelve · con el video corriendo, 180 fotogramas: p50 6,1 ms, p95 6,3, máximo 6,5 (este equipo, no el teléfono) · velo 72 % en escritorio y 88 % bajo 64rem | `playwright-cli` con toques por CDP |
@@ -215,14 +230,16 @@ Todas medidas el **8 de septiembre de 2026 sobre `0594058`**, salvo las que llev
 
 ## 6. Lo siguiente, en orden
 
-1. **Confirmar que el documento de práctica se envió** el 4 sep (Sua). Si no, es 0.0 y hay que hablar con el docente.
-2. **Ver las dos superficies nuevas en un teléfono real** (Android y un iPhone), que es lo que exige la S7 y lo que ya no puede esperar: la barra pública del teléfono —Safari de iOS, la barra de direcciones que crece y encoge, el rebote elástico, el teclado, la transparencia reducida— y el **riel del panel**, sobre todo el tacto del resorte. Si algo cede, se corrige sobre `main` y se vuelve a empujar.
-3. **Medir el coste del campo de puntos en marcha** (Sua): no lo puede hacer una sesión automatizada, porque el navegador no pinta fotogramas con la ventana detrás. Si sale caro, se baja la densidad con un token.
-4. **Enseñar a la dirección lo desplegado** y cerrar el Acta 06 (D-26) con el cambio de barra. Antes, si se puede, **D-31** (transparencia reducida en un equipo real y un iPad de verdad) y **D-33** (qué cede entre 1024 y 1130 px, que ya está en producción).
-5. **Lo que queda de la capa visual:** correr `ContenidoOficialSeeder` una vez en producción **con visto bueno aparte, porque toca datos** (sin él la portada usa los textos de respaldo del rótulo y la frase corta no se pinta); confirmar con Ingrid dónde va el rótulo del video y los dos portadores claros; **que Sua e Ingrid miren el panel con ojos**; corregir el documento de práctica, que describe la barra A; y decidir con ella si se reescribe `239eda0` para quitar el `Co-Authored-By`.
-6. **Una sola reunión con Natalia** con la tabla del §3 impresa: D-01, D-04 a D-12, D-20, D-27, D-28, D-29. Si está la cuenta de Google del gremio, se hace ahí mismo el SMTP (D-07).
-7. **Resolver D-28 antes de la demo**: sin credenciales de afiliado no hay a quién enseñarle el directorio de proveedores ni el banco de talento.
-8. **Fijar la demo 2** (D-20) para el jueves 10 o viernes 11; guion de siete pantallas; sitio despierto media hora antes.
-9. **Franja visual, lo que queda** (Ingrid): las 19 fotos, pies de foto, D-29.
-10. **Backend tras el SMTP**: enlace del correo de ficha publicada; bucket (D-13); disco privado para fotos pendientes; procedencia de semillas (D-14); `noindex` (D-08); filtro de municipios; `lang/es`; medición de rendimiento completa; importar la base de 48 filas desde `D:/Sua_Files/material-asobares/`.
-11. Semana 8: dominio y SSL, manual actualizado y en PDF, capacitación y Acta 02, traspaso de cuentas (D-12), acuerdo de soporte (DPV-13).
+1. **Decidir qué pasa con `p1-cierre-bolsas`.** Son cinco commits con la suite en verde y nada empujado: hay que elegir si se publica la rama para que Ingrid la revise —que es lo que pide su plan—, si se fusiona a `main`, y si se despliega. Ojo al desplegarla: trae **tres migraciones** y, en cuanto entre, **el banco de talento se ve vacío hasta que la secretaría apruebe los perfiles** (D-40). Y `main` local tampoco está empujado.
+2. **Confirmar que el documento de práctica se envió** el 4 sep (Sua). Si no, es 0.0 y hay que hablar con el docente.
+3. **Pedirle a Ingrid la lista de la auditoría** (D-38): sin los 2 FAIL y los 3 NOT TESTED, el bloque de QA del plan no se puede cerrar.
+4. **Ver las dos superficies nuevas en un teléfono real** (Android y un iPhone), que es lo que exige la S7 y lo que ya no puede esperar: la barra pública del teléfono —Safari de iOS, la barra de direcciones que crece y encoge, el rebote elástico, el teclado, la transparencia reducida— y el **riel del panel**, sobre todo el tacto del resorte. Si algo cede, se corrige sobre `main` y se vuelve a empujar.
+5. **Medir el coste del campo de puntos en marcha** (Sua): no lo puede hacer una sesión automatizada, porque el navegador no pinta fotogramas con la ventana detrás. Si sale caro, se baja la densidad con un token.
+6. **Enseñar a la dirección lo desplegado** y cerrar el Acta 06 (D-26) con el cambio de barra. Antes, si se puede, **D-31** (transparencia reducida en un equipo real y un iPad de verdad) y **D-33** (qué cede entre 1024 y 1130 px, que ya está en producción).
+7. **Lo que queda de la capa visual:** correr `ContenidoOficialSeeder` una vez en producción **con visto bueno aparte, porque toca datos** (sin él la portada usa los textos de respaldo del rótulo y la frase corta no se pinta); confirmar con Ingrid dónde va el rótulo del video y los dos portadores claros; **que Sua e Ingrid miren el panel con ojos**; corregir el documento de práctica, que describe la barra A; y decidir con ella si se reescribe `239eda0` para quitar el `Co-Authored-By`.
+8. **Una sola reunión con Natalia** con la tabla del §3 impresa: D-01, D-04 a D-12, D-20, D-27, D-28, D-29, y las dos nuevas que solo ella cierra: **D-39** (de quién es cada beneficio) y **D-40** (aprobar los perfiles del banco). Si está la cuenta de Google del gremio, se hace ahí mismo el SMTP (D-07). Y el Acta 07, para firmarla.
+9. **Resolver D-28 antes de la demo**: sin credenciales de afiliado no hay a quién enseñarle el directorio de proveedores ni el banco de talento.
+10. **Fijar la demo 2** (D-20) para el jueves 10 o viernes 11; guion de siete pantallas; sitio despierto media hora antes.
+11. **Franja visual, lo que queda** (Ingrid): las 19 fotos, pies de foto, D-29.
+12. **Backend tras el SMTP**: enlace del correo de ficha publicada; bucket (D-13); disco privado para fotos pendientes; procedencia de semillas (D-14); `noindex` (D-08); filtro de municipios; `lang/es`; medición de rendimiento completa; importar la base de 48 filas desde `D:/Sua_Files/material-asobares/`.
+13. Semana 8: dominio y SSL, manual actualizado y en PDF, capacitación y Acta 02, traspaso de cuentas (D-12), acuerdo de soporte (DPV-13).

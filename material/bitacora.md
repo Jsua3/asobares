@@ -2173,3 +2173,47 @@ Y una nota sobre las guardias que conviene no perder: **la del riel afirmaba que
 Suite completa la tarde del 8 sep, sobre `0594058` y ya desplegado: **1.105 casos, 1.094 pasan, 11 omitidas, 0 fallos, 5.048 aserciones en 317 s**. Producción comprobada por contenido servido y no por hash: el CSS del panel trae `--asb-admin-barra-riel:4rem` y, dentro de `@media (width<=63.999rem)`, `.fi-sidebar.fi-sidebar-open:before{content:none}`, que es el último commit. Lo único abierto es **el tacto del resorte en un teléfono de verdad**, que no se mide aquí; lo gobiernan `ARRASTRE` y `AMORTIGUACION` y se ajustan en una línea cada una.
 
 Y la lección que no es técnica. **Los seis commits se empujaron y se desplegaron sin reescribir `estado.md` ni anexar esta entrada.** El estado se quedó seis commits atrás apuntando a un árbol que ya no era el desplegado, y el §3 del prompt maestro existe exactamente para eso: la sesión siguiente lo detectó comparando el encabezado con `HEAD`, y recuperar el día costó leer los seis commits, la spec y volver a medirlo todo. Lo que **no** se perdió fue el diseño, porque D-L29 y D-L30 sí se escribieron antes del código. Se perdió la foto. Barato de arreglar esta vez; caro el día que la sesión que llegue no se dé cuenta.
+
+## 46. EL PLAN DE TRABAJO DE INGRID, MEDIDO CONTRA EL CÓDIGO (8 sep 2026)
+
+### 46.1 La mitad del encargo ya estaba hecha
+
+Sua trajo un documento de reparto que Ingrid escribió el 8 de septiembre y que le asigna cinco frentes: bolsas exclusivas, beneficios por territorio, WhatsApp y orden alfabético, analítica, y el QA de sus módulos. Antes de escribir una línea se midieron los cinco contra el repositorio, con cuatro reconocimientos en paralelo. **Tres de los cinco estaban total o casi totalmente construidos.**
+
+Las **bolsas** se hicieron el 4 de septiembre en `f2092c5`: registro público naciendo pendiente, aprobación y devolución con motivo en el panel, `/mi-cuenta/proveedores` y `/mi-cuenta/aspirantes` detrás de la sesión. El **orden alfabético** de la portada existe desde antes, con `Collator('es_CO')` porque SQLite ordena por bytes, y con cuatro pruebas que lo vigilan. Del **WhatsApp** existían el ajuste, el ayudante que normaliza el número y cero números escritos a mano en Blade: el RNF-09 ya se cumplía y lo único que faltaba era el botón.
+
+Y una parte del documento **pedía revertir una decisión escrita**: «en Empleo, el contenido interno de la bolsa queda restringido a usuarios asociados». La bolsa de empleo no se cierra, lo decidió Ingrid misma el 4 de septiembre —«quien busca trabajo tiene que poder ver la vacante para postularse»—, está en `encargo.md` §13 y tiene prueba que lo afirma. Sua resolvió dejarla pública.
+
+**La lección de reparto, que es la que vale para la próxima:** medir el encargo contra el código antes de aceptarlo. De nueve tareas, dos estaban hechas, una casi, dos eran ampliación de alcance sin acta y una revertía una decisión registrada. Aceptarlo entero habría significado rehacer trabajo y romper lo que ya funcionaba.
+
+### 46.2 Lo que sí faltaba, y el documento no nombraba
+
+Dos huecos reales, ninguno mencionado como tal en el plan.
+
+**Las fichas públicas de artistas seguían dando WhatsApp e Instagram** mientras las de proveedores ya no daban nada. O el criterio del 3 de septiembre vale para las tres bolsas o no vale. Se movió el contacto detrás de la sesión **sin vaciar la ficha**: nombre, foto, género y video siguen públicos, porque el escaparate es lo que el artista viene a buscar. Es el patrón de los convenios: página pública, una línea que dice que el detalle es de los afiliados, y el dato real dentro de `/mi-cuenta`.
+
+**El banco de talento no tenía puerta.** Quien dejaba su perfil en `/empleo` quedaba visible en el mismo segundo para todos los establecimientos afiliados: nombre, teléfono y correo de un tercero, a un público cerrado, sin que nadie los mirara. Ahora hay `aprobado_el`, y nace en null para todos —incluidos los siete de la D-27, que aceptaron con otra política—. Sua eligió esa opción sabiendo el costo: el banco se ve vacío hasta que la secretaría apruebe uno por uno.
+
+### 46.3 Dos ampliaciones, y el acta antes del código
+
+Beneficios por territorio y analítica no figuran en ningún RF de la ERS v3, así que son ampliación. Se emitió el **Acta 07** —numerada 07 y no 06 porque el 06 sigue reservado para la ampliación de las bolsas (D-26)— con el costo medido y no estimado a ojo, y con una contrapropuesta que es la parte que importa: **analítica anónima sin visitantes únicos**, porque distinguir personas exige IP, cookie o sesión, que es justo lo que el diseño evita para no entrar en la Ley 1581. Sua aprobó todo lo relativo a firmas y se construyeron las dos.
+
+En **beneficios**, la decisión que gobierna el resto es que `alcance` nace nullable y sin valor por defecto: los cinco sembrados salen del catálogo oficial y ese documento no dice de quién es cada uno, así que clasificarlos de oficio habría sido publicar una afirmación que nadie hizo. Hay guardia contra eso. En **analítica**, la vuelta de tuerca es que no hay una fila por visita sino un contador por ruta y día: la tabla crece con el calendario y no con el tráfico, y desaparece la hora exacta de cada visita, que era la última traza que quedaba.
+
+### 46.4 Tres falsos verdes cazados al romper las guardias, y uno que no era nuestro
+
+**Cuarenta y dos casos nuevos** —la suite pasó de 1.105 a 1.147 en la sesión—, todos vistos rojos antes del código y rotos después uno por uno. Tres pasaban por el motivo equivocado y solo se supo al mutarlos.
+
+1. **«El panel no cuenta como visita del sitio» pasaba porque Filament no usa el grupo `web`**, no porque el filtro funcionara: el contador no llega ahí. Se conserva la prueba —fija el resultado— y se añade la del portal del afiliado, que sí pasa por `web` y ejerce el filtro de verdad.
+2. **«Una respuesta que no es 200 no cuenta» pasaba por la rama de "ruta sin nombre"**, no por la comprobación del código. Se partió en dos, y la segunda usa una ficha de artista en borrador: ruta con nombre que responde 404.
+3. **Dos pruebas del sello de alcance afirmaban sobre texto que la página ya traía por otro lado**: el sitio entero se llama «ASOBARES Quindío» y `/afiliate` lista todos los municipios en su formulario, así que un `assertSee` pasaba aunque el sello dijera cualquier cosa. Ahora se afirma sobre el contenido del sello con una expresión regular.
+
+Y una trampa que no era de nadie de la casa: **`dia` con casteo a fecha se guarda como «2026-09-08 00:00:00» en SQLite y como «2026-09-08» en PostgreSQL**, la misma fila con dos formas según el motor y las comparaciones de la ventana dependiendo de eso. Cuando una columna es la clave de un cubo y no un instante, se trata como la cadena que es.
+
+**Y una lectura del navegador que parecía un defecto y no lo era:** midiendo el botón flotante, las cuatro esquinas de su caja devolvían «tapada» con `elementFromPoint`. El botón es un círculo: las esquinas del rectángulo caen fuera de él. Los cinco puntos sobre el círculo devuelven el botón. Es la tercera vez que este proyecto anota una lectura de `elementFromPoint` que hay que interpretar antes de creer.
+
+### 46.5 Cómo quedó
+
+Cinco commits en la rama `p1-cierre-bolsas`, ninguno empujado. Suite completa sobre `fc2142f`: **1.147 casos, 1.136 pasan, 11 omitidas, 0 fallos, 5.204 aserciones en 335 s**. El botón de WhatsApp y el sello de alcance se vieron en el navegador a 375 y a 1.280 px; la analítica se comprobó contra el servidor de desarrollo y no solo en pruebas.
+
+Queda **un solo bloque del plan sin tocar: el QA**, y está bloqueado por lo mismo desde el principio: el documento dice que la auditoría funcional dio 44 PASS, 2 FAIL, 1 BLOCKED y 3 NOT TESTED, **y no dice cuáles**. Los 2 FAIL son lo más accionable de todo el plan y no están descritos en ninguna parte.

@@ -2,7 +2,7 @@
 
 **Versión:** 1.0 · **Fecha:** 18 de agosto de 2026 · **Elaboró:** Juan José Sua Gómez (práctica empresarial, Universidad Alexander von Humboldt)
 **Línea base de requisitos:** ERS v3.0 (RF-01 a RF-62, RNF-01 a RNF-14) · **Espejo técnico:** product backlog v2 (14 épicas, 53 historias de usuario)
-**Estado del repositorio:** `main` en `4f15d24` · repositorio `Jsua3/asobares`
+**Estado del repositorio:** rama `p1-cierre-bolsas` en `fc2142f` · repositorio `Jsua3/asobares`
 
 ---
 
@@ -27,17 +27,19 @@ No se confunde con la suite automatizada: la suite es el **instrumento**, esta m
 
 | Métrica | Valor |
 |---|---|
-| Archivos de prueba | 60 |
-| **Métodos de prueba** | **592** |
-| **Casos ejecutados** | **820** (los métodos con proveedor de datos expanden a varios casos cada uno) |
-| Resultado de la última ejecución **verificada** | 809 pasan · 11 omitidas · **0 fallos** |
-| Aserciones | **2.904** |
-| Duración de la suite completa | 348 s |
+| Archivos de prueba | 90 |
+| **Métodos de prueba** | **876** |
+| **Casos ejecutados** | **1.147** (los métodos con proveedor de datos expanden a varios casos cada uno) |
+| Resultado de la última ejecución **verificada** | 1.136 pasan · 11 omitidas · **0 fallos** |
+| Aserciones | **5.204** |
+| Duración de la suite completa | 335 s |
 | Requisitos funcionales V1 con cobertura total o parcial | 52 de 53 |
 | Requisitos no funcionales con cobertura total o parcial | 11 de 14 |
 
 > **Cómo se cuenta la fila de arriba.** Se cuentan **filas** de la tabla de la §3 (una fila que agrupa varios RF, como «RF-03, RF-04», cuenta una sola vez). La §3 tiene 58 filas; se excluyen las 5 marcadas ➖ —fuera del alcance V1 por decisión de la ERS v3: RF-55, RF-58, RF-59, RF-61 y RF-62—, lo que deja **53 filas en alcance V1**. De esas, cuentan como cobertura total o parcial las marcadas ✅ o ⚠️ (**52**); la única ❌ es RF-05, cuya columna Prueba está vacía. Reconstruible fila por fila leyendo la §3, o contando los símbolos de la columna Estado sobre las líneas que empiezan por `| RF-`.
 
+> ✅ **Última ejecución — 8 de septiembre de 2026.** Sobre la rama `p1-cierre-bolsas` en `fc2142f`, con `php artisan test --compact` y PHP 8.5.9 con `intl` y `gd`: **1.147 casos · 1.136 pasan · 11 omitidas · 0 fallos · 5.204 aserciones · 335 s**. Es la corrida que respalda la tabla de arriba. Los casos nuevos respecto al 25 de agosto cubren la capa visual entera —barra pública de escritorio y de teléfono, panel y su barra lateral— y las cuatro entregas del plan de trabajo del 8 de septiembre, que están en «Decisiones y ampliaciones posteriores a la ERS v3», al final de la §3.
+>
 > ✅ **Última ejecución — 25 de agosto de 2026.** Sobre el árbol de trabajo, con `php artisan test --compact` y PHP 8.5.9 con `intl` y `gd`: **820 casos · 809 pasan · 11 omitidas · 0 fallos · 2.904 aserciones · 348 s**. Es la revisión final de RF-60: cinco pruebas de `VigenciaDeLaGuiaTest` que podían pasar sin ejercer lo que decían proteger —una fecha bomba, una bitácora que solo leía su propia configuración, un scope cuyas dos negaciones las cumplía un conjunto vacío— quedaron corregidas con reloj fijo, un `update()` real contra `Activity` y un control positivo; el caso nuevo (+1) cubre el `noindex` de un municipio cuya guía entera caducó.
 >
 > ✅ **Última ejecución — 24 de agosto de 2026.** Sobre el árbol de trabajo, con `php artisan test --compact` y PHP 8.5.9 con `intl` y `gd`: **819 casos · 808 pasan · 11 omitidas · 0 fallos · 2.899 aserciones · 350 s**. Los casos nuevos respecto al 23 de agosto cierran RF-60: la vigencia de la guía normativa en el modelo, en las cuatro puertas por las que sale y en el panel.
@@ -128,7 +130,7 @@ No se confunde con la suite automatizada: la suite es el **instrumento**, esta m
 |---|---|---|---|---|
 | RF-50 | HU-ART-01 | Inscripción pública moderada, con foto validada por tipo real y video legítimo | `SolicitudesDeBolsaTest` (13 casos) · `Unit/VideoDeArtistaTest` | ✅ |
 | RF-51 | HU-ART-02 | Solo las fichas publicadas salen en consultas públicas | `FichasDeBolsaTest::test_solo_las_fichas_publicadas_salen_en_las_consultas_publicas` | ✅ |
-| RF-52 | HU-ART-03 | Moderación desde el panel, con aviso al solicitante | `ModeracionDeBolsasTest` (21 casos) | ✅ |
+| RF-52 | HU-ART-03 | Moderación desde el panel, con aviso al solicitante | `ModeracionDeBolsasTest` (27 casos) | ✅ |
 
 ### EP-08 · Bolsa de proveedores
 
@@ -191,6 +193,19 @@ No se confunde con la suite automatizada: la suite es el **instrumento**, esta m
 | RF-40 | HU-ADM-05 | Segundo factor obligatorio en el panel; sin él no se llega al escritorio | `LoginDelPanelTest` (10 casos) | ✅ |
 | RF-61 | *(nuevo ERS v3)* | Certificado automático de afiliación | — | ➖ Fase II |
 | RF-62 | *(nuevo ERS v3)* | Integración de contenidos desde redes sociales | — | ➖ Fase II |
+
+### Decisiones y ampliaciones posteriores a la ERS v3
+
+Van aparte de los RF a propósito. **Nada de esto es un requisito contratado**: son decisiones que afinan un módulo ya construido, o ampliaciones que entraron por acta después de la congelación del 14 de agosto. Mezclarlas con los RF haría creer que el alcance creció solo.
+
+| Ref. | De dónde viene | Criterio verificado | Prueba | Estado |
+|---|---|---|---|---|
+| Contactos de las bolsas | Decisión del 3 sep (`encargo.md` §13) | Los contactos de proveedores y los perfiles del banco de talento viven detrás de la sesión del afiliado; `/proveedores` sigue pública y sin un solo contacto; `/empleo` **no** se cierra | `AccesoDeAsociadosTest` (16 casos con lo de artistas y aprobación) | ✅ |
+| Contactos de artistas | Decisión del 8 sep, misma regla | La ficha pública del artista conserva el escaparate y pierde el contacto; el directorio con contactos vive en `/mi-cuenta/artistas` | `AccesoDeAsociadosTest::test_la_ficha_publica_del_artista_conserva_el_escaparate_pero_no_el_contacto` · `::test_un_afiliado_ve_los_contactos_de_los_artistas` | ✅ |
+| Aprobación en el banco de talento | Decisión del 8 sep · `encargo.md` §9 · D-27 | Un perfil registrado en `/empleo` no se ve hasta que la secretaría lo aprueba, y volver a enviarlo lo devuelve a revisión | `AccesoDeAsociadosTest::test_el_banco_no_muestra_a_quien_la_secretaria_no_ha_aprobado` · `::test_volver_a_dejar_el_perfil_lo_devuelve_a_revision` · `ModeracionDeBolsasTest` (3 casos) | ✅ |
+| Botón de WhatsApp | Plan de trabajo del 8 sep · RNF-09 | Botón público con el número saliendo de Ajustes, que se apaga si el ajuste se vacía y se aparta de la barra inferior del teléfono | `BotonFlotanteDeWhatsappTest` (9 casos) | ✅ |
+| **A-01** Beneficios por territorio | **Acta 07**, 8 sep | Alcance nacional, departamental o municipal en un solo módulo; el municipal exige municipio y el resto lo suelta; sin clasificar no se anuncia nada | `BeneficiosPorAlcanceTest` (10 casos) | ✅ |
+| **A-02** Analítica del sitio | **Acta 07**, 8 sep, con la contrapropuesta | Conteo anónimo por ruta y día, sin IP, navegador ni sesión; sin visitantes únicos por decisión; dos gráficas tras el permiso de dirección | `AnaliticaDelSitioTest` (14 casos) | ✅ |
 
 ---
 
