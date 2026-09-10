@@ -589,6 +589,39 @@ class NavbarMovilTest extends TestCase
     }
 
     /**
+     * La gota no lleva contorno, y esto lo decidió un teléfono.
+     *
+     * Nació con `1px solid rgb(238 65 55 / 0.3)` y sobre la pantalla real no se
+     * lee como una gota sino como un aro rojo dibujado alrededor del icono (Sua,
+     * 10 sep, con la barra abierta en el móvil). Una gota sobre un cristal no
+     * tiene línea: tiene un borde que se apaga. Por eso el salto al fondo de la
+     * barra lo hace un halo de opacidad y no un trazo, y por eso el halo se
+     * vigila junto con su ausencia: quitar los dos deja la gota cortada a pico.
+     *
+     * La guardia mira la DECLARACIÓN, no la palabra. El comentario de `app.css`
+     * cita el contorno viejo para explicar por qué se fue, y una guardia que
+     * buscara el término a secas saltaría con esa misma explicación: van tres
+     * veces en este proyecto que una prohibición por texto se dispara sola.
+     */
+    public function test_la_gota_no_lleva_contorno(): void
+    {
+        $movil = $this->bloque(File::get(resource_path('css/app.css')), '@media (max-width: 63.999rem)', 2);
+        $gota = $this->regla($movil, '.pestana__gota');
+
+        $this->assertSame(
+            0,
+            preg_match('/\bborder(-(width|style|color|top|right|bottom|left))?\s*:/', $gota),
+            'La gota volvió a llevar contorno. Se le quitó el 10 de septiembre mirándola en un teléfono de verdad: con trazo es un aro, no una gota. `border-radius` sí puede seguir.'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/box-shadow:\s*0 0 0 [\d.]+px/',
+            $gota,
+            'El halo es lo que sustituye al trazo: sin él la gota corta a pico contra el fondo de la barra.'
+        );
+    }
+
+    /**
      * La gota se pinta vacía y solo en la pestaña activa.
      *
      * Vacía, porque su nombre la convierte en raíz de fondo y cualquier hijo

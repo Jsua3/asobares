@@ -2415,3 +2415,15 @@ Lo que sí cabría hoy son las tres entidades públicas (Alcaldía de Armenia, C
 ### 49.3 La lección
 
 **Verificar contra el documento, no contra el resumen del documento.** Los cuatro textos que entraron se leyeron del PDF y del `.docx` originales, palabra por palabra; el que no se pudo leer, no entró. La diferencia entre las dos mitades de esta sesión es exactamente esa, y es la regla del §4.2 del prompt maestro —ninguna cifra sale de una suma— aplicada a texto en vez de a números.
+
+## §50 — La gota vista en un teléfono de verdad (10 de septiembre de 2026)
+
+Primera pasada de la S7 sobre la capa visual: Sua abrió el sitio en un Android contra el servidor de la LAN y mandó la captura. La barra se pinta bien y el estado activo se entiende. Salió **una** cosa, y es de las que ninguna medición iba a dar.
+
+**La gota llevaba un contorno de 1 px**, `rgb(238 65 55 / 0.3)`, encima de un relleno al 14 %. En el navegador de escritorio y en la maqueta eso pasaba por una píldora discreta. En la mano no: se lee como **un aro rojo dibujado alrededor del icono**, que es exactamente lo contrario de lo que se pidió — «que el botón asemeje el movimiento de una gota de agua sobre un cristal». Una gota sobre un cristal no tiene línea: tiene un borde que se apaga.
+
+Se le quitó el trazo. El relleno sube del 14 al 20 % para no perder el «estás aquí» que daba el contorno, y el salto al fondo de la barra lo amortigua un halo de 5 px al 6 %: dos escalones de opacidad en vez de una línea. Medido después en los dos temas, con la caja intacta —40×28, el icono dentro con 2 px de holgura arriba y 8 a los lados— así que la corrección del 9 de septiembre sigue en pie.
+
+**La guardia tiene truco, y por cuarta vez el mismo.** Prohibir la palabra «border» en la regla la habría disparado el propio comentario de `app.css`, que cita el contorno viejo para explicar por qué se fue. La guardia mira la **declaración** —`border`, `border-width`, `border-style`… seguido de dos puntos— y deja pasar `border-radius`, que sí hace falta. Comprobada con tres mutaciones: devolver el aro, roja; quitar el halo, roja; `border-radius` intacto, verde.
+
+**La lección, que es de método:** el catálogo de trampas de este proyecto se llenó de cosas que el navegador miente. Esta es la otra mitad — **una decisión de diseño que ninguna medición podía tomar**. El contraste pasaba, la geometría pasaba, las mutaciones pasaban, y aun así estaba mal. Lo único que lo dijo fue una pantalla de seis pulgadas en una mano. Quedan dos superficies en esa misma situación y **más peligrosas, porque son gesto y no dibujo**: la hoja arrastrable y el vidriado del botón, que a día de hoy no ha tocado nadie.
