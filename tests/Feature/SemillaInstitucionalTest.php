@@ -6,6 +6,7 @@ use App\Enums\TipoAliado;
 use App\Models\Aliado;
 use App\Models\Iniciativa;
 use App\Models\RequisitoApertura;
+use App\Models\Setting;
 use Database\Seeders\ArtistaSeeder;
 use Database\Seeders\AsociadoSeeder;
 use Database\Seeders\CarteraSeeder;
@@ -269,6 +270,88 @@ class SemillaInstitucionalTest extends TestCase
                 'Diplomado en Gerencia de Bares',
             ],
             Iniciativa::query()->orderBy('orden')->pluck('nombre')->all()
+        );
+    }
+
+    /**
+     * El presidente firma con sus dos apellidos en un orden, y el sitio los
+     * tenía al revés: decía «Jorge Iván Botero Ángel».
+     *
+     * La invitación a los ponentes del foro nocturno de noviembre de 2025 la
+     * firma él mismo como «Jorge Iván Ángel Botero · Presidente Asobares
+     * Quindío». Es el nombre de una persona real en una página pública con el
+     * nombre del gremio encima, así que la guardia no se conforma con que el
+     * bueno esté: comprueba además que el malo no sobreviva en ningún sitio de
+     * la página --que es como estuvo cuatro semanas--.
+     */
+    public function test_el_presidente_lleva_los_apellidos_como_el_mismo_los_firma(): void
+    {
+        $this->assertSame('Jorge Iván Ángel Botero', ajuste('quienes_presidente'));
+
+        $this->get(route('quienes-somos'))
+            ->assertOk()
+            ->assertSee('Jorge Iván Ángel Botero', escape: false)
+            ->assertDontSee('Jorge Iván Botero Ángel', escape: false);
+    }
+
+    /**
+     * El lema es el del gremio, no el que redactó este equipo.
+     *
+     * Cierra la última lámina de la presentación institucional, entre comillas.
+     * Antes decía «La noche construye territorio», de cosecha propia, y se veía
+     * en el pie de todas las páginas, en el título de la portada y sobre el
+     * hero de «Quiénes somos»: era el texto inventado más repetido del sitio.
+     */
+    public function test_el_lema_del_sitio_es_el_del_gremio(): void
+    {
+        $this->assertSame('Construyendo un Quindío nocturno', ajuste('sitio_eslogan'));
+    }
+
+    /**
+     * Y lo mismo con la propuesta de valor, que es el subtítulo del hero de
+     * «Quiénes somos»: lo primero que lee quien entra a saber qué es esto.
+     *
+     * Entra tal cual la escribe la lámina 2, sin resumir: la regla del §17.2
+     * del encargo es que un texto del gremio no se «mejora», y si está mal
+     * escrito se le pregunta a la dirección ejecutiva.
+     */
+    public function test_la_propuesta_de_valor_la_escribe_el_gremio(): void
+    {
+        $this->assertSame(
+            'En Asobares Capítulo Quindío nos comprometemos a ser un aliado estratégico de los empresarios y '
+            .'establecimientos de la vida nocturna, brindando oportunidades de crecimiento, innovación y conexión '
+            .'para impulsar el desarrollo del sector turístico como un producto nocturno.',
+            ajuste('quienes_mision')
+        );
+    }
+
+    /**
+     * Las dos cifras del respaldo nacional salen de la lámina 3, y son de la
+     * Nacional --no del capítulo--.
+     *
+     * La aserción que de verdad protege es la última. `cifra_afiliados` se
+     * jubiló el 9 de septiembre porque el sitio prometía «60», la base tenía 48
+     * y ningún documento lo sostenía (D-18). Estas dos claves entran el mismo
+     * día por la puerta de al lado: si el rótulo no dice de quién son, el
+     * defecto vuelve con otro nombre y esta vez con una cifra cuatro veces
+     * mayor.
+     */
+    public function test_el_respaldo_nacional_dice_de_quien_son_sus_cifras(): void
+    {
+        $this->assertSame('17', ajuste('nacional_capitulos'));
+        $this->assertSame('2.500', ajuste('nacional_afiliados'));
+
+        foreach (['nacional_capitulos_rotulo', 'nacional_afiliados_rotulo'] as $clave) {
+            $this->assertStringContainsString(
+                'en el país',
+                (string) ajuste($clave),
+                "El rótulo «{$clave}» tiene que decir que la cifra es de la Nacional: sin eso se lee como el tamaño del capítulo del Quindío."
+            );
+        }
+
+        $this->assertNull(
+            Setting::query()->where('clave', 'cifra_afiliados')->value('valor'),
+            'La cifra de afiliados DEL QUINDÍO sigue sin documento (D-18) y no puede volver por esta puerta.'
         );
     }
 }
