@@ -57,6 +57,82 @@ class DirectorioTest extends TestCase
         $respuesta->assertDontSee('en otra categoría');
     }
 
+    public function test_el_directorio_usa_tarjetas_uniformes_y_conserva_distincion_de_destacado(): void
+    {
+        Asociado::factory()->destacado()->create(['nombre' => 'Bar Amnesia']);
+        Asociado::factory()->publicado()->create(['nombre' => 'BBC Pub']);
+
+        $respuesta = $this->get(route('directorio.index'));
+
+        $respuesta->assertSuccessful();
+        $respuesta->assertSee('Destacado');
+        $respuesta->assertDontSee('tarjeta-escena');
+        $respuesta->assertDontSee('sm:col-span-2');
+        $respuesta->assertDontSee('lg:col-span-2');
+    }
+
+    public function test_el_directorio_ordena_ignorando_solo_el_prefijo_bar(): void
+    {
+        foreach ([
+            'Restaurante Aaa',
+            'BBC Pub',
+            'Bar Zafiro',
+            'BAR Baco',
+            'bAr Amnesia',
+            'bar Cava',
+        ] as $nombre) {
+            Asociado::factory()->publicado()->create(['nombre' => $nombre]);
+        }
+
+        $respuesta = $this->get(route('directorio.index'));
+
+        $respuesta->assertSuccessful();
+        $respuesta->assertSeeInOrder([
+            'bAr Amnesia',
+            'BAR Baco',
+            'BBC Pub',
+            'bar Cava',
+            'Restaurante Aaa',
+            'Bar Zafiro',
+        ]);
+        $respuesta->assertSee('Bar Zafiro');
+    }
+
+    public function test_los_destacados_conservan_prioridad_y_orden_comercial_interno(): void
+    {
+        Asociado::factory()->publicado()->create(['nombre' => 'Bar Amnesia']);
+        Asociado::factory()->destacado()->create(['nombre' => 'Bar Zulu']);
+        Asociado::factory()->destacado()->create(['nombre' => 'BAR Baco']);
+
+        $respuesta = $this->get(route('directorio.index'));
+
+        $respuesta->assertSuccessful();
+        $respuesta->assertSeeInOrder([
+            'BAR Baco',
+            'Bar Zulu',
+            'Bar Amnesia',
+        ]);
+    }
+
+    public function test_el_orden_comercial_ocurre_antes_de_paginar(): void
+    {
+        Asociado::factory()->publicado()->create(['nombre' => 'Bar Zulu']);
+
+        foreach (range(1, 12) as $indice) {
+            Asociado::factory()->publicado()->create(['nombre' => sprintf('BBC Pub %02d', $indice)]);
+        }
+
+        $this->get(route('directorio.index'))
+            ->assertSuccessful()
+            ->assertSee('BBC Pub 01')
+            ->assertSee('BBC Pub 12')
+            ->assertDontSee('Bar Zulu');
+
+        $this->get(route('directorio.index', ['page' => 2]))
+            ->assertSuccessful()
+            ->assertSee('Bar Zulu');
+    }
+
     public function test_un_parametro_invalido_no_tumba_la_pagina(): void
     {
         $this->get(route('directorio.index', ['municipio' => 'no-existe']))

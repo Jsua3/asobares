@@ -8,6 +8,7 @@ use App\Models\Categoria;
 use App\Models\Municipio;
 use App\Models\Publicidad;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class DirectorioController
@@ -45,10 +46,12 @@ class DirectorioController
 
         $vista = $datos['vista'] ?? 'grid';
 
+        $this->ordenarParaDirectorio($consulta);
+
         // En modo mapa se necesitan todos los pines, no una página.
         $asociados = $vista === 'mapa'
-            ? $consulta->orderBy('nombre')->get()
-            : $consulta->orderByDesc('destacado')->orderBy('nombre')->paginate(12)->withQueryString();
+            ? $consulta->get()
+            : $consulta->paginate(12)->withQueryString();
 
         return view('publico.directorio.index', [
             'asociados' => $asociados,
@@ -58,6 +61,14 @@ class DirectorioController
             'publicidadDirectorio' => Publicidad::publicaEn(UbicacionPublicidad::Directorio)->first(),
             'vista' => $vista,
         ]);
+    }
+
+    private function ordenarParaDirectorio(Builder $consulta): void
+    {
+        $consulta
+            ->orderByDesc('destacado')
+            ->orderByRaw("lower(case when lower(nombre) like 'bar %' then substr(nombre, 5) else nombre end)")
+            ->orderBy('nombre');
     }
 
     public function show(Asociado $asociado): View

@@ -131,10 +131,8 @@
             @else
                 <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach ($asociados as $asociado)
-                        <div @class(['sm:col-span-2 lg:col-span-2' => $loop->first])>
-                            <x-publico.tarjeta-asociado
-                                :asociado="$asociado"
-                                :variante="$loop->first ? 'editorial' : 'ficha'" />
+                        <div>
+                            <x-publico.tarjeta-asociado :asociado="$asociado" />
                         </div>
                     @endforeach
                 </div>
