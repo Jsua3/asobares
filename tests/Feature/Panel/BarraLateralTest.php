@@ -1714,4 +1714,74 @@ class BarraLateralTest extends TestCase
 
         return $valor[1];
     }
+
+    /**
+     * El botón que abre la navegación en el teléfono llega a los 44 px.
+     *
+     * Medido el 10 sep sobre el panel real a 375 px: la caja daba 36x36 y el
+     * área de impacto 36x37, contra los 44 que este proyecto aplica en toda la
+     * barra pública. No es código nuestro --lo pinta Filament-- pero es EL
+     * control que abre la navegación entera en un teléfono: si falla, no hay
+     * segunda forma de llegar a ningún sitio.
+     *
+     * El área crece y el dibujo no, igual que «Afíliate» en el sitio público.
+     * El `position: relative` se declara aunque el tema de Filament ya lo
+     * traiga: sin él el pseudoelemento se cuelga del ancestro posicionado más
+     * cercano y el área de toque aparece en otra parte de la pantalla.
+     *
+     * Roturas: quitar el `::after`; quitar el `position: relative`.
+     */
+    public function test_el_disparador_de_la_navegacion_movil_llega_a_los_44_px(): void
+    {
+        $tema = $this->tema();
+
+        $this->assertMatchesRegularExpression(
+            '/\.fi-topbar-open-sidebar-btn \{\s*position: relative;/',
+            $tema,
+            'sin ancestro posicionado el area de toque se cuelga de otro elemento'
+        );
+
+        $this->assertSame(
+            1,
+            preg_match('/\.fi-topbar-open-sidebar-btn::after \{(.*?)\}/s', $tema, $area),
+            'el disparador se queda en 36 px sin el pseudoelemento que recoge el toque'
+        );
+
+        $this->assertStringContainsString('position: absolute;', $area[1]);
+
+        $this->assertSame(
+            1,
+            preg_match('/inset: -(\d+)px;/', $area[1], $inset),
+            'el area tiene que declarar cuanto crece'
+        );
+
+        $this->assertGreaterThanOrEqual(
+            4,
+            (int) $inset[1],
+            "con 36 px de caja hacen falta 4 por lado para llegar a 44, y declara {$inset[1]}"
+        );
+    }
+
+    /**
+     * El rótulo de la barra se pliega, no se recorta.
+     *
+     * «Eventos y capacitaciones» salía como «Eventos y capacitacion…» con el
+     * cajón abierto, y no por falta de sitio: Filament trunca por defecto. Un
+     * destino cuyo nombre se corta obliga a adivinarlo o a pasar el ratón por
+     * encima, y con el dedo no hay ratón.
+     *
+     * Dos líneas como mucho --un nombre absurdo no puede estirar la fila sin
+     * fin-- y el corte por palabra: partir «capacitaciones» por la mitad se lee
+     * peor que la elipsis.
+     *
+     * Rotura: devolver `white-space: nowrap`; quitar el `line-clamp`.
+     */
+    public function test_el_rotulo_de_la_barra_se_pliega_en_vez_de_recortarse(): void
+    {
+        $regla = $this->bloque($this->tema(), '.fi-sidebar .fi-sidebar-item-label {');
+
+        $this->assertStringContainsString('white-space: normal;', $regla, 'con nowrap el rotulo vuelve a la elipsis');
+        $this->assertStringContainsString('-webkit-line-clamp: 2;', $regla, 'sin tope, un nombre absurdo estira la fila sin fin');
+        $this->assertStringContainsString('overflow-wrap: normal;', $regla, 'break-word partiria las palabras por la mitad');
+    }
 }

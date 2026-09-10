@@ -9,6 +9,20 @@
 {{--
     Leaflet + OpenStreetMap por CDN: gratis y sin API key. Todo el mapa vive
     en este componente para poder cambiar de proveedor sin tocar las páginas.
+
+    ⚠️ El guion de abajo va dentro de un ATRIBUTO de Alpine, así que ni un
+    comentario puede llevar comillas dobles: cierran el atributo y el
+    navegador se queda con un `SyntaxError` y sin mapa. Comprobado el 10 sep
+    metiendo una en un comentario. Lo que haya que explicar, se explica aquí.
+
+    **Los dos botones de zoom se rotulan a mano (10 sep).** Leaflet los pinta
+    con `title` y `aria-label` en inglés --Zoom in / Zoom out--, o sea que en
+    un sitio en español el globito salía en inglés y un lector de pantalla lo
+    anunciaba en inglés. Era el único texto de interfaz que no salía de
+    nosotros. Se apaga el control de fábrica y se añade uno rotulado, que es
+    opción de la propia librería y por tanto sobrevive a que Leaflet redibuje
+    el control. Lo demás ya estaba bien: `role="button"`, nombre accesible y
+    44x44 de objetivo táctil.
 --}}
 @once
     @push('cabeza')
@@ -76,7 +90,14 @@
                 fadeAnimation: ! movimientoReducido,
                 zoomAnimation: ! movimientoReducido,
                 markerZoomAnimation: ! movimientoReducido,
+                // Sin el control de zoom de fábrica: lo rotula en inglés.
+                zoomControl: false,
             }).setView([{{ $lat }}, {{ $lng }}], {{ $zoom }});
+
+            L.control.zoom({
+                zoomInTitle: 'Acercar el mapa',
+                zoomOutTitle: 'Alejar el mapa',
+            }).addTo(mapa);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; colaboradores de OpenStreetMap',

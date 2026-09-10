@@ -42,7 +42,14 @@
 
     <a
         href="{{ $url }}"
-        class="shrink-0 rounded-lg border border-linea px-3 py-1.5 text-sm font-medium text-tinta transition-colors hover:border-acento hover:text-acento"
+        {{-- El área crece, el dibujo no. Con `py-1.5` la pastilla mide 34 px de
+             alto, y en el teléfono esta es la acción principal del tablero: se
+             pulsa con el pulgar sobre una lista. El `::after` la lleva a 46 sin
+             engordar el borde, que es el mismo recurso que usa «Afíliate» en la
+             barra pública (34 -> 45 medidos). 6 px por lado y no 8 a propósito:
+             las filas de la cola van una debajo de otra y un área más generosa
+             empezaría a robarle el toque a la vecina. --}}
+        class="relative shrink-0 rounded-lg border border-linea px-3 py-1.5 text-sm font-medium text-tinta transition-colors after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] hover:border-acento hover:text-acento"
     >
         {{ $accion }}
     </a>

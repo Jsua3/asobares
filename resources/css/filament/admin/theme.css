@@ -1155,9 +1155,32 @@
         font-weight: 650;
     }
 
+    /*
+     * El rótulo se pliega, no se recorta (10 sep).
+     *
+     * «Eventos y capacitaciones» salía como «Eventos y capacitacion…» con el
+     * cajón abierto a 15,75rem, y no por falta de sitio: Filament trunca por
+     * defecto. Un destino de navegación cuyo nombre se corta obliga a
+     * adivinarlo o a pasar el ratón por encima, y con el dedo no hay ratón.
+     *
+     * Dos líneas como mucho --el resto sí se recorta, para que un nombre
+     * absurdo no estire la fila indefinidamente-- y con el corte por palabra:
+     * `break-word` partiría «capacitaciones» por la mitad, que es peor de leer
+     * que la elipsis. La fila ya crece sola porque su alto es `min-height`.
+     *
+     * Ojo con el riel: ahí el rótulo se esconde entero por recorte visual
+     * (línea 717), no por `display: none`, para que los enlaces conserven su
+     * nombre accesible. Esta regla no lo toca.
+     */
     .fi-sidebar .fi-sidebar-item-label {
         color: var(--asb-admin-barra-tinta);
         font-weight: 600;
+        white-space: normal;
+        overflow-wrap: normal;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
     }
 
     /*
@@ -2295,5 +2318,33 @@
         box-shadow: none;
         outline: 1px solid CanvasText;
         outline-offset: -1px;
+    }
+}
+
+/*
+ * El botón que abre la navegación en el teléfono: 44 px, no 36.
+ *
+ * Medido el 10 sep sobre el panel real a 375 px: la caja daba 36x36 y el área
+ * de impacto 36x37, contra los 44 que este proyecto aplica en toda la barra
+ * pública. No es código nuestro --es el disparador de Filament-- pero es EL
+ * control que abre la navegación entera en un teléfono: si falla, no hay
+ * segunda forma de llegar a ningún sitio.
+ *
+ * Se agranda el área sin tocar el dibujo del icono, igual que en el sitio
+ * público: el `::after` no pinta nada, solo recoge el toque. El botón ya es
+ * `position: relative` en el tema de Filament; se declara igualmente porque
+ * sin eso el pseudoelemento se colgaría del ancestro posicionado más cercano
+ * y el área aparecería en otro sitio.
+ */
+@media (max-width: 63.999rem) {
+    .fi-topbar-open-sidebar-btn {
+        position: relative;
+    }
+
+    .fi-topbar-open-sidebar-btn::after {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        /* Sin fondo ni borde: esto es área de toque, no un dibujo. */
     }
 }

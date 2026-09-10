@@ -10,6 +10,7 @@ use App\Models\Noticia;
 use App\Models\Vacante;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -285,5 +286,45 @@ class SitioPublicoTest extends TestCase
         }
 
         $this->get('/abre-tu-negocio/formato/999999')->assertStatus(429);
+    }
+
+    /**
+     * Los botones del mapa hablan español.
+     *
+     * Leaflet pinta su control de zoom con `title` y `aria-label` en inglés
+     * --Zoom in / Zoom out--, así que en un sitio en español el globito salía
+     * en inglés y un lector de pantalla lo anunciaba en inglés. Era el único
+     * texto de interfaz que no salía de nosotros. Comprobado el 10 sep leyendo
+     * los atributos del control ya pintado.
+     *
+     * Se apaga el control de fábrica y se añade uno rotulado, en vez de
+     * reescribir el DOM después: la opción es de la propia librería y por tanto
+     * sobrevive a que Leaflet vuelva a dibujar el control, cosa que hace.
+     *
+     * ⚠️ El guion del mapa vive dentro de un ATRIBUTO de Alpine, así que ni un
+     * comentario puede llevar comillas dobles: cierran el atributo y el mapa
+     * desaparece con un `SyntaxError`. Pasó al escribir este arreglo.
+     *
+     * Roturas: devolver `zoomControl` a su valor de fábrica; quitar cualquiera
+     * de los dos rótulos.
+     */
+    public function test_los_botones_del_mapa_estan_en_espanol(): void
+    {
+        $mapa = File::get(resource_path('views/components/publico/mapa.blade.php'));
+
+        $this->assertStringContainsString('zoomControl: false', $mapa, 'sin apagar el de fabrica, Leaflet pinta el suyo en ingles');
+        $this->assertStringContainsString("zoomInTitle: 'Acercar el mapa'", $mapa);
+        $this->assertStringContainsString("zoomOutTitle: 'Alejar el mapa'", $mapa);
+
+        // Aquí había una aserción más, que decía vigilar que el guion no
+        // llevara comillas dobles. Se retiró el 10 sep porque NO PODÍA FALLAR:
+        // aislaba el atributo con `x-init="([^"]*)"`, y esa expresión se corta
+        // justo en la primera comilla doble, así que el trozo capturado nunca
+        // contenía ninguna. Comprobado metiendo una a propósito: verde. Una
+        // guardia que no puede ponerse roja es peor que no tenerla, porque
+        // ocupa el sitio de la que sí serviría.
+        //
+        // La regla sigue viva donde se puede leer: en la cabecera del propio
+        // componente, con el aviso de que una comilla doble mata el mapa.
     }
 }

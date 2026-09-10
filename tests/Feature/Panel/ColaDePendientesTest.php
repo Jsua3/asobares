@@ -229,4 +229,42 @@ class ColaDePendientesTest extends TestCase
             'RolYPermisoSeeder::PUBLICABLES debe listar el mismo slug singular para cada modelo que usa EsPublicable.'
         );
     }
+
+    /**
+     * El botón de la fila llega al mínimo táctil sin engordar el dibujo.
+     *
+     * Medido el 10 sep en el panel a 375 px: la pastilla daba 78x34 y el área
+     * de impacto, 78x34 también --no tenía nada que la agrandara--. En el
+     * teléfono esta es la acción principal del tablero y se pulsa con el pulgar
+     * sobre una lista de filas seguidas.
+     *
+     * Crece el área y no el borde, que es el mismo recurso de «Afíliate» en la
+     * barra pública (34 -> 45 medidos). Seis píxeles por lado y no ocho a
+     * propósito: las filas van una debajo de otra y un área más generosa
+     * empezaría a robarle el toque a la vecina.
+     *
+     * Rotura: quitar el `::after` o el `relative` de la clase del enlace.
+     */
+    public function test_el_boton_de_la_fila_crece_el_area_y_no_el_dibujo(): void
+    {
+        $cola = File::get(resource_path('views/components/panel/cola.blade.php'));
+
+        $this->assertStringContainsString('after:absolute', $cola, 'sin pseudoelemento la pastilla se queda en 34 px');
+        $this->assertStringContainsString('after:inset-x-0', $cola);
+        $this->assertStringContainsString("after:content-['']", $cola, 'un ::after sin content no se genera');
+
+        $this->assertSame(
+            1,
+            preg_match('/after:-inset-y-([0-9.]+)/', $cola, $crece),
+            'el area tiene que declarar cuanto crece a lo alto'
+        );
+
+        // Tailwind cuenta en cuartos de rem: 1.5 son 6 px por lado.
+        $porLado = ((float) $crece[1]) * 4;
+
+        $this->assertGreaterThanOrEqual(5, $porLado, "crece {$porLado} px por lado y con 34 de caja no llega a 44");
+        $this->assertLessThanOrEqual(8, $porLado, "crece {$porLado} px por lado: empieza a robarle el toque a la fila vecina");
+
+        $this->assertStringContainsString('relative shrink-0', $cola, 'sin ancestro posicionado el area aparece en otro sitio');
+    }
 }
