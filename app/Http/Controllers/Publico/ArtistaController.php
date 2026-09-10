@@ -33,8 +33,41 @@ class ArtistaController
         return view('publico.artistas.index', [
             'artistas' => $consulta->orderBy('nombre')->paginate(12)->withQueryString(),
             'generos' => Artista::publicado()->whereNotNull('genero_musical')->distinct()->orderBy('genero_musical')->pluck('genero_musical'),
+            'tipos' => $this->tiposConFicha($datos['tipo'] ?? null),
             'filtros' => $datos,
         ]);
+    }
+
+    /**
+     * Los tipos que de verdad tienen ficha publicada, más el elegido.
+     *
+     * El desplegable de al lado —«Género musical»— ya salía de las fichas
+     * publicadas, y este seguía recorriendo el enum entero desde la propia
+     * plantilla. Se veía dentro del MISMO formulario: medido contra producción
+     * el 9 de septiembre de 2026, con cero fichas publicadas, «Género musical»
+     * se quedaba correctamente en «Todos los géneros» mientras «Tipo» ofrecía
+     * DJ, Banda, Solista y Otro, las cuatro muertas.
+     *
+     * Se recorre el enum y no la consulta para conservar el orden declarado, que
+     * es el que la oficina espera. Y lo elegido se conserva aunque se quede sin
+     * fichas: si el filtro borrara de la lista lo que el visitante escogió, el
+     * desplegable volvería solo a «Todos» mientras la consulta sigue filtrando.
+     *
+     * @return list<TipoArtista>
+     */
+    private function tiposConFicha(?string $elegido): array
+    {
+        $conFicha = Artista::publicado()
+            ->distinct()
+            ->pluck('tipo')
+            ->push(filled($elegido) ? TipoArtista::from($elegido) : null)
+            ->filter()
+            ->unique();
+
+        return array_values(array_filter(
+            TipoArtista::cases(),
+            fn (TipoArtista $tipo): bool => $conFicha->contains($tipo)
+        ));
     }
 
     public function show(Artista $artista): View

@@ -138,11 +138,15 @@ class FlujoDeEntradasAlSitioTest extends TestCase
 
     public function test_la_grafica_de_visitas_dibuja_las_dos_series(): void
     {
-        $this->actingAs($this->direccion());
-        Filament::setCurrentPanel('admin');
-
+        // La navegación va ANTES de autenticarse, y sin sesión: desde el 9 de
+        // septiembre de 2026 el equipo del gremio no cuenta como tráfico del
+        // sitio, así que estas dos visitas hechas como la dirección no dejarían
+        // ni una fila y la gráfica saldría plana por el motivo equivocado.
         $this->get(route('inicio'))->assertOk();
         $this->get(route('directorio.index'), ['referer' => route('inicio')])->assertOk();
+
+        $this->actingAs($this->direccion());
+        Filament::setCurrentPanel('admin');
 
         $datos = (fn (): array => $this->getData())->call(new VisitasDelSitio);
 

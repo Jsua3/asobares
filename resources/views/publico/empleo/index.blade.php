@@ -21,6 +21,17 @@
                 <p class="text-xs text-apagado">{{ ajuste('empleo_aviso') }}</p>
             </div>
 
+            {{--
+                Sin nada que filtrar, la caja de filtros sobra: prometía cortar
+                algo cuando no hay nada que cortar. Es el estado real de
+                producción hoy —cero vacantes publicadas— y era lo primero que
+                veía quien entraba a la bolsa.
+
+                La condición mira las OPCIONES y no las vacantes de la página:
+                así el formulario sigue en pie cuando un filtro deja la lista
+                vacía, que es justo cuando hace falta para volver atrás.
+            --}}
+            @if ($municipios->isNotEmpty() || filled($categorias))
             <form method="GET" action="{{ route('empleo.index') }}#vacantes" class="tarjeta mt-6 grid gap-4 p-5 sm:grid-cols-3">
                 <x-publico.campo nombre="categoria" etiqueta="Área" tipo="select"
                                  :valor="$filtros['categoria'] ?? null"
@@ -38,6 +49,7 @@
                     @endif
                 </div>
             </form>
+            @endif
 
             @if ($vacantes->isEmpty())
                 <div class="tarjeta mt-6 p-12 text-center">

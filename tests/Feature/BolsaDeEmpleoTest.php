@@ -7,6 +7,7 @@ use App\Mail\AcuseDePostulacion;
 use App\Mail\NuevaPostulacion;
 use App\Models\Asociado;
 use App\Models\Aspirante;
+use App\Models\Municipio;
 use App\Models\Postulacion;
 use App\Models\Vacante;
 use App\Support\Formulario;
@@ -294,6 +295,97 @@ class BolsaDeEmpleoTest extends TestCase
             ->assertSuccessful()
             ->assertSee('No hay vacantes con ese filtro')
             ->assertDontSee('Bartender de barra');
+    }
+
+    /**
+     * Un filtro que ofrece opciones sin resultados no filtra: manda a callejones
+     * sin salida.
+     *
+     * Medido el 9 de septiembre de 2026 sobre la base de demostración: **7 de los
+     * 8 municipios del selector no llevaban a ninguna vacante**. Y en producción,
+     * que es donde importa, era peor: cero vacantes publicadas y **quince
+     * opciones —ocho municipios y siete áreas— que devolvían todas cero**. Quien
+     * llega a la bolsa, que es el módulo que el cliente puso de primero, ve una
+     * caja de filtros que promete cortar algo y no hay nada que cortar.
+     *
+     * El selector se arma con lo que de verdad hay, y por eso pregunta por
+     * `publicado()->vigente()`: las mismas dos condiciones que deciden qué sale
+     * en el muro. Si divergieran, el filtro volvería a ofrecer humo.
+     */
+    public function test_el_selector_de_municipios_solo_ofrece_los_que_tienen_vacante_viva(): void
+    {
+        $conVacante = Municipio::factory()->create(['nombre' => 'Armenia', 'slug' => 'armenia']);
+        $sinVacante = Municipio::factory()->create(['nombre' => 'Salento', 'slug' => 'salento']);
+        $soloCerrada = Municipio::factory()->create(['nombre' => 'Filandia', 'slug' => 'filandia']);
+
+        Vacante::factory()->publicado()->for(Asociado::factory()->for($conVacante))->create();
+        Vacante::factory()->publicado()->cerrada()->for(Asociado::factory()->for($soloCerrada))->create();
+
+        $municipios = $this->get(route('empleo.index'))->assertOk()->viewData('municipios');
+
+        $this->assertEqualsCanonicalizing(
+            ['Armenia'],
+            $municipios->pluck('nombre')->all(),
+            'El selector solo puede ofrecer municipios donde de verdad hay una vacante viva.'
+        );
+
+        $this->assertNotContains('Salento', $municipios->pluck('nombre')->all());
+        $this->assertNotContains('Filandia', $municipios->pluck('nombre')->all(), 'Una vacante cerrada no cuenta.');
+    }
+
+    /** Mismo criterio para las áreas: no se ofrece un cargo que nadie busca hoy. */
+    public function test_el_selector_de_areas_solo_ofrece_las_que_tienen_vacante_viva(): void
+    {
+        Vacante::factory()->publicado()->create(['categoria_cargo' => CargoDelSector::Barra]);
+        Vacante::factory()->pendiente()->create(['categoria_cargo' => CargoDelSector::Cocina]);
+
+        $categorias = $this->get(route('empleo.index'))->assertOk()->viewData('categorias');
+
+        $this->assertSame([CargoDelSector::Barra], $categorias);
+    }
+
+    /**
+     * El caso que hace falso a un filtro «inteligente»: si al elegir un municipio
+     * el propio filtro lo borra de sus opciones, el desplegable vuelve solo a
+     * «Todos» mientras la consulta sigue filtrando. La página diría una cosa y
+     * enseñaría otra.
+     */
+    public function test_lo_elegido_sigue_en_el_selector_aunque_se_quede_sin_vacantes(): void
+    {
+        $vivo = Municipio::factory()->create(['nombre' => 'Armenia', 'slug' => 'armenia']);
+        $vacio = Municipio::factory()->create(['nombre' => 'Salento', 'slug' => 'salento']);
+
+        Vacante::factory()->publicado()->for(Asociado::factory()->for($vivo))->create();
+
+        $municipios = $this->get(route('empleo.index', ['municipio' => 'salento']))
+            ->assertOk()
+            ->viewData('municipios');
+
+        $this->assertContains(
+            'Salento',
+            $municipios->pluck('nombre')->all(),
+            'Lo que el visitante eligió no puede desaparecer del desplegable que lo muestra.'
+        );
+    }
+
+    /** Sin nada que filtrar, la caja de filtros sobra. */
+    public function test_sin_vacantes_no_se_pinta_la_caja_de_filtros(): void
+    {
+        $this->get(route('empleo.index'))
+            ->assertOk()
+            ->assertDontSee('Todos los municipios')
+            ->assertDontSee('Todas las áreas');
+    }
+
+    /** Con vacantes, el filtro está donde siempre. */
+    public function test_con_vacantes_la_caja_de_filtros_sigue_estando(): void
+    {
+        Vacante::factory()->publicado()->create();
+
+        $this->get(route('empleo.index'))
+            ->assertOk()
+            ->assertSee('Todos los municipios')
+            ->assertSee('Todas las áreas');
     }
 
     public function test_el_error_del_perfil_devuelve_al_formulario(): void

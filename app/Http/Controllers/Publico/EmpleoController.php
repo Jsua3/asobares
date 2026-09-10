@@ -13,6 +13,8 @@ use App\Models\Postulacion;
 use App\Models\Vacante;
 use App\Support\DestinatariosDelAsociado;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -47,10 +49,73 @@ class EmpleoController
 
         return view('publico.empleo.index', [
             'vacantes' => $consulta->latest()->paginate(10)->withQueryString(),
-            'municipios' => Municipio::orderBy('nombre')->get(),
-            'categorias' => CargoDelSector::cases(),
+            'municipios' => $this->municipiosConVacante($datos['municipio'] ?? null),
+            'categorias' => $this->areasConVacante($datos['categoria'] ?? null),
             'filtros' => $datos,
         ]);
+    }
+
+    /**
+     * Los municipios que de verdad tienen una vacante viva, más el que el
+     * visitante haya elegido.
+     *
+     * Antes se ofrecían todos. Medido el 9 de septiembre de 2026: sobre la base
+     * de demostración, **7 de los 8 municipios del selector no llevaban a
+     * ninguna vacante**; en producción, con cero vacantes publicadas, las
+     * **quince opciones del formulario devolvían todas cero**. Un filtro así no
+     * filtra: reparte callejones sin salida en el módulo que el cliente puso de
+     * primero.
+     *
+     * Se pregunta por `publicado()->vigente()`, que son **las mismas dos
+     * condiciones que deciden qué sale en el muro** unas líneas más arriba. Si
+     * divergieran, el selector volvería a ofrecer humo.
+     *
+     * El municipio elegido se conserva aunque se quede sin vacantes: si el
+     * propio filtro borrara de la lista lo que el visitante acaba de escoger, el
+     * desplegable volvería solo a «Todos los municipios» mientras la consulta
+     * sigue filtrando, y la página diría una cosa mientras enseña otra.
+     *
+     * @return Collection<int, Municipio>
+     */
+    private function municipiosConVacante(?string $elegido): Collection
+    {
+        return Municipio::query()
+            ->where(function (Builder $q) use ($elegido): void {
+                $q->whereHas('asociados.vacantes', fn (Builder $v) => $v->publicado()->vigente());
+
+                if (filled($elegido)) {
+                    $q->orWhere('slug', $elegido);
+                }
+            })
+            ->orderBy('nombre')
+            ->get();
+    }
+
+    /**
+     * Las áreas con vacante viva, más la elegida. Mismo criterio y mismo motivo
+     * que los municipios: no se ofrece un cargo que hoy no busca nadie.
+     *
+     * Sale de la tabla y no de `CargoDelSector::cases()` porque la pregunta no
+     * es «qué áreas existen» sino «en cuáles hay trabajo ahora».
+     *
+     * @return list<CargoDelSector>
+     */
+    private function areasConVacante(?string $elegida): array
+    {
+        $conVacante = Vacante::publicado()
+            ->vigente()
+            ->distinct()
+            ->pluck('categoria_cargo')
+            ->push(filled($elegida) ? CargoDelSector::from($elegida) : null)
+            ->filter()
+            ->unique();
+
+        // Se recorre el enum y no la consulta para conservar el orden declarado,
+        // que es el que la oficina espera ver en el desplegable.
+        return array_values(array_filter(
+            CargoDelSector::cases(),
+            fn (CargoDelSector $area): bool => $conVacante->contains($area)
+        ));
     }
 
     public function show(Vacante $vacante): View
