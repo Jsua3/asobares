@@ -348,7 +348,12 @@
                     portador y con ella moría la duración cero de su `:active`.
                     Se nombra y no se pega porque la guardia lee este archivo
                     crudo, comentarios incluidos. --}}
-               class="pulsable cta-vivo relative rounded-lg bg-marca-500 px-4 py-1.5 text-sm font-semibold text-white after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-[''] hover:bg-marca-600">
+               {{-- Sin `bg-*` ni `hover:bg-*`: el relleno lo pone `.cta-vivo`
+                    en app.css, porque al pulsar se vidria y el fondo depende de
+                    `--vidriado`. Una utilidad los pisaría. `relative` tampoco
+                    hace falta ya —el portador lo declara— pero se queda porque
+                    el ::after del área pulsable lo necesitaba antes que él. --}}
+               class="pulsable cta-vivo relative rounded-lg px-4 py-1.5 text-sm font-semibold after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-['']">
                 Afíliate
             </a>
             @endguest
@@ -400,8 +405,19 @@
                        'text-acento' => $actual,
                        'text-suave' => ! $actual,
                    ])>
-                    <x-dynamic-component :component="'heroicon-'.($actual ? 's' : 'o').'-'.$enlace['icono']"
-                                         class="h-6 w-6 shrink-0" aria-hidden="true" />
+                    {{-- La gota abraza al ICONO y no a la pestaña entera: el
+                         contenido mide 63,3 px dentro de una caja de 68, así que
+                         no hay holgura para rodearlo sin pegarse al canto de la
+                         barra. Colgada del icono, el margen es suyo y sobra en
+                         los dos estados. Solo la pinta la pestaña activa, así
+                         que su nombre de transición nunca se duplica. --}}
+                    <span class="pestana__icono">
+                        @if ($actual)
+                            <span class="pestana__gota" aria-hidden="true"></span>
+                        @endif
+                        <x-dynamic-component :component="'heroicon-'.($actual ? 's' : 'o').'-'.$enlace['icono']"
+                                             class="h-6 w-6 shrink-0" aria-hidden="true" />
+                    </span>
                     <span class="pestana__rotulo"><span class="text-balance">{{ $enlace['texto'] }}</span></span>
                 </a>
             @endforeach

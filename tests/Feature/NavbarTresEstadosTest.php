@@ -310,7 +310,36 @@ class NavbarTresEstadosTest extends TestCase
         // selector: una vuelta parcial a --duracion-rebote (p. ej. en la
         // visibility de los plegados) descoordinaría el plegado con la suite
         // verde. --duracion-rebote es de los popovers y vive en las vistas.
-        $this->assertStringNotContainsString('var(--duracion-rebote)', $css, 'app.css no usa --duracion-rebote: la geometría de la barra va toda a --duracion-estado');
+        /*
+         * La GEOMETRÍA de la barra no usa --duracion-rebote. Antes esto se
+         * afirmaba sobre el archivo entero; desde el 9 sep 2026 hay una
+         * excepción, y no es geometría: el viaje de la gota de la pestaña
+         * activa, que es un `::view-transition-group` y ocurre entre dos
+         * documentos, no dentro de la barra. Que la gota rebote no descoordina
+         * ningún plegado, porque para cuando viaja la página ya se ha ido.
+         *
+         * Se sigue vigilando lo que importaba: ninguna regla de la barra puede
+         * volver a --duracion-rebote, porque una vuelta parcial (por ejemplo en
+         * la visibility de los plegados) descoordinaría el plegado con la suite
+         * en verde.
+         */
+        $this->assertSame(
+            1,
+            substr_count($css, 'var(--duracion-rebote)'),
+            'app.css usa --duracion-rebote más de una vez: la geometría de la barra va toda a --duracion-estado.'
+        );
+        $this->assertStringContainsString(
+            'animation-duration: var(--duracion-rebote);',
+            $this->regla($css, '::view-transition-group(pestana-activa)'),
+            'El único --duracion-rebote de app.css es el viaje de la gota.'
+        );
+        foreach (['.modulo', '.bandeja', '.pestanas', '.logo-doble', '.indicador-mas', '.pestana__rotulo'] as $geometria) {
+            $this->assertStringNotContainsString(
+                'var(--duracion-rebote)',
+                $this->regla($css, $geometria),
+                "`{$geometria}` es geometría de la barra y tiene que ir a --duracion-estado."
+            );
+        }
 
         $this->assertMatchesRegularExpression(
             '/@media \(hover: hover\) and \(pointer: fine\) \{\s*\.modulo::before \{[^}]*--puntero-x/',

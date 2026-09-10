@@ -11,7 +11,14 @@
         @endpush
     @endif
 
-    <x-publico.hero :titulo="ajuste('guia_titulo')" :subtitulo="ajuste('guia_intro')" atmosfera />
+    {{-- El hueco de la foto de cabecera. Hoy pinta el marcador de marca; el día
+         que ASOBARES entregue material autorizado basta con guardar la ruta en
+         el ajuste `guia_foto` desde el panel, sin tocar esta plantilla. --}}
+    <x-publico.hero :titulo="ajuste('guia_titulo')" :subtitulo="ajuste('guia_intro')" atmosfera>
+        <x-slot:medio>
+            <x-publico.hueco-foto :foto="ajuste('guia_foto', null)" />
+        </x-slot:medio>
+    </x-publico.hero>
 
     <div class="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
 

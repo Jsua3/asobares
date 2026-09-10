@@ -930,7 +930,73 @@
         }
 
         .pestana {
+            position: relative;
+            isolation: isolate;
             row-gap: 0.1875rem;
+        }
+
+        /*
+         * La gota de la pestaña activa: lo que convierte cinco botones sueltos
+         * en un solo objeto.
+         *
+         * Y VIAJA. Este sitio recarga la página entera en cada navegación, así
+         * que no hay estado de cliente que animar: la única forma de que la
+         * gota se mueva de una pestaña a otra es que las transiciones de vista
+         * la emparejen entre el documento que se va y el que llega. Por eso
+         * lleva nombre, y por eso solo la pinta la pestaña activa — dos
+         * elementos con el mismo nombre en un documento anulan la transición
+         * entera, y en este árbol es imposible que haya dos: la activa la
+         * decide el servidor y es una.
+         *
+         * ⚠️ El nombre va en ESTE hijo y nunca en `.pestana`, `.pestanas` ni el
+         * módulo. Un elemento con `view-transition-name` es raíz de fondo (View
+         * Transitions 1, §2.1.1), y ponerlo más arriba dejaría a las hojas que
+         * cuelgan de la barra sin página que desenfocar. La gota no tiene
+         * descendientes, así que ahí no rompe nada. La hoja es HERMANA de la
+         * pestaña, no hija, y no la alcanza.
+         *
+         * `z-index: -1` con `isolation` en la pestaña la deja bajo el icono y
+         * el rótulo pero sobre el fondo del acuse de pulsación.
+         */
+        /*
+         * La gota cuelga del ICONO y no de la pestaña.
+         *
+         * Colgada de la pestaña quedaba mal, y no por poco: el contenido
+         * --icono de 24, hueco de 3 y el rótulo de dos líneas de 36,3-- suma
+         * 63,3 px dentro de una caja de 68, así que la holgura total son 4,7 px
+         * y el margen de 4,8 por lado con el que nació la dejaba MÁS PEQUEÑA
+         * que su contenido: medido, el icono se salía 2,5 px por arriba y el
+         * rótulo 2,4 por abajo. Agrandarla hasta rodearlo la habría dejado
+         * pegada al canto de la barra.
+         *
+         * Colgada del icono, el margen es suyo y sobra en los dos estados: la
+         * gota no sabe si hay rótulo debajo ni le importa, así que el estado
+         * compacto no necesita ninguna regla aparte.
+         */
+        .pestana__icono {
+            position: relative;
+            display: grid;
+            place-items: center;
+        }
+
+        /*
+         * El aire vertical está TASADO y la cifra manda sobre el gusto: entre
+         * el canto de la pestaña y el icono hay 2,3 px, y entre el icono y el
+         * rótulo hay 3. Pasarse de ahí saca la gota por encima de la barra --el
+         * módulo no recorta a propósito, para que las hojas puedan colgar-- o
+         * la mete debajo del texto. Así que 2 px arriba y abajo, y el aire que
+         * falta se compensa a lo ancho, que es donde sí sobra: el icono no
+         * llena su caja por los lados y la píldora puede respirar hasta 40 px.
+         */
+        .pestana__gota {
+            pointer-events: none;
+            position: absolute;
+            inset: -0.125rem -0.5rem;
+            z-index: -1;
+            border-radius: 999px;
+            background-color: rgb(238 65 55 / 0.14);
+            border: 1px solid rgb(238 65 55 / 0.3);
+            view-transition-name: pestana-activa;
         }
 
         /* El rótulo pliega por pista de rejilla, nunca por `height`. El texto no
@@ -963,10 +1029,27 @@
                 opacity var(--duracion-salida) var(--ease-color);
         }
 
-        /* La hoja que sube: solo el resplandor al canto que mira a la barra. En
-           vertical NO es contenedor de scroll: desplazarse es cerrar. */
+        /*
+         * La hoja que sube: solo el resplandor al canto que mira a la barra. En
+         * vertical NO es contenedor de scroll.
+         *
+         * `touch-action: none` desde el 9 sep 2026, y cambia una decisión
+         * anterior. Antes, un gesto vertical que empezaba sobre la hoja
+         * desplazaba la página y eso la cerraba de rebote. Ahora la hoja SE
+         * ARRASTRA: sigue al dedo, resiste con goma hacia arriba y al soltar
+         * proyecta el momento para decidir si se va. Para eso tiene que quedarse
+         * el gesto, y el navegador solo lo cede con `none`.
+         *
+         * No se pierde el cierre por desplazamiento: `cerrarSiSeDesplaza()`
+         * sigue cerrando cuando la página se mueve por un gesto hecho FUERA de
+         * la hoja, que es de donde viene casi siempre.
+         *
+         * En apaisado no aplica: allí la hoja sí desplaza por dentro y su
+         * `touch-action: pan-y pinch-zoom` está más abajo, en su propia media.
+         */
         .hoja-inferior {
             background-image: radial-gradient(16rem circle at 18% 100%, rgb(238 65 55 / 0.09), transparent 54%);
+            touch-action: none;
         }
 
         /* Apartado para lo fijo abajo (el pie es hermano de main) y para la
@@ -1177,6 +1260,36 @@
         background-size: 14px 14px;
     }
 
+    /*
+     * El hueco de una foto que todavía no existe.
+     *
+     * Repite en CSS el dibujo que `GeneradorImagen` compone en PHP para las
+     * portadas del demo: diagonales grises y el monograma centrado. El gris es
+     * el MISMO --#747474-- y por el mismo motivo: da 3,7:1 tanto sobre la
+     * superficie del tema claro como sobre la del oscuro, así que una sola
+     * receta sirve para los dos y el hueco nunca desaparece ni deslumbra.
+     *
+     * Se dibuja con gradientes y no con un archivo porque aquí el tamaño es
+     * variable --un banner de hero y una tarjeta cuadrada usan el mismo
+     * portador-- y un PNG estirado enseñaría las diagonales deformadas.
+     */
+    .hueco-foto {
+        display: grid;
+        place-items: center;
+        background-color: var(--asb-superficie-alta);
+        background-image: repeating-linear-gradient(
+            135deg,
+            rgb(116 116 116 / 0.32) 0 2px,
+            transparent 2px 14px
+        );
+    }
+
+    .hueco-foto__marca {
+        width: clamp(3rem, 14%, 7rem);
+        height: auto;
+        opacity: 0.55;
+    }
+
     /* Antetitulo en versalitas muy espaciadas, como en las piezas del gremio. */
     .antetitulo {
         font-weight: 500;
@@ -1275,14 +1388,101 @@
         transition: transform var(--duracion-entrada) var(--ease-out);
     }
 
+    /*
+     * El botón lleno de la marca: «Afíliate», «Enviar solicitud», «Explora la
+     * noche». Al pulsarlo se VIDRIA — el relleno se retira y deja ver lo que
+     * hay detrás, desenfocado y con la saturación subida.
+     *
+     * El relleno vive AQUÍ y ya no en una utilidad `bg-*` del marcado, por la
+     * misma razón por la que `.contorno-claro` vive aquí desde el 31 de agosto:
+     * en Tailwind 4 una utilidad de `@layer utilities` gana siempre a
+     * `@layer components`, así que un `bg-accion` en la plantilla pisaría este
+     * fondo y el vidriado no se vería nunca.
+     *
+     * La asimetría es el truco entero: la vuelta tarda 280 ms y la ida 90. Un
+     * líquido al que apartas huye deprisa y regresa despacio; con las dos
+     * duraciones iguales esto parpadea.
+     *
+     * El relleno va en una CAPA propia y no en el fondo del botón, y el cambio
+     * de estado es un `background-color` de toda la vida.
+     *
+     * El primer intento derivaba fondo, tinta y filo de una propiedad
+     * registrada (`@property --vidriado`) con `color-mix(... calc(var() *
+     * 100%) ...)`. Compila, pero **Lightning CSS lo pliega**: en el CSS
+     * servido el `color-mix` salía convertido en su primer color a secas, de
+     * modo que el rótulo se quedaba pintado con la tinta del estado pulsado
+     * SIEMPRE --rojo oscuro sobre rojo, 1,89:1-- y el filo del canto igual.
+     * Se vio comprobando el archivo construido, no el fuente.
+     *
+     * Esto no usa `color-mix`, ni `calc()` dentro de un color, ni propiedades
+     * registradas: dos capas y transiciones de las que el navegador lleva
+     * animando quince años.
+     */
     .cta-vivo {
+        position: relative;
+        isolation: isolate;
+        color: #fff;
+        background-color: transparent;
+        -webkit-backdrop-filter: blur(0) saturate(100%);
+        backdrop-filter: blur(0) saturate(100%);
         box-shadow: 0 0 0 0 transparent;
         transition:
             transform var(--duracion-instante) var(--ease-out),
-            color var(--duracion-boton) var(--ease-color),
-            background-color var(--duracion-boton) var(--ease-color),
-            border-color var(--duracion-boton) var(--ease-color),
+            backdrop-filter var(--duracion-vidriado-vuelta) var(--ease-out),
             box-shadow var(--duracion-boton) var(--ease-out);
+    }
+
+    /*
+     * La capa que se retira. `z-index: -1` con `isolation: isolate` en el
+     * portador la deja bajo el rótulo y dentro del botón, sin escaparse al
+     * contexto de apilamiento de la página.
+     *
+     * Va detrás del elemento, así que NO forma parte del fondo que
+     * `backdrop-filter` desenfoca: lo que se desenfoca es la página, y este
+     * tinte se pinta encima. Ese orden es lo que hace el sándwich de cristal.
+     */
+    .cta-vivo::before {
+        content: '';
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        background-color: var(--asb-accion);
+        box-shadow: inset 0 0 0 1px transparent;
+        transition:
+            background-color var(--duracion-vidriado-vuelta) var(--ease-color),
+            box-shadow var(--duracion-vidriado-vuelta) var(--ease-color);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .cta-vivo:hover::before {
+            background-color: var(--asb-accion-fuerte);
+        }
+    }
+
+    /*
+     * Se vidria al pulsar, y la ida es más rápida que la vuelta: 90 ms para
+     * retirarse y 280 para volver. Un líquido al que apartas huye deprisa y
+     * regresa despacio; con las dos duraciones iguales esto parpadea.
+     *
+     * La duración de `transform` la sigue mandando `.pulsable:active`, que la
+     * pone a 0 ms: cada regla nombra sus propiedades y no se pisan.
+     */
+    .cta-vivo:active {
+        -webkit-backdrop-filter: blur(var(--asb-desenfoque-vidriado)) saturate(190%);
+        backdrop-filter: blur(var(--asb-desenfoque-vidriado)) saturate(190%);
+        transition-duration:
+            var(--duracion-instante),
+            var(--duracion-vidriado-ida),
+            var(--duracion-boton);
+    }
+
+    .cta-vivo:active::before {
+        background-color: var(--asb-vidrio-boton);
+        /* Sólido no se ve el canto; cristal sin filo no se lee como material. */
+        box-shadow: inset 0 0 0 1px var(--asb-filo-vidriado);
+        transition-duration: var(--duracion-vidriado-ida);
     }
 
     .video-marquesina {
@@ -1498,6 +1698,36 @@
 ::view-transition-new(root) {
     animation-duration: 180ms;
     animation-timing-function: var(--ease-out);
+}
+
+/*
+ * El viaje de la gota entre pestañas.
+ *
+ * El navegador empareja la gota del documento que se va con la del que llega
+ * --mismo `view-transition-name`-- y anima la diferencia de posición y de
+ * tamaño. Es lo más cerca que se puede estar de un resorte en una navegación
+ * de documento a documento, donde no hay JavaScript vivo que interpole nada.
+ *
+ * Va con la curva del rebote suave y no con la del cajón: la gota es lo único
+ * de la barra que se mueve por sí solo, y un sobreimpulso del 4,6 % es lo que
+ * la hace parecer líquido en vez de una caja que se desliza. La duración es la
+ * del asentamiento del resorte, no la de la raíz: el fondo cruza en 180 ms y
+ * la gota sigue viajando, que es exactamente el efecto que se busca.
+ *
+ * El grupo lleva también el par old/new a `opacity: 1`: por defecto el
+ * navegador funde el viejo con el nuevo y, siendo el mismo objeto, ese fundido
+ * solo lo hace parpadear a mitad del recorrido.
+ */
+::view-transition-group(pestana-activa) {
+    animation-duration: var(--duracion-rebote);
+    animation-timing-function: var(--ease-rebote-suave);
+}
+
+::view-transition-old(pestana-activa),
+::view-transition-new(pestana-activa) {
+    animation: none;
+    mix-blend-mode: normal;
+    opacity: 1;
 }
 
 /*

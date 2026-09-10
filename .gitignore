@@ -50,6 +50,12 @@ base-de-datos-cap*.xls*
 # fotos de personas identificables y un PDF de 47 MB. Nunca se versiona; entra por importador/sembradores/medios.
 /material/nuevomaterial/
 
+# Material del gremio recibido el 9 sep 2026 (carpeta "materialnoviembre"): 6,4 GB con 383 archivos.
+# Cartera con saldos por establecimiento, fotos y videos de personas identificables, RAW de sesiones
+# fotograficas, logos de terceros y presentaciones institucionales. Mismo trato que nuevomaterial:
+# nunca se versiona; entra por importador, sembradores o medios optimizados.
+/material/materialnoviembre/
+
 # `public/videos/` SÍ se versiona. El original del gremio son 58 MB y esos no
 # entran en git: lo que se versiona es el bucle de 10 s recortado y comprimido
 # (1,5 MB) más su póster. Cloud despliega desde git, así que un archivo

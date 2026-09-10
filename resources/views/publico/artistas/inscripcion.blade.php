@@ -48,7 +48,7 @@
             <div>
                 <label for="foto" class="mb-1.5 block text-sm font-medium text-tinta">Foto</label>
                 <input type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/webp"
-                       class="w-full rounded-xl border border-linea bg-fondo px-4 py-1.5 text-sm text-tinta file:mr-4 file:min-h-11 file:rounded-lg file:border-0 file:bg-marca-500 file:px-4 file:text-sm file:font-semibold file:text-white">
+                       class="w-full rounded-xl border border-linea bg-fondo px-4 py-1.5 text-sm text-tinta file:mr-4 file:min-h-11 file:rounded-lg file:border-0 file:bg-accion file:px-4 file:text-sm file:font-semibold file:text-white">
                 <p class="mt-1.5 text-xs text-apagado">JPG, PNG o WebP. Máximo 5 MB.</p>
                 @error('foto')
                     <p class="mt-1.5 text-xs text-acento">{{ $message }}</p>

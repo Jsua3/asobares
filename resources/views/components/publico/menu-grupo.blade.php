@@ -89,7 +89,16 @@
                     'text-acento' => $grupoActivo,
                     'text-suave' => ! $grupoActivo,
                 ])>
-            <x-dynamic-component :component="'heroicon-'.($grupoActivo ? 's' : 'o').'-'.$icono" class="h-6 w-6 shrink-0" aria-hidden="true" />
+            {{-- La misma gota que los enlaces directos de `navbar.blade.php`,
+                 colgada del icono por el mismo motivo: la pinta la pestaña
+                 activa y ninguna otra, de modo que su nombre de transición es
+                 único en el documento. --}}
+            <span class="pestana__icono">
+                @if ($grupoActivo)
+                    <span class="pestana__gota" aria-hidden="true"></span>
+                @endif
+                <x-dynamic-component :component="'heroicon-'.($grupoActivo ? 's' : 'o').'-'.$icono" class="h-6 w-6 shrink-0" aria-hidden="true" />
+            </span>
             <span class="pestana__rotulo"><span class="text-balance">{{ $titulo }}</span></span>
         </button>
     @else
@@ -122,6 +131,21 @@
     <div id="{{ $panel }}"
          x-show="abierto"
          x-cloak
+         @if ($esPestana)
+             {{-- Se cierra con el dedo (9 sep 2026). La referencia es lo que
+                  enciende el arrastre: en escritorio no se declara y todos los
+                  métodos de `app.js` quedan inertes.
+
+                  El clic va en fase de CAPTURA para poder tragárselo antes de
+                  que llegue a la fila: soltar encima de un enlace después de
+                  empujar la hoja no puede navegar. --}}
+             x-ref="hoja"
+             x-on:pointerdown="tomarLaHoja($event)"
+             x-on:pointermove="moverLaHoja($event)"
+             x-on:pointerup="soltarLaHoja($event)"
+             x-on:pointercancel="soltarLaHoja($event)"
+             x-on:click.capture="tragarElClicDelArrastre($event)"
+         @endif
          @if ($esPestana)
              {{-- Sube desde la barra con el resorte vivo de los popovers y sale
                   por el cajón: la receta de #popover-tema con el signo del

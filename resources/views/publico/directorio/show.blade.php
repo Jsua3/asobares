@@ -70,7 +70,7 @@
                         {{ $asociado->municipio->nombre }}
                     </span>
                     @if ($asociado->destacado)
-                        <span class="rounded-full bg-marca-500 px-3 py-1 text-xs font-semibold text-white">Destacado</span>
+                        <span class="rounded-full bg-accion px-3 py-1 text-xs font-semibold text-white">Destacado</span>
                     @endif
                 </div>
 

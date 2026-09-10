@@ -39,7 +39,7 @@
             @endif
 
             @if ($asociado->destacado)
-                <span class="absolute left-3 top-3 rounded-full bg-marca-500 px-2.5 py-1 text-2xs font-semibold uppercase tracking-wide text-white">
+                <span class="absolute left-3 top-3 rounded-full bg-accion px-2.5 py-1 text-2xs font-semibold uppercase tracking-wide text-white">
                     Destacado
                 </span>
             @endif

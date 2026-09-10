@@ -102,6 +102,62 @@
     --asb-marca-panel: rgb(238 65 55 / 0.07);
 
     /*
+     * El rojo que puede LLEVAR texto blanco encima, que no es el mismo que el
+     * rojo de marca. Pub Red puro con blanco da 3,86:1 y el minimo de RNF-12
+     * para texto normal es 4,5:1, asi que los 43 botones de accion del sitio
+     * --«Afiliate» incluido-- llevaban un rotulo que no cumple. Y fallaba en
+     * los DOS temas, porque el relleno del boton es el mismo rojo en ambos: no
+     * depende del fondo de la pagina, solo del rojo.
+     *
+     * Marca 600 da 4,83:1 y marca 700 --el del hover-- 6,52:1, y los dos
+     * siguen leyendose como el rojo del gremio. Es exactamente la misma
+     * decision que ya se tomo tres lineas mas arriba para el texto sobre fondo
+     * claro, aplicada ahora al caso contrario: texto blanco sobre el rojo.
+     *
+     * No cambia con el tema, y por eso no se repite en `.dark`: lo que se mide
+     * es blanco contra rojo, y ninguno de los dos se mueve al cambiar de tema.
+     *
+     * ⚠️ Esto NO sustituye a `bg-marca-500` en todas partes. El rojo de marca
+     * se queda donde no hay texto encima --puntos, insignias sin rotulo,
+     * tintes al 15 %--: alli no hay contraste de texto que medir y cambiarlo
+     * seria apagar la marca sin motivo. Lo vigila `ContrasteDelBotonTest`.
+     */
+    --asb-accion: #da2b21;
+    --asb-accion-fuerte: #b71f18;
+
+    /*
+     * Vidriado del boton al pulsar (9 sep 2026).
+     *
+     * Al pulsar, el relleno se retira y queda el cristal: se ve lo que hay
+     * detras, desenfocado y con la saturacion subida. Es lo que separa un
+     * material de un boton atenuado, y lo que pidio la direccion al ver la
+     * maqueta: «que al presionarlo le de efecto transparente».
+     *
+     * El SUELO no es estetico, es el limite de contraste, y son DOS recetas
+     * como todo material de este sistema. Medido sobre --asb-accion:
+     *   oscuro, alfa 0,42 sobre la pagina -> blanco a 12,71:1 (MEJOR que el
+     *     boton solido, que da 4,83)
+     *   claro, alfa 0,42 sobre blanco -> el rotulo blanco cae a 1,97:1, y
+     *     NINGUN alfa por debajo de 1 lo sostiene
+     * Por eso en claro la tinta cruza a marca-900, que sobre ese mismo cristal
+     * da 5,13:1. Lo vigila `VidriadoDelBotonTest`.
+     *
+     * En claro el cristal se tine de marca-950 al 65 %: por debajo de esa
+     * opacidad el rotulo blanco no llega a AA, y con el rojo de marca no llega
+     * a ninguna. El 35 % que queda deja pasar la pagina desenfocada de sobra
+     * para leerse como cristal, que es de lo que se trata.
+     */
+    --asb-vidrio-boton: rgb(68 11 9 / 0.65);
+    --asb-filo-vidriado: rgb(255 255 255 / 0.3);
+    --asb-desenfoque-vidriado: 14px;
+
+    /* La ida es mas rapida que la vuelta a proposito: un liquido al que
+       apartas huye deprisa y regresa despacio. Con las dos duraciones iguales
+       el boton parpadea en vez de fluir. */
+    --duracion-vidriado-ida: 90ms;
+    --duracion-vidriado-vuelta: 280ms;
+
+    /*
      * Paleta categorica de las graficas: un color por serie, y son DOS
      * recetas, no una. Igual que el vidrio esmerilado se hace con sombra en
      * claro y con luz en oscuro, estos siete colores no pueden ser los mismos
@@ -308,7 +364,27 @@
     --asb-tinta: #f5f3f4;
     --asb-suave: #d0cccd;
     --asb-tenue: #a8a3a5;
-    --asb-apagado: #7d7779;
+    /*
+     * Era Noche 400 (#7d7779) y no llegaba a AA. Medido en Chromium el 9 de
+     * septiembre de 2026 sobre la portada: daba 4,53:1 contra `--asb-fondo`,
+     * 4,32:1 contra `--asb-superficie` y 3,99:1 contra `--asb-superficie-alta`,
+     * o sea que fallaba el 4,5:1 de RNF-12 en DOS de las tres superficies del
+     * tema. Quince de los diecisiete elementos medibles con `text-apagado`
+     * quedaban por debajo.
+     *
+     * Este valor es un paso intermedio de la rampa `noche` --el 35 % del
+     * camino de 400 a 300-- y despega de las tres: 5,56:1 sobre el fondo,
+     * 5,31:1 sobre la superficie y 4,90:1 sobre la superficie alta, que es el
+     * peor caso. No se sube hasta Noche 300 porque ese ES `--asb-tenue`, y
+     * colapsar los dos se llevaría por delante un escalón de la jerarquía.
+     *
+     * En el tema claro NO hacía falta tocar nada: allí el mínimo medido de los
+     * diecisiete era 6,94:1. Por eso este arreglo vive solo en `.dark`.
+     *
+     * Lo vigila `ContrasteDelTextoTenueTest`, que lee este archivo y vuelve a
+     * medir contra las tres superficies en vez de fiarse de este comentario.
+     */
+    --asb-apagado: #8c8688;
 
     --asb-linea: rgb(255 255 255 / 0.1);
     --asb-linea-fuerte: rgb(255 255 255 / 0.16);
@@ -376,6 +452,13 @@
     --asb-vidrio-velo: color-mix(in oklab, var(--asb-superficie) 55%, transparent);
     --asb-luz-ambiente: rgb(238 65 55 / 0.18);
 
+    /* Sobre Pub Black el cristal SI puede ser del rojo de marca y adelgazar
+       hasta el 42 %: la pagina de detras es negra, asi que el rotulo blanco no
+       solo aguanta, mejora --12,71:1 contra los 4,83 del boton solido--. Es la
+       receta contraria a la del claro, donde el tinte tiene que oscurecer. */
+    --asb-vidrio-boton: rgb(218 43 33 / 0.42);
+    --asb-filo-vidriado: rgb(255 255 255 / 0.42);
+
     --asb-cromo-apoyo-inferior:
         0 -1px 0 rgb(255 255 255 / 0.1),
         0 -8px 28px rgb(0 0 0 / 0.55);
@@ -416,6 +499,15 @@
         --asb-vidrio-velo: var(--asb-superficie);
         --asb-vidrio-desenfoque: none;
         --asb-hoja-velo: var(--asb-superficie);
+
+        /*
+         * El vidriado del boton se apaga con DOS tokens y sin tocar una sola
+         * regla: el cristal pasa a ser el mismo relleno opaco --asi no se
+         * retira nada al pulsar-- y el desenfoque muere. Queda el hundimiento,
+         * que es movimiento y no transparencia.
+         */
+        --asb-vidrio-boton: var(--asb-accion);
+        --asb-desenfoque-vidriado: 0px;
     }
 }
 
@@ -464,6 +556,9 @@
     --color-acento: var(--asb-acento);
     --color-acento-fuerte: var(--asb-acento-fuerte);
     --color-marca-panel: var(--asb-marca-panel);
+
+    --color-accion: var(--asb-accion);
+    --color-accion-fuerte: var(--asb-accion-fuerte);
 
     --color-exito: var(--asb-exito);
     --color-exito-suave: var(--asb-exito-suave);

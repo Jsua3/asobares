@@ -1,7 +1,12 @@
 <x-layouts.publico :titulo="ajuste('seo_artistas_titulo', ajuste('artistas_titulo').' — ASOBARES Quindío')"
                    :descripcion="ajuste('seo_artistas_descripcion', 'DJs, bandas y solistas del Quindío: género musical, contacto directo y video para escucharlos.')">
 
-    <x-publico.hero :titulo="ajuste('artistas_titulo')" :subtitulo="ajuste('artistas_intro')" compacto atmosfera />
+    {{-- Hueco de foto de cabecera: marcador hoy, `artistas_foto` cuando llegue. --}}
+    <x-publico.hero :titulo="ajuste('artistas_titulo')" :subtitulo="ajuste('artistas_intro')" compacto atmosfera>
+        <x-slot:medio>
+            <x-publico.hueco-foto :foto="ajuste('artistas_foto', null)" />
+        </x-slot:medio>
+    </x-publico.hero>
 
     <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
 

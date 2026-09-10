@@ -1,5 +1,6 @@
 import Alpine from 'alpinejs';
 import collapse from '@alpinejs/collapse';
+import { animar, crearRastro, crearResorte, goma, proyectar, vibrar } from './movimiento.js';
 
 Alpine.plugin(collapse);
 
@@ -125,6 +126,23 @@ Alpine.data('escena', () => ({
  */
 const GRACIA_AL_RETIRAR_MS = 280;
 
+/**
+ * Deceleración con la que se proyecta el momento de la hoja al soltarla.
+ *
+ * NO es el 0,998 por defecto, que es el del scroll, y la diferencia no es
+ * cosmética: 0,998 multiplica la velocidad por 499, y eso está calibrado para
+ * una lista que se desplaza miles de píxeles. La hoja mide 155.
+ *
+ * Medido el 9 de septiembre de 2026 sobre la hoja de «Bolsas» (155 px):
+ * arrastrarla 40 px despacio da unos 143 px/s, que con 0,998 proyectan 71 px
+ * y llevan el reposo a 111 —o sea que un tirón suave y corto la CERRABA, que
+ * es justo lo que no debe pasar—. Con 0,99 el multiplicador baja a 99, esos
+ * mismos 143 px/s proyectan 14 px y la hoja vuelve a abrirse; y un golpe corto
+ * y rápido (45 px en 32 ms, unos 1400 px/s) sigue proyectando 139 px y la
+ * cierra, que es lo que se quiere.
+ */
+const DECELERACION_DE_LA_HOJA = 0.99;
+
 Alpine.data('desplegable', () => ({
     abierto: false,
     cierre: null,
@@ -137,6 +155,16 @@ Alpine.data('desplegable', () => ({
     // cerraba lo que acababa de abrir: Enter no abría nada (Chromium, 5 sep).
     abrir() {
         clearTimeout(this.cierre);
+        // Si había un cierre por gesto en vuelo, se corta AQUÍ. Sin esto, su
+        // resorte sigue corriendo, llega a su meta y ejecuta el `cerrar()` que
+        // tenía pendiente: la hoja que se acaba de reabrir se cerraría sola.
+        this.pararElReloj();
+        // La hoja vuelve a nacer limpia. El estilo en línea que deja un cierre
+        // por gesto NO se quita al cerrar --pisaría la transición de salida de
+        // Alpine y la hoja daría un salto hacia arriba en pleno desvanecido--,
+        // así que se quita aquí, que es el otro momento en que es seguro.
+        this.soltarLaPintura();
+        this.resorteDeLaHoja?.fijar(0);
         this.abierto = true;
         this.scrollAlAbrir = posicionDelDocumento();
         this.$dispatch('desplegable-abierto', this.$root);
@@ -223,6 +251,250 @@ Alpine.data('desplegable', () => ({
         }
 
         this.$refs.disparador.focus();
+    },
+
+    /*
+     * ── La hoja del teléfono se cierra con el dedo ──────────────────────
+     *
+     * Hasta hoy la hoja solo se abría y se cerraba: no había forma de
+     * empujarla. Esto le da lo que le faltaba —seguimiento 1:1, goma en el
+     * borde, proyección de momento al soltar y entrega de velocidad al
+     * resorte— usando el motor de `movimiento.js`.
+     *
+     * Solo existe donde existe `$refs.hoja`, que es la variante de pestaña.
+     * En escritorio no se declara la referencia y todo esto queda inerte.
+     *
+     * Esto CAMBIA una decisión anterior: en vertical, un gesto que empieza
+     * sobre la hoja ya no desplaza la página para cerrarla, sino que arrastra
+     * la hoja. Desplazar la página desde cualquier otro sitio la sigue
+     * cerrando, que es lo que hace `cerrarSiSeDesplaza()`.
+     */
+
+    /** Cuánto hay que mover el dedo antes de robarle el gesto al toque. */
+    umbralDeArrastre: 10,
+
+    arrastrando: false,
+    reclamado: false,
+    punteroDelArrastre: null,
+    dedoAlEmpezar: 0,
+    hojaAlEmpezar: 0,
+    altoDeLaHoja: 0,
+    resorteDeLaHoja: null,
+    rastroDeLaHoja: null,
+    quitarDelReloj: null,
+
+    /** Escribe la posición de la hoja. Opacidad y desplazamiento van juntos. */
+    pintarHoja(y) {
+        const hoja = this.$refs.hoja;
+
+        if (! hoja) {
+            return;
+        }
+
+        const recorrido = Math.max(this.altoDeLaHoja, 1);
+        const avance = Math.min(Math.max(y / recorrido, 0), 1);
+
+        hoja.style.translate = `0 ${y}px`;
+        // Se desvanece mientras baja, y llega a cero justo al final del
+        // recorrido. Además de leerse mejor, evita que la hoja cruce por
+        // encima de las pestañas al descender: el módulo inferior es su propio
+        // contexto de apilamiento y la hoja va arriba. Al cuadrado y no lineal
+        // para que los primeros píxeles del arrastre no la apaguen de golpe.
+        hoja.style.opacity = `${Math.max(0, 1 - avance * avance)}`;
+    },
+
+    soltarLaPintura() {
+        const hoja = this.$refs.hoja;
+
+        if (hoja) {
+            hoja.style.translate = '';
+            hoja.style.opacity = '';
+        }
+    },
+
+    tomarLaHoja(evento) {
+        const hoja = this.$refs.hoja;
+
+        // Solo el dedo o el ratón arrastran, y solo con la hoja abierta. El
+        // botón secundario abre el menú del sistema: no es un arrastre.
+        if (! hoja || ! this.abierto || evento.button > 0) {
+            return;
+        }
+
+        const alto = hoja.offsetHeight;
+
+        // Sin alto no hay nada que arrastrar, y además dividir por él es lo que
+        // gradúa el desvanecido y la goma: con cero, el primer píxel apagaría
+        // la hoja entera. Pasa mientras la transición de entrada aún no la ha
+        // mostrado.
+        if (alto === 0) {
+            return;
+        }
+
+        this.arrastrando = true;
+        this.reclamado = false;
+        this.punteroDelArrastre = evento.pointerId;
+        this.dedoAlEmpezar = evento.clientY;
+        this.altoDeLaHoja = alto;
+
+        if (this.resorteDeLaHoja === null) {
+            this.resorteDeLaHoja = crearResorte({ respuesta: 0.35, amortiguacion: 0.82, valor: 0 });
+            this.rastroDeLaHoja = crearRastro();
+        }
+
+        // Se toma el mando DESDE LA POSICIÓN EN PANTALLA, no desde la meta:
+        // así se puede agarrar una hoja que ya se estaba yendo y devolverla
+        // sin que dé un salto. Es la interrupción, que es de lo que va todo.
+        this.hojaAlEmpezar = this.resorteDeLaHoja.valor;
+        this.resorteDeLaHoja.fijar(this.hojaAlEmpezar);
+        this.rastroDeLaHoja.limpiar();
+        this.rastroDeLaHoja.anotar(this.hojaAlEmpezar);
+
+        this.pararElReloj();
+    },
+
+    moverLaHoja(evento) {
+        if (! this.arrastrando || evento.pointerId !== this.punteroDelArrastre) {
+            return;
+        }
+
+        const recorrido = evento.clientY - this.dedoAlEmpezar;
+
+        // Histéresis: hasta que el dedo no se mueve de verdad, esto sigue
+        // siendo un toque y el enlace de debajo tiene que poder recibirlo.
+        if (! this.reclamado) {
+            if (Math.abs(recorrido) < this.umbralDeArrastre) {
+                return;
+            }
+
+            this.reclamado = true;
+
+            // Capturar puede fallar si el puntero ya no está activo --el dedo
+            // se levantó entre este evento y el anterior, o el sistema se
+            // llevó el gesto--. Sin captura el arrastre sigue funcionando
+            // mientras el dedo no salga de la hoja, así que no es motivo para
+            // abortar nada.
+            try {
+                this.$refs.hoja.setPointerCapture(evento.pointerId);
+            } catch {
+                // Se sigue arrastrando sin captura.
+            }
+        }
+
+        let y = this.hojaAlEmpezar + recorrido;
+
+        // Por encima de «abierta» no hay nada que enseñar: resiste con goma en
+        // vez de plantarse en seco.
+        if (y < 0) {
+            y = -goma(-y, this.altoDeLaHoja);
+        }
+
+        this.resorteDeLaHoja.fijar(y);
+        this.rastroDeLaHoja.anotar(y);
+        this.pintarHoja(y);
+    },
+
+    soltarLaHoja(evento) {
+        if (! this.arrastrando || (evento && evento.pointerId !== this.punteroDelArrastre)) {
+            return;
+        }
+
+        const seArrastro = this.reclamado;
+
+        this.arrastrando = false;
+        this.reclamado = false;
+        this.punteroDelArrastre = null;
+        // `reclamado` ya vale falso cuando llega el `click`, que va después del
+        // `pointerup`: hace falta una segunda marca que sobreviva a ese hueco.
+        this.acabaDeArrastrar = seArrastro;
+
+        if (! seArrastro) {
+            return;
+        }
+
+        const velocidad = this.rastroDeLaHoja.velocidad();
+        const reposo = this.resorteDeLaHoja.valor + proyectar(velocidad, DECELERACION_DE_LA_HOJA);
+
+        // Decide la PROYECCIÓN y no dónde se soltó el dedo: un golpe corto y
+        // rápido cierra aunque la hoja apenas se haya movido, que es justo lo
+        // que espera quien lo hace.
+        if (reposo > this.altoDeLaHoja / 2) {
+            vibrar(8);
+            this.cerrarConGesto(velocidad);
+
+            return;
+        }
+
+        this.resorteDeLaHoja.meta = 0;
+        this.resorteDeLaHoja.empujar(velocidad);
+        this.correrElResorte();
+    },
+
+    /**
+     * El cierre lo termina el resorte y no la transición de Alpine: una
+     * transición no acepta la velocidad que traía el dedo, y sin ella se ve la
+     * costura entre el arrastre y la animación.
+     */
+    cerrarConGesto(velocidad) {
+        this.resorteDeLaHoja.meta = this.altoDeLaHoja;
+        this.resorteDeLaHoja.empujar(velocidad);
+        this.correrElResorte(() => {
+            this.cerrar();
+            this.soltarLaPintura();
+            this.resorteDeLaHoja.fijar(0);
+        });
+    },
+
+    correrElResorte(alAcabar = null) {
+        this.pararElReloj();
+
+        this.quitarDelReloj = animar((dt) => {
+            this.resorteDeLaHoja.paso(dt);
+            this.pintarHoja(this.resorteDeLaHoja.valor);
+
+            if (! this.resorteDeLaHoja.quieto) {
+                return;
+            }
+
+            this.pararElReloj();
+
+            if (alAcabar) {
+                alAcabar();
+
+                return;
+            }
+
+            // Asentada en su sitio: se devuelve el estilo a la hoja para que
+            // las transiciones de Alpine vuelvan a mandar en el próximo cierre.
+            this.soltarLaPintura();
+        });
+    },
+
+    pararElReloj() {
+        if (this.quitarDelReloj) {
+            this.quitarDelReloj();
+            this.quitarDelReloj = null;
+        }
+    },
+
+    acabaDeArrastrar: false,
+
+    /**
+     * Un arrastre no puede acabar en navegación. Sin esto, soltar el dedo
+     * encima de una fila después de empujar la hoja abre ese enlace.
+     *
+     * Se traga UN solo clic y la marca se apaga en el acto: si se quedara
+     * puesta, el siguiente toque legítimo sobre la misma fila tampoco
+     * navegaría y la hoja parecería rota.
+     */
+    tragarElClicDelArrastre(evento) {
+        if (! this.acabaDeArrastrar) {
+            return;
+        }
+
+        this.acabaDeArrastrar = false;
+        evento.preventDefault();
+        evento.stopPropagation();
     },
 }));
 

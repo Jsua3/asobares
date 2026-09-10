@@ -256,8 +256,14 @@ class NavbarMovilTest extends TestCase
         $this->assertStringContainsString(route('mi-cuenta.entrar'), $pestana);
         $this->assertStringNotContainsString('aria-current', $pestana, 'ninguna sección activa: ni el botón ni las filas lo llevan');
         $this->assertStringNotContainsString('origin-top-left', $pestana);
-        // El icono: contorno en reposo, y del vendor, no un path a mano.
-        $this->assertMatchesRegularExpression('/<button[^>]*aria-controls="menu-bolsas-movil"[^>]*>\s*<svg[^>]*class="h-6 w-6 shrink-0"/s', $pestana);
+        // El icono: contorno en reposo, y del vendor, no un path a mano. Desde
+        // el 9 sep 2026 va dentro de `.pestana__icono`, que es de quien cuelga
+        // la gota de la pestaña activa; la gota es opcional aquí porque en esta
+        // comprobación no hay ninguna sección activa.
+        $this->assertMatchesRegularExpression(
+            '/<button[^>]*aria-controls="menu-bolsas-movil"[^>]*>\s*<span class="pestana__icono">\s*(?:<span class="pestana__gota"[^>]*><\/span>\s*)?<svg[^>]*class="h-6 w-6 shrink-0"/s',
+            $pestana
+        );
         foreach (['role="menu"', 'aria-haspopup', 'x-collapse', 'line-clamp', 'leading-'] as $prohibido) {
             $this->assertStringNotContainsString($prohibido, $pestana);
         }
@@ -466,7 +472,150 @@ class NavbarMovilTest extends TestCase
         $this->assertStringContainsString('isolation: isolate;', $cromo);
         $this->assertStringNotContainsString('.cromo-'.'oculto', $css, 'la clase de ocultación del cromo, que nadie usaba, se retiró con su transform');
         $this->assertStringNotContainsString('.tema-lateral', $css);
-        $this->assertStringNotContainsString('view-transition-'.'name', $css, 'un elemento con nombre de transición de vista es raíz de fondo');
+    }
+
+    /**
+     * Un nombre de transición de vista en el cromo, y solo donde no puede hacer
+     * daño.
+     *
+     * Esta prueba sustituye a la prohibición en bloque que vivía dentro de
+     * `test_el_cromo_ya_no_es_bloque_contenedor` desde el 6 de septiembre. Aquel
+     * contrato era «`view-transition-name` no aparece en app.css», y la razón
+     * era buena: un elemento con nombre es raíz de fondo (View Transitions 1,
+     * §2.1.1), así que ponerlo en un módulo dejaría a las hojas que cuelgan de
+     * él sin página que desenfocar.
+     *
+     * Lo que la prohibición no distinguía es **de quién** es raíz de fondo: de
+     * sus DESCENDIENTES. Sobre una hoja vacía no hay descendientes a los que
+     * quitarles nada. Por eso la gota de la pestaña activa sí puede llevar
+     * nombre --y lo necesita: este sitio recarga la página entera en cada
+     * navegación, y emparejar el elemento entre los dos documentos es la única
+     * forma de que la gota viaje de una pestaña a otra--.
+     *
+     * Comprobado en el navegador el 9 sep 2026 con la hoja de «Bolsas» abierta:
+     * la gota tiene 0 descendientes, 0 elementos con `backdrop-filter` dentro,
+     * no contiene a la hoja, y la hoja conserva su `blur(20px) saturate(1.8)`.
+     *
+     * Así que lo que se vigila ya no es la palabra sino el invariante:
+     * **ningún elemento con nombre puede tener descendientes**, y ninguno de
+     * los contenedores del cromo puede llevarlo.
+     *
+     * Roturas: poner el nombre en `.pestana`, `.pestanas`, `.modulo-inferior`,
+     * `.cromo` o `.bandeja`; meterle un hijo a la gota en el Blade.
+     */
+    public function test_solo_una_hoja_sin_hijos_lleva_nombre_de_transicion(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+        $propiedad = 'view-transition-'.'name';
+
+        $this->assertSame(
+            1,
+            substr_count($css, $propiedad.':'),
+            "En app.css solo puede haber UN `{$propiedad}`, y es el de la gota de la pestaña activa."
+        );
+
+        $this->assertStringContainsString(
+            $propiedad.': pestana-activa;',
+            $this->regla($css, '.pestana__gota'),
+            'El único nombre permitido vive en la gota.'
+        );
+
+        foreach (['.cromo', '.bandeja', '.modulo-inferior', '.pestanas', '.pestana', '.pestana__icono', '.hoja-flotante'] as $contenedor) {
+            $this->assertStringNotContainsString(
+                $propiedad,
+                $this->regla($css, $contenedor),
+                "`{$contenedor}` tiene descendientes con `backdrop-filter`: con nombre los deja sin fondo que desenfocar."
+            );
+        }
+    }
+
+    /**
+     * La gota cuelga del ICONO, no de la pestaña. Esto lo destapó Sua mirando
+     * la barra el 9 sep 2026: «el cuadro rojo deja un cacho de icono por
+     * fuera».
+     *
+     * Y no era por poco. Medido: el contenido de la pestaña --icono de 24,
+     * hueco de 3 y rótulo de dos líneas de 36,3-- suma 63,3 px dentro de una
+     * caja de 68, así que la holgura total son 4,7 px. La gota nacía con un
+     * margen de 4,8 por lado, o sea MÁS PEQUEÑA que su propio contenido: el
+     * icono se salía 2,5 px por arriba y el rótulo 2,4 por abajo.
+     *
+     * Colgada del icono el margen es suyo, y además el estado compacto deja de
+     * necesitar regla aparte: la gota sigue al icono sin saber si hay rótulo.
+     *
+     * El signo del `inset` es lo que separa las dos formas, y por eso es lo que
+     * se vigila: NEGATIVO crece hacia fuera desde el icono; positivo encoge
+     * hacia dentro de lo que la contenga, que es exactamente el defecto.
+     *
+     * Roturas: devolver el `inset` a un valor positivo; quitarle
+     * `position: relative` a `.pestana__icono` (la gota se iría a buscar el
+     * primer ancestro posicionado, que es la pestaña, y volvería el recorte).
+     */
+    public function test_la_gota_abraza_al_icono_y_no_encoge_dentro_de_la_pestana(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+        $movil = $this->bloque($css, '@media (max-width: 63.999rem)', 2);
+
+        $this->assertStringContainsString(
+            'position: relative;',
+            $this->regla($movil, '.pestana__icono'),
+            'Sin ancestro posicionado la gota se cuelga de la pestaña y vuelve a recortar el icono.'
+        );
+
+        $inset = $this->regla($movil, '.pestana__gota');
+
+        $this->assertSame(
+            1,
+            preg_match('/inset:\s*(-?[\d.]+)rem\s+(-?[\d.]+)rem;/', $inset, $lados),
+            'No se pudo leer el `inset` de la gota.'
+        );
+
+        foreach ([[$lados[1], 'vertical'], [$lados[2], 'horizontal']] as [$valor, $eje]) {
+            $this->assertLessThan(
+                0,
+                (float) $valor,
+                "El `inset` {$eje} de la gota es positivo: la encoge dentro de su caja en vez de abrazar al icono, y el icono vuelve a salirse."
+            );
+        }
+
+        // Y ya no hay regla aparte para el compacto: sobra desde que cuelga
+        // del icono, y volver a escribirla es la señal de que alguien la
+        // recolgó de la pestaña y está parcheando el estado plegado a mano.
+        $this->assertStringNotContainsString(
+            '[data-estado="scroll"] .pestana__gota',
+            $css,
+            'El compacto no necesita regla propia: la gota sigue al icono y el icono ya se recoloca solo.'
+        );
+    }
+
+    /**
+     * La gota se pinta vacía y solo en la pestaña activa.
+     *
+     * Vacía, porque su nombre la convierte en raíz de fondo y cualquier hijo
+     * que llegara con `backdrop-filter` se quedaría sin página que desenfocar.
+     * Y una sola, porque dos elementos con el mismo nombre en un documento
+     * anulan la transición entera --no la de la gota: la de toda la página--.
+     */
+    public function test_la_gota_va_vacia_y_solo_en_la_pestana_activa(): void
+    {
+        foreach (['navbar', 'menu-grupo'] as $vista) {
+            $html = File::get(resource_path("views/components/publico/{$vista}.blade.php"));
+
+            $this->assertStringContainsString(
+                '<span class="pestana__gota" aria-hidden="true"></span>',
+                $html,
+                "En «{$vista}» la gota dejó de ser un elemento vacío y decorativo."
+            );
+        }
+
+        // Y en una página real solo hay una, con la sección activa marcada.
+        $html = $this->get(route('guia.index'))->assertOk()->getContent();
+
+        $this->assertSame(
+            1,
+            substr_count($html, 'pestana__gota'),
+            'Hay más de una gota en la página: dos nombres iguales anulan la transición de vista entera.'
+        );
     }
 
     /** Rotura: mover el vidrio del pseudoelemento al módulo; escribir `blur(14px)`. */
@@ -555,17 +704,52 @@ class NavbarMovilTest extends TestCase
         }
     }
 
-    /** Rotura: sacar `overflow-y: auto` de la media de apaisado. */
-    public function test_la_hoja_no_bloquea_el_gesto_en_vertical(): void
+    /**
+     * En vertical la hoja SE ARRASTRA, y para eso tiene que quedarse el gesto.
+     *
+     * ⚠️ Esta prueba afirmaba lo contrario hasta el 9 de septiembre de 2026.
+     * El contrato de entonces era «en vertical desplazarse es cerrar»: un gesto
+     * vertical que empezaba sobre la hoja desplazaba la página, y ese
+     * desplazamiento la cerraba de rebote. Por eso `touch-action` estaba
+     * PROHIBIDO aquí.
+     *
+     * El contrato nuevo es manipulación directa: la hoja sigue al dedo 1:1,
+     * resiste con goma hacia arriba y al soltar proyecta el momento para
+     * decidir si se va. El navegador solo cede un gesto vertical con
+     * `touch-action: none`, así que lo que antes se prohibía ahora se exige.
+     *
+     * Lo que NO cambia, y se sigue comprobando: en vertical la hoja no es
+     * contenedor de scroll, y el cierre por desplazamiento de la PÁGINA sigue
+     * existiendo para los gestos que empiezan fuera de ella.
+     *
+     * Roturas: quitar `touch-action: none` de `.hoja-inferior` (la hoja deja de
+     * poder arrastrarse y el navegador se lleva el gesto); sacar
+     * `overflow-y: auto` de la media de apaisado; borrar `cerrarSiSeDesplaza`.
+     */
+    public function test_la_hoja_se_queda_el_gesto_vertical_para_poder_arrastrarse(): void
     {
         $css = File::get(resource_path('css/app.css'));
         $movil = $this->bloque($css, '@media (max-width: 63.999rem)', 2);
         $apaisado = $this->bloque($movil, '@media (orientation: landscape) and (max-height: 30rem)');
 
         $hoja = $this->regla($movil, '.hoja-inferior');
-        foreach (['overflow-y', 'overscroll-behavior', 'touch-action'] as $prohibido) {
-            $this->assertStringNotContainsString($prohibido, $hoja, 'en vertical desplazarse es cerrar');
+
+        $this->assertStringContainsString(
+            'touch-action: none;',
+            $hoja,
+            'Sin esto el navegador se queda el gesto vertical y la hoja no se puede arrastrar.'
+        );
+
+        // Sigue sin ser contenedor de scroll en vertical: lo que se mueve es la
+        // hoja entera, no su contenido.
+        foreach (['overflow-y', 'overscroll-behavior'] as $prohibido) {
+            $this->assertStringNotContainsString($prohibido, $hoja, 'en vertical la hoja no desplaza por dentro');
         }
+
+        // Y el cierre por desplazamiento de la página no se ha perdido: es lo
+        // que cubre los gestos que empiezan fuera de la hoja.
+        $this->assertStringContainsString('cerrarSiSeDesplaza() {', File::get(resource_path('js/app.js')));
+
         $this->assertStringContainsString('touch-action: pan-y pinch-zoom;', $this->regla($apaisado, '.hoja-flotante'));
         $this->assertStringContainsString('overscroll-behavior: contain;', $this->regla($apaisado, '.hoja-flotante'));
 
