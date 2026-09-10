@@ -56,6 +56,17 @@
 
         Open Graph exige URL absoluta; `asset()` ya la entrega así, y una que
         venga del disco puede llegar relativa.
+
+        ⚠️ **Y esto no se ve todavía en producción, por una razón que no es un
+        defecto.** Mientras `SITIO_INDEXABLE` sea falsa, `robots.txt` sirve
+        `Disallow: /` (D-08, cerrada el 9 sep), y los rastreadores de WhatsApp y
+        Facebook lo respetan: no descargan la página, así que no hay miniatura
+        por mucha etiqueta que haya. La tarjeta empieza a verse **el día del
+        dominio propio**, cuando esa variable se ponga en `true`.
+
+        Dejar pasar solo a los rastreadores de vista previa sin abrir el sitio a
+        los buscadores se puede hacer --se les nombra en `robots.txt`--, pero
+        eso toca una decisión ya escrita y no se hace sin Sua e Ingrid.
     --}}
     @php($ogImagenFinal = $ogImagen ?: asset('img/og-asobares.jpg'))
     <meta property="og:image" content="{{ Str::startsWith($ogImagenFinal, ['http://', 'https://']) ? $ogImagenFinal : url($ogImagenFinal) }}">
