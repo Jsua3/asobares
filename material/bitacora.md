@@ -2427,3 +2427,35 @@ Se le quitó el trazo. El relleno sube del 14 al 20 % para no perder el «estás
 **La guardia tiene truco, y por cuarta vez el mismo.** Prohibir la palabra «border» en la regla la habría disparado el propio comentario de `app.css`, que cita el contorno viejo para explicar por qué se fue. La guardia mira la **declaración** —`border`, `border-width`, `border-style`… seguido de dos puntos— y deja pasar `border-radius`, que sí hace falta. Comprobada con tres mutaciones: devolver el aro, roja; quitar el halo, roja; `border-radius` intacto, verde.
 
 **La lección, que es de método:** el catálogo de trampas de este proyecto se llenó de cosas que el navegador miente. Esta es la otra mitad — **una decisión de diseño que ninguna medición podía tomar**. El contraste pasaba, la geometría pasaba, las mutaciones pasaban, y aun así estaba mal. Lo único que lo dijo fue una pantalla de seis pulgadas en una mano. Quedan dos superficies en esa misma situación y **más peligrosas, porque son gesto y no dibujo**: la hoja arrastrable y el vidriado del botón, que a día de hoy no ha tocado nadie.
+
+## §51 — Las dos tareas «que no dependían de nadie» no eran tareas (10 de septiembre de 2026)
+
+Quedaban dos filas del §17 marcadas como trabajo puro de código, sin bloqueos: sustituir el logo y sustituir el video del hero. De una de ellas el propio §17 decía que era «la única tarea de toda la entrega que no depende de nadie». **Las dos estaban equivocadas**, y la forma de averiguarlo fue la misma en los dos casos: abrir el archivo en vez de leer su nombre.
+
+### 51.1 El video: no se sustituye, y no es discutible
+
+`Video de Asobares Capítulo Quindio.mp4` sale de la carpeta de proyectos y dura 24,8 s, así que sobre el papel encajaba. Extraídos seis fotogramas, es **una persona hablando a cámara mientras camina por un centro comercial**: contenido de redes sociales. Y `ffprobe` lo remata — `rotation=-90`: es **vertical**, guardado como 1280×720.
+
+El hero no es un reproductor: es un fondo **mudo y en bucle** detrás del titular, forzado a `muted` por el propio JavaScript. Meter ahí ese archivo es poner a alguien moviendo la boca en silencio detrás de la portada del gremio. Y además expone a una persona identificable, cuando D-03 —autorizaciones de imagen— lleva desde el 26 de agosto sin respuesta.
+
+Los otros dos videos de la entrega caen por lo mismo: `Asobares Gestión 2025.mp4` es vertical y pesa 79 MB, y `video.mp4` es un tutorial **de la Nacional**, con su marca de agua, sobre la biblioteca virtual.
+
+El bucle que hay hoy, en cambio, es exactamente lo que un fondo debe ser: cócteles sirviéndose, cocteleras, brindis, con la marca del capítulo. Y está bien montado — medida la luminancia media, **funde a negro por los dos extremos** (16→39 al entrar, 42→18 al salir), así que el bucle no parpadea. Fui a comprobar un defecto que sospechaba y no existía.
+
+### 51.2 El logo: ya estaba puesto, y el PNG es una decisión, no una dejadez
+
+El §17 decía que el sitio servía «`material/logo asobares.svg`, un archivo suelto». No lo sirve: sirve `public/img/logo-asobares.png`. Comparado con el del kit oficial a la misma escala, **es el mismo dibujo** —mismo isotipo, mismo logotipo, misma línea «CAPÍTULO QUINDÍO»—; lo que cambia es la nitidez, porque el del sitio son 592×108 y el oficial 3128×572.
+
+Y el PNG no es una degradación: `logo.blade.php` ya deja escrito que aquel `.svg` **nunca fue un vector** —era este mismo PNG en base64 dentro de un `<svg><image>`, un 34 % más de bytes— y que se cambió midiendo, porque el logo tiene que estar en el primer pintado y antes se veía desaparecer y volver en cada navegación. Medido hoy: la instancia mayor se pinta a 219 px, así que a 3x pide 658 y hay 592. Un 11 % de estiramiento en un solo sitio: no justifica tocar algo que se afinó midiendo.
+
+### 51.3 Lo que sí faltaba de esa fila, y no lo decía
+
+La fila del logo listaba cuatro destinos: cabecera, pie, favicon y **imagen al compartir**. Los tres primeros estaban. El cuarto **no existía**: `ogImagen` nacía en `null` y solo lo pasaban cuatro vistas —artista, noticia, ficha de asociado y evento—, así que la portada, «Quiénes somos», la guía, el directorio y contacto se compartían **sin miniatura**.
+
+Para este gremio eso no es posicionamiento: su canal es WhatsApp, y un enlace sin imagen es el primer contacto de mucha gente con el sitio. Ya hay tarjeta —logotipo blanco del kit, sin recolorear, sobre el fondo del sitio, 1200×630, 22 KB— y se declara siempre. **Las medidas solo se juran sobre la tarjeta nuestra**: hacerlo sobre la foto de un artista es peor que callarse, porque el desplegador recorta contra un tamaño que no existe.
+
+El defecto no lo veía nadie porque **el `<meta>` existía y estaba bien escrito**: lo que casi nunca se cumplía era su `@if`. Una prueba que mirase la plantilla lo habría dado por bueno; la guardia nueva recorre cinco páginas servidas y lee el HTML. Y una de sus tres aserciones se puso roja sola en la primera pasada, por no haber añadido el archivo al índice de git — que es **exactamente** la avería que enseñó el video del hero, cazada esta vez antes de producción.
+
+### 51.4 La lección
+
+**Una tabla de instrucciones escrita desde un listado de archivos no es lo mismo que una escrita desde los archivos.** El §17 es un trabajo bueno y útil, y aun así dos de sus filas mandaban hacer algo incorrecto: una porque no miró dentro del video, otra porque no comprobó qué archivo sirve el sitio. Es la misma regla del §49.3 —verificar contra el documento y no contra el resumen— aplicada al propio expediente. El expediente también es un resumen.

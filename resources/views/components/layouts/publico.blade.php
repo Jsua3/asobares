@@ -40,13 +40,45 @@
     <meta property="og:description" content="{{ $descripcion ?? ajuste('sitio_descripcion') }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:locale" content="es_CO">
-    @if (! empty($ogImagen))
-        {{-- Open Graph exige URL absoluta; el disco las entrega relativas. --}}
-        <meta property="og:image" content="{{ Str::startsWith($ogImagen, ['http://', 'https://']) ? $ogImagen : url($ogImagen) }}">
-        <meta name="twitter:card" content="summary_large_image">
-    @else
-        <meta name="twitter:card" content="summary">
-    @endif
+    {{--
+        Con imagen SIEMPRE. Hasta el 10 de septiembre `ogImagen` nacía en `null`
+        y solo cuatro vistas la pasaban --artista, noticia, ficha de asociado y
+        evento--, así que la portada, «Quiénes somos», la guía, el directorio y
+        todo lo demás se compartían **sin miniatura**. En un gremio cuyo canal
+        principal es WhatsApp, ese es el primer contacto de mucha gente con el
+        sitio: un enlace pelado.
+
+        El respaldo es el logotipo blanco del kit, sin recolorear ni recomponer,
+        centrado sobre el fondo del sitio en 1200x630 --la medida que piden
+        Facebook y WhatsApp--. Fondo oscuro y no rojo a propósito: la vista
+        previa tiene que parecerse a lo que el visitante se encuentra al entrar,
+        y este sitio es oscuro con el rojo de acento, no al revés.
+
+        Open Graph exige URL absoluta; `asset()` ya la entrega así, y una que
+        venga del disco puede llegar relativa.
+
+        ⚠️ **Y esto no se ve todavía en producción, por una razón que no es un
+        defecto.** Mientras `SITIO_INDEXABLE` sea falsa, `robots.txt` sirve
+        `Disallow: /` (D-08, cerrada el 9 sep), y los rastreadores de WhatsApp y
+        Facebook lo respetan: no descargan la página, así que no hay miniatura
+        por mucha etiqueta que haya. La tarjeta empieza a verse **el día del
+        dominio propio**, cuando esa variable se ponga en `true`.
+
+        Dejar pasar solo a los rastreadores de vista previa sin abrir el sitio a
+        los buscadores se puede hacer --se les nombra en `robots.txt`--, pero
+        eso toca una decisión ya escrita y no se hace sin Sua e Ingrid.
+    --}}
+    @php($ogImagenFinal = $ogImagen ?: asset('img/og-asobares.jpg'))
+    <meta property="og:image" content="{{ Str::startsWith($ogImagenFinal, ['http://', 'https://']) ? $ogImagenFinal : url($ogImagenFinal) }}">
+    @empty($ogImagen)
+        {{-- Las medidas solo se declaran para la tarjeta nuestra. Una foto de
+             artista o de noticia llega con las suyas, y jurar 1200x630 sobre
+             ellas es peor que callarse: el desplegador recorta contra un tamaño
+             que no existe. --}}
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+    @endempty
+    <meta name="twitter:card" content="summary_large_image">
 
     <link rel="icon" type="image/png" href="{{ asset('img/favicon.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('img/favicon.png') }}">
