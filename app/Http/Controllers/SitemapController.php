@@ -40,6 +40,7 @@ class SitemapController
             ['eventos.index', Url::CHANGE_FREQUENCY_WEEKLY, 0.7],
             ['boletin.index', Url::CHANGE_FREQUENCY_MONTHLY, 0.6],
             ['quienes-somos', Url::CHANGE_FREQUENCY_YEARLY, 0.6],
+            ['aliados.index', Url::CHANGE_FREQUENCY_MONTHLY, 0.6],
             ['afiliate', Url::CHANGE_FREQUENCY_MONTHLY, 0.8],
             ['contacto', Url::CHANGE_FREQUENCY_YEARLY, 0.5],
             ['politica-de-datos', Url::CHANGE_FREQUENCY_YEARLY, 0.3],

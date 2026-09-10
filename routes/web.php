@@ -60,6 +60,7 @@ Route::get('/robots.txt', function (): Response {
 })->name('robots');
 
 Route::get('/quienes-somos', [PaginaController::class, 'quienesSomos'])->name('quienes-somos');
+Route::get('/aliados', [PaginaController::class, 'aliados'])->name('aliados.index');
 Route::get('/politica-de-datos', [PaginaController::class, 'politicaDeDatos'])->name('politica-de-datos');
 
 // Directorio de establecimientos.

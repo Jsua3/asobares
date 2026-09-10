@@ -544,14 +544,15 @@
                         @endforeach
                     </div>
                 @endif
-                <p class="mt-4 text-xs text-apagado">
-                    El detalle de cada convenio es información privada de los afiliados.
+                <div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-apagado">
+                    <span>El detalle de cada convenio es información privada de los afiliados.</span>
                     {{-- `whitespace-nowrap` porque el espacio duro NO basta: Chromium parte la línea
                          delante de una caja atómica aunque la preceda un espacio de no separación
                          (medido; con el carácter de antes sí bastaba). Sin esto la flecha cae sola
                          al renglón siguiente entre 328 y 336 px y otra vez cerca de 600. --}}
                     <a href="{{ route('mi-cuenta.index') }}" class="enlace-accion whitespace-nowrap text-acento hover:text-acento-fuerte">Inicia sesión para verlo&nbsp;<x-publico.flecha /></a>
-                </p>
+                    <a href="{{ route('aliados.index') }}" class="enlace-accion whitespace-nowrap text-acento hover:text-acento-fuerte">Ver aliados&nbsp;<x-publico.flecha /></a>
+                </div>
             </div>
         </section>
     @endif

@@ -134,6 +134,7 @@ class SitioPublicoTest extends TestCase
             '/boletin',
             '/boletin?categoria=observatorio',
             '/afiliate',
+            '/aliados',
             '/contacto',
             '/politica-de-datos',
             '/mi-cuenta/entrar',
