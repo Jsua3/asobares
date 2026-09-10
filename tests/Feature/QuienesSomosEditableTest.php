@@ -191,4 +191,42 @@ class QuienesSomosEditableTest extends TestCase
             ->assertOk()
             ->assertDontSee($afiliados, escape: false);
     }
+
+    /**
+     * El caso de producción, que no es el de arriba.
+     *
+     * `SettingSeeder` **no corre en el despliegue**: cuando esta rama llegue a
+     * producción, las cuatro claves del respaldo nacional no existirán en la
+     * base hasta que alguien pase `ContenidoOficialSeeder` a mano. Una clave
+     * ausente no es lo mismo que una vacía --`ajuste()` devuelve su valor por
+     * defecto-- y esa diferencia es la que decide si desplegar rompe la página
+     * o simplemente no enseña el bloque todavía.
+     *
+     * Comprobada borrando las filas, que es literalmente el estado de la base
+     * de producción hoy.
+     */
+    public function test_la_pagina_aguanta_sin_las_claves_del_respaldo_nacional(): void
+    {
+        $rotulos = [ajuste('nacional_capitulos_rotulo'), ajuste('nacional_afiliados_rotulo')];
+
+        Setting::query()->whereIn('clave', [
+            'nacional_capitulos',
+            'nacional_capitulos_rotulo',
+            'nacional_afiliados',
+            'nacional_afiliados_rotulo',
+        ])->get()->each->delete();
+
+        $respuesta = $this->get(route('quienes-somos'))->assertOk();
+
+        // Ni el bloque, ni un rótulo suelto, ni una lista vacía.
+        foreach ($rotulos as $rotulo) {
+            $respuesta->assertDontSee($rotulo, escape: false);
+        }
+
+        $respuesta->assertDontSee('<dl', escape: false);
+
+        // Y el resto de la página sigue en pie: el bloque que las alberga es el
+        // del respaldo nacional, y su título no depende de las cuatro claves.
+        $respuesta->assertSee(ajuste('quienes_titulo_nacional'), escape: false);
+    }
 }
