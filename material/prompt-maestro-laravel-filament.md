@@ -32,9 +32,10 @@ Un avance técnico impecable que llegue tarde al documento pierde la mayor parte
 | Panel, recursos, policies, aprobación | Frente producto | §6 Panel · §15: Filament, bolsas y aprobación | §16, §24.6 si vas a escribir pruebas de permisos |
 | Modelo de datos, migraciones, sembradores | Frente contenido · Deuda | §5 Modelo · §10 Semillas · §15: fechas | §31 si vas a sembrar en producción |
 | Formularios públicos, datos personales, fotos | Frente datos personales | **§9 Seguridad, entero, obligatorio** | §15 (bitácora), §29.4 |
-| Pagos, Bold, cartera | Decisiones pendientes | §8 Pagos · §15: pagos y CSV | §15 (bitácora) |
+| Pagos, Bold, cartera | Decisiones pendientes | §8 Pagos · §15: pagos y CSV · **§17.3 el archivo real de la contadora** | §15 (bitácora) |
 | Despliegue, variables, correo, bucket, dominio | Frente infraestructura | §15: Cloud, más `docs/ingenieria/runbook-despliegue.md` | §20, §29, §31.6 |
-| Textos, contenido, guía normativa | Frente contenido · Decisiones pendientes | §2 El cliente · §12 Reglas de contenido | §17, §31 |
+| Textos, contenido, guía normativa | Frente contenido · Decisiones pendientes | §2 El cliente · §12 Reglas de contenido · **§17.1 y §17.2: qué dato real va dónde y qué provisional se retira** | §17, §31 (bitácora) |
+| Material del gremio, aliados, cifras de la portada, importadores | Frente contenido | **§17 entero** · §10 Semillas | §31 si vas a sembrar en producción |
 | El documento de práctica | Frente académico | Nada | §23.2: lo que el docente ha exigido, textual |
 | Una ampliación que alguien pidió | Decisiones pendientes | §13 Decisiones que rigen · §14 | §27.4 |
 

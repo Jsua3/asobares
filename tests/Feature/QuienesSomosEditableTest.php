@@ -30,7 +30,14 @@ class QuienesSomosEditableTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** Los quince textos que dejaron de estar cableados. */
+    /**
+     * Los quince textos que dejaron de estar cableados, más las cuatro claves
+     * del respaldo nacional que entraron el 9 de septiembre de 2026 (las dos
+     * cifras de la lámina 3 de la presentación institucional y sus dos
+     * rótulos). Los rótulos son ajuste y no texto en la vista justamente por
+     * esta guardia: dicen «en el país», que es lo que impide leerlos como el
+     * tamaño del capítulo, y el gremio tiene que poder cambiarlos.
+     */
     private const array CLAVES = [
         'quienes_titulo_historia',
         'quienes_titulo_que_hacemos',
@@ -47,6 +54,10 @@ class QuienesSomosEditableTest extends TestCase
         'quienes_rotulo_programas',
         'quienes_cargo_presidente',
         'quienes_cargo_directora',
+        'nacional_capitulos',
+        'nacional_capitulos_rotulo',
+        'nacional_afiliados',
+        'nacional_afiliados_rotulo',
     ];
 
     protected function setUp(): void
@@ -142,5 +153,80 @@ class QuienesSomosEditableTest extends TestCase
         foreach (['Tesorero', 'Secretario', 'Vocal', 'Fiscal', 'Suplente'] as $cargoDeMas) {
             $respuesta->assertDontSee($cargoDeMas, escape: false);
         }
+    }
+
+    /**
+     * El respaldo nacional se comporta como la franja de cifras de la portada:
+     * la cifra que la oficina deje en blanco no se pinta, y si borra las dos
+     * desaparece el bloque entero.
+     *
+     * Sin esto, vaciar el número deja el rótulo flotando solo --«Capítulos en
+     * el país» sin ningún número al lado--, que es peor que no enseñar nada y
+     * es exactamente lo que pasa cuando alguien limpia un campo para volver a
+     * escribirlo y se va a comer.
+     */
+    public function test_el_respaldo_nacional_sin_cifra_no_deja_el_rotulo_solo(): void
+    {
+        $capitulos = ajuste('nacional_capitulos_rotulo');
+        $afiliados = ajuste('nacional_afiliados_rotulo');
+
+        $this->get(route('quienes-somos'))
+            ->assertOk()
+            ->assertSee($capitulos, escape: false)
+            ->assertSee($afiliados, escape: false);
+
+        // Solo espacios: la vista recorta antes de decidir, así que esto tiene
+        // que contar como vacía. Por instancia, para que salte el evento que
+        // limpia la caché de `Setting::todos()`.
+        Setting::query()->where('clave', 'nacional_capitulos')->first()->update(['valor' => '   ']);
+
+        $this->get(route('quienes-somos'))
+            ->assertOk()
+            ->assertDontSee($capitulos, escape: false)
+            ->assertSee($afiliados, escape: false);
+
+        Setting::query()->where('clave', 'nacional_afiliados')->first()->update(['valor' => '']);
+
+        $this->get(route('quienes-somos'))
+            ->assertOk()
+            ->assertDontSee($afiliados, escape: false);
+    }
+
+    /**
+     * El caso de producción, que no es el de arriba.
+     *
+     * `SettingSeeder` **no corre en el despliegue**: cuando esta rama llegue a
+     * producción, las cuatro claves del respaldo nacional no existirán en la
+     * base hasta que alguien pase `ContenidoOficialSeeder` a mano. Una clave
+     * ausente no es lo mismo que una vacía --`ajuste()` devuelve su valor por
+     * defecto-- y esa diferencia es la que decide si desplegar rompe la página
+     * o simplemente no enseña el bloque todavía.
+     *
+     * Comprobada borrando las filas, que es literalmente el estado de la base
+     * de producción hoy.
+     */
+    public function test_la_pagina_aguanta_sin_las_claves_del_respaldo_nacional(): void
+    {
+        $rotulos = [ajuste('nacional_capitulos_rotulo'), ajuste('nacional_afiliados_rotulo')];
+
+        Setting::query()->whereIn('clave', [
+            'nacional_capitulos',
+            'nacional_capitulos_rotulo',
+            'nacional_afiliados',
+            'nacional_afiliados_rotulo',
+        ])->get()->each->delete();
+
+        $respuesta = $this->get(route('quienes-somos'))->assertOk();
+
+        // Ni el bloque, ni un rótulo suelto, ni una lista vacía.
+        foreach ($rotulos as $rotulo) {
+            $respuesta->assertDontSee($rotulo, escape: false);
+        }
+
+        $respuesta->assertDontSee('<dl', escape: false);
+
+        // Y el resto de la página sigue en pie: el bloque que las alberga es el
+        // del respaldo nacional, y su título no depende de las cuatro claves.
+        $respuesta->assertSee(ajuste('quienes_titulo_nacional'), escape: false);
     }
 }

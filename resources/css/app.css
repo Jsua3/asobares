@@ -988,14 +988,24 @@
          * falta se compensa a lo ancho, que es donde sí sobra: el icono no
          * llena su caja por los lados y la píldora puede respirar hasta 40 px.
          */
+        /* Sin contorno, a propósito. Llevaba `border: 1px solid rgb(238 65 55 /
+         * 0.3)` y en un teléfono de verdad eso no se lee como una gota: se lee
+         * como un aro rojo dibujado alrededor del icono, que es justo lo que
+         * Sua dijo que no le simpatizaba (10 sep, sobre la pantalla real). Una
+         * gota sobre un cristal no tiene línea: tiene un borde que se apaga.
+         *
+         * Así que el relleno sube un poco --para no perder el «estás aquí» que
+         * daba el trazo-- y el salto al fondo de la barra lo amortigua un halo
+         * de 5 px al 6 %, que no llega a ser una silueta. Dos escalones de
+         * opacidad en vez de una línea. */
         .pestana__gota {
             pointer-events: none;
             position: absolute;
             inset: -0.125rem -0.5rem;
             z-index: -1;
             border-radius: 999px;
-            background-color: rgb(238 65 55 / 0.14);
-            border: 1px solid rgb(238 65 55 / 0.3);
+            background-color: rgb(238 65 55 / 0.2);
+            box-shadow: 0 0 0 5px rgb(238 65 55 / 0.06);
             view-transition-name: pestana-activa;
         }
 

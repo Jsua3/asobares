@@ -65,7 +65,13 @@ class SettingSeeder extends Seeder
         return [
             // --- Identidad (lema oficial del capítulo) ---
             $this->texto('sitio_nombre', 'ASOBARES Capítulo Quindío', 'identidad', 'Nombre del sitio'),
-            $this->texto('sitio_eslogan', 'La noche construye territorio', 'identidad', 'Lema del capítulo'),
+            // 9 sep 2026. Decía «La noche construye territorio», que lo escribió
+            // este equipo. El lema del gremio es este, y cierra la última lámina
+            // de «Presentación Asobares actualizada.pdf» entre comillas. Se ve en
+            // el pie de todo el sitio, en el título de la portada y sobre el hero
+            // de «Quiénes somos», así que era el texto propio más repetido que
+            // quedaba en producción.
+            $this->texto('sitio_eslogan', 'Construyendo un Quindío nocturno', 'identidad', 'Lema del capítulo'),
             $this->texto('sitio_descripcion_corta', 'El gremio que representa, fortalece y dinamiza el sector nocturno, gastronómico y de entretenimiento del Quindío.', 'identidad', 'Descripción corta'),
             $this->largo('sitio_descripcion', 'Asociación de Bares de Colombia, Capítulo Quindío. Representamos a bares, gastrobares, cafés y discotecas del departamento ante las instituciones, y acompañamos a quien quiere abrir su establecimiento.', 'identidad', 'Descripción para buscadores'),
 
@@ -178,10 +184,24 @@ class SettingSeeder extends Seeder
             $this->texto('quienes_cargo_presidente', 'Presidente', 'institucional', 'Quiénes somos · cargo del presidente'),
             $this->texto('quienes_cargo_directora', 'Directora ejecutiva', 'institucional', 'Quiénes somos · cargo de la directora'),
             $this->largo('quienes_historia', 'Somos una organización gremial que nace en Bogotá y llega al Quindío con la necesidad de afianzar la relación TURISMO – NOCHE. El capítulo se fundó el 14 de agosto de 2024 en Armenia y reúne a bares, gastrobares, cafés y discotecas del departamento alrededor de una idea simple: la vida nocturna es una industria que genera empleo, paga impuestos y merece ser tratada como tal.', 'institucional', 'Historia'),
-            $this->largo('quienes_mision', 'Representar al sector de la vida nocturna del Quindío ante las instituciones públicas y privadas, para proponer como gremio: participar en las decisiones sobre horarios, ruido, orden público y formalización antes de que se tomen, y no reclamar después.', 'institucional', 'Misión'),
+            // 9 sep 2026. Es el subtítulo del hero de «Quiénes somos», o sea lo
+            // primero que se lee al entrar a la página que explica el gremio, y
+            // hasta hoy lo había redactado este equipo. La lámina 2 de la
+            // presentación institucional trae la propuesta de valor del propio
+            // gremio: entra tal cual, sin resumir y sin «mejorar» (§17.2 del
+            // encargo). Por eso cambia también la etiqueta que ve la oficina:
+            // ya no es nuestra misión redactada, es su propuesta de valor.
+            $this->largo('quienes_mision', 'En Asobares Capítulo Quindío nos comprometemos a ser un aliado estratégico de los empresarios y establecimientos de la vida nocturna, brindando oportunidades de crecimiento, innovación y conexión para impulsar el desarrollo del sector turístico como un producto nocturno.', 'institucional', 'Propuesta de valor'),
             $this->largo('quienes_que_hacemos', 'Trabajamos por una vida nocturna más diversa y por la dignificación del sector, para consolidarnos como el corazón nocturno del Eje Cafetero. Gestionamos con las Secretarías de Salud, Gobierno y Planeación; negociamos tarifas de derechos de autor; formamos a los equipos de nuestros afiliados; y construimos la guía normativa por municipio que hoy no tiene ningún otro gremio del país.', 'institucional', 'Qué hacemos'),
             $this->texto('quienes_vision', 'Hacia la transformación del Quindío en un paraíso nocturno seguro', 'institucional', 'Visión'),
-            $this->texto('quienes_presidente', 'Jorge Iván Botero Ángel', 'institucional', 'Presidente'),
+            // 9 sep 2026. Decía «Jorge Iván Botero Ángel»: los dos apellidos
+            // estaban al revés. La invitación a los ponentes del foro nocturno
+            // (jul 2025, «Apoyos ejecutivos/INVITACION PONENTES FORO NOCTURNO.docx»)
+            // la firma él mismo como «Jorge Iván Ángel Botero · Presidente
+            // Asobares Quindío». Es el nombre de una persona real en una página
+            // pública con el nombre del gremio encima: no se toca sin documento,
+            // y ahora hay uno firmado por el interesado.
+            $this->texto('quienes_presidente', 'Jorge Iván Ángel Botero', 'institucional', 'Presidente'),
             $this->texto('quienes_directora', 'Natalia Gutiérrez', 'institucional', 'Directora ejecutiva'),
             $this->texto('quienes_fundacion', '14 de agosto de 2024', 'institucional', 'Fecha de fundación'),
 
@@ -195,6 +215,22 @@ class SettingSeeder extends Seeder
 
             $this->largo('quienes_estrategia_armenia', 'Armenia Nocturna es la propuesta del capítulo para la ciudad: articular a la Secretaría de Gobierno y a la de Desarrollo Económico alrededor de una vida económica nocturna regulada, segura y reconocida como industria.', 'institucional', 'Estrategia Armenia Nocturna'),
             $this->largo('quienes_programas_nacionales', "Tardeo en la ciudad\nMi destino, tu noche\nLa ruta del coctel\nPregunta por Ángela", 'institucional', 'Programas de la Nacional que aterriza el capítulo'),
+            // 9 sep 2026. La lámina 3 de la presentación institucional respalda
+            // al capítulo con dos cifras del gremio nacional: 17 capítulos y
+            // 2.500 afiliados. El bloque «Somos el capítulo regional de Asobares
+            // Colombia» lo afirmaba sin enseñar de qué tamaño es ese respaldo.
+            //
+            // ⚠️ Son cifras NACIONALES y no reabren D-18, que es la cifra de
+            // afiliados DEL QUINDÍO --el sitio decía 60, la base tiene 48 y nadie
+            // lo ha zanjado--. `cifra_afiliados` se jubiló por eso y sigue en la
+            // lista de jubilados de arriba.
+            // Cifra y rótulo por separado, como las cuatro de la portada
+            // (`CifrasDelGremio`): la oficina cambia el número sin pelearse con
+            // un texto, y el rótulo es editable porque también se ve.
+            $this->texto('nacional_capitulos', '17', 'institucional', 'Respaldo nacional · cifra de capítulos'),
+            $this->texto('nacional_capitulos_rotulo', 'Capítulos en el país', 'institucional', 'Respaldo nacional · rótulo de capítulos'),
+            $this->texto('nacional_afiliados', '2.500', 'institucional', 'Respaldo nacional · cifra de afiliados'),
+            $this->texto('nacional_afiliados_rotulo', 'Afiliados en el país', 'institucional', 'Respaldo nacional · rótulo de afiliados'),
             $this->texto('url_nacional', 'https://asobares.org', 'institucional', 'Sitio de Asobares Nacional'),
 
             // --- Contacto ---

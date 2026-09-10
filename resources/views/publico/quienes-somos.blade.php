@@ -220,7 +220,41 @@
 
         <section class="revelar tarjeta p-8 text-center" data-revelar>
             <h2 class="font-display text-xl font-bold">{{ ajuste('quienes_titulo_nacional') }}</h2>
-            <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-tenue">
+
+            {{-- El tamaño de ese respaldo, de la lámina 3 de la presentación
+                 institucional. Los rótulos dicen «en el país» a propósito: son
+                 cifras de la Nacional, y sin esa palabra se leen como el tamaño
+                 del capítulo, que es otra cosa y todavía no está zanjada (D-18).
+                 Como en la franja de la portada, la cifra que la oficina deje en
+                 blanco no se pinta, y si borra las dos desaparece el bloque. --}}
+            @php
+                $respaldoNacional = array_values(array_filter([
+                    ['cifra' => trim((string) ajuste('nacional_capitulos')), 'rotulo' => ajuste('nacional_capitulos_rotulo')],
+                    ['cifra' => trim((string) ajuste('nacional_afiliados')), 'rotulo' => ajuste('nacional_afiliados_rotulo')],
+                ], fn (array $dato): bool => $dato['cifra'] !== ''));
+            @endphp
+
+            @if ($respaldoNacional !== [])
+                {{-- A 375 px las dos cifras se apilan, y así se queda. Medido el
+                     10 sep: dentro de la tarjeta solo hay 279 px de ancho útil
+                     (`p-8` a cada lado), y los dos pares miden 165 y 160 --lo
+                     ancho es el rótulo, no el número--. Caben hombro con hombro
+                     solo si se acota el rótulo a ~123 px, y entonces se parte en
+                     dos líneas y el bloque pasa de 121 a 154 px de alto: peor por
+                     los dos lados. Apilados, cada cifra se lee de un vistazo. --}}
+                <dl class="mt-6 flex flex-wrap items-start justify-center gap-x-12 gap-y-5">
+                    @foreach ($respaldoNacional as $dato)
+                        {{-- En orden inverso para que el número quede arriba sin
+                             romper el par <dt>/<dd>, que va al revés en el DOM. --}}
+                        <div class="flex flex-col-reverse">
+                            <dt class="antetitulo mt-1 text-tenue">{{ $dato['rotulo'] }}</dt>
+                            <dd class="font-display text-3xl font-bold leading-none text-acento">{{ $dato['cifra'] }}</dd>
+                        </div>
+                    @endforeach
+                </dl>
+            @endif
+
+            <p class="mx-auto mt-6 max-w-xl text-sm leading-relaxed text-tenue">
                 Aterrizamos en el Quindío los programas nacionales del gremio:
                 {{ collect(array_filter(explode("\n", (string) ajuste('quienes_programas_nacionales'))))->map(fn ($p) => trim($p))->join(', ', ' y ') }}.
                 Lo que no es local se gestiona directamente con la Nacional.
