@@ -751,6 +751,64 @@
         }
     }
 
+    /*
+     * La franja estrecha de escritorio: de 64rem a 82.5rem la barra no cabe.
+     *
+     * Medido el 10 sep sobre el sitio servido, y es peor de lo que decía D-33.
+     * Los tres módulos ocupan 1.102 px sin sesión y 1.121 con ella, un ancho
+     * FIJO; la píldora mide el hueco menos 47. Y el módulo del medio va
+     * centrado, así que el de la cuenta no se limita a desbordar: se le monta
+     * encima. A 1024 el solape es de 152 px sin sesión y 171 con, y «El
+     * gremio» y «Mi cuenta» quedan impresos uno sobre otro, ilegibles.
+     *
+     * No termina a 1130 como decía el expediente. Despejando la geometría del
+     * centrado, el solape desaparece en 1.262 px sin sesión y en 1.300 con
+     * ella --por eso el corte está en 82.5rem, con margen--. Un portátil de
+     * 1280 con la sesión abierta estaba roto.
+     *
+     * Se recortan dos cosas y ninguna es un destino:
+     *
+     * 1. El logotipo cruza a isotipo (175 -> 46 px, 129 menos). No es una
+     *    invención: es el MISMO cruce que la barra ya hace al desplazarse, con
+     *    los mismos tokens, así que no entra vocabulario visual nuevo.
+     * 2. El chip de idioma se esconde (50 menos). Ya estaba oculto por debajo
+     *    de 64rem (`max-lg:hidden`): esto solo estira esa decisión hasta donde
+     *    hace falta. Es un sitio reservado que anuncia «próximamente» y no
+     *    funciona a propósito, así que es lo más barato que se puede quitar.
+     *
+     * Lo que NO se toca son los dos `control-plegable` --«Abre tu negocio» y
+     * «El gremio»--: plegarlos aquí dejaría dos destinos sin ninguna forma de
+     * alcanzarlos en un portátil, y eso es peor que el solape.
+     *
+     * 179 px de ahorro: a 1024 quedan 54 px de holgura sin sesión y 35 con.
+     */
+    @media (min-width: 64rem) and (max-width: 82.5rem) {
+        /*
+         * El reparto de columnas de esta franja NO vive aquí: vive en dos
+         * utilidades del marcado de `navbar.blade.php`, porque una utilidad de
+         * `@layer utilities` gana siempre a un portador de `@layer components`
+         * y esta regla no se aplicaría. Comprobado: escrita aquí, la rejilla
+         * seguía midiendo 329/588/329. El motivo del reparto está allí.
+         */
+        .logo-doble {
+            max-width: 2.9rem;
+        }
+
+        .logo-doble__completo {
+            opacity: 0;
+            scale: var(--asb-escala-isotipo);
+        }
+
+        .logo-doble__isotipo {
+            opacity: 1;
+            scale: 1;
+        }
+
+        .modulo-cuenta .control-idioma {
+            display: none;
+        }
+    }
+
     @media (hover: none) {
         [data-estado="scroll"] .indicador-mas {
             visibility: visible;

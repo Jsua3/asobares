@@ -218,11 +218,20 @@ class NavbarMovilTest extends TestCase
      * px no sobra un solo control. Se esconde bajo 64rem y sigue en el DOM
      * para las guardias. La raíz no fusiona atributos, así que va en el literal.
      *
-     * Rotura: quitar `max-lg:hidden`.
+     * Desde el 10 sep lleva delante la clase `control-idioma`, que es el gancho
+     * con el que `app.css` lo esconde **también** en la franja estrecha de
+     * escritorio, donde la barra no cabe y este chip es lo más barato que se
+     * puede quitar. La guardia comprueba las dos cosas por separado para que
+     * quitar cualquiera de ellas se ponga roja por su propio motivo.
+     *
+     * Roturas: quitar `max-lg:hidden`; quitar la clase `control-idioma`.
      */
     public function test_el_chip_de_idioma_se_esconde_en_movil(): void
     {
-        $this->assertStringContainsString('class="relative max-lg:hidden"', File::get(resource_path('views/components/publico/control-idioma.blade.php')));
+        $chip = File::get(resource_path('views/components/publico/control-idioma.blade.php'));
+
+        $this->assertStringContainsString('max-lg:hidden"', $chip, 'el chip tiene que seguir oculto por debajo de 64rem');
+        $this->assertStringContainsString('class="control-idioma ', $chip, 'sin el gancho, `app.css` no puede esconderlo en la franja estrecha de escritorio');
     }
 
     /**

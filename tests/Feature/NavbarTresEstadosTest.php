@@ -520,19 +520,82 @@ class NavbarTresEstadosTest extends TestCase
     }
 
     /**
+     * La franja estrecha de escritorio: de 64rem a 82.5rem la barra no cabe.
+     *
+     * Medido sobre el sitio servido el 10 sep, y era peor de lo que decía D-33.
+     * Los tres módulos ocupan un ancho FIJO --1.102 px sin sesión, 1.121 con
+     * ella-- y el módulo del medio va centrado por rejilla, así que el de la
+     * cuenta no se limitaba a desbordar: se le montaba encima. A 1024 el solape
+     * era de 152 px sin sesión y 171 con, con «El gremio» y «Mi cuenta»
+     * impresos uno sobre otro. Y no terminaba a 1130 como decía el expediente:
+     * despejando la geometría del centrado, desaparecía en 1.262 px sin sesión
+     * y en 1.300 con ella. Un portátil de 1280 con sesión estaba roto.
+     *
+     * Dos recortes aquí, y ninguno pierde un destino: el logotipo cruza a
+     * isotipo con los mismos tokens que usa al desplazarse, y el chip de idioma
+     * se esconde --ya lo estaba bajo 64rem--. El tercero, el reparto de
+     * columnas, vive en el marcado porque una utilidad gana a esta capa.
+     *
+     * Los dos `control-plegable` NO se tocan: plegarlos aquí dejaría «Abre tu
+     * negocio» y «El gremio» sin forma de alcanzarse en un portátil.
+     *
+     * Roturas: quitar el bloque de 82.5rem de `app.css`; devolver el máximo del
+     * logotipo a 11rem dentro de él; dejar de esconder el chip.
+     */
+    public function test_la_barra_cabe_en_la_franja_estrecha_de_escritorio(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+
+        $this->assertSame(
+            1,
+            preg_match('/@media \(min-width: 64rem\) and \(max-width: 82\.5rem\) \{(.*?)\n    \}/s', $css, $franja),
+            'no existe el bloque de la franja estrecha: la barra vuelve a solaparse entre 1024 y 1320'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.logo-doble \{\s*max-width: 2\.9rem;/',
+            $franja[1],
+            'sin el cruce a isotipo el módulo del logo pide 201 px y no hay de dónde sacarlos'
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\.control-idioma \{\s*display: none;/',
+            $franja[1],
+            'el chip de idioma es lo más barato que se puede quitar aquí: no funciona todavía'
+        );
+
+        $this->assertStringNotContainsString(
+            'control-plegable',
+            $franja[1],
+            'plegar «Abre tu negocio» y «El gremio» aquí los deja inalcanzables en un portátil'
+        );
+    }
+
+    /**
      * Con `justify-between` el módulo principal caía en el punto medio entre
      * el logo y la cuenta, no en el de la pantalla: 120 px a la izquierda en
      * scroll y atención, medido a 1440, 1280 y 1024 el 5 sep. La rejilla
      * `1fr auto 1fr` lo clava al centro del viewport en los tres estados.
      *
-     * Roturas: quitar `lg:grid-cols-[1fr_auto_1fr]` de la <nav>; borrar la
-     * regla `.modulo-logo { min-width: max-content; }` del bloque de 64rem.
+     * ⚠️ **Desde el 10 sep el centrado exacto empieza en 82.5rem, no en 64rem**,
+     * y no es un descuido: entre las dos anchuras es imposible. Centrar exige
+     * columnas laterales IGUALES, o sea 2 x 255 + 588 = 1.098 px de contenido
+     * en un hueco que a 1024 da 953. El módulo de cuenta se derramaba sobre el
+     * central y «El gremio» y «Mi cuenta» salían impresos uno encima del otro
+     * --152 px de solape sin sesión y 171 con ella, medidos ese día--. Así que
+     * en esa franja las columnas van `auto auto auto`: se pierde el punto medio
+     * exacto, que es el defecto que esta prueba vigilaba, y se gana que los dos
+     * rótulos se lean. De 82.5rem en adelante nada cambia.
+     *
+     * Roturas: quitar cualquiera de las dos utilidades de rejilla de la <nav>;
+     * borrar la regla `.modulo-logo { min-width: max-content; }` del bloque de
+     * 64rem.
      */
     public function test_el_modulo_principal_se_centra_por_rejilla_en_escritorio(): void
     {
         $navbar = File::get(resource_path('views/components/publico/navbar.blade.php'));
 
-        $this->assertStringContainsString('bandeja mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-3', $navbar);
+        $this->assertStringContainsString('bandeja mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:grid lg:grid-cols-[auto_auto_auto] lg:px-3 min-[82.5rem]:grid-cols-[1fr_auto_1fr]', $navbar);
         // `shrink-0` sigue porque por debajo de 64rem la <nav> es flex y ahí
         // sí protege al logo; en rejilla es inerte.
         $this->assertStringContainsString('modulo modulo-logo pulsable -my-1.5 flex shrink-0 items-center py-1.5 lg:justify-self-start lg:px-3', $navbar);

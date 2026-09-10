@@ -34,7 +34,11 @@
      x-on:pageshow.window="if ($event.persisted) cerrar()"
      {{-- Oculto bajo 64rem (Parte II, D-M5): no funciona todavía y en 360 px
           no sobra un control; sigue en el DOM para las guardias. --}}
-     class="relative max-lg:hidden">
+     {{-- `control-idioma` es el gancho que usa `app.css` para esconderlo
+          también en la franja estrecha de escritorio, donde la barra no cabe
+          y este chip es lo más barato que se puede quitar: es un sitio
+          reservado que no funciona todavía. --}}
+     class="control-idioma relative max-lg:hidden">
 
     <button type="button"
             x-ref="disparador"

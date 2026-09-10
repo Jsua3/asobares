@@ -265,7 +265,24 @@
          x-on:keydown.escape.window="atendiendo = false"
          x-bind:style="`--puntero-x: ${px}; --puntero-y: ${py}`"
          x-bind:aria-label="esEscritorio ? 'Navegación principal' : 'Marca y cuenta'"
-         class="bandeja mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-3"
+         {{-- La rejilla va en DOS utilidades y no en `app.css` a propósito: una
+              utilidad de `@layer utilities` gana siempre a un portador de
+              `@layer components`, así que declarar esto en la hoja no serviría
+              de nada. Misma capa, gana la de después.
+
+              De 64rem a 82.5rem las columnas van `auto auto auto`: ahí el
+              centrado óptico es imposible. Centrar exige columnas laterales
+              IGUALES, y eso pide 2 x 255 + 588 = 1.098 px cuando el hueco da
+              953, así que el módulo de cuenta se derramaba sobre el central y
+              «El gremio» y «Mi cuenta» salían impresos uno encima del otro
+              (medido el 10 sep: 152 px de solape sin sesión, 171 con ella).
+              De 82.5rem en adelante vuelve `1fr auto 1fr` y el centrado exacto.
+
+              Sí, esto reintroduce en la franja estrecha el descentrado que
+              `1fr auto 1fr` vino a corregir el 5 sep. Es a sabiendas: un módulo
+              que no cae en el punto medio exacto se lee; dos rótulos
+              superpuestos, no. --}}
+         class="bandeja mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:grid lg:grid-cols-[auto_auto_auto] lg:px-3 min-[82.5rem]:grid-cols-[1fr_auto_1fr]"
          aria-label="Navegación principal">
 
         {{-- Módulo 1: la marca. `-my-1.5 py-1.5` es padding negativo óptico: el
