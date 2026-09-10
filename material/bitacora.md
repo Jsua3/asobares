@@ -2495,3 +2495,38 @@ Sobre la fusión: **1.353 casos · 1.339 pasan · 14 omitidas · 0 fallos · 6.2
 `main` avanzó de `adfcd97` a `5a4958b` por avance rápido: **45 commits y tres migraciones**. Producción sirvió el build nuevo unos **60 segundos** después del push. Comprobado por contenido servido: ocho rutas públicas en 200 entre 0,86 y 1,25 s, la tarjeta de compartir en 200 con sus 22.357 bytes, `Disallow: /` intacto y el formulario de afiliación con el cargo del solicitante.
 
 **Y con el sembrador sin correr, que es lo que hay que saber:** el presidente sigue con los apellidos al revés, el respaldo nacional no se pinta, el título de la portada sigue diciendo «La noche construye territorio», y los dos módulos nuevos del panel devuelven «Forbidden». **El código está desplegado; el contenido, no.** Correrlo tiene un coste que se decide antes y no después: `SettingSeeder` usa `updateOrCreate` y sobrescribe cualquier ajuste que la oficina haya editado desde el 3 de septiembre, sin forma de saber cuáles. Es la D-14 cobrando por primera vez.
+
+## §53 — El reparto de cierre: tres arreglos, dos hallazgos que no existían (10 de septiembre de 2026)
+
+Ingrid repartió el cierre y me asignó cinco de los hallazgos de la revisión. Tres eran reales. Los otros dos no, y eso es lo que más conviene guardar de esta entrada.
+
+### 53.1 El solape de la barra era más grande de lo que yo mismo había reportado
+
+D-33 hablaba de «qué cede entre 1024 y ~1130 px». Al medirlo para arreglarlo, el alcance creció: los tres módulos ocupan un ancho **fijo** —1.102 px sin sesión, 1.121 con ella— y el del medio va centrado por rejilla, así que el de la cuenta no desbordaba, **se le montaba encima**. Despejando la geometría del centrado, el solape desaparece en **1.262 px sin sesión y 1.300 con ella**: un portátil de 1280 con la sesión abierta estaba roto, y eso es la mitad de los portátiles.
+
+Y la causa de verdad solo apareció **midiendo después de recortar**. Con el logotipo cruzado a isotipo (−129 px) y el chip de idioma fuera (−50) seguían solapándose 74 px, porque el reparto simétrico no depende de lo que ocupen los módulos sino de que las columnas de los lados midan lo mismo. Centrar exige `2 × 255 + 588 = 1.098 px` de contenido en un hueco que a 1024 da 953. **No hay tercera vía: o centrado, o legible.**
+
+De paso, dos tropiezos conocidos, repetidos:
+
+- Escribí el arreglo de la rejilla en `app.css` y **no hizo nada**: una utilidad de `@layer utilities` gana siempre a un portador de `@layer components`. La rejilla seguía midiendo 329/588/329. Terminó en dos utilidades del marcado, misma capa, gana la de después.
+- Al verificarlo en producción, el grep de la media falló: Tailwind 4 la minifica en **sintaxis de rango** (`width<=82.5rem`, no `max-width:82.5rem`). Buscar la declaración en vez de la media es lo que lo destapó.
+
+### 53.2 Los dos que no existían
+
+**«Ver ficha» y «WhatsApp» del Directorio ya cumplían.** Los dos llevan su `::after` y dan 46 y 49 px de área. Mi medición los daba en 22 y 33 porque `elementFromPoint` **solo ve el viewport** y esas tarjetas estaban bajo el pliegue; `scrollIntoView` no scrollea en este entorno, así que el bucle se rompía en el primer punto y devolvía la caja. Lo que lo zanjó fue leer el **inset computado del pseudoelemento**, que no depende de que el navegador componga.
+
+**Los `+`/`−` del mapa tampoco eran enlaces muertos.** Leaflet ya los pinta con `role="button"`, nombre accesible y 44×44. Mi hallazgo decía que un lector de pantalla los anunciaría como enlaces a ninguna parte: falso. Pero al abrirlos apareció otro que sí era real y que nadie había visto — **los rotulaba en inglés**, «Zoom in» / «Zoom out», en el globito y para el lector de pantalla. Era el único texto de interfaz de todo el sitio que no salía de nosotros.
+
+Con estos van **tres defectos fabricados por el entorno en un solo día**: el contraste del Directorio, el «500» del observatorio y estas dos áreas táctiles. El patrón es siempre el mismo — una lectura que parece una medición y no lo es.
+
+### 53.3 Dos cosas que hice mal
+
+**Una guardia que no podía fallar.** Escribí una aserción que decía vigilar que el guion del mapa no llevara comillas dobles —ahí cierran el atributo de Alpine y el mapa desaparece con un `SyntaxError`, cosa que me pasó al escribir el arreglo—. La aserción aislaba el atributo con `x-init="([^"]*)"`, y esa expresión **se corta justo en la primera comilla doble**: el trozo capturado nunca podía contener una. Comprobado metiendo una a propósito: verde. Retirada. Van dos guardias inútiles escritas por mí en dos días.
+
+**Y siete pruebas ajenas rotas.** Reescribí `BarraLateralTest` con Python en modo texto para añadirle dos guardias, y eso mutiló unos marcadores que llevan `\r\n` literales dentro; Pint remató el estropicio «arreglando» los finales de línea. Restaurado desde git y rehecho con edición directa. **En este repositorio los PHP no se reescriben con herramientas que normalicen finales de línea.**
+
+### 53.4 Lo que queda, y no es código
+
+Los tres arreglos están desplegados y comprobados contra el CSS servido. Lo que sigue pendiente en producción no depende de ninguna línea: **el sembrador**. Sin él, Afiliaciones y Publicidad devuelven «Forbidden» a todo el mundo, el presidente sigue con los apellidos al revés y el título de la portada sigue siendo la frase que inventó este equipo.
+
+Y una deuda de coordinación que ya pesa: **Ingrid no sabe que se desplegó lo que ella estaba revisando.** Ancló su revisión a un commit, la rama se movió dos veces, propuso integrar tres commits que llevaban horas integrados, y dos de los cinco hallazgos que le describí no eran lo que le conté.
