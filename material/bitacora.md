@@ -2459,3 +2459,39 @@ El defecto no lo veía nadie porque **el `<meta>` existía y estaba bien escrito
 ### 51.4 La lección
 
 **Una tabla de instrucciones escrita desde un listado de archivos no es lo mismo que una escrita desde los archivos.** El §17 es un trabajo bueno y útil, y aun así dos de sus filas mandaban hacer algo incorrecto: una porque no miró dentro del video, otra porque no comprobó qué archivo sirve el sitio. Es la misma regla del §49.3 —verificar contra el documento y no contra el resumen— aplicada al propio expediente. El expediente también es un resumen.
+
+## §52 — La consolidación y el despliegue de los 45 commits (10 de septiembre de 2026)
+
+Ingrid pidió parar el desarrollo y hacer una revisión manual completa sobre una rama consolidada, `cierre/ingrid @ 46efdc0`. De ahí salieron tres cosas: lo que la revisión encontró, lo que la revisión **no** pudo encontrar, y el despliegue.
+
+### 52.1 Lo primero que apareció no era una pantalla: era una cifra
+
+La consolidación se validó con «425 tests, 0 fallos». El árbol tiene **1.062 métodos de prueba en 106 archivos**, y PHPUnit reporta **1.350 casos** contando proveedores de datos. Los 425 cubren menos de un tercio. La fusión estaba sana —la corrí entera: 1.350 casos, 0 fallos—, pero la cifra con la que se dio por buena no era la suite, y este proyecto tiene una regla escrita sobre eso.
+
+### 52.2 El hallazgo que solo aparece tropezando
+
+`/admin/solicitudes-afiliacion` devolvió **403** siendo `super_admin`. Del lado del servidor: `shouldRegisterNavigation` decía **sí** y `canViewAny` decía **no**. El módulo se anuncia en el menú y no deja entrar.
+
+La policy estaba bien escrita. Lo que faltaba eran los **ocho permisos nuevos** que la rama añade —tres de solicitud de afiliación y cinco de publicidad—, que solo nacen en `RolYPermisoSeeder`. La base local tenía 80; al correr el sembrador pasó a 88 y las dos pantallas abrieron sin tocar una línea.
+
+**Y ese sembrador no corre en el despliegue.** Vive dentro de `ContenidoOficialSeeder`, que ningún guion invoca. Es exactamente el patrón que destapó la auditoría del 9 de septiembre —una mitad construida y la pieza de al lado sin conectar—, esta vez con dos módulos enteros del panel detrás.
+
+### 52.3 Lo que la revisión no pudo encontrar, y por qué importa decirlo
+
+**Ningún hallazgo de contraste sobrevivió a la verificación, y no reporté ninguno.** Este entorno no compone fotogramas: el `IntersectionObserver` no dispara —nueve secciones de la portada se quedan en `opacity: 0`— y alternar el tema por clase sin recargar da lecturas fantasma. Con esas dos trampas llegué a *confirmarle a Sua* que las tarjetas del Directorio incumplían RNF-12 con 2,91:1. Al recargar de verdad en oscuro, el mismo elemento da **6,62:1**. Me retracté en el momento.
+
+Dos veces en la misma sesión este entorno fabricó un defecto que no existía; la otra fue un «500» del observatorio que venía del búfer viejo de la consola. La lección no es nueva pero se pagó otra vez: **una medición que no sobrevive a una recarga real no es una medición.**
+
+Lo que sí quedó, medido y repetible: la barra de escritorio **se superpone 151 px a 1024** (171 con sesión) y deja «El gremio» y «Mi cuenta» ilegibles uno encima del otro —es D-33, que el expediente describía como desbordamiento cuando es solape—; «Ver ficha» y «WhatsApp» de las tarjetas nuevas se quedan en 22 y 33 px de área táctil; la hamburguesa del panel móvil en 36; y el `h1` de la portada sigue siendo la frase que inventó este equipo mientras el pie ya lleva la del gremio.
+
+### 52.4 La fusión, y lo que no hubo que arbitrar
+
+`cierre/ingrid` ya contenía casi todo. Faltaban tres commits de `diseno/movimiento` —la imagen al compartir, las correcciones del §17 y las cifras remedidas—. El ensayo en seco y la fusión real dieron **cero conflictos**: ninguna línea en disputa entre las dos mitades.
+
+Sobre la fusión: **1.353 casos · 1.339 pasan · 14 omitidas · 0 fallos · 6.208 aserciones**. Pint limpio, `git diff --check` limpio.
+
+### 52.5 El despliegue
+
+`main` avanzó de `adfcd97` a `5a4958b` por avance rápido: **45 commits y tres migraciones**. Producción sirvió el build nuevo unos **60 segundos** después del push. Comprobado por contenido servido: ocho rutas públicas en 200 entre 0,86 y 1,25 s, la tarjeta de compartir en 200 con sus 22.357 bytes, `Disallow: /` intacto y el formulario de afiliación con el cargo del solicitante.
+
+**Y con el sembrador sin correr, que es lo que hay que saber:** el presidente sigue con los apellidos al revés, el respaldo nacional no se pinta, el título de la portada sigue diciendo «La noche construye territorio», y los dos módulos nuevos del panel devuelven «Forbidden». **El código está desplegado; el contenido, no.** Correrlo tiene un coste que se decide antes y no después: `SettingSeeder` usa `updateOrCreate` y sobrescribe cualquier ajuste que la oficina haya editado desde el 3 de septiembre, sin forma de saber cuáles. Es la D-14 cobrando por primera vez.
