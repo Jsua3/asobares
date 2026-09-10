@@ -139,11 +139,11 @@ class PublicidadesTable
             ->color('success')
             ->requiresConfirmation()
             ->visible(fn (Publicidad $record): bool => auth()->user()?->can('publicar', $record) === true
-                && $record->estado !== EstadoPublicidad::Publicada)
+                && $record->puedePublicarse())
             ->action(function (Publicidad $record): void {
                 if (! $record->puedePublicarse()) {
                     throw ValidationException::withMessages([
-                        'estado' => 'Para publicar la pauta debe tener imagen y fechas validas.',
+                        'estado' => 'Solo una pauta pagada, con imagen y fechas validas, puede publicarse.',
                     ]);
                 }
 

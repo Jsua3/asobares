@@ -102,6 +102,12 @@ class Publicidad extends Model
 
     public function puedePublicarse(): bool
     {
+        return $this->estado === EstadoPublicidad::Pagada
+            && $this->tieneDatosPublicables();
+    }
+
+    public function tieneDatosPublicables(): bool
+    {
         return filled($this->imagen)
             && $this->fecha_inicio !== null
             && $this->fecha_fin !== null
@@ -160,12 +166,24 @@ class Publicidad extends Model
 
     private function validarPublicacion(): void
     {
-        if ($this->puedePublicarse()) {
-            return;
+        $usuario = auth()->user();
+
+        if ($usuario === null || $usuario->can('publicar', $this) !== true) {
+            throw ValidationException::withMessages([
+                'estado' => 'No tienes permiso para publicar esta pauta.',
+            ]);
         }
 
-        throw ValidationException::withMessages([
-            'estado' => 'Para publicar la pauta debe tener imagen y fechas validas.',
-        ]);
+        if ($this->isDirty('estado') && $this->getRawOriginal('estado') !== EstadoPublicidad::Pagada->value) {
+            throw ValidationException::withMessages([
+                'estado' => 'Solo una pauta marcada como pagada puede publicarse.',
+            ]);
+        }
+
+        if (! $this->tieneDatosPublicables()) {
+            throw ValidationException::withMessages([
+                'estado' => 'Para publicar la pauta debe tener imagen y fechas validas.',
+            ]);
+        }
     }
 }

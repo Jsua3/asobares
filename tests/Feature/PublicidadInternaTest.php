@@ -15,6 +15,7 @@ use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -32,15 +33,27 @@ class PublicidadInternaTest extends TestCase
 
     public function test_el_scope_publico_solo_devuelve_pautas_publicadas_vigentes_y_ordenadas(): void
     {
-        Publicidad::factory()->vencida()->enInicio()->create(['anunciante' => 'Vencida']);
+        $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
+
+        $this->crearPublicidadPublicada([
+            'anunciante' => 'Vencida',
+            'ubicacion' => UbicacionPublicidad::Inicio,
+            'fecha_inicio' => now()->subWeeks(2),
+            'fecha_fin' => now()->subDay(),
+        ]);
         Publicidad::factory()->enInicio()->create(['anunciante' => 'Borrador']);
-        Publicidad::factory()->publicadaVigente()->enDirectorio()->create(['anunciante' => 'Otra ubicacion']);
-        $segunda = Publicidad::factory()->publicadaVigente()->enInicio()->create([
+        $this->crearPublicidadPublicada([
+            'anunciante' => 'Otra ubicacion',
+            'ubicacion' => UbicacionPublicidad::Directorio,
+        ]);
+        $segunda = $this->crearPublicidadPublicada([
             'anunciante' => 'Segunda',
+            'ubicacion' => UbicacionPublicidad::Inicio,
             'fecha_inicio' => now()->subHours(2),
         ]);
-        $primera = Publicidad::factory()->publicadaVigente()->enInicio()->create([
+        $primera = $this->crearPublicidadPublicada([
             'anunciante' => 'Primera',
+            'ubicacion' => UbicacionPublicidad::Inicio,
             'fecha_inicio' => now()->subDay(),
         ]);
 
@@ -60,6 +73,75 @@ class PublicidadInternaTest extends TestCase
         $this->assertTrue($visible->visiblePublicamente());
         $this->assertFalse($sinImagen->visiblePublicamente());
         $this->assertFalse($pendiente->visiblePublicamente());
+    }
+
+    public function test_solo_una_publicidad_pagada_puede_publicarse(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
+
+        foreach ([EstadoPublicidad::Borrador, EstadoPublicidad::PendientePago, EstadoPublicidad::PendienteAprobacion, EstadoPublicidad::Rechazada] as $estado) {
+            $publicidad = Publicidad::factory()->create(['estado' => $estado]);
+
+            try {
+                $publicidad->update(['estado' => EstadoPublicidad::Publicada]);
+            } catch (ValidationException) {
+                // El contrato es que el salto no se persista.
+            }
+
+            $this->assertSame($estado, $publicidad->fresh()->estado, "El estado {$estado->value} no debe saltar directo a publicada.");
+            $this->assertNull($publicidad->fresh()->aprobado_at);
+        }
+
+        $pagada = Publicidad::factory()->create(['estado' => EstadoPublicidad::Pagada]);
+
+        $pagada->update(['estado' => EstadoPublicidad::Publicada]);
+
+        $this->assertSame(EstadoPublicidad::Publicada, $pagada->fresh()->estado);
+        $this->assertNotNull($pagada->fresh()->aprobado_at);
+
+        $pagadaDesdePanel = Publicidad::factory()->create(['estado' => EstadoPublicidad::Pagada]);
+
+        Livewire::test(ListPublicidades::class)
+            ->callAction(TestAction::make('publicar')->table($pagadaDesdePanel));
+
+        $this->assertSame(EstadoPublicidad::Publicada, $pagadaDesdePanel->fresh()->estado);
+        $this->assertNotNull($pagadaDesdePanel->fresh()->aprobado_at);
+    }
+
+    public function test_marcar_pagada_no_publica_automaticamente(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
+
+        $publicidad = Publicidad::factory()->create([
+            'estado' => EstadoPublicidad::PendientePago,
+        ]);
+
+        Livewire::test(ListPublicidades::class)
+            ->callAction(TestAction::make('marcar_pagada')->table($publicidad));
+
+        $publicidad = $publicidad->fresh();
+
+        $this->assertSame(EstadoPublicidad::Pagada, $publicidad->estado);
+        $this->assertFalse($publicidad->visiblePublicamente());
+        $this->get('/')->assertSuccessful()->assertDontSee($publicidad->anunciante);
+    }
+
+    public function test_un_usuario_sin_permiso_no_puede_publicar_aunque_este_pagada(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $publicidad = Publicidad::factory()->create([
+            'estado' => EstadoPublicidad::Pagada,
+        ]);
+
+        try {
+            $publicidad->update(['estado' => EstadoPublicidad::Publicada]);
+        } catch (ValidationException) {
+            // La proteccion vive en el modelo, no solo en el boton.
+        }
+
+        $this->assertSame(EstadoPublicidad::Pagada, $publicidad->fresh()->estado);
+        $this->assertNull($publicidad->fresh()->aprobado_at);
     }
 
     public function test_la_direccion_crea_y_edita_publicidad_desde_el_panel(): void
@@ -97,7 +179,7 @@ class PublicidadInternaTest extends TestCase
         $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
 
         $publicidad = Publicidad::factory()->create([
-            'estado' => EstadoPublicidad::PendienteAprobacion,
+            'estado' => EstadoPublicidad::Pagada,
             'imagen' => null,
         ]);
 
@@ -158,13 +240,17 @@ class PublicidadInternaTest extends TestCase
 
     public function test_inicio_y_directorio_muestran_solo_la_pauta_correspondiente_sin_romper_filtros(): void
     {
-        Publicidad::factory()->publicadaVigente()->enInicio()->create([
+        $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
+
+        $this->crearPublicidadPublicada([
             'anunciante' => 'Pauta Inicio',
             'nombre_comercial' => null,
+            'ubicacion' => UbicacionPublicidad::Inicio,
         ]);
-        Publicidad::factory()->publicadaVigente()->enDirectorio()->create([
+        $this->crearPublicidadPublicada([
             'anunciante' => 'Pauta Directorio',
             'nombre_comercial' => null,
+            'ubicacion' => UbicacionPublicidad::Directorio,
         ]);
 
         $this->get('/')
@@ -185,6 +271,19 @@ class PublicidadInternaTest extends TestCase
         $usuario->syncRoles([$rol]);
 
         return $usuario->fresh();
+    }
+
+    private function crearPublicidadPublicada(array $sobrescribir = []): Publicidad
+    {
+        $publicidad = Publicidad::factory()->create(array_merge([
+            'estado' => EstadoPublicidad::Pagada,
+            'fecha_inicio' => now()->subDay(),
+            'fecha_fin' => now()->addWeek(),
+        ], $sobrescribir));
+
+        $publicidad->update(['estado' => EstadoPublicidad::Publicada]);
+
+        return $publicidad->fresh();
     }
 
     private function datosFormulario(array $sobrescribir = []): array
