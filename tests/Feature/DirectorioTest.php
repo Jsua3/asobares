@@ -57,6 +57,26 @@ class DirectorioTest extends TestCase
         $respuesta->assertDontSee('en otra categoría');
     }
 
+    public function test_el_directorio_renderiza_panel_lateral_y_control_movil_de_filtros(): void
+    {
+        Asociado::factory()->publicado()->create();
+
+        $this->get(route('directorio.index'))
+            ->assertSuccessful()
+            ->assertSee('Buscar por nombre')
+            ->assertSee('id="directorio-filtros-panel"', escape: false)
+            ->assertSee('id="directorio-filtros-drawer"', escape: false)
+            ->assertSee('aria-controls="directorio-filtros-panel"', escape: false)
+            ->assertSee('aria-controls="directorio-filtros-drawer"', escape: false);
+    }
+
+    public function test_los_filtros_preservan_la_vista_en_el_formulario(): void
+    {
+        $this->get(route('directorio.index', ['vista' => 'mapa']))
+            ->assertSuccessful()
+            ->assertSee('name="vista" value="mapa"', escape: false);
+    }
+
     public function test_el_directorio_usa_tarjetas_uniformes_y_conserva_distincion_de_destacado(): void
     {
         Asociado::factory()->destacado()->create(['nombre' => 'Bar Amnesia']);
