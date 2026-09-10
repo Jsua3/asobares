@@ -209,27 +209,27 @@ No se «arregla de paso»:
 
 ## 5. Cifras medidas del árbol
 
-Todas medidas el **8 de septiembre de 2026 sobre `fc2142f`** (la rama), salvo las que llevan otra fecha en su fila. **Vuelve a medirlas antes de citarlas** en un documento.
+Las filas del árbol están medidas el **10 de septiembre de 2026 sobre `a371a3a`** (la rama `diseno/movimiento`, que es lo que se fusionaría); las demás llevan su fecha en su fila. La medición anterior era del 8 sep sobre `fc2142f`, **una rama anterior a toda esta cadena**, así que casi todas se movieron, y la de ajustes sembrados en un 63 %. **Vuelve a medirlas antes de citarlas** en un documento.
 
 | Cifra | Valor | Comando |
 |---|---|---|
-| Confirmaciones | **402** | `git rev-list --count HEAD` |
-| Migraciones | **43** (entra `entradas` en `visitas_diarias`) | `Get-ChildItem database/migrations -File` |
-| Modelos | **22** | `Get-ChildItem app/Models/*.php` |
+| Confirmaciones | **439** | `git rev-list --count HEAD` |
+| Migraciones | **46** (entran las tres de afiliación y publicidad) | `Get-ChildItem database/migrations -File` |
+| Modelos | **24** | `Get-ChildItem app/Models/*.php` |
 | Sembradores | 21 (+ `Support/`) | `Get-ChildItem database/seeders/*.php` |
-| Fábricas | **17** (entra `MensajeFactory`) | `Get-ChildItem database/factories/*.php` |
-| Archivos de prueba | **97** | `Get-ChildItem tests -Recurse -Filter *Test.php` |
-| Métodos de prueba | **933** | `Select-String '^\s*public function test_'` |
-| Vistas Blade | **78** | `Get-ChildItem resources/views -Recurse -Filter *.blade.php` |
-| Componentes públicos | **21** | `Get-ChildItem resources/views/components/publico/*.blade.php` |
-| Panel | 19 recursos · 6 páginas · 20 policies · **9 widgets** | `Get-ChildItem app/Filament/…` |
+| Fábricas | **19** | `Get-ChildItem database/factories/*.php` |
+| Archivos de prueba | **106** (+9: seis de la capa visual y tres de la cadena) | `Get-ChildItem tests -Recurse -Filter *Test.php` |
+| Métodos de prueba | **1.047** (+114) | `Select-String '^\s*public function test_'` |
+| Vistas Blade | **86** | `Get-ChildItem resources/views -Recurse -Filter *.blade.php` |
+| Componentes públicos | **23** (entran `hueco-foto` y el de publicidad) | `Get-ChildItem resources/views/components/publico/*.blade.php` |
+| Panel | **21** recursos · 6 páginas · **22** policies · **16 widgets** (eran 9: los siete nuevos son de analítica y observatorio) | `Get-ChildItem app/Filament/…` |
 | Comandos de Artisan propios | 6 | `Get-ChildItem app/Console/Commands` |
-| Enums | **17** | `Get-ChildItem app/Enums` |
-| Controladores públicos | **18** | `Get-ChildItem app/Http/Controllers/Publico/*.php` |
+| Enums | **20** | `Get-ChildItem app/Enums` |
+| Controladores públicos | **19** (entra `AfiliacionController`) | `Get-ChildItem app/Http/Controllers/Publico/*.php` |
 | Middleware propio | **3** | `Get-ChildItem app/Http/Middleware` |
-| Archivos de configuración | **17** (entra `sitio.php`) | `Get-ChildItem config/*.php` |
-| Rutas GET propias | **89** | `php artisan route:list --method=GET --except-vendor --json` |
-| Ajustes que siembra `SettingSeeder` | **124** (bajan dos: `hero_subtitulo` y `cifra_afiliados`, jubilados por no leerlos nadie); en producción **109**, del 3 sep | reflexión sobre `SettingSeeder::ajustes()` |
+| Archivos de configuración | **17** | `Get-ChildItem config/*.php` |
+| Rutas GET propias | **95** | `php artisan route:list --method=GET --except-vendor --json` |
+| Ajustes que siembra `SettingSeeder` | ⚠️ **202** sobre la rama, no 124: `feat(settings)` de Ingrid añadió la mayoría y el respaldo nacional cuatro. En **producción siguen 109**, del 3 sep, porque el sembrador no corre en el despliegue — o sea que hoy hay **93 ajustes que la oficina no ve** | reflexión sobre `SettingSeeder::ajustes()` |
 | **Suite completa** | **1.209 casos · 1.198 pasan · 11 omitidas · 0 fallos · 5.394 aserciones** · 353 s (9 sep, madrugada, sobre `759b43a`) | `php artisan test --compact` |
 | Clases nuevas de la auditoría | `CalendarioDeTareasTest` 6 · `AjustesQueSirvenParaAlgoTest` 4 · `IndexacionDelSitioTest` 6 · `AvisoDeMensajeAlGremioTest` 15 · `FlujoDeEntradasAlSitioTest` 15 · `Panel\BitacoraTest` 3 · `Panel\AvisosQueSeVenTest` 1 | `php artisan test --compact --filter=` |
 | Comprobado contra servidor corriendo (9 sep) | `noindex, nofollow` en la portada servida · `Disallow: /` en el `robots.txt` servido · 5 vacantes en el sitemap · **0** visitas contadas para `sitemap`, `robots` y `guia.formato` | `curl` + `php artisan tinker` sobre `artisan serve` |
