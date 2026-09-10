@@ -403,3 +403,101 @@ Cada una costó al menos una ronda. Dos o tres líneas por trampa; el detalle y 
 **Guion de la cartera** (README): entrar a `/mi-cuenta` con la cuenta de asociado → ver «Debes N meses · $X» → «Pagar ahora» → pasarela simulada → aprobar → cartera al día y transacción visible en `/admin`. En producción la pasarela simulada no existe: este guion es de local.
 
 **Guion de la segunda demostración ante el gremio (4–11 sep 2026)** — se escribe en `estado.md` cuando se fije la fecha; va sobre la URL pública, en el teléfono del directivo, con el sitio despertado media hora antes.
+
+## 17. Material real del gremio: qué hay, dónde va y qué reemplaza
+
+_Añadida el 9 de septiembre de 2026 tras la segunda entrega del gremio (`material/materialnoviembre/`, 383 archivos, 6,4 GB). La primera fue el 26 de agosto (`material/nuevomaterial/`). **Las dos carpetas están en `.gitignore` y ahí se quedan.** El inventario completo, con veredicto pieza por pieza, está en `claude/material-gremio-9-sep.md` del Project; aquí queda solo lo que el producto necesita saber._
+
+**La regla no cambia (§10 y decisión del 26 ago):** el material del gremio nunca se versiona. Entra por tres puertas y ninguna otra — **importador** (datos), **sembrador con su fuente** (contenido institucional) y **medio optimizado en `public/`** (logos, video). Nada salta el paso de conversión: el cronograma firmado exige `.webp` o `.svg`.
+
+### 17.1 Tabla maestra: dato real → dónde va → qué reemplaza
+
+| Dato real | De dónde sale | Dónde va en la página | Qué hay hoy ahí | Qué hacer |
+|---|---|---|---|---|
+| **18 aliados departamentales** | `Presentación Asobares actualizada.pdf`, láminas 15–16 | `/beneficios` y la franja de aliados | 23 aliados del catálogo **nacional** y 4 institucionales. **Ni uno solo del Quindío** | Añadirlos a `AliadoSeeder` en los dos niveles del §12. Alcaldía de Armenia, Comfenalco Quindío y EDEQ entran como **institucionales**; los demás como comerciales |
+| **Nombre del presidente** | Invitación al foro nocturno (jul 2025), donde **firma él mismo** | `quienes_presidente` | ⚠️ **«Jorge Iván Botero Ángel» — el orden está mal** | Corregir a **«Jorge Iván Ángel Botero»**. Es el error de contenido más visible del sitio y ahora hay documento del gremio que lo zanja |
+| **Junta directiva** | Lámina «Nuestra Junta» + 5 retratos en `Fotos asociados/` | «Quiénes somos», bloque de dirección | Solo dos nombres, sin foto | La junta la componen **cinco establecimientos**: Isla Corona, GDN Resto Bar, La Victoria e Icónico Terraza, más uno sin identificar. Tres retratos sirven; el de Luz Ángela mide 242 px. **La junta se sigue mostrando corta** (§12): esto es insumo, no permiso para alargarla |
+| **Propuesta de valor y lema** | Presentación, láminas 2 y 18 | `sitio_eslogan`, hero, «Quiénes somos» | Texto redactado por el equipo de práctica | Sustituir por el del gremio, palabra por palabra. El lema institucional es **«Construyendo un Quindío nocturno»** |
+| **Respaldo nacional: 17 capítulos, 2.500 afiliados** | Presentación, lámina 3 | «Quiénes somos», bloque nacional | `cifra_afiliados` se **jubiló el 9 sep** por no tener documento detrás | Ahora sí lo tiene. Puede volver, con su fuente y su vista |
+| **Cartera de 41 establecimientos** | `CARTERA ASOBARES 2026.xlsx`, corte 31 ago 2026 | Panel → Cartera · `/mi-cuenta` · el conteo de afiliados de la portada | Cartera ficticia de los 24 asociados de demostración, **solo local**. En producción no hay ninguna | Importar **solo después** de confirmar la cuota (§17.3) |
+| **Logo institucional** | `Logos/` — PNG 3128×572, editables en PDF | Cabecera, pie, favicon, imagen al compartir | `material/logo asobares.svg`, un archivo suelto | Reemplazar por el oficial en WebP y SVG. **Es la única tarea de toda la entrega que no depende de nadie** |
+| **Video del capítulo** | `Proyectos - Eventos/` — 24,8 s, 720p, 8,8 MB | Hero de la portada | Bucle de 10 s recortado de otro original | Sustituir, regenerar póster y **volver a medir el rendimiento**. `VideoDelHeroTest` vigila que el archivo exista |
+| **Foro nocturno (18 nov 2025) y Ruta del Cóctel 2025** | `INVITACION PONENTES FORO NOCTURNO.docx` y `Ruta del coctel.pdf` | `/eventos`, como memoria de gestión | 6 eventos ficticios en local; ninguno real en producción | Son eventos **del gremio**, así que caben sin ampliar alcance (§12). Van como pasados, nunca como agenda |
+| **Logos y fotos de 20 establecimientos** | `Establecimientos/` — 19 logos utilizables, 53 JPG | Fichas del directorio | 24 fichas ficticias en local; **0 en producción, que es lo correcto** | Cargar **en borrador**. Ninguna se publica sin la autorización de su titular (§9) |
+| **Buzón institucional** | Invitación al foro: `asobaresquindio@asobares.org` y 321 554 9513 | `contacto_correo`, pie | Ya dice ese correo | No cambia el valor: **cambia su respaldo**. Pasa de dato leído en la web a dato de documento del gremio. Es el buzón con el que se crea la cuenta del panel que se intentó contra un `.test` inexistente |
+
+### 17.2 Lo que sale, y la regla que lo gobierna
+
+En **producción** no hay contenido inventado: `DatabaseSeeder` se niega a correr allí y `SemillaInstitucionalTest` impide que entre nada sin documento. Lo que hay que retirar o corregir es otra cosa — **valores que pusimos nosotros a falta de fuente y que ahora sí la tienen**:
+
+1. **`quienes_presidente`** — orden de apellidos equivocado. Corregir.
+2. **La franja de aliados sin un solo aliado del Quindío.** Un gremio departamental que solo enseña aliados nacionales se lee como sucursal. Los 18 lo arreglan.
+3. **Los textos institucionales de redacción propia** en el grupo `institucional`: donde exista la frase del gremio, gana la del gremio.
+4. **El logo suelto y el bucle del hero**, que eran soluciones provisionales.
+
+**La regla, para que no haya duda:** un texto redactado por el equipo es provisional por definición y **se retira en cuanto aparece el del gremio**. Un texto del gremio no se «mejora» ni se resume: entra como está, y si está mal escrito se le pregunta a Natalia. Y sigue vigente la deuda **D-14**: el contenido sembrado todavía no lleva marca de procedencia, así que hoy no se distingue en la base lo que dijo el gremio de lo que escribimos nosotros. Mientras eso siga así, **la fuente se anota en el sembrador, en el comentario de la clave**.
+
+### 17.3 El archivo de la contadora: contrato de lectura
+
+El sistema ya sabe leer cartera (`App\Services\ImportadorDeCartera`). Lo que faltaba era el archivo real. Ya está, y **no hay que pedirle a la contadora que cambie su forma de trabajar: el programa se acopla al archivo que ella ya manda.**
+
+**Cómo llega hoy** — hoja `«CATERA AGOSTO 31 2026»` (sí, sin la R):
+
+| Columna | Contenido |
+|---|---|
+| A, B | vacías |
+| C | `ESTABLECIMIENTO` |
+| D, E, F | `CARTERA 2024`, `CARTERA 2025`, `CARTERA 2026` |
+| G | `NOTAS` — el rango de meses en mora, o `AL DIA`, o `PAGO ANUALIDAD` |
+| H | **sin encabezado**, lleva el estado del negocio: `CERRARON`, `NO APRETURAN ` |
+
+Encabezados en la **fila 2**, datos de la 3 a la 43, y una fila `TOTAL` al final.
+
+**Qué espera el importador:** un CSV con cabecera en la primera fila y las columnas `establecimiento`, `saldo_pendiente`, `meses_mora`, y opcionalmente `ultimo_pago`. Cruza por **slug** del asociado.
+
+**Reglas de conversión — esto es lo que hay que construir:**
+
+- `establecimiento` ← columna C **con `trim`**. Tres filas traen espacio final (`DOS CIELOS `, `MISTRAL `, `KAL DISCOBAR `) y sin recortarlo el slug no cruza.
+- `saldo_pendiente` ← **D + E + F**. La deuda del afiliado es la suma de los tres años, no la del año en curso.
+- `meses_mora` ← se traduce la columna G: `AL DIA` y `PAGO ANUALIDAD` valen **0**; un mes suelto vale 1; un rango vale los meses que abarca. Los nueve valores que trae hoy el archivo son `AL DIA`, `PAGO ANUALIDAD`, `AGOSTO`, `MAR-AGOSTO`, `ABRIL-AGOSTO`, `MAYO-AGOSTO`, `JUNIO- AGOSTO` (con espacio de más), `ENE-JULIO` y `ENE-AGOSTO`. **Acepta abreviatura y nombre completo, y normaliza espacios**: la lista crecerá con los meses que vengan.
+- La columna H **no es mora**: `CERRARON` y `NO APRETURAN` son estado de negocio. Esas filas **no se importan como deuda**; se reportan aparte para que el gremio decida si salen de la base o quedan inactivas.
+- La fila `TOTAL` se descarta.
+
+**Tres trampas del archivo real, verificadas el 9 de septiembre:**
+
+1. ⚠️ **El total no cuadra.** La fila `TOTAL` dice **$12.870.000** para 2026; la columna suma **$13.990.000**. Faltan **$1.120.000**, que son exactamente dieciséis cuotas de $70.000. **El importador no debe leer nunca la fila de total** —ya la descarta— y hay que avisarle a la contadora del descuadre antes de usar cualquiera de las dos cifras en un documento.
+2. ⚠️ **La cuota se contradice.** El archivo implica **$70.000 al mes** ($560.000 por ocho meses, y lo confirman las filas parciales). El formulario oficial de afiliación del 26 de agosto dice **$30.000 los dos primeros meses y $50.000 desde el tercero**. **No se importa nada hasta que Natalia lo diga por escrito** (D-44): es el número que el afiliado verá en su portal.
+3. ⚠️ **Ninguno de los 41 nombres existe como asociado.** El importador cruza por slug y hoy no habría un solo cruce. La base tiene que cargarse primero (D-45).
+
+**La plantilla que se le devuelve al gremio.** Una vez el conversor lea este archivo, se guarda una copia limpia como plantilla en `docs/ingenieria/plantillas/`, **con los encabezados tal como la contadora ya los escribe**, para que los cortes siguientes lleguen con la misma forma. Mismo trato para la base de establecimientos, que llegó en dos versiones distintas (41 y 48 filas). La plantilla es un acuerdo, no una imposición: si el archivo cambia, cambia el conversor.
+
+### 17.4 Las cuatro cifras de la portada, y hasta dónde llega el archivo de la contadora
+
+**Cómo funciona hoy.** La franja «El gremio en cifras» (`App\Support\CifrasDelGremio`, D-25, Acta 05) son **cuatro ranuras** —un número y qué significa— que la oficina teclea en «Ajustes del sitio». Nacen vacías; las que no tienen número no se pintan, y si ninguna lo tiene la franja entera desaparece. El sistema **no lee** el archivo de la contadora: es la fuente de la que la oficina copia. La lectura automática quedó declarada **Fase II** en esa misma acta.
+
+**Lo que hay que dejar claro antes de automatizar nada:**
+
+> **De la cartera no sale ninguna cifra pública salvo el conteo de afiliados.** Cuánto debe el gremio y quién lo debe es información comercial de terceros: vive en el panel y en `/mi-cuenta`, y **no aparece en la portada, ni en una captura de la presentación, ni en un anexo del documento de práctica**. La demostración del módulo se hace con los datos de demostración.
+
+Con eso dicho, la cartera sostiene hoy **una** de las cuatro ranuras: **41 establecimientos con cartera al 31 de agosto de 2026**. Las otras tres tienen que salir de otra parte —12 municipios del departamento, 17 capítulos nacionales, 7 trámites publicados en la guía— y cada una necesita su documento.
+
+**Qué es ampliación y qué no:**
+
+| Paso | ¿Necesita acta? | Por qué |
+|---|---|---|
+| Conversor del `.xlsx` de la contadora al CSV del importador, con pruebas | **No** | El módulo de cartera está en el alcance y el importador ya existe. Esto es adaptarlo al archivo real |
+| Reportar aparte las filas con estado de negocio (`CERRARON`, `NO APRETURAN`) | **No** | Es calidad de datos del mismo importador |
+| Que el panel **calcule y proponga** el conteo de afiliados tras cada importación, y que la oficina lo acepte con un botón | **Sí, pero barata** | Toca D-25, que dijo «manual». Es la que yo pediría: quita la aritmética a mano y **conserva la regla de que la oficina decide qué se publica** |
+| Que el sitio **lea el archivo** y actualice las cifras solo | **Sí, y no la recomiendo antes del 22 de septiembre** | Es la Fase II de la Acta 05. Añade una fuente de verdad que nadie revisa y puede publicar una cifra equivocada sin que nadie se entere — y el archivo de hoy ya trae un total descuadrado, que es exactamente ese modo de fallo |
+
+**El orden, entonces:** conversor → importar la cartera real → el panel propone el conteo → la oficina lo acepta. La lectura automática se registra por escrito y se construye después de la entrega, si el gremio la quiere.
+
+### 17.5 Lo que sigue sin poderse sembrar
+
+Nada de esto lo desbloquea el material nuevo:
+
+- **Las autorizaciones de habeas data.** Es lo único que separa al directorio de tener fichas. Llegaron 28 carpetas de fotos y sigue sin poder publicarse una sola.
+- **Las autorizaciones de imagen y los pies de foto**, ahora de un banco de ~106 fotos y 123 videos con personas identificables (D-03).
+- **La credencial SMTP.** Se sabe el buzón, no la clave.
+- **Los municipios 2 a 12 de la guía normativa** (D-21).
+- **La política de tratamiento de datos** (D-19), que con este volumen de datos de terceros deja de ser un trámite.

@@ -2348,3 +2348,70 @@ Y entonces la analítica se midió a sí misma, que es la parte que vale la pena
 La portada sin procedencia contó llegada. La guía con `Referer` de Google contó llegada. `/empleo` con procedencia nuestra contó página **y no** llegada. `sitemap.xml` y `robots.txt` no contaron nada. Es la definición entera del módulo, comprobada en el sitio de verdad con tráfico de verdad, unas horas después de escribirla.
 
 **Lo que queda dicho y no hecho:** el sembrador de contenido oficial no corre en el despliegue, así que las dos claves jubiladas hoy —`hero_subtitulo` y `cifra_afiliados`— **le siguen apareciendo a la oficina en el panel**. La limpieza existe y vive en `SettingSeeder`; hace falta correrlo una vez, y eso toca datos, así que pide visto bueno aparte.
+
+## §48 — La capa visual: gesto, vidrio y sitio para las fotos (9 de septiembre de 2026)
+
+Sua pidió potenciar el diseño «a un 300 %», y con una condición que cambia el trabajo entero: **no cambiar el estilo, sino potenciar el que ya hay.** Lo que había que darle a los botones, barras y paneles era *vida* — el `liquidglass` de iOS 26, donde lo que predomina no es la apariencia sino la sensación de que el elemento reacciona al movimiento, «que el botón asemeja el movimiento de una gota de agua sobre un cristal». Más el encargo de imaginar dónde irán las fotos del gremio cuando lleguen, dejando el hueco marcado. Y el móvil primero, porque la mayoría va a conocer el sitio por ahí.
+
+Salieron siete commits en la rama `diseno/movimiento`, sobre `cierre/sua`: `0eacd68`, `30dec30`, `b52d292`, `42fc01a`, `ee01f64`, `311fdf2` y `86dcdb9`, más `b074c44` de cierre.
+
+### 48.1 Qué se construyó
+
+**Un motor de resortes propio** (`resources/js/movimiento.js`, 302 líneas, **sin una sola dependencia nueva**). Amortiguador con la parametrización de Apple —respuesta y razón de amortiguación en vez de masa, rigidez y rozamiento—, proyección de momento, goma en los bordes y un solo bucle de `requestAnimationFrame` que **se apaga cuando no queda nada en vuelo**, que es lo que separa un motor de un consumo de batería. Integra a paso fijo de 4 ms con tope de 50 ms por fotograma, para que una pestaña que vuelve del fondo no dispare el resorte al infinito. Se verifica con un script de Node que importa el módulo de verdad y comprueba 25 propiedades numéricas; si Node no está, la prueba se omite en vez de mentir.
+
+**La hoja del teléfono se cierra con el dedo.** Arrastre 1:1 con histéresis de 10 px, captura del puntero, y la proyección decide si se cierra o vuelve.
+
+**El botón se vidria al pulsarlo.** Sua corrigió la propuesta original —yo había planteado un destello— por algo mejor: que al presionarlo se vuelva transparente y deje ver lo que hay detrás. Dos capas, `backdrop-filter` de 0 a 14 px, 90 ms de ida y 280 de vuelta.
+
+**La pestaña activa lleva una gota que viaja** entre pestañas con una transición de vista nombrada.
+
+**Los huecos de fotografía.** Mientras no hay foto pintan el marcador de marca; cuando la haya, basta con guardar la ruta en un ajuste. Abiertos en Guía, Empleo, Artistas y Proveedores; el Directorio se dejó fuera por ser de Ingrid.
+
+**Y dos incumplimientos de RNF-12 que aparecieron midiendo, no buscando:** un rótulo tenue en oscuro daba 4,32:1 y el botón de acción con texto blanco daba 3,86:1.
+
+Medido sobre la rama: **1.324 casos · 1.310 pasan · 14 omitidas · 0 fallos · 6.035 aserciones**, Pint limpio, **veintidós mutaciones comprobadas en rojo**.
+
+### 48.2 Las cuatro lecciones, que son más caras que el código
+
+**1. El minificador pliega `color-mix()` cuando el porcentaje lleva `calc()` dentro.** El fuente mezclaba dos colores con un porcentaje calculado; en `public/build/assets/app-*.css` salía el primer color a secas, sin mezcla. Efecto: el botón pintado siempre con la tinta del estado pulsado, rojo oscuro sobre rojo, **1,89:1**. Ni Vite ni Tailwind avisan, y **la prueba que leía el fuente pasaba en verde**. La salida no fue pelearse con el minificador sino no necesitar interpolar colores: dos capas y un `background-color` que transiciona entre dos valores literales. Desde aquí, **el CSS que se comprueba es el construido**.
+
+**2. La constante de Apple es para el scroll, no para una hoja de 155 px.** La proyección de momento con `0.998` convertía un arrastre suave de 40 px (unos 143 px/s) en 71 px proyectados, y la hoja se cerraba sola. Con `0.99` el mismo gesto proyecta 14 px y se queda abierta, mientras que un golpe real de 45 px en 34 ms —1.351 px/s medidos— proyecta 134 y cierra. La fórmula era correcta; el parámetro estaba copiado de un contexto que mide miles de píxeles.
+
+**3. El decimocuarto falso verde del proyecto, y otra vez mío.** Una guardia que buscaba una llamada dentro de un método con una expresión regular se escapaba del método y la encontraba en otro sitio: pasaba en verde con el código mutado. Se sustituyó por un ayudante que cuenta llaves y acota el cuerpo de verdad. **Ninguna expresión regular delimita un bloque de código.**
+
+**4. Prohibir la palabra no es prohibir la sintaxis — tres veces seguidas.** Tres guardias que vetaban un identificador saltaban al encontrarlo **en un comentario que explicaba por qué no se usa**. Las tres se reescribieron para afirmar sobre la forma sintáctica en vez de sobre el texto.
+
+### 48.3 Lo que quedó abierto
+
+**Ni el arrastre ni el vidriado se han visto con dedo**: solo con puntero sintético y medidos por geometría, porque el navegador de esta máquina no compone fotogramas con la ventana detrás. Los números que se ajustan cuando alguien lo toque son la deceleración de la hoja y las dos duraciones del vidriado. Quedan además **D-46** —Ingrid tiene que aprobar los dos tokens compartidos, que cambian cómo se ven cuatro módulos suyos— y **D-47**: el §9 del encargo exige registrar por escrito toda ampliación **antes** de codificarla, y esta se codificó el mismo día que se pidió. El Acta 09 está debida.
+
+## §49 — El material del gremio empieza a entrar al sitio (10 de septiembre de 2026)
+
+La sesión anterior tradujo la segunda entrega del gremio a instrucciones (`encargo.md` §17). Esta ejecuta la parte que no dependía de nadie, y se estrella con la que sí.
+
+### 49.1 Cuatro textos que dejaron de ser nuestros
+
+**El presidente tenía los apellidos al revés.** El sitio decía «Jorge Iván Botero Ángel». La invitación a los ponentes del foro nocturno de noviembre de 2025 **la firma él mismo**: «Jorge Iván Ángel Botero · Presidente Asobares Quindío». Era el error de contenido más visible de la plataforma —el nombre de una persona real en una página pública con el nombre del gremio encima— y llevaba semanas ahí.
+
+**El lema.** `sitio_eslogan` decía «La noche construye territorio», de cosecha propia, y se ve en el pie de todas las páginas, en el título de la portada y sobre el hero de «Quiénes somos»: era el texto inventado más repetido del sitio. El del gremio cierra la última lámina de la presentación institucional: **«Construyendo un Quindío nocturno»**. Un detalle lo confirma: esa frase **ya estaba en el sitio**, sembrada como firma del cierre del manifiesto. El lema real llevaba semanas conviviendo con el inventado sin que nadie los cruzara.
+
+**La propuesta de valor**, de la lámina 2, sustituye a la misión que redactó este equipo. Es el subtítulo del hero de «Quiénes somos»: lo primero que lee quien entra a saber qué es esto.
+
+**Y el respaldo nacional deja de ser una afirmación sin tamaño.** El bloque decía «Somos el capítulo regional de Asobares Colombia» sin enseñar de qué tamaño es ese respaldo; la lámina 3 trae **17 capítulos y 2.500 afiliados**. Entran con la forma de la franja de la portada —cifra y rótulo por separado, editables, y la que se deje en blanco no se pinta—. Los rótulos dicen «en el país» **a propósito**: `cifra_afiliados` se jubiló el 9 de septiembre justo por publicar un número de afiliados que ningún documento sostenía (D-18), y sin esa palabra el mismo defecto volvía por la puerta de al lado con una cifra cuatro veces mayor. Hay una guardia que lo comprueba.
+
+Cuatro guardias nuevas en `SemillaInstitucionalTest`, cuatro claves nuevas en la de «Quiénes somos» y una que vigila que una cifra vacía no deje su rótulo flotando solo. **Ocho mutaciones, ocho rojas.** Contraste medido en los dos temas: los números 6,52:1 en claro y 6,62 en oscuro (exigido 3), los rótulos de 11 px 11,37 y 7,62 (exigido 4,5).
+
+### 49.2 Los 18 aliados del Quindío no entran, y el motivo no es el que parecía
+
+`encargo.md` §17.1 dice que la franja de aliados no tiene un solo aliado del Quindío y que las láminas 15–16 traen 18 departamentales. Es el hallazgo de contenido más gordo de la entrega: un gremio departamental que solo enseña aliados nacionales se lee como sucursal. Y aun así no se sembró ninguno, por dos motivos independientes:
+
+1. **No pude leer los nombres.** En esas dos láminas la capa de texto solo trae el título: los 18 nombres son **logos**. Esta máquina tiene `pdftotext` pero no con qué rasterizar el PDF; el visor del navegador lo incrusta en un marco que no compone; el visor de PDF de las herramientas no tiene directorios permitidos; y de los diez JPEG que sí se pueden extraer del archivo a mano, ninguno es la lámina de logos. La lista existe escrita en el §17.1, pero **escrita por otra sesión, y copiarla sería citar un resumen como si fuera el documento**.
+2. **Y aunque los tuviera, faltaría lo esencial.** El tipo comercial exige `detalle_convenio` —lo que el afiliado ve cuando inicia sesión— y hay una guardia que lo comprueba desde agosto. La presentación trae logos, **no condiciones**. Sembrarlos sin convenio rompe la guardia; inventarles el convenio es exactamente lo que el §10 prohíbe.
+
+Lo que sí cabría hoy son las tres entidades públicas (Alcaldía de Armenia, Comfenalco Quindío, EDEQ) como **institucionales**, que no llevan convenio. Se dejan sin sembrar por el motivo 1: son entidades públicas, y afirmar una alianza que no he podido verificar en el documento es peor que no afirmarla.
+
+**Lo que hace falta para desbloquearlo** cabe en una frase: que alguien abra esas dos láminas y escriba los 18 nombres, y que el gremio diga qué le da cada uno al afiliado. Sin lo segundo, los quince comerciales no pueden entrar por diseño del propio esquema.
+
+### 49.3 La lección
+
+**Verificar contra el documento, no contra el resumen del documento.** Los cuatro textos que entraron se leyeron del PDF y del `.docx` originales, palabra por palabra; el que no se pudo leer, no entró. La diferencia entre las dos mitades de esta sesión es exactamente esa, y es la regla del §4.2 del prompt maestro —ninguna cifra sale de una suma— aplicada a texto en vez de a números.
