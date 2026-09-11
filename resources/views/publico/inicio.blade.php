@@ -8,11 +8,7 @@
     <div class="home-editorial">
         <x-publico.home.hero :destacados="$destacados" :total-asociados="$totalAsociados" />
 
-        <x-publico.home.cinta
-            :iniciativas="$iniciativas"
-            :beneficios="$beneficios"
-            :total-asociados="$totalAsociados"
-        />
+        <x-publico.home.cinta />
 
         <x-publico.home.cifras
             :cifras-del-gremio="$cifrasDelGremio"
