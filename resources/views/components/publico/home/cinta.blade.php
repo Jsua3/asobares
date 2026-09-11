@@ -1,6 +1,6 @@
 {{--
-    Cinta editorial entre el Hero y Cifras. Solo ítems con destino público
-    real: si no hay ruta, no se pinta. El movimiento vive en home-editorial.css.
+    Cinta editorial entre el Hero y Cifras. El isotipo queda fijo; el
+    recorrido solo lleva destinos públicos reales, con rótulos cortos.
 --}}
 @php
     /** @var list<array{texto: string, href: string}> $items */
@@ -8,13 +8,13 @@
 
     foreach ([
         ['texto' => 'Directorio', 'href' => route('directorio.index')],
-        ['texto' => ajuste('portada_guia_titulo'), 'href' => route('guia.index')],
-        ['texto' => ajuste('eventos_titulo'), 'href' => route('eventos.index')],
-        ['texto' => ajuste('portada_empleo_titulo'), 'href' => route('empleo.index')],
-        ['texto' => ajuste('boletin_titulo'), 'href' => route('boletin.index')],
-        ['texto' => ajuste('portada_aliados_titulo'), 'href' => route('aliados.index')],
-        ['texto' => ajuste('hero_cta_afiliate'), 'href' => route('afiliate')],
-        ['texto' => ajuste('iniciativas_titulo'), 'href' => route('quienes-somos').'#iniciativas'],
+        ['texto' => 'Abre tu negocio', 'href' => route('guia.index')],
+        ['texto' => 'Eventos', 'href' => route('eventos.index')],
+        ['texto' => 'Empleo', 'href' => route('empleo.index')],
+        ['texto' => 'Boletín', 'href' => route('boletin.index')],
+        ['texto' => 'Aliados', 'href' => route('aliados.index')],
+        ['texto' => 'Iniciativas', 'href' => route('quienes-somos').'#iniciativas'],
+        ['texto' => 'Afíliate', 'href' => route('afiliate')],
     ] as $enlace) {
         if (filled($enlace['texto']) && filled($enlace['href']) && ! str_ends_with($enlace['href'], '#')) {
             $items[] = $enlace;
@@ -33,15 +33,16 @@
         </a>
 
         <div class="home-editorial-cinta__pista">
+            <span class="home-editorial-cinta__velo home-editorial-cinta__velo--izq" aria-hidden="true"></span>
             <div class="home-editorial-cinta__recorrido">
                 @foreach ([false, true] as $decorativa)
                     <ul class="home-editorial-cinta__lista"@if ($decorativa) aria-hidden="true"@endif>
                         @foreach ($items as $item)
                             <li class="home-editorial-cinta__item">
                                 @if ($decorativa)
-                                    <span class="home-editorial-cinta__enlace">{{ $item['texto'] }}&nbsp;<x-publico.flecha /></span>
+                                    <span class="home-editorial-cinta__enlace">{{ $item['texto'] }}</span>
                                 @else
-                                    <a href="{{ $item['href'] }}" class="home-editorial-cinta__enlace enlace-accion">{{ $item['texto'] }}&nbsp;<x-publico.flecha /></a>
+                                    <a href="{{ $item['href'] }}" class="home-editorial-cinta__enlace enlace-accion">{{ $item['texto'] }}</a>
                                 @endif
                                 <span class="home-editorial-cinta__sep" aria-hidden="true"></span>
                             </li>
@@ -49,6 +50,7 @@
                     </ul>
                 @endforeach
             </div>
+            <span class="home-editorial-cinta__velo home-editorial-cinta__velo--der" aria-hidden="true"></span>
         </div>
     </aside>
 @endif

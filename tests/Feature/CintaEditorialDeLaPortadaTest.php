@@ -8,11 +8,11 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * HOME-07.1: la cinta es una franja de vidrio con isotipo y solo destinos
- * reales; el CTA deja ver más la fotografía sin tocar el archivo.
+ * HOME-07.2: la cinta es una barra editorial de navegación — isotipo fijo,
+ * rótulos cortos y destinos reales. El CTA no se vuelve a tocar.
  *
- * Roturas: devolver el fondo rojo sólido; pintar un ítem sin href; recortar
- * el pantallazo como logo; poner opacity en el <img> del CTA.
+ * Roturas: devolver el fondo rojo; meter el logo en el track; href="#";
+ * volver a los rótulos largos en mayúsculas.
  */
 class CintaEditorialDeLaPortadaTest extends TestCase
 {
@@ -51,6 +51,27 @@ class CintaEditorialDeLaPortadaTest extends TestCase
         $this->assertLessThan($posCifras, $posCinta);
     }
 
+    public function test_el_isotipo_queda_fijo_y_separado_del_track(): void
+    {
+        $vista = File::get(resource_path('views/components/publico/home/cinta.blade.php'));
+
+        $marca = strpos($vista, 'home-editorial-cinta__marca');
+        $isotipo = strpos($vista, 'img/monograma-asobares.png');
+        $pista = strpos($vista, 'home-editorial-cinta__pista');
+        $recorrido = strpos($vista, 'home-editorial-cinta__recorrido');
+
+        $this->assertNotFalse($marca);
+        $this->assertNotFalse($isotipo);
+        $this->assertNotFalse($pista);
+        $this->assertNotFalse($recorrido);
+        $this->assertLessThan($isotipo, $marca);
+        $this->assertLessThan($pista, $isotipo);
+        $this->assertLessThan($recorrido, $pista);
+        $this->assertStringContainsString('home-editorial-cinta__velo--izq', $vista);
+        $this->assertStringContainsString('home-editorial-cinta__velo--der', $vista);
+        $this->assertStringNotContainsString('home-editorial-cinta__recorrido', explode('home-editorial-cinta__pista', $vista)[0]);
+    }
+
     public function test_la_cinta_usa_el_isotipo_oficial_y_solo_enlaces_reales(): void
     {
         $this->assertFileExists(public_path('img/monograma-asobares.png'));
@@ -60,7 +81,6 @@ class CintaEditorialDeLaPortadaTest extends TestCase
 
         $this->assertStringContainsString('img/monograma-asobares.png', $cinta);
         $this->assertStringContainsString('href="'.route('inicio').'"', $cinta);
-        $this->assertStringNotContainsString('ASOBARES QUINDÍO', mb_strtoupper($cinta));
 
         $this->assertStringContainsString('href="'.route('directorio.index').'"', $cinta);
         $this->assertStringContainsString('href="'.route('guia.index').'"', $cinta);
@@ -72,16 +92,20 @@ class CintaEditorialDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('href="'.route('quienes-somos').'#iniciativas"', $cinta);
 
         $this->assertStringContainsString('Directorio', $cinta);
-        $this->assertStringContainsString((string) ajuste('portada_guia_titulo'), $cinta);
-        $this->assertStringContainsString((string) ajuste('eventos_titulo'), $cinta);
-        $this->assertStringContainsString((string) ajuste('portada_empleo_titulo'), $cinta);
-        $this->assertStringContainsString((string) ajuste('boletin_titulo'), $cinta);
-        $this->assertStringContainsString((string) ajuste('portada_aliados_titulo'), $cinta);
-        $this->assertStringContainsString((string) ajuste('hero_cta_afiliate'), $cinta);
+        $this->assertStringContainsString('Abre tu negocio', $cinta);
+        $this->assertStringContainsString('Eventos', $cinta);
+        $this->assertStringContainsString('Empleo', $cinta);
+        $this->assertStringContainsString('Boletín', $cinta);
+        $this->assertStringContainsString('Aliados', $cinta);
+        $this->assertStringContainsString('Iniciativas', $cinta);
+        $this->assertStringContainsString('Afíliate', $cinta);
 
         $this->assertStringNotContainsString('href="#"', $cinta);
-        $this->assertStringNotContainsString('Vibrarte — En ejecución', $cinta);
-        $this->assertStringNotContainsString('Representación gremial', $cinta);
+        $this->assertStringNotContainsString('Eventos y capacitaciones', $cinta);
+        $this->assertStringNotContainsString('Bolsa de empleo', $cinta);
+        $this->assertStringNotContainsString('Boletín del gremio', $cinta);
+        $this->assertStringNotContainsString('Aliados del capítulo', $cinta);
+        $this->assertStringNotContainsString('Las iniciativas más importantes', $cinta);
     }
 
     public function test_todos_los_items_visibles_de_la_cinta_son_enlaces(): void
@@ -130,41 +154,48 @@ class CintaEditorialDeLaPortadaTest extends TestCase
         $this->assertStringNotContainsString('<a ', $copia[1]);
     }
 
-    public function test_el_css_declara_vidrio_desfile_y_movimiento_reducido(): void
+    public function test_el_css_declara_vidrio_mascara_y_movimiento_reducido(): void
     {
         $css = File::get(resource_path('css/home-editorial.css'));
 
-        $this->assertStringContainsString('rgb(12 12 12 / 0.72)', $css);
-        $this->assertStringContainsString('backdrop-filter: blur(10px)', $css);
-        $this->assertStringContainsString('-webkit-backdrop-filter: blur(10px)', $css);
+        $this->assertStringContainsString('rgb(28 18 16 / 0.62)', $css);
+        $this->assertStringContainsString('backdrop-filter: blur(16px)', $css);
+        $this->assertStringContainsString('-webkit-backdrop-filter: blur(16px)', $css);
+        $this->assertStringContainsString('mask-image: linear-gradient', $css);
+        $this->assertStringContainsString('-webkit-mask-image: linear-gradient', $css);
+        $this->assertStringContainsString('animation: home-editorial-cinta-desfile 50s linear infinite', $css);
         $this->assertStringContainsString('@keyframes home-editorial-cinta-desfile', $css);
-        $this->assertStringContainsString('@keyframes home-editorial-cinta-brillo', $css);
         $this->assertStringContainsString('animation-play-state: paused', $css);
         $this->assertStringContainsString('@media (hover: hover) and (pointer: fine)', $css);
         $this->assertStringContainsString('@media (prefers-reduced-motion: reduce)', $css);
         $this->assertStringContainsString('@media (prefers-reduced-transparency: reduce)', $css);
         $this->assertStringContainsString('.home-editorial-cinta__lista[aria-hidden=\'true\']', $css);
-        $this->assertStringContainsString('overflow-x: auto', $css);
-        $this->assertStringContainsString('height: 2.125rem', $css);
-        $this->assertStringContainsString('height: 2.5rem', $css);
+        $this->assertStringNotContainsString('text-transform: uppercase', $this->bloqueDeLaCinta($css));
         $this->assertStringNotContainsString('--cinta-fondo: #5c1a16', $css);
         $this->assertStringNotContainsString('--cinta-fondo: #7a241c', $css);
     }
 
-    public function test_el_cta_conserva_la_foto_y_aligera_el_velo(): void
+    public function test_el_cta_sigue_sin_tocarse(): void
     {
         $cta = File::get(resource_path('views/components/publico/home/cta-afiliacion.blade.php'));
         $css = File::get(resource_path('css/home-editorial.css'));
 
         $this->assertStringContainsString('config(\'home_banco.cta\')', $cta);
-        $this->assertDoesNotMatchRegularExpression('/<img[^>]*style="[^"]*opacity/', $cta);
-        $this->assertStringNotContainsString('opacity-50', $cta);
-        $this->assertStringNotContainsString('opacity-70', $cta);
-
         $this->assertStringContainsString('object-position: 62% 48%', $css);
         $this->assertStringContainsString('object-position: 78% 42%', $css);
         $this->assertStringContainsString('rgb(5 5 5 / 0.55)', $css);
-        $this->assertStringNotContainsString('rgb(5 5 5 / 0.72) 0%', $css);
+    }
+
+    private function bloqueDeLaCinta(string $css): string
+    {
+        $inicio = strpos($css, '/* —— Cinta editorial');
+        $fin = strpos($css, '/* —— Cifras');
+
+        $this->assertNotFalse($inicio);
+        $this->assertNotFalse($fin);
+        $this->assertGreaterThan($inicio, $fin);
+
+        return substr($css, $inicio, $fin - $inicio);
     }
 
     private function fragmentoDeLaCinta(string $html): string
