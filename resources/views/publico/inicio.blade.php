@@ -15,7 +15,7 @@
 
         <x-publico.home.descubre :destacados="$destacados" />
 
-        <x-publico.home.respalda :beneficios="$beneficios" />
+        <x-publico.home.respalda :beneficios="$beneficios" :destacados="$destacados" />
 
         <x-publico.home.actualidad
             :proximos-eventos="$proximosEventos"

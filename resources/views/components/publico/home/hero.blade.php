@@ -52,26 +52,25 @@
     </x-slot:medio>
 
     <x-slot:encima>
-        @if ($totalAsociados > 0)
-            <p class="mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium etiqueta-clara">
-                <span class="h-1.5 w-1.5 rounded-full bg-marca-500"></span>
-                {{ $totalAsociados }} establecimientos afiliados en el Quindío
-            </p>
-        @endif
-        <p class="mb-5 max-w-2xl font-display text-base font-medium leading-snug text-white/72 text-balance sm:text-lg">
-            {{ ajuste('manifiesto_apertura') }}
-        </p>
-
         @if ($fraseCorta = ajuste('hero_frase_corta'))
-            <p class="antetitulo mb-3 text-acento">{{ $fraseCorta }}</p>
+            <p class="home-editorial-eyebrow mb-4 text-acento">{{ $fraseCorta }}</p>
+        @else
+            <p class="home-editorial-eyebrow mb-4">{{ ajuste('sitio_nombre') }}</p>
+        @endif
+
+        @if ($totalAsociados > 0)
+            <p class="mb-5 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium etiqueta-clara">
+                <span class="h-1.5 w-1.5 rounded-full bg-marca-500"></span>
+                {{ $totalAsociados }} afiliados en el Quindío
+            </p>
         @endif
     </x-slot:encima>
 
-    <p class="mt-5 max-w-xl text-base leading-relaxed text-white/74 sm:text-lg text-pretty">
+    <p class="home-editorial-lead mt-4 max-w-lg text-base leading-relaxed text-white/80 sm:text-lg text-pretty">
         {{ ajuste('hero_resumen_corto', 'Representamos la vida nocturna del Quindío con criterio, cultura y territorio.') }}
     </p>
 
-    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+    <div class="mt-7 flex flex-col gap-3 sm:flex-row">
         <x-publico.boton :href="route('directorio.index')">
             {{ ajuste('hero_cta_directorio') }}
         </x-publico.boton>
@@ -80,9 +79,8 @@
         </x-publico.boton>
     </div>
 
-    <p class="mt-10 max-w-md border-l pl-4 text-sm leading-relaxed text-white/72 pie-de-video">
-        <span class="antetitulo block text-white/60">{{ ajuste('hero_video_rotulo', 'Video institucional') }}</span>
-        <span class="mt-1 block font-display font-semibold text-white">{{ $videoInstitucional['titulo'] }}</span>
-        <span class="mt-0.5 block">{{ $videoInstitucional['detalle'] }}</span>
+    <p class="home-editorial-video-nota mt-8 max-w-md border-l pl-4 text-sm leading-relaxed text-white/72 pie-de-video">
+        <span class="antetitulo block text-white/50">{{ ajuste('hero_video_rotulo', 'Video institucional') }}</span>
+        <span class="mt-0.5 block text-white/70">{{ $videoInstitucional['titulo'] }} · {{ $videoInstitucional['detalle'] }}</span>
     </p>
 </x-publico.hero>

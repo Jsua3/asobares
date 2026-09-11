@@ -1,5 +1,46 @@
 @props(['publicidad'])
 
-<section class="home-editorial-publicidad revelar mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8" data-revelar aria-label="Publicidad">
-    <x-publico.publicidad :publicidad="$publicidad" class="home-editorial-publicidad__tarjeta overflow-hidden rounded-2xl border border-linea" />
+@php
+    use Illuminate\Support\Facades\Storage;
+
+    $nombre = $publicidad->nombre_comercial ?: $publicidad->anunciante;
+    $imagen = Storage::disk(config('almacenamiento.publico'))->url($publicidad->imagen);
+    $href = $publicidad->url_destino;
+@endphp
+
+<section class="home-editorial-publicidad revelar" data-revelar aria-label="Publicidad">
+    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        @if ($href)
+            <a href="{{ $href }}" target="_blank" rel="noopener noreferrer sponsored" class="home-editorial-publicidad__banner group block overflow-hidden rounded-xl">
+        @else
+            <div class="home-editorial-publicidad__banner overflow-hidden rounded-xl">
+        @endif
+            <div class="relative min-h-[10rem] sm:min-h-[12rem]">
+                <img src="{{ $imagen }}"
+                     alt="Publicidad de {{ $nombre }}"
+                     loading="lazy"
+                     decoding="async"
+                     width="1280"
+                     height="400"
+                     class="imagen-viva home-editorial-publicidad__img absolute inset-0 h-full w-full object-cover">
+                <div class="home-editorial-publicidad__overlay absolute inset-0"></div>
+                <div class="relative flex h-full min-h-[inherit] flex-col justify-end p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
+                    <div class="max-w-lg">
+                        <p class="home-editorial-eyebrow text-white/70">{{ ajuste('publicidad_rotulo', 'Publicidad') }}</p>
+                        <p class="mt-1 font-display text-xl font-semibold text-white sm:text-2xl">{{ $nombre }}</p>
+                        <p class="mt-1 text-sm text-white/75">{{ ajuste('publicidad_pie', 'Campaña vigente de ASOBARES Capítulo Quindío.') }}</p>
+                    </div>
+                    @if ($href)
+                        <span class="home-editorial-enlace mt-4 inline-flex items-center text-sm font-medium text-white sm:mt-0">
+                            Conocer más&nbsp;<x-publico.flecha />
+                        </span>
+                    @endif
+                </div>
+            </div>
+        @if ($href)
+            </a>
+        @else
+            </div>
+        @endif
+    </div>
 </section>
