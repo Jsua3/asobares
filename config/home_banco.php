@@ -13,7 +13,7 @@ return [
         'img/home/establecimiento-03.png',
     ],
     'beneficios' => 'img/home/beneficios-gremio.png',
-    'evento' => 'img/home/evento-destacado.png',
+    'evento' => 'videos/asobares-institucional.jpg',
     'cta' => 'img/home/cta-afiliacion.png',
     'publicidad' => 'img/home/publicidad-fallback.png',
 ];

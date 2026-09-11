@@ -11,11 +11,11 @@ use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
- * HOME-05: el banco visual de la portada tiene que existir, resolverse
+ * HOME-05/06: el banco visual de la portada tiene que existir, resolverse
  * en el orden foto real → asset editorial → fallback gráfico, y no
  * pintarse con las portadas de relleno del demo.
  *
- * Roturas: borrar un PNG de `public/img/home/`; volver a pintar
+ * Roturas: borrar un asset de `public/img/home/` o `public/videos/`; volver a pintar
  * `foto_portada` del generador por encima del banco; cablear el Hero
  * como respaldo de publicidad.
  */
@@ -29,12 +29,12 @@ class BancoVisualDeLaPortadaTest extends TestCase
         'img/home/establecimiento-02.png',
         'img/home/establecimiento-03.png',
         'img/home/beneficios-gremio.png',
-        'img/home/evento-destacado.png',
+        'videos/asobares-institucional.jpg',
         'img/home/cta-afiliacion.png',
         'img/home/publicidad-fallback.png',
     ];
 
-    public function test_los_siete_assets_del_banco_existen_y_estan_mapeados(): void
+    public function test_los_assets_del_banco_existen_y_estan_mapeados(): void
     {
         foreach (self::ASSETS as $ruta) {
             $this->assertFileExists(
@@ -52,7 +52,7 @@ class BancoVisualDeLaPortadaTest extends TestCase
             config('home_banco.establecimientos')
         );
         $this->assertSame('img/home/beneficios-gremio.png', config('home_banco.beneficios'));
-        $this->assertSame('img/home/evento-destacado.png', config('home_banco.evento'));
+        $this->assertSame('videos/asobares-institucional.jpg', config('home_banco.evento'));
         $this->assertSame('img/home/cta-afiliacion.png', config('home_banco.cta'));
         $this->assertSame('img/home/publicidad-fallback.png', config('home_banco.publicidad'));
     }
@@ -147,7 +147,7 @@ class BancoVisualDeLaPortadaTest extends TestCase
         }
 
         $this->get('/')->assertOk()
-            ->assertSee('img/home/evento-destacado.png', false);
+            ->assertSee('videos/asobares-institucional.jpg', false);
     }
 
     public function test_la_publicidad_sin_archivo_no_reusa_el_hero(): void
