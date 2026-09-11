@@ -4,6 +4,9 @@
     use Illuminate\Support\Facades\Storage;
 
     $destacadosVisibles = $destacados->take(3);
+    $fallbacksEditoriales = collect(config('home_banco.establecimientos', []))
+        ->map(fn (string $ruta) => asset($ruta))
+        ->values();
 @endphp
 
 @if ($destacadosVisibles->isNotEmpty())
@@ -24,7 +27,10 @@
             </div>
 
             <div class="mt-6 grid gap-4 sm:grid-cols-3">
-                @foreach ($destacadosVisibles as $asociado)
+                @foreach ($destacadosVisibles as $indice => $asociado)
+                    @php
+                        $fotoEditorial = $fallbacksEditoriales->get($indice % max($fallbacksEditoriales->count(), 1));
+                    @endphp
                     <article class="home-editorial-establecimiento group">
                         <a href="{{ route('directorio.show', $asociado) }}" class="tarjeta-pulsable block">
                             <div class="home-editorial-establecimiento__foto relative aspect-[5/4] overflow-hidden rounded-xl sm:aspect-[4/3]">
@@ -35,19 +41,28 @@
                                          decoding="async"
                                          width="480"
                                          height="360"
-                                         class="imagen-viva home-editorial-establecimiento__img h-full w-full object-cover">
+                                         class="home-editorial-establecimiento__img h-full w-full object-cover">
+                                @elseif ($fotoEditorial)
+                                    <img src="{{ $fotoEditorial }}"
+                                         alt=""
+                                         loading="lazy"
+                                         decoding="async"
+                                         width="480"
+                                         height="360"
+                                         class="home-editorial-establecimiento__img h-full w-full object-cover">
                                 @else
                                     <div class="home-editorial-establecimiento__fallback h-full w-full" aria-hidden="true">
                                         <span class="home-editorial-establecimiento__monograma">A</span>
                                     </div>
                                 @endif
+                                <div class="home-editorial-establecimiento__velo" aria-hidden="true"></div>
                                 <div class="home-editorial-establecimiento__overlay absolute inset-x-0 bottom-0 p-4 pt-12">
                                     @if ($asociado->categoria)
-                                        <p class="text-2xs font-semibold uppercase tracking-wider text-white/70">{{ $asociado->categoria->nombre }}</p>
+                                        <p class="text-2xs font-semibold uppercase tracking-wider text-white/80">{{ $asociado->categoria->nombre }}</p>
                                     @endif
                                     <h3 class="mt-0.5 font-display text-lg font-semibold text-white">{{ $asociado->nombre }}</h3>
                                     @if ($asociado->municipio)
-                                        <p class="mt-0.5 text-xs text-white/65">{{ $asociado->municipio->nombre }}</p>
+                                        <p class="mt-0.5 text-xs text-white/75">{{ $asociado->municipio->nombre }}</p>
                                     @endif
                                 </div>
                                 <span class="home-editorial-establecimiento__flecha absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm" aria-hidden="true">

@@ -1,6 +1,6 @@
 @php
-    $fondo = file_exists(public_path('videos/asobares-institucional.jpg'))
-        ? asset('videos/asobares-institucional.jpg')
+    $fondo = file_exists(public_path(config('home_banco.cta', 'img/home/cta-afiliacion.png')))
+        ? asset(config('home_banco.cta', 'img/home/cta-afiliacion.png'))
         : asset('img/og-asobares.jpg');
 @endphp
 
@@ -8,20 +8,20 @@
     <div class="absolute inset-0">
         <img src="{{ $fondo }}"
              alt=""
-             width="1600"
+             width="1200"
              height="900"
-             class="imagen-viva home-editorial-cta__foto h-full w-full object-cover"
+             class="home-editorial-cta__foto h-full w-full object-cover"
              loading="lazy"
              decoding="async">
-        <div class="home-editorial-cta__velo absolute inset-0"></div>
+        <div class="home-editorial-cta__velo absolute inset-0" aria-hidden="true"></div>
     </div>
 
     <div class="relative mx-auto max-w-2xl px-4 py-14 text-center sm:px-6 sm:py-16">
-        <p class="home-editorial-eyebrow text-white/70">{{ ajuste('cta_final_titulo') }}</p>
+        <p class="home-editorial-eyebrow text-white/75">{{ ajuste('cta_final_titulo') }}</p>
         <h2 id="cta-afiliacion" class="mt-3 font-display text-3xl font-bold text-balance text-white sm:text-4xl">
             {{ ajuste('cta_editorial_frase', 'La noche es más fuerte cuando tiene voz.') }}
         </h2>
-        <p class="home-editorial-copy mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/82 sm:text-base">
+        <p class="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/88 sm:text-base">
             {{ ajuste('cta_final_texto') }}
         </p>
         <x-publico.boton :href="route('afiliate')" class="mt-6">

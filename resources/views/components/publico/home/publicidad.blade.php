@@ -4,7 +4,9 @@
     use Illuminate\Support\Facades\Storage;
 
     $nombre = $publicidad->nombre_comercial ?: $publicidad->anunciante;
-    $imagen = Storage::disk(config('almacenamiento.publico'))->url($publicidad->imagen);
+    $imagen = filled($publicidad->imagen)
+        ? Storage::disk(config('almacenamiento.publico'))->url($publicidad->imagen)
+        : asset(config('home_banco.publicidad', 'img/home/publicidad-fallback.png'));
     $href = $publicidad->url_destino;
 @endphp
 
@@ -22,13 +24,13 @@
                      decoding="async"
                      width="1280"
                      height="400"
-                     class="imagen-viva home-editorial-publicidad__img absolute inset-0 h-full w-full object-cover">
-                <div class="home-editorial-publicidad__overlay absolute inset-0"></div>
+                     class="home-editorial-publicidad__img absolute inset-0 h-full w-full object-cover">
+                <div class="home-editorial-publicidad__velo absolute inset-0" aria-hidden="true"></div>
                 <div class="relative flex h-full min-h-[inherit] flex-col justify-end p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
                     <div class="max-w-lg">
-                        <p class="home-editorial-eyebrow text-white/70">{{ ajuste('publicidad_rotulo', 'Publicidad') }}</p>
+                        <p class="home-editorial-eyebrow text-white/75">{{ ajuste('publicidad_rotulo', 'Publicidad') }}</p>
                         <p class="mt-1 font-display text-xl font-semibold text-white sm:text-2xl">{{ $nombre }}</p>
-                        <p class="mt-1 text-sm text-white/75">{{ ajuste('publicidad_pie', 'Campaña vigente de ASOBARES Capítulo Quindío.') }}</p>
+                        <p class="mt-1 text-sm text-white/80">{{ ajuste('publicidad_pie', 'Campaña vigente de ASOBARES Capítulo Quindío.') }}</p>
                     </div>
                     @if ($href)
                         <span class="home-editorial-enlace mt-4 inline-flex items-center text-sm font-medium text-white sm:mt-0">

@@ -1,13 +1,8 @@
 @props(['beneficios', 'destacados'])
 
 @php
-    use Illuminate\Support\Facades\Storage;
-
     $beneficiosVisibles = $beneficios->take(5);
-
-    $fotoRespaldo = $destacados
-        ->filter(fn ($asociado) => filled($asociado->foto_portada))
-        ->first();
+    $fotoBeneficios = asset(config('home_banco.beneficios', 'img/home/beneficios-gremio.png'));
 @endphp
 
 @if ($beneficiosVisibles->isNotEmpty())
@@ -21,17 +16,16 @@
                     </h2>
                     <p class="mt-3 text-sm leading-relaxed text-suave sm:text-base">{{ ajuste('portada_beneficios_intro') }}</p>
 
-                    @if ($fotoRespaldo)
-                        <div class="home-editorial-respalda__foto relative mt-6 hidden aspect-[4/3] overflow-hidden rounded-xl lg:block">
-                            <img src="{{ Storage::disk('public')->url($fotoRespaldo->foto_portada) }}"
-                                 alt=""
-                                 loading="lazy"
-                                 decoding="async"
-                                 width="560"
-                                 height="420"
-                                 class="imagen-viva home-editorial-respalda__img h-full w-full object-cover">
-                        </div>
-                    @endif
+                    <div class="home-editorial-respalda__foto relative mt-6 hidden aspect-[4/3] overflow-hidden rounded-xl lg:block">
+                        <img src="{{ $fotoBeneficios }}"
+                             alt=""
+                             loading="lazy"
+                             decoding="async"
+                             width="560"
+                             height="420"
+                             class="home-editorial-respalda__img h-full w-full object-cover">
+                        <div class="home-editorial-respalda__velo" aria-hidden="true"></div>
+                    </div>
 
                     <a href="{{ route('afiliate') }}" class="home-editorial-enlace enlace-accion mt-6 inline-flex text-sm font-medium text-acento hover:text-acento-fuerte">
                         Conoce la afiliación&nbsp;<x-publico.flecha />
