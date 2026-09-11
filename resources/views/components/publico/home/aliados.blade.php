@@ -22,9 +22,14 @@
                     <p class="home-editorial-aliados__etiqueta">{{ ajuste('portada_aliados_institucionales') }}</p>
                     <ul class="home-editorial-aliados__logos home-editorial-aliados__logos--institucionales mt-2">
                         @foreach ($aliadosInstitucionales as $aliado)
+                            @php
+                                $logo = filled($aliado->logo) && ! esImagenDeRelleno($aliado->logo)
+                                    ? Storage::disk('public')->url($aliado->logo)
+                                    : null;
+                            @endphp
                             <li class="home-editorial-aliados__item">
-                                @if ($aliado->logo)
-                                    <img src="{{ Storage::disk('public')->url($aliado->logo) }}"
+                                @if ($logo)
+                                    <img src="{{ $logo }}"
                                          alt="{{ $aliado->nombre }}"
                                          loading="lazy"
                                          decoding="async"
@@ -44,9 +49,14 @@
                     <p class="home-editorial-aliados__etiqueta">{{ ajuste('portada_aliados_comerciales') }}</p>
                     <ul class="home-editorial-aliados__logos home-editorial-aliados__logos--comerciales mt-2">
                         @foreach ($aliadosComerciales as $aliado)
+                            @php
+                                $logo = filled($aliado->logo) && ! esImagenDeRelleno($aliado->logo)
+                                    ? Storage::disk('public')->url($aliado->logo)
+                                    : null;
+                            @endphp
                             <li class="home-editorial-aliados__item home-editorial-aliados__item--comercial">
-                                @if ($aliado->logo)
-                                    <img src="{{ Storage::disk('public')->url($aliado->logo) }}"
+                                @if ($logo)
+                                    <img src="{{ $logo }}"
                                          alt="{{ $aliado->nombre }}"
                                          loading="lazy"
                                          decoding="async"

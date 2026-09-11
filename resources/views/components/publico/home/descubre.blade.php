@@ -1,12 +1,8 @@
 @props(['destacados'])
 
 @php
-    use Illuminate\Support\Facades\Storage;
-
     $destacadosVisibles = $destacados->take(3);
-    $fallbacksEditoriales = collect(config('home_banco.establecimientos', []))
-        ->map(fn (string $ruta) => asset($ruta))
-        ->values();
+    $fallbacksEditoriales = collect(config('home_banco.establecimientos', []))->values();
 @endphp
 
 @if ($destacadosVisibles->isNotEmpty())
@@ -29,22 +25,15 @@
             <div class="mt-6 grid gap-4 sm:grid-cols-3">
                 @foreach ($destacadosVisibles as $indice => $asociado)
                     @php
-                        $fotoEditorial = $fallbacksEditoriales->get($indice % max($fallbacksEditoriales->count(), 1));
+                        $editorial = $fallbacksEditoriales->get($indice % max($fallbacksEditoriales->count(), 1));
+                        $foto = urlDeFotoDeLaHome($asociado->foto_portada, $editorial);
                     @endphp
                     <article class="home-editorial-establecimiento group">
                         <a href="{{ route('directorio.show', $asociado) }}" class="tarjeta-pulsable block">
                             <div class="home-editorial-establecimiento__foto relative aspect-[5/4] overflow-hidden rounded-xl sm:aspect-[4/3]">
-                                @if ($asociado->foto_portada)
-                                    <img src="{{ Storage::disk('public')->url($asociado->foto_portada) }}"
-                                         alt="Portada de {{ $asociado->nombre }}"
-                                         loading="lazy"
-                                         decoding="async"
-                                         width="480"
-                                         height="360"
-                                         class="home-editorial-establecimiento__img h-full w-full object-cover">
-                                @elseif ($fotoEditorial)
-                                    <img src="{{ $fotoEditorial }}"
-                                         alt=""
+                                @if ($foto)
+                                    <img src="{{ $foto }}"
+                                         alt="{{ filled($asociado->foto_portada) && ! esImagenDeRelleno($asociado->foto_portada) ? 'Portada de '.$asociado->nombre : '' }}"
                                          loading="lazy"
                                          decoding="async"
                                          width="480"
@@ -65,7 +54,7 @@
                                         <p class="mt-0.5 text-xs text-white/75">{{ $asociado->municipio->nombre }}</p>
                                     @endif
                                 </div>
-                                <span class="home-editorial-establecimiento__flecha absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm" aria-hidden="true">
+                                <span class="home-editorial-establecimiento__flecha absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-white backdrop-blur-sm" aria-hidden="true">
                                     <x-publico.flecha />
                                 </span>
                             </div>

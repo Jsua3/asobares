@@ -2,6 +2,7 @@
 
 use App\Models\Setting;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 if (! function_exists('ajuste')) {
     /**
@@ -108,5 +109,49 @@ if (! function_exists('enlaceWhatsapp')) {
         }
 
         return 'https://wa.me/'.$limpio.($mensaje !== '' ? '?text='.rawurlencode($mensaje) : '');
+    }
+}
+
+if (! function_exists('esImagenDeRelleno')) {
+    /**
+     * Las portadas del demo las dibuja `GeneradorImagen` con un PNG
+     * transparente cuyo nombre es el md5 de la semilla. No son fotografía:
+     * si se pintan en la portada tapan el banco editorial y la Home se lee
+     * como maqueta. Una foto subida por Filament nace con ULID, no con md5.
+     */
+    function esImagenDeRelleno(?string $ruta, ?string $disco = null): bool
+    {
+        if (! filled($ruta)) {
+            return true;
+        }
+
+        if (preg_match('/^[a-f0-9]{32}\.png$/i', basename($ruta)) === 1) {
+            return true;
+        }
+
+        $disco ??= config('almacenamiento.publico', 'public');
+
+        return ! Storage::disk($disco)->exists($ruta);
+    }
+}
+
+if (! function_exists('urlDeFotoDeLaHome')) {
+    /**
+     * Cadena visual de la portada: foto real → asset editorial → nada
+     * (el llamador pinta el fallback gráfico).
+     */
+    function urlDeFotoDeLaHome(?string $rutaAlmacenada, ?string $editorial = null, ?string $disco = null): ?string
+    {
+        $disco ??= config('almacenamiento.publico', 'public');
+
+        if (filled($rutaAlmacenada) && ! esImagenDeRelleno($rutaAlmacenada, $disco)) {
+            return Storage::disk($disco)->url($rutaAlmacenada);
+        }
+
+        if (filled($editorial) && is_file(public_path($editorial))) {
+            return asset($editorial);
+        }
+
+        return null;
     }
 }

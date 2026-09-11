@@ -1,12 +1,12 @@
 @props(['publicidad'])
 
 @php
-    use Illuminate\Support\Facades\Storage;
-
     $nombre = $publicidad->nombre_comercial ?: $publicidad->anunciante;
-    $imagen = filled($publicidad->imagen)
-        ? Storage::disk(config('almacenamiento.publico'))->url($publicidad->imagen)
-        : asset(config('home_banco.publicidad', 'img/home/publicidad-fallback.png'));
+    $imagen = urlDeFotoDeLaHome(
+        $publicidad->imagen,
+        config('home_banco.publicidad'),
+        config('almacenamiento.publico')
+    );
     $href = $publicidad->url_destino;
 @endphp
 
@@ -18,13 +18,17 @@
             <div class="home-editorial-publicidad__banner overflow-hidden rounded-xl">
         @endif
             <div class="relative min-h-[9rem] sm:min-h-[10.5rem]">
-                <img src="{{ $imagen }}"
-                     alt="Publicidad de {{ $nombre }}"
-                     loading="lazy"
-                     decoding="async"
-                     width="1280"
-                     height="400"
-                     class="home-editorial-publicidad__img absolute inset-0 h-full w-full object-cover">
+                @if ($imagen)
+                    <img src="{{ $imagen }}"
+                         alt="Publicidad de {{ $nombre }}"
+                         loading="lazy"
+                         decoding="async"
+                         width="1280"
+                         height="400"
+                         class="home-editorial-publicidad__img absolute inset-0 h-full w-full object-cover">
+                @else
+                    <div class="home-editorial-publicidad__fallback" aria-hidden="true"></div>
+                @endif
                 <div class="home-editorial-publicidad__velo absolute inset-0" aria-hidden="true"></div>
                 <div class="relative flex h-full min-h-[inherit] flex-col justify-end p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
                     <div class="max-w-lg">

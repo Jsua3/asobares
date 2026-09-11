@@ -1,11 +1,11 @@
 @props(['proximosEventos', 'iniciativas', 'destacados'])
 
 @php
-    use Illuminate\Support\Facades\Storage;
-
     $eventoPrincipal = $proximosEventos->first();
     $iniciativaPrincipal = $iniciativas->first();
-    $fotoEventoEditorial = asset(config('home_banco.evento', 'img/home/evento-destacado.png'));
+    $fotoEvento = $eventoPrincipal
+        ? urlDeFotoDeLaHome($eventoPrincipal->imagen, config('home_banco.evento'))
+        : null;
 @endphp
 
 <section class="home-editorial-actualidad revelar" data-revelar aria-labelledby="actualidad">
@@ -22,8 +22,8 @@
                 <article class="home-editorial-actualidad__destacada lg:col-span-7">
                     <a href="{{ route('eventos.show', $eventoPrincipal) }}" class="group tarjeta-pulsable block h-full">
                         <div class="relative h-full min-h-[17rem] overflow-hidden rounded-xl sm:min-h-[20rem] lg:min-h-[22rem]">
-                            @if ($eventoPrincipal->imagen)
-                                <img src="{{ Storage::disk('public')->url($eventoPrincipal->imagen) }}"
+                            @if ($fotoEvento)
+                                <img src="{{ $fotoEvento }}"
                                      alt=""
                                      loading="lazy"
                                      decoding="async"
@@ -31,13 +31,9 @@
                                      height="520"
                                      class="home-editorial-actualidad__img h-full w-full object-cover">
                             @else
-                                <img src="{{ $fotoEventoEditorial }}"
-                                     alt=""
-                                     loading="lazy"
-                                     decoding="async"
-                                     width="800"
-                                     height="520"
-                                     class="home-editorial-actualidad__img h-full w-full object-cover">
+                                <div class="home-editorial-establecimiento__fallback absolute inset-0" aria-hidden="true">
+                                    <span class="home-editorial-establecimiento__monograma">A</span>
+                                </div>
                             @endif
                             <div class="home-editorial-actualidad__velo" aria-hidden="true"></div>
                             <div class="home-editorial-actualidad__overlay absolute inset-x-0 bottom-0 p-5 sm:p-6">
@@ -107,19 +103,21 @@
             </div>
         </div>
 
-        <div class="home-editorial-movimiento mt-6 border-t border-linea/60 pt-6">
+        <div class="home-editorial-movimiento mt-6 border-t pt-6">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div class="max-w-xl">
                     <p class="home-editorial-eyebrow text-acento">{{ ajuste('portada_videos_rotulo', 'ASOBARES en movimiento') }}</p>
                     <p class="mt-1 font-display text-base font-semibold sm:text-lg">{{ ajuste('portada_videos_titulo', 'Historias cortas para sentir el gremio.') }}</p>
-                    <p class="mt-2 text-sm leading-relaxed text-tenue">{{ ajuste('portada_videos_intro', 'Una banda audiovisual para mostrar recorridos, eventos, testimonios y momentos de la noche quindiana con un tono sobrio, local y cercano.') }}</p>
+                    <p class="mt-2 text-sm leading-relaxed text-tenue">{{ ajuste('portada_videos_intro', 'Recorridos, eventos, testimonios y momentos que muestran la vida nocturna del Quindío desde quienes la hacen posible.') }}</p>
                     <p class="sr-only">{{ ajuste('portada_videos_proxima_rotulo', 'Próxima pieza') }} {{ ajuste('portada_videos_proxima_texto', 'Clips de afiliados, activaciones y memoria del capítulo.') }}</p>
-                    <p class="mb-3 text-xs leading-relaxed text-apagado">{{ ajuste('portada_guia_texto') }}</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-                    <a href="{{ route('guia.index') }}" class="home-editorial-enlace enlace-accion text-acento hover:text-acento-fuerte">
+                    <a href="{{ route('guia.index') }}"
+                       class="home-editorial-enlace enlace-accion text-acento hover:text-acento-fuerte"
+                       aria-describedby="home-guia-texto">
                         {{ ajuste('portada_guia_titulo') }}&nbsp;<x-publico.flecha />
                     </a>
+                    <p id="home-guia-texto" class="sr-only">{{ ajuste('portada_guia_texto') }}</p>
                     <a href="{{ route('eventos.index') }}" class="home-editorial-enlace enlace-accion text-acento hover:text-acento-fuerte">
                         Ver agenda&nbsp;<x-publico.flecha />
                     </a>

@@ -2,7 +2,7 @@
 
 @php
     $beneficiosVisibles = $beneficios->take(5);
-    $fotoBeneficios = asset(config('home_banco.beneficios', 'img/home/beneficios-gremio.png'));
+    $fotoBeneficios = urlDeFotoDeLaHome(null, config('home_banco.beneficios'));
 @endphp
 
 @if ($beneficiosVisibles->isNotEmpty())
@@ -16,14 +16,20 @@
                     </h2>
                     <p class="mt-3 text-sm leading-relaxed text-suave sm:text-base">{{ ajuste('portada_beneficios_intro') }}</p>
 
-                    <div class="home-editorial-respalda__foto relative mt-6 hidden aspect-[4/3] overflow-hidden rounded-xl lg:block">
-                        <img src="{{ $fotoBeneficios }}"
-                             alt=""
-                             loading="lazy"
-                             decoding="async"
-                             width="560"
-                             height="420"
-                             class="home-editorial-respalda__img h-full w-full object-cover">
+                    <div class="home-editorial-respalda__foto relative mt-6 aspect-[4/3] overflow-hidden rounded-xl">
+                        @if ($fotoBeneficios)
+                            <img src="{{ $fotoBeneficios }}"
+                                 alt=""
+                                 loading="lazy"
+                                 decoding="async"
+                                 width="560"
+                                 height="420"
+                                 class="home-editorial-respalda__img h-full w-full object-cover">
+                        @else
+                            <div class="home-editorial-establecimiento__fallback h-full w-full" aria-hidden="true">
+                                <span class="home-editorial-establecimiento__monograma">A</span>
+                            </div>
+                        @endif
                         <div class="home-editorial-respalda__velo" aria-hidden="true"></div>
                     </div>
 

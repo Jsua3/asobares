@@ -1,18 +1,20 @@
 @php
-    $fondo = file_exists(public_path(config('home_banco.cta', 'img/home/cta-afiliacion.png')))
-        ? asset(config('home_banco.cta', 'img/home/cta-afiliacion.png'))
-        : asset('img/og-asobares.jpg');
+    $fondo = urlDeFotoDeLaHome(null, config('home_banco.cta'));
 @endphp
 
 <section class="home-editorial-cta revelar relative overflow-hidden" data-revelar aria-labelledby="cta-afiliacion">
     <div class="absolute inset-0">
-        <img src="{{ $fondo }}"
-             alt=""
-             width="1200"
-             height="900"
-             class="home-editorial-cta__foto h-full w-full object-cover"
-             loading="lazy"
-             decoding="async">
+        @if ($fondo)
+            <img src="{{ $fondo }}"
+                 alt=""
+                 width="1200"
+                 height="900"
+                 class="home-editorial-cta__foto h-full w-full object-cover"
+                 loading="lazy"
+                 decoding="async">
+        @else
+            <div class="home-editorial-cta__fallback h-full w-full" aria-hidden="true"></div>
+        @endif
         <div class="home-editorial-cta__velo absolute inset-0" aria-hidden="true"></div>
     </div>
 

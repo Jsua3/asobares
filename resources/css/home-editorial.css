@@ -4,20 +4,46 @@
 @source '../views/publico/inicio.blade.php';
 
 /*
- * HOME-04 — Banco visual editorial (scoped).
- * Foto → velo/gradiente independiente → contenido. Ritmo oscuro → aliados claro → CTA.
+ * HOME-05 — tokens locales de la portada.
+ *
+ * El sitio ya resuelve el tema con `.dark` en <html> (tokens.css,
+ * localStorage.theme). Estos tokens no inventan un segundo sistema:
+ * se adaptan a esa clase. El default es el modo claro; `.dark` conserva
+ * el grafito cinematográfico de HOME-03/04.
  */
 
 .home-editorial {
-    --home-tono-0: #080808;
-    --home-tono-1: #0b0b0b;
-    --home-tono-2: #101010;
-    --home-tono-3: #131010;
-    --home-tono-4: #161616;
-    --home-linea-sutil: rgb(255 255 255 / 0.07);
-    --home-linea-media: rgb(255 255 255 / 0.1);
+    --home-bg: #f5f2ee;
+    --home-bg-elevated: #f9f7f4;
+    --home-surface: #fffdf9;
+    --home-surface-alta: #efebe6;
+    --home-border: rgb(23 17 15 / 0.1);
+    --home-border-media: rgb(23 17 15 / 0.16);
+    --home-text: #171717;
+    --home-muted: #5f5a56;
+    --home-accent: var(--asb-acento, #b71f18);
+    --home-overlay: rgb(8 8 8 / 0.78);
+    --home-shadow: 0 1px 2px rgb(23 17 15 / 0.06);
+    --home-hover: rgb(23 17 15 / 0.03);
+    --home-divisor: linear-gradient(180deg, transparent, rgb(23 17 15 / 0.12), transparent);
     --home-transicion: 200ms ease;
     --home-zoom: 1.02;
+}
+
+.dark .home-editorial {
+    --home-bg: #080808;
+    --home-bg-elevated: #0b0b0b;
+    --home-surface: #101010;
+    --home-surface-alta: #131010;
+    --home-border: rgb(255 255 255 / 0.07);
+    --home-border-media: rgb(255 255 255 / 0.1);
+    --home-text: #f5f3f4;
+    --home-muted: #a8a3a5;
+    --home-accent: var(--asb-acento, #f27166);
+    --home-overlay: rgb(8 8 8 / 0.82);
+    --home-shadow: none;
+    --home-hover: rgb(255 255 255 / 0.015);
+    --home-divisor: linear-gradient(180deg, transparent, rgb(255 255 255 / 0.1), transparent);
 }
 
 /* —— Capítulos: separación sutil entre bloques —— */
@@ -25,7 +51,7 @@
 .home-editorial > section + section,
 .home-editorial > section + .home-editorial-cifras-gremio,
 .home-editorial .home-editorial-cifras-gremio + section {
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.035);
+    box-shadow: inset 0 1px 0 var(--home-border);
 }
 
 /* —— Tipografía —— */
@@ -37,7 +63,7 @@
     letter-spacing: 0.16em;
     line-height: 1.35;
     text-transform: uppercase;
-    color: var(--asb-apagado, rgb(163 163 163));
+    color: var(--home-muted);
 }
 
 .home-editorial .home-editorial-eyebrow--claro {
@@ -50,7 +76,7 @@
     font-weight: 600;
     line-height: 1.15;
     letter-spacing: -0.02em;
-    color: var(--asb-fuerte, white);
+    color: var(--home-text);
 }
 
 .home-editorial .home-editorial-copy {
@@ -71,11 +97,16 @@
     transform: translateX(4px);
 }
 
-/* —— Hero (ajustes mínimos) —— */
+.home-editorial a:focus-visible {
+    outline: 2px solid var(--home-accent);
+    outline-offset: 3px;
+}
+
+/* —— Hero (aprobado: permanece nocturno en los dos temas) —— */
 
 .home-editorial .hero-portada {
     min-height: clamp(28rem, 86svh, 44rem);
-    background-color: var(--home-tono-0);
+    background-color: #080808;
 }
 
 .home-editorial .hero-portada > div {
@@ -90,6 +121,13 @@
         linear-gradient(90deg, rgb(5 5 5 / 0.88) 0%, rgb(5 5 5 / 0.58) 42%, rgb(5 5 5 / 0.15) 75%, rgb(5 5 5 / 0.05) 100%),
         linear-gradient(0deg, rgb(8 8 8 / 0.42) 0%, transparent 38%, rgb(8 8 8 / 0.12) 100%),
         radial-gradient(38rem circle at 18% 24%, rgb(238 65 55 / 0.1), transparent 56%);
+}
+
+html:not(.dark) .home-editorial .hero-portada .hero-medio::after {
+    background:
+        linear-gradient(90deg, rgb(5 5 5 / 0.84) 0%, rgb(5 5 5 / 0.52) 42%, rgb(5 5 5 / 0.14) 75%, rgb(5 5 5 / 0.06) 100%),
+        linear-gradient(0deg, rgb(8 8 8 / 0.36) 0%, transparent 38%, rgb(8 8 8 / 0.1) 100%),
+        radial-gradient(38rem circle at 18% 24%, rgb(238 65 55 / 0.08), transparent 56%);
 }
 
 .home-editorial .hero-portada h1 {
@@ -109,13 +147,13 @@
 /* —— Cifras —— */
 
 .home-editorial-cifras {
-    background: linear-gradient(180deg, var(--home-tono-1) 0%, var(--home-tono-2) 100%);
-    border-block: 1px solid var(--home-linea-sutil);
+    background: var(--home-bg-elevated);
+    border-block: 1px solid var(--home-border);
 }
 
 .home-editorial-cifras-gremio {
-    background: var(--home-tono-0);
-    border-bottom: 1px solid var(--home-linea-sutil);
+    background: var(--home-bg);
+    border-bottom: 1px solid var(--home-border);
 }
 
 .home-editorial-cifras__banda {
@@ -149,7 +187,7 @@
     width: 1px;
     flex-shrink: 0;
     align-self: stretch;
-    background: linear-gradient(180deg, transparent, rgb(255 255 255 / 0.1), transparent);
+    background: var(--home-divisor);
     min-height: 2.75rem;
 }
 
@@ -157,7 +195,7 @@
     display: inline-flex;
     shrink: 0;
     padding: 0.375rem;
-    color: rgb(238 65 55 / 0.85);
+    color: var(--home-accent);
 }
 
 .home-editorial-cifra__valor {
@@ -175,11 +213,16 @@
 .home-editorial-descubre {
     background:
         radial-gradient(ellipse 80% 50% at 50% 0%, rgb(238 65 55 / 0.04), transparent 55%),
-        var(--home-tono-3);
+        var(--home-bg);
 }
 
 .home-editorial-establecimiento__foto {
-    background: var(--home-tono-0);
+    background: var(--home-surface-alta);
+    box-shadow: var(--home-shadow);
+}
+
+html:not(.dark) .home-editorial-establecimiento__foto {
+    outline: 1px solid var(--home-border);
 }
 
 .home-editorial-establecimiento__fallback {
@@ -215,6 +258,10 @@
     transition: opacity var(--home-transicion);
 }
 
+html:not(.dark) .home-editorial-establecimiento__velo {
+    background: linear-gradient(180deg, transparent 42%, rgb(238 65 55 / 0.03) 100%);
+}
+
 .home-editorial-establecimiento:hover .home-editorial-establecimiento__velo {
     opacity: 0.85;
 }
@@ -223,7 +270,12 @@
     background: linear-gradient(0deg, rgb(0 0 0 / 0.82) 0%, rgb(0 0 0 / 0.38) 42%, transparent 72%);
 }
 
+html:not(.dark) .home-editorial-establecimiento__overlay {
+    background: linear-gradient(0deg, rgb(0 0 0 / 0.72) 0%, rgb(0 0 0 / 0.28) 46%, transparent 74%);
+}
+
 .home-editorial-establecimiento__flecha {
+    background-color: rgb(0 0 0 / 0.35);
     transition: background-color var(--home-transicion), transform var(--home-transicion);
 }
 
@@ -235,8 +287,8 @@
 /* —— Respalda —— */
 
 .home-editorial-respalda {
-    background: linear-gradient(180deg, var(--home-tono-0) 0%, var(--home-tono-1) 55%, var(--home-tono-2) 100%);
-    border-block: 1px solid var(--home-linea-sutil);
+    background: linear-gradient(180deg, var(--home-bg) 0%, var(--home-bg-elevated) 55%, var(--home-surface-alta) 100%);
+    border-block: 1px solid var(--home-border);
 }
 
 .home-editorial-respalda__velo {
@@ -246,6 +298,12 @@
     background:
         linear-gradient(0deg, rgb(8 8 8 / 0.28) 0%, transparent 50%),
         radial-gradient(ellipse 90% 70% at 100% 50%, rgb(238 65 55 / 0.08), transparent 55%);
+}
+
+html:not(.dark) .home-editorial-respalda__velo {
+    background:
+        linear-gradient(0deg, rgb(8 8 8 / 0.1) 0%, transparent 48%),
+        radial-gradient(ellipse 90% 70% at 100% 50%, rgb(238 65 55 / 0.04), transparent 55%);
 }
 
 .home-editorial-respalda__img {
@@ -260,13 +318,13 @@
     display: flex;
     flex-direction: column;
     gap: 0;
-    border-top: 1px solid var(--home-linea-sutil);
+    border-top: 1px solid var(--home-border);
 }
 
 @media (min-width: 1024px) {
     .home-editorial-beneficios {
         border-top: none;
-        border-left: 1px solid var(--home-linea-sutil);
+        border-left: 1px solid var(--home-border);
         padding-left: 1.75rem;
     }
 }
@@ -275,12 +333,12 @@
     display: flex;
     gap: 0.875rem;
     padding-block: 0.75rem;
-    border-bottom: 1px solid var(--home-linea-sutil);
+    border-bottom: 1px solid var(--home-border);
     transition: background-color var(--home-transicion);
 }
 
 .home-editorial-beneficio:hover {
-    background: rgb(255 255 255 / 0.015);
+    background: var(--home-hover);
 }
 
 .home-editorial-beneficio:last-child {
@@ -296,15 +354,14 @@
     justify-content: center;
     border-radius: 9999px;
     background: rgb(238 65 55 / 0.11);
-    color: var(--asb-acento, rgb(238 65 55));
+    color: var(--home-accent);
 }
 
 /* —— Actualidad —— */
 
 .home-editorial-actualidad {
-    background:
-        linear-gradient(180deg, var(--home-tono-2) 0%, var(--home-tono-1) 100%);
-    border-bottom: 1px solid var(--home-linea-sutil);
+    background: var(--home-bg-elevated);
+    border-bottom: 1px solid var(--home-border);
 }
 
 .home-editorial-actualidad__destacada {
@@ -312,7 +369,8 @@
 }
 
 .home-editorial-actualidad__destacada .relative {
-    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06);
+    box-shadow: var(--home-shadow);
+    outline: 1px solid var(--home-border);
 }
 
 .home-editorial-actualidad__img {
@@ -330,41 +388,50 @@
     background: linear-gradient(180deg, transparent 30%, rgb(238 65 55 / 0.05) 100%);
 }
 
+html:not(.dark) .home-editorial-actualidad__velo {
+    background: linear-gradient(180deg, transparent 38%, rgb(238 65 55 / 0.03) 100%);
+}
+
 .home-editorial-actualidad__overlay {
     background: linear-gradient(0deg, rgb(0 0 0 / 0.88) 0%, rgb(0 0 0 / 0.4) 48%, transparent 78%);
 }
 
+html:not(.dark) .home-editorial-actualidad__overlay {
+    background: linear-gradient(0deg, rgb(0 0 0 / 0.78) 0%, rgb(0 0 0 / 0.32) 50%, transparent 78%);
+}
+
 .home-editorial-actualidad__secundaria,
 .home-editorial-actualidad__oportunidad {
-    background: rgb(255 255 255 / 0.02);
-    border: 1px solid var(--home-linea-sutil);
+    background: var(--home-surface);
+    border: 1px solid var(--home-border);
     transition: border-color var(--home-transicion), background-color var(--home-transicion);
 }
 
 .home-editorial-actualidad__secundaria:hover,
 .home-editorial-actualidad__oportunidad:hover {
-    border-color: var(--home-linea-media);
-    background: rgb(255 255 255 / 0.035);
+    border-color: var(--home-border-media);
+    background: var(--home-bg-elevated);
 }
 
 .home-editorial-movimiento {
-    border-color: var(--home-linea-sutil);
+    border-color: var(--home-border);
 }
 
-/* —— Publicidad —— */
+/* —— Publicidad (banner fotográfico, también en claro) —— */
 
 .home-editorial-publicidad {
-    background: var(--home-tono-3);
-    border-top: 1px solid var(--home-linea-sutil);
+    background: var(--home-bg);
+    border-top: 1px solid var(--home-border);
 }
 
 .home-editorial-publicidad__banner {
-    border: 1px solid var(--home-linea-sutil);
+    border: 1px solid var(--home-border);
+    background: #080808;
     transition: border-color var(--home-transicion);
 }
 
 .home-editorial-publicidad__banner:hover {
-    border-color: var(--home-linea-media);
+    border-color: var(--home-border-media);
 }
 
 .home-editorial-publicidad__img {
@@ -382,17 +449,26 @@
     pointer-events: none;
 }
 
-/* —— Aliados — franja institucional compacta —— */
+.home-editorial-publicidad__fallback {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 28% 20%, rgb(238 65 55 / 0.2), transparent 42%),
+        linear-gradient(145deg, #131010 0%, #080808 100%);
+}
+
+/* —— Aliados — dos tratamientos para no confundirse con el fondo —— */
 
 .home-editorial-aliados__franja {
-    background: linear-gradient(180deg, rgb(252 252 252) 0%, rgb(255 255 255) 100%);
+    background: var(--home-surface-alta);
     color: rgb(23 23 23);
-    border-block: 1px solid rgb(0 0 0 / 0.07);
+    border-block: 1px solid rgb(23 17 15 / 0.1);
 }
 
 .dark .home-editorial-aliados__franja {
-    background: linear-gradient(180deg, rgb(248 248 248) 0%, rgb(255 255 255) 100%);
+    background: linear-gradient(180deg, #f4efe8 0%, #fbf8f4 100%);
     color: rgb(23 23 23);
+    border-block-color: rgb(0 0 0 / 0.08);
 }
 
 .home-editorial-aliados__cabecera {
@@ -409,7 +485,7 @@
     letter-spacing: 0.14em;
     line-height: 1.3;
     text-transform: uppercase;
-    color: rgb(115 115 115);
+    color: #4f4a46;
 }
 
 .home-editorial-aliados__logos {
@@ -428,14 +504,19 @@
 }
 
 @media (min-width: 1024px) {
-    .home-editorial-aliados__logos--institucionales {
-        grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
-        justify-content: space-between;
+    .home-editorial-aliados__logos--institucionales,
+    .home-editorial-aliados__logos--comerciales {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        align-items: flex-end;
+        gap: 1.25rem 2rem;
     }
 
-    .home-editorial-aliados__logos--comerciales {
-        grid-template-columns: repeat(auto-fill, minmax(5.75rem, 1fr));
-        gap: 1rem 1.75rem;
+    .home-editorial-aliados__logos--institucionales .home-editorial-aliados__item,
+    .home-editorial-aliados__logos--comerciales .home-editorial-aliados__item {
+        flex: 1 1 7.5rem;
+        max-width: 11rem;
     }
 }
 
@@ -508,10 +589,11 @@
     line-clamp: 2;
 }
 
-/* —— CTA —— */
+/* —— CTA (cierre fotográfico, nocturno en los dos temas) —— */
 
 .home-editorial-cta {
-    border-top: 1px solid var(--home-linea-sutil);
+    border-top: 1px solid var(--home-border);
+    background: #080808;
 }
 
 .home-editorial-cta .home-editorial-copy {
@@ -533,6 +615,18 @@
     background:
         linear-gradient(90deg, rgb(5 5 5 / 0.72) 0%, rgb(5 5 5 / 0.45) 45%, rgb(5 5 5 / 0.22) 100%),
         radial-gradient(circle at 50% 40%, rgb(238 65 55 / 0.14), transparent 50%);
+}
+
+.home-editorial-cta__fallback {
+    background:
+        radial-gradient(circle at 30% 20%, rgb(238 65 55 / 0.22), transparent 46%),
+        linear-gradient(145deg, #131010 0%, #080808 100%);
+}
+
+/* —— Pie de la portada: oscuro permanente, cierre institucional —— */
+
+.home-editorial-pie {
+    margin-top: 0;
 }
 
 /* —— Secciones: padding vertical más contenido —— */
