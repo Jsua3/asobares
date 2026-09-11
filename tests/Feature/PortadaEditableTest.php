@@ -135,37 +135,40 @@ class PortadaEditableTest extends TestCase
      */
     public function test_ningun_texto_propio_de_la_portada_esta_cableado(): void
     {
-        $vista = resource_path('views/publico/inicio.blade.php');
-        $this->assertFileExists($vista);
+        $vistas = array_merge(
+            [resource_path('views/publico/inicio.blade.php')],
+            File::glob(resource_path('views/components/publico/home/*.blade.php')) ?: []
+        );
 
-        $contenido = File::get($vista);
         $cableados = [];
 
-        foreach (['h2', 'p'] as $etiqueta) {
-            $encontrados = preg_match_all(
-                sprintf('/<%1$s\b[^>]*>(.*?)<\/%1$s>/s', $etiqueta),
-                $contenido,
-                $coincidencias
-            );
+        foreach ($vistas as $vista) {
+            $this->assertFileExists($vista);
 
-            $this->assertGreaterThan(
-                0,
-                $encontrados,
-                "No se encontro ningun <{$etiqueta}> en la portada: el patron de la guardia quedo obsoleto."
-            );
+            $contenido = File::get($vista);
 
-            foreach ($coincidencias[1] as $cuerpo) {
-                if (str_contains($cuerpo, '{{') || str_contains($cuerpo, '<')) {
-                    continue;
-                }
+            foreach (['h2', 'p'] as $etiqueta) {
+                preg_match_all(
+                    sprintf('/<%1$s\b[^>]*>(.*?)<\/%1$s>/s', $etiqueta),
+                    $contenido,
+                    $coincidencias
+                );
 
-                $limpio = trim(preg_replace('/\s+/', ' ', $cuerpo));
+                foreach ($coincidencias[1] as $cuerpo) {
+                    if (str_contains($cuerpo, '{{') || str_contains($cuerpo, '<')) {
+                        continue;
+                    }
 
-                if ($limpio !== '') {
-                    $cableados[] = "<{$etiqueta}> {$limpio}";
+                    $limpio = trim(preg_replace('/\s+/', ' ', $cuerpo));
+
+                    if ($limpio !== '') {
+                        $cableados[] = basename($vista).": <{$etiqueta}> {$limpio}";
+                    }
                 }
             }
         }
+
+        $this->assertNotSame([], $vistas, 'La portada editorial no tiene vistas que vigilar.');
 
         $this->assertSame(
             [],

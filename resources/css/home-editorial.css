@@ -1,0 +1,98 @@
+@import 'tailwindcss';
+
+@source '../views/components/publico/home/**/*.blade.php';
+@source '../views/publico/inicio.blade.php';
+
+/*
+ * Estilos exclusivos de la portada editorial (HOME-01).
+ * Todo vive bajo `.home-editorial` para no alcanzar páginas internas.
+ */
+
+.home-editorial {
+    --home-editorial-respiro: clamp(3rem, 6vw, 5rem);
+}
+
+.home-editorial .home-editorial-kicker {
+    font-family: var(--font-display, inherit);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    color: var(--asb-apagado, rgb(163 163 163));
+}
+
+.home-editorial .home-editorial-kicker--claro {
+    color: rgb(82 82 82);
+}
+
+.dark .home-editorial .home-editorial-kicker--claro {
+    color: rgb(212 212 212);
+}
+
+.home-editorial-cifras,
+.home-editorial-cifras-gremio {
+    background: linear-gradient(180deg, var(--asb-fondo) 0%, var(--asb-superficie) 100%);
+}
+
+.home-editorial-cifra {
+    padding-top: 0.25rem;
+}
+
+.home-editorial-descubre .home-editorial-establecimiento {
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.04);
+}
+
+.home-editorial-beneficio {
+    min-height: 100%;
+}
+
+.home-editorial-actualidad .home-editorial-acceso:focus-visible {
+    outline: 2px solid var(--asb-marca-500, rgb(238 65 55));
+    outline-offset: 2px;
+}
+
+.home-editorial-aliados__franja {
+    background: linear-gradient(180deg, rgb(250 250 250) 0%, rgb(255 255 255) 55%, rgb(245 245 245) 100%);
+    color: rgb(23 23 23);
+}
+
+.dark .home-editorial-aliados__franja {
+    background: linear-gradient(180deg, rgb(245 245 245) 0%, rgb(255 255 255) 40%, rgb(250 250 250) 100%);
+    color: rgb(23 23 23);
+}
+
+.home-editorial-publicidad__tarjeta {
+    max-width: 56rem;
+    margin-inline: auto;
+}
+
+.home-editorial-publicidad__tarjeta .grid {
+    min-height: 0;
+}
+
+.home-editorial-publicidad__tarjeta img {
+    max-height: 12rem;
+}
+
+@media (min-width: 640px) {
+    .home-editorial-publicidad__tarjeta img {
+        max-height: none;
+    }
+}
+
+.home-editorial-cta__velo {
+    background:
+        linear-gradient(180deg, rgb(0 0 0 / 0.72) 0%, rgb(0 0 0 / 0.84) 100%),
+        radial-gradient(circle at 20% 20%, rgb(238 65 55 / 0.18), transparent 42%);
+}
+
+.home-editorial-hero.hero-portada {
+    min-height: clamp(28rem, 78vh, 44rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-editorial .imagen-viva {
+        transform: none !important;
+    }
+}

@@ -54,27 +54,32 @@ class EscenaPublicaTest extends TestCase
 
     public function test_la_portada_usa_video_de_fondo_y_el_revelado(): void
     {
-        $vista = File::get(resource_path('views/publico/inicio.blade.php'));
+        $inicio = File::get(resource_path('views/publico/inicio.blade.php'));
+        $hero = File::get(resource_path('views/components/publico/home/hero.blade.php'));
 
-        $this->assertStringContainsString('data-revelar', $vista);
-        $this->assertStringContainsString('variante="editorial"', $vista);
-        $this->assertStringContainsString('variante="horizontal"', $vista);
-        $this->assertStringContainsString('x-slot:medio', $vista);
-        $this->assertStringContainsString('hero-video-fondo', $vista);
-        $this->assertStringContainsString('portada', $vista);
-        $this->assertStringContainsString('atmosfera', $vista);
+        $this->assertStringContainsString('home-editorial', $inicio);
+        $this->assertStringContainsString('home-editorial.css', $inicio);
+        $this->assertStringContainsString(
+            'data-revelar',
+            File::get(resource_path('views/components/publico/home/descubre.blade.php')),
+            'El revelado sigue declarado en las secciones de la portada editorial.'
+        );
+        $this->assertStringContainsString('x-slot:medio', $hero);
+        $this->assertStringContainsString('hero-video-fondo', $hero);
+        $this->assertStringContainsString('portada', $hero);
+        $this->assertStringContainsString('atmosfera', $hero);
 
         // Sobre el video oscuro, lo que era para fondo claro desaparecía: el
         // «Afíliate» de contorno (tinta sobre negro) y la píldora de
         // afiliados (rojo oscuro sobre negro). Roturas: volver a
         // `variante="contorno"` en el hero; devolver `text-acento-fuerte` a la píldora.
-        $this->assertStringContainsString('variante="contorno-claro" :href="route(\'afiliate\')"', $vista);
-        $this->assertStringContainsString('rounded-full border px-3 py-1 text-xs font-medium etiqueta-clara', $vista);
+        $this->assertStringContainsString('variante="contorno-claro" :href="route(\'afiliate\')"', $hero);
+        $this->assertStringContainsString('rounded-full border px-3 py-1 text-xs font-medium etiqueta-clara', $hero);
         // El pie del video: su filete blanco también va en CSS, no en `border-white`.
-        $this->assertStringContainsString('border-l pl-4 text-sm leading-relaxed text-white/72 pie-de-video', $vista);
+        $this->assertStringContainsString('border-l pl-4 text-sm leading-relaxed text-white/72 pie-de-video', $hero);
         $this->assertMatchesRegularExpression('/\.hero-portada \.pie-de-video \{\s*border-color: rgb\(255 255 255 \/ 0\.3\);/', File::get(resource_path('css/app.css')));
         $this->assertMatchesRegularExpression('/\.etiqueta-clara \{\s*color: white;\s*border-color: rgb\(255 255 255 \/ 0\.25\);\s*background-color: rgb\(255 255 255 \/ 0\.1\);/', File::get(resource_path('css/app.css')), 'el portador de la etiqueta clara vive en app.css');
-        $this->assertStringNotContainsString('text-acento-fuerte', substr($vista, 0, strpos($vista, '</x-publico.hero>')), 'nada de tinta de fondo claro dentro del hero oscuro');
+        $this->assertStringNotContainsString('text-acento-fuerte', substr($hero, 0, strpos($hero, '</x-publico.hero>')), 'nada de tinta de fondo claro dentro del hero oscuro');
     }
 
     public function test_los_portadores_de_escena_existen_en_el_css_publico(): void
