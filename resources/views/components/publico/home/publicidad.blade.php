@@ -9,13 +9,13 @@
 @endphp
 
 <section class="home-editorial-publicidad revelar" data-revelar aria-label="Publicidad">
-    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         @if ($href)
             <a href="{{ $href }}" target="_blank" rel="noopener noreferrer sponsored" class="home-editorial-publicidad__banner group block overflow-hidden rounded-xl">
         @else
             <div class="home-editorial-publicidad__banner overflow-hidden rounded-xl">
         @endif
-            <div class="relative min-h-[10rem] sm:min-h-[12rem]">
+            <div class="relative min-h-[9rem] sm:min-h-[10.5rem]">
                 <img src="{{ $imagen }}"
                      alt="Publicidad de {{ $nombre }}"
                      loading="lazy"

@@ -16,15 +16,15 @@
         <div class="home-editorial-cta__velo absolute inset-0"></div>
     </div>
 
-    <div class="relative mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 sm:py-20">
-        <p class="home-editorial-eyebrow text-white/65">{{ ajuste('cta_final_titulo') }}</p>
-        <h2 id="cta-afiliacion" class="mt-3 font-display text-3xl font-bold text-balance text-white sm:text-4xl lg:text-[2.75rem] lg:leading-tight">
+    <div class="relative mx-auto max-w-2xl px-4 py-14 text-center sm:px-6 sm:py-16">
+        <p class="home-editorial-eyebrow text-white/70">{{ ajuste('cta_final_titulo') }}</p>
+        <h2 id="cta-afiliacion" class="mt-3 font-display text-3xl font-bold text-balance text-white sm:text-4xl">
             {{ ajuste('cta_editorial_frase', 'La noche es más fuerte cuando tiene voz.') }}
         </h2>
-        <p class="mx-auto mt-4 max-w-xl text-sm text-white/75 text-pretty">
-            {{ Str::limit(strip_tags((string) ajuste('cta_final_texto')), 120) }}
+        <p class="home-editorial-copy mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/82 sm:text-base">
+            {{ ajuste('cta_final_texto') }}
         </p>
-        <x-publico.boton :href="route('afiliate')" class="mt-7">
+        <x-publico.boton :href="route('afiliate')" class="mt-6">
             {{ ajuste('cta_final_boton', 'Quiero afiliarme') }}
         </x-publico.boton>
     </div>

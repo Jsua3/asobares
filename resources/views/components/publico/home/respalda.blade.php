@@ -12,7 +12,7 @@
 
 @if ($beneficiosVisibles->isNotEmpty())
     <section class="home-editorial-respalda revelar" data-revelar aria-labelledby="beneficios">
-        <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-start gap-8 lg:grid-cols-12 lg:gap-10">
                 <div class="lg:col-span-5">
                     <p class="home-editorial-eyebrow">{{ ajuste('portada_beneficios_titulo') }}</p>
@@ -47,7 +47,7 @@
                             <div class="min-w-0 flex-1">
                                 <h3 class="font-display text-sm font-semibold leading-snug sm:text-base">{{ $beneficio->titulo }}</h3>
                                 <x-publico.sello-de-alcance :beneficio="$beneficio" />
-                                <p class="mt-1 line-clamp-1 text-sm text-tenue">{{ $beneficio->descripcion }}</p>
+                                <p class="home-editorial-copy mt-1 text-sm leading-relaxed text-tenue">{{ $beneficio->descripcion }}</p>
                             </div>
                         </li>
                     @endforeach

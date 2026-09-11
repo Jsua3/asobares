@@ -8,7 +8,7 @@
 
 @if ($destacadosVisibles->isNotEmpty())
     <section class="home-editorial-descubre revelar" data-revelar aria-labelledby="destacados">
-        <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="flex flex-wrap items-end justify-between gap-4">
                 <div class="max-w-lg">
                     <p class="home-editorial-eyebrow">{{ ajuste('portada_destacados_titulo') }}</p>
@@ -37,7 +37,9 @@
                                          height="360"
                                          class="imagen-viva home-editorial-establecimiento__img h-full w-full object-cover">
                                 @else
-                                    <div class="h-full w-full bg-[linear-gradient(145deg,#111111,#080808)]"></div>
+                                    <div class="home-editorial-establecimiento__fallback h-full w-full" aria-hidden="true">
+                                        <span class="home-editorial-establecimiento__monograma">A</span>
+                                    </div>
                                 @endif
                                 <div class="home-editorial-establecimiento__overlay absolute inset-x-0 bottom-0 p-4 pt-12">
                                     @if ($asociado->categoria)

@@ -4,20 +4,31 @@
 @source '../views/publico/inicio.blade.php';
 
 /*
- * HOME-02 — Portada editorial nocturna (scoped).
- * Ritmo: fotografía → datos → fotografía → beneficios → actualidad → publicidad → franja clara → CTA.
+ * HOME-03 — Pulido editorial (scoped).
+ * Ritmo: capas oscuras alternas → franja clara aliados → CTA fotográfico.
  */
 
 .home-editorial {
     --home-tono-0: #080808;
-    --home-tono-1: #0d0d0d;
-    --home-tono-2: #111111;
-    --home-tono-3: #161616;
-    --home-linea-sutil: rgb(255 255 255 / 0.08);
-    --home-transicion: 220ms ease;
+    --home-tono-1: #0b0b0b;
+    --home-tono-2: #101010;
+    --home-tono-3: #131010;
+    --home-tono-4: #161616;
+    --home-linea-sutil: rgb(255 255 255 / 0.07);
+    --home-linea-media: rgb(255 255 255 / 0.1);
+    --home-transicion: 200ms ease;
+    --home-zoom: 1.02;
 }
 
-/* —— Tipografía editorial —— */
+/* —— Capítulos: separación sutil entre bloques —— */
+
+.home-editorial > section + section,
+.home-editorial > section + .home-editorial-cifras-gremio,
+.home-editorial .home-editorial-cifras-gremio + section {
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.035);
+}
+
+/* —— Tipografía —— */
 
 .home-editorial .home-editorial-eyebrow {
     font-family: var(--font-display, inherit);
@@ -42,33 +53,43 @@
     color: var(--asb-fuerte, white);
 }
 
-.home-editorial .home-editorial-enlace:hover svg {
-    transform: translateX(3px);
+.home-editorial .home-editorial-copy {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    line-height: 1.45;
+    overflow-wrap: break-word;
 }
 
 .home-editorial .home-editorial-enlace svg {
     transition: transform var(--home-transicion);
 }
 
-/* —— Hero cinematográfico —— */
+.home-editorial .home-editorial-enlace:hover svg {
+    transform: translateX(4px);
+}
+
+/* —— Hero (ajustes mínimos) —— */
 
 .home-editorial .hero-portada {
-    min-height: clamp(30rem, 88svh, 46rem);
+    min-height: clamp(28rem, 86svh, 44rem);
     background-color: var(--home-tono-0);
 }
 
 .home-editorial .hero-portada > div {
     min-height: inherit;
-    padding-top: clamp(5rem, 12vh, 7rem);
-    padding-bottom: clamp(3rem, 8vh, 5rem);
+    padding-top: clamp(5rem, 11vh, 6.5rem);
+    padding-bottom: clamp(2.75rem, 7vh, 4.5rem);
 }
 
 .home-editorial .hero-portada .hero-medio::after {
-    opacity: 0.52;
+    opacity: 0.48;
     background:
-        linear-gradient(90deg, rgb(8 8 8 / 0.78) 0%, rgb(8 8 8 / 0.42) 44%, rgb(8 8 8 / 0.18) 100%),
-        linear-gradient(0deg, rgb(8 8 8 / 0.55) 0%, transparent 38%, rgb(8 8 8 / 0.25) 100%),
-        radial-gradient(40rem circle at 18% 20%, rgb(238 65 55 / 0.14), transparent 58%);
+        linear-gradient(90deg, rgb(8 8 8 / 0.72) 0%, rgb(8 8 8 / 0.38) 46%, rgb(8 8 8 / 0.14) 100%),
+        linear-gradient(0deg, rgb(8 8 8 / 0.5) 0%, transparent 40%, rgb(8 8 8 / 0.2) 100%),
+        radial-gradient(38rem circle at 20% 22%, rgb(238 65 55 / 0.12), transparent 56%);
 }
 
 .home-editorial .hero-portada h1 {
@@ -79,19 +100,16 @@
     text-transform: uppercase;
 }
 
-.home-editorial .home-editorial-lead {
-    font-weight: 400;
-}
-
 .home-editorial .home-editorial-video-nota {
-    border-color: rgb(255 255 255 / 0.18);
+    border-color: rgb(255 255 255 / 0.15);
     font-size: 0.75rem;
+    opacity: 0.9;
 }
 
-/* —— Cifras — banda compacta —— */
+/* —— Cifras —— */
 
 .home-editorial-cifras {
-    background: var(--home-tono-1);
+    background: linear-gradient(180deg, var(--home-tono-1) 0%, var(--home-tono-2) 100%);
     border-block: 1px solid var(--home-linea-sutil);
 }
 
@@ -131,8 +149,8 @@
     width: 1px;
     flex-shrink: 0;
     align-self: stretch;
-    background: linear-gradient(180deg, transparent, rgb(255 255 255 / 0.12), transparent);
-    min-height: 3rem;
+    background: linear-gradient(180deg, transparent, rgb(255 255 255 / 0.1), transparent);
+    min-height: 2.75rem;
 }
 
 .home-editorial-cifra__icono {
@@ -148,29 +166,49 @@
 }
 
 .home-editorial-cifra__detalle {
-    max-width: 12rem;
+    max-width: 13rem;
+    line-height: 1.35;
 }
 
-/* —— Descubre — fotografía protagonista —— */
+/* —— Descubre —— */
 
 .home-editorial-descubre {
-    background: var(--home-tono-2);
+    background:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgb(238 65 55 / 0.04), transparent 55%),
+        var(--home-tono-3);
 }
 
 .home-editorial-establecimiento__foto {
     background: var(--home-tono-0);
 }
 
+.home-editorial-establecimiento__fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(circle at 30% 20%, rgb(238 65 55 / 0.18), transparent 42%),
+        linear-gradient(145deg, #131010 0%, #080808 100%);
+}
+
+.home-editorial-establecimiento__monograma {
+    font-family: var(--font-display, inherit);
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: rgb(255 255 255 / 0.12);
+}
+
 .home-editorial-establecimiento__img {
-    transition: transform 520ms ease;
+    transition: transform 280ms ease;
 }
 
 .home-editorial-establecimiento:hover .home-editorial-establecimiento__img {
-    transform: scale(1.04);
+    transform: scale(var(--home-zoom));
 }
 
 .home-editorial-establecimiento__overlay {
-    background: linear-gradient(0deg, rgb(0 0 0 / 0.82) 0%, rgb(0 0 0 / 0.35) 42%, transparent 100%);
+    background: linear-gradient(0deg, rgb(0 0 0 / 0.78) 0%, rgb(0 0 0 / 0.32) 45%, transparent 100%);
 }
 
 .home-editorial-establecimiento__flecha {
@@ -178,14 +216,14 @@
 }
 
 .home-editorial-establecimiento:hover .home-editorial-establecimiento__flecha {
-    background-color: rgb(238 65 55 / 0.85);
-    transform: translateX(2px);
+    background-color: rgb(238 65 55 / 0.88);
+    transform: translateX(3px);
 }
 
-/* —— Respalda — lista compacta —— */
+/* —— Respalda —— */
 
 .home-editorial-respalda {
-    background: linear-gradient(180deg, var(--home-tono-0) 0%, var(--home-tono-1) 100%);
+    background: linear-gradient(180deg, var(--home-tono-0) 0%, var(--home-tono-1) 55%, var(--home-tono-2) 100%);
     border-block: 1px solid var(--home-linea-sutil);
 }
 
@@ -193,16 +231,16 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(0deg, rgb(8 8 8 / 0.35), transparent 55%);
+    background: linear-gradient(0deg, rgb(8 8 8 / 0.32), transparent 55%);
     pointer-events: none;
 }
 
 .home-editorial-respalda__img {
-    transition: transform 520ms ease;
+    transition: transform 280ms ease;
 }
 
 .home-editorial-respalda:hover .home-editorial-respalda__img {
-    transform: scale(1.03);
+    transform: scale(var(--home-zoom));
 }
 
 .home-editorial-beneficios {
@@ -223,8 +261,13 @@
 .home-editorial-beneficio {
     display: flex;
     gap: 0.875rem;
-    padding-block: 0.875rem;
+    padding-block: 0.75rem;
     border-bottom: 1px solid var(--home-linea-sutil);
+    transition: background-color var(--home-transicion);
+}
+
+.home-editorial-beneficio:hover {
+    background: rgb(255 255 255 / 0.015);
 }
 
 .home-editorial-beneficio:last-child {
@@ -233,20 +276,21 @@
 
 .home-editorial-beneficio__icono {
     display: inline-flex;
-    height: 2rem;
-    width: 2rem;
+    height: 2.125rem;
+    width: 2.125rem;
     shrink: 0;
     align-items: center;
     justify-content: center;
     border-radius: 9999px;
-    background: rgb(238 65 55 / 0.1);
+    background: rgb(238 65 55 / 0.11);
     color: var(--asb-acento, rgb(238 65 55));
 }
 
-/* —— Actualidad — jerarquía editorial —— */
+/* —— Actualidad —— */
 
 .home-editorial-actualidad {
-    background: var(--home-tono-1);
+    background:
+        linear-gradient(180deg, var(--home-tono-2) 0%, var(--home-tono-1) 100%);
     border-bottom: 1px solid var(--home-linea-sutil);
 }
 
@@ -254,8 +298,12 @@
     min-height: 100%;
 }
 
+.home-editorial-actualidad__destacada .relative {
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+
 .home-editorial-actualidad__img {
-    transition: transform 520ms ease;
+    transition: transform 280ms ease;
 }
 
 .home-editorial-actualidad__destacada:hover .home-editorial-actualidad__img {
@@ -263,81 +311,194 @@
 }
 
 .home-editorial-actualidad__overlay {
-    background: linear-gradient(0deg, rgb(0 0 0 / 0.88) 0%, rgb(0 0 0 / 0.25) 50%, transparent 100%);
+    background: linear-gradient(0deg, rgb(0 0 0 / 0.9) 0%, rgb(0 0 0 / 0.35) 55%, transparent 100%);
+}
+
+.home-editorial-actualidad__fallback {
+    background:
+        radial-gradient(circle at 70% 20%, rgb(238 65 55 / 0.14), transparent 45%),
+        linear-gradient(135deg, #131010, #0b0b0b);
 }
 
 .home-editorial-actualidad__secundaria,
 .home-editorial-actualidad__oportunidad {
-    background: var(--home-tono-3);
+    background: rgb(255 255 255 / 0.02);
     border: 1px solid var(--home-linea-sutil);
-    transition: border-color var(--home-transicion);
+    transition: border-color var(--home-transicion), background-color var(--home-transicion);
 }
 
 .home-editorial-actualidad__secundaria:hover,
 .home-editorial-actualidad__oportunidad:hover {
-    border-color: rgb(255 255 255 / 0.16);
+    border-color: var(--home-linea-media);
+    background: rgb(255 255 255 / 0.035);
 }
 
-/* —— Publicidad — banner editorial —— */
+.home-editorial-actualidad__pie {
+    border-color: var(--home-linea-sutil);
+}
+
+/* —— Publicidad —— */
 
 .home-editorial-publicidad {
-    background: var(--home-tono-2);
+    background: var(--home-tono-3);
+    border-top: 1px solid var(--home-linea-sutil);
 }
 
 .home-editorial-publicidad__banner {
     border: 1px solid var(--home-linea-sutil);
-    transition: border-color var(--home-transicion), transform var(--home-transicion);
+    transition: border-color var(--home-transicion);
 }
 
 .home-editorial-publicidad__banner:hover {
-    border-color: rgb(255 255 255 / 0.18);
+    border-color: var(--home-linea-media);
 }
 
 .home-editorial-publicidad__img {
-    transition: transform 520ms ease;
+    transition: transform 280ms ease;
 }
 
 .home-editorial-publicidad__banner:hover .home-editorial-publicidad__img {
-    transform: scale(1.02);
+    transform: scale(var(--home-zoom));
 }
 
 .home-editorial-publicidad__overlay {
     background:
-        linear-gradient(90deg, rgb(8 8 8 / 0.82) 0%, rgb(8 8 8 / 0.45) 55%, rgb(8 8 8 / 0.2) 100%),
-        linear-gradient(0deg, rgb(8 8 8 / 0.55), transparent 50%);
+        linear-gradient(90deg, rgb(8 8 8 / 0.78) 0%, rgb(8 8 8 / 0.42) 58%, rgb(8 8 8 / 0.18) 100%),
+        linear-gradient(0deg, rgb(8 8 8 / 0.45), transparent 55%);
 }
 
-/* —— Aliados — franja clara compacta —— */
+/* —— Aliados — franja institucional compacta —— */
 
 .home-editorial-aliados__franja {
-    background: linear-gradient(180deg, rgb(250 250 250) 0%, rgb(255 255 255) 100%);
+    background: linear-gradient(180deg, rgb(252 252 252) 0%, rgb(255 255 255) 100%);
     color: rgb(23 23 23);
-    border-block: 1px solid rgb(0 0 0 / 0.06);
+    border-block: 1px solid rgb(0 0 0 / 0.07);
 }
 
 .dark .home-editorial-aliados__franja {
-    background: linear-gradient(180deg, rgb(245 245 245) 0%, rgb(252 252 252) 100%);
+    background: linear-gradient(180deg, rgb(248 248 248) 0%, rgb(255 255 255) 100%);
     color: rgb(23 23 23);
 }
 
-/* —— CTA cierre —— */
+.home-editorial-aliados__cabecera {
+    padding-bottom: 0.125rem;
+}
+
+.home-editorial-aliados__cta {
+    white-space: nowrap;
+}
+
+.home-editorial-aliados__etiqueta {
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    color: rgb(115 115 115);
+}
+
+.home-editorial-aliados__logos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .home-editorial-aliados__logos--institucionales {
+        justify-content: space-between;
+    }
+
+    .home-editorial-aliados__logos--comerciales {
+        gap: 1.25rem 2rem;
+    }
+}
+
+.home-editorial-aliados__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+    min-width: 0;
+    max-width: 9.5rem;
+    text-align: center;
+}
+
+.home-editorial-aliados__item--comercial {
+    max-width: 7.5rem;
+}
+
+.home-editorial-aliados__logo {
+    height: 3rem;
+    width: auto;
+    max-width: 9rem;
+    object-fit: contain;
+}
+
+.home-editorial-aliados__logo--comercial {
+    height: 2.5rem;
+    max-width: 7rem;
+}
+
+@media (min-width: 640px) {
+    .home-editorial-aliados__logo {
+        height: 3.5rem;
+        max-width: 10rem;
+    }
+
+    .home-editorial-aliados__logo--comercial {
+        height: 2.75rem;
+        max-width: 7.5rem;
+    }
+}
+
+.home-editorial-aliados__nombre {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1.25;
+    color: rgb(64 64 64);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+}
+
+/* —— CTA —— */
 
 .home-editorial-cta {
     border-top: 1px solid var(--home-linea-sutil);
 }
 
+.home-editorial-cta .home-editorial-copy {
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    display: block;
+    overflow: visible;
+}
+
 .home-editorial-cta__foto {
-    transition: transform 520ms ease;
+    transition: transform 280ms ease;
 }
 
 .home-editorial-cta:hover .home-editorial-cta__foto {
-    transform: scale(1.02);
+    transform: scale(var(--home-zoom));
 }
 
 .home-editorial-cta__velo {
     background:
-        linear-gradient(180deg, rgb(0 0 0 / 0.55) 0%, rgb(0 0 0 / 0.78) 100%),
-        radial-gradient(circle at 24% 18%, rgb(238 65 55 / 0.22), transparent 46%);
+        linear-gradient(180deg, rgb(0 0 0 / 0.5) 0%, rgb(0 0 0 / 0.74) 100%),
+        radial-gradient(circle at 50% 30%, rgb(238 65 55 / 0.16), transparent 48%);
+}
+
+/* —— Secciones: padding vertical más contenido —— */
+
+.home-editorial-cifras > div,
+.home-editorial-descubre > div,
+.home-editorial-respalda > div,
+.home-editorial-actualidad > div,
+.home-editorial-publicidad > div {
+    padding-block: clamp(2rem, 4vw, 2.5rem);
 }
 
 /* —— Accesibilidad / movimiento reducido —— */
@@ -345,8 +506,21 @@
 @media (prefers-reduced-motion: reduce) {
     .home-editorial .imagen-viva,
     .home-editorial .home-editorial-enlace svg,
-    .home-editorial-establecimiento__flecha {
+    .home-editorial-establecimiento__flecha,
+    .home-editorial-establecimiento__img,
+    .home-editorial-respalda__img,
+    .home-editorial-actualidad__img,
+    .home-editorial-publicidad__img,
+    .home-editorial-cta__foto {
         transition: none !important;
+        transform: none !important;
+    }
+
+    .home-editorial-establecimiento:hover .home-editorial-establecimiento__img,
+    .home-editorial-respalda:hover .home-editorial-respalda__img,
+    .home-editorial-actualidad__destacada:hover .home-editorial-actualidad__img,
+    .home-editorial-publicidad__banner:hover .home-editorial-publicidad__img,
+    .home-editorial-cta:hover .home-editorial-cta__foto {
         transform: none !important;
     }
 }

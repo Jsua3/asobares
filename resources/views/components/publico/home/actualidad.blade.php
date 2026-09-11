@@ -14,7 +14,7 @@
 @endphp
 
 <section class="home-editorial-actualidad revelar" data-revelar aria-labelledby="actualidad">
-    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="max-w-2xl">
             <p class="home-editorial-eyebrow">{{ ajuste('portada_eventos_titulo') }}</p>
             <h2 id="actualidad" class="home-editorial-titulo mt-2 text-balance">
@@ -26,7 +26,7 @@
             @if ($eventoPrincipal)
                 <article class="home-editorial-actualidad__destacada lg:col-span-7">
                     <a href="{{ route('eventos.show', $eventoPrincipal) }}" class="group tarjeta-pulsable block h-full">
-                        <div class="relative h-full min-h-[16rem] overflow-hidden rounded-xl sm:min-h-[18rem]">
+                        <div class="relative h-full min-h-[17rem] overflow-hidden rounded-xl sm:min-h-[20rem] lg:min-h-[22rem]">
                             @if ($eventoPrincipal->imagen)
                                 <img src="{{ Storage::disk('public')->url($eventoPrincipal->imagen) }}"
                                      alt=""
@@ -36,7 +36,9 @@
                                      height="520"
                                      class="imagen-viva home-editorial-actualidad__img h-full w-full object-cover">
                             @else
-                                <div class="h-full w-full bg-[linear-gradient(135deg,#111111,#0d0d0d)]"></div>
+                                <div class="home-editorial-actualidad__fallback flex h-full min-h-[inherit] w-full items-center justify-center">
+                                    <span class="font-display text-4xl font-bold text-white/10">ASOBARES</span>
+                                </div>
                             @endif
                             <div class="home-editorial-actualidad__overlay absolute inset-x-0 bottom-0 p-5 sm:p-6">
                                 <div class="flex flex-wrap items-center gap-2 text-xs">
@@ -46,12 +48,12 @@
                                     <span class="text-white/75">{{ $eventoPrincipal->fecha_inicio->translatedFormat('d M Y') }}</span>
                                 </div>
                                 <h3 class="mt-3 font-display text-xl font-semibold text-white sm:text-2xl">{{ $eventoPrincipal->titulo }}</h3>
-                                <p class="mt-2 line-clamp-2 text-sm text-white/75">
+                                <p class="mt-2 text-sm text-white/80">
                                     {{ $eventoPrincipal->esGratuito() ? 'Entrada libre' : pesos($eventoPrincipal->precio) }}
-                                    @if ($eventoPrincipal->lugar)
-                                        · {{ Str::limit($eventoPrincipal->lugar, 48) }}
-                                    @endif
                                 </p>
+                                @if ($eventoPrincipal->lugar)
+                                    <p class="mt-1 text-sm text-white/70">{{ $eventoPrincipal->lugar }}</p>
+                                @endif
                             </div>
                         </div>
                     </a>
@@ -73,7 +75,7 @@
                             'bg-amber-500/15 text-aviso' => $iniciativaPrincipal->estado_iniciativa === \App\Enums\EstadoIniciativa::Escalando,
                             'border border-linea-fuerte text-apagado' => $iniciativaPrincipal->estado_iniciativa === \App\Enums\EstadoIniciativa::Formulacion,
                         ])>{{ $iniciativaPrincipal->estado_iniciativa->getLabel() }}</span>
-                        <p class="mt-3 line-clamp-2 text-sm text-tenue">{{ $iniciativaPrincipal->resumen }}</p>
+                        <p class="home-editorial-copy mt-3 text-sm leading-relaxed text-tenue">{{ $iniciativaPrincipal->resumen }}</p>
                         <a href="{{ route('quienes-somos') }}#iniciativas"
                            class="home-editorial-enlace enlace-accion mt-4 inline-flex text-sm font-medium text-acento hover:text-acento-fuerte">
                             {{ ajuste('iniciativas_titulo') }}&nbsp;<x-publico.flecha />
@@ -95,7 +97,7 @@
                     <a href="{{ route('empleo.index') }}" class="group tarjeta-pulsable flex h-full flex-col justify-between p-5">
                         <div>
                             <p class="home-editorial-eyebrow">{{ ajuste('portada_empleo_titulo') }}</p>
-                            <p class="mt-2 line-clamp-2 text-sm text-tenue">{{ ajuste('portada_empleo_texto') }}</p>
+                            <p class="home-editorial-copy mt-2 text-sm leading-relaxed text-tenue">{{ ajuste('portada_empleo_texto') }}</p>
                         </div>
                         <span class="home-editorial-enlace enlace-accion mt-4 inline-flex text-sm font-medium text-acento group-hover:text-acento-fuerte">
                             Ver vacantes&nbsp;<x-publico.flecha />
