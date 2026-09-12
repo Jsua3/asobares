@@ -2530,3 +2530,54 @@ Con estos van **tres defectos fabricados por el entorno en un solo día**: el co
 Los tres arreglos están desplegados y comprobados contra el CSS servido. Lo que sigue pendiente en producción no depende de ninguna línea: **el sembrador**. Sin él, Afiliaciones y Publicidad devuelven «Forbidden» a todo el mundo, el presidente sigue con los apellidos al revés y el título de la portada sigue siendo la frase que inventó este equipo.
 
 Y una deuda de coordinación que ya pesa: **Ingrid no sabe que se desplegó lo que ella estaba revisando.** Ancló su revisión a un commit, la rama se movió dos veces, propuso integrar tres commits que llevaban horas integrados, y dos de los cinco hallazgos que le describí no eran lo que le conté.
+
+---
+
+## §54 — El P0 de permisos, y la prueba que solo cerraba un dedo (10 y 11 de septiembre de 2026)
+
+Ingrid repartió el cierre y redujo nuestro alcance: nada de módulos nuevos, Aliados y la retención se los queda ella. De nuestro lado quedaban tres cosas. Las tres están hechas, y dos de ellas enseñan algo que conviene no volver a aprender.
+
+### 54.1 El sembrador que sí había que correr, y por qué no bastaba con correrlo
+
+Afiliaciones y Publicidad llevaban desde el despliegue del 10 devolviendo «Forbidden» a todo el mundo, dirección incluida. La causa estaba descrita desde el día anterior —ocho permisos que solo nacen en `RolYPermisoSeeder`, que no corre en el despliegue— pero el arreglo tenía un filo que la descripción no mencionaba: **`RolYPermisoSeeder` hace `syncPermissions`, y `syncPermissions` revoca todo lo que no esté en su lista.** Correrlo a ciegas en producción podía quitarle permisos a la secretaría sin que nadie se enterara hasta que intentara guardar algo.
+
+Así que se midió primero. `php artisan permission:show` contra producción dio la foto de antes; el sembrador corrido en la base local dio la de después —la del sembrador de verdad, no una copia de su lógica escrita a mano, que es la diferencia entre comprobar y suponer—; y un diff rol por rol dio el veredicto:
+
+```
+tabla permissions     80 → 88
+creados               8     borrados   0
+super_admin           80 → 88   pierde 0
+subadmin              47 → 52   pierde 0
+asociado               0 →  0   pierde 0
+desvío contra el código:  ninguno
+```
+
+Estrictamente aditivo. Y ayuda una propiedad del panel que no se había nombrado nunca: **solo sabe asignar roles, no permisos sueltos**, así que no existía ningún permiso concedido a mano que el `sync` pudiera borrar. Con eso delante, el comando —`--force`, que en producción es obligatorio porque `db:seed` aborta sin él— se ejecutó en un segundo.
+
+La comprobación no se hizo sobre la tabla sino sobre **la puerta**: `SolicitudAfiliacionPolicy::viewAny()` y `PublicidadPolicy::viewAny()` contra el `super_admin` que existe de verdad allí. Los dos `true`. Mirar la tabla habría probado que las filas están; mirar la política prueba que la pantalla abre.
+
+**Lo que hay que guardar de aquí, porque va a volver:** el `deployCommand` del entorno es `php artisan migrate --force` **y nada más**. Un permiso nuevo no llega a producción por desplegar. Cada módulo que traiga permisos trae este comando con él, o nace en 403.
+
+### 54.2 La caché que no hacía falta limpiar, y el caso en que sí haría falta
+
+Ingrid dejó `permission:cache-reset` como paso condicional. No hizo falta, pero el motivo importa más que el hecho: **`cache.default` es `database`**, o sea caché compartida entre contenedores, y el sembrador la olvida al entrar y al salir. Si hubiera sido caché de archivo, el reset habría arreglado **solo el contenedor que lo ejecuta** y los demás habrían seguido sirviendo 403 hasta que expirara el plazo de Spatie, que por omisión son 24 horas. Un «no hizo falta» sin esa frase detrás es una moneda al aire que salió bien.
+
+### 54.3 Dos paredes del ejecutor remoto, las dos de comillas
+
+`cloud command:run` llega al servidor por `cloud.bat` → `cmd.exe`, y por ese camino **una comilla doble dentro del `--cmd` rompe la tokenización**: el argumento se parte y el CLI responde «Too many arguments». Las comillas simples sí pasan. Consecuencia práctica: el PHP que se ejecute por ahí **no puede llevar ni una comilla doble ni una simple propia**, porque las simples ya son del nivel del shell. La salida es escribirlo **sin literales de cadena**: constantes de clase en vez de texto (`User::ROL_SUPER_ADMIN`) y objetos de política en vez de nombres de permiso (`app(PublicidadPolicy::class)->viewAny(...)`). Sale más corto y además comprueba la capa correcta.
+
+La segunda pared es de este lado: **capturar `permission:show` con PowerShell se come los ✔**. La consola decodifica en la página de códigos del sistema, el `·` (U+00B7) sobrevive y el ✔ (U+2714) desaparece, así que la matriz local salió con todas las casillas vacías y el primer diff dijo que **127 concesiones se perdían**. No era un hallazgo, era la codificación. Lo zanjó consultar la base por SQL, que no pasa por ninguna consola.
+
+### 54.4 El cajón que no se pudo medir, y no es un defecto
+
+Al medir el Directorio a 375 px, el cajón de filtros no se dibujaba al pulsar «Filtros». La tentación era apuntarlo como hallazgo. Lo que lo desmontó fue leer el estado de Alpine directamente: **`drawerAbierto=true`**. El estado sí cambia; lo que no ocurre es el pintado, porque la transición necesita un fotograma y el panel del navegador de esta máquina no compone con la ventana detrás. Habría sido el **cuarto defecto fabricado por el entorno en dos días**, después del contraste del Directorio, el «500» del observatorio y las dos áreas táctiles.
+
+Lo que sí quedó medido, y con prueba de control: las **quince rutas públicas a 375 px dan desborde horizontal cero**. La prueba de control es lo que hace que ese cero signifique algo —se metió un elemento de 460 px a propósito y la sonda lo detectó—, y merece decirse que el detector de culpables señala también los carruseles legítimos, que desbordan dentro de su propio contenedor a propósito: la señal buena es el `scrollWidth` del documento, no la lista de elementos.
+
+### 54.5 Lo que cerró un dedo y no una medición
+
+El 11, Sua recorrió en su teléfono los seis puntos de la lista: barra móvil, el gesto de cerrar la hoja, navegación inferior, claro y oscuro, el Directorio con el cajón de filtros, y solapes o scroll horizontal. **Sin un hallazgo.**
+
+Eso cierra **la deuda más vieja del bloque visual**: el arrastre de la hoja y el botón vidriado llevaban desde el 9 de septiembre medidos solo por geometría y con puntero sintético, y el expediente lo decía en tres sitios distintos. Los números que estaban en duda se quedan como están —la deceleración de la hoja en 0,99, no la 0,998 del scroll, y el vidriado en 90 ms de ida y 280 de vuelta—. La S7 del cronograma, «pruebas en dispositivos reales», queda cumplida dentro de su semana.
+
+Lo que **no** cubre esa pasada, y no se cuenta como hecho: **iOS y Safari**, y el riel del panel en el teléfono, que no entraba en la lista.
