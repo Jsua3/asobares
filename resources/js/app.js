@@ -581,10 +581,104 @@ const prepararRevelado = () => {
     nodos.forEach((nodo) => observador.observe(nodo));
 };
 
+const leerCifraColombiana = (molde) => {
+    const cuerpo = String(molde).trim().replace(/^\$/, '').replace(/\s*%$/, '').trim();
+
+    return Number(cuerpo.replace(/\./g, '').replace(',', '.'));
+};
+
+const formatearCifraAlMolde = (valor, molde) => {
+    const original = String(molde).trim();
+    const conPesos = original.startsWith('$');
+    const conPorcentaje = original.includes('%');
+    const espacioAntesDePorcentaje = original.includes(' %');
+    const cuerpo = original.replace(/^\$/, '').replace(/\s*%$/, '').trim();
+    const decimales = cuerpo.includes(',') ? cuerpo.split(',')[1].length : 0;
+    const [entero, decimal = ''] = valor.toFixed(decimales).split('.');
+    const enteroConPuntos = entero.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+    let texto = (conPesos ? '$' : '') + enteroConPuntos;
+
+    if (decimales > 0) {
+        texto += `,${decimal}`;
+    }
+
+    if (conPorcentaje) {
+        texto += espacioAntesDePorcentaje ? ' %' : '%';
+    }
+
+    return texto;
+};
+
+const animarCifra = (nodo) => {
+    const final = nodo.getAttribute('data-cifra-final') ?? '';
+    const destino = leerCifraColombiana(final);
+
+    if (! Number.isFinite(destino) || final === '') {
+        nodo.textContent = final;
+
+        return;
+    }
+
+    const duracion = 1100;
+    const inicio = performance.now();
+
+    const cuadro = (ahora) => {
+        const t = Math.min((ahora - inicio) / duracion, 1);
+        const ease = 1 - ((1 - t) ** 3);
+
+        if (t === 1) {
+            nodo.textContent = final;
+
+            return;
+        }
+
+        nodo.textContent = formatearCifraAlMolde(destino * ease, final);
+        requestAnimationFrame(cuadro);
+    };
+
+    requestAnimationFrame(cuadro);
+};
+
+const prepararCifras = () => {
+    const nodos = document.querySelectorAll('[data-cifra-final]');
+
+    if (nodos.length === 0) {
+        return;
+    }
+
+    const aplicarFinal = (nodo) => {
+        nodo.textContent = nodo.getAttribute('data-cifra-final') ?? nodo.textContent;
+    };
+
+    if (reduceMovimiento()) {
+        nodos.forEach(aplicarFinal);
+
+        return;
+    }
+
+    const observador = new IntersectionObserver((entradas) => {
+        for (const entrada of entradas) {
+            if (! entrada.isIntersecting) {
+                continue;
+            }
+
+            animarCifra(entrada.target);
+            observador.unobserve(entrada.target);
+        }
+    }, { threshold: 0.35, rootMargin: '0px 0px -8% 0px' });
+
+    nodos.forEach((nodo) => observador.observe(nodo));
+};
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', prepararRevelado);
+    document.addEventListener('DOMContentLoaded', () => {
+        prepararRevelado();
+        prepararCifras();
+    });
 } else {
     prepararRevelado();
+    prepararCifras();
 }
 
 // Otra pestaña cambió el tema: el script del <head> ya repintó, aquí solo

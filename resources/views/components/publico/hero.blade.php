@@ -61,7 +61,7 @@
                     'font-display font-bold tracking-tight text-balance',
                     'text-3xl sm:text-5xl lg:text-6xl' => ! $compacto,
                     'text-2xl sm:text-4xl' => $compacto,
-                ])>{{ $titulo }}</h1>
+                ])>@if ($portada)<span class="home-editorial-hero-titulo">{{ $titulo }}</span>@else{{ $titulo }}@endif</h1>
 
                 @if ($subtitulo)
                     <p class="mt-5 text-base leading-relaxed text-suave sm:text-lg text-pretty">{{ $subtitulo }}</p>

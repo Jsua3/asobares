@@ -52,21 +52,22 @@
     </x-slot:medio>
 
     <x-slot:encima>
-        @if ($fraseCorta = ajuste('hero_frase_corta'))
-            <p class="home-editorial-eyebrow mb-4 text-acento">{{ $fraseCorta }}</p>
-        @else
+        @if (! ajuste('hero_frase_corta'))
             <p class="home-editorial-eyebrow mb-4">{{ ajuste('sitio_nombre') }}</p>
-        @endif
-
-        @if ($totalAsociados > 0)
-            <p class="mb-5 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium etiqueta-clara">
-                <span class="h-1.5 w-1.5 rounded-full bg-marca-500"></span>
-                {{ $totalAsociados }} afiliados en el Quindío
-            </p>
         @endif
     </x-slot:encima>
 
-    <p class="home-editorial-lead mt-4 max-w-lg text-base leading-relaxed text-white/80 sm:text-lg text-pretty">
+    @if ($fraseCorta = ajuste('hero_frase_corta'))
+        <p class="home-editorial-concepto mt-5 max-w-lg text-pretty">{{ $fraseCorta }}</p>
+    @endif
+
+    @if ($totalAsociados > 0)
+        <p class="home-editorial-hero-secundario mt-4">
+            {{ $totalAsociados }} afiliados en el Quindío
+        </p>
+    @endif
+
+    <p class="home-editorial-hero-secundario mt-3 max-w-md text-pretty">
         {{ ajuste('hero_resumen_corto', 'Representamos la vida nocturna del Quindío con criterio, cultura y territorio.') }}
     </p>
 
@@ -79,8 +80,8 @@
         </x-publico.boton>
     </div>
 
-    <p class="home-editorial-video-nota mt-8 max-w-md border-l pl-4 text-sm leading-relaxed text-white/72 pie-de-video">
-        <span class="antetitulo block text-white/50">{{ ajuste('hero_video_rotulo', 'Video institucional') }}</span>
-        <span class="mt-0.5 block text-white/70">{{ $videoInstitucional['titulo'] }} · {{ $videoInstitucional['detalle'] }}</span>
+    <p class="home-editorial-video-nota pie-de-video mt-8 max-w-md border-l pl-4 leading-relaxed">
+        <span class="antetitulo block">{{ ajuste('hero_video_rotulo', 'Video institucional') }}</span>
+        <span class="mt-0.5 block">{{ $videoInstitucional['titulo'] }} · {{ $videoInstitucional['detalle'] }}</span>
     </p>
 </x-publico.hero>

@@ -57,7 +57,7 @@
                             @endswitch
                         </span>
                         <span>
-                            <span class="home-editorial-cifra__valor font-display font-bold text-acento">{{ $cifra['valor'] }}</span>
+                            <span class="home-editorial-cifra__valor font-display font-bold text-acento" data-cifra-final="{{ $cifra['valor'] }}">{{ $cifra['valor'] }}</span>
                             <span class="home-editorial-cifra__detalle mt-1 block text-sm text-tenue">{{ $cifra['texto'] }}</span>
                         </span>
                     </dt>

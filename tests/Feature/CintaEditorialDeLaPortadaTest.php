@@ -151,16 +151,37 @@ class CintaEditorialDeLaPortadaTest extends TestCase
                 $copia
             )
         );
-        $this->assertStringNotContainsString('<a ', $copia[1]);
+
+        preg_match_all('/<a\b[^>]*>/', $copia[1], $enlaces);
+
+        $this->assertNotSame([], $enlaces[0], 'La copia visual tiene que seguir siendo clicable.');
+
+        foreach ($enlaces[0] as $enlace) {
+            $this->assertStringContainsString('tabindex="-1"', $enlace);
+        }
+    }
+
+    public function test_el_loop_declara_continuidad_y_el_hover_es_uniforme(): void
+    {
+        $css = File::get(resource_path('css/home-editorial.css'));
+        $bloque = $this->bloqueDeLaCinta($css);
+
+        $this->assertStringContainsString('min-width: 100cqi', $bloque);
+        $this->assertStringContainsString('flex-shrink: 0', $bloque);
+        $this->assertStringContainsString('container-type: inline-size', $bloque);
+        $this->assertStringContainsString('translateY(-2px)', $bloque);
+        $this->assertStringContainsString('.home-editorial-cinta__item:hover .home-editorial-cinta__enlace', $bloque);
+        $this->assertStringContainsString('.home-editorial-cinta__item:hover .home-editorial-cinta__sep', $bloque);
+        $this->assertStringContainsString('.home-editorial-cinta:hover .home-editorial-cinta__recorrido', $bloque);
+        $this->assertStringContainsString('.home-editorial-cinta:focus-within .home-editorial-cinta__recorrido', $bloque);
     }
 
     public function test_el_css_declara_vidrio_mascara_y_movimiento_reducido(): void
     {
         $css = File::get(resource_path('css/home-editorial.css'));
 
-        $this->assertStringContainsString('rgb(28 18 16 / 0.62)', $css);
-        $this->assertStringContainsString('backdrop-filter: blur(16px)', $css);
-        $this->assertStringContainsString('-webkit-backdrop-filter: blur(16px)', $css);
+        $this->assertStringContainsString('backdrop-filter: blur(14px)', $css);
+        $this->assertStringContainsString('-webkit-backdrop-filter: blur(14px)', $css);
         $this->assertStringContainsString('mask-image: linear-gradient', $css);
         $this->assertStringContainsString('-webkit-mask-image: linear-gradient', $css);
         $this->assertStringContainsString('animation: home-editorial-cinta-desfile 50s linear infinite', $css);

@@ -39,11 +39,7 @@
                     <ul class="home-editorial-cinta__lista"@if ($decorativa) aria-hidden="true"@endif>
                         @foreach ($items as $item)
                             <li class="home-editorial-cinta__item">
-                                @if ($decorativa)
-                                    <span class="home-editorial-cinta__enlace">{{ $item['texto'] }}</span>
-                                @else
-                                    <a href="{{ $item['href'] }}" class="home-editorial-cinta__enlace enlace-accion">{{ $item['texto'] }}</a>
-                                @endif
+                                <a href="{{ $item['href'] }}" class="home-editorial-cinta__enlace enlace-accion"@if ($decorativa) tabindex="-1"@endif>{{ $item['texto'] }}</a>
                                 <span class="home-editorial-cinta__sep" aria-hidden="true"></span>
                             </li>
                         @endforeach
