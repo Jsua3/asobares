@@ -553,6 +553,28 @@ Alpine.data('videoHero', () => ({
     },
 }));
 
+Alpine.data('bandaEstablecimientos', () => ({
+    avanzar(direccion) {
+        const pista = this.$refs.pista;
+
+        if (! pista) {
+            return;
+        }
+
+        const tarjeta = pista.querySelector('.home-editorial-establecimiento');
+        const estilo = tarjeta ? window.getComputedStyle(pista) : null;
+        const hueco = estilo ? Number.parseFloat(estilo.columnGap || estilo.gap) || 16 : 16;
+        const paso = tarjeta
+            ? tarjeta.getBoundingClientRect().width + hueco
+            : pista.clientWidth * 0.8;
+
+        pista.scrollBy({
+            left: direccion * paso,
+            behavior: reduceMovimiento() ? 'auto' : 'smooth',
+        });
+    },
+}));
+
 window.Alpine = Alpine;
 Alpine.start();
 

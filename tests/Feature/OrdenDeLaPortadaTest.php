@@ -3,21 +3,20 @@
 namespace Tests\Feature;
 
 use App\Models\Asociado;
+use App\Support\BandaDeEstablecimientos;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * El bloque de destacados de la portada sale ordenado (OBS3-06).
+ * El bloque de destacados de la portada sale de un cupo alfabético (OBS3-06).
  *
  * El directivo se paró justo en esto mirando la portada: «¿por qué está
  * colina primero, por qué mirador... o simplemente un aleatorio?» (R21
  * 06:11-06:17), y pidió «que sea en orden alfabético» (R21 06:24).
  *
- * El §27.2 aclara dónde estaba el defecto de verdad, que no era el directorio
- * --ese ya ordenaba y ya tenía buscador-- sino la portada, que iba por
- * `latest('updated_at')`. Desde fuera eso no se distingue del azar: nadie ve
- * las fechas de edición.
+ * La franja ya no recorta a tres fijos: gira el cupo en presentación. Lo
+ * que no puede volver es elegir el cupo por `updated_at` ni por RANDOM().
  */
 class OrdenDeLaPortadaTest extends TestCase
 {
@@ -30,10 +29,6 @@ class OrdenDeLaPortadaTest extends TestCase
      *   creación (= `updated_at`):  Zorba, Mirador, Colina, Ámbar
      *   bytes (= SQLite crudo):     Colina, Mirador, Zorba, Ámbar
      *   español (= lo correcto):    Ámbar, Colina, Mirador, Zorba
-     *
-     * «Ámbar» está ahí a propósito: es lo único que separa el orden de bytes
-     * del alfabético de verdad, y sin él la prueba pasaría en verde con
-     * `ORDER BY nombre` a secas.
      */
     public function test_los_destacados_salen_en_orden_alfabetico_espanol(): void
     {
@@ -59,37 +54,33 @@ class OrdenDeLaPortadaTest extends TestCase
         $this->assertNotSame($nombres, $esperado, 'El caso no sirve si el orden de creación ya es el correcto.');
         $this->assertNotSame($porBytes, $esperado, 'El caso no sirve si el orden de bytes ya es el correcto.');
 
-        $enPortada = ordenarEnEspanol(
-            Asociado::publicado()->where('destacado', true)->orderBy('nombre')->take(6)->get()
-        )->take(3)->pluck('nombre')->all();
+        $cupo = ordenarEnEspanol(
+            Asociado::publicado()->where('destacado', true)->orderBy('nombre')->take(BandaDeEstablecimientos::TOPE)->get()
+        )->pluck('nombre')->all();
 
         if (class_exists(\Collator::class)) {
-            $this->assertSame(array_slice($esperado, 0, 3), $enPortada);
+            $this->assertSame($esperado, $cupo);
         }
 
-        $this->get('/')->assertOk()->assertSeeInOrder($enPortada, escape: false);
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $this->assertTrue(
+            $this->esRotacionDe($cupo, $this->nombresEnPortada($html)),
+            'La portada tiene que pintar una rotación del cupo alfabético, no otro orden.'
+        );
     }
 
     /**
-     * La portada muestra TRES destacados, y cuáles son los tres lo decide el
-     * `ORDER BY` de la base, no el reordenado en PHP.
-     *
-     * Esta prueba existe porque la de arriba NO protege eso: con cuatro
-     * fichas `take(6)` se las lleva todas, y el colador las ordena bien
-     * aunque la consulta venga por `updated_at`. Se descubrió mutando
-     * --volver al orden viejo dejaba la suite en verde-- y es exactamente la
-     * forma de falso verde que este proyecto ya pagó once veces. Hacen falta
-     * más de seis para que la selección signifique algo.
+     * El cupo lo decide el `ORDER BY` de la base, no el reordenado en PHP.
+     * Hacen falta más fichas que el tope para que la selección signifique algo.
      */
-    public function test_con_mas_de_seis_destacados_salen_los_tres_primeros_del_alfabeto(): void
+    public function test_con_mas_destacados_que_el_tope_solo_entra_el_cupo_alfabetico(): void
     {
         $this->seed(DatabaseSeeder::class);
 
         Asociado::query()->update(['destacado' => false]);
 
-        // Creados al revés del alfabeto: por `updated_at` saldrían los de la
-        // cola, que son justo los que NO deben salir.
-        $nombres = ['Zorba', 'Yatra', 'Xilema', 'Waldorf', 'Vega', 'Tulipán', 'Sauce', 'Roble'];
+        $nombres = ['Zorba', 'Yatra', 'Xilema', 'Waldorf', 'Vega', 'Tulipán', 'Sauce', 'Roble', 'Quimera', 'Pino', 'Olivo', 'Nardo', 'Mirador'];
 
         foreach ($nombres as $indice => $nombre) {
             Asociado::factory()->publicado()->create([
@@ -97,16 +88,19 @@ class OrdenDeLaPortadaTest extends TestCase
             ]);
         }
 
-        $enPortada = ordenarEnEspanol(
-            Asociado::publicado()->where('destacado', true)->orderBy('nombre')->take(6)->get()
-        )->take(3)->pluck('nombre')->all();
+        $cupo = ordenarEnEspanol(
+            Asociado::publicado()->where('destacado', true)->orderBy('nombre')->take(BandaDeEstablecimientos::TOPE)->get()
+        )->pluck('nombre')->all();
 
-        $respuesta = $this->get('/')
-            ->assertOk()
-            ->assertSeeInOrder($enPortada, escape: false);
+        $this->assertCount(BandaDeEstablecimientos::TOPE, $cupo);
 
-        foreach (array_diff($nombres, $enPortada) as $fuera) {
-            $respuesta->assertDontSee('>'.$fuera.'<', escape: false);
+        $html = $this->get('/')->assertOk()->getContent();
+        $enPortada = $this->nombresEnPortada($html);
+
+        $this->assertTrue($this->esRotacionDe($cupo, $enPortada));
+
+        foreach (array_diff($nombres, $cupo) as $fuera) {
+            $this->assertStringNotContainsString('>'.$fuera.'<', $html);
         }
     }
 
@@ -121,7 +115,7 @@ class OrdenDeLaPortadaTest extends TestCase
 
         Asociado::query()->update(['destacado' => false]);
 
-        foreach (['Roble', 'Sauce', 'Tulipán', 'Vega', 'Waldorf', 'Xilema'] as $indice => $nombre) {
+        foreach (['Mirador', 'Nardo', 'Olivo', 'Pino', 'Quimera', 'Roble', 'Sauce', 'Tulipán', 'Vega', 'Waldorf', 'Xilema', 'Yatra'] as $indice => $nombre) {
             Asociado::factory()->publicado()->create([
                 'nombre' => $nombre, 'slug' => 'dentro-'.$indice, 'destacado' => true,
             ]);
@@ -131,23 +125,60 @@ class OrdenDeLaPortadaTest extends TestCase
             'nombre' => 'Zorba', 'slug' => 'fuera', 'destacado' => true,
         ]);
 
-        // Lo que haría la secretaría: corregir un dato de una ficha cualquiera.
         $fuera->touch();
 
         $this->get('/')->assertOk()->assertDontSee('>'.$fuera->nombre.'<', escape: false);
     }
 
-    /** El directorio ya ordenaba así: las dos listas del sitio coinciden. */
-    public function test_la_portada_y_el_directorio_ordenan_con_el_mismo_criterio(): void
+    /** El directorio no hereda la rotación de la portada. */
+    public function test_la_portada_y_el_directorio_no_comparten_la_rotacion(): void
     {
         $this->seed(DatabaseSeeder::class);
 
-        $destacados = Asociado::publicado()->where('destacado', true)->orderBy('nombre')->take(6)->pluck('nombre');
-        $enPortada = $destacados->take(3);
-
-        $this->assertGreaterThan(1, $enPortada->count(), 'Hacen falta varios destacados para que el orden signifique algo.');
-
-        $this->get('/')->assertOk()->assertSeeInOrder($enPortada->all(), escape: false);
+        $this->get('/')->assertOk();
         $this->get('/directorio')->assertOk();
+
+        $this->assertStringNotContainsString(
+            'BandaDeEstablecimientos',
+            file_get_contents(app_path('Http/Controllers/Publico/DirectorioController.php'))
+        );
+    }
+
+    /**
+     * @param  list<string>  $base
+     * @param  list<string>  $visto
+     */
+    private function esRotacionDe(array $base, array $visto): bool
+    {
+        if ($base === [] || count($base) !== count($visto)) {
+            return false;
+        }
+
+        $doble = array_merge($base, $base);
+
+        for ($indice = 0; $indice < count($base); $indice++) {
+            if (array_slice($doble, $indice, count($visto)) === $visto) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function nombresEnPortada(string $html): array
+    {
+        $this->assertTrue(
+            (bool) preg_match('/<section class="home-editorial-descubre[^"]*"[^>]*>(.*?)<\/section>/s', $html, $seccion)
+        );
+
+        preg_match_all('/<h3[^>]*>(.*?)<\/h3>/s', $seccion[1], $titulos);
+
+        return array_values(array_map(
+            fn (string $titulo): string => trim(html_entity_decode(strip_tags($titulo), ENT_QUOTES, 'UTF-8')),
+            $titulos[1]
+        ));
     }
 }

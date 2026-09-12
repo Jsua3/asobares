@@ -93,9 +93,8 @@ class BancoVisualDeLaPortadaTest extends TestCase
 
         $html = $this->get('/')->assertOk()->getContent();
 
-        $this->assertStringContainsString('img/home/establecimiento-01.png', $html);
-        $this->assertStringContainsString('img/home/establecimiento-02.png', $html);
-        $this->assertStringContainsString('img/home/establecimiento-03.png', $html);
+        $this->assertStringContainsString('home-editorial-establecimiento__fallback', $html);
+        $this->assertStringNotContainsString('img/home/establecimiento-', $html);
         $this->assertStringContainsString('img/home/beneficios-gremio.png', $html);
         $this->assertStringContainsString('img/home/cta-afiliacion.png', $html);
     }
@@ -133,7 +132,8 @@ class BancoVisualDeLaPortadaTest extends TestCase
         $html = $this->get('/')->assertOk()->getContent();
 
         $this->assertStringContainsString('asociados/portada-real-home.jpg', $html);
-        $this->assertStringContainsString('img/home/establecimiento-', $html);
+        $this->assertStringContainsString('home-editorial-establecimiento__fallback', $html);
+        $this->assertStringNotContainsString('img/home/establecimiento-', $html);
     }
 
     public function test_el_evento_de_relleno_usa_el_asset_editorial(): void

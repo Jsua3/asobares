@@ -10,6 +10,7 @@ use App\Models\Beneficio;
 use App\Models\Evento;
 use App\Models\Iniciativa;
 use App\Models\Publicidad;
+use App\Support\BandaDeEstablecimientos;
 use App\Support\CifrasDelGremio;
 use App\Support\ReglaDeAlcaldias;
 use Illuminate\Contracts\View\View;
@@ -43,16 +44,17 @@ class InicioController
             // editar una ficha en el panel la subia al primer puesto de la
             // portada sin que nadie lo hubiera pedido.
             //
-            // El `orderBy` de la base elige CUALES son los seis, de forma
+            // El `orderBy` de la base elige CUALES entran al cupo, de forma
             // estable; `ordenarEnEspanol` decide en que ORDEN se pintan,
             // porque SQLite ordena por bytes y dejaria «Ambar» detras de
-            // «Zorba». Ver el comentario del ayudante.
+            // «Zorba». La franja de la portada gira ese cupo en presentacion
+            // (`BandaDeEstablecimientos`), sin RANDOM() ni tocar el directorio.
             'destacados' => ordenarEnEspanol(
                 Asociado::publicado()
                     ->where('destacado', true)
                     ->with(['categoria', 'municipio'])
                     ->orderBy('nombre')
-                    ->take(6)
+                    ->take(BandaDeEstablecimientos::TOPE)
                     ->get()
             ),
             'beneficios' => Beneficio::with('municipio')->orderBy('orden')->get(),
