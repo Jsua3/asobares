@@ -30,7 +30,7 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <!-- La suite no puede depender del .env de cada máquina para decidir
-             si los pagos son simulados: PAYMENT_DRIVER ya no tiene defecto. -->
+             si los pagos son simulados: PAYMENT_DRIVER no tiene defecto. -->
         <env name="PAYMENT_DRIVER" value="fake"/>
         <!-- Las galerias reprocesan 36 conversiones webp en cada test y no
              aportan nada a lo que se verifica: se omiten en la suite. -->

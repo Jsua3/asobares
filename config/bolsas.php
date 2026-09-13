@@ -30,7 +30,7 @@ return [
 
     /*
      * El máximo absoluto cierra el hueco de la vacante que nadie cierra:
-     * sin él, una vacante de tiempo completo sin fecha límite conservaba
+     * sin él, una vacante de tiempo completo sin fecha límite conservaría
      * sus postulaciones para siempre, porque el reloj de arriba solo
      * arranca al cerrar o vencer. Cuenta desde el consentimiento (o desde
      * la llegada, si la fila no trae sello), aunque la vacante siga

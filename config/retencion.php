@@ -7,11 +7,11 @@ return [
     | Retención de mensajes de contacto y PQR (Ley 1581 de 2012)
     |--------------------------------------------------------------------------
     |
-    | La bolsa de empleo ya se depura sola (ver `config/bolsas.php`), pero los
-    | formularios públicos de contacto y PQR guardan nombre, correo, teléfono y
-    | el texto del mensaje sin ninguna fecha de caducidad. Eso contradice el
-    | principio de caducidad de la Ley 1581: los datos se guardan mientras
-    | sirvan al fin que la persona autorizó, no para siempre.
+    | Los formularios públicos de contacto y PQR guardan nombre, correo,
+    | teléfono y el texto del mensaje. Por el principio de caducidad de la Ley
+    | 1581 esos datos se guardan mientras sirvan al fin que la persona
+    | autorizó, no para siempre; la bolsa de empleo sigue la misma regla (ver
+    | `config/bolsas.php`).
     |
     | El plazo cuenta desde que el mensaje se respondió. Si nunca se respondió,
     | desde que entró: un mensaje abandonado no puede volverse inmortal por no
