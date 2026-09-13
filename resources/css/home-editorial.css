@@ -796,8 +796,94 @@ html:not(.dark) .home-editorial-establecimiento__overlay {
 /* —— Respalda —— */
 
 .home-editorial-respalda {
-    background: linear-gradient(180deg, var(--home-bg) 0%, var(--home-bg-elevated) 55%, var(--home-surface-alta) 100%);
+    position: relative;
+    isolation: isolate;
+    background:
+        radial-gradient(ellipse 70% 60% at 18% 20%, rgb(238 65 55 / 0.07), transparent 52%),
+        linear-gradient(180deg, #0c0b0b 0%, #101010 58%, #0b0b0b 100%);
     border-block: 1px solid var(--home-border);
+}
+
+html:not(.dark) .home-editorial-respalda {
+    background:
+        radial-gradient(ellipse 70% 60% at 16% 12%, rgb(183 31 24 / 0.04), transparent 50%),
+        linear-gradient(180deg, #f6f2eb 0%, #f3eee6 55%, #efebe4 100%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.55);
+}
+
+.dark .home-editorial-respalda {
+    background:
+        radial-gradient(ellipse 70% 60% at 18% 20%, rgb(238 65 55 / 0.07), transparent 52%),
+        linear-gradient(180deg, #0c0b0b 0%, #101010 58%, #0b0b0b 100%);
+}
+
+.home-editorial-respalda__cuerpo {
+    display: grid;
+    gap: 1.5rem 2rem;
+    grid-template-areas:
+        'media'
+        'lista'
+        'cta';
+}
+
+@media (min-width: 768px) {
+    .home-editorial-respalda__cuerpo {
+        grid-template-columns: 5fr 7fr;
+        grid-template-areas:
+            'media lista'
+            'cta lista';
+        align-items: start;
+    }
+}
+
+.home-editorial-respalda__media {
+    position: relative;
+    grid-area: media;
+}
+
+.home-editorial-respalda__media::before {
+    content: '';
+    position: absolute;
+    inset: 4.5rem -8% -8% -6%;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(ellipse 70% 60% at 40% 45%, rgb(238 65 55 / 0.12), transparent 68%);
+}
+
+.home-editorial-beneficios {
+    grid-area: lista;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.home-editorial-respalda__cta {
+    grid-area: cta;
+}
+
+.home-editorial-respalda__foto {
+    aspect-ratio: 16 / 10;
+    outline: 1px solid rgb(255 255 255 / 0.08);
+}
+
+@media (min-width: 768px) {
+    .home-editorial-respalda__foto {
+        aspect-ratio: 5 / 4;
+    }
+}
+
+@media (min-width: 1024px) {
+    .home-editorial-respalda__foto {
+        aspect-ratio: 4 / 3;
+    }
+}
+
+html:not(.dark) .home-editorial-respalda__foto {
+    outline: 1px solid rgb(23 17 15 / 0.08);
+    box-shadow: 0 1px 2px rgb(23 17 15 / 0.05), 0 16px 32px rgb(23 17 15 / 0.05);
 }
 
 .home-editorial-respalda__velo {
@@ -805,53 +891,33 @@ html:not(.dark) .home-editorial-establecimiento__overlay {
     inset: 0;
     pointer-events: none;
     background:
-        linear-gradient(0deg, rgb(8 8 8 / 0.28) 0%, transparent 50%),
-        radial-gradient(ellipse 90% 70% at 100% 50%, rgb(238 65 55 / 0.08), transparent 55%);
+        linear-gradient(0deg, rgb(8 8 8 / 0.32) 0%, transparent 48%),
+        radial-gradient(ellipse 90% 70% at 100% 50%, rgb(238 65 55 / 0.1), transparent 55%);
 }
 
 html:not(.dark) .home-editorial-respalda__velo {
     background:
-        linear-gradient(0deg, rgb(8 8 8 / 0.1) 0%, transparent 48%),
-        radial-gradient(ellipse 90% 70% at 100% 50%, rgb(238 65 55 / 0.04), transparent 55%);
+        linear-gradient(0deg, rgb(8 8 8 / 0.12) 0%, transparent 46%),
+        radial-gradient(ellipse 90% 70% at 100% 50%, rgb(238 65 55 / 0.05), transparent 55%);
 }
 
 .home-editorial-respalda__img {
-    transition: transform 280ms ease;
-}
-
-.home-editorial-respalda:hover .home-editorial-respalda__img {
-    transform: scale(var(--home-zoom));
-}
-
-.home-editorial-beneficios {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    border-top: 1px solid var(--home-border);
-}
-
-@media (min-width: 1024px) {
-    .home-editorial-beneficios {
-        border-top: none;
-        border-left: 1px solid var(--home-border);
-        padding-left: 1.75rem;
-    }
+    display: block;
 }
 
 .home-editorial-beneficio {
     display: flex;
     gap: 0.875rem;
-    padding-block: 0.75rem;
+    padding-block: 0.85rem;
     border-bottom: 1px solid var(--home-border);
-    transition: background-color var(--home-transicion);
-}
-
-.home-editorial-beneficio:hover {
-    background: var(--home-hover);
 }
 
 .home-editorial-beneficio:last-child {
-    border-bottom: none;
+    border-bottom-color: transparent;
+}
+
+.home-editorial-beneficio__titulo {
+    transition: transform 220ms ease, color 220ms ease;
 }
 
 .home-editorial-beneficio__icono {
@@ -864,6 +930,70 @@ html:not(.dark) .home-editorial-respalda__velo {
     border-radius: 9999px;
     background: rgb(238 65 55 / 0.11);
     color: var(--home-accent);
+    transition: background-color 220ms ease, color 220ms ease, box-shadow 220ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .home-editorial-beneficio:hover .home-editorial-beneficio__icono {
+        background: rgb(238 65 55 / 0.22);
+        color: #ee4137;
+        box-shadow: 0 0 0 1px rgb(238 65 55 / 0.28);
+    }
+
+    .home-editorial-beneficio:hover .home-editorial-beneficio__titulo {
+        transform: translateX(2px);
+    }
+
+    .home-editorial-beneficio:hover {
+        border-bottom-color: rgb(238 65 55 / 0.38);
+    }
+}
+
+html.con-script:not(.sin-desplazamiento) .home-editorial-respalda.revelar:not(.revelar-visto) .home-editorial-beneficio {
+    opacity: 0;
+    transform: translateY(0.35rem);
+}
+
+html.con-script:not(.sin-desplazamiento) .home-editorial-respalda.revelar-visto .home-editorial-beneficio {
+    animation: home-editorial-beneficio-entra 520ms ease both;
+}
+
+html.con-script:not(.sin-desplazamiento) .home-editorial-respalda.revelar-visto .home-editorial-beneficio:nth-child(2) {
+    animation-delay: 60ms;
+}
+
+html.con-script:not(.sin-desplazamiento) .home-editorial-respalda.revelar-visto .home-editorial-beneficio:nth-child(3) {
+    animation-delay: 120ms;
+}
+
+html.con-script:not(.sin-desplazamiento) .home-editorial-respalda.revelar-visto .home-editorial-beneficio:nth-child(4) {
+    animation-delay: 180ms;
+}
+
+html.con-script:not(.sin-desplazamiento) .home-editorial-respalda.revelar-visto .home-editorial-beneficio:nth-child(5) {
+    animation-delay: 240ms;
+}
+
+@keyframes home-editorial-beneficio-entra {
+    from {
+        opacity: 0;
+        transform: translateY(0.35rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .home-editorial-respalda__media::before {
+        opacity: 0;
+    }
+
+    .home-editorial-respalda__velo {
+        background: rgb(8 8 8 / 0.28);
+    }
 }
 
 /* —— Actualidad —— */
@@ -1178,6 +1308,16 @@ html:not(.dark) .home-editorial-cta__velo {
         clip-path: none !important;
     }
 
+    .home-editorial-beneficio,
+    .home-editorial-beneficio__titulo,
+    .home-editorial-beneficio__icono,
+    .home-editorial-respalda.revelar-visto .home-editorial-beneficio {
+        animation: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+        transition: none !important;
+    }
+
     .home-editorial-cifra,
     .home-editorial-cifra:hover,
     .home-editorial-cinta__item:hover .home-editorial-cinta__enlace,
@@ -1190,7 +1330,6 @@ html:not(.dark) .home-editorial-cta__velo {
     .home-editorial .home-editorial-enlace svg,
     .home-editorial-establecimiento__flecha,
     .home-editorial-establecimiento__img,
-    .home-editorial-respalda__img,
     .home-editorial-actualidad__img,
     .home-editorial-publicidad__img,
     .home-editorial-cta__foto,
@@ -1203,7 +1342,7 @@ html:not(.dark) .home-editorial-cta__velo {
     .home-editorial-establecimiento,
     .home-editorial-establecimiento:hover,
     .home-editorial-establecimiento:hover .home-editorial-establecimiento__img,
-    .home-editorial-respalda:hover .home-editorial-respalda__img,
+    .home-editorial-beneficio:hover .home-editorial-beneficio__titulo,
     .home-editorial-actualidad__destacada:hover .home-editorial-actualidad__img,
     .home-editorial-publicidad__banner:hover .home-editorial-publicidad__img,
     .home-editorial-cta:hover .home-editorial-cta__foto,
