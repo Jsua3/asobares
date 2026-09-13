@@ -97,6 +97,11 @@ class PublicidadesTable
             ->modalContent(fn (Publicidad $record) => view('filament.publicidad-preview', ['publicidad' => $record]));
     }
 
+    /**
+     * Sobre una pauta publicada, volver a pendiente de pago la saca del sitio:
+     * es despublicar, asi que exige el mismo permiso que retirar_publicacion.
+     * authorize() la oculta y ademas la rechaza si se invoca a la fuerza.
+     */
     private static function marcarPendientePago(): Action
     {
         return Action::make('marcar_pendiente_pago')
@@ -104,7 +109,13 @@ class PublicidadesTable
             ->icon('heroicon-o-clock')
             ->color('warning')
             ->visible(fn (Publicidad $record): bool => $record->estado !== EstadoPublicidad::PendientePago)
-            ->action(fn (Publicidad $record): bool => $record->update(['estado' => EstadoPublicidad::PendientePago]));
+            ->authorize(fn (Publicidad $record): bool => $record->estado !== EstadoPublicidad::Publicada
+                || auth()->user()?->can('publicar', $record) === true)
+            ->action(fn (Publicidad $record): bool => $record->update([
+                'estado' => EstadoPublicidad::PendientePago,
+                'aprobado_por' => null,
+                'aprobado_at' => null,
+            ]));
     }
 
     private static function marcarPagada(): Action
