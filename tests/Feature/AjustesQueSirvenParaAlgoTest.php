@@ -12,7 +12,7 @@ use Tests\TestCase;
 /**
  * Ningún ajuste que el panel ofrece editar puede no cambiar nada.
  *
- * RNF-09 dice que nada esté quemado en el código, y de ahí salen los 126 ajustes
+ * RNF-09 dice que nada esté quemado en el código, y de ahí salen los 197 ajustes
  * de «Ajustes del sitio». La cara B de esa regla no la vigilaba nadie: un ajuste
  * **sembrado y que ninguna vista lee** es peor que no tenerlo, porque la oficina
  * lo cambia, guarda, ve el aviso verde y el sitio se queda igual. No hay error,
@@ -119,6 +119,69 @@ class AjustesQueSirvenParaAlgoTest extends TestCase
 
         $this->assertDatabaseHas('settings', ['clave' => 'hero_resumen_corto']);
         $this->assertSame(count($this->clavesSembradas()), Setting::query()->count());
+    }
+
+    /**
+     * Los trece textos que el rediseño editorial de la portada y del directorio
+     * dejó sin vista (SUITE-01, 13 sep 2026). Salir del sembrador no basta: sin
+     * estar en `JUBILADOS`, producción los sigue ofreciendo en el panel.
+     *
+     * La lista va escrita aquí y no leída del sembrador a propósito: quitar una
+     * clave de `JUBILADOS` tiene que ponerse rojo.
+     */
+    public function test_el_sembrador_retira_los_textos_que_el_rediseno_dejo_sin_vista(): void
+    {
+        $retirados = [
+            'portada_empleo_titulo',
+            'portada_empleo_texto',
+            'portada_videos_intro',
+            'portada_videos_cta',
+            'portada_video_1_titulo',
+            'portada_video_1_detalle',
+            'portada_video_2_titulo',
+            'portada_video_2_detalle',
+            'portada_video_3_titulo',
+            'portada_video_3_detalle',
+            'portada_videos_proxima_rotulo',
+            'portada_videos_proxima_texto',
+            'directorio_intro',
+        ];
+
+        foreach ($retirados as $clave) {
+            Setting::create([
+                'clave' => $clave,
+                'valor' => 'Texto viejo que el panel seguiría ofreciendo',
+                'tipo' => 'string',
+                'grupo' => 'inicio',
+                'etiqueta' => $clave,
+            ]);
+        }
+
+        (new SettingSeeder)->run();
+
+        foreach ($retirados as $clave) {
+            $this->assertDatabaseMissing('settings', ['clave' => $clave]);
+        }
+    }
+
+    /**
+     * Jubilar es solo para lo que ya nadie lee. Un jubilado que el código lea
+     * se borraría de producción en el siguiente resembrado y la vista pintaría
+     * su respaldo sin que la oficina lo pudiera editar; uno que se siga
+     * sembrando se borra y se vuelve a crear en cada pasada.
+     */
+    public function test_ningun_jubilado_se_siembra_ni_lo_lee_el_codigo(): void
+    {
+        $codigo = $this->codigoDelProyecto();
+        $sembradas = $this->clavesSembradas();
+        $jubilados = (new \ReflectionClassConstant(SettingSeeder::class, 'JUBILADOS'))->getValue();
+
+        $this->assertNotSame([], $jubilados);
+
+        foreach ($jubilados as $clave) {
+            $this->assertNotContains($clave, $sembradas, "«{$clave}» está jubilada y se sigue sembrando.");
+            $this->assertStringNotContainsString("'{$clave}'", $codigo, "«{$clave}» está jubilada y el código la lee: el siguiente resembrado la borra de producción.");
+        }
     }
 
     /** @return list<string> */

@@ -27,8 +27,16 @@ class PortadaEditableTest extends TestCase
      * `portada_empleo_*` salió de Eventos en HOME-FINAL-04.
      * `portada_videos_intro` y `portada_videos_proxima_*` salieron de
      * «en movimiento» en HOME-FINAL-05: prometían clips que no hay.
+     * Los cuatro subtítulos y los dos textos del cierre entraron con la
+     * portada editorial leyendo un respaldo que nadie sembraba (COD-04).
      */
     private const array TITULOS = [
+        'portada_cifras_subtitulo',
+        'portada_destacados_subtitulo',
+        'portada_beneficios_subtitulo',
+        'portada_actualidad_subtitulo',
+        'cta_editorial_frase',
+        'cta_final_boton',
         'portada_cifras_titulo',
         'portada_guia_titulo',
         'portada_destacados_titulo',
@@ -86,14 +94,24 @@ class PortadaEditableTest extends TestCase
     public function test_cada_titulo_de_la_portada_obedece_a_su_ajuste(): void
     {
         foreach (self::TITULOS as $indice => $clave) {
-            $this->editarAjuste($clave, "TITULO EDITADO DESDE EL PANEL {$indice}");
+            $this->editarAjuste($clave, $this->textoEditado($indice));
         }
 
         $respuesta = $this->get('/')->assertOk();
 
         foreach (self::TITULOS as $indice => $clave) {
-            $respuesta->assertSee("TITULO EDITADO DESDE EL PANEL {$indice}", escape: false);
+            $respuesta->assertSee($this->textoEditado($indice), escape: false);
         }
+    }
+
+    /**
+     * El índice va cerrado entre corchetes a propósito. Sin cierre, «PANEL 1»
+     * es prefijo de «PANEL 10» a «PANEL 19», y la clave del índice 1 pasaba en
+     * verde aunque su vista la cableara: la sostenía el texto de otra clave.
+     */
+    private function textoEditado(int $indice): string
+    {
+        return "TITULO EDITADO DESDE EL PANEL [{$indice}]";
     }
 
     /** La entradilla de beneficios también se edita, no solo el título. */

@@ -37,6 +37,28 @@ class SettingSeeder extends Seeder
         // en producción solo entra lo que salga de un documento oficial. El día
         // que el gremio fije la cifra, entra con su fuente y su vista.
         'cifra_afiliados',
+
+        // 13 sep 2026 (SUITE-01). El rediseño editorial de la portada (10-12 sep,
+        // 9a9e683, 0de6d48 y 0411335) quitó la tarjeta de empleo y la banda de
+        // tres videos con su «próxima pieza»: prometían clips que no hay
+        // (HOME-FINAL-04 y 05). Las vistas dejaron de leerlas y el sembrador las
+        // siguió ofreciendo. El diseño se queda como está, así que salen ellas.
+        'portada_empleo_titulo',
+        'portada_empleo_texto',
+        'portada_videos_intro',
+        'portada_videos_cta',
+        'portada_video_1_titulo',
+        'portada_video_1_detalle',
+        'portada_video_2_titulo',
+        'portada_video_2_detalle',
+        'portada_video_3_titulo',
+        'portada_video_3_detalle',
+        'portada_videos_proxima_rotulo',
+        'portada_videos_proxima_texto',
+
+        // 13 sep 2026 (SUITE-01). La cabecera editorial del directorio (11 sep,
+        // 6d071c2) dejó de pintar la entradilla bajo el título.
+        'directorio_intro',
     ];
 
     public function run(): void
@@ -100,7 +122,6 @@ class SettingSeeder extends Seeder
              */
             $this->texto('portada_cifras_titulo', 'La noche en cifras · Observatorio Económico', 'inicio', 'Portada · título de la franja de cifras'),
             $this->texto('portada_guia_titulo', 'Abre tu negocio', 'inicio', 'Portada · título de la tarjeta de la guía'),
-            $this->texto('portada_empleo_titulo', 'Bolsa de empleo', 'inicio', 'Portada · título de la tarjeta de empleo'),
             $this->texto('portada_destacados_titulo', 'La noche del Quindío', 'inicio', 'Portada · título de los establecimientos destacados'),
             // OBS3-01: «Lo que gana tu establecimiento» le sonó al directivo
             // «como si estuviéramos vendiendo una lotería» (R22 03:05).
@@ -113,7 +134,6 @@ class SettingSeeder extends Seeder
             // portada que promete lo que la página siguiente no da es la misma
             // clase de defecto que el «ya» del WhatsApp (OBS3-14).
             $this->largo('portada_guia_texto', 'Los requisitos reales para abrir un establecimiento, con la lista de lo que pide cada entidad, a quién se le pide y qué documento sale de ahí.', 'inicio', 'Portada · texto de la tarjeta de la guía'),
-            $this->largo('portada_empleo_texto', 'Bartenders, chefs, meseros y administradores para la vida nocturna del Quindío. Publican solo los establecimientos asociados.', 'inicio', 'Portada · texto de la tarjeta de empleo'),
             $this->texto('portada_destacados_texto', 'Algunos de los establecimientos afiliados al gremio.', 'inicio', 'Portada · pie de los destacados'),
             $this->texto('portada_eventos_titulo', 'Próximos eventos del gremio', 'inicio', 'Portada · título de eventos'),
             $this->texto('portada_aliados_titulo', 'Aliados del capítulo', 'inicio', 'Portada · título de aliados'),
@@ -122,16 +142,32 @@ class SettingSeeder extends Seeder
             $this->texto('portada_aliados_comerciales', 'Convenios para afiliados', 'inicio', 'Portada · rótulo de aliados comerciales'),
             $this->texto('portada_videos_rotulo', 'ASOBARES en movimiento', 'inicio', 'Portada · rótulo de videos'),
             $this->texto('portada_videos_titulo', 'Historias cortas para sentir el gremio.', 'inicio', 'Portada · título de videos'),
-            $this->largo('portada_videos_intro', 'Una banda audiovisual para mostrar recorridos, eventos, testimonios y momentos de la noche quindiana con un tono sobrio, local y cercano.', 'inicio', 'Portada · introducción de videos'),
-            $this->texto('portada_videos_cta', 'Ver agenda del gremio', 'inicio', 'Portada · enlace de videos'),
-            $this->texto('portada_video_1_titulo', 'La noche se mueve', 'inicio', 'Portada · video principal'),
-            $this->texto('portada_video_1_detalle', 'Recorridos, eventos y voces del sector', 'inicio', 'Portada · detalle del video principal'),
-            $this->texto('portada_video_2_titulo', 'Rutas del gremio', 'inicio', 'Portada · video secundario 1'),
-            $this->texto('portada_video_2_detalle', 'Establecimientos, cocina, barra y cultura local', 'inicio', 'Portada · detalle del video secundario 1'),
-            $this->texto('portada_video_3_titulo', 'Agenda viva', 'inicio', 'Portada · video secundario 2'),
-            $this->texto('portada_video_3_detalle', 'Encuentros, formación y noches memorables', 'inicio', 'Portada · detalle del video secundario 2'),
-            $this->texto('portada_videos_proxima_rotulo', 'Próxima pieza', 'inicio', 'Portada · rótulo de próxima pieza'),
-            $this->largo('portada_videos_proxima_texto', 'Clips de afiliados, activaciones y memoria del capítulo.', 'inicio', 'Portada · texto de próxima pieza'),
+
+            /**
+             * Los textos que la portada editorial (10-12 sep 2026) lee con
+             * `ajuste('clave', 'respaldo')` y nadie sembraba (COD-04): sin
+             * fila en la base el panel no los ofrecía, así que la portada
+             * pintaba el respaldo y la oficina no tenía cómo cambiarlo.
+             *
+             * ⚠️ Procedencia (D-14): el valor es el texto de respaldo EXACTO de
+             * cada vista de `components/publico/home/`, escrito por el equipo.
+             * No sale de ningún documento oficial del gremio. Se siembra igual
+             * para que la portada no cambie ni una letra y el texto pase a
+             * editarse desde el panel; el día que el gremio lo redacte, se
+             * cambia allí.
+             *
+             * Van en `inicio` porque es la pestaña de la portada y el panel no
+             * tiene grupo propio de publicidad: un grupo nuevo quedaría fuera
+             * de `AjustesDelSitio::PESTANAS` y el ajuste no se vería.
+             */
+            $this->texto('portada_cifras_subtitulo', 'La noche también mueve la economía.', 'inicio', 'Portada · subtítulo de la franja de cifras'),
+            $this->texto('portada_destacados_subtitulo', 'Lugares que dan vida a nuestra ciudad.', 'inicio', 'Portada · subtítulo de los establecimientos destacados'),
+            $this->texto('portada_beneficios_subtitulo', 'Más beneficios. Más oportunidades.', 'inicio', 'Portada · subtítulo de beneficios'),
+            $this->texto('portada_actualidad_subtitulo', 'Eventos que mueven la noche del Quindío.', 'inicio', 'Portada · subtítulo de eventos'),
+            $this->texto('cta_editorial_frase', 'La noche es más fuerte cuando tiene voz.', 'inicio', 'Portada · frase del cierre'),
+            $this->texto('cta_final_boton', 'Quiero afiliarme', 'inicio', 'Portada · botón del cierre'),
+            $this->texto('publicidad_rotulo', 'Contenido patrocinado', 'inicio', 'Portada · rótulo de la pauta publicitaria'),
+            $this->texto('publicidad_pie', 'Campaña vigente de ASOBARES Capítulo Quindío.', 'inicio', 'Portada · pie de la pauta publicitaria'),
 
             // --- Manifiesto (discurso del TED gremial) ---
             $this->texto('manifiesto_apertura', 'Nos conocen por la rumba. Pero hoy venimos a hablarles del territorio.', 'manifiesto', 'Frase de apertura'),
@@ -257,7 +293,6 @@ class SettingSeeder extends Seeder
 
             // --- Directorio ---
             $this->texto('directorio_titulo', 'Directorio de establecimientos', 'directorio', 'Título del directorio'),
-            $this->largo('directorio_intro', 'Bares, gastrobares, cafés y discotecas afiliados en el Quindío.', 'directorio', 'Introducción del directorio'),
 
             // --- Guía normativa ---
             // OBS3-10. Dos rotulos porque el enlace no siempre cumple lo mismo.
