@@ -9,6 +9,7 @@ use Database\Seeders\RolYPermisoSeeder;
 use Database\Seeders\SettingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -146,6 +147,55 @@ class AliadosEditorialesDeLaPortadaTest extends TestCase
         $this->assertStringNotContainsString('placeholder', $vista.$fila);
     }
 
+    /**
+     * MUT-12: la prueba de arriba solo crea aliados con logo null y busca la
+     * palabra esImagenDeRelleno en el archivo. Aquí se ejerce el filtro: un
+     * logo que no está en el disco y uno de relleno del demo (md5.png, aunque
+     * exista) caen al nombre sin <img>; uno real sí se pinta, para que la
+     * prueba no pase porque la franja haya dejado de pintar imágenes.
+     *
+     * Rotura: anular la condición esImagenDeRelleno en fila-aliados
+     * conservando la palabra.
+     */
+    public function test_un_logo_inexistente_o_de_relleno_cae_al_nombre_sin_imagen(): void
+    {
+        config(['almacenamiento.publico' => 'public']);
+        Storage::fake('public');
+
+        $relleno = 'aliados/'.md5('logo de relleno').'.png';
+        Storage::disk('public')->put($relleno, 'png');
+        Storage::disk('public')->put('aliados/logo-real.png', 'png');
+
+        Aliado::factory()->visible()->institucional()->create([
+            'nombre' => 'Logo Inexistente Home',
+            'logo' => 'aliados/no-existe-en-el-disco.png',
+            'url' => null,
+        ]);
+        Aliado::factory()->visible()->create([
+            'nombre' => 'Logo Relleno Home',
+            'logo' => $relleno,
+            'url' => null,
+        ]);
+        Aliado::factory()->visible()->create([
+            'nombre' => 'Logo Real Home',
+            'logo' => 'aliados/logo-real.png',
+            'url' => null,
+        ]);
+
+        $seccion = $this->seccionDeAliados($this->get('/')->assertOk()->getContent());
+
+        foreach (['Logo Inexistente Home', 'Logo Relleno Home'] as $nombre) {
+            $marca = $this->marcaDe($seccion, $nombre);
+
+            $this->assertStringContainsString('home-editorial-aliados__marca--nombre', $marca, "{$nombre} tiene que caer al nombre");
+            $this->assertStringNotContainsString('<img', $marca, "{$nombre} no puede pintarse como imagen");
+        }
+
+        $real = $this->marcaDe($seccion, 'Logo Real Home');
+        $this->assertStringContainsString('home-editorial-aliados__marca--logo', $real);
+        $this->assertStringContainsString('<img src="'.Storage::disk('public')->url('aliados/logo-real.png').'"', $real, 'un logo real sí se pinta');
+    }
+
     public function test_con_un_solo_aliado_la_portada_sigue_renderizando(): void
     {
         Aliado::factory()->visible()->create([
@@ -199,6 +249,21 @@ class AliadosEditorialesDeLaPortadaTest extends TestCase
         );
 
         return $seccion[1];
+    }
+
+    /** El <li> de la franja que pinta a ese aliado, exigido una sola vez. */
+    private function marcaDe(string $seccion, string $nombre): string
+    {
+        preg_match_all('/<li class="home-editorial-aliados__item">(.*?)<\/li>/s', $seccion, $items);
+
+        $marcas = array_values(array_filter(
+            $items[1],
+            fn (string $item): bool => str_contains($item, '>'.$nombre.'</span>')
+        ));
+
+        $this->assertCount(1, $marcas, "la franja no pinta a {$nombre} una sola vez");
+
+        return $marcas[0];
     }
 
     private function bloqueDeAliados(string $css): string
