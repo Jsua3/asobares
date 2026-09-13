@@ -38,6 +38,54 @@ class PublicidadEditorialDeLaPortadaTest extends TestCase
         $this->assertStringNotContainsString('href="#"', $html);
     }
 
+    /**
+     * La prueba de arriba no siembra nada: pasaba con la portada tomando
+     * cualquier pauta de Inicio (MUT-04). Cada caso va solo, para que quitar
+     * UN filtro (estado, vigencia o ubicación) también se note.
+     */
+    public function test_la_portada_no_pinta_pautas_sin_publicar_vencidas_futuras_ni_de_otra_ubicacion(): void
+    {
+        $casos = [
+            'Pauta pagada sin publicar' => ['estado' => EstadoPublicidad::Pagada],
+            'Pauta pendiente de aprobacion' => ['estado' => EstadoPublicidad::PendienteAprobacion],
+            'Pauta publicada vencida' => [
+                'estado' => EstadoPublicidad::Publicada,
+                'fecha_inicio' => now()->subWeeks(2),
+                'fecha_fin' => now()->subDay(),
+            ],
+            'Pauta publicada futura' => [
+                'estado' => EstadoPublicidad::Publicada,
+                'fecha_inicio' => now()->addDay(),
+                'fecha_fin' => now()->addWeek(),
+            ],
+            'Pauta publicada del directorio' => [
+                'estado' => EstadoPublicidad::Publicada,
+                'ubicacion' => UbicacionPublicidad::Directorio,
+            ],
+        ];
+
+        foreach ($casos as $nombre => $atributos) {
+            $pauta = $this->sembrarPauta(['nombre_comercial' => $nombre, ...$atributos]);
+
+            $html = $this->get('/')->assertOk()->getContent();
+
+            $this->assertStringNotContainsString('home-editorial-publicidad', $html, "La portada pintó la «{$nombre}».");
+            $this->assertStringNotContainsString($nombre, $html);
+
+            $pauta->delete();
+        }
+
+        // Control: la misma siembra, publicada y vigente en Inicio, sí sale.
+        // Sin esto las aserciones de arriba podrían pasar por un nombre de
+        // clase que ya no existe.
+        $this->sembrarPauta(['nombre_comercial' => 'Pauta publicada vigente', 'estado' => EstadoPublicidad::Publicada]);
+
+        $this->assertStringContainsString(
+            'Pauta publicada vigente',
+            $this->seccionDePublicidad($this->get('/')->assertOk()->getContent())
+        );
+    }
+
     public function test_la_portada_conserva_url_real_target_y_rel_de_la_pauta(): void
     {
         $pauta = $this->crearPautaDeInicio([
@@ -56,6 +104,7 @@ class PublicidadEditorialDeLaPortadaTest extends TestCase
         $this->assertStringNotContainsString('href="#"', $seccion);
         $this->assertStringNotContainsString('videos/asobares-institucional', $seccion);
         $this->assertSame($pauta->url_destino, 'https://example.com/campana-real');
+        $this->assertSeIdentificaComoPatrocinada($html, 'Campaña editorial de prueba');
     }
 
     public function test_sin_url_la_pieza_no_inventa_enlace(): void
@@ -72,6 +121,49 @@ class PublicidadEditorialDeLaPortadaTest extends TestCase
         $this->assertStringNotContainsString('<a ', $seccion);
         $this->assertStringNotContainsString('href="#"', $seccion);
         $this->assertStringNotContainsString('Conocer más', $seccion);
+        $this->assertSeIdentificaComoPatrocinada($html, 'Pauta sin destino');
+    }
+
+    /**
+     * La pauta tiene que decir que es publicidad, a la vista y en el nombre
+     * accesible de la sección y de la pieza (MUT-03). Antes solo se pedía
+     * `aria-label=`, que cumple hasta un atributo vacío.
+     */
+    private function assertSeIdentificaComoPatrocinada(string $html, string $nombre): void
+    {
+        $rotulo = 'Contenido patrocinado';
+        $seccion = $this->seccionDePublicidad($html);
+
+        $this->assertMatchesRegularExpression(
+            '/<section class="home-editorial-publicidad[^"]*"(?=[^>]*\baria-label="'.preg_quote($rotulo, '/').'")[^>]*>/',
+            $html,
+            'La sección de publicidad perdió su rótulo accesible.'
+        );
+        $this->assertStringContainsString(
+            '<p class="home-editorial-publicidad__rotulo">'.e($rotulo).'</p>',
+            $seccion,
+            'La pieza de publicidad perdió el rótulo visible.'
+        );
+        $this->assertMatchesRegularExpression(
+            '/class="home-editorial-publicidad__pieza[^"]*"(?:[^>]*)\baria-label="'.preg_quote(e($rotulo.': '.$nombre), '/').'"/',
+            $seccion,
+            'El nombre accesible de la pieza tiene que empezar por el rótulo de patrocinio.'
+        );
+    }
+
+    /**
+     * Siembra directa, sin el hook `saving`: el modelo rechaza publicar
+     * fuera de la dirección, y aquí interesa la portada, no el flujo.
+     *
+     * @param  array<string, mixed>  $atributos
+     */
+    private function sembrarPauta(array $atributos): Publicidad
+    {
+        return Publicidad::withoutEvents(fn (): Publicidad => Publicidad::factory()->create(array_merge([
+            'ubicacion' => UbicacionPublicidad::Inicio,
+            'fecha_inicio' => now()->subDay(),
+            'fecha_fin' => now()->addWeek(),
+        ], $atributos)));
     }
 
     public function test_la_vista_prioriza_foto_real_y_cae_al_banco_no_al_hero(): void

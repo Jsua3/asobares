@@ -23,12 +23,25 @@ class OrdenDeLaPortadaTest extends TestCase
     use RefreshDatabase;
 
     /**
+     * Semilla del giro por sesión (40 alfanuméricos, lo que exige el
+     * almacén de sesiones). Se fija para poder comparar la lista EXACTA:
+     * con una sesión al azar el giro cae en 0 una de cada n veces y la
+     * portada sin `paraLaPortada` pasaría esas veces.
+     */
+    private const string SESION_FIJA = 'portadaSesionFijaParaLaBandaDeAsobares02';
+
+    /**
      * La prueba construye el caso donde los tres órdenes posibles difieren,
      * o pasaría con el defecto dentro:
      *
-     *   creación (= `updated_at`):  Zorba, Mirador, Colina, Ámbar
-     *   bytes (= SQLite crudo):     Colina, Mirador, Zorba, Ámbar
-     *   español (= lo correcto):    Ámbar, Colina, Mirador, Zorba
+     *   creación (= `updated_at`):  Zorba, Mirador, Érase, Colina, Ámbar
+     *   bytes (= SQLite crudo):     Colina, Mirador, Zorba, Ámbar, Érase
+     *   español (= lo correcto):    Ámbar, Colina, Érase, Mirador, Zorba
+     *
+     * «Érase» está ahí a propósito. Con solo «Ámbar» el orden de bytes es
+     * el español girado una posición, y la banda gira: la portada sin
+     * `ordenarEnEspanol` pasaba por una rotación válida (COD-08). Una tilde
+     * en medio del alfabeto rompe esa coincidencia.
      */
     public function test_los_destacados_salen_en_orden_alfabetico_espanol(): void
     {
@@ -36,7 +49,7 @@ class OrdenDeLaPortadaTest extends TestCase
 
         Asociado::query()->update(['destacado' => false]);
 
-        $nombres = ['Zorba Bar', 'Mirador del Quindío', 'Colina Nocturna', 'Ámbar Gastrobar'];
+        $nombres = ['Zorba Bar', 'Mirador del Quindío', 'Érase una Vez', 'Colina Nocturna', 'Ámbar Gastrobar'];
 
         foreach ($nombres as $indice => $nombre) {
             Asociado::factory()->publicado()->create([
@@ -49,24 +62,37 @@ class OrdenDeLaPortadaTest extends TestCase
         $porBytes = $nombres;
         sort($porBytes);
 
-        $esperado = ['Ámbar Gastrobar', 'Colina Nocturna', 'Mirador del Quindío', 'Zorba Bar'];
+        $esperado = ['Ámbar Gastrobar', 'Colina Nocturna', 'Érase una Vez', 'Mirador del Quindío', 'Zorba Bar'];
 
         $this->assertNotSame($nombres, $esperado, 'El caso no sirve si el orden de creación ya es el correcto.');
         $this->assertNotSame($porBytes, $esperado, 'El caso no sirve si el orden de bytes ya es el correcto.');
+        $this->assertFalse(
+            $this->esRotacionDe($esperado, $porBytes),
+            'El caso no sirve si el orden de bytes es una rotación del español: la banda lo giraría y pasaría.'
+        );
 
         $cupo = ordenarEnEspanol(
             Asociado::publicado()->where('destacado', true)->orderBy('nombre')->take(BandaDeEstablecimientos::TOPE)->get()
         )->pluck('nombre')->all();
 
-        if (class_exists(\Collator::class)) {
-            $this->assertSame($esperado, $cupo);
-        }
+        $this->assertSame($esperado, $cupo);
 
-        $html = $this->get('/')->assertOk()->getContent();
+        $origen = BandaDeEstablecimientos::origen(self::SESION_FIJA, count($esperado));
 
+        $this->assertNotSame(0, $origen, 'La sesión fija no sirve si no gira: la portada sin giro pasaría.');
+
+        $html = $this->conSesionFija()->get('/')->assertOk()->getContent();
+        $enPortada = $this->nombresEnPortada($html);
+
+        $this->assertSame(self::SESION_FIJA, session()->getId(), 'La cookie no fijó la sesión que siembra el giro.');
         $this->assertTrue(
-            $this->esRotacionDe($cupo, $this->nombresEnPortada($html)),
+            $this->esRotacionDe($cupo, $enPortada),
             'La portada tiene que pintar una rotación del cupo alfabético, no otro orden.'
+        );
+        $this->assertSame(
+            $this->girar($esperado, $origen),
+            $enPortada,
+            'La portada tiene que pintar el cupo en orden español, girado desde el origen de la sesión.'
         );
     }
 
@@ -94,10 +120,19 @@ class OrdenDeLaPortadaTest extends TestCase
 
         $this->assertCount(BandaDeEstablecimientos::TOPE, $cupo);
 
-        $html = $this->get('/')->assertOk()->getContent();
+        $alfabetico = ['Mirador', 'Nardo', 'Olivo', 'Pino', 'Quimera', 'Roble', 'Sauce', 'Tulipán', 'Vega', 'Waldorf', 'Xilema', 'Yatra'];
+
+        $this->assertSame($alfabetico, $cupo);
+
+        $origen = BandaDeEstablecimientos::origen(self::SESION_FIJA, count($alfabetico));
+
+        $this->assertNotSame(0, $origen, 'La sesión fija no sirve si no gira: la portada sin giro pasaría.');
+
+        $html = $this->conSesionFija()->get('/')->assertOk()->getContent();
         $enPortada = $this->nombresEnPortada($html);
 
         $this->assertTrue($this->esRotacionDe($cupo, $enPortada));
+        $this->assertSame($this->girar($alfabetico, $origen), $enPortada);
 
         foreach (array_diff($nombres, $cupo) as $fuera) {
             $this->assertStringNotContainsString('>'.$fuera.'<', $html);
@@ -142,6 +177,26 @@ class OrdenDeLaPortadaTest extends TestCase
             'BandaDeEstablecimientos',
             file_get_contents(app_path('Http/Controllers/Publico/DirectorioController.php'))
         );
+    }
+
+    /** La cookie de sesión va cifrada, como la manda el navegador. */
+    private function conSesionFija(): static
+    {
+        return $this->withCookie((string) config('session.cookie'), self::SESION_FIJA);
+    }
+
+    /**
+     * Gira la lista a mano, sin pasar por `BandaDeEstablecimientos::rotar`:
+     * si la prueba usara el mismo código que vigila, lo daría por bueno.
+     *
+     * @param  list<string>  $lista
+     * @return list<string>
+     */
+    private function girar(array $lista, int $origen): array
+    {
+        $desplazamiento = $origen % count($lista);
+
+        return array_merge(array_slice($lista, $desplazamiento), array_slice($lista, 0, $desplazamiento));
     }
 
     /**

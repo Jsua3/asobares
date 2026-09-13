@@ -31,6 +31,15 @@ class HeroEditorialDeLaPortadaTest extends TestCase
 
         $this->assertStringContainsString('videos/asobares-institucional.mp4', $html);
         $this->assertStringContainsString('videos/asobares-institucional.jpg', $html);
+
+        // MUT-10: la ruta también vive en el atributo poster del <video>,
+        // que es una capa invisible hasta que carga y no arranca con
+        // movimiento reducido. La foto fija tiene que ser la <img>.
+        $this->assertMatchesRegularExpression(
+            '/<div class="hero-video-fondo">\s*<img src="[^"]*videos\/asobares-institucional\.jpg"/',
+            $html,
+            'El hero perdió la <img> fija: con movimiento reducido o sin video se quedaría sin foto.'
+        );
         $this->assertStringContainsString('La noche construye territorio', $html);
         $this->assertStringContainsString('Gremio, ciudad y noche en una sola voz.', $html);
         $this->assertStringContainsString('href="'.route('directorio.index').'"', $html);

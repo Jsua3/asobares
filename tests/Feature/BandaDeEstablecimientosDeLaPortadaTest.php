@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\EstadoPublicacion;
 use App\Models\Asociado;
 use App\Support\BandaDeEstablecimientos;
 use Database\Seeders\DatabaseSeeder;
@@ -19,6 +20,13 @@ use Tests\TestCase;
 class BandaDeEstablecimientosDeLaPortadaTest extends TestCase
 {
     use RefreshDatabase;
+
+    /**
+     * Semilla del giro por sesión (40 alfanuméricos, lo que exige el
+     * almacén de sesiones). Con una sesión al azar el giro cae en 0 una de
+     * cada n veces y la portada sin `paraLaPortada` pasaría (MUT-11).
+     */
+    private const string SESION_FIJA = 'portadaSesionFijaParaLaBandaDeAsobares02';
 
     public function test_rotar_conserva_el_ciclo_alfabetico_y_no_baraja(): void
     {
@@ -49,7 +57,18 @@ class BandaDeEstablecimientosDeLaPortadaTest extends TestCase
         $this->seed(DatabaseSeeder::class);
         Asociado::query()->update(['destacado' => false]);
 
-        $nombres = ['Ámbar Gastrobar', 'Colina Nocturna', 'Mirador del Quindío', 'Roble Bar', 'Sauce Club', 'Zorba Bar'];
+        // «Érase» en medio del alfabeto: sin él, el orden de bytes de SQLite
+        // (Colina… Zorba, Ámbar) es una rotación del español y la banda lo
+        // daría por bueno aunque faltara `ordenarEnEspanol` (MUT-01).
+        $nombres = ['Ámbar Gastrobar', 'Colina Nocturna', 'Érase una Vez', 'Mirador del Quindío', 'Sauce Club', 'Zorba Bar'];
+
+        $porBytes = $nombres;
+        sort($porBytes);
+
+        $this->assertFalse(
+            $this->esRotacionDe($nombres, $porBytes),
+            'El caso no sirve si el orden de bytes es una rotación del español.'
+        );
 
         foreach ($nombres as $indice => $nombre) {
             Asociado::factory()->publicado()->create([
@@ -59,15 +78,35 @@ class BandaDeEstablecimientosDeLaPortadaTest extends TestCase
             ]);
         }
 
-        $html = $this->get('/')->assertOk()->getContent();
+        $origen = BandaDeEstablecimientos::origen(self::SESION_FIJA, count($nombres));
+
+        $this->assertNotSame(0, $origen, 'La sesión fija no sirve si no gira: la portada sin giro pasaría.');
+
+        $html = $this->conSesionFija()->get('/')->assertOk()->getContent();
         $seccion = $this->seccionDeDescubre($html);
         $vistos = $this->nombresDeLaBanda($seccion);
 
+        $this->assertSame(self::SESION_FIJA, session()->getId(), 'La cookie no fijó la sesión que siembra el giro.');
         $this->assertGreaterThan(3, count($vistos));
         $this->assertTrue($this->esRotacionDe($nombres, $vistos), 'La banda no es una rotación del alfabeto español.');
+        $this->assertSame(
+            $this->girar($nombres, $origen),
+            $vistos,
+            'La banda tiene que empezar en el origen de la sesión y seguir el alfabeto español.'
+        );
         $this->assertStringContainsString('home-editorial-banda__pista', $seccion);
         $this->assertStringContainsString('Ver establecimientos anteriores', $seccion);
         $this->assertStringContainsString('Ver establecimientos siguientes', $seccion);
+        $this->assertMatchesRegularExpression(
+            '/<button\b(?=[^>]*home-editorial-banda__control--prev)(?=[^>]*\baria-label="Ver establecimientos anteriores")[^>]*>/',
+            $seccion,
+            'El control anterior de la banda solo lleva un icono: su nombre accesible es el aria-label.'
+        );
+        $this->assertMatchesRegularExpression(
+            '/<button\b(?=[^>]*home-editorial-banda__control--next)(?=[^>]*\baria-label="Ver establecimientos siguientes")[^>]*>/',
+            $seccion,
+            'El control siguiente de la banda solo lleva un icono: su nombre accesible es el aria-label.'
+        );
         $this->assertStringNotContainsString('href="#"', $seccion);
         $this->assertStringContainsString('La noche del Quindío', $seccion);
         $this->assertStringContainsString('Lugares que dan vida a nuestra ciudad.', $seccion);
@@ -109,14 +148,59 @@ class BandaDeEstablecimientosDeLaPortadaTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/->orderByRaw\(/', $controlador);
     }
 
+    /**
+     * Las fichas nacen en borrador y no se publican sin autorización del
+     * titular: marcar «destacado» no basta para salir en la portada (MUT-02).
+     */
+    public function test_un_destacado_sin_publicar_no_entra_en_la_banda(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        Asociado::query()->update(['destacado' => false]);
+
+        $publicados = ['Colina Nocturna', 'Mirador del Quindío', 'Zorba Bar'];
+
+        foreach ($publicados as $indice => $nombre) {
+            Asociado::factory()->publicado()->create([
+                'nombre' => $nombre,
+                'slug' => 'publicado-'.$indice,
+                'destacado' => true,
+            ]);
+        }
+
+        $sinPublicar = collect(EstadoPublicacion::cases())
+            ->reject(fn (EstadoPublicacion $estado): bool => $estado === EstadoPublicacion::Publicado)
+            ->map(fn (EstadoPublicacion $estado): Asociado => Asociado::factory()->create([
+                'nombre' => 'Bodega sin publicar '.$estado->value,
+                'slug' => 'sin-publicar-'.$estado->value,
+                'destacado' => true,
+                'estado' => $estado,
+            ]));
+
+        $this->assertNotEmpty($sinPublicar);
+
+        $html = $this->get('/')->assertOk()->getContent();
+        $seccion = $this->seccionDeDescubre($html);
+
+        $this->assertEqualsCanonicalizing($publicados, $this->nombresDeLaBanda($seccion));
+
+        foreach ($sinPublicar as $asociado) {
+            $this->assertStringNotContainsString($asociado->nombre, $html, 'Una ficha '.$asociado->estado->value.' salió en la portada.');
+            $this->assertStringNotContainsString(route('directorio.show', $asociado), $seccion);
+        }
+    }
+
     public function test_la_banda_no_tiene_autoplay(): void
     {
         $js = File::get(resource_path('js/app.js'));
 
         $this->assertStringContainsString("Alpine.data('bandaEstablecimientos'", $js);
+
+        // Acotado al bloque de la banda: la regex sobre el archivo entero
+        // casaba con el reduceMovimiento() de prepararCifras (COD-09).
         $this->assertMatchesRegularExpression(
-            '/Alpine\.data\(\'bandaEstablecimientos\'[\s\S]*reduceMovimiento\(\)/',
-            $js
+            '/behavior:\s*reduceMovimiento\(\)\s*\?\s*\'auto\'\s*:\s*\'smooth\'/',
+            $this->bloqueDeAlpine($js, 'bandaEstablecimientos'),
+            'La banda tiene que desplazarse sin animación si pidieron menos movimiento.'
         );
         $this->assertDoesNotMatchRegularExpression(
             '/Alpine\.data\(\'bandaEstablecimientos\'[\s\S]*setInterval/',
@@ -129,6 +213,40 @@ class BandaDeEstablecimientosDeLaPortadaTest extends TestCase
         $directorio = File::get(app_path('Http/Controllers/Publico/DirectorioController.php'));
 
         $this->assertStringNotContainsString('BandaDeEstablecimientos', $directorio);
+    }
+
+    /** La cookie de sesión va cifrada, como la manda el navegador. */
+    private function conSesionFija(): static
+    {
+        return $this->withCookie((string) config('session.cookie'), self::SESION_FIJA);
+    }
+
+    /**
+     * Gira la lista a mano, sin pasar por `BandaDeEstablecimientos::rotar`:
+     * si la prueba usara el mismo código que vigila, lo daría por bueno.
+     *
+     * @param  list<string>  $lista
+     * @return list<string>
+     */
+    private function girar(array $lista, int $origen): array
+    {
+        $desplazamiento = $origen % count($lista);
+
+        return array_merge(array_slice($lista, $desplazamiento), array_slice($lista, 0, $desplazamiento));
+    }
+
+    /** Desde `Alpine.data('nombre'` hasta el `}));` que lo cierra. */
+    private function bloqueDeAlpine(string $js, string $componente): string
+    {
+        $inicio = strpos($js, "Alpine.data('".$componente."'");
+
+        $this->assertNotFalse($inicio, "No encontré Alpine.data('{$componente}').");
+
+        $fin = strpos($js, "\n}));", $inicio);
+
+        $this->assertNotFalse($fin, "No encontré el cierre de Alpine.data('{$componente}').");
+
+        return substr($js, $inicio, $fin - $inicio);
     }
 
     /**
