@@ -54,6 +54,23 @@ class EventosEditorialesDeLaPortadaTest extends TestCase
         $this->assertSame($proximos->count(), preg_match_all('/class="[^"]*home-editorial-evento(?:\s|")/', $seccion));
         $this->assertStringContainsString('aria-label="Ver el evento anterior"', $seccion);
         $this->assertStringContainsString('aria-label="Ver el evento siguiente"', $seccion);
+
+        // Los puntos solo pintan un número con aria-hidden: sin aria-label
+        // son botones sin nombre (MUT-06).
+        $this->assertSame(
+            $proximos->count(),
+            preg_match_all('/<button\b(?=[^>]*home-editorial-eventos__punto)(?=[^>]*\baria-label="Ir al evento )[^>]*>/', $seccion),
+            'Cada evento tiene que tener un punto con nombre accesible.'
+        );
+
+        foreach ($proximos->values() as $indice => $evento) {
+            $rotulo = 'Ir al evento '.($indice + 1).' de '.$proximos->count().': '.$evento->titulo;
+
+            $this->assertMatchesRegularExpression(
+                '/<button\b(?=[^>]*home-editorial-eventos__punto)(?=[^>]*\baria-label="'.preg_quote(e($rotulo), '/').'")[^>]*>/',
+                $seccion
+            );
+        }
     }
 
     public function test_un_solo_evento_proximo_se_pinta_sin_controles_ni_href_vacio(): void

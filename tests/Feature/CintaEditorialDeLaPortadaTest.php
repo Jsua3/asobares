@@ -82,6 +82,23 @@ class CintaEditorialDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('img/monograma-asobares.png', $cinta);
         $this->assertStringContainsString('href="'.route('inicio').'"', $cinta);
 
+        // MUT-07: el enlace a inicio solo contiene el isotipo, así que su
+        // nombre es el alt; y un <aside> sin etiqueta no se distingue de
+        // otros complementarios.
+        $nombreDelSitio = (string) ajuste('sitio_nombre');
+
+        $this->assertNotSame('', trim($nombreDelSitio), 'Sin nombre del sitio la cinta se queda sin nombre accesible.');
+        $this->assertMatchesRegularExpression(
+            '/^<aside class="home-editorial-cinta" aria-label="'.preg_quote(e($nombreDelSitio), '/').'">/',
+            $cinta,
+            'La cinta perdió su aria-label.'
+        );
+        $this->assertMatchesRegularExpression(
+            '/<a href="'.preg_quote(route('inicio'), '/').'" class="home-editorial-cinta__marca[^"]*">\s*<img\b(?=[^>]*img\/monograma-asobares\.png)(?=[^>]*\balt="'.preg_quote(e($nombreDelSitio), '/').'")[^>]*>/',
+            $cinta,
+            'El enlace del isotipo se quedó sin nombre accesible: el alt no puede ir vacío.'
+        );
+
         $this->assertStringContainsString('href="'.route('directorio.index').'"', $cinta);
         $this->assertStringContainsString('href="'.route('guia.index').'"', $cinta);
         $this->assertStringContainsString('href="'.route('eventos.index').'"', $cinta);
