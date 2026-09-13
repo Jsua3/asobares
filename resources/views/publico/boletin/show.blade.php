@@ -1,11 +1,7 @@
 @php
-    // El contenido viene de un editor enriquecido: se sanea antes de mostrarlo.
-    $contenidoSeguro = (new \Symfony\Component\HtmlSanitizer\HtmlSanitizer(
-        (new \Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig)
-            ->allowSafeElements()
-            ->allowRelativeLinks()
-            ->forceHttpsUrls()
-    ))->sanitize((string) $noticia->contenido);
+    // El panel escribe texto plano y lo sembrado trae HTML: el modelo convierte
+    // el texto en párrafos cuando hace falta y sanea el resultado (SEG-04).
+    $contenidoSeguro = $noticia->contenidoSaneado();
 @endphp
 
 <x-layouts.publico :titulo="$noticia->titulo.' — Boletín ASOBARES Quindío'"
