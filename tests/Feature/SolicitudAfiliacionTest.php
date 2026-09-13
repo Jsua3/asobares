@@ -154,6 +154,33 @@ class SolicitudAfiliacionTest extends TestCase
         $this->assertSame(0, SolicitudAfiliacion::count());
     }
 
+    /**
+     * RUT-03. La redirección de validación volvía a la URL previa sin ancla, y
+     * en un teléfono el formulario empieza tres pantallas más abajo: la
+     * persona aterrizaba en el hero sin ver ningún error y creía que no había
+     * pasado nada. Se envía desde la propia página para que la URL previa
+     * exista y la prueba distinga el ancla, no un redirect a la portada.
+     */
+    public function test_un_envio_invalido_vuelve_anclado_al_formulario(): void
+    {
+        $this->get(route('afiliate'))->assertSee('id="formulario"', escape: false);
+
+        $respuesta = $this->from(route('afiliate'))
+            ->post(route('afiliate.store'), $this->datosValidos(['descripcion' => 'corto']));
+
+        // Se compara la cabecera y no con `assertRedirect`: cuando esa aserción
+        // falla, el contexto que le añade Laravel revienta con los errores de
+        // sesión y el motivo real del rojo no se ve.
+        $respuesta->assertSessionHasErrors('descripcion');
+        $this->assertSame(
+            route('afiliate').'#formulario',
+            $respuesta->headers->get('Location'),
+            'Tras un error de validación hay que volver anclado al formulario, no al tope de la página.'
+        );
+
+        $this->assertSame(0, SolicitudAfiliacion::count());
+    }
+
     public function test_honeypot_continua_bloqueando_bots(): void
     {
         $this->post(route('afiliate.store'), $this->datosValidos([

@@ -19,8 +19,11 @@ use App\Panel\ColaDePendientes;
 use Filament\Resources\Resource;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
@@ -43,6 +46,47 @@ class AppServiceProvider extends ServiceProvider
         Artista::class,
         Proveedor::class,
         Aliado::class,
+    ];
+
+    /**
+     * Peticiones por minuto de cada ruta limitada, por nombre de limitador.
+     *
+     * Antes cada ruta llevaba `throttle:N,1`, y ese limitador sin nombre firma
+     * el contador solo con el usuario —o con la IP del anónimo—, nunca con la
+     * ruta: todas compartían un único contador y cada una lo comparaba con su
+     * propio máximo. Seis postulaciones gestionadas dejaban «Pagar» (máximo 5)
+     * en 429, y siete consultas a la guía (máximo 30) hacían lo mismo con el
+     * formulario de afiliación (máximo 6). Los comentarios de `routes/web.php`
+     * razonan cada máximo como si fuera de su ruta; con un limitador por ruta,
+     * por fin lo es (PERM-02).
+     *
+     * Los números son los mismos que había, y el porqué de cada uno sigue
+     * junto a su ruta. `LimitesDePeticionesTest` fija los dos lados.
+     *
+     * @var array<string, int>
+     */
+    public const array LIMITES_POR_MINUTO = [
+        'guia' => 30,
+        'guia-formato' => 10,
+        'empleo-perfil' => 6,
+        'empleo-postular' => 6,
+        'artistas-inscripcion' => 6,
+        'proveedores-inscripcion' => 6,
+        'eventos-inscripcion' => 6,
+        'afiliate' => 6,
+        'contacto' => 6,
+        'mi-cuenta-entrar' => 5,
+        'mi-cuenta-contrasena' => 5,
+        'mi-cuenta-pagar' => 5,
+        'mi-cuenta-fotos-subir' => 30,
+        'mi-cuenta-fotos-borrar' => 20,
+        'mi-cuenta-vacantes-crear' => 20,
+        'mi-cuenta-vacantes-editar' => 20,
+        'mi-cuenta-postulaciones' => 60,
+        'pago-simulado' => 10,
+        'pago-retorno' => 30,
+        'pago-estado' => 30,
+        'webhook-bold' => 120,
     ];
 
     public function register(): void
@@ -77,6 +121,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->registrarReglaDeYoutube();
         $this->registrarBitacoraDeSesiones();
+        $this->registrarLimitesDePeticiones();
 
         // Filament capitaliza cada palabra de los títulos, que es convención
         // inglesa. En español solo va mayúscula la primera: sin esto se lee
@@ -128,6 +173,22 @@ class AppServiceProvider extends ServiceProvider
                 'MAIL_MAILER=log fuera de local escribe el contenido de cada PQR, con los datos '
                 .'personales del ciudadano, en storage/logs. Configura un mailer real (smtp).'
             );
+        }
+    }
+
+    /**
+     * Un contador por ruta y por usuario —o por IP si no hay sesión—.
+     *
+     * El nombre del limitador va también en la clave aunque Laravel ya lo
+     * antepone por su cuenta: así la separación por ruta no depende de un
+     * detalle interno del framework. Sin usuario ni IP en la clave, un solo
+     * afiliado agotaría el límite de todos.
+     */
+    private function registrarLimitesDePeticiones(): void
+    {
+        foreach (self::LIMITES_POR_MINUTO as $limitador => $maximo) {
+            RateLimiter::for($limitador, fn (Request $request): Limit => Limit::perMinute($maximo)
+                ->by($limitador.'|'.($request->user()?->getAuthIdentifier() ?? $request->ip())));
         }
     }
 
