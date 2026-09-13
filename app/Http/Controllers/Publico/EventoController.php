@@ -182,7 +182,7 @@ class EventoController
         if ($evento->esGratuito()) {
             return redirect()
                 ->route('eventos.show', $evento)
-                ->with('exito', "Tu inscripción a «{$evento->titulo}» quedó registrada. Te enviamos la confirmación a {$inscripcion->correo}.");
+                ->with('exito', "Tu inscripción a «{$evento->titulo}» quedó registrada.");
         }
 
         $transaccion = $pagos->cobrarInscripcion($inscripcion);

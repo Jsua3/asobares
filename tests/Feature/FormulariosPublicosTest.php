@@ -57,6 +57,36 @@ class FormulariosPublicosTest extends TestCase
         $this->assertSame(0, Inscripcion::count(), 'Sin autorización no se guarda nada.');
     }
 
+    /**
+     * La inscripción gratuita no manda ningún correo, así que el aviso que ve
+     * la persona no puede prometerle una confirmación que nunca va a llegar.
+     */
+    public function test_la_inscripcion_gratuita_no_promete_un_correo_que_no_se_envia(): void
+    {
+        Mail::fake();
+
+        $evento = Evento::create([
+            'titulo' => 'Capacitación de prueba',
+            'slug' => 'capacitacion-de-prueba',
+            'fecha_inicio' => now()->addDays(10),
+            'precio' => 0,
+            'permite_inscripcion' => true,
+            'estado' => EstadoPublicacion::Publicado,
+        ]);
+
+        $this->post(route('eventos.inscribir', $evento), [
+            'nombre' => 'Laura Gómez',
+            'correo' => 'laura@ejemplo.test',
+            'telefono' => '3145520000',
+            'acepta_datos' => '1',
+        ])
+            ->assertRedirect(route('eventos.show', $evento))
+            ->assertSessionHas('exito', 'Tu inscripción a «Capacitación de prueba» quedó registrada.');
+
+        $this->assertSame(1, Inscripcion::count());
+        Mail::assertNothingOutgoing();
+    }
+
     // --- Vuelta anclada tras un error de validación (RUT-03) ---
 
     /**
