@@ -136,7 +136,7 @@ class BancoVisualDeLaPortadaTest extends TestCase
         $this->assertStringNotContainsString('img/home/establecimiento-', $html);
     }
 
-    public function test_el_evento_de_relleno_usa_el_asset_editorial(): void
+    public function test_el_evento_de_relleno_no_reusa_el_poster_del_hero(): void
     {
         $this->seed(DatabaseSeeder::class);
 
@@ -146,8 +146,15 @@ class BancoVisualDeLaPortadaTest extends TestCase
             $this->markTestSkipped('No hay evento próximo con portada de relleno para comprobar el banco.');
         }
 
-        $this->get('/')->assertOk()
-            ->assertSee('videos/asobares-institucional.jpg', false);
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $this->assertTrue(
+            (bool) preg_match('/<section class="home-editorial-eventos[^"]*"[^>]*>(.*?)<\/section>/s', $html, $seccion),
+            'La portada no pintó la franja editorial de eventos.'
+        );
+
+        $this->assertStringContainsString('home-editorial-evento__fallback', $seccion[1]);
+        $this->assertStringNotContainsString('videos/asobares-institucional.jpg', $seccion[1]);
     }
 
     public function test_la_publicidad_sin_archivo_no_reusa_el_hero(): void

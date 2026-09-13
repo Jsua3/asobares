@@ -996,60 +996,310 @@ html.con-script:not(.sin-desplazamiento) .home-editorial-respalda.revelar-visto 
     }
 }
 
+/* —— Eventos —— */
+
+.home-editorial-eventos {
+    position: relative;
+    isolation: isolate;
+    background:
+        radial-gradient(ellipse 58% 52% at 82% 18%, rgb(238 65 55 / 0.08), transparent 58%),
+        linear-gradient(180deg, #0a0a0a 0%, #121010 46%, #0d0c0c 100%);
+    border-bottom: 1px solid var(--home-border);
+}
+
+html:not(.dark) .home-editorial-eventos {
+    background:
+        radial-gradient(ellipse 58% 52% at 84% 12%, rgb(183 31 24 / 0.05), transparent 56%),
+        linear-gradient(180deg, #f4efe7 0%, #f7f3ec 48%, #f1ece4 100%);
+}
+
+.dark .home-editorial-eventos {
+    background:
+        radial-gradient(ellipse 58% 52% at 82% 18%, rgb(238 65 55 / 0.08), transparent 58%),
+        linear-gradient(180deg, #0a0a0a 0%, #121010 46%, #0d0c0c 100%);
+}
+
+.home-editorial-eventos__carrusel {
+    position: relative;
+}
+
+.home-editorial-eventos__pista {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.home-editorial-eventos__pista::-webkit-scrollbar {
+    display: none;
+}
+
+.home-editorial-evento {
+    flex: 0 0 100%;
+    min-width: 0;
+    scroll-snap-align: start;
+}
+
+@media (min-width: 768px) {
+    .home-editorial-evento {
+        flex-basis: 78%;
+    }
+}
+
+@media (min-width: 1024px) {
+    .home-editorial-evento {
+        flex-basis: 72%;
+    }
+}
+
+.home-editorial-evento:only-child {
+    flex-basis: 100%;
+}
+
+.home-editorial-evento__enlace {
+    display: block;
+    height: 100%;
+}
+
+.home-editorial-evento__foto {
+    position: relative;
+    overflow: hidden;
+    min-height: 20rem;
+    border-radius: 0.75rem;
+    background: #080808;
+    outline: 1px solid rgb(255 255 255 / 0.08);
+}
+
+@media (min-width: 768px) {
+    .home-editorial-evento__foto {
+        min-height: 22rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .home-editorial-evento__foto {
+        min-height: 24rem;
+    }
+}
+
+html:not(.dark) .home-editorial-evento__foto {
+    outline: 1px solid rgb(23 17 15 / 0.08);
+    box-shadow: 0 1px 2px rgb(23 17 15 / 0.05), 0 18px 36px rgb(23 17 15 / 0.06);
+}
+
+.home-editorial-evento__img,
+.home-editorial-evento__fallback {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 20rem;
+    object-fit: cover;
+}
+
+.home-editorial-evento__img {
+    transform: scale(1);
+    transition: transform 700ms ease;
+}
+
+.home-editorial-evento.is-activo .home-editorial-evento__img {
+    transform: scale(1.02);
+}
+
+.home-editorial-evento__velo {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(0deg, rgb(5 5 5 / 0.88) 0%, rgb(5 5 5 / 0.28) 46%, rgb(5 5 5 / 0.18) 100%),
+        radial-gradient(ellipse 70% 50% at 100% 0%, rgb(238 65 55 / 0.14), transparent 58%);
+    transition: opacity 650ms ease;
+}
+
+.home-editorial-evento.is-activo .home-editorial-evento__velo {
+    opacity: 1;
+}
+
+.home-editorial-evento:not(.is-activo) .home-editorial-evento__velo {
+    opacity: 0.88;
+}
+
+.home-editorial-evento__fecha {
+    position: absolute;
+    top: 1.1rem;
+    left: 1.1rem;
+    z-index: 1;
+    display: flex;
+    min-width: 3.5rem;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.45rem 0.55rem 0.5rem;
+    border: 1px solid rgb(255 255 255 / 0.14);
+    background: rgb(8 8 8 / 0.62);
+    color: #f5f3f4;
+    line-height: 1;
+}
+
+.home-editorial-evento.is-activo .home-editorial-evento__fecha {
+    animation: home-editorial-evento-fecha 620ms ease both;
+}
+
+.home-editorial-evento__dia {
+    font-family: var(--font-display);
+    font-size: 1.65rem;
+    font-weight: 700;
+}
+
+.home-editorial-evento__mes {
+    margin-top: 0.2rem;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+}
+
+.home-editorial-evento__cuerpo {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    padding: 1.25rem 1.25rem 1.35rem;
+    color: #f5f3f4;
+}
+
+.home-editorial-evento__tipo {
+    border-radius: 9999px;
+    background: rgb(238 65 55 / 0.92);
+    padding: 0.2rem 0.6rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+.home-editorial-evento__titulo {
+    max-width: 28rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.2rem, 2.4vw, 1.85rem);
+    font-weight: 600;
+    line-height: 1.2;
+    text-wrap: balance;
+}
+
+.home-editorial-evento.is-activo .home-editorial-evento__titulo {
+    animation: home-editorial-evento-titulo 520ms ease both;
+}
+
+.home-editorial-evento__meta {
+    font-size: 0.875rem;
+    color: rgb(245 243 244 / 0.78);
+}
+
+.home-editorial-evento__cta {
+    margin-top: 0.35rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #ee4137;
+}
+
+.home-editorial-eventos__control {
+    position: absolute;
+    top: calc(50% - 1.75rem);
+    z-index: 2;
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(255 255 255 / 0.16);
+    border-radius: 9999px;
+    background: rgb(8 8 8 / 0.55);
+    color: #fff;
+}
+
+html:not(.dark) .home-editorial-eventos__control {
+    border-color: rgb(23 17 15 / 0.1);
+    background: rgb(249 247 244 / 0.88);
+    color: #3d3733;
+    box-shadow: 0 1px 2px rgb(23 17 15 / 0.08);
+}
+
+.home-editorial-eventos__control--prev {
+    left: 0.55rem;
+}
+
+.home-editorial-eventos__control--next {
+    right: 0.55rem;
+}
+
+.home-editorial-eventos__control:focus-visible {
+    outline: 2px solid var(--home-accent);
+    outline-offset: 3px;
+}
+
+.home-editorial-eventos__progreso {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.home-editorial-eventos__punto {
+    padding: 0.15rem 0;
+    border: 0;
+    background: transparent;
+    color: var(--home-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+}
+
+.home-editorial-eventos__punto[aria-current='true'] {
+    color: var(--home-accent);
+    box-shadow: inset 0 -1px 0 currentColor;
+}
+
+.home-editorial-eventos__punto:focus-visible {
+    outline: 2px solid var(--home-accent);
+    outline-offset: 3px;
+}
+
+@keyframes home-editorial-evento-fecha {
+    from {
+        opacity: 0.45;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes home-editorial-evento-titulo {
+    from {
+        opacity: 0.4;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
 /* —— Actualidad —— */
 
 .home-editorial-actualidad {
     background: var(--home-bg-elevated);
     border-bottom: 1px solid var(--home-border);
-}
-
-.home-editorial-actualidad__destacada {
-    min-height: 100%;
-}
-
-.home-editorial-actualidad__destacada .relative {
-    box-shadow: var(--home-shadow);
-    outline: 1px solid var(--home-border);
-}
-
-.home-editorial-actualidad__img {
-    transition: transform 280ms ease;
-}
-
-.home-editorial-actualidad__destacada:hover .home-editorial-actualidad__img {
-    transform: scale(1.03);
-}
-
-.home-editorial-actualidad__velo {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(180deg, transparent 30%, rgb(238 65 55 / 0.05) 100%);
-}
-
-html:not(.dark) .home-editorial-actualidad__velo {
-    background: linear-gradient(180deg, transparent 38%, rgb(238 65 55 / 0.03) 100%);
-}
-
-.home-editorial-actualidad__overlay {
-    background: linear-gradient(0deg, rgb(0 0 0 / 0.88) 0%, rgb(0 0 0 / 0.4) 48%, transparent 78%);
-}
-
-html:not(.dark) .home-editorial-actualidad__overlay {
-    background: linear-gradient(0deg, rgb(0 0 0 / 0.78) 0%, rgb(0 0 0 / 0.32) 50%, transparent 78%);
-}
-
-.home-editorial-actualidad__secundaria,
-.home-editorial-actualidad__oportunidad {
-    background: var(--home-surface);
-    border: 1px solid var(--home-border);
-    transition: border-color var(--home-transicion), background-color var(--home-transicion);
-}
-
-.home-editorial-actualidad__secundaria:hover,
-.home-editorial-actualidad__oportunidad:hover {
-    border-color: var(--home-border-media);
-    background: var(--home-bg-elevated);
 }
 
 .home-editorial-movimiento {
@@ -1293,6 +1543,7 @@ html:not(.dark) .home-editorial-cta__velo {
 .home-editorial-cifras > div,
 .home-editorial-descubre > div,
 .home-editorial-respalda > div,
+.home-editorial-eventos > div,
 .home-editorial-actualidad > div,
 .home-editorial-publicidad > div {
     padding-block: clamp(2rem, 4vw, 2.5rem);
@@ -1330,11 +1581,14 @@ html:not(.dark) .home-editorial-cta__velo {
     .home-editorial .home-editorial-enlace svg,
     .home-editorial-establecimiento__flecha,
     .home-editorial-establecimiento__img,
-    .home-editorial-actualidad__img,
+    .home-editorial-evento__img,
+    .home-editorial-evento__fecha,
+    .home-editorial-evento__titulo,
     .home-editorial-publicidad__img,
     .home-editorial-cta__foto,
     .home-editorial-cinta a.home-editorial-cinta__enlace,
     .home-editorial-cinta a.home-editorial-cinta__enlace svg {
+        animation: none !important;
         transition: none !important;
         transform: none !important;
     }
@@ -1343,7 +1597,9 @@ html:not(.dark) .home-editorial-cta__velo {
     .home-editorial-establecimiento:hover,
     .home-editorial-establecimiento:hover .home-editorial-establecimiento__img,
     .home-editorial-beneficio:hover .home-editorial-beneficio__titulo,
-    .home-editorial-actualidad__destacada:hover .home-editorial-actualidad__img,
+    .home-editorial-evento.is-activo .home-editorial-evento__img,
+    .home-editorial-evento.is-activo .home-editorial-evento__fecha,
+    .home-editorial-evento.is-activo .home-editorial-evento__titulo,
     .home-editorial-publicidad__banner:hover .home-editorial-publicidad__img,
     .home-editorial-cta:hover .home-editorial-cta__foto,
     .home-editorial-cinta a.home-editorial-cinta__enlace:hover,

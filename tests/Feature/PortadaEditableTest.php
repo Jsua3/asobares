@@ -22,11 +22,14 @@ class PortadaEditableTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** Las doce claves que gobiernan el texto propio de la portada. */
+    /**
+     * Claves de texto propio de la portada que esta vista todavía pinta.
+     * `portada_empleo_*` salió de Eventos en HOME-FINAL-04 y vuelve con
+     * «ASOBARES en movimiento» (HOME-FINAL-05); no se exige aquí.
+     */
     private const array TITULOS = [
         'portada_cifras_titulo',
         'portada_guia_titulo',
-        'portada_empleo_titulo',
         'portada_destacados_titulo',
         'portada_beneficios_titulo',
         'portada_eventos_titulo',
@@ -44,7 +47,6 @@ class PortadaEditableTest extends TestCase
         'hero_video_titulo',
         'hero_video_detalle',
         'portada_guia_texto',
-        'portada_empleo_texto',
         'portada_destacados_texto',
     ];
 

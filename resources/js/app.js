@@ -553,6 +553,125 @@ Alpine.data('videoHero', () => ({
     },
 }));
 
+Alpine.data('carruselEventos', (total = 1) => ({
+    indice: 0,
+    total,
+    pausadoPorUsuario: false,
+    temporizador: null,
+    alCambiarVisibilidad: null,
+
+    init() {
+        this.alCambiarVisibilidad = () => {
+            if (document.hidden) {
+                this.detenerAuto();
+
+                return;
+            }
+
+            this.intentarAuto();
+        };
+
+        this.sincronizar();
+        this.$refs.pista?.addEventListener('scroll', () => this.sincronizar(), { passive: true });
+        document.addEventListener('visibilitychange', this.alCambiarVisibilidad);
+        this.intentarAuto();
+    },
+
+    destroy() {
+        this.detenerAuto();
+
+        if (this.alCambiarVisibilidad) {
+            document.removeEventListener('visibilitychange', this.alCambiarVisibilidad);
+        }
+    },
+
+    puedeAutoplay() {
+        return this.total > 1
+            && ! reduceMovimiento()
+            && window.matchMedia('(min-width: 768px)').matches
+            && ! this.pausadoPorUsuario
+            && ! document.hidden;
+    },
+
+    intentarAuto() {
+        this.detenerAuto();
+
+        if (! this.puedeAutoplay()) {
+            return;
+        }
+
+        this.temporizador = window.setInterval(() => this.desplazar(this.indice + 1), 7000);
+    },
+
+    detenerAuto() {
+        if (this.temporizador) {
+            window.clearInterval(this.temporizador);
+            this.temporizador = null;
+        }
+    },
+
+    pausar() {
+        this.pausadoPorUsuario = true;
+        this.detenerAuto();
+    },
+
+    reanudar() {
+        this.pausadoPorUsuario = false;
+        this.intentarAuto();
+    },
+
+    desplazar(destino) {
+        const pista = this.$refs.pista;
+        const tarjetas = pista ? [...pista.querySelectorAll('.home-editorial-evento')] : [];
+        const tarjeta = tarjetas[((destino % this.total) + this.total) % this.total];
+
+        if (! pista || ! tarjeta) {
+            return;
+        }
+
+        pista.scrollTo({
+            left: tarjeta.offsetLeft,
+            behavior: reduceMovimiento() ? 'auto' : 'smooth',
+        });
+    },
+
+    ir(destino) {
+        this.pausar();
+        this.desplazar(destino);
+    },
+
+    siguiente() {
+        this.ir(this.indice + 1);
+    },
+
+    anterior() {
+        this.ir(this.indice - 1);
+    },
+
+    sincronizar() {
+        const pista = this.$refs.pista;
+
+        if (! pista) {
+            return;
+        }
+
+        const tarjetas = [...pista.querySelectorAll('.home-editorial-evento')];
+        let cercano = 0;
+        let distancia = Number.POSITIVE_INFINITY;
+
+        tarjetas.forEach((tarjeta, indice) => {
+            const delta = Math.abs(tarjeta.offsetLeft - pista.scrollLeft);
+
+            if (delta < distancia) {
+                distancia = delta;
+                cercano = indice;
+            }
+        });
+
+        this.indice = cercano;
+    },
+}));
+
 Alpine.data('bandaEstablecimientos', () => ({
     avanzar(direccion) {
         const pista = this.$refs.pista;
