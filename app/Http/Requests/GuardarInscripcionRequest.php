@@ -14,6 +14,16 @@ class GuardarInscripcionRequest extends FormRequest
         return true;
     }
 
+    /**
+     * La inscripción queda por debajo de la descripción del evento: sin el
+     * ancla, un error de validación devolvía a la persona al tope de la ficha
+     * sin ningún error a la vista (RUT-03).
+     */
+    protected function getRedirectUrl(): string
+    {
+        return route('eventos.show', $this->route('evento')).'#inscripcion';
+    }
+
     /** @return array<string, mixed> */
     public function rules(): array
     {

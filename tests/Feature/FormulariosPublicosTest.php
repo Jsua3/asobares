@@ -57,6 +57,70 @@ class FormulariosPublicosTest extends TestCase
         $this->assertSame(0, Inscripcion::count(), 'Sin autorización no se guarda nada.');
     }
 
+    // --- Vuelta anclada tras un error de validación (RUT-03) ---
+
+    /**
+     * La redirección de validación volvía a la URL previa sin ancla: en un
+     * teléfono el formulario del evento queda pantalla y media por debajo del
+     * hero, y la persona no veía ningún error. Se envía desde la propia ficha
+     * para que la URL previa exista y la prueba distinga el ancla.
+     */
+    public function test_una_inscripcion_invalida_vuelve_anclada_al_formulario_del_evento(): void
+    {
+        $evento = Evento::create([
+            'titulo' => 'Capacitación de prueba',
+            'slug' => 'capacitacion-de-prueba',
+            'fecha_inicio' => now()->addDays(10),
+            'precio' => 0,
+            'permite_inscripcion' => true,
+            'estado' => EstadoPublicacion::Publicado,
+        ]);
+
+        $this->get(route('eventos.show', $evento))->assertSee('id="inscripcion"', escape: false);
+
+        $respuesta = $this->from(route('eventos.show', $evento))
+            ->post(route('eventos.inscribir', $evento), [
+                'nombre' => 'Correo Roto',
+                'correo' => 'correo-roto',
+                'telefono' => '3145520000',
+                'acepta_datos' => '1',
+            ]);
+
+        // Cabecera y no `assertRedirect`: cuando esa aserción falla, el
+        // contexto que le añade Laravel revienta y esconde el motivo del rojo.
+        $respuesta->assertSessionHasErrors('correo');
+        $this->assertSame(
+            route('eventos.show', $evento).'#inscripcion',
+            $respuesta->headers->get('Location'),
+            'Tras un error de validación hay que volver anclado al formulario del evento.'
+        );
+
+        $this->assertSame(0, Inscripcion::count());
+    }
+
+    public function test_un_mensaje_invalido_vuelve_anclado_al_formulario_de_contacto(): void
+    {
+        $this->get(route('contacto'))->assertSee('id="formulario"', escape: false);
+
+        $respuesta = $this->from(route('contacto'))
+            ->post(route('contacto.store'), [
+                'tipo' => TipoMensaje::Contacto->value,
+                'nombre' => 'Paula Restrepo',
+                'correo' => 'paula@ejemplo.test',
+                'mensaje' => 'corto',
+                'acepta_datos' => '1',
+            ]);
+
+        $respuesta->assertSessionHasErrors('mensaje');
+        $this->assertSame(
+            route('contacto').'#formulario',
+            $respuesta->headers->get('Location'),
+            'Tras un error de validación hay que volver anclado al formulario de contacto.'
+        );
+
+        $this->assertSame(0, Mensaje::count());
+    }
+
     public function test_el_registro_de_aspirante_exige_la_autorizacion_de_datos(): void
     {
         $this->post(route('empleo.aspirante'), [

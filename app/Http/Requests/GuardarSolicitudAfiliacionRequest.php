@@ -16,6 +16,16 @@ class GuardarSolicitudAfiliacionRequest extends FormRequest
         return true;
     }
 
+    /**
+     * El formulario empieza varias pantallas por debajo del hero: sin el ancla,
+     * un error de validación devolvía a la persona al tope sin nada a la vista
+     * (RUT-03). Mismo remedio que los formularios de empleo.
+     */
+    protected function getRedirectUrl(): string
+    {
+        return route('afiliate').'#formulario';
+    }
+
     protected function prepareForValidation(): void
     {
         if ($this->has('solicitante_cargo_otro')) {
