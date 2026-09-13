@@ -12,7 +12,7 @@ use Tests\TestCase;
 /**
  * Ningún ajuste que el panel ofrece editar puede no cambiar nada.
  *
- * RNF-09 dice que nada esté quemado en el código, y de ahí salen los 126 ajustes
+ * RNF-09 dice que nada esté quemado en el código, y de ahí salen los 197 ajustes
  * de «Ajustes del sitio». La cara B de esa regla no la vigilaba nadie: un ajuste
  * **sembrado y que ninguna vista lee** es peor que no tenerlo, porque la oficina
  * lo cambia, guarda, ve el aviso verde y el sitio se queda igual. No hay error,

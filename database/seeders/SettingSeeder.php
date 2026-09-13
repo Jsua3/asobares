@@ -143,6 +143,32 @@ class SettingSeeder extends Seeder
             $this->texto('portada_videos_rotulo', 'ASOBARES en movimiento', 'inicio', 'Portada · rótulo de videos'),
             $this->texto('portada_videos_titulo', 'Historias cortas para sentir el gremio.', 'inicio', 'Portada · título de videos'),
 
+            /**
+             * Los textos que la portada editorial (10-12 sep 2026) lee con
+             * `ajuste('clave', 'respaldo')` y nadie sembraba (COD-04): sin
+             * fila en la base el panel no los ofrecía, así que la portada
+             * pintaba el respaldo y la oficina no tenía cómo cambiarlo.
+             *
+             * ⚠️ Procedencia (D-14): el valor es el texto de respaldo EXACTO de
+             * cada vista de `components/publico/home/`, escrito por el equipo.
+             * No sale de ningún documento oficial del gremio. Se siembra igual
+             * para que la portada no cambie ni una letra y el texto pase a
+             * editarse desde el panel; el día que el gremio lo redacte, se
+             * cambia allí.
+             *
+             * Van en `inicio` porque es la pestaña de la portada y el panel no
+             * tiene grupo propio de publicidad: un grupo nuevo quedaría fuera
+             * de `AjustesDelSitio::PESTANAS` y el ajuste no se vería.
+             */
+            $this->texto('portada_cifras_subtitulo', 'La noche también mueve la economía.', 'inicio', 'Portada · subtítulo de la franja de cifras'),
+            $this->texto('portada_destacados_subtitulo', 'Lugares que dan vida a nuestra ciudad.', 'inicio', 'Portada · subtítulo de los establecimientos destacados'),
+            $this->texto('portada_beneficios_subtitulo', 'Más beneficios. Más oportunidades.', 'inicio', 'Portada · subtítulo de beneficios'),
+            $this->texto('portada_actualidad_subtitulo', 'Eventos que mueven la noche del Quindío.', 'inicio', 'Portada · subtítulo de eventos'),
+            $this->texto('cta_editorial_frase', 'La noche es más fuerte cuando tiene voz.', 'inicio', 'Portada · frase del cierre'),
+            $this->texto('cta_final_boton', 'Quiero afiliarme', 'inicio', 'Portada · botón del cierre'),
+            $this->texto('publicidad_rotulo', 'Contenido patrocinado', 'inicio', 'Portada · rótulo de la pauta publicitaria'),
+            $this->texto('publicidad_pie', 'Campaña vigente de ASOBARES Capítulo Quindío.', 'inicio', 'Portada · pie de la pauta publicitaria'),
+
             // --- Manifiesto (discurso del TED gremial) ---
             $this->texto('manifiesto_apertura', 'Nos conocen por la rumba. Pero hoy venimos a hablarles del territorio.', 'manifiesto', 'Frase de apertura'),
             $this->texto('manifiesto_cierre_titulo', 'Asobares no representa bares. Representa el Quindío que se vive de noche.', 'manifiesto', 'Frase de cierre'),
