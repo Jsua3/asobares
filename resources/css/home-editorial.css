@@ -1435,44 +1435,165 @@ html.con-script:not(.sin-desplazamiento) .home-editorial-movimiento.revelar-vist
     }
 }
 
-/* —— Publicidad (banner fotográfico, también en claro) —— */
+/* —— Publicidad (pieza editorial, fotográfica también en claro) —— */
 
 .home-editorial-publicidad {
-    background: var(--home-bg);
-    border-top: 1px solid var(--home-border);
+    background: transparent;
+    padding-block: 0.25rem;
 }
 
-.home-editorial-publicidad__banner {
-    border: 1px solid var(--home-border);
+.home-editorial-publicidad__pieza {
+    display: block;
+    overflow: hidden;
     background: #080808;
-    transition: border-color var(--home-transicion);
+    outline: 1px solid rgb(238 65 55 / 0.22);
+    box-shadow: 0 10px 28px rgb(0 0 0 / 0.18);
+    transition: transform 280ms ease, box-shadow 280ms ease, outline-color 280ms ease;
 }
 
-.home-editorial-publicidad__banner:hover {
-    border-color: var(--home-border-media);
+html:not(.dark) .home-editorial-publicidad__pieza {
+    outline-color: rgb(183 31 24 / 0.2);
+    box-shadow: 0 12px 32px rgb(23 17 15 / 0.1);
 }
 
-.home-editorial-publicidad__img {
-    transition: transform 280ms ease;
+.home-editorial-publicidad__escena {
+    position: relative;
+    min-height: 12.5rem;
+    overflow: hidden;
 }
 
-.home-editorial-publicidad__banner:hover .home-editorial-publicidad__img {
-    transform: scale(var(--home-zoom));
+@media (min-width: 768px) {
+    .home-editorial-publicidad__escena {
+        min-height: 14.5rem;
+    }
 }
 
-.home-editorial-publicidad__velo {
-    background:
-        linear-gradient(90deg, rgb(8 8 8 / 0.82) 0%, rgb(8 8 8 / 0.48) 52%, rgb(8 8 8 / 0.12) 100%),
-        linear-gradient(0deg, rgb(8 8 8 / 0.35) 0%, transparent 50%);
-    pointer-events: none;
+@media (min-width: 1024px) {
+    .home-editorial-publicidad__escena {
+        min-height: 16rem;
+    }
 }
 
+.home-editorial-publicidad__img,
 .home-editorial-publicidad__fallback {
     position: absolute;
     inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.home-editorial-publicidad__img {
+    transform: scale(1);
+    transition: transform 300ms ease;
+}
+
+.home-editorial-publicidad__velo {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(90deg, rgb(8 8 8 / 0.78) 0%, rgb(8 8 8 / 0.38) 46%, rgb(8 8 8 / 0.08) 78%),
+        linear-gradient(0deg, rgb(8 8 8 / 0.42) 0%, transparent 52%);
+}
+
+.home-editorial-publicidad__fallback {
     background:
         radial-gradient(circle at 28% 20%, rgb(238 65 55 / 0.2), transparent 42%),
         linear-gradient(145deg, #131010 0%, #080808 100%);
+}
+
+.home-editorial-publicidad__cuerpo {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    min-height: inherit;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.15rem 1.2rem 1.25rem;
+}
+
+@media (min-width: 640px) {
+    .home-editorial-publicidad__cuerpo {
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: space-between;
+        padding: 1.4rem 1.6rem 1.5rem;
+    }
+}
+
+.home-editorial-publicidad__texto {
+    max-width: 32rem;
+}
+
+.home-editorial-publicidad__rotulo {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgb(245 243 244 / 0.72);
+}
+
+.home-editorial-publicidad__titulo {
+    margin-top: 0.4rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.4vw, 1.85rem);
+    font-weight: 600;
+    line-height: 1.2;
+    color: #f5f3f4;
+    text-wrap: balance;
+}
+
+.home-editorial-publicidad__pie {
+    display: none;
+    margin-top: 0.4rem;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: rgb(245 243 244 / 0.78);
+}
+
+@media (min-width: 640px) {
+    .home-editorial-publicidad__pie {
+        display: block;
+    }
+}
+
+.home-editorial-publicidad__cta {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #ee4137;
+    transition: transform 280ms ease;
+}
+
+.home-editorial-publicidad__cta svg {
+    transition: transform 280ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .home-editorial-publicidad__pieza:hover {
+        transform: translateY(-4px) scale(1.012);
+        outline-color: rgb(238 65 55 / 0.42);
+        box-shadow:
+            0 0 0 1px rgb(238 65 55 / 0.22),
+            0 22px 40px rgb(0 0 0 / 0.22);
+    }
+
+    .home-editorial-publicidad__pieza:hover .home-editorial-publicidad__img {
+        transform: scale(1.03);
+    }
+
+    .home-editorial-publicidad__pieza:hover .home-editorial-publicidad__cta,
+    .home-editorial-publicidad__pieza:hover .home-editorial-publicidad__cta svg {
+        transform: translateX(3px);
+    }
+}
+
+.home-editorial-publicidad a.home-editorial-publicidad__pieza:focus-visible {
+    outline: 2px solid var(--home-accent);
+    outline-offset: 3px;
 }
 
 /* —— Aliados — dos tratamientos para no confundirse con el fondo —— */
@@ -1714,6 +1835,9 @@ html:not(.dark) .home-editorial-cta__velo {
     .home-editorial-evento__fecha,
     .home-editorial-evento__titulo,
     .home-editorial-publicidad__img,
+    .home-editorial-publicidad__pieza,
+    .home-editorial-publicidad__cta,
+    .home-editorial-publicidad__cta svg,
     .home-editorial-cta__foto,
     .home-editorial-cinta a.home-editorial-cinta__enlace,
     .home-editorial-cinta a.home-editorial-cinta__enlace svg {
@@ -1734,7 +1858,11 @@ html:not(.dark) .home-editorial-cta__velo {
     .home-editorial-movimiento .home-editorial-enlace,
     .home-editorial-movimiento .home-editorial-enlace:hover,
     .home-editorial-movimiento .home-editorial-enlace:hover svg,
-    .home-editorial-publicidad__banner:hover .home-editorial-publicidad__img,
+    .home-editorial-publicidad__pieza,
+    .home-editorial-publicidad__pieza:hover,
+    .home-editorial-publicidad__pieza:hover .home-editorial-publicidad__img,
+    .home-editorial-publicidad__pieza:hover .home-editorial-publicidad__cta,
+    .home-editorial-publicidad__pieza:hover .home-editorial-publicidad__cta svg,
     .home-editorial-cta:hover .home-editorial-cta__foto,
     .home-editorial-cinta a.home-editorial-cinta__enlace:hover,
     .home-editorial-cinta a.home-editorial-cinta__enlace:hover svg {
