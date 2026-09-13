@@ -44,10 +44,10 @@
 /*
  * Escala tipográfica óptica: el par [tamaño → line-height, letter-spacing] que
  * Tailwind 4 escribe con los modificadores `--text-*--line-height` y
- * `--text-*--letter-spacing`. El default no trae NINGÚN `letter-spacing`, así
- * que hasta hoy todo el tracking del sitio lo ponía un `-0.02em` plano sobre
- * h1..h4 que valía -0,32 px sobre un título de tarjeta de 16 px y -1,20 px
- * sobre un hero de 60 px: el mismo número para dos problemas opuestos.
+ * `--text-*--letter-spacing`. El default no trae NINGÚN `letter-spacing`, y un
+ * `-0.02em` plano sobre h1..h4 vale -0,32 px sobre un título de tarjeta de
+ * 16 px y -1,20 px sobre un hero de 60 px: el mismo número para dos problemas
+ * opuestos.
  *
  * Poppins se sirve en seis pesos ESTÁTICOS (`vite.config.js:15`). Leído el
  * directorio de tablas del woff, no hay `fvar`: sin ejes de variación no hay
@@ -187,7 +187,7 @@
         border: 1px solid var(--asb-linea);
         border-radius: var(--asb-radio-tarjeta);
         /* En claro el borde al 12% no basta para despegar la tarjeta del
-           fondo: una sombra minima hace el trabajo que en oscuro hace el
+           fondo: una sombra mínima hace el trabajo que en oscuro hace el
            contraste de superficies. */
         box-shadow: var(--asb-sombra-tarjeta);
     }
@@ -1208,10 +1208,10 @@
 
     /*
      * Hero con imagen o video de fondo (OBS3-02). La ranura `medio` del
-     * componente pinta aqui detras, y el texto queda por encima con un velo
+     * componente pinta aquí detrás, y el texto queda por encima con un velo
      * en medio que garantiza el contraste.
      *
-     * El apilado se aisla con `isolation` para que el z-index del contenido no
+     * El apilado se aísla con `isolation` para que el z-index del contenido no
      * compita con nada de fuera: la portada tiene secciones vecinas con
      * `resplandor-marca` y `trama-puntos`.
      */
@@ -1286,9 +1286,9 @@
     }
 
     /*
-     * El velo. Es lo unico que separa un fondo bonito de un titular ilegible,
-     * y su opacidad es un minimo calculado --ver `--asb-velo-hero`--, no una
-     * preferencia. El color sale del fondo del tema, asi que el velo se
+     * El velo. Es lo único que separa un fondo bonito de un titular ilegible,
+     * y su opacidad es un mínimo calculado --ver `--asb-velo-hero`--, no una
+     * preferencia. El color sale del fondo del tema, así que el velo se
      * invierte solo entre claro y oscuro sin una segunda regla.
      */
     .hero-medio::after {
@@ -1314,7 +1314,7 @@
     }
 
     /*
-     * Trama de puntos: el motivo grafico que la marca usa en sus piezas
+     * Trama de puntos: el motivo gráfico que la marca usa en sus piezas
      * (ver cronograma y TED gremial). Se aplica como textura de fondo.
      */
     .trama-puntos {
@@ -1361,10 +1361,11 @@
     }
 
     /*
-     * Escena pública (rediseño visual, 31 ago 2026).
+     * Escena pública: vidrio, luz ambiente, revelado al entrar en pantalla e
+     * inclinación de las fotos.
      *
-     * El §10 de la spec de movimiento rechazó el scroll-reveal en las
-     * rejillas. Se reabre aquí a propósito: el gremio pidió vida, aire y
+     * El revelado al desplazarse es deliberado aunque la especificación de
+     * movimiento no lo quiere en rejillas: el gremio pidió vida, aire y
      * fotografía, no otra grilla de cajas. El interruptor de movimiento
      * reducido anula desplazamientos y deja fundidos de opacidad y color.
      */
@@ -1455,11 +1456,11 @@
      * noche». Al pulsarlo se VIDRIA — el relleno se retira y deja ver lo que
      * hay detrás, desenfocado y con la saturación subida.
      *
-     * El relleno vive AQUÍ y ya no en una utilidad `bg-*` del marcado, por la
-     * misma razón por la que `.contorno-claro` vive aquí desde el 31 de agosto:
-     * en Tailwind 4 una utilidad de `@layer utilities` gana siempre a
-     * `@layer components`, así que un `bg-accion` en la plantilla pisaría este
-     * fondo y el vidriado no se vería nunca.
+     * El relleno vive AQUÍ y no en una utilidad `bg-*` del marcado, por la
+     * misma razón por la que `.contorno-claro` vive aquí: en Tailwind 4 una
+     * utilidad de `@layer utilities` gana siempre a `@layer components`, así
+     * que un `bg-accion` en la plantilla pisaría este fondo y el vidriado no se
+     * vería nunca.
      *
      * La asimetría es el truco entero: la vuelta tarda 280 ms y la ida 90. Un
      * líquido al que apartas huye deprisa y regresa despacio; con las dos
@@ -1468,17 +1469,17 @@
      * El relleno va en una CAPA propia y no en el fondo del botón, y el cambio
      * de estado es un `background-color` de toda la vida.
      *
-     * El primer intento derivaba fondo, tinta y filo de una propiedad
-     * registrada (`@property --vidriado`) con `color-mix(... calc(var() *
-     * 100%) ...)`. Compila, pero **Lightning CSS lo pliega**: en el CSS
-     * servido el `color-mix` salía convertido en su primer color a secas, de
-     * modo que el rótulo se quedaba pintado con la tinta del estado pulsado
-     * SIEMPRE --rojo oscuro sobre rojo, 1,89:1-- y el filo del canto igual.
-     * Se vio comprobando el archivo construido, no el fuente.
+     * No se deriva fondo, tinta y filo de una propiedad registrada
+     * (`@property --vidriado`) con `color-mix(... calc(var() * 100%) ...)`.
+     * Compila, pero **Lightning CSS lo pliega**: en el CSS servido el
+     * `color-mix` sale convertido en su primer color a secas, de modo que el
+     * rótulo quedaría pintado con la tinta del estado pulsado SIEMPRE --rojo
+     * oscuro sobre rojo, 1,89:1-- y el filo del canto igual. Solo se ve
+     * comprobando el archivo construido, no el fuente.
      *
-     * Esto no usa `color-mix`, ni `calc()` dentro de un color, ni propiedades
-     * registradas: dos capas y transiciones de las que el navegador lleva
-     * animando quince años.
+     * Por eso esto no usa `color-mix`, ni `calc()` dentro de un color, ni
+     * propiedades registradas: dos capas y transiciones de las que el
+     * navegador lleva animando quince años.
      */
     .cta-vivo {
         position: relative;

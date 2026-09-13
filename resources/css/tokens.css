@@ -40,7 +40,7 @@
     --ease-rebote-vivo: cubic-bezier(0.32, 0.72, 0, 1);
 
     /* --- Paleta principal --- */
-    /* Pub Red #EE4137: dinamismo, accion y movimiento. Unico acento. */
+    /* Pub Red #EE4137: dinamismo, acción y movimiento. Único acento. */
     --color-marca-50: #fef3f2;
     --color-marca-100: #fde4e2;
     --color-marca-200: #fbcac6;
@@ -74,10 +74,10 @@
 }
 
 /*
- * Tokens semanticos: las vistas no dicen "negro" ni "blanco", dicen que papel
- * juega cada color. Los dos temas son la misma rampa `noche` leida en sentidos
- * opuestos, asi que el modo oscuro conserva exactamente los valores con los que
- * se diseno el sitio y el claro nace con el Ambient White del manual de marca.
+ * Tokens semánticos: las vistas no dicen "negro" ni "blanco", dicen qué papel
+ * juega cada color. Los dos temas son la misma rampa `noche` leída en sentidos
+ * opuestos, así que el modo oscuro conserva exactamente los valores con los que
+ * se diseñó el sitio y el claro nace con el Ambient White del manual de marca.
  */
 :root {
     color-scheme: light;
@@ -96,81 +96,78 @@
     --asb-linea-fuerte: rgb(11 9 10 / 0.22);
 
     /* Sobre fondo claro el Pub Red puro no alcanza AA en texto: se usa la
-       variante 700, que da 5.86:1 y sigue leyendose como rojo de marca. */
+       variante 700, que da 5.86:1 y sigue leyéndose como rojo de marca. */
     --asb-acento: #b71f18;
     --asb-acento-fuerte: #971d18;
     --asb-marca-panel: rgb(238 65 55 / 0.07);
 
     /*
      * El rojo que puede LLEVAR texto blanco encima, que no es el mismo que el
-     * rojo de marca. Pub Red puro con blanco da 3,86:1 y el minimo de RNF-12
-     * para texto normal es 4,5:1, asi que los 43 botones de accion del sitio
-     * --«Afiliate» incluido-- llevaban un rotulo que no cumple. Y fallaba en
-     * los DOS temas, porque el relleno del boton es el mismo rojo en ambos: no
-     * depende del fondo de la pagina, solo del rojo.
+     * rojo de marca. Pub Red puro con blanco da 3,86:1 y el mínimo de RNF-12
+     * para texto normal es 4,5:1, así que no sirve de relleno para los
+     * botones de acción del sitio --«Afíliate» incluido--. Y falla en los DOS
+     * temas, porque el relleno del botón es el mismo rojo en ambos: no
+     * depende del fondo de la página, solo del rojo.
      *
      * Marca 600 da 4,83:1 y marca 700 --el del hover-- 6,52:1, y los dos
-     * siguen leyendose como el rojo del gremio. Es exactamente la misma
-     * decision que ya se tomo tres lineas mas arriba para el texto sobre fondo
-     * claro, aplicada ahora al caso contrario: texto blanco sobre el rojo.
+     * siguen leyéndose como el rojo del gremio. Es la misma decisión que el
+     * acento de arriba toma para el texto sobre fondo claro, aplicada al caso
+     * contrario: texto blanco sobre el rojo.
      *
      * No cambia con el tema, y por eso no se repite en `.dark`: lo que se mide
      * es blanco contra rojo, y ninguno de los dos se mueve al cambiar de tema.
      *
      * ⚠️ Esto NO sustituye a `bg-marca-500` en todas partes. El rojo de marca
-     * se queda donde no hay texto encima --puntos, insignias sin rotulo,
-     * tintes al 15 %--: alli no hay contraste de texto que medir y cambiarlo
-     * seria apagar la marca sin motivo. Lo vigila `ContrasteDelBotonTest`.
+     * se queda donde no hay texto encima --puntos, insignias sin rótulo,
+     * tintes al 15 %--: allí no hay contraste de texto que medir y cambiarlo
+     * sería apagar la marca sin motivo. Lo vigila `ContrasteDelBotonTest`.
      */
     --asb-accion: #da2b21;
     --asb-accion-fuerte: #b71f18;
 
     /*
-     * Vidriado del boton al pulsar (9 sep 2026).
+     * Vidriado del botón al pulsar.
      *
      * Al pulsar, el relleno se retira y queda el cristal: se ve lo que hay
-     * detras, desenfocado y con la saturacion subida. Es lo que separa un
-     * material de un boton atenuado, y lo que pidio la direccion al ver la
-     * maqueta: «que al presionarlo le de efecto transparente».
+     * detrás, desenfocado y con la saturación subida. Es lo que separa un
+     * material de un botón atenuado.
      *
-     * El SUELO no es estetico, es el limite de contraste, y son DOS recetas
+     * El SUELO no es estético, es el límite de contraste, y son DOS recetas
      * como todo material de este sistema. Medido sobre --asb-accion:
-     *   oscuro, alfa 0,42 sobre la pagina -> blanco a 12,71:1 (MEJOR que el
-     *     boton solido, que da 4,83)
-     *   claro, alfa 0,42 sobre blanco -> el rotulo blanco cae a 1,97:1, y
-     *     NINGUN alfa por debajo de 1 lo sostiene
-     * Por eso en claro la tinta cruza a marca-900, que sobre ese mismo cristal
-     * da 5,13:1. Lo vigila `VidriadoDelBotonTest`.
-     *
-     * En claro el cristal se tine de marca-950 al 65 %: por debajo de esa
-     * opacidad el rotulo blanco no llega a AA, y con el rojo de marca no llega
-     * a ninguna. El 35 % que queda deja pasar la pagina desenfocada de sobra
-     * para leerse como cristal, que es de lo que se trata.
+     *   oscuro, alfa 0,42 sobre la página -> blanco a 12,71:1 (MEJOR que el
+     *     botón sólido, que da 4,83)
+     *   claro, alfa 0,42 sobre blanco -> el rótulo blanco cae a 1,97:1, y
+     *     NINGÚN alfa por debajo de 1 lo sostiene
+     * Por eso en claro el cristal no es el rojo de marca adelgazado: se tiñe
+     * de marca-950 al 65 %, y el rótulo sigue blanco. Por debajo de esa
+     * opacidad el blanco no llega a AA. El 35 % que queda deja pasar la página
+     * desenfocada de sobra para leerse como cristal, que es de lo que se
+     * trata. Lo vigila `VidriadoDelBotonTest`.
      */
     --asb-vidrio-boton: rgb(68 11 9 / 0.65);
     --asb-filo-vidriado: rgb(255 255 255 / 0.3);
     --asb-desenfoque-vidriado: 14px;
 
-    /* La ida es mas rapida que la vuelta a proposito: un liquido al que
+    /* La ida es más rápida que la vuelta a propósito: un líquido al que
        apartas huye deprisa y regresa despacio. Con las dos duraciones iguales
-       el boton parpadea en vez de fluir. */
+       el botón parpadea en vez de fluir. */
     --duracion-vidriado-ida: 90ms;
     --duracion-vidriado-vuelta: 280ms;
 
     /*
-     * Paleta categorica de las graficas: un color por serie, y son DOS
+     * Paleta categórica de las gráficas: un color por serie, y son DOS
      * recetas, no una. Igual que el vidrio esmerilado se hace con sombra en
      * claro y con luz en oscuro, estos siete colores no pueden ser los mismos
-     * en los dos temas: la paleta del manual esta pensada sobre Ambient
+     * en los dos temas: la paleta del manual está pensada sobre Ambient
      * White, y sobre Pub Black tres de ellos —Wine, Pub Grey y Pub Black
      * mismo— caen por debajo de 3:1 contra la superficie. Pub Black sobre el
      * tema oscuro es, literalmente, el color del fondo.
      *
      * Solo cambian esos tres al cruzar de tema; los otros cuatro aguantan en
-     * los dos y se quedan quietos para que la grafica se lea igual.
+     * los dos y se quedan quietos para que la gráfica se lea igual.
      *
-     * WCAG 2.1 §1.4.11 pide 3:1 para objetos graficos portadores de
-     * informacion. Lo vigila `ObservatorioTest`, que lee estos tokens y mide
+     * WCAG 2.1 §1.4.11 pide 3:1 para objetos gráficos portadores de
+     * información. Lo vigila `ObservatorioTest`, que lee estos tokens y mide
      * el contraste de verdad contra `--asb-superficie` de cada tema.
      */
     --asb-serie-1: #ee4137; /* Pub Red */
@@ -181,7 +178,7 @@
     --asb-serie-6: #0b090a; /* Pub Black */
     --asb-serie-7: #7d7779; /* Noche 400 */
 
-    /* Estados. Los recuadros de exito y aviso estaban pensados sobre negro
+    /* Estados. Los recuadros de éxito y aviso del tema oscuro van sobre negro
        (verde 950 al 30 %); en claro hay que invertirlos o quedan ilegibles. */
     /* Emerald 800 y no 700: sobre `exito-fondo` el 700 se quedaba en 4.35:1 y
        la insignia «En ejecución» del inicio no llegaba a AA. */
@@ -200,19 +197,19 @@
 
     /*
      * Opacidad del velo que va entre la imagen de fondo del hero y su texto.
-     * NO es un gusto: es el minimo demostrado, y por eso vive aqui y no
+     * NO es un gusto: es el mínimo demostrado, y por eso vive aquí y no
      * cableado en una vista.
      *
-     * El directivo pidio imagen de fondo «no sea que afecte la visibilidad de
-     * las letras» (R21 05:35). Sin velo el peor caso da 1,40:1 en claro y
-     * 1,59:1 en oscuro, que es texto invisible. Con el fondo del tema por
-     * velo, el minimo para que el texto mas flojo del hero --`--asb-suave`--
-     * conserve AA 4,5:1 contra la imagen mas hostil posible es 0,579 en claro
-     * y 0,681 en oscuro. Un solo valor sirve para los dos porque el color del
-     * velo ya cambia con el tema: es `--asb-fondo`.
+     * La imagen de fondo no puede costar la legibilidad de las letras. Sin
+     * velo el peor caso da 1,40:1 en claro y 1,59:1 en oscuro, que es texto
+     * invisible. Con el fondo del tema por velo, el mínimo para que el texto
+     * más flojo del hero --`--asb-suave`-- conserve AA 4,5:1 contra la imagen
+     * más hostil posible es 0,579 en claro y 0,681 en oscuro. Un solo valor
+     * sirve para los dos porque el color del velo ya cambia con el tema: es
+     * `--asb-fondo`.
      *
-     * 0,8 deja 8,48:1 en claro y 7,10:1 en oscuro. El margen sobre el minimo
-     * es a proposito: las fotos reales no son blanco ni negro puros, asi que
+     * 0,8 deja 8,48:1 en claro y 7,10:1 en oscuro. El margen sobre el mínimo
+     * es a propósito: las fotos reales no son blanco ni negro puros, así que
      * la imagen se sigue viendo. `VeloDelHeroTest` recalcula esto leyendo este
      * mismo fichero, de modo que bajarlo pone la suite en rojo.
      */
@@ -365,12 +362,10 @@
     --asb-suave: #d0cccd;
     --asb-tenue: #a8a3a5;
     /*
-     * Era Noche 400 (#7d7779) y no llegaba a AA. Medido en Chromium el 9 de
-     * septiembre de 2026 sobre la portada: daba 4,53:1 contra `--asb-fondo`,
-     * 4,32:1 contra `--asb-superficie` y 3,99:1 contra `--asb-superficie-alta`,
-     * o sea que fallaba el 4,5:1 de RNF-12 en DOS de las tres superficies del
-     * tema. Quince de los diecisiete elementos medibles con `text-apagado`
-     * quedaban por debajo.
+     * No es Noche 400 (#7d7779) porque no llega a AA. Medido en Chromium
+     * sobre la portada, Noche 400 da 4,53:1 contra `--asb-fondo`, 4,32:1
+     * contra `--asb-superficie` y 3,99:1 contra `--asb-superficie-alta`, o sea
+     * que falla el 4,5:1 de RNF-12 en DOS de las tres superficies del tema.
      *
      * Este valor es un paso intermedio de la rampa `noche` --el 35 % del
      * camino de 400 a 300-- y despega de las tres: 5,56:1 sobre el fondo,
@@ -378,8 +373,8 @@
      * peor caso. No se sube hasta Noche 300 porque ese ES `--asb-tenue`, y
      * colapsar los dos se llevaría por delante un escalón de la jerarquía.
      *
-     * En el tema claro NO hacía falta tocar nada: allí el mínimo medido de los
-     * diecisiete era 6,94:1. Por eso este arreglo vive solo en `.dark`.
+     * En el tema claro NO hace falta: allí el mínimo medido es 6,94:1. Por eso
+     * este valor vive solo en `.dark`.
      *
      * Lo vigila `ContrasteDelTextoTenueTest`, que lee este archivo y vuelve a
      * medir contra las tres superficies en vez de fiarse de este comentario.
@@ -400,8 +395,8 @@
      *   Wine      #a4161a (2.44:1) -> #d9313a (4.02:1)
      *   Pub Grey  #282628 (1.26:1) -> Noche 300 (7.62:1)
      *   Pub Black #0b090a (1.05:1) -> Noche 200 (11.91:1)
-     * Las otras cuatro no se repiten aqui a proposito: heredan de `:root` y
-     * asi no pueden divergir por descuido.
+     * Las otras cuatro no se repiten aquí a propósito: heredan de `:root` y
+     * así no pueden divergir por descuido.
      */
     --asb-serie-2: #d9313a; /* Wine aclarado */
     --asb-serie-5: #a8a3a5; /* Noche 300 */
@@ -421,14 +416,14 @@
     --asb-trama: 0.28;
 
     /*
-     * En oscuro esto valia `none`, y por eso las cuarenta y pico tarjetas del
-     * sitio se leian como rectangulos dibujados con una raya finisima:
-     * superficie #121011 contra fondo #0b090a se diferencian en 1,1:1, o sea
-     * nada. La receta de luz las convierte en objetos.
+     * En oscuro esto no puede ser `none`: superficie #121011 contra fondo
+     * #0b090a se diferencian en 1,1:1, o sea nada, y las tarjetas se leerían
+     * como rectángulos dibujados con una raya finísima. La receta de luz las
+     * convierte en objetos.
      *
      * El `inset 0 1px 0` es el filo superior brillante: la luz que engancha el
      * canto que mira hacia arriba. La sombra ambiental sobre negro casi puro
-     * no se lee como sombra sino como caida, que es lo que hace falta.
+     * no se lee como sombra sino como caída, que es lo que hace falta.
      */
     --asb-sombra-tarjeta:
         inset 0 1px 0 rgb(255 255 255 / 0.055),
@@ -452,9 +447,9 @@
     --asb-vidrio-velo: color-mix(in oklab, var(--asb-superficie) 55%, transparent);
     --asb-luz-ambiente: rgb(238 65 55 / 0.18);
 
-    /* Sobre Pub Black el cristal SI puede ser del rojo de marca y adelgazar
-       hasta el 42 %: la pagina de detras es negra, asi que el rotulo blanco no
-       solo aguanta, mejora --12,71:1 contra los 4,83 del boton solido--. Es la
+    /* Sobre Pub Black el cristal SÍ puede ser del rojo de marca y adelgazar
+       hasta el 42 %: la página de detrás es negra, así que el rótulo blanco no
+       solo aguanta, mejora --12,71:1 contra los 4,83 del botón sólido--. Es la
        receta contraria a la del claro, donde el tinte tiene que oscurecer. */
     --asb-vidrio-boton: rgb(218 43 33 / 0.42);
     --asb-filo-vidriado: rgb(255 255 255 / 0.42);
@@ -482,10 +477,10 @@
 }
 
 /*
- * Las otras dos senales de accesibilidad que Apple trata al mismo nivel que
- * `prefers-reduced-motion`, y que este sitio no atendia.
+ * Las otras dos señales de accesibilidad que Apple trata al mismo nivel que
+ * `prefers-reduced-motion`.
  *
- * Van despues de `.dark` y con `:root.dark` para ganar por especificidad y no
+ * Van después de `.dark` y con `:root.dark` para ganar por especificidad y no
  * solo por orden: hay que pisar los valores de LOS DOS temas.
  */
 @media (prefers-reduced-transparency: reduce) {
@@ -501,8 +496,8 @@
         --asb-hoja-velo: var(--asb-superficie);
 
         /*
-         * El vidriado del boton se apaga con DOS tokens y sin tocar una sola
-         * regla: el cristal pasa a ser el mismo relleno opaco --asi no se
+         * El vidriado del botón se apaga con DOS tokens y sin tocar una sola
+         * regla: el cristal pasa a ser el mismo relleno opaco --así no se
          * retira nada al pulsar-- y el desenfoque muere. Queda el hundimiento,
          * que es movimiento y no transparencia.
          */
@@ -537,7 +532,7 @@
     }
 }
 
-/* `inline` es obligatorio aqui: hace que las utilidades emitan la variable
+/* `inline` es obligatorio aquí: hace que las utilidades emitan la variable
    cruda, de modo que cambiar `.dark` repinte sin recompilar nada. */
 @theme inline {
     --color-fondo: var(--asb-fondo);
