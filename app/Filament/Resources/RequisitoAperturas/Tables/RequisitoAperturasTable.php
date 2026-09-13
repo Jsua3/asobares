@@ -47,7 +47,7 @@ class RequisitoAperturasTable
                     })
                     ->tooltip(fn (RequisitoApertura $requisito): ?string => $requisito->enlaceEsPuntual()
                         ? null
-                        : 'El enlace abre la portada de la entidad. La revisión del 28 de agosto pidió que abra el trámite exacto.'),
+                        : 'El enlace abre la portada de la entidad; debería abrir el trámite exacto.'),
                 TextColumn::make('adjunto')
                     ->searchable(),
                 TextColumn::make('adjunto_nombre')

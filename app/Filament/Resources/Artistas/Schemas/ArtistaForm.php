@@ -69,7 +69,7 @@ class ArtistaForm
                             ->numeric()
                             ->minValue(0)
                             ->prefix('$')
-                            ->helperText('En pesos, por presentación. Uso interno del gremio: NO se publica en la ficha del artista (OBS3-08), donde siempre se lee «a convenir».'),
+                            ->helperText('En pesos, por presentación. Uso interno del gremio: NO se publica en la ficha del artista, donde siempre se lee «a convenir».'),
                         TextInput::make('whatsapp')
                             ->label('WhatsApp')
                             ->tel()
