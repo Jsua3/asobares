@@ -1295,6 +1295,7 @@ class BarraLateralTest extends TestCase
     public function test_el_comando_de_la_maqueta_la_deja_medible(): void
     {
         $ruta = 'public/_medicion/prueba-barra.html';
+        $carpetaExistia = File::isDirectory(dirname(base_path($ruta)));
 
         try {
             $this->artisan('maqueta:barra', ['--ruta' => $ruta])->assertSuccessful();
@@ -1324,7 +1325,7 @@ class BarraLateralTest extends TestCase
             );
 
             $this->assertNotFalse(strpos($maqueta, '[x-cloak]'), 'Falta el estilo de x-cloak.');
-            $this->assertNotFalse(strpos($maqueta, '$store'), 'Falta el almacén de mentira: sin él la consola se llena de errores que esconden a los de verdad.');
+            $this->assertNotFalse(strpos($maqueta, 'window.Alpine = window.Alpine ||'), 'Falta el almacén de mentira: sin él la consola se llena de errores que esconden a los de verdad.');
 
             // Las rutas salen del manifiesto, no escritas a mano: si no, la
             // maqueta mediría una hoja vieja sin que nadie se entere.
@@ -1343,7 +1344,7 @@ class BarraLateralTest extends TestCase
                 'La maqueta no apunta a la hoja compilada de hoy: mediría una vieja sin avisar.'
             );
         } finally {
-            File::deleteDirectory(base_path('public/_medicion'));
+            $this->borrarLaMaquetaDePrueba($ruta, $carpetaExistia);
         }
     }
 
@@ -1358,6 +1359,7 @@ class BarraLateralTest extends TestCase
     public function test_la_maqueta_no_se_genera_en_produccion(): void
     {
         $ruta = 'public/_medicion/produccion.html';
+        $carpetaExistia = File::isDirectory(dirname(base_path($ruta)));
 
         $this->app->detectEnvironment(fn () => 'production');
 
@@ -1370,7 +1372,24 @@ class BarraLateralTest extends TestCase
             );
         } finally {
             $this->app->detectEnvironment(fn () => 'testing');
-            File::deleteDirectory(base_path('public/_medicion'));
+            $this->borrarLaMaquetaDePrueba($ruta, $carpetaExistia);
+        }
+    }
+
+    /**
+     * Borra solo lo que generó la prueba: su archivo y, si la carpeta no
+     * existía antes, la carpeta vacía. `public/_medicion` es también donde el
+     * comando deja por defecto la maqueta de medición, y borrarla entera se
+     * llevaría la de quien esté midiendo.
+     */
+    private function borrarLaMaquetaDePrueba(string $ruta, bool $carpetaExistia): void
+    {
+        $carpeta = dirname(base_path($ruta));
+
+        File::delete(base_path($ruta));
+
+        if (! $carpetaExistia && File::isDirectory($carpeta) && File::isEmptyDirectory($carpeta)) {
+            File::deleteDirectory($carpeta);
         }
     }
 
