@@ -53,6 +53,42 @@ class PanelCompletoTest extends TestCase
     }
 
     /**
+     * Solo los recursos que tienen formulario de creación. Los demás no llegan
+     * a la prueba: omitirlos dentro del cuerpo dejaba omisiones fijas en cada
+     * ejecución, y entre ellas una omisión nueva de verdad no se ve.
+     *
+     * @return list<array{0: class-string<resource>}>
+     */
+    public static function recursosConCreacion(): array
+    {
+        return self::recursosConPagina('create');
+    }
+
+    /**
+     * Solo los recursos que tienen formulario de edición, por la misma razón.
+     *
+     * @return list<array{0: class-string<resource>}>
+     */
+    public static function recursosConEdicion(): array
+    {
+        return self::recursosConPagina('edit');
+    }
+
+    /**
+     * `hasPage()` solo lee el arreglo de páginas del recurso, así que se puede
+     * consultar desde un proveedor, antes de que arranque la aplicación.
+     *
+     * @return list<array{0: class-string<resource>}>
+     */
+    private static function recursosConPagina(string $pagina): array
+    {
+        return array_values(array_filter(
+            self::recursosDelPanel(),
+            fn (array $caso): bool => $caso[0]::hasPage($pagina)
+        ));
+    }
+
+    /**
      * Se anclan las rutas al propio archivo de prueba, no al directorio de
      * trabajo, y la clase se arma con los dos últimos segmentos: así funciona
      * igual en Windows que en Linux.
@@ -85,19 +121,14 @@ class PanelCompletoTest extends TestCase
             ->assertSuccessful();
     }
 
-    #[DataProvider('recursosDelPanel')]
+    #[DataProvider('recursosConCreacion')]
     public function test_el_formulario_de_creacion_de_cada_recurso_carga(string $recurso): void
     {
-        if (! $recurso::hasPage('create')) {
-            $this->markTestSkipped(class_basename($recurso).' no se crea desde el panel.');
-        }
-
         $respuesta = $this->actingAs($this->direccion())
             ->get($recurso::getUrl('create'));
 
-        // O puede crear, o la policy se lo niega limpiamente. Los recursos sin
-        // creación desde el panel (como las bolsas) ya se saltaron arriba por
-        // no tener página `create`; lo que no puede pasar aquí es un 500.
+        // O puede crear, o la policy se lo niega limpiamente. Lo que no puede
+        // pasar es un 500.
         $this->assertContains(
             $respuesta->status(),
             [200, 403],
@@ -105,25 +136,20 @@ class PanelCompletoTest extends TestCase
         );
     }
 
-    #[DataProvider('recursosDelPanel')]
+    #[DataProvider('recursosConEdicion')]
     public function test_el_formulario_de_edicion_de_cada_recurso_carga_con_un_registro_real(string $recurso): void
     {
-        if (! $recurso::hasPage('edit')) {
-            $this->markTestSkipped(class_basename($recurso).' no se edita desde el panel.');
-        }
+        $modelo = $recurso::getModel();
 
-        $registro = $recurso::getModel()::query()->first();
-
-        if ($registro === null) {
-            $this->markTestSkipped('Las semillas no crearon ningún '.class_basename($recurso).'.');
-        }
+        // El sembrador no crea solicitudes de afiliación ni piezas de
+        // publicidad: sin la fábrica, esos dos formularios no se abrirían nunca.
+        $registro = $modelo::query()->first() ?? $modelo::factory()->create();
 
         $respuesta = $this->actingAs($this->direccion())
             ->get($recurso::getUrl('edit', ['record' => $registro]));
 
-        // O puede editar, o la policy se lo niega limpiamente. Los recursos
-        // sin edición desde el panel (como las bolsas) ya se saltaron arriba
-        // por no tener página `edit`; lo que no puede pasar aquí es un 500.
+        // O puede editar, o la policy se lo niega limpiamente. Lo que no puede
+        // pasar es un 500.
         $this->assertContains(
             $respuesta->status(),
             [200, 403],
