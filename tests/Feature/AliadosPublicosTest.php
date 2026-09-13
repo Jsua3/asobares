@@ -116,7 +116,7 @@ class AliadosPublicosTest extends TestCase
         $this->get(route('inicio'))
             ->assertOk()
             ->assertSee('Aliado En Portada')
-            ->assertSee('Ver aliados');
+            ->assertSee('Ver todos los aliados');
     }
 
     public function test_el_asociado_sigue_viendo_el_detalle_privado_en_mi_cuenta(): void
