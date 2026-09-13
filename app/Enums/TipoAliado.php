@@ -26,13 +26,4 @@ enum TipoAliado: string implements HasLabel
             self::Comercial => 'Comercial',
         };
     }
-
-    /** Lo que se explica en el panel a quien clasifica un aliado. */
-    public function descripcion(): string
-    {
-        return match ($this) {
-            self::Institucional => 'Entidades que respaldan al gremio: agremiaciones, cámaras de comercio y entidades públicas.',
-            self::Comercial => 'Marcas con convenio para los afiliados.',
-        };
-    }
 }

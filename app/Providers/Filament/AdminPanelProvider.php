@@ -2,15 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Widgets\AsociadosPorMunicipio;
-use App\Filament\Widgets\EntradasAlSitio;
-use App\Filament\Widgets\PaginasMasVisitadas;
-use App\Filament\Widgets\PendientesDeAprobacion;
-use App\Filament\Widgets\PorDondeEntranAlSitio;
-use App\Filament\Widgets\RecaudoMensual;
-use App\Filament\Widgets\ResumenDelGremio;
-use App\Filament\Widgets\UltimasTransacciones;
-use App\Filament\Widgets\VisitasDelSitio;
 use App\Http\Responses\LogoutDelPanelResponse;
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse as LogoutResponseContract;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
@@ -140,13 +131,10 @@ class AdminPanelProvider extends PanelProvider
                 ],
                 isRequired: true,
             )
-            // La campana se retira (D-L22, 7 sep): lo que anunciaba lo cuenta
-            // mejor la banda «Te está esperando» del tablero, que además dice
-            // qué hay que aprobar y desde cuándo espera. Si el gremio pide
-            // avisos de verdad, es un frente propio con su decisión.
+            // Sin campana de notificaciones: lo pendiente lo cuentan la banda
+            // «Te está esperando» del tablero y los contadores del menú.
+            // `Panel\AvisosQueSeVenTest` impide escribir avisos que nadie lee.
             //
-            // ->databaseNotifications()
-            // ->databaseNotificationsPolling('30s')
             // Sin icono de grupo a propósito: Filament no admite iconos en el
             // grupo y en sus items a la vez, y el icono por recurso orienta más.
             ->navigationGroups([
@@ -158,7 +146,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
-            ->pages([])
             // `discoverWidgets()` recorre `Filament/Widgets` RECURSIVAMENTE:
             // cualquier subdirectorio (como `Observatorio/`) entra también,
             // con su propio `$sort` compitiendo por posición con el tablero.
@@ -169,20 +156,6 @@ class AdminPanelProvider extends PanelProvider
             // de widgets que se agregue aquí necesita el mismo mecanismo si
             // no debe aparecer en el tablero.
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([
-                PendientesDeAprobacion::class,
-                ResumenDelGremio::class,
-                RecaudoMensual::class,
-                AsociadosPorMunicipio::class,
-                UltimasTransacciones::class,
-                // El flujo del sitio, de arriba abajo: primero los tres números
-                // (Acta 08, A-03), luego la curva de 30 días, luego por dónde
-                // entran y qué se mira una vez dentro.
-                EntradasAlSitio::class,
-                VisitasDelSitio::class,
-                PorDondeEntranAlSitio::class,
-                PaginasMasVisitadas::class,
-            ])
             ->assets($this->assetsDelPanel())
             ->middleware([
                 EncryptCookies::class,

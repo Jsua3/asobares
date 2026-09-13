@@ -39,13 +39,6 @@ class BeneficioResource extends Resource
         return BeneficiosTable::configure($table);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
     public static function getPages(): array
     {
         return [

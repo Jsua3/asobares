@@ -5,7 +5,6 @@ namespace App\Models;
 use Database\Factories\CategoriaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -23,12 +22,6 @@ class Categoria extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
-    }
-
-    /** @return HasMany<Asociado, $this> */
-    public function asociados(): HasMany
-    {
-        return $this->hasMany(Asociado::class);
     }
 
     public function getActivitylogOptions(): LogOptions

@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Mensajes\Pages;
 
 use App\Filament\Resources\Mensajes\MensajeResource;
-use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListMensajes extends ListRecords
@@ -20,10 +19,9 @@ class ListMensajes extends ListRecords
         'class' => 'asb-operativo',
     ];
 
+    /** Los mensajes entran por el formulario público de contacto, no a mano. */
     protected function getHeaderActions(): array
     {
-        return [
-            CreateAction::make(),
-        ];
+        return [];
     }
 }

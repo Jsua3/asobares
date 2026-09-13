@@ -38,13 +38,6 @@ class AspiranteResource extends Resource
         return AspirantesTable::configure($table);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
     public static function getPages(): array
     {
         return [

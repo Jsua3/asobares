@@ -39,13 +39,6 @@ class EventoResource extends Resource
         return EventosTable::configure($table);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
     public static function getPages(): array
     {
         return [

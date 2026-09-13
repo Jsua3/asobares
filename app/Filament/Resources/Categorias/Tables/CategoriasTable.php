@@ -31,9 +31,6 @@ class CategoriasTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
             ->recordActions([
                 EditAction::make(),
             ])

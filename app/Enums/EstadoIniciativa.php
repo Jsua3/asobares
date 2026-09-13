@@ -34,14 +34,4 @@ enum EstadoIniciativa: string implements HasColor, HasLabel
             self::EnEjecucion => 'success',
         };
     }
-
-    /** Qué significa el estado, para quien lo lee por primera vez. */
-    public function descripcion(): string
-    {
-        return match ($this) {
-            self::Formulacion => 'Se está diseñando con las entidades.',
-            self::Escalando => 'Ya funciona y se está extendiendo a más establecimientos.',
-            self::EnEjecucion => 'Está andando hoy.',
-        };
-    }
 }
