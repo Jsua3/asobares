@@ -181,7 +181,7 @@ class LimitesDePeticionesTest extends TestCase
         $this->assertSame(
             429,
             $this->call($metodo, $url)->getStatusCode(),
-            "La petición ".($maximo + 1)." a {$ruta} debía rebotar con 429."
+            'La petición '.($maximo + 1)." a {$ruta} debía rebotar con 429."
         );
     }
 
