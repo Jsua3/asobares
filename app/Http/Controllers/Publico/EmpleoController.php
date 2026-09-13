@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
@@ -44,7 +45,7 @@ class EmpleoController
         }
 
         if (filled($datos['municipio'] ?? null)) {
-            $consulta->whereHas('asociado.municipio', fn ($q) => $q->where('slug', $datos['municipio']));
+            $consulta->whereHas('asociado.municipio', fn (Builder $municipio): Builder => $municipio->where('slug', $datos['municipio']));
         }
 
         return view('publico.empleo.index', [
@@ -80,11 +81,11 @@ class EmpleoController
     private function municipiosConVacante(?string $elegido): Collection
     {
         return Municipio::query()
-            ->where(function (Builder $q) use ($elegido): void {
-                $q->whereHas('asociados.vacantes', fn (Builder $v) => $v->publicado()->vigente());
+            ->where(function (Builder $municipios) use ($elegido): void {
+                $municipios->whereHas('asociados.vacantes', fn (Builder $vacantes): Builder => $vacantes->publicado()->vigente());
 
                 if (filled($elegido)) {
-                    $q->orWhere('slug', $elegido);
+                    $municipios->orWhere('slug', $elegido);
                 }
             })
             ->orderBy('nombre')
@@ -218,7 +219,7 @@ class EmpleoController
             return;
         }
 
-        rescue(fn () => Mail::to($correos)->send(new NuevaPostulacion($postulacion)));
+        rescue(fn (): ?SentMessage => Mail::to($correos)->send(new NuevaPostulacion($postulacion)));
     }
 
     /**
@@ -228,7 +229,7 @@ class EmpleoController
      */
     private function confirmarAlPostulante(Postulacion $postulacion): void
     {
-        rescue(fn () => Mail::to($postulacion->correo)->send(new AcuseDePostulacion($postulacion)));
+        rescue(fn (): ?SentMessage => Mail::to($postulacion->correo)->send(new AcuseDePostulacion($postulacion)));
     }
 
     public function registrarAspirante(GuardarAspiranteRequest $request): RedirectResponse

@@ -71,7 +71,7 @@ class ImportadorDeCartera
      * @param  array<string, string>  $fila
      * @param  Collection<string, int>  $asociados
      */
-    private function procesarFila(array $fila, int $numero, $asociados, ResultadoDeImportacion $resultado): void
+    private function procesarFila(array $fila, int $numero, Collection $asociados, ResultadoDeImportacion $resultado): void
     {
         $nombre = trim($fila['establecimiento'] ?? '');
 
@@ -139,7 +139,10 @@ class ImportadorDeCartera
         $resultado->contarActualizado();
     }
 
-    /** @param  array<string, string|null>  $fila */
+    /**
+     * @param  array<string, string|null>  $fila
+     * @return array<string, string>
+     */
     private function normalizarFila(array $fila): array
     {
         $normalizada = [];

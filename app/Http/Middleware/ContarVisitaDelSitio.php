@@ -25,7 +25,7 @@ class ContarVisitaDelSitio
      * Sin esto la cifra la escribirían los buscadores y el gremio leería como
      * interés lo que es indexación.
      */
-    private const RASTREADORES = '/(bot|crawler|spider|crawling|slurp|bingpreview|facebookexternalhit|headlesschrome|lighthouse|curl|wget|python-requests)/i';
+    private const string RASTREADORES = '/(bot|crawler|spider|crawling|slurp|bingpreview|facebookexternalhit|headlesschrome|lighthouse|curl|wget|python-requests)/i';
 
     /**
      * Lo que no es el sitio público: el panel, el portal del afiliado y la
@@ -42,7 +42,7 @@ class ContarVisitaDelSitio
      * `/pago-simulado` junto al panel y a `/mi-cuenta`--. Contarlas mezclaba el
      * tráfico de una pasarela con el interés por el contenido.
      */
-    private const FUERA_DEL_SITIO = ['filament.', 'mi-cuenta.', 'pago.'];
+    private const array FUERA_DEL_SITIO = ['filament.', 'mi-cuenta.', 'pago.'];
 
     /**
      * Lo que se cuenta es una PÁGINA, y una página es `text/html`.
@@ -61,13 +61,15 @@ class ContarVisitaDelSitio
      * literalmente en `bootstrap/app.php`: «cuenta páginas servidas, no
      * descargas ni webhooks».
      */
-    private const TIPO_DE_UNA_PAGINA = 'text/html';
+    private const string TIPO_DE_UNA_PAGINA = 'text/html';
 
     public function handle(Request $request, Closure $siguiente): Response
     {
         $respuesta = $siguiente($request);
 
-        rescue(fn () => $this->contar($request, $respuesta));
+        rescue(function () use ($request, $respuesta): void {
+            $this->contar($request, $respuesta);
+        });
 
         return $respuesta;
     }

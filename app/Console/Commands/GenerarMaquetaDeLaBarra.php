@@ -35,7 +35,7 @@ class GenerarMaquetaDeLaBarra extends Command
      *
      * @var array<string, list<string>>
      */
-    private const GRUPOS = [
+    private const array GRUPOS = [
         'Contenido' => ['Asociados', 'Eventos y capacitaciones', 'Fotos de afiliados', 'Boletín', 'Guía normativa', 'Iniciativas del gremio'],
         'Bolsas' => ['Bolsa de empleo', 'Aspirantes', 'Artistas', 'Proveedores'],
         'Bandejas' => ['Mensajes y PQR', 'Inscripciones', 'Postulaciones'],

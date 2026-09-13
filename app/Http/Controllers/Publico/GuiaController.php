@@ -6,6 +6,7 @@ use App\Models\ConsultaGuia;
 use App\Models\Municipio;
 use App\Models\RequisitoApertura;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -23,7 +24,7 @@ class GuiaController
         // Sólo se ofrecen municipios que ya tienen la guía levantada Y vigente:
         // uno cuyos trámites hayan caducado todos saldría en el selector con la
         // guía vacía.
-        $municipiosConGuia = Municipio::whereHas('requisitos', fn ($q) => $q->publicado()->vigente())
+        $municipiosConGuia = Municipio::whereHas('requisitos', fn (Builder $requisitos): Builder => $requisitos->publicado()->vigente())
             ->orderBy('nombre')
             ->get();
 

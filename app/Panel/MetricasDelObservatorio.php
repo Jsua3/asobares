@@ -216,7 +216,7 @@ class MetricasDelObservatorio
                     $meses
                 ),
             ],
-            n: (int) $filasRecaudo->sum(fn ($fila): int => (int) $fila->cantidad),
+            n: (int) $filasRecaudo->sum(fn (Transaccion $fila): int => (int) $fila->cantidad),
             unidad: 'transacciones',
         );
     }
@@ -331,7 +331,7 @@ class MetricasDelObservatorio
         return new SerieDelObservatorio(
             etiquetas: array_column($meses, 'etiqueta'),
             series: $series,
-            n: (int) $filas->sum(fn ($fila): int => (int) $fila->total),
+            n: (int) $filas->sum(fn (Vacante $fila): int => (int) $fila->total),
             unidad: 'vacantes',
             // Las siete áreas son rebanadas de una sola población —las
             // vacantes publicadas—, no siete medidas independientes: el

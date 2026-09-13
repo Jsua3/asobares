@@ -57,9 +57,9 @@ if (! function_exists('ordenarEnEspanol')) {
         $comparador = new Collator('es_CO');
 
         return $elementos
-            ->sort(fn ($a, $b): int => $comparador->compare(
-                (string) data_get($a, $campo),
-                (string) data_get($b, $campo)
+            ->sort(fn (mixed $primero, mixed $segundo): int => $comparador->compare(
+                (string) data_get($primero, $campo),
+                (string) data_get($segundo, $campo)
             ))
             ->values();
     }

@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Mail\MensajeRecibido;
 use App\Models\Mensaje;
+use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Mail;
 
 /**
@@ -60,6 +61,6 @@ final class AvisoDeMensajeAlGremio
             return;
         }
 
-        rescue(fn () => Mail::to($destino)->send(new MensajeRecibido($mensaje)));
+        rescue(fn (): ?SentMessage => Mail::to($destino)->send(new MensajeRecibido($mensaje)));
     }
 }

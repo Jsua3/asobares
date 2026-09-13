@@ -26,7 +26,7 @@ class SettingSeeder extends Seeder
      *
      * @var list<string>
      */
-    private const JUBILADOS = [
+    private const array JUBILADOS = [
         // 9 sep 2026. `hero_resumen_corto` hace ese trabajo desde el rediseño del
         // hero; este párrafo se quedó sembrado y ninguna vista lo pintaba.
         'hero_subtitulo',

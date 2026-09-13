@@ -37,11 +37,11 @@ class DirectorioController
         }
 
         if (filled($datos['municipio'] ?? null)) {
-            $consulta->whereHas('municipio', fn ($q) => $q->where('slug', $datos['municipio']));
+            $consulta->whereHas('municipio', fn (Builder $municipio): Builder => $municipio->where('slug', $datos['municipio']));
         }
 
         if (filled($datos['categoria'] ?? null)) {
-            $consulta->whereHas('categoria', fn ($q) => $q->where('slug', $datos['categoria']));
+            $consulta->whereHas('categoria', fn (Builder $categoria): Builder => $categoria->where('slug', $datos['categoria']));
         }
 
         $vista = $datos['vista'] ?? 'grid';
