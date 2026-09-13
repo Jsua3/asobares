@@ -38,9 +38,24 @@ class AliadosPublicosTest extends TestCase
         Aliado::factory()->visible()->institucional()->create(['nombre' => 'Cámara Aliada']);
         Aliado::factory()->visible()->create(['nombre' => 'Marca Aliada', 'tipo' => TipoAliado::Comercial]);
 
-        $this->get(route('aliados.index'))
+        $html = $this->get(route('aliados.index'))
             ->assertOk()
-            ->assertSeeInOrder(['Respaldo institucional', 'Cámara Aliada', 'Convenios para afiliados', 'Marca Aliada'], escape: false);
+            ->assertSeeInOrder(['Respaldo institucional', 'Cámara Aliada', 'Convenios para afiliados', 'Marca Aliada'], escape: false)
+            ->getContent();
+
+        /*
+         * MUT-05: assertSeeInOrder tolera duplicados, así que un aliado pintado
+         * en los dos niveles seguía en orden. Cada nivel se afirma dentro de su
+         * propia <section>. Roturas: quitar el filtro de tipo de cualquiera de
+         * los dos niveles en PaginaController::aliados.
+         */
+        $institucionales = $this->seccion($html, 'aliados-institucionales');
+        $comerciales = $this->seccion($html, 'aliados-comerciales');
+
+        $this->assertStringContainsString('Cámara Aliada', $institucionales);
+        $this->assertStringNotContainsString('Marca Aliada', $institucionales, 'un convenio comercial no se presenta como respaldo institucional');
+        $this->assertStringContainsString('Marca Aliada', $comerciales);
+        $this->assertStringNotContainsString('Cámara Aliada', $comerciales, 'una entidad institucional no se presenta como convenio comercial');
     }
 
     public function test_no_muestra_el_detalle_privado_del_convenio_a_visitantes(): void
@@ -73,6 +88,20 @@ class AliadosPublicosTest extends TestCase
         $respuesta->assertSee('target="_blank"', escape: false);
         $respuesta->assertSee('rel="noopener"', escape: false);
         $respuesta->assertDontSee('javascript:alert(1)', escape: false);
+
+        /*
+         * MUT-13: el pie ya lleva target="_blank" y rel="noopener", así que
+         * buscarlos en toda la página no protegía la tarjeta. Se exigen en la
+         * etiqueta <a> del aliado. Roturas: cambiar rel="noopener" por
+         * rel="external" en la tarjeta; quitarle target="_blank".
+         */
+        $this->assertSame(
+            1,
+            preg_match('/<a href="https:\/\/example\.com\/aliado"[^>]*>/', $respuesta->getContent(), $etiqueta),
+            'la tarjeta no enlaza al sitio del aliado'
+        );
+        $this->assertStringContainsString('target="_blank"', $etiqueta[0], 'el enlace de la tarjeta abre en otra pestaña');
+        $this->assertMatchesRegularExpression('/\srel="[^"]*\bnoopener\b[^"]*"/', $etiqueta[0], 'el enlace de la tarjeta lleva noopener en su propia etiqueta');
     }
 
     public function test_un_aliado_sin_logo_no_rompe_la_pagina(): void
@@ -158,5 +187,17 @@ class AliadosPublicosTest extends TestCase
         $this->get(route('sitemap'))
             ->assertOk()
             ->assertSee(route('aliados.index'), escape: false);
+    }
+
+    /** El contenido de la <section> que etiqueta el encabezado con ese id. */
+    private function seccion(string $html, string $encabezado): string
+    {
+        $this->assertSame(
+            1,
+            preg_match('/<section\b[^>]*aria-labelledby="'.preg_quote($encabezado, '/').'"[^>]*>(.*?)<\/section>/s', $html, $trozos),
+            "la página no tiene la sección {$encabezado}"
+        );
+
+        return $trozos[1];
     }
 }
