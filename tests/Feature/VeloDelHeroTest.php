@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
+use Tests\Support\MideContraste;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,8 @@ use Tests\TestCase;
  */
 class VeloDelHeroTest extends TestCase
 {
+    use MideContraste;
+
     /** Lo que exige WCAG 2.1 AA para texto normal. */
     private const float AA_TEXTO_NORMAL = 4.5;
 
@@ -63,11 +66,11 @@ class VeloDelHeroTest extends TestCase
         ];
 
         foreach ($temas as $tema => [$bloque, $alfa]) {
-            $velo = $this->declaracion($bloque, '--asb-fondo');
+            $velo = $this->color($bloque, '--asb-fondo');
 
             // `--asb-suave` es el texto más flojo que pinta el hero: es el
             // color del subtítulo. Si él pasa, el titular pasa de sobra.
-            $texto = $this->declaracion($bloque, '--asb-suave');
+            $texto = $this->color($bloque, '--asb-suave');
 
             $fondoCompuesto = $this->componer($velo, $alfa, self::PEOR_IMAGEN[$tema]);
             $contraste = $this->contraste($texto, $fondoCompuesto);
@@ -96,7 +99,7 @@ class VeloDelHeroTest extends TestCase
         foreach (['claro' => ':root', 'oscuro' => '.dark'] as $tema => $selector) {
             $bloque = $this->bloque($css, $selector);
             $contraste = $this->contraste(
-                $this->declaracion($bloque, '--asb-suave'),
+                $this->color($bloque, '--asb-suave'),
                 self::PEOR_IMAGEN[$tema]
             );
 
@@ -162,6 +165,19 @@ class VeloDelHeroTest extends TestCase
 
     // --- utilidades ---------------------------------------------------
 
+    /**
+     * Un color del bloque, exigiendo `#rrggbb`: `MideContraste` compone por
+     * pares hexadecimales, y con otro formato daría una cuenta falsa sin avisar.
+     */
+    private function color(string $bloque, string $propiedad): string
+    {
+        $valor = $this->declaracion($bloque, $propiedad);
+
+        $this->assertMatchesRegularExpression('/^#[0-9a-f]{6}$/i', $valor, "El color `{$valor}` de {$propiedad} no está en formato #rrggbb.");
+
+        return $valor;
+    }
+
     /** Cuerpo de un bloque CSS de primer nivel, que aquí no anidan llaves. */
     private function bloque(string $css, string $selector): string
     {
@@ -185,55 +201,5 @@ class VeloDelHeroTest extends TestCase
         $this->assertNotNull($porDefecto, "No se encontró `{$propiedad}` y no hay valor heredado que usar.");
 
         return $porDefecto;
-    }
-
-    /** Composición alfa normal, que es como el navegador pinta el velo. */
-    private function componer(string $velo, float $alfa, string $imagen): string
-    {
-        $v = $this->canales($velo);
-        $i = $this->canales($imagen);
-
-        return sprintf(
-            '#%02x%02x%02x',
-            (int) round($alfa * $v[0] + (1 - $alfa) * $i[0]),
-            (int) round($alfa * $v[1] + (1 - $alfa) * $i[1]),
-            (int) round($alfa * $v[2] + (1 - $alfa) * $i[2])
-        );
-    }
-
-    private function contraste(string $a, string $b): float
-    {
-        $luminancias = [$this->luminancia($a), $this->luminancia($b)];
-        rsort($luminancias);
-
-        return ($luminancias[0] + 0.05) / ($luminancias[1] + 0.05);
-    }
-
-    /** Luminancia relativa de WCAG 2.1. */
-    private function luminancia(string $hex): float
-    {
-        $lineal = array_map(static function (int $canal): float {
-            $proporcion = $canal / 255;
-
-            return $proporcion <= 0.03928
-                ? $proporcion / 12.92
-                : (($proporcion + 0.055) / 1.055) ** 2.4;
-        }, $this->canales($hex));
-
-        return 0.2126 * $lineal[0] + 0.7152 * $lineal[1] + 0.0722 * $lineal[2];
-    }
-
-    /** @return array{int, int, int} */
-    private function canales(string $hex): array
-    {
-        $limpio = ltrim(trim($hex), '#');
-
-        $this->assertSame(6, strlen($limpio), "El color `{$hex}` no está en formato #rrggbb.");
-
-        return [
-            (int) hexdec(substr($limpio, 0, 2)),
-            (int) hexdec(substr($limpio, 2, 2)),
-            (int) hexdec(substr($limpio, 4, 2)),
-        ];
     }
 }
