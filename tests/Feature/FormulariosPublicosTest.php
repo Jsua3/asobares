@@ -6,9 +6,8 @@ use App\Enums\CargoDelSector;
 use App\Enums\EstadoPublicacion;
 use App\Enums\TipoMensaje;
 use App\Mail\AcuseDeRadicado;
-use App\Mail\NuevaPqr;
+use App\Mail\MensajeRecibido;
 use App\Mail\NuevaSolicitudAfiliacion;
-use App\Mail\NuevoMensajeContacto;
 use App\Models\Aliado;
 use App\Models\Asociado;
 use App\Models\Aspirante;
@@ -224,8 +223,8 @@ class FormulariosPublicosTest extends TestCase
         );
 
         Mail::assertSent(AcuseDeRadicado::class, 3);
-        Mail::assertSent(NuevaPqr::class, 3);
-        Mail::assertSent(NuevaPqr::class, fn (NuevaPqr $correo): bool => $correo->hasTo('oficina@asobares.test'));
+        Mail::assertSent(MensajeRecibido::class, 3);
+        Mail::assertSent(MensajeRecibido::class, fn (MensajeRecibido $correo): bool => $correo->hasTo('oficina@asobares.test'));
     }
 
     public function test_un_mensaje_de_contacto_normal_no_recibe_radicado(): void
@@ -242,7 +241,7 @@ class FormulariosPublicosTest extends TestCase
         ]);
 
         $this->assertNull(Mensaje::firstOrFail()->radicado);
-        Mail::assertSent(NuevoMensajeContacto::class, fn (NuevoMensajeContacto $correo): bool => $correo->hasTo('oficina@asobares.test'));
+        Mail::assertSent(MensajeRecibido::class, fn (MensajeRecibido $correo): bool => $correo->hasTo('oficina@asobares.test'));
     }
 
     public function test_la_afiliacion_se_guarda_como_solicitud_estructurada(): void
