@@ -176,7 +176,7 @@ class BancoVisualDeLaPortadaTest extends TestCase
             $vista,
             'El texto de la guía tiene que quedar fuera de la intro visible de «en movimiento».'
         );
-        $this->assertStringContainsString('ajuste(\'portada_videos_intro\'', $vista);
+        $this->assertStringNotContainsString('ajuste(\'portada_videos_intro\'', $vista);
     }
 
     public function test_los_tokens_de_home_existen_en_los_dos_temas(): void

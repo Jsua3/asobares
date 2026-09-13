@@ -114,31 +114,28 @@
     </div>
 </section>
 
-<section class="home-editorial-actualidad revelar" data-revelar aria-labelledby="home-movimiento">
+<section class="home-editorial-actualidad home-editorial-movimiento revelar" data-revelar aria-labelledby="home-movimiento">
+    <div class="home-editorial-movimiento__atmosfera" aria-hidden="true"></div>
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="home-editorial-movimiento">
-            <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <div class="max-w-xl">
-                    <p class="home-editorial-eyebrow text-acento">{{ ajuste('portada_videos_rotulo', 'ASOBARES en movimiento') }}</p>
-                    <p id="home-movimiento" class="mt-1 font-display text-base font-semibold sm:text-lg">{{ ajuste('portada_videos_titulo', 'Historias cortas para sentir el gremio.') }}</p>
-                    <p class="mt-2 text-sm leading-relaxed text-tenue">{{ ajuste('portada_videos_intro', 'Recorridos, eventos, testimonios y momentos que muestran la vida nocturna del Quindío desde quienes la hacen posible.') }}</p>
-                    <p class="sr-only">{{ ajuste('portada_videos_proxima_rotulo', 'Próxima pieza') }} {{ ajuste('portada_videos_proxima_texto', 'Clips de afiliados, activaciones y memoria del capítulo.') }}</p>
-                </div>
-                <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-                    <a href="{{ route('guia.index') }}"
-                       class="home-editorial-enlace enlace-accion text-acento hover:text-acento-fuerte"
-                       aria-describedby="home-guia-texto">
-                        {{ ajuste('portada_guia_titulo') }}&nbsp;<x-publico.flecha />
-                    </a>
-                    <p id="home-guia-texto" class="sr-only">{{ ajuste('portada_guia_texto') }}</p>
-                    <a href="{{ route('eventos.index') }}" class="home-editorial-enlace enlace-accion text-acento hover:text-acento-fuerte">
-                        Ver agenda&nbsp;<x-publico.flecha />
-                    </a>
-                    <a href="{{ route('boletin.index') }}" class="home-editorial-enlace enlace-accion text-acento hover:text-acento-fuerte">
-                        Boletín ASOBARES&nbsp;<x-publico.flecha />
-                    </a>
-                </div>
+        <div class="home-editorial-movimiento__cuerpo">
+            <div class="home-editorial-movimiento__texto">
+                <h2 id="home-movimiento" class="home-editorial-eyebrow">{{ ajuste('portada_videos_rotulo', 'ASOBARES en movimiento') }}</h2>
+                <p class="home-editorial-movimiento__frase">{{ ajuste('portada_videos_titulo', 'Historias cortas para sentir el gremio.') }}</p>
             </div>
+            <nav class="home-editorial-movimiento__accesos" aria-label="{{ ajuste('portada_videos_rotulo', 'ASOBARES en movimiento') }}">
+                <a href="{{ route('guia.index') }}"
+                   class="home-editorial-enlace enlace-accion"
+                   aria-describedby="home-guia-texto">
+                    {{ ajuste('portada_guia_titulo') }}&nbsp;<x-publico.flecha />
+                </a>
+                <p id="home-guia-texto" class="sr-only">{{ ajuste('portada_guia_texto') }}</p>
+                <a href="{{ route('eventos.index') }}" class="home-editorial-enlace enlace-accion">
+                    Ver agenda&nbsp;<x-publico.flecha />
+                </a>
+                <a href="{{ route('boletin.index') }}" class="home-editorial-enlace enlace-accion">
+                    Boletín ASOBARES&nbsp;<x-publico.flecha />
+                </a>
+            </nav>
         </div>
     </div>
 </section>

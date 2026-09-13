@@ -24,8 +24,9 @@ class PortadaEditableTest extends TestCase
 
     /**
      * Claves de texto propio de la portada que esta vista todavía pinta.
-     * `portada_empleo_*` salió de Eventos en HOME-FINAL-04 y vuelve con
-     * «ASOBARES en movimiento» (HOME-FINAL-05); no se exige aquí.
+     * `portada_empleo_*` salió de Eventos en HOME-FINAL-04.
+     * `portada_videos_intro` y `portada_videos_proxima_*` salieron de
+     * «en movimiento» en HOME-FINAL-05: prometían clips que no hay.
      */
     private const array TITULOS = [
         'portada_cifras_titulo',
@@ -38,9 +39,6 @@ class PortadaEditableTest extends TestCase
         'portada_aliados_comerciales',
         'portada_videos_rotulo',
         'portada_videos_titulo',
-        'portada_videos_intro',
-        'portada_videos_proxima_rotulo',
-        'portada_videos_proxima_texto',
         'hero_frase_corta',
         'hero_resumen_corto',
         'hero_video_rotulo',
