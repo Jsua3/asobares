@@ -189,7 +189,7 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringNotContainsString('logo-doble', $simple, 'sin `doble` el componente rinde lo de siempre');
 
         $html = $this->get('/contacto')->assertOk()->getContent();
-        $this->assertStringContainsString('rel="preload" as="image" href="http://localhost:8000/img/monograma-asobares.png">', $html, 'el móvil cruza al isotipo en scroll y con sesión: se precarga en los dos anchos');
+        $this->assertStringContainsString('rel="preload" as="image" href="'.asset('img/monograma-asobares.png').'">', $html, 'el móvil cruza al isotipo en scroll y con sesión: se precarga en los dos anchos');
         $this->assertStringNotContainsString('monograma-asobares.png" media=', $html);
     }
 
