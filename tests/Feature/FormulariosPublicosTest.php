@@ -27,6 +27,7 @@ use Database\Seeders\RolYPermisoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Mail;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Mailer\Exception\TransportException;
 use Tests\TestCase;
 
@@ -474,6 +475,42 @@ class FormulariosPublicosTest extends TestCase
         $respuesta->assertSee('Bruma Gastrobar');
         $respuesta->assertSee('$150.000');
         $respuesta->assertSee($convenio->detalle_convenio);
+    }
+
+    /** @return array<string, array{int, string}> */
+    public static function mesesDeMora(): array
+    {
+        return [
+            'un mes' => [1, 'mes'],
+            'tres meses' => [3, 'meses'],
+        ];
+    }
+
+    /**
+     * PANEL-06: `Str::plural('mes', 3)` pluraliza en inglés y devolvía «mes»,
+     * así que la tarjeta de mora decía «Debes 3 mes».
+     */
+    #[DataProvider('mesesDeMora')]
+    public function test_la_tarjeta_de_mora_concuerda_los_meses_en_espanol(int $meses, string $palabra): void
+    {
+        $this->seed(RolYPermisoSeeder::class);
+
+        $asociado = Asociado::factory()->publicado()->create(['nombre' => 'Bruma Gastrobar']);
+        Cartera::create([
+            'asociado_id' => $asociado->id,
+            'saldo_pendiente' => 50000 * $meses,
+            'meses_mora' => $meses,
+            'actualizado_at' => now(),
+        ]);
+
+        $duenio = User::factory()->create(['asociado_id' => $asociado->id]);
+        $duenio->syncRoles([User::ROL_ASOCIADO]);
+
+        $html = $this->actingAs($duenio->fresh())->get(route('mi-cuenta.index'))->assertSuccessful()->getContent();
+
+        $this->assertSame(1, preg_match('/Debes\s+(\d+)\s+(\S+)/u', $html, $coincidencia), 'La tarjeta de mora tiene que decir cuántos meses se deben.');
+        $this->assertSame((string) $meses, $coincidencia[1]);
+        $this->assertSame($palabra, $coincidencia[2]);
     }
 
     public function test_el_asociado_al_dia_ve_el_estado_sin_deuda(): void

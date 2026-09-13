@@ -81,7 +81,7 @@
                             </span>
                             <div>
                                 <p class="font-display text-2xl font-bold text-acento-fuerte">
-                                    Debes {{ $cartera->meses_mora }} {{ Str::plural('mes', $cartera->meses_mora) }}
+                                    Debes {{ $cartera->meses_mora }} {{ (int) $cartera->meses_mora === 1 ? 'mes' : 'meses' }}
                                 </p>
                                 <p class="mt-1.5 font-display text-3xl font-bold">{{ pesos($cartera->saldo_pendiente) }}</p>
                                 @if ($cartera->ultimo_pago_at)
