@@ -20,7 +20,7 @@ enum EstadoPublicidad: string implements HasColor, HasLabel
             self::Borrador => 'Borrador',
             self::PendientePago => 'Pendiente de pago',
             self::Pagada => 'Pagada',
-            self::PendienteAprobacion => 'Pendiente de aprobacion',
+            self::PendienteAprobacion => 'Pendiente de aprobación',
             self::Publicada => 'Publicada',
             self::Rechazada => 'Rechazada',
         };

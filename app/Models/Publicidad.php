@@ -182,7 +182,7 @@ class Publicidad extends Model
 
         if (! $this->tieneDatosPublicables()) {
             throw ValidationException::withMessages([
-                'estado' => 'Para publicar la pauta debe tener imagen y fechas validas.',
+                'estado' => 'Para publicar la pauta debe tener imagen y fechas válidas.',
             ]);
         }
     }

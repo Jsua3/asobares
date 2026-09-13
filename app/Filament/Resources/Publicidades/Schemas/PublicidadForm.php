@@ -38,7 +38,7 @@ class PublicidadForm
                             ->required()
                             ->maxLength(255),
                         TextInput::make('telefono')
-                            ->label('Telefono')
+                            ->label('Teléfono')
                             ->tel()
                             ->required()
                             ->maxLength(30),
@@ -48,7 +48,7 @@ class PublicidadForm
                     ->columns(2)
                     ->schema([
                         Select::make('ubicacion')
-                            ->label('Ubicacion')
+                            ->label('Ubicación')
                             ->options(UbicacionPublicidad::class)
                             ->native(false)
                             ->required(),
@@ -58,7 +58,7 @@ class PublicidadForm
                             ->numeric()
                             ->minValue(0)
                             ->required()
-                            ->helperText('Valor administrativo en pesos colombianos. No calcula descuentos, IVA ni facturacion.'),
+                            ->helperText('Valor administrativo en pesos colombianos. No calcula descuentos, IVA ni facturación.'),
                         DateTimePicker::make('fecha_inicio')
                             ->label('Inicio de vigencia')
                             ->seconds(false)
@@ -82,21 +82,21 @@ class PublicidadForm
                             ->required()
                             ->disabled(fn (): bool => auth()->user()?->can('publicar_publicidad') !== true)
                             ->helperText(fn (): string => auth()->user()?->can('publicar_publicidad') === true
-                                ? 'La direccion puede cambiar el estado o usar las acciones de la tabla.'
-                                : 'Puedes redactar la pauta; la publicacion queda para aprobacion.'),
+                                ? 'La dirección puede cambiar el estado o usar las acciones de la tabla.'
+                                : 'Puedes redactar la pauta; la publicación queda para aprobación.'),
                     ]),
 
                 Section::make('Imagen')
                     ->schema([
                         SubidaSegura::make('imagen')
-                            ->label('Pieza grafica')
+                            ->label('Pieza gráfica')
                             ->imagen()
                             ->directory('publicidades')
                             ->deletable()
                             ->downloadable()
                             ->openable()
                             ->imageEditor()
-                            ->helperText('JPG, PNG o WebP, maximo 5 MB. Es obligatoria para publicar.'),
+                            ->helperText('JPG, PNG o WebP, máximo 5 MB. Es obligatoria para publicar.'),
                     ]),
 
                 Section::make('Notas internas')
