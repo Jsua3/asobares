@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Tests\TestCase;
+use Throwable;
 
 /**
  * Cómo se ve el sitio cuando alguien pega el enlace en WhatsApp.
@@ -46,11 +47,6 @@ class ImagenAlCompartirTest extends TestCase
     {
         $ruta = public_path(self::TARJETA);
 
-        $this->assertTrue(
-            Process::path(base_path())->run(['git', 'ls-files', '--error-unmatch', 'public/'.self::TARJETA])->successful(),
-            'La tarjeta de Open Graph no está en el índice de git: en producción el enlace se comparte sin imagen.'
-        );
-
         $this->assertFileExists($ruta);
 
         $this->assertLessThanOrEqual(
@@ -66,6 +62,32 @@ class ImagenAlCompartirTest extends TestCase
             [$ancho, $alto],
             'La plantilla jura 1200x630 en `og:image:width` y `og:image:height`. Si el archivo mide otra cosa, el desplegador recorta contra un tamaño que no existe.'
         );
+
+        // El índice se mira al final: sin `git` o sin repositorio la prueba se
+        // omite, pero el peso y las medidas ya se comprobaron.
+        $this->omitirSinRepositorio();
+
+        $this->assertTrue(
+            Process::path(base_path())->run(['git', 'ls-files', '--error-unmatch', 'public/'.self::TARJETA])->successful(),
+            'La tarjeta de Open Graph no está en el índice de git: en producción el enlace se comparte sin imagen.'
+        );
+    }
+
+    /**
+     * Sin `git` o fuera de un repositorio, `ls-files` falla y el mensaje diría
+     * que la tarjeta no viaja, que es falso: la prueba se omite.
+     */
+    private function omitirSinRepositorio(): void
+    {
+        try {
+            $repositorio = Process::path(base_path())->run(['git', 'rev-parse', '--git-dir']);
+        } catch (Throwable) {
+            $repositorio = null;
+        }
+
+        if ($repositorio === null || ! $repositorio->successful()) {
+            $this->markTestSkipped('Sin `git` o sin repositorio en esta máquina: no se puede comprobar el índice.');
+        }
     }
 
     /**
