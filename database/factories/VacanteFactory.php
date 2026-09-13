@@ -49,12 +49,4 @@ class VacanteFactory extends Factory
     {
         return $this->state(['fecha_limite' => now()->subDay()->toDateString()]);
     }
-
-    public function momentanea(): static
-    {
-        return $this->state([
-            'tipo' => TipoVacante::Momentaneo,
-            'fecha_limite' => now()->addWeek()->toDateString(),
-        ]);
-    }
 }

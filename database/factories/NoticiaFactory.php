@@ -60,13 +60,4 @@ class NoticiaFactory extends Factory
             'publicado_at' => now()->subDay(),
         ]);
     }
-
-    /** Programada para más adelante: aprobada, pero todavía fuera del sitio. */
-    public function programada(): static
-    {
-        return $this->state([
-            'estado' => EstadoPublicacion::Publicado,
-            'publicado_at' => now()->addWeek(),
-        ]);
-    }
 }

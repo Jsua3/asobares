@@ -31,7 +31,7 @@ class AfiliacionController
     {
         $solicitud = SolicitudAfiliacion::create($request->datosDeSolicitud());
 
-        $this->correosInstitucionales->enviar(new NuevaSolicitudAfiliacion($solicitud), 'afiliacion');
+        $this->correosInstitucionales->enviar(new NuevaSolicitudAfiliacion($solicitud));
 
         return redirect()
             ->route('afiliate')

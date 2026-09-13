@@ -38,12 +38,11 @@ class MisVacantesController
         ]);
     }
 
-    public function crear(Request $request): View
+    public function crear(): View
     {
         Gate::authorize('create', Vacante::class);
 
         return view('publico.mi-cuenta.vacantes.crear', [
-            'vacante' => null,
             'categorias' => CargoDelSector::cases(),
             'tipos' => TipoVacante::cases(),
         ]);

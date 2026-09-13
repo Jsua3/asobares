@@ -41,11 +41,6 @@ final class AvisoDeMensajeAlGremio
     /** El ajuste que la oficina edita en «Ajustes del sitio». */
     public const string CLAVE_DESTINO = 'contacto_correo_destino';
 
-    public static function enviar(Mensaje $mensaje): void
-    {
-        self::escribirAlBuzon($mensaje);
-    }
-
     /**
      * El correo no puede tumbar la petición que lo dispara (§9, D-23).
      *
@@ -57,7 +52,7 @@ final class AvisoDeMensajeAlGremio
      * Vaciar el ajuste apaga el aviso, igual que vaciar el número apaga el botón
      * de WhatsApp: no es un error, es cómo se desactiva.
      */
-    private static function escribirAlBuzon(Mensaje $mensaje): void
+    public static function enviar(Mensaje $mensaje): void
     {
         $destino = trim((string) ajuste(self::CLAVE_DESTINO));
 
