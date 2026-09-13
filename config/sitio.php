@@ -11,6 +11,10 @@ return [
     | hace que Google tome esas URLs como las canónicas de cada página, y
     | cuando llegue el dominio definitivo compiten con las suyas.
     |
+    | Conmuta dos cosas: `Allow: /` o `Disallow: /` en `robots.txt`, y la
+    | etiqueta `noindex, nofollow` del layout público. La canónica y la línea
+    | `Sitemap:` de `robots.txt` salen siempre.
+    |
     | Va por variable y no por código para que abrirlo el día del dominio sea
     | poner esto en `true` y redesplegar, sin tocar un archivo ni pasar por una
     | revisión.
