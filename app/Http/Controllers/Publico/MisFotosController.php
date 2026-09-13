@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Publico;
 
+use App\Filament\Forms\Components\SubidaSegura;
 use App\Models\Asociado;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -83,15 +84,9 @@ class MisFotosController
          * La extensión la decide el servidor, nunca el nombre que llega.
          * Un JPEG legítimo llamado «payload.html» pasa la validación de tipo
          * --su MIME es image/jpeg-- y quedaría servido como HTML desde el
-         * disco público. Es el mismo razonamiento de `SubidaSegura`, que aquí
-         * no se puede reutilizar porque es un componente de Filament.
+         * disco público. Sale del mismo mapa que usan las subidas del panel.
          */
-        $extension = match ($archivo->getMimeType()) {
-            'image/jpeg' => 'jpg',
-            'image/png' => 'png',
-            'image/webp' => 'webp',
-            default => 'bin',
-        };
+        $extension = SubidaSegura::extensionPara($archivo->getMimeType());
 
         $asociado->addMedia($archivo->getRealPath())
             ->usingFileName(Str::ulid().'.'.$extension)

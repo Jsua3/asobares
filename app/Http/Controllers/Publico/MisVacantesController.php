@@ -52,7 +52,7 @@ class MisVacantesController
     {
         Gate::authorize('create', Vacante::class);
 
-        $request->user()->asociado->vacantes()->create([
+        $this->establecimientoDe($request)->vacantes()->create([
             ...$request->datosDeLaVacante(),
             // El asociado nunca publica directo: su vacante entra a la fila
             // de revisión de la secretaría.
