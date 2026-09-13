@@ -22,28 +22,30 @@ use Illuminate\Support\Facades\Storage;
 class LimpiezaDeArchivosObserver
 {
     /**
-     * Campo de archivo por modelo y disco donde vive.
+     * Campo de archivo por modelo y clase de almacenamiento donde vive
+     * (`publico` o `privado`). El disco concreto lo decide
+     * `config('almacenamiento.*')`, igual que en la subida.
      *
-     * @var array<class-string<Model>, array<string, string>>
+     * @var array<class-string<Model>, array<string, 'publico'|'privado'>>
      */
     public const array CAMPOS_POR_MODELO = [
-        Asociado::class => ['foto_portada' => 'public'],
-        Aliado::class => ['logo' => 'public'],
-        Artista::class => ['foto' => 'public'],
-        Evento::class => ['imagen' => 'public'],
-        Noticia::class => ['imagen' => 'public'],
-        RequisitoApertura::class => ['adjunto' => 'local'],
+        Asociado::class => ['foto_portada' => 'publico'],
+        Aliado::class => ['logo' => 'publico'],
+        Artista::class => ['foto' => 'publico'],
+        Evento::class => ['imagen' => 'publico'],
+        Noticia::class => ['imagen' => 'publico'],
+        RequisitoApertura::class => ['adjunto' => 'privado'],
     ];
 
     /** Al reemplazar un archivo, el anterior deja de tener dueño. */
     public function updated(Model $modelo): void
     {
-        foreach ($this->camposDe($modelo) as $campo => $disco) {
+        foreach ($this->camposDe($modelo) as $campo => $almacenamiento) {
             if (! $modelo->wasChanged($campo)) {
                 continue;
             }
 
-            $this->borrarSiNadieLoUsa($modelo, $campo, (string) $modelo->getOriginal($campo), $disco);
+            $this->borrarSiNadieLoUsa($modelo, $campo, (string) $modelo->getOriginal($campo), $almacenamiento);
         }
     }
 
@@ -54,8 +56,8 @@ class LimpiezaDeArchivosObserver
             return;
         }
 
-        foreach ($this->camposDe($modelo) as $campo => $disco) {
-            $this->borrarSiNadieLoUsa($modelo, $campo, (string) $modelo->getAttribute($campo), $disco);
+        foreach ($this->camposDe($modelo) as $campo => $almacenamiento) {
+            $this->borrarSiNadieLoUsa($modelo, $campo, (string) $modelo->getAttribute($campo), $almacenamiento);
         }
     }
 
@@ -64,7 +66,7 @@ class LimpiezaDeArchivosObserver
      * formato de bomberos sirve para tres municipios—, así que un borrado
      * ciego se llevaría por delante el adjunto de fichas ajenas.
      */
-    private function borrarSiNadieLoUsa(Model $modelo, string $campo, string $ruta, string $disco): void
+    private function borrarSiNadieLoUsa(Model $modelo, string $campo, string $ruta, string $almacenamiento): void
     {
         if ($ruta === '') {
             return;
@@ -79,7 +81,7 @@ class LimpiezaDeArchivosObserver
             return;
         }
 
-        Storage::disk($disco)->delete($ruta);
+        Storage::disk(config('almacenamiento.'.$almacenamiento))->delete($ruta);
     }
 
     /** @return array<string, string> */
