@@ -25,8 +25,10 @@ class RequisitoAperturasTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('entidad')
+                    ->label('Entidad')
                     ->searchable(),
                 TextColumn::make('enlace_externo')
+                    ->label('Enlace externo')
                     ->searchable(),
                 // OBS3-10. La columna de arriba enseña la URL; esta dice si
                 // sirve para lo que el gremio pidió. Sin una señal a la vista,
@@ -49,16 +51,21 @@ class RequisitoAperturasTable
                         ? null
                         : 'El enlace abre la portada de la entidad; debería abrir el trámite exacto.'),
                 TextColumn::make('adjunto')
+                    ->label('Formato oficial (PDF)')
                     ->searchable(),
                 TextColumn::make('adjunto_nombre')
+                    ->label('Nombre del formato')
                     ->searchable(),
                 TextColumn::make('costo_aproximado')
+                    ->label('Costo aproximado')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('orden')
+                    ->label('Orden')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('estado')
+                    ->label('Estado')
                     ->badge()
                     ->searchable(),
                 TextColumn::make('verificado_el')
@@ -79,10 +86,12 @@ class RequisitoAperturasTable
                     ->color(fn (RequisitoApertura $record): string => $record->haCaducado() ? 'danger' : 'gray')
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label('Creado')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Actualizado')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

@@ -19,10 +19,13 @@ class BeneficiosTable
         return $table
             ->columns([
                 TextColumn::make('titulo')
+                    ->label('Título')
                     ->searchable(),
                 TextColumn::make('icono')
+                    ->label('Icono')
                     ->searchable(),
                 TextColumn::make('orden')
+                    ->label('Orden')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('alcance')
@@ -35,10 +38,12 @@ class BeneficiosTable
                     ->placeholder('—')
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label('Creado')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Actualizado')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

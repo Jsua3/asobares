@@ -15,14 +15,18 @@ class CategoriasTable
         return $table
             ->columns([
                 TextColumn::make('nombre')
+                    ->label('Nombre')
                     ->searchable(),
                 TextColumn::make('slug')
+                    ->label('Slug (URL)')
                     ->searchable(),
                 TextColumn::make('created_at')
+                    ->label('Creado')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Actualizado')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

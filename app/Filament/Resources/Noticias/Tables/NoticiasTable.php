@@ -18,25 +18,33 @@ class NoticiasTable
         return $table
             ->columns([
                 TextColumn::make('titulo')
+                    ->label('Título')
                     ->searchable(),
                 TextColumn::make('slug')
+                    ->label('Slug (URL)')
                     ->searchable(),
                 TextColumn::make('imagen')
+                    ->label('Imagen')
                     ->searchable(),
                 TextColumn::make('categoria')
+                    ->label('Categoría')
                     ->badge()
                     ->searchable(),
                 TextColumn::make('publicado_at')
+                    ->label('Fecha de publicación')
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('estado')
+                    ->label('Estado')
                     ->badge()
                     ->searchable(),
                 TextColumn::make('created_at')
+                    ->label('Creado')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Actualizado')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
