@@ -417,6 +417,27 @@ class SolicitudAfiliacionTest extends TestCase
         $this->assertSame(1, User::count());
     }
 
+    /**
+     * La sección de seguimiento es lo que la secretaría lee al gestionar una
+     * solicitud: tiene que remitir a la acción que aprueba, que ya existe, y
+     * no anunciarla como algo por venir.
+     */
+    public function test_el_seguimiento_remite_a_la_accion_de_aprobar(): void
+    {
+        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
+
+        $solicitud = SolicitudAfiliacion::factory()->create([
+            'municipio_id' => $this->municipio->id,
+            'categoria_id' => $this->categoria->id,
+            'estado' => EstadoSolicitudAfiliacion::Pendiente,
+        ]);
+
+        Livewire::test(EditSolicitudAfiliacion::class, ['record' => $solicitud->getRouteKey()])
+            ->assertSuccessful()
+            ->assertDontSee('vendrá después')
+            ->assertSee('Para aprobar y crear el acceso, usa la acción «Aprobar y crear acceso» de la lista de solicitudes.');
+    }
+
     public function test_aprobar_dos_veces_no_crea_duplicados(): void
     {
         Mail::fake();
