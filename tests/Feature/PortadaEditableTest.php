@@ -94,14 +94,24 @@ class PortadaEditableTest extends TestCase
     public function test_cada_titulo_de_la_portada_obedece_a_su_ajuste(): void
     {
         foreach (self::TITULOS as $indice => $clave) {
-            $this->editarAjuste($clave, "TITULO EDITADO DESDE EL PANEL {$indice}");
+            $this->editarAjuste($clave, $this->textoEditado($indice));
         }
 
         $respuesta = $this->get('/')->assertOk();
 
         foreach (self::TITULOS as $indice => $clave) {
-            $respuesta->assertSee("TITULO EDITADO DESDE EL PANEL {$indice}", escape: false);
+            $respuesta->assertSee($this->textoEditado($indice), escape: false);
         }
+    }
+
+    /**
+     * El índice va cerrado entre corchetes a propósito. Sin cierre, «PANEL 1»
+     * es prefijo de «PANEL 10» a «PANEL 19», y la clave del índice 1 pasaba en
+     * verde aunque su vista la cableara: la sostenía el texto de otra clave.
+     */
+    private function textoEditado(int $indice): string
+    {
+        return "TITULO EDITADO DESDE EL PANEL [{$indice}]";
     }
 
     /** La entradilla de beneficios también se edita, no solo el título. */
