@@ -61,7 +61,9 @@ class Noticia extends Model
      */
     public function contenidoSaneado(): string
     {
-        $contenido = (string) $this->contenido;
+        // Un byte UTF-8 roto hace que las expresiones con /u devuelvan false,
+        // y la noticia saldría vacía sin avisar: se sustituye antes de mirar.
+        $contenido = mb_scrub((string) $this->contenido, 'UTF-8');
 
         if (! self::traeEtiquetasHtml($contenido)) {
             $contenido = self::parrafosDesdeTextoPlano($contenido);
@@ -76,12 +78,19 @@ class Noticia extends Model
     }
 
     /**
-     * Una etiqueta de verdad, de apertura o de cierre. Un «<3», un «a < b» o
-     * un correo entre ángulos no cuentan: son texto y se escapan como tal.
+     * Una etiqueta HTML de verdad, de apertura o de cierre, de las que escriben
+     * un editor o el sembrador. Un «<3», un «a < b», un correo entre ángulos o
+     * un marcador como «<de 8 a 12>» o «<nombre del contacto>» no cuentan: son
+     * texto. Tomarlos por etiqueta hacía que el saneado se comiera todo lo que
+     * venía detrás. El enlace solo cuenta con `href`, para que «<a lo sumo
+     * cinco>» siga siendo texto.
      */
     private static function traeEtiquetasHtml(string $contenido): bool
     {
-        return preg_match('/<\/?[a-z][a-z0-9-]*(\s[^>]*)?\/?>/i', $contenido) === 1;
+        return preg_match(
+            '/<\/?(?:a(?=\s[^>]*\bhref\b|>)|p|br|hr|strong|em|b|i|u|s|small|mark|span|div|ul|ol|li|h[1-6]|blockquote|code|pre|table|thead|tbody|tr|th|td|figure|figcaption|img)(?:\s[^>]*)?\/?>/i',
+            $contenido
+        ) === 1;
     }
 
     /**

@@ -98,12 +98,12 @@ class BandaDeEstablecimientosDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('Ver establecimientos anteriores', $seccion);
         $this->assertStringContainsString('Ver establecimientos siguientes', $seccion);
         $this->assertMatchesRegularExpression(
-            '/<button\b(?=[^>]*home-editorial-banda__control--prev)(?=[^>]*\baria-label="Ver establecimientos anteriores")[^>]*>/',
+            '/<button\b(?=[^>]*home-editorial-banda__control--prev)(?=[^>]*\saria-label="Ver establecimientos anteriores")[^>]*>/',
             $seccion,
             'El control anterior de la banda solo lleva un icono: su nombre accesible es el aria-label.'
         );
         $this->assertMatchesRegularExpression(
-            '/<button\b(?=[^>]*home-editorial-banda__control--next)(?=[^>]*\baria-label="Ver establecimientos siguientes")[^>]*>/',
+            '/<button\b(?=[^>]*home-editorial-banda__control--next)(?=[^>]*\saria-label="Ver establecimientos siguientes")[^>]*>/',
             $seccion,
             'El control siguiente de la banda solo lleva un icono: su nombre accesible es el aria-label.'
         );

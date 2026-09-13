@@ -48,7 +48,9 @@ class EventosEditorialesDeLaPortadaTest extends TestCase
         $this->assertStringNotContainsString('href="'.route('empleo.index').'"', $seccion);
         $this->assertStringNotContainsString('href="'.route('quienes-somos').'#iniciativas"', $seccion);
         $this->assertStringNotContainsString('Ver vacantes', $seccion);
-        $this->assertStringNotContainsString(ajuste('portada_empleo_titulo'), $seccion);
+        // Literal y no ajuste(): portada_empleo_titulo se jubiló el 13 sep, y
+        // una aguja vacía hace fallar assertStringNotContainsString siempre.
+        $this->assertStringNotContainsString('Bolsa de empleo', $seccion);
         $this->assertStringNotContainsString(ajuste('iniciativas_titulo'), $seccion);
 
         $this->assertSame($proximos->count(), preg_match_all('/class="[^"]*home-editorial-evento(?:\s|")/', $seccion));
@@ -56,10 +58,11 @@ class EventosEditorialesDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('aria-label="Ver el evento siguiente"', $seccion);
 
         // Los puntos solo pintan un número con aria-hidden: sin aria-label
-        // son botones sin nombre (MUT-06).
+        // son botones sin nombre (MUT-06). `\s` y no `\b` delante del atributo:
+        // `\b` también casa tras `:` y aceptaba un `:aria-label` sin nombre servido.
         $this->assertSame(
             $proximos->count(),
-            preg_match_all('/<button\b(?=[^>]*home-editorial-eventos__punto)(?=[^>]*\baria-label="Ir al evento )[^>]*>/', $seccion),
+            preg_match_all('/<button\b(?=[^>]*home-editorial-eventos__punto)(?=[^>]*\saria-label="Ir al evento )[^>]*>/', $seccion),
             'Cada evento tiene que tener un punto con nombre accesible.'
         );
 
@@ -67,7 +70,7 @@ class EventosEditorialesDeLaPortadaTest extends TestCase
             $rotulo = 'Ir al evento '.($indice + 1).' de '.$proximos->count().': '.$evento->titulo;
 
             $this->assertMatchesRegularExpression(
-                '/<button\b(?=[^>]*home-editorial-eventos__punto)(?=[^>]*\baria-label="'.preg_quote(e($rotulo), '/').'")[^>]*>/',
+                '/<button\b(?=[^>]*home-editorial-eventos__punto)(?=[^>]*\saria-label="'.preg_quote(e($rotulo), '/').'")[^>]*>/',
                 $seccion
             );
         }

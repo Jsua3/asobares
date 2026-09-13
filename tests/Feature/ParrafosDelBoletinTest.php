@@ -81,6 +81,34 @@ class ParrafosDelBoletinTest extends TestCase
         $this->assertStringNotContainsString('javascript:', $cuerpo);
     }
 
+    /**
+     * Un marcador entre ángulos es texto, no una etiqueta. Tomado por HTML, el
+     * saneado se comía todo lo que venía detrás, párrafos incluidos.
+     */
+    public function test_un_marcador_entre_angulos_no_se_come_el_resto_del_texto(): void
+    {
+        $noticia = Noticia::factory()->visible()->create([
+            'contenido' => "Horario <de 8 a 12> en la sede.\n\nEscribe a <nombre del contacto> o <a lo sumo cinco> personas.",
+        ]);
+
+        $cuerpo = $this->cuerpoDeLaFicha($noticia);
+
+        $this->assertSame(2, substr_count($cuerpo, '<p>'), "Cuerpo pintado: {$cuerpo}");
+        $this->assertStringContainsString('<p>Horario &lt;de 8 a 12&gt; en la sede.</p>', $cuerpo);
+        $this->assertStringContainsString('Escribe a &lt;nombre del contacto&gt; o &lt;a lo sumo cinco&gt; personas.', $cuerpo);
+    }
+
+    /** Un byte UTF-8 roto no puede dejar la noticia vacía. */
+    public function test_un_byte_utf8_roto_no_deja_la_noticia_vacia(): void
+    {
+        $noticia = new Noticia(['contenido' => "Primer párrafo \xC3\x28 roto.\n\nSegundo párrafo."]);
+
+        $cuerpo = $noticia->contenidoSaneado();
+
+        $this->assertSame(2, substr_count($cuerpo, '<p>'), "Cuerpo pintado: {$cuerpo}");
+        $this->assertStringContainsString('Segundo párrafo.', $cuerpo);
+    }
+
     /** Lo que la ficha pinta dentro del bloque `prose-asobares`. */
     private function cuerpoDeLaFicha(Noticia $noticia): string
     {

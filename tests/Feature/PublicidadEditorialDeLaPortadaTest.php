@@ -135,7 +135,7 @@ class PublicidadEditorialDeLaPortadaTest extends TestCase
         $seccion = $this->seccionDePublicidad($html);
 
         $this->assertMatchesRegularExpression(
-            '/<section class="home-editorial-publicidad[^"]*"(?=[^>]*\baria-label="'.preg_quote($rotulo, '/').'")[^>]*>/',
+            '/<section class="home-editorial-publicidad[^"]*"(?=[^>]*\saria-label="'.preg_quote($rotulo, '/').'")[^>]*>/',
             $html,
             'La sección de publicidad perdió su rótulo accesible.'
         );
@@ -145,7 +145,7 @@ class PublicidadEditorialDeLaPortadaTest extends TestCase
             'La pieza de publicidad perdió el rótulo visible.'
         );
         $this->assertMatchesRegularExpression(
-            '/class="home-editorial-publicidad__pieza[^"]*"(?:[^>]*)\baria-label="'.preg_quote(e($rotulo.': '.$nombre), '/').'"/',
+            '/class="home-editorial-publicidad__pieza[^"]*"(?:[^>]*)\saria-label="'.preg_quote(e($rotulo.': '.$nombre), '/').'"/',
             $seccion,
             'El nombre accesible de la pieza tiene que empezar por el rótulo de patrocinio.'
         );

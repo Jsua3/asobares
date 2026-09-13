@@ -70,10 +70,11 @@ Route::get('/directorio/{asociado:slug}', [DirectorioController::class, 'show'])
 // Guía normativa: el producto insignia.
 // Es lectura, no un formulario, y cada visita con ?municipio= inserta una fila
 // para el observatorio: sin límite, un bucle sobre los 12 municipios del
-// Quindío envenena esa cifra. 6,1 —el límite de los formularios de escritura—
-// cortaría a la mitad a alguien comparando municipios de verdad; 30,1 iguala
-// el límite que ya usan las otras rutas de lectura del sitio (retorno y
-// estado de pago) y sigue muy lejos de permitir un bucle serio.
+// Quindío envenena esa cifra. Seis por minuto —el límite de los formularios de
+// escritura— cortaría a la mitad a alguien comparando municipios de verdad;
+// treinta iguala el límite que ya usan las otras rutas de lectura del sitio
+// (retorno y estado de pago) y sigue muy lejos de permitir un bucle serio.
+// Cada máximo vive en AppServiceProvider::LIMITES_POR_MINUTO, uno por ruta.
 Route::get('/abre-tu-negocio', [GuiaController::class, 'index'])
     ->middleware('throttle:guia')
     ->name('guia.index');

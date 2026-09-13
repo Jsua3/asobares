@@ -192,7 +192,7 @@ class AliadosEditorialesDeLaPortadaTest extends TestCase
         }
 
         $real = $this->marcaDe($seccion, 'Logo Real Home');
-        $this->assertStringContainsString('home-editorial-aliados__marca--logo', $real);
+        $this->assertStringContainsString('home-editorial-aliados__marca--logo', $real, 'Un logo real se pinta como logo, no como nombre.');
         $this->assertStringContainsString('<img src="'.Storage::disk('public')->url('aliados/logo-real.png').'"', $real, 'un logo real sí se pinta');
     }
 

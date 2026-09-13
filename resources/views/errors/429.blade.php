@@ -1,5 +1,6 @@
 {{--
-    Sale sobre todo con los `throttle:6,1` de los formularios públicos. Igual
+    Sale cuando alguien agota el límite de un formulario público; los máximos
+    por minuto están en AppServiceProvider::LIMITES_POR_MINUTO. Igual
     que la 419, «Volver a la página» usa solo la ruta de la dirección anterior
     para no sacar a nadie del sitio. Lo fija PaginasDeErrorTest.
 --}}

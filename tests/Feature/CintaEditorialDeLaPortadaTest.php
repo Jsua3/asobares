@@ -94,7 +94,7 @@ class CintaEditorialDeLaPortadaTest extends TestCase
             'La cinta perdió su aria-label.'
         );
         $this->assertMatchesRegularExpression(
-            '/<a href="'.preg_quote(route('inicio'), '/').'" class="home-editorial-cinta__marca[^"]*">\s*<img\b(?=[^>]*img\/monograma-asobares\.png)(?=[^>]*\balt="'.preg_quote(e($nombreDelSitio), '/').'")[^>]*>/',
+            '/<a href="'.preg_quote(route('inicio'), '/').'" class="home-editorial-cinta__marca[^"]*">\s*<img\b(?=[^>]*img\/monograma-asobares\.png)(?=[^>]*\salt="'.preg_quote(e($nombreDelSitio), '/').'")[^>]*>/',
             $cinta,
             'El enlace del isotipo se quedó sin nombre accesible: el alt no puede ir vacío.'
         );

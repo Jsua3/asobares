@@ -150,8 +150,11 @@ class Bitacora extends Page implements HasTable
      * de una persona a todos los afiliados, el otro se los quita--. Con la frase
      * genérica las dos filas se leen idénticas, que es tanto como no registrar
      * nada. Estos modelos escriben su propia descripción y aquí se respeta.
+     * Las incidencias de pago (`pagos`, que escribe RegistroDePagos) también:
+     * su descripción dice qué notificó la pasarela contra lo ya resuelto, y la
+     * frase genérica la dejaba en «El sistema actualizó un registro».
      */
-    private const array DESCRIPCION_PROPIA = ['aspirante'];
+    private const array DESCRIPCION_PROPIA = ['aspirante', 'pagos'];
 
     /** Arma «Natalia actualizó el asociado La Cava del Yipao». */
     private function frase(Activity $registro): string
