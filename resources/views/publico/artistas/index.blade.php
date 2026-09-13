@@ -18,9 +18,9 @@
         @if (filled($tipos) || $generos->isNotEmpty())
         <form method="GET" action="{{ route('artistas.index') }}" class="revelar tarjeta grid gap-4 p-5 sm:grid-cols-3" data-revelar>
             {{-- Los tipos los arma el controlador con los que de verdad tienen
-                 ficha publicada. Antes se recorría el enum entero desde aquí, y
-                 el desplegable de al lado —que sí se deriva— dejaba el defecto a
-                 la vista dentro del mismo formulario. --}}
+                 ficha publicada, igual que los géneros del desplegable de al
+                 lado: recorrer el enum entero desde aquí ofrecería tipos que no
+                 devuelven ningún resultado. --}}
             <x-publico.campo nombre="tipo" etiqueta="Tipo" tipo="select" :valor="$filtros['tipo'] ?? null"
                              :opciones="['' => 'Todos'] + collect($tipos)->mapWithKeys(fn ($t) => [$t->value => $t->getLabel()])->all()" />
 

@@ -115,8 +115,8 @@
             @if ($enlace = enlaceWhatsapp($vacante->whatsapp_contacto, "Hola, vi la vacante de {$vacante->cargo} en la bolsa de empleo de ASOBARES Quindío."))
                 <p class="mt-6 text-xs text-apagado">
                     ¿Prefieres escribir?
-                    {{-- `whitespace-nowrap` por lo mismo que en `inicio.blade.php`: el espacio duro no
-                         frena el salto delante del SVG. Aquí la flecha quedaba huérfana a 368-376 px. --}}
+                    {{-- `whitespace-nowrap`: el espacio duro no frena el salto delante del SVG, y
+                         sin él la flecha queda huérfana a 368-376 px. --}}
                     <a href="{{ $enlace }}" target="_blank" rel="noopener nofollow"
                        class="enlace-accion whitespace-nowrap text-acento hover:text-acento-fuerte">Contactar por WhatsApp&nbsp;<x-publico.flecha direccion="externa" /></a>
                 </p>

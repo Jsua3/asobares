@@ -20,11 +20,11 @@
     $id = 'campo-'.Str::slug(str_replace(['[', ']', '.'], ['-', '', '-'], $nombre));
     $hayError = $errors->has($nombre);
 
-    // `aria-describedby` admite varios ids separados por espacio. Hasta hoy solo
-    // se emitía al errar, así que las once ayudas del sitio no existían para un
-    // lector de pantalla ni cuando se veían en pantalla (SC 1.3.1). La ayuda va
-    // primero porque describe el formato; el error, que es la consecuencia de
-    // no seguirlo, se anuncia después.
+    // `aria-describedby` admite varios ids separados por espacio. Se emite con
+    // la ayuda aunque no haya error: si solo se emitiera al errar, la ayuda que
+    // se ve en pantalla no existiría para un lector de pantalla (SC 1.3.1). La
+    // ayuda va primero porque describe el formato; el error, que es la
+    // consecuencia de no seguirlo, se anuncia después.
     $descripciones = array_filter([
         $ayuda ? $id.'-ayuda' : null,
         $hayError ? $id.'-error' : null,

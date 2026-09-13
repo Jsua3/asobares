@@ -12,17 +12,16 @@
 
     ⚠️ El guion de abajo va dentro de un ATRIBUTO de Alpine, así que ni un
     comentario puede llevar comillas dobles: cierran el atributo y el
-    navegador se queda con un `SyntaxError` y sin mapa. Comprobado el 10 sep
-    metiendo una en un comentario. Lo que haya que explicar, se explica aquí.
+    navegador se queda con un `SyntaxError` y sin mapa. Lo que haya que
+    explicar, se explica aquí.
 
-    **Los dos botones de zoom se rotulan a mano (10 sep).** Leaflet los pinta
-    con `title` y `aria-label` en inglés --Zoom in / Zoom out--, o sea que en
-    un sitio en español el globito salía en inglés y un lector de pantalla lo
-    anunciaba en inglés. Era el único texto de interfaz que no salía de
-    nosotros. Se apaga el control de fábrica y se añade uno rotulado, que es
+    **Los dos botones de zoom se rotulan a mano.** Leaflet los pinta con
+    `title` y `aria-label` en inglés --Zoom in / Zoom out--, así que en un
+    sitio en español el globito y el lector de pantalla los anunciarían en
+    inglés. Se apaga el control de fábrica y se añade uno rotulado, que es
     opción de la propia librería y por tanto sobrevive a que Leaflet redibuje
-    el control. Lo demás ya estaba bien: `role="button"`, nombre accesible y
-    44x44 de objetivo táctil.
+    el control. Lo demás ya viene resuelto: `role="button"`, nombre accesible
+    y el objetivo táctil de 44x44 que fija la regla de abajo.
 --}}
 @once
     @push('cabeza')
@@ -44,7 +43,7 @@
 
             /*
              * Y el acuse al pulsarlos, que es lo mismo que hace `.pulsable` en
-             * los 43 botones del sitio. Va aquí y no en `app.css` por lo mismo
+             * los botones del sitio. Va aquí y no en `app.css` por lo mismo
              * que el tamaño: `app.css` declara sus portadores en
              * `@layer components`, y una regla EN CAPA pierde siempre contra la
              * hoja sin capa que Leaflet sirve desde el CDN, da igual la

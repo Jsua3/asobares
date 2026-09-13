@@ -87,15 +87,13 @@
                                             {{ pesos($requisito->costo_aproximado) }}
                                         </span>
                                     @else
-                                        {{-- Decía «Sin costo directo», que es una AFIRMACIÓN: le
-                                             dice al empresario que el trámite es gratis. Un
-                                             `costo_aproximado` nulo no significa eso, significa que
-                                             nadie ha averiguado cuánto vale --que es el estado de
-                                             los ocho trámites, porque el documento oficial del
-                                             gremio no trae ni una cifra--. Decirle «sin costo» a
-                                             quien está haciendo cuentas para abrir un bar es
-                                             exactamente el error que el §29.4 señala. La cabecera
-                                             de la tarjeta ya lo dice bien: «Por confirmar». --}}
+                                        {{-- «Por confirmar» y no una afirmación de gratuidad: un
+                                             `costo_aproximado` nulo no significa que el trámite
+                                             sea gratis, significa que nadie ha averiguado cuánto
+                                             vale, y el documento oficial del gremio no trae
+                                             cifras. Decirle «sin costo» a quien está haciendo
+                                             cuentas para abrir un bar sería darle un dato falso.
+                                             La cabecera de la tarjeta dice lo mismo. --}}
                                         <span class="rounded-full border border-linea px-2.5 py-0.5 text-apagado">Costo por confirmar</span>
                                     @endif
 
@@ -165,9 +163,9 @@
                                 @endif
 
                                 @if ($requisito->enlace_externo)
-                                    {{-- OBS3-10: la etiqueta no promete mas de lo que el enlace
-                                         cumple. Con enlace puntual invita al tramite; con un
-                                         dominio pelado dice lo que es, una puerta. Asi el dia que
+                                    {{-- OBS3-10: la etiqueta no promete más de lo que el enlace
+                                         cumple. Con enlace puntual invita al trámite; con un
+                                         dominio pelado dice lo que es, una puerta. Así, el día que
                                          el gremio entregue las URL exactas la mejora se nota sola,
                                          sin tocar la vista. --}}
                                     <a href="{{ $requisito->enlace_externo }}" target="_blank" rel="noopener"

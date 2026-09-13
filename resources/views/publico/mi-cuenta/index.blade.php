@@ -21,13 +21,13 @@
                 Mis vacantes
             </x-publico.boton>
             {{-- OBS3-13: sin esta puerta la funcionalidad existe y nadie la
-                 encuentra, que es la misma nada con mas codigo. --}}
+                 encuentra, que es la misma nada con más código. --}}
             <x-publico.boton variante="contorno" :href="route('mi-cuenta.fotos.index')">
                 Mis fotos
             </x-publico.boton>
-            {{-- Los dos beneficios que dejaron de ser publicos: el directorio de
-                 proveedores y el banco de talento. Si no se entra por aqui, no
-                 se entra por ningun lado. --}}
+            {{-- Los directorios con contacto reservado a los afiliados:
+                 proveedores, artistas y banco de talento. Si no se entra por
+                 aquí, no se entra por ningún lado. --}}
             <x-publico.boton variante="contorno" :href="route('mi-cuenta.proveedores.index')">
                 Proveedores
             </x-publico.boton>
