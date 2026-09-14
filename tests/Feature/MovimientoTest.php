@@ -304,13 +304,16 @@ class MovimientoTest extends TestCase
 
         /*
          * El portador que levanta es `.vidrio-hover`, en el tema del panel; la
-         * tarjeta del sitio público no se eleva. Se afirma sobre la regla y no
-         * sobre la cadena `var(--asb-levante)` suelta, que también casaría con
-         * una declaración que ninguna propiedad lee.
+         * tarjeta del sitio público no se eleva. Se afirma sobre la regla, con
+         * los comentarios quitados, y no sobre la cadena `var(--asb-levante)`
+         * suelta: también casaría con una declaración comentada o que ninguna
+         * propiedad lee.
          */
+        $temaSinComentarios = (string) preg_replace('#/\*.*?\*/#s', '', $tema);
+
         $this->assertMatchesRegularExpression(
             '/\.vidrio-hover:hover\s*\{[^}]*transform:\s*translateY\(var\(--asb-levante\)\)/',
-            $tema,
+            $temaSinComentarios,
             'El levante de `.vidrio-hover` debe salir del token, o el movimiento reducido no puede anularlo.'
         );
     }
