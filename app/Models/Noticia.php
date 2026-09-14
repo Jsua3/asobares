@@ -53,11 +53,12 @@ class Noticia extends Model
      *
      * El panel lo edita en un Textarea de texto plano, pero la ficha lo pinta
      * como HTML, así que sin conversión dos párrafos separados por una línea
-     * en blanco saldrían como un solo bloque. Si el contenido no trae etiquetas, cada
-     * bloque separado por líneas en blanco pasa a ser un `<p>` y los saltos
-     * simples se conservan como `<br>`. Si trae HTML (lo sembrado, o lo que
-     * llegue de un editor enriquecido) se deja como estaba. En los dos casos
-     * el resultado pasa por el saneado: la conversión va antes, nunca después.
+     * en blanco saldrían como un solo bloque. Si el contenido no trae
+     * etiquetas, cada bloque separado por líneas en blanco pasa a ser un `<p>`
+     * y los saltos simples se conservan como `<br>`. Si trae HTML (lo
+     * sembrado, o lo que llegue de un editor enriquecido) se deja como estaba.
+     * En los dos casos el resultado pasa por el saneado: la conversión va
+     * antes, nunca después.
      */
     public function contenidoSaneado(): string
     {

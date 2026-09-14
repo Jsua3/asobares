@@ -90,11 +90,11 @@ class Observatorio extends Page
     /**
      * Las seis gráficas del observatorio: las que tienen datos que sostienen
      * lo que dibujan y las flacas con su estado vacío honesto. El mecanismo
-     * es `getFooterWidgets()` y no
-     * `<x-filament-widgets::widgets>`: ese componente está `@deprecated` en
-     * `vendor/filament/`, y quien de verdad rinde estos widgets es el
-     * envoltorio `<x-filament-panels::page>` (invoca `{{ $this->footerWidgets }}`
-     * por dentro) — la vista de esta página no vuelve a llamarlos.
+     * es `getFooterWidgets()` y no `<x-filament-widgets::widgets>`: ese
+     * componente está `@deprecated` en `vendor/filament/`, y quien de verdad
+     * rinde estos widgets es el envoltorio `<x-filament-panels::page>`
+     * (invoca `{{ $this->footerWidgets }}` por dentro) — la vista de esta
+     * página no vuelve a llamarlos.
      *
      * @return array<class-string<Widget>>
      */

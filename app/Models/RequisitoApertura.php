@@ -142,10 +142,10 @@ class RequisitoApertura extends Model
      * que seguir viéndose: alguien tiene que poder renovarlo.
      *
      * El cierre que agrupa el `orWhere` es cinturón y tirantes, no la única
-     * guarda: Eloquent ya aísla las condiciones
-     * de un scope local en su propio grupo —`Builder::callScope()` cuenta los
-     * `where` antes y después y llama a `addNewWheresWithinGroup()`—, así que
-     * `publicado()->vigente()` sale agrupado con o sin él.
+     * guarda: Eloquent ya aísla las condiciones de un scope local en su propio
+     * grupo —`Builder::callScope()` cuenta los `where` antes y después y llama
+     * a `addNewWheresWithinGroup()`—, así que `publicado()->vigente()` sale
+     * agrupado con o sin él.
      *
      * Se conserva porque el peligro es real fuera del scope: estas mismas dos
      * líneas escritas en un controlador, en un `whereRaw` o tras un `toBase()`

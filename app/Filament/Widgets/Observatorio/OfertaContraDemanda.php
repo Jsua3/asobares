@@ -13,9 +13,9 @@ use App\Panel\SerieDelObservatorio;
  * Es justo el argumento institucional que el observatorio existe para
  * sostener ante el gremio y una alcaldía, así que es una de las gráficas que
  * menos puede permitirse fingir una tendencia que la muestra no aguanta — ver
- * el docblock de
- * `SerieDelObservatorio::hayMuestraSuficiente()`: con dos conjuntos de datos,
- * el umbral se le exige al más flaco de los dos, no a su suma.
+ * el docblock de `SerieDelObservatorio::hayMuestraSuficiente()`: con dos
+ * conjuntos de datos, el umbral se le exige al más flaco de los dos, no a su
+ * suma.
  */
 class OfertaContraDemanda extends GraficaDelObservatorio
 {
