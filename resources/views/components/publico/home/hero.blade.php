@@ -24,7 +24,7 @@
 
 <x-publico.hero :titulo="ajuste('hero_titulo')" atmosfera portada>
     <x-slot:medio>
-        <div class="hero-video-fondo">
+        <div class="hero-video-fondo" @if ($videoInstitucional['src']) x-data="videoHero" @endif>
             @if ($videoInstitucional['poster'])
                 <img src="{{ $videoInstitucional['poster'] }}"
                      alt=""
@@ -37,7 +37,7 @@
 
             @if ($videoInstitucional['src'])
                 <video class="imagen-viva video-hero-capa absolute inset-0 h-full w-full object-cover"
-                       x-data="videoHero"
+                       x-ref="video"
                        x-bind:class="listo ? 'video-hero-capa--visible' : ''"
                        x-on:error="listo = false"
                        @if ($videoInstitucional['poster']) poster="{{ $videoInstitucional['poster'] }}" @endif
@@ -47,6 +47,17 @@
                        preload="none">
                     <source src="{{ $videoInstitucional['src'] }}" type="video/mp4">
                 </video>
+                <button type="button"
+                        class="control-movimiento control-movimiento--hero"
+                        aria-pressed="false"
+                        aria-label="Reproducir video institucional"
+                        x-on:click="alternar()"
+                        x-bind:aria-pressed="reproduciendo ? 'true' : 'false'"
+                        x-bind:aria-label="reproduciendo ? 'Pausar video institucional' : 'Reproducir video institucional'">
+                    <x-heroicon-o-pause class="h-4 w-4" x-show="reproduciendo" aria-hidden="true" />
+                    <x-heroicon-o-play class="h-4 w-4" x-show="! reproduciendo" x-cloak aria-hidden="true" />
+                    <span class="sr-only" x-text="reproduciendo ? 'Pausar video institucional' : 'Reproducir video institucional'"></span>
+                </button>
             @endif
         </div>
     </x-slot:medio>

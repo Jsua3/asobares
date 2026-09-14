@@ -56,6 +56,9 @@ class EventosEditorialesDeLaPortadaTest extends TestCase
         $this->assertSame($proximos->count(), preg_match_all('/class="[^"]*home-editorial-evento(?:\s|")/', $seccion));
         $this->assertStringContainsString('aria-label="Ver el evento anterior"', $seccion);
         $this->assertStringContainsString('aria-label="Ver el evento siguiente"', $seccion);
+        $this->assertStringContainsString('aria-label="Pausar carrusel de eventos"', $seccion);
+        $this->assertStringContainsString('aria-pressed="false"', $seccion);
+        $this->assertStringContainsString('x-on:click="alternarPausaManual()"', $seccion);
 
         // Los puntos solo pintan un número con aria-hidden: sin aria-label
         // son botones sin nombre. `\s` y no `\b` delante del atributo: `\b`
@@ -114,6 +117,7 @@ class EventosEditorialesDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('top: 1rem;', $bloque);
         $this->assertStringContainsString('right: 3.75rem;', $bloque);
         $this->assertStringContainsString('right: 1rem;', $bloque);
+        $this->assertStringContainsString('right: 6.5rem;', $bloque);
         $this->assertStringContainsString('rgb(120 21 17 / 0.96)', $bloque);
     }
 
@@ -141,6 +145,16 @@ class EventosEditorialesDeLaPortadaTest extends TestCase
         $this->assertStringContainsString(":class=\"indice === {{ \$indice }} && 'is-activo'\"", $vista);
         $this->assertStringContainsString(':aria-current="indice === {{ $indice }} ? \'true\' : \'false\'"', $vista);
         $this->assertStringNotContainsString("{{ \$indice === 0 ? 'is-activo' : '' }}", $vista);
+
+        $js = File::get(resource_path('js/app.js'));
+
+        $this->assertStringContainsString('pausadoTemporalmente: false', $js);
+        $this->assertStringContainsString('this.pausadoPorUsuario = reduceMovimiento()', $js);
+        $this->assertStringContainsString('&& ! this.pausadoPorUsuario', $js);
+        $this->assertStringContainsString('&& ! this.pausadoTemporalmente', $js);
+        $this->assertStringContainsString('pausarTemporal()', $js);
+        $this->assertStringContainsString('reanudarTemporal()', $js);
+        $this->assertStringContainsString('alternarPausaManual()', $js);
     }
 
     private function seccionDeEventos(string $html): string

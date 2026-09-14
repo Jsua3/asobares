@@ -176,6 +176,58 @@ html:not(.dark) .home-editorial .hero-portada .hero-medio::after {
     text-shadow: 0 1px 14px rgb(0 0 0 / 0.35);
 }
 
+.control-movimiento {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid rgb(255 255 255 / 0.18);
+    border-radius: 9999px;
+    background: rgb(8 8 8 / 0.54);
+    color: #fff;
+    box-shadow: 0 10px 26px rgb(0 0 0 / 0.18);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+}
+
+.control-movimiento:hover {
+    border-color: rgb(238 65 55 / 0.52);
+    color: #fff;
+}
+
+.control-movimiento[aria-pressed='true'] {
+    border-color: rgb(238 65 55 / 0.56);
+    background: rgb(238 65 55 / 0.22);
+    color: #fff;
+}
+
+.control-movimiento:focus-visible {
+    outline: 2px solid var(--home-accent);
+    outline-offset: 3px;
+}
+
+.control-movimiento--hero {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 3;
+}
+
+html:not(.dark) .control-movimiento {
+    border-color: rgb(23 17 15 / 0.12);
+    background: rgb(249 247 244 / 0.82);
+    color: #3d3733;
+    box-shadow: 0 10px 22px rgb(23 17 15 / 0.12);
+}
+
+html:not(.dark) .control-movimiento:hover,
+html:not(.dark) .control-movimiento[aria-pressed='true'] {
+    border-color: rgb(183 31 24 / 0.36);
+    background: rgb(183 31 24 / 0.12);
+    color: #7a1d18;
+}
+
 /* —— Cinta editorial (vidrio cálido, isotipo fijo) —— */
 
 .home-editorial-cinta {
@@ -256,6 +308,26 @@ html:not(.dark) .home-editorial .hero-portada .hero-medio::after {
     padding-left: 1rem;
     padding-right: 0.8rem;
     background: var(--cinta-marca);
+}
+
+.control-movimiento--cinta {
+    position: relative;
+    z-index: 3;
+    flex: 0 0 auto;
+    align-self: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-inline: 0.25rem 0.45rem;
+    border-color: rgb(183 31 24 / 0.18);
+    background: rgb(255 255 255 / 0.38);
+    color: var(--cinta-acento);
+    box-shadow: none;
+}
+
+.dark .control-movimiento--cinta {
+    border-color: rgb(255 255 255 / 0.12);
+    background: rgb(255 255 255 / 0.06);
+    color: #f6f1eb;
 }
 
 @media (min-width: 640px) {
@@ -462,7 +534,8 @@ html:not(.dark) .home-editorial .hero-portada .hero-medio::after {
 }
 
 .home-editorial-cinta:hover .home-editorial-cinta__recorrido,
-.home-editorial-cinta:focus-within .home-editorial-cinta__recorrido {
+.home-editorial-cinta:focus-within .home-editorial-cinta__recorrido,
+.home-editorial-cinta--pausada .home-editorial-cinta__recorrido {
     animation-play-state: paused;
 }
 
@@ -1239,6 +1312,13 @@ html:not(.dark) .home-editorial-evento:not(.is-activo) .home-editorial-evento__f
     color: #fff;
 }
 
+.control-movimiento--eventos {
+    position: absolute;
+    top: 1rem;
+    right: 6.5rem;
+    z-index: 2;
+}
+
 html:not(.dark) .home-editorial-eventos__control {
     border-color: rgb(23 17 15 / 0.1);
     background: rgb(249 247 244 / 0.88);
@@ -1949,6 +2029,7 @@ html:not(.dark) .home-editorial-cta__velo {
     }
 
     .home-editorial .imagen-viva,
+    .control-movimiento,
     .home-editorial .home-editorial-enlace svg,
     .home-editorial-establecimiento__flecha,
     .home-editorial-establecimiento__img,

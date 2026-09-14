@@ -509,14 +509,14 @@ Alpine.data('desplegable', () => ({
  */
 Alpine.data('videoHero', () => ({
     listo: false,
+    reproduciendo: false,
 
     init() {
+        this.video().muted = true;
+
         if (reduceMovimiento()) {
             return;
         }
-
-        // Las políticas de reproducción automática solo perdonan el video mudo.
-        this.$el.muted = true;
 
         /*
          * Pedir la descarga es cambiar `preload`; NO se llama a `load()`.
@@ -526,30 +526,92 @@ Alpine.data('videoHero', () => ({
          * póster **con el archivo entero ya descargado** (`readyState` 4,
          * `paused` true). Sin `load()`, `play()` resuelve.
          */
-        this.$el.preload = 'auto';
+        this.video().preload = 'auto';
 
         this.arrancar();
 
         // Si todavía no había datos, el primer intento se rechaza; se reintenta
         // en cuanto el navegador dice que puede. `arrancar()` se protege sola.
-        this.$el.addEventListener('canplay', () => this.arrancar());
+        this.video().addEventListener('canplay', () => this.arrancar());
+        this.video().addEventListener('pause', () => { this.reproduciendo = false; });
+        this.video().addEventListener('play', () => { this.reproduciendo = true; });
+    },
+
+    video() {
+        return this.$refs.video;
     },
 
     arrancar() {
-        if (this.listo) {
+        if (this.listo || ! this.video()) {
             return;
         }
 
-        const intento = this.$el.play();
+        const intento = this.video().play();
 
         // Navegadores viejos no devuelven promesa: se mira el estado y ya.
         if (! intento) {
-            this.listo = ! this.$el.paused;
+            this.reproduciendo = ! this.video().paused;
+            this.listo = this.reproduciendo;
 
             return;
         }
 
-        intento.then(() => { this.listo = true; }).catch(() => { this.listo = false; });
+        intento
+            .then(() => {
+                this.listo = true;
+                this.reproduciendo = true;
+            })
+            .catch(() => {
+                this.listo = false;
+                this.reproduciendo = false;
+            });
+    },
+
+    alternar() {
+        const video = this.video();
+
+        if (! video) {
+            return;
+        }
+
+        if (! video.paused) {
+            video.pause();
+
+            return;
+        }
+
+        video.muted = true;
+        video.preload = 'auto';
+
+        const intento = video.play();
+
+        if (! intento) {
+            this.listo = ! video.paused;
+            this.reproduciendo = ! video.paused;
+
+            return;
+        }
+
+        intento
+            .then(() => {
+                this.listo = true;
+                this.reproduciendo = true;
+            })
+            .catch(() => {
+                this.reproduciendo = false;
+            });
+    },
+}));
+
+Alpine.data('cintaEditorial', () => ({
+    pausada: false,
+
+    init() {
+        this.pausada = reduceMovimiento();
+    },
+
+    alternar() {
+        this.pausada = ! this.pausada;
     },
 }));
 
@@ -557,6 +619,7 @@ Alpine.data('carruselEventos', (total = 1) => ({
     indice: 0,
     total,
     pausadoPorUsuario: false,
+    pausadoTemporalmente: false,
     temporizador: null,
     alCambiarVisibilidad: null,
 
@@ -571,6 +634,7 @@ Alpine.data('carruselEventos', (total = 1) => ({
             this.intentarAuto();
         };
 
+        this.pausadoPorUsuario = reduceMovimiento();
         this.sincronizar();
         this.$refs.pista?.addEventListener('scroll', () => this.sincronizar(), { passive: true });
         document.addEventListener('visibilitychange', this.alCambiarVisibilidad);
@@ -590,6 +654,7 @@ Alpine.data('carruselEventos', (total = 1) => ({
             && ! reduceMovimiento()
             && window.matchMedia('(min-width: 768px)').matches
             && ! this.pausadoPorUsuario
+            && ! this.pausadoTemporalmente
             && ! document.hidden;
     },
 
@@ -608,6 +673,28 @@ Alpine.data('carruselEventos', (total = 1) => ({
             window.clearInterval(this.temporizador);
             this.temporizador = null;
         }
+    },
+
+    pausarTemporal() {
+        this.pausadoTemporalmente = true;
+        this.detenerAuto();
+    },
+
+    reanudarTemporal() {
+        this.pausadoTemporalmente = false;
+        this.intentarAuto();
+    },
+
+    alternarPausaManual() {
+        this.pausadoPorUsuario = ! this.pausadoPorUsuario;
+
+        if (this.pausadoPorUsuario) {
+            this.detenerAuto();
+
+            return;
+        }
+
+        this.intentarAuto();
     },
 
     pausar() {

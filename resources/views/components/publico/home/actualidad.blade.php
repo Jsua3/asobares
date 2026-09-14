@@ -23,11 +23,23 @@
         @if ($eventosVisibles->isNotEmpty())
             <div class="home-editorial-eventos__carrusel mt-6"
                  @if ($haySecuencia) x-data="carruselEventos({{ $eventosVisibles->count() }})"
-                      x-on:mouseenter="pausar()"
-                      x-on:mouseleave="reanudar()"
-                      x-on:focusin="pausar()"
-                      x-on:focusout="reanudar()" @endif>
+                      x-on:mouseenter="pausarTemporal()"
+                      x-on:mouseleave="reanudarTemporal()"
+                      x-on:focusin="pausarTemporal()"
+                      x-on:focusout="reanudarTemporal()" @endif>
                 @if ($haySecuencia)
+                    <button type="button"
+                            class="control-movimiento control-movimiento--eventos"
+                            aria-pressed="false"
+                            aria-label="Pausar carrusel de eventos"
+                            x-on:click="alternarPausaManual()"
+                            x-bind:aria-pressed="pausadoPorUsuario ? 'true' : 'false'"
+                            x-bind:aria-label="pausadoPorUsuario ? 'Reanudar carrusel de eventos' : 'Pausar carrusel de eventos'">
+                        <x-heroicon-o-pause class="h-4 w-4" x-show="! pausadoPorUsuario" aria-hidden="true" />
+                        <x-heroicon-o-play class="h-4 w-4" x-show="pausadoPorUsuario" x-cloak aria-hidden="true" />
+                        <span class="sr-only" x-text="pausadoPorUsuario ? 'Reanudar carrusel de eventos' : 'Pausar carrusel de eventos'"></span>
+                    </button>
+
                     <button type="button"
                             class="home-editorial-eventos__control home-editorial-eventos__control--prev"
                             x-on:click="anterior()"

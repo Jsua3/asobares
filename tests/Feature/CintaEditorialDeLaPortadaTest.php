@@ -89,10 +89,15 @@ class CintaEditorialDeLaPortadaTest extends TestCase
 
         $this->assertNotSame('', trim($nombreDelSitio), 'Sin nombre del sitio la cinta se queda sin nombre accesible.');
         $this->assertMatchesRegularExpression(
-            '/^<aside class="home-editorial-cinta" aria-label="'.preg_quote(e($nombreDelSitio), '/').'">/',
+            '/^<aside\b(?=[^>]*class="home-editorial-cinta")(?=[^>]*aria-label="'.preg_quote(e($nombreDelSitio), '/').'")[^>]*>/',
             $cinta,
             'La cinta perdió su aria-label.'
         );
+        $this->assertStringContainsString('x-data="cintaEditorial"', $cinta);
+        $this->assertStringContainsString('x-bind:class="pausada && \'home-editorial-cinta--pausada\'"', $cinta);
+        $this->assertStringContainsString('aria-label="Pausar cinta editorial"', $cinta);
+        $this->assertStringContainsString('aria-pressed="false"', $cinta);
+        $this->assertStringContainsString('x-on:click="alternar()"', $cinta);
         $this->assertMatchesRegularExpression(
             '/<a href="'.preg_quote(route('inicio'), '/').'" class="home-editorial-cinta__marca[^"]*">\s*<img\b(?=[^>]*img\/monograma-asobares\.png)(?=[^>]*\salt="'.preg_quote(e($nombreDelSitio), '/').'")[^>]*>/',
             $cinta,
@@ -191,6 +196,7 @@ class CintaEditorialDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('.home-editorial-cinta__item:hover .home-editorial-cinta__sep', $bloque);
         $this->assertStringContainsString('.home-editorial-cinta:hover .home-editorial-cinta__recorrido', $bloque);
         $this->assertStringContainsString('.home-editorial-cinta:focus-within .home-editorial-cinta__recorrido', $bloque);
+        $this->assertStringContainsString('.home-editorial-cinta--pausada .home-editorial-cinta__recorrido', $bloque);
     }
 
     public function test_el_css_declara_vidrio_mascara_y_movimiento_reducido(): void
@@ -204,6 +210,8 @@ class CintaEditorialDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('animation: home-editorial-cinta-desfile 50s linear infinite', $css);
         $this->assertStringContainsString('@keyframes home-editorial-cinta-desfile', $css);
         $this->assertStringContainsString('animation-play-state: paused', $css);
+        $this->assertStringContainsString("Alpine.data('cintaEditorial'", File::get(resource_path('js/app.js')));
+        $this->assertStringContainsString('this.pausada = reduceMovimiento()', File::get(resource_path('js/app.js')));
         $this->assertStringContainsString('@media (hover: hover) and (pointer: fine)', $css);
         $this->assertStringContainsString('@media (prefers-reduced-motion: reduce)', $css);
         $this->assertStringContainsString('@media (prefers-reduced-transparency: reduce)', $css);

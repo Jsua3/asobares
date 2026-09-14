@@ -125,6 +125,10 @@ class VideoDelHeroTest extends TestCase
         $html = $this->get('/')->assertOk()->getContent();
 
         $this->assertStringContainsString('preload="none"', $html);
+        $this->assertStringContainsString('x-ref="video"', $html);
+        $this->assertStringContainsString('aria-label="Reproducir video institucional"', $html);
+        $this->assertStringContainsString('aria-pressed="false"', $html);
+        $this->assertStringContainsString('x-on:click="alternar()"', $html);
         $this->assertDoesNotMatchRegularExpression(
             '/<video\b[^>]*\bautoplay\b/i',
             $html,
@@ -134,6 +138,10 @@ class VideoDelHeroTest extends TestCase
         $js = File::get(resource_path('js/app.js'));
 
         $this->assertStringContainsString("Alpine.data('videoHero'", $js);
+        $this->assertStringContainsString('reproduciendo: false', $js);
+        $this->assertStringContainsString('video() {', $js);
+        $this->assertStringContainsString('return this.$refs.video', $js);
+        $this->assertStringContainsString('alternar() {', $js);
         $this->assertMatchesRegularExpression(
             '/Alpine\.data\(\'videoHero\'.*?reduceMovimiento\(\)/s',
             $js,

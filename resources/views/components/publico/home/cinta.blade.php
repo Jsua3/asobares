@@ -23,7 +23,7 @@
 @endphp
 
 @if ($items !== [])
-    <aside class="home-editorial-cinta" aria-label="{{ ajuste('sitio_nombre') }}">
+    <aside class="home-editorial-cinta" aria-label="{{ ajuste('sitio_nombre') }}" x-data="cintaEditorial" x-bind:class="pausada && 'home-editorial-cinta--pausada'">
         <a href="{{ route('inicio') }}" class="home-editorial-cinta__marca enlace-accion">
             <img src="{{ asset('img/monograma-asobares.png') }}"
                  alt="{{ ajuste('sitio_nombre') }}"
@@ -31,6 +31,18 @@
                  height="108"
                  class="home-editorial-cinta__isotipo">
         </a>
+
+        <button type="button"
+                class="control-movimiento control-movimiento--cinta"
+                aria-pressed="false"
+                aria-label="Pausar cinta editorial"
+                x-on:click="alternar()"
+                x-bind:aria-pressed="pausada ? 'true' : 'false'"
+                x-bind:aria-label="pausada ? 'Reanudar cinta editorial' : 'Pausar cinta editorial'">
+            <x-heroicon-o-pause class="h-4 w-4" x-show="! pausada" aria-hidden="true" />
+            <x-heroicon-o-play class="h-4 w-4" x-show="pausada" x-cloak aria-hidden="true" />
+            <span class="sr-only" x-text="pausada ? 'Reanudar cinta editorial' : 'Pausar cinta editorial'"></span>
+        </button>
 
         <div class="home-editorial-cinta__pista">
             <span class="home-editorial-cinta__velo home-editorial-cinta__velo--izq" aria-hidden="true"></span>
