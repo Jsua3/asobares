@@ -191,7 +191,7 @@ class SolicitudAfiliacionTest extends TestCase
     }
 
     /** @return array<string, array{0: CargoDelSolicitante}> */
-    public static function cargosEstandarProvider(): array
+    public static function cargosEstandar(): array
     {
         return collect(CargoDelSolicitante::cases())
             ->reject(fn (CargoDelSolicitante $cargo): bool => $cargo->esOtro())
@@ -199,7 +199,7 @@ class SolicitudAfiliacionTest extends TestCase
             ->all();
     }
 
-    #[DataProvider('cargosEstandarProvider')]
+    #[DataProvider('cargosEstandar')]
     public function test_acepta_cada_cargo_estandar(CargoDelSolicitante $cargo): void
     {
         Mail::fake();
