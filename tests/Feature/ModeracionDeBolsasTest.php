@@ -519,9 +519,9 @@ class ModeracionDeBolsasTest extends TestCase
     {
         $usuario = $this->crearUsuario(User::ROL_SUBADMIN);
 
-        // Hoy los dos roles del panel pueden editar aspirantes --es una bandeja
-        // de secretaria--, asi que la unica forma de ejercer esta guardia es
-        // quitarle el permiso al rol. Lo que se vigila aqui es que la accion le
+        // Los dos roles del panel pueden editar aspirantes --es una bandeja
+        // de secretaría--, así que la única forma de ejercer esta guardia es
+        // quitarle el permiso al rol. Lo que se vigila aquí es que la acción le
         // pregunte a la policy; del reparto de permisos se ocupa
         // PermisosDeBolsaTest.
         $usuario->roles->first()->revokePermissionTo('editar_aspirante');

@@ -264,10 +264,11 @@ class MetricasDelObservatorioTest extends TestCase
     }
 
     /**
-     * La relacion entre etiquetas y n es un OR: si cualquiera de los dos falta,
-     * la serie esta vacia. Sin esta prueba, un cambio futuro de `||` a `&&`
-     * pasaria desapercibido: el observatorio dibujaria un grafico de nada.
-     * Este caso asinmetrico fija que etiquetas presentes pero n=0 sigue siendo vacia.
+     * La relación entre etiquetas y n es un OR: si cualquiera de los dos falta,
+     * la serie está vacía. Sin esta prueba, un cambio futuro de `||` a `&&`
+     * pasaría desapercibido: el observatorio dibujaría un gráfico de nada.
+     * Este caso asimétrico fija que etiquetas presentes pero n=0 sigue siendo
+     * vacía.
      */
     public function test_con_etiquetas_pero_sin_muestra_esta_vacia(): void
     {
@@ -282,10 +283,10 @@ class MetricasDelObservatorioTest extends TestCase
     }
 
     /**
-     * La relacion entre etiquetas y n es un OR: si cualquiera de los dos falta,
-     * la serie esta vacia. Sin esta prueba, un cambio futuro de `||` a `&&`
-     * pasaria desapercibido: el observatorio dibujaria un grafico de nada.
-     * Este caso asinmetrico fija que sin etiquetas pero n>0 sigue siendo vacia.
+     * La relación entre etiquetas y n es un OR: si cualquiera de los dos falta,
+     * la serie está vacía. Sin esta prueba, un cambio futuro de `||` a `&&`
+     * pasaría desapercibido: el observatorio dibujaría un gráfico de nada.
+     * Este caso asimétrico fija que sin etiquetas pero n>0 sigue siendo vacía.
      */
     public function test_sin_etiquetas_pero_con_muestra_esta_vacia(): void
     {

@@ -69,15 +69,15 @@ class GraficasDelPanelTest extends TestCase
 
     /**
      * Un manifiesto que existe pero no conoce esta entrada es el otro
-     * camino hacia el mismo punto muerto: alguien que compilo en otra rama
+     * camino hacia el mismo punto muerto: alguien que compiló en otra rama
      * (main, por ejemplo) hace checkout de esta y corre cualquier `artisan`
-     * antes de `npm run build`. Esta prueba es la razon de que la guarda
+     * antes de `npm run build`. Esta prueba es la razón de que la guarda
      * real sea un `catch (ViteException)` y no un `file_exists()`: el
-     * archivo existe, así que `file_exists()` por si solo no distingue
+     * archivo existe, así que `file_exists()` por sí solo no distingue
      * este caso de uno sano.
      *
      * Mismo motivo que la prueba anterior para no tocar el disco: la
-     * cache estatica de `Vite::$manifests` haria inutil sobrescribir el
+     * caché estática de `Vite::$manifests` haría inútil sobrescribir el
      * manifiesto real.
      */
     public function test_definir_el_panel_no_estalla_con_manifiesto_desactualizado(): void
@@ -100,10 +100,10 @@ class GraficasDelPanelTest extends TestCase
      * fachada (`vendor/laravel/framework/src/Illuminate/Support/Facades/Vite.php`,
      * `getFacadeAccessor()`), así que esa es la clave que hay que
      * sustituir en el contenedor. Y como la fachada cachea la instancia ya
-     * resuelta en una propiedad estatica propia (`Facade::$resolvedInstance`),
-     * hace falta limpiar tambien ese cache: si no, la fachada sigue
+     * resuelta en una propiedad estática propia (`Facade::$resolvedInstance`),
+     * hace falta limpiar también esa caché: si no, la fachada sigue
      * devolviendo el Vite real que el arranque de consola de esta misma
-     * prueba ya resolvio antes de que el cuerpo de la prueba se ejecute.
+     * prueba ya resolvió antes de que el cuerpo de la prueba se ejecute.
      */
     private function fingirQueViteLanzaAlPedirAsset(\Closure $lanzar): void
     {
