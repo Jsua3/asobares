@@ -65,10 +65,9 @@ class DepurarBolsas extends Command
      * El máximo absoluto cierra un hueco: una vacante de tiempo completo sin
      * fecha límite que nadie cierra nunca conservaría sus postulaciones para
      * siempre, porque el otro reloj solo arranca al cerrar o vencer. Se ancla
-     * al consentimiento (o a
-     * `created_at` si la fila no trae sello, igual que en aspirantes) y
-     * cada `orWhere` va en su propio grupo para no ampliar sin querer el
-     * conjunto que se borra.
+     * al consentimiento (o a `created_at` si la fila no trae sello, igual que
+     * en aspirantes) y cada `orWhere` va en su propio grupo para no ampliar
+     * sin querer el conjunto que se borra.
      *
      * @return Builder<Postulacion>
      */

@@ -32,8 +32,9 @@ if (! function_exists('ordenarEnEspanol')) {
      * `ORDER BY nombre` en SQLite usa colación BINARIA: 'Z' es 0x5A y 'Á' es
      * 0xC3 0x81, así que «Zorba» sale antes que «Ámbar». En un sitio en
      * español eso se lee como desorden, y encima depende de la colación del
-     * motor: el PostgreSQL local ordena por bytes igual que SQLite, pero otro
-     * con colación de idioma ordena bien, así que el defecto puede verse en
+     * motor: el PostgreSQL de pruebas en contenedor Alpine (musl) ordena por
+     * bytes igual que SQLite (runbook de despliegue, §14.3), pero uno con
+     * colación de idioma ordena bien, así que el defecto puede verse en
      * desarrollo y no en producción, o al revés.
      *
      * Se usa sobre colecciones ya acotadas (la portada trae seis). Para una

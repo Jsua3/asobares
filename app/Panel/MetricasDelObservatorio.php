@@ -22,9 +22,9 @@ use Illuminate\Support\Facades\DB;
  * Las cifras del Observatorio del gremio: seis gráficas más un indicador.
  *
  * Cada método agrega en SQL y devuelve una {@see SerieDelObservatorio}: los
- * datos y el tamaño de muestra que los sostiene. Nada de traer modelos a
- * memoria para contarlos con `groupBy` de Collection, igual que en
- * `RecaudoMensual`.
+ * datos y el tamaño de muestra que los sostiene. Como hace `RecaudoMensual`,
+ * se agrega en SQL en vez de traer los modelos a memoria para contarlos con
+ * `groupBy` de Collection.
  *
  * Solo cuenta lo publicado donde el modelo tiene estado editorial: un
  * asociado, una vacante o un proveedor en borrador no es presencia del

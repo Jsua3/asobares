@@ -191,8 +191,8 @@ class SettingSeeder extends Seeder
             ...$this->cifrasDelGremio(),
 
             // --- Quiénes somos ---
-            // Los quince textos de «Quiénes somos», editables para
-            // que la redacción propia del capítulo entre sin tocar código.
+            // Los quince textos de «Quiénes somos», editables para que la
+            // redacción propia del capítulo entre sin tocar código.
             $this->texto('quienes_titulo_historia', 'Cómo nació el capítulo', 'institucional', 'Quiénes somos · título de la historia'),
             $this->texto('quienes_titulo_que_hacemos', 'Qué hace el gremio', 'institucional', 'Quiénes somos · título de qué hace el gremio'),
             $this->texto('quienes_titulo_barreras', 'Lo que hoy nos frena', 'institucional', 'Quiénes somos · título de las barreras'),

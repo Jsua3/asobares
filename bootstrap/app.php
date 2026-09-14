@@ -31,8 +31,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // En `web` y no global: cuenta páginas servidas, no descargas ni
         // webhooks. Qué es una página lo decide el propio middleware por el
-        // `Content-Type` de la respuesta; el panel arma su propia pila y no
-        // pasa por este grupo.
+        // `Content-Type` de la respuesta, y excluye por nombre de ruta el
+        // portal del afiliado y la pasarela de pago; el panel arma su propia
+        // pila y no pasa por este grupo.
         $middleware->web(append: [ContarVisitaDelSitio::class]);
 
         // TRUSTED_PROXIES lista las IPs del balanceador, o `*` si el proveedor

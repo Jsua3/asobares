@@ -18,8 +18,8 @@ use Illuminate\Validation\Rule;
  * establecimiento que quiera a alguien lo contacta y ya.
  *
  * Y no se ve todo el que se registra: hay que aprobar el perfil antes
- * (`aprobado_el`). Los descartados por el gremio tampoco se
- * muestran: descartar y seguir apareciendo es no haber descartado nada. Las dos
+ * (`aprobado_el`). Los descartados por el gremio tampoco se muestran:
+ * descartar y seguir apareciendo es no haber descartado nada. Las dos
  * condiciones viven juntas en `visibleParaAfiliados`.
  */
 class MisAspirantesController

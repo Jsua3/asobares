@@ -158,11 +158,11 @@ class EventoController
         abort_unless($evento->estaPublicado(), 404);
 
         // Comprobar el cupo y luego insertar en dos pasos sueltos deja que dos
-        // peticiones simultáneas lean el mismo conteo, lo den por bueno y
-        // las dos inserten. Con el último asiento eso es sobreventa,
-        // y en un evento de pago se cobra por una silla que no existe. El
-        // bloqueo de la fila del evento serializa a los competidores, y la
-        // comprobación se repite ya dentro del cerrojo.
+        // peticiones simultáneas lean el mismo conteo, lo den por bueno y las
+        // dos inserten. Con el último asiento eso es sobreventa, y en un evento
+        // de pago se cobra por una silla que no existe. El bloqueo de la fila
+        // del evento serializa a los competidores, y la comprobación se repite
+        // ya dentro del cerrojo.
         $inscripcion = DB::transaction(function () use ($evento, $request): ?Inscripcion {
             $enExclusiva = Evento::whereKey($evento->getKey())->lockForUpdate()->firstOrFail();
 

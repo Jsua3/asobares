@@ -19,8 +19,8 @@ class BeneficioFactory extends Factory
      * El icono se deja en el valor por defecto de la columna a propósito: es un
      * nombre de Heroicon que la portada renderiza sin comprobar que exista
      * (`<x-dynamic-component>` en `components/publico/home/respalda.blade.php`),
-     * y un nombre inventado por la fábrica
-     * haría reventar con 500 cualquier prueba que cargue `/`.
+     * y un nombre inventado por la fábrica haría reventar con 500 cualquier
+     * prueba que cargue `/`.
      *
      * @return array<string, mixed>
      */
