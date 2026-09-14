@@ -197,14 +197,10 @@ class SitioPublicoTest extends TestCase
     }
 
     /**
-     * La ficha de la vacante trae JSON-LD `JobPosting` completo desde que se
-     * construyó el módulo, que es el marcado con el que una oferta entra en
-     * Google Jobs. Sin la URL en el mapa del sitio ese marcado casi no puede
-     * hacer su trabajo: Google tiene que descubrir la dirección primero.
-     *
-     * Era el único detalle público que faltaba --asociados, eventos, noticias y
-     * artistas sí estaban-- y justamente en el módulo que el cliente puso de
-     * primero.
+     * La ficha de la vacante trae JSON-LD `JobPosting` completo, que es el
+     * marcado con el que una oferta entra en Google Jobs. Sin la URL en el mapa
+     * del sitio ese marcado casi no puede hacer su trabajo: Google tiene que
+     * descubrir la dirección primero.
      */
     public function test_el_sitemap_lista_las_vacantes_publicadas(): void
     {

@@ -9,10 +9,11 @@ use Tests\TestCase;
 /**
  * Los objetivos táctiles del sitio público, y por qué hace falta vigilarlos.
  *
- * Un objetivo por debajo de 44x44 px no falla a la vista, y por eso sobrevive:
- * sin sus clases, la navbar de escritorio mide 37,7, el conmutador
- * Tarjetas/Mapa 33,7, el chip de WhatsApp de la tarjeta 33,2 y el paginador 44
- * de alto pero 40 de ancho.
+ * Un objetivo por debajo de 44x44 px no falla a la vista, y por eso sobrevive.
+ * Medido en Chromium sin las clases que los agrandan: los enlaces de la barra
+ * de escritorio de una sola fila, 37,7 px; el conmutador Tarjetas/Mapa, 33,7;
+ * el chip de WhatsApp de la tarjeta, 33,2; y el paginador, 44 de alto pero 40
+ * de ancho.
  *
  * ESTA CLASE NO MIDE GEOMETRÍA, Y HAY QUE LEERLA SABIÉNDOLO. Un objetivo táctil
  * se mide con el navegador —`document.elementFromPoint` sobre el cuadrado de

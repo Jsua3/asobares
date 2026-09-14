@@ -204,7 +204,10 @@ class MovimientoTest extends TestCase
         }
     }
 
-    /** Sin un `:active`, un botón no acusa el dedo: el portador tiene que existir. */
+    /**
+     * Sin un `:active`, un botón no acusa el dedo: el portador tiene que
+     * existir.
+     */
     public function test_existe_el_portador_del_acuse_de_pulsacion(): void
     {
         $app = File::get(resource_path('css/app.css'));
@@ -586,7 +589,10 @@ class MovimientoTest extends TestCase
         $this->assertStringNotContainsString('transition-colors', $componente);
     }
 
-    /** Las clases de maquetación del llamador (`w-full sm:w-auto`) llegan al botón. */
+    /**
+     * Las clases de maquetación del llamador (`w-full sm:w-auto`) llegan al
+     * botón.
+     */
     public function test_el_boton_deja_pasar_las_clases_de_maquetacion(): void
     {
         $html = Blade::render(

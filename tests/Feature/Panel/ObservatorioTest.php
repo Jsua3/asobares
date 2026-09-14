@@ -139,10 +139,10 @@ class ObservatorioTest extends TestCase
      * Lo que esta prueba demuestra es DIVERGENCIA: que las dos frases no se
      * separen. No detecta que alguien vuelva a escribir a mano en el informe
      * la misma cadena que ya devuelve el widget —eso pasa en verde— y no
-     * puede detectarlo comparando valores. La duplicación
-     * idéntica es un problema de lectura del código; la divergencia es el que
-     * llega al lector del informe con dos frases distintas para el mismo
-     * dato, y es el que se vigila aquí.
+     * puede detectarlo comparando valores. La duplicación idéntica es un
+     * problema de lectura del código; la divergencia es el que llega al
+     * lector del informe con dos frases distintas para el mismo dato, y es el
+     * que se vigila aquí.
      */
     public function test_el_que_del_informe_es_el_mismo_que_el_de_su_widget(): void
     {
@@ -281,9 +281,9 @@ class ObservatorioTest extends TestCase
      * encima del umbral, no solo uno:
      * `SerieDelObservatorio::hayMuestraSuficiente()` (ver su docblock) exige
      * muestra a cada conjunto, así que empujar uno solo no basta para que la
-     * serie completa se declare con muestra suficiente.
-     * Esta prueba tiene que demostrar el caso real: los dos conjuntos con
-     * muestra propia, no uno prestándole la suya al otro.
+     * serie completa se declare con muestra suficiente. Esta prueba tiene que
+     * demostrar el caso real: los dos conjuntos con muestra propia, no uno
+     * prestándole la suya al otro.
      */
     public function test_la_misma_visualizacion_dibuja_en_cuanto_hay_muestra(): void
     {
@@ -347,8 +347,8 @@ class ObservatorioTest extends TestCase
      * `coberturaDeProveedores()` no alcanza con la semilla por defecto
      * (ver el docblock de `CoberturaDeProveedores`, n = 10), y se empuja
      * `ofertaContraDemanda()` por encima del umbral con vacantes Y
-     * aspirantes reales de una sola categoría —los dos lados, no solo
-     * uno: `SerieDelObservatorio::hayMuestraSuficiente()` exige muestra a cada
+     * aspirantes reales de una sola categoría —los dos lados, no solo uno:
+     * `SerieDelObservatorio::hayMuestraSuficiente()` exige muestra a cada
      * conjunto—, mismo mecanismo que
      * `test_la_misma_visualizacion_dibuja_en_cuanto_hay_muestra`.
      *
@@ -576,9 +576,8 @@ class ObservatorioTest extends TestCase
      * Recorre TODAS las gráficas del observatorio, no una: dos gráficas que
      * cablearan por su lado la misma paleta pensada para fondo claro
      * necesitarían el mismo arreglo, y arreglar solo una dejaría a Wine
-     * invisible en la otra. Una gráfica de una sola serie no
-     * entra: su relleno es el acento de marca, que sí funciona en los dos
-     * temas.
+     * invisible en la otra. Una gráfica de una sola serie no entra: su
+     * relleno es el acento de marca, que sí funciona en los dos temas.
      */
     public function test_ninguna_grafica_de_varias_series_cablea_sus_colores(): void
     {

@@ -13,9 +13,10 @@ use Tests\TestCase;
 /**
  * OCHO enlaces de primer nivel no caben en la barra de escritorio: «Abre tu
  * negocio» y «Quiénes somos» parten cada uno en dos líneas a 1280, 1440 y
- * 1600 px y la cabecera sube a 83,38 px. No es un defecto de estilo, es una
- * navegación que no entra en su sitio. Agrupados en cinco controles, medido en
- * Chromium: 61,69 px, UNA línea, en los dos temas y en los tres anchos, con
+ * 1600 px. No es un defecto de estilo, es una navegación que no entra en su
+ * sitio. Medido en Chromium sobre la barra de una sola fila, sin los tres
+ * estados: con ocho enlaces la cabecera mide 83,38 px; agrupados en cinco
+ * controles, 61,69 px, UNA línea, en los dos temas y en los tres anchos, con
  * los cinco en 45,7 px de alto.
  *
  * ESTA CLASE NO MIDE ESA GEOMETRÍA —eso se mide con el navegador, como en
