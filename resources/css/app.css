@@ -204,7 +204,6 @@
     @media (hover: hover) and (pointer: fine) {
         .tarjeta-hover:hover {
             border-color: rgb(238 65 55 / 0.45);
-            --asb-levante-estable: var(--asb-levante);
             box-shadow:
                 var(--asb-sombra-tarjeta),
                 0 14px 34px rgb(238 65 55 / 0.08);
