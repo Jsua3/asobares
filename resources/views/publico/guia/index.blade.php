@@ -163,11 +163,11 @@
                                 @endif
 
                                 @if ($requisito->enlace_externo)
-                                    {{-- OBS3-10: la etiqueta no promete más de lo que el enlace
-                                         cumple. Con enlace puntual invita al trámite; con un
-                                         dominio pelado dice lo que es, una puerta. Así, el día que
-                                         el gremio entregue las URL exactas la mejora se nota sola,
-                                         sin tocar la vista. --}}
+                                    {{-- La etiqueta no promete más de lo que el enlace cumple.
+                                         Con enlace puntual invita al trámite; con un dominio
+                                         pelado dice lo que es, una puerta. Cuando un requisito
+                                         recibe su URL exacta, la etiqueta cambia sola, sin tocar
+                                         la vista. --}}
                                     <a href="{{ $requisito->enlace_externo }}" target="_blank" rel="noopener"
                                        class="pulsable inline-flex min-h-11 items-center rounded-xl border border-linea px-4 py-2.5 text-sm text-tinta hover:border-marca-500/50">
                                         {{ $requisito->enlaceEsPuntual()

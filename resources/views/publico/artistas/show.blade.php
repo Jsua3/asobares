@@ -53,7 +53,7 @@
                 @endif
 
                 <div class="vidrio rounded-[1.5rem] p-6">
-                    {{-- OBS3-08: ver el comentario de `index.blade.php`. --}}
+                    {{-- La tarifa no se publica: ver el comentario de `index.blade.php`. --}}
                     <p class="text-xs uppercase tracking-wide text-apagado">Tarifa</p>
                     <p class="mt-1 font-display text-2xl font-bold text-acento">
                         {{ ajuste('artistas_tarifa_leyenda') }}

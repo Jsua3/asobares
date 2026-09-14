@@ -99,10 +99,10 @@
 
                                 <div class="mt-4 flex items-end justify-between gap-3">
                                     <div>
-                                        {{-- OBS3-08: la tarifa NO sale. «De pronto no lo contacto
-                                             porque se sesga de una vez con el precio» (R21 14:01);
-                                             «yo no le pondría precio» (R21 14:37). El campo sigue en
-                                             el modelo y en el panel, pero no se pinta nunca. --}}
+                                        {{-- La tarifa NO sale: el gremio decidió no publicarla,
+                                             porque un precio a la vista sesga la decisión de
+                                             contactar al artista. El campo sigue en el modelo y en
+                                             el panel, pero no se pinta nunca. --}}
                                         <p class="text-[.65rem] uppercase tracking-wide text-apagado">Tarifa</p>
                                         <p class="font-display text-base font-semibold">
                                             {{ ajuste('artistas_tarifa_leyenda') }}

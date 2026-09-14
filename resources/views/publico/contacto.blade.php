@@ -71,7 +71,7 @@
                                     WhatsApp {{ ajuste('contacto_whatsapp_visible') }}
                                 </a>
                             </p>
-                            {{-- OBS3-14. Ver el comentario de `afiliate.blade.php`. --}}
+                            {{-- El aviso honesto: ver el comentario de `afiliate.blade.php`. --}}
                             <p class="text-2xs text-apagado">{{ ajuste('contacto_whatsapp_aviso') }}</p>
                         @endif
                         <p>

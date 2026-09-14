@@ -20,8 +20,8 @@
             <x-publico.boton variante="contorno" :href="route('mi-cuenta.vacantes.index')">
                 Mis vacantes
             </x-publico.boton>
-            {{-- OBS3-13: sin esta puerta la funcionalidad existe y nadie la
-                 encuentra, que es la misma nada con más código. --}}
+            {{-- Sin esta puerta la funcionalidad existe y nadie la encuentra,
+                 que es la misma nada con más código. --}}
             <x-publico.boton variante="contorno" :href="route('mi-cuenta.fotos.index')">
                 Mis fotos
             </x-publico.boton>

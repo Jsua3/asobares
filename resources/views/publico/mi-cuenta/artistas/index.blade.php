@@ -78,9 +78,8 @@
 
                             <p class="mt-3 flex-1 text-sm leading-relaxed text-tenue">{{ $artista->descripcion }}</p>
 
-                            {{-- La tarifa NO se muestra tampoco aquí: «la tarifa del artista no se
-                                 publica» es decisión del gremio (OBS3-08) y el campo sigue en el modelo
-                                 solo para la secretaría. Se enseña la misma leyenda editable que la
+                            {{-- La tarifa NO se muestra tampoco aquí: la tarifa del artista no se
+                                 publica y el campo queda en el modelo solo para la secretaría. Se enseña la misma leyenda editable que la
                                  ficha pública. --}}
                             <p class="mt-3 text-2xs text-apagado">{{ ajuste('artistas_tarifa_leyenda') }}</p>
 
