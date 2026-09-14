@@ -22,7 +22,7 @@ class GeneradorPdf
      *
      * Van al disco privado porque los sirve GuiaController, que comprueba que
      * el requisito esté publicado. En el disco público esa comprobación no
-     * servía de nada: el mismo PDF era alcanzable por /storage.
+     * serviría de nada: el mismo PDF sería alcanzable por /storage.
      */
     public function generar(string $titulo, string $subtitulo, array $lineas, string $carpeta, string $archivo): string
     {

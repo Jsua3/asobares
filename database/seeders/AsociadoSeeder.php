@@ -99,11 +99,11 @@ class AsociadoSeeder extends Seeder
      * Fecha de negocio de la afiliación, no la de inserción de la fila.
      *
      * Los de `RECIEN_AFILIADOS` se afiliaron dentro de los últimos treinta
-     * días: el prompt maestro dice que el gremio «crece mes a mes», y una
-     * semilla donde nadie se afilió nunca en el último mes hace que la
-     * tarjeta «altas este mes» del tablero muestre siempre cero, un
-     * artefacto tan falso como el que corrige (ver `ResumenDelGremio`). El
-     * resto queda repartido entre dos y veintidós meses atrás, como antes.
+     * días: un gremio que crece tiene altas cada mes, y una semilla donde nadie
+     * se afilió en el último mes hace que la tarjeta «altas este mes» del
+     * tablero muestre siempre cero, un artefacto tan falso como el que
+     * `ResumenDelGremio` evita al contar por `fecha_afiliacion`. El resto queda
+     * repartido entre dos y veintidós meses atrás.
      *
      * Para los morosos (`CarteraSeeder::EN_MORA`) el sorteo nunca puede caer
      * por debajo de su propia mora fija: nadie puede deber más meses de

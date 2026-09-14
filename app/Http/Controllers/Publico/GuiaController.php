@@ -59,9 +59,9 @@ class GuiaController
      * Sirve el formato oficial con un nombre limpio, nunca la ruta interna.
      *
      * Los adjuntos viven en el disco privado justamente para que esta puerta
-     * sea la única: mientras estuvieron en el disco público, comprobar aquí el
-     * estado de publicación era decorativo, porque el mismo PDF se descargaba
-     * por /storage sin pasar por ningún control.
+     * sea la única: en el disco público, comprobar aquí el estado de
+     * publicación sería decorativo, porque el mismo PDF se descargaría por
+     * /storage sin pasar por ningún control.
      */
     public function descargarFormato(RequisitoApertura $requisito): StreamedResponse
     {
