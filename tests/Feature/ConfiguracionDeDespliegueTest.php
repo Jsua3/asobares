@@ -14,8 +14,8 @@ use Tests\TestCase;
 /**
  * La guardia del despliegue remoto (riesgo R-14).
  *
- * Todo lo que hay aquí se rompió alguna vez sin que nadie se enterara, o se
- * habría roto en el primer despliegue. Son tres familias:
+ * Lo que se vigila aquí falla sin avisar: la suite local sigue verde y el
+ * defecto solo asoma en el entorno remoto. Son tres familias:
  *
  * 1. La coraza de configuración: qué se endurece y en qué entornos.
  * 2. La semántica que cambia entre SQLite y PostgreSQL. Ojo: la suite corre
@@ -43,9 +43,9 @@ class ConfiguracionDeDespliegueTest extends TestCase
     // -----------------------------------------------------------------------
 
     /**
-     * La coraza no se ata a `production`: el entorno de Laravel Cloud se llama
-     * `staging`, y atarla a `production` dejaría sin endurecer justo el entorno
-     * expuesto.
+     * La coraza no se ata solo a `production`: el entorno de Laravel Cloud se
+     * llama `staging`, y atarla a `production` dejaría sin endurecer justo el
+     * entorno expuesto.
      *
      * @return array<string, array{string}>
      */
@@ -91,10 +91,9 @@ class ConfiguracionDeDespliegueTest extends TestCase
 
     /**
      * `MAIL_MAILER=log` escribe el cuerpo de cada PQR —con el nombre, el
-     * correo y el teléfono del ciudadano— en el registro. Como modo de
-     * emergencia sin proveedor de correo es tentador, y por eso se rechaza: se
-     * despliega con SMTP. Los códigos MFA se leen por `stderr`, que no arrastra
-     * las PQR.
+     * correo y el teléfono del ciudadano— en el registro. Es tentador como modo
+     * de emergencia sin proveedor de correo, y se rechaza igual: se despliega
+     * con SMTP. Los códigos MFA se leen por `stderr`, que no arrastra las PQR.
      */
     #[DataProvider('entornosExpuestos')]
     public function test_fuera_de_local_no_se_arranca_escribiendo_las_pqr_en_el_registro(string $entorno): void
@@ -254,8 +253,10 @@ class ConfiguracionDeDespliegueTest extends TestCase
     }
 
     /**
-     * El fichero que se copia y pega en las variables del entorno remoto. Sin
-     * cualquiera de las líneas de aquí abajo, el despliegue se cae.
+     * El fichero que se copia y pega en las variables del entorno remoto. Cada
+     * línea de aquí abajo fija un valor del que depende el entorno remoto y que
+     * la suite local no ejercita: la etiqueta de cada caso dice qué garantiza,
+     * y el comentario, cuando lo hay, qué se rompe sin ella.
      *
      * @return array<string, array{string}>
      */
