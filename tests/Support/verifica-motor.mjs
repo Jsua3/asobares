@@ -1,8 +1,9 @@
 /*
  * Verificación numérica del motor REAL (importa el archivo, no una copia).
  *
- * No entra en la suite: el proyecto no tiene runner de JS y añadir uno sería
- * cambiar dependencias. Esto se ejecuta a mano y sus cifras se reportan.
+ * Lo ejecuta `MotorDeMovimientoTest` con Node y exige que salga con código 0;
+ * si no hay Node, esa prueba se omite. No hay runner de JS porque montarlo
+ * sería cambiar dependencias.
  */
 import { pathToFileURL } from 'node:url';
 
