@@ -53,7 +53,7 @@
                 @endif
 
                 <div class="vidrio rounded-[1.5rem] p-6">
-                    {{-- OBS3-08: ver el comentario de `index.blade.php`. --}}
+                    {{-- La tarifa no se publica: ver el comentario de `index.blade.php`. --}}
                     <p class="text-xs uppercase tracking-wide text-apagado">Tarifa</p>
                     <p class="mt-1 font-display text-2xl font-bold text-acento">
                         {{ ajuste('artistas_tarifa_leyenda') }}
@@ -62,11 +62,11 @@
                         El valor final depende de la duración, el montaje y el desplazamiento.
                     </p>
 
-                    {{-- El contacto es contraprestacion de la cuota, igual que el del
-                         proveedor: quien contrata musica en vivo es el establecimiento
+                    {{-- El contacto es contraprestación de la cuota, igual que el del
+                         proveedor: quien contrata música en vivo es el establecimiento
                          afiliado. Lo que NO se toca es el escaparate de arriba --nombre,
-                         foto, genero, video--, que es el motivo por el que el artista se
-                         inscribe. El enlace de abajo no se ramifica por sesion a proposito:
+                         foto, género, video--, que es el motivo por el que el artista se
+                         inscribe. El enlace de abajo no se ramifica por sesión a propósito:
                          `/mi-cuenta/artistas` ya manda al login a quien no la tiene. --}}
                     <div class="mt-5 space-y-2.5">
                         <p class="text-xs leading-relaxed text-apagado">

@@ -16,15 +16,15 @@
     // nombrar el campo desde fuera: enlazar a /afiliate#campo-correo, un resumen
     // de errores en cabecera, la heurística de autorrelleno del navegador y
     // cualquier selector de prueba. Colisionaría si una página repitiera un
-    // `nombre`; hoy ninguna lo hace y `FocoVisibleTest` lo vigila.
+    // `nombre`; ninguna lo hace y `FocoVisibleTest` lo vigila.
     $id = 'campo-'.Str::slug(str_replace(['[', ']', '.'], ['-', '', '-'], $nombre));
     $hayError = $errors->has($nombre);
 
-    // `aria-describedby` admite varios ids separados por espacio. Hasta hoy solo
-    // se emitía al errar, así que las once ayudas del sitio no existían para un
-    // lector de pantalla ni cuando se veían en pantalla (SC 1.3.1). La ayuda va
-    // primero porque describe el formato; el error, que es la consecuencia de
-    // no seguirlo, se anuncia después.
+    // `aria-describedby` admite varios ids separados por espacio. Se emite con
+    // la ayuda aunque no haya error: si solo se emitiera al errar, la ayuda que
+    // se ve en pantalla no existiría para un lector de pantalla (SC 1.3.1). La
+    // ayuda va primero porque describe el formato; el error, que es la
+    // consecuencia de no seguirlo, se anuncia después.
     $descripciones = array_filter([
         $ayuda ? $id.'-ayuda' : null,
         $hayError ? $id.'-error' : null,
@@ -33,25 +33,24 @@
     /*
      * Lo que este atributo NO lleva es la mitad del diseño, así que va escrito.
      *
-     * Llevaba la utilidad que apaga el outline en foco. Compila en
+     * No lleva la utilidad que apaga el outline en foco: compila en
      * `@layer utilities` y el `:focus-visible` del proyecto (`app.css`) vive en
-     * `@layer base`: utilities gana a base por orden de capa, sin que la
-     * especificidad entre en juego, así que apagaba el único indicador de foco
-     * de todos los formularios del sitio. Y el anillo de marca-500 al 60 % que
-     * lo sustituía, compuesto sobre lo que tiene detrás, da 2,21:1 en claro y
-     * 2,47:1 en oscuro: por debajo del 3:1 que exige WCAG 2.1 §1.4.11, o sea
-     * visible lo justo para que nadie lo denunciara y no lo bastante para
-     * cumplir. Sin las dos gobierna el outline de `app.css`: 3,49:1 y 5,15:1.
+     * `@layer base`; utilities gana a base por orden de capa, sin que la
+     * especificidad entre en juego, así que apagaría el único indicador de foco
+     * de todos los formularios del sitio. Tampoco lleva un anillo de marca-500
+     * al 60 %: compuesto sobre lo que tiene detrás da 2,21:1 en claro y 2,47:1
+     * en oscuro, por debajo del 3:1 que exige WCAG 2.1 §1.4.11. Sin ninguno de
+     * los dos gobierna el outline de `app.css`: 3,49:1 y 5,15:1.
      *
-     * `focus:border-marca-500` repone la única pérdida real de quitarlas:
+     * `focus:border-marca-500` cubre el único caso que el outline no cubre:
      * `:focus-visible` no empareja en un `<select>` desplegado con ratón —ni en
-     * Chrome ni en Firefox— y el `focus:` viejo sí. Es un borde OPACO, con las
-     * mismas cifras que el outline por ser el mismo color sin transparencia. El
-     * indicador de foco sigue siendo el outline; el borde solo dice qué campo
-     * está activo, y en un campo errado ya era rojo de todos modos.
+     * Chrome ni en Firefox— y `focus:` sí. Es un borde OPACO, con las mismas
+     * cifras que el outline por ser el mismo color sin transparencia. El
+     * indicador de foco es el outline; el borde solo dice qué campo está
+     * activo, y en un campo errado ya es rojo de todos modos.
      *
-     * `FocoVisibleTest` vigila las dos cosas: que ninguna vista vuelva a apagar
-     * el outline, y que ningún anillo translúcido se reponga por debajo de 3:1.
+     * `FocoVisibleTest` vigila las dos cosas: que ninguna vista apague el
+     * outline, y que ningún anillo translúcido quede por debajo de 3:1.
      */
     // `min-h-11` y no `py-3`: con la escala óptica vigente el control mide
     // 21,7 + 20 + 2 = 43,7 px y solo le faltan 0,3. Subir el relleno movería
@@ -92,8 +91,8 @@
             @if ($necesitaOpcionVacia)
                 {{-- `hidden` además de `disabled`: sin él el marcador de posición
                      sigue ocupando un renglón en la lista desplegada, aunque no
-                     se pueda elegir. Donde el navegador no lo entienda se queda
-                     el comportamiento de hoy, que ya era correcto. --}}
+                     se pueda elegir. Donde el navegador no lo entienda, la
+                     opción queda solo deshabilitada, que también es correcto. --}}
                 <option value="" disabled hidden @selected(blank(old($nombre, $valor)))>Selecciona una opción</option>
             @endif
             {{-- `?? []` porque el componente no puede reventar con
@@ -111,23 +110,22 @@
                class="{{ $clases }}">
     @endif
 
-    {{-- Ranura de apoyo INCONDICIONAL, y las dos cosas que arregla se pierden
-         si alguien vuelve a condicionarla:
+    {{-- Ranura de apoyo INCONDICIONAL. Condicionarla rompe dos cosas:
 
-         1. La ayuda ya no desaparece al errar. Quien acaba de incumplir el
+         1. La ayuda no desaparece al errar. Quien acaba de incumplir el
             formato («Solo YouTube», «Déjalo vacío si prefieres decir “a
             convenir”») es exactamente quien necesita releerlo.
-         2. La rejilla deja de saltar. `min-h-5` reserva 20 px, que cubren la
+         2. La rejilla no salta. `min-h-5` reserva 20 px, que cubren la
             caja de una línea de `text-xs` — 0,75rem × 1,6 = 19,2 px con la
             escala óptica de `app.css`, no los 16 px del default de fábrica.
-            Sin la reserva, estrenar un error empujaba al campo vecino en los
+            Sin la reserva, estrenar un error empujaría al campo vecino en los
             `sm:grid-cols-2`. `FocoVisibleTest` recalcula esa caja contra la
             escala vigente: si la tipografía cambia, la prueba pide el
-            `min-h-*` siguiente en vez de dejar que la rejilla salte otra vez.
+            `min-h-*` siguiente en vez de dejar que la rejilla salte.
 
          El precio son 26 px bajo cada campo que no trae ayuda. Si un
-         formulario respira de más, se recorta su `space-y-*`; volver a
-         condicionar esta ranura reabre las dos brechas de arriba. --}}
+         formulario respira de más, se recorta su `space-y-*`; condicionar
+         esta ranura reabre las dos brechas de arriba. --}}
     <div class="mt-1.5 min-h-5 space-y-1 text-xs">
         @if ($ayuda)
             <p id="{{ $id }}-ayuda" class="text-apagado">{{ $ayuda }}</p>

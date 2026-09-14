@@ -40,12 +40,11 @@
     Y una que cuesta encontrar: el espacio de no separación que llevan las
     llamadas NO impide que el icono caiga solo al renglón siguiente. Medido en
     Chromium: la línea se parte igual delante de una caja atómica, incluso sin
-    ningún espacio de por medio. Con el carácter de antes sí bastaba; con un
-    SVG no. Donde el rótulo va dentro de un párrafo y el ancho aprieta, la
-    única defensa es `whitespace-nowrap` en el portador, y solo hay dos sitios
-    que lo necesiten (`inicio` y `empleo/show`, ambos comentados allí). El
-    espacio duro se queda porque sigue siendo el hueco visible entre palabra e
-    icono, no porque frene nada.
+    ningún espacio de por medio. Donde el rótulo va dentro de un párrafo y el
+    ancho aprieta, la única defensa es no dejar partir la línea en el portador
+    (`whitespace-nowrap`, o `white-space: nowrap` en su CSS). El espacio duro
+    se queda porque sigue siendo el hueco visible entre palabra e icono, no
+    porque frene nada.
 --}}
 <svg {{ $attributes->merge(['class' => 'inline-block size-[1em] shrink-0 align-[-0.125em]']) }}
      fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">

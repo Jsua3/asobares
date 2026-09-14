@@ -6,32 +6,30 @@
 
 @php
     /*
-     * Un solo portador para los 43 botones de acción del sitio. Antes la
-     * cadena del submit primario estaba repetida idéntica ocho veces y la
-     * utilidad de fundido de color aparecía en 18 de 34: dos botones
-     * iguales se comportaban distinto al pasar el ratón.
+     * Portador único de los botones de acción del sitio: la variante decide
+     * las clases, así que dos botones iguales no pueden comportarse distinto.
      *
-     * `.pulsable` llega de fábrica: es el acuse de pulsación que el proyecto
-     * no tenía en ningún sitio, y en táctil es el único que existe. Ya no
-     * lleva la utilidad de fundido de color aparte (`duration-(--duracion-
+     * `.pulsable` llega de fábrica: es el acuse de pulsación, y en táctil el
+     * único que existe. No lleva la utilidad de fundido de color aparte
+     * (`duration-(--duracion-
      * boton) ease-color` sobre la clase que Tailwind genera para animar
      * color, fondo y borde): esa utilidad compila en `@layer utilities`,
      * que en Tailwind 4 gana siempre a `@layer components` sin importar
-     * especificidad, así que pisaba la transición que `.pulsable` declara
+     * especificidad, así que pisaría la transición que `.pulsable` declara
      * en `app.css` (incluida su `transition-duration: 0ms` del `:active`).
-     * El color viaja ahora dentro de `.pulsable`, no como utilidad aparte —
-     * la guardia de abajo impide que esa clase vuelva a este archivo.
+     * El color viaja dentro de `.pulsable`, no como utilidad aparte, y
+     * `MovimientoTest` impide que esa clase vuelva a este archivo.
      */
     $base = 'inline-block rounded-xl px-6 py-3 text-center text-sm font-semibold pulsable';
 
     $estilos = match ($variante) {
         'contorno' => 'border border-linea-fuerte text-tinta hover:border-marca-500/50 hover:bg-superficie-alta',
-        // Para fondos oscuros, como el video de la portada: el contorno de
-        // tinta era un botón invisible sobre negro. El color va en el
+        // Para fondos oscuros, como el video de la portada: un contorno de
+        // tinta sería invisible sobre negro. El color va en el
         // portador `.contorno-claro` de app.css y no en utilidades: el blanco
         // fijo no sigue al tema y la guardia de tema lo prohíbe aquí.
         'contorno-claro' => 'border contorno-claro',
-        // El relleno, el hover y la tinta viven en `.cta-vivo` (app.css) y ya no
+        // El relleno, el hover y la tinta viven en `.cta-vivo` (app.css) y no
         // en utilidades, por lo mismo que `contorno-claro`: al pulsar el botón
         // se vidria —el relleno se retira y deja ver lo de detrás— y eso pide un
         // fondo que dependa del estado. Una utilidad `bg-*` de

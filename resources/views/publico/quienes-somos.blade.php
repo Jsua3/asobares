@@ -235,8 +235,8 @@
             @endphp
 
             @if ($respaldoNacional !== [])
-                {{-- A 375 px las dos cifras se apilan, y así se queda. Medido el
-                     10 sep: dentro de la tarjeta solo hay 279 px de ancho útil
+                {{-- A 375 px las dos cifras se apilan, y así se queda. Medido:
+                     dentro de la tarjeta solo hay 279 px de ancho útil
                      (`p-8` a cada lado), y los dos pares miden 165 y 160 --lo
                      ancho es el rótulo, no el número--. Caben hombro con hombro
                      solo si se acota el rótulo a ~123 px, y entonces se parte en

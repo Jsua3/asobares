@@ -60,9 +60,10 @@
 
                                 <p class="mt-3 flex-1 text-sm leading-relaxed text-tenue">{{ $proveedor->descripcion }}</p>
 
-                                {{-- OBS3-12: un contacto sin fecha no vale más que un contacto
-                                     viejo: vale menos, porque el lector no sabe cuál de los dos
-                                     tiene. Mismo patrón que RF-60 en la guía. --}}
+                                {{-- Un contacto sin fecha no vale más que un contacto viejo:
+                                     vale menos, porque el lector no sabe cuál de los dos tiene.
+                                     Es el mismo patrón que la fecha de verificación de los
+                                     requisitos de la guía. --}}
                                 <p class="mt-3 text-2xs">
                                     @if (! $proveedor->estaVerificado())
                                         <span class="text-aviso-suave">{{ ajuste('proveedores_sin_verificar') }}</span>
