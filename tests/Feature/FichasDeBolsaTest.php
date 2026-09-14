@@ -42,19 +42,17 @@ class FichasDeBolsaTest extends TestCase
         $this->assertFalse($publicados->contains('DJ En Revision'));
     }
 
-    // --- El escaparate de artistas (SUA-12) ---
+    // --- El escaparate de artistas ---
 
     /**
-     * El aviso de vacío decía SIEMPRE «No hay artistas con ese filtro. Prueba
-     * con otro género o tipo», hubiera filtro o no.
+     * El aviso de vacío distingue «no hay artistas» de «no hay artistas con ese
+     * filtro», igual que la bolsa de empleo.
      *
-     * Medido contra producción el 9 de septiembre de 2026: cero fichas
-     * publicadas, así que quien entraba a `/artistas` sin tocar nada leía que su
-     * filtro no daba resultados —no había filtro— y que probara otro género
-     * —no hay ninguno que funcione—. Un mensaje que manda a buscar donde no hay
-     * nada es peor que no decir nada.
-     *
-     * La bolsa de empleo ya distinguía los dos casos; este escaparate no.
+     * Con cero fichas publicadas, un aviso fijo de «No hay artistas con ese
+     * filtro. Prueba con otro género o tipo» le diría a quien entra a
+     * `/artistas` sin tocar nada que su filtro no da resultados —no hay filtro—
+     * y que pruebe otro género —no hay ninguno que funcione—. Un mensaje que
+     * manda a buscar donde no hay nada es peor que no decir nada.
      */
     public function test_sin_artistas_el_aviso_no_habla_de_filtros(): void
     {
@@ -74,10 +72,10 @@ class FichasDeBolsaTest extends TestCase
     }
 
     /**
-     * Mismo defecto que tenía la bolsa de empleo, y aquí se veía dentro del
-     * MISMO formulario: «Género musical» ya salía de las fichas publicadas
-     —en producción se quedaba en «Todos los géneros», que es correcto— y
-     * «Tipo» seguía ofreciendo las cuatro opciones del enum, todas muertas.
+     * La misma regla que la bolsa de empleo, dentro del MISMO formulario:
+     * «Género musical» sale de las fichas publicadas —sin fichas se queda en
+     * «Todos los géneros», que es correcto— y «Tipo» también, para no ofrecer
+     * las cuatro opciones del enum muertas.
      */
     public function test_el_selector_de_tipo_solo_ofrece_los_que_tienen_ficha_publicada(): void
     {

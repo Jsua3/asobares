@@ -28,9 +28,9 @@ use Tests\TestCase;
  * visitas de la misma persona en dos días cuentan dos. Contar personas exige
  * guardar IP, cookie o sesión --lo que el Acta 07 descartó a propósito para
  * quedar fuera de la Ley 1581-- y sigue necesitando la política de tratamiento
- * publicada (D-19). Aquí no se guarda nada de quien visita: el encabezado se
- * MIRA para decidir y no se escribe, igual que ya se hace con el navegador para
- * descartar rastreadores.
+ * publicada. Aquí no se guarda nada de quien visita: el encabezado se MIRA para
+ * decidir y no se escribe, igual que se hace con el navegador para descartar
+ * rastreadores.
  */
 class FlujoDeEntradasAlSitioTest extends TestCase
 {
@@ -138,10 +138,10 @@ class FlujoDeEntradasAlSitioTest extends TestCase
 
     public function test_la_grafica_de_visitas_dibuja_las_dos_series(): void
     {
-        // La navegación va ANTES de autenticarse, y sin sesión: desde el 9 de
-        // septiembre de 2026 el equipo del gremio no cuenta como tráfico del
-        // sitio, así que estas dos visitas hechas como la dirección no dejarían
-        // ni una fila y la gráfica saldría plana por el motivo equivocado.
+        // La navegación va ANTES de autenticarse, y sin sesión: el equipo del
+        // gremio no cuenta como tráfico del sitio, así que estas dos visitas
+        // hechas como la dirección no dejarían ni una fila y la gráfica saldría
+        // plana por el motivo equivocado.
         $this->get(route('inicio'))->assertOk();
         $this->get(route('directorio.index'), ['referer' => route('inicio')])->assertOk();
 
@@ -221,10 +221,9 @@ class FlujoDeEntradasAlSitioTest extends TestCase
      * `getData()` prueba la aritmética y no toca la plantilla: un widget con los
      * números correctos y un error de Blade pasa esa prueba y revienta en el
      * tablero. Y mirarlo con ojos no es una opción aquí --el segundo factor
-     * impide que una sesión automatizada abra el panel, y el navegador de esta
-     * máquina no compone con la ventana detrás (estado.md, deuda del 7 y 8 sep)--,
-     * así que este renderizado completo es el sustituto honesto: no prueba que se
-     * vea bonito, prueba que se vea.
+     * impide que una sesión automatizada abra el panel--, así que este
+     * renderizado completo es el sustituto honesto: no prueba que se vea
+     * bonito, prueba que se vea.
      */
     public function test_los_tres_widgets_del_flujo_se_pintan_sin_reventar(): void
     {
@@ -251,8 +250,7 @@ class FlujoDeEntradasAlSitioTest extends TestCase
 
     /**
      * El tablero tiene que traerlos puestos. Un widget que existe, se prueba y no
-     * está registrado es trabajo que nadie ve: exactamente el modo de fallo que
-     * este proyecto ya pagó con la analítica del Acta 07.
+     * está registrado es trabajo que nadie ve.
      */
     public function test_los_tres_widgets_estan_registrados_en_el_tablero(): void
     {

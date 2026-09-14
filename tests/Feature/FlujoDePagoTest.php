@@ -139,7 +139,7 @@ class FlujoDePagoTest extends TestCase
      * Sustituye la pasarela por una que se cae al pedirle el enlace de pago.
      *
      * Es exactamente lo que hará el entorno remoto: se despliega con
-     * `PAYMENT_DRIVER=bold` y sin llaves de Bold (§20.5.2), así que
+     * `PAYMENT_DRIVER=bold` y sin llaves de Bold, así que
      * `PasarelaBold::crearEnlaceDePago` lanza en cuanto alguien pulsa pagar.
      */
     private function pasarelaCaida(): void
@@ -884,7 +884,7 @@ class FlujoDePagoTest extends TestCase
         $this->assertSame(EstadoInscripcion::Confirmada, Inscripcion::firstOrFail()->estado);
     }
 
-    // --- Notificaciones que contradicen un cobro ya resuelto (SEG-02) ---
+    // --- Notificaciones que contradicen un cobro ya resuelto ---
 
     private function transaccionDeInscripcionPendiente(): Transaccion
     {
@@ -931,11 +931,11 @@ class FlujoDePagoTest extends TestCase
     }
 
     /**
-     * `PasarelaBold` traduce VOID_APPROVED a Rechazada, pero `RegistroDePagos`
-     * devolvía intacta cualquier transacción que ya no estuviera pendiente, y
-     * una anulación solo tiene sentido sobre un cobro aprobado: Bold recibía
-     * 200, no quedaba ni una línea en el log y la inscripción seguía
-     * confirmada sin dinero detrás.
+     * `PasarelaBold` traduce VOID_APPROVED a Rechazada, y una anulación solo
+     * tiene sentido sobre un cobro aprobado. Si `RegistroDePagos` devolviera
+     * intacta cualquier transacción que ya no estuviera pendiente, Bold
+     * recibiría 200, no quedaría ni una línea en el log y la inscripción
+     * seguiría confirmada sin dinero detrás.
      *
      * Revertir los efectos es una decisión de negocio sin tomar, así que la
      * prueba fija lo contrario de un revertido automático: el cobro y la

@@ -17,16 +17,15 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
- * PERM-02. `throttle:N,1` sin nombre firma el contador solo con el usuario
- * —o con la IP del visitante anónimo—, nunca con la ruta. Todas las rutas
- * limitadas compartían un contador y cada una lo comparaba con su propio
- * máximo: seis postulaciones gestionadas dejaban «Pagar» (máximo 5) en 429
- * durante un minuto, y siete consultas a la guía (máximo 30) hacían lo mismo
- * con el formulario de afiliación (máximo 6).
+ * `throttle:N,1` sin nombre firma el contador solo con el usuario —o con la IP
+ * del visitante anónimo—, nunca con la ruta. Si todas las rutas limitadas
+ * compartieran un contador y cada una lo comparara con su propio máximo, seis
+ * postulaciones gestionadas dejarían «Pagar» (máximo 5) en 429 durante un
+ * minuto, y siete consultas a la guía (máximo 30) harían lo mismo con el
+ * formulario de afiliación (máximo 6).
  *
- * Estas pruebas fijan las dos mitades del arreglo: que una ruta ya no gasta
- * el cupo de otra, y que cada una sigue rebotando justo en su máximo de
- * siempre.
+ * Estas pruebas fijan las dos mitades: que una ruta no gasta el cupo de otra,
+ * y que cada una sigue rebotando justo en su máximo de siempre.
  */
 class LimitesDePeticionesTest extends TestCase
 {

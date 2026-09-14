@@ -12,18 +12,16 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
- * El enlace de la guía dice lo que cumple (OBS3-10).
+ * El enlace de la guía dice lo que cumple.
  *
- * El directivo pidió enlaces al trámite exacto: «que sea puntual… o sea que no
- * me abra la página de la cámara solamente» (R23 05:39-05:44), «tiene que ir
- * directamente el enlace» (R23 05:50). Su razón no era estética: «muchas veces
- * llegar a ese registro es difícil» (R23 06:05) y «hay personas que no son tan
- * amigables con la tecnología» (R23 06:27).
+ * El gremio pide enlaces al trámite exacto y no a la portada de la entidad, y
+ * su razón no es estética: llegar a ese registro es difícil, y hay personas
+ * que no se llevan bien con la tecnología.
  *
- * ⚠️ Las URL exactas son insumo del gremio y todavía no existen: los siete
- * trámites sembrados apuntan a dominio pelado, y el documento de fuente
- * oficial tampoco las trae. Inventar direcciones de trámites legales es lo que
- * el §29.4 prohíbe expresamente.
+ * ⚠️ Las URL exactas son insumo del gremio y todavía no existen: los trámites
+ * sembrados apuntan a dominio pelado, y el documento de fuente oficial tampoco
+ * las trae. Inventar direcciones de trámites legales choca con la regla del
+ * encargo: en producción solo entra contenido de documento oficial del gremio.
  *
  * Así que lo que se construye aquí es la otra mitad: el sitio distingue las
  * dos cosas y no promete la que no tiene, y el día que lleguen las URL la
@@ -65,7 +63,8 @@ class EnlacePuntualDeLaGuiaTest extends TestCase
     /**
      * Lo que de verdad importa: la etiqueta que lee el usuario. Con un enlace
      * a portada no puede decir «ir al trámite», porque eso es prometerle que
-     * el clic lo deja donde tiene que estar y es justo lo que se señaló.
+     * el clic lo deja donde tiene que estar y es justo lo que el gremio pide
+     * evitar.
      */
     public function test_un_enlace_a_la_portada_no_promete_el_tramite(): void
     {
@@ -101,7 +100,7 @@ class EnlacePuntualDeLaGuiaTest extends TestCase
     }
 
     /**
-     * Deja constancia medida de la deuda que este cambio NO cierra, para que
+     * Deja constancia medida de la deuda que el código NO puede cerrar, para que
      * quien lea la suite sepa que el pendiente es contenido y no código. Si
      * un día alguien siembra las URL buenas, esta prueba se pone roja y hay
      * que venir a celebrarlo y borrarla.

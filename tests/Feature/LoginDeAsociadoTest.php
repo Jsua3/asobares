@@ -12,12 +12,12 @@ use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 /**
- * El login de /mi-cuenta, que hasta ahora sólo se ejercitaba de refilón.
+ * El login de /mi-cuenta.
  *
- * Las tres pruebas de abajo cubren lo que la auditoría encontró abierto: que
- * la respuesta delataba una contraseña de administrador correcta, que el
- * límite de intentos era por IP y no por cuenta, y que el destino posterior
- * al login salía de la sesión sin comprobar el host.
+ * Las tres pruebas de abajo cubren tres fugas: que la respuesta no delate una
+ * contraseña de administrador correcta, que el límite de intentos cuente por
+ * cuenta y no solo por IP, y que el destino posterior al login no salga de la
+ * sesión sin comprobar el host.
  */
 class LoginDeAsociadoTest extends TestCase
 {

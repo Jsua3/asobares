@@ -13,15 +13,15 @@ use Throwable;
 /**
  * Cómo se ve el sitio cuando alguien pega el enlace en WhatsApp.
  *
- * Hasta el 10 de septiembre de 2026 `ogImagen` nacía en `null` y solo cuatro
- * vistas la pasaban --artista, noticia, ficha de asociado y evento--. Todas las
- * demás, **incluida la portada**, se compartían sin miniatura: un enlace pelado.
- * Para un gremio cuyo canal es WhatsApp eso no es un detalle de SEO, es el
- * primer contacto de mucha gente con el sitio.
+ * `ogImagen` nace en `null` y solo algunas vistas la pasan --artista, noticia,
+ * ficha de asociado y evento--, así que el layout pone la tarjeta del gremio a
+ * todas las demás. Sin ella, **incluida la portada**, se compartirían sin
+ * miniatura: un enlace pelado. Para un gremio cuyo canal es WhatsApp eso no es
+ * un detalle de SEO, es el primer contacto de mucha gente con el sitio.
  *
- * No lo veía nadie porque el `<meta>` existía y estaba bien escrito: el defecto
- * era que su `@if` casi nunca se cumplía. Una prueba que solo mirase la
- * plantilla lo habría dado por bueno.
+ * El defecto no se ve leyendo la plantilla: el `<meta>` puede existir y estar
+ * bien escrito con un `@if` que casi nunca se cumple. Una prueba que solo mire
+ * la plantilla lo daría por bueno.
  */
 class ImagenAlCompartirTest extends TestCase
 {
@@ -39,9 +39,8 @@ class ImagenAlCompartirTest extends TestCase
     }
 
     /**
-     * La misma lección que dejó el video del hero: lo que no está en el índice
-     * de git no llega a producción, por mucho que esté en el disco de quien
-     * programa. Cloud despliega desde git.
+     * Lo que no está en el índice de git no llega a producción, por mucho que
+     * esté en el disco de quien programa: Cloud despliega desde git.
      */
     public function test_la_tarjeta_viaja_en_el_repositorio_y_mide_lo_que_dice_medir(): void
     {
@@ -92,8 +91,8 @@ class ImagenAlCompartirTest extends TestCase
 
     /**
      * La que de verdad protege: recorre páginas que NO pasan imagen propia y
-     * comprueba que todas se comparten con la tarjeta. Con el `@if` de antes,
-     * las cinco fallaban.
+     * comprueba que todas se comparten con la tarjeta. Con un `@if` que solo
+     * pinte la etiqueta cuando la vista pasa imagen, las cinco fallarían.
      */
     public function test_las_paginas_sin_imagen_propia_se_comparten_con_la_tarjeta(): void
     {

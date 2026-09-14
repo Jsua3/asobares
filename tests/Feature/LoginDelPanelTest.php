@@ -96,7 +96,7 @@ class LoginDelPanelTest extends TestCase
 
     /**
      * Lo que compra el segundo factor: quien robe la contraseña no entra con
-     * ella sola. Antes bastaba, porque nadie estaba obligado a configurarlo.
+     * ella sola.
      */
     public function test_con_segundo_factor_las_credenciales_solas_no_abren_sesion(): void
     {

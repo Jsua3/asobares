@@ -9,14 +9,13 @@ use Tests\TestCase;
 use Throwable;
 
 /**
- * La guardia del expediente partido en cuatro (bitácora §32).
+ * La guardia del expediente partido en cuatro archivos.
  *
- * Durante agosto el prompt maestro fue un solo archivo de 1.800 líneas donde
- * las reglas, el estado semanal, la referencia del producto y la historia se
- * tachaban unas a otras: la auditoría del §30.5 le contó 106 contradicciones.
- * El 1 de septiembre se repartió en cuatro archivos con una regla de
- * mantenimiento distinta para cada uno. Dos de esas reglas las puede vigilar
- * una máquina, y son las que están aquí:
+ * Un solo archivo que mezcle las reglas, el estado semanal, la referencia del
+ * producto y la historia acaba con secciones que se tachan unas a otras. Por
+ * eso `material/` los reparte en cuatro, con una regla de mantenimiento
+ * distinta para cada uno. Dos de esas reglas las puede vigilar una máquina, y
+ * son las que están aquí:
  *
  * 1. `estado.md` cita en su encabezado el commit sobre el que se midió. Si ese
  *    commit no existe, la foto no es de nadie: alguien copió una cabecera
@@ -24,7 +23,7 @@ use Throwable;
  *    de verdad, no contra una lista.
  * 2. El prompt maestro no lleva cifras ni fechas: lo que cambia cada semana va
  *    al estado. La primera cifra de la suite que alguien pegue ahí es el
- *    primer paso de vuelta al archivo de 1.800 líneas.
+ *    primer paso para volver a mezclarlos.
  */
 class GuardiaDelEstadoTest extends TestCase
 {

@@ -194,9 +194,9 @@ class HojaArrastrableTest extends TestCase
      *
      * El 0,998 por defecto multiplica la velocidad por 499 y está calibrado
      * para una lista que se desplaza miles de píxeles. La hoja mide 155.
-     * Medido el 9 sep 2026 sobre «Bolsas»: un arrastre suave de 40 px da unos
-     * 143 px/s, que con 0,998 proyectan 71 px y llevan el reposo a 111 --la
-     * hoja se CERRABA con un tirón corto y suave--. Con 0,99 esos mismos
+     * Medido sobre «Bolsas»: un arrastre suave de 40 px da unos 143 px/s, que
+     * con 0,998 proyectan 71 px y llevan el reposo a 111 --la hoja se CERRARÍA
+     * con un tirón corto y suave--. Con 0,99 esos mismos
      * 143 px/s proyectan 14 px y vuelve a abrirse, mientras que un golpe real
      * de 45 px en 34 ms (1351 px/s medidos) proyecta 134 px y la cierra.
      *
