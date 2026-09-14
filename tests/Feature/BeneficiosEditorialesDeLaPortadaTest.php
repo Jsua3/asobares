@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * HOME-FINAL-03: los cinco beneficios oficiales se leen como lista editorial,
+ * Los cinco beneficios oficiales se leen como lista editorial,
  * no como tarjetas sueltas, y el CTA sigue yendo a afiliación.
  *
  * Roturas: inventar un sexto beneficio; href="#"; quitar el sello; volver a

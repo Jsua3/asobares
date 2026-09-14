@@ -44,8 +44,8 @@ class AliadosPublicosTest extends TestCase
             ->getContent();
 
         /*
-         * MUT-05: assertSeeInOrder tolera duplicados, así que un aliado pintado
-         * en los dos niveles seguía en orden. Cada nivel se afirma dentro de su
+         * assertSeeInOrder tolera duplicados, así que un aliado pintado en los
+         * dos niveles seguiría en orden. Cada nivel se afirma dentro de su
          * propia <section>. Roturas: quitar el filtro de tipo de cualquiera de
          * los dos niveles en PaginaController::aliados.
          */
@@ -90,10 +90,10 @@ class AliadosPublicosTest extends TestCase
         $respuesta->assertDontSee('javascript:alert(1)', escape: false);
 
         /*
-         * MUT-13: el pie ya lleva target="_blank" y rel="noopener", así que
-         * buscarlos en toda la página no protegía la tarjeta. Se exigen en la
-         * etiqueta <a> del aliado. Roturas: cambiar rel="noopener" por
-         * rel="external" en la tarjeta; quitarle target="_blank".
+         * El pie ya lleva target="_blank" y rel="noopener", así que buscarlos
+         * en toda la página no protege la tarjeta. Se exigen en la etiqueta <a>
+         * del aliado. Roturas: cambiar rel="noopener" por rel="external" en la
+         * tarjeta; quitarle target="_blank".
          */
         $this->assertSame(
             1,

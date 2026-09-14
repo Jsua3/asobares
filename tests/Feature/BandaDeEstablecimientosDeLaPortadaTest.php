@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * HOME-FINAL-02: la franja de establecimientos es una banda, no tres
- * tarjetas fijas, y el punto de partida gira por sesión sin tocar la BD.
+ * La franja de establecimientos es una banda, no tres tarjetas fijas, y el
+ * punto de partida gira por sesión sin tocar la BD.
  *
  * Roturas: volver a take(3); meter ORDER BY RANDOM(); href="#"; pintar
  * una foto editorial como si fuera la del asociado.
@@ -24,7 +24,7 @@ class BandaDeEstablecimientosDeLaPortadaTest extends TestCase
     /**
      * Semilla del giro por sesión (40 alfanuméricos, lo que exige el
      * almacén de sesiones). Con una sesión al azar el giro cae en 0 una de
-     * cada n veces y la portada sin `paraLaPortada` pasaría (MUT-11).
+     * cada n veces y la portada sin `paraLaPortada` pasaría.
      */
     private const string SESION_FIJA = 'portadaSesionFijaParaLaBandaDeAsobares02';
 
@@ -59,7 +59,7 @@ class BandaDeEstablecimientosDeLaPortadaTest extends TestCase
 
         // «Érase» en medio del alfabeto: sin él, el orden de bytes de SQLite
         // (Colina… Zorba, Ámbar) es una rotación del español y la banda lo
-        // daría por bueno aunque faltara `ordenarEnEspanol` (MUT-01).
+        // daría por bueno aunque faltara `ordenarEnEspanol`.
         $nombres = ['Ámbar Gastrobar', 'Colina Nocturna', 'Érase una Vez', 'Mirador del Quindío', 'Sauce Club', 'Zorba Bar'];
 
         $porBytes = $nombres;
@@ -150,7 +150,7 @@ class BandaDeEstablecimientosDeLaPortadaTest extends TestCase
 
     /**
      * Las fichas nacen en borrador y no se publican sin autorización del
-     * titular: marcar «destacado» no basta para salir en la portada (MUT-02).
+     * titular: marcar «destacado» no basta para salir en la portada.
      */
     public function test_un_destacado_sin_publicar_no_entra_en_la_banda(): void
     {
@@ -196,7 +196,7 @@ class BandaDeEstablecimientosDeLaPortadaTest extends TestCase
         $this->assertStringContainsString("Alpine.data('bandaEstablecimientos'", $js);
 
         // Acotado al bloque de la banda: la regex sobre el archivo entero
-        // casaba con el reduceMovimiento() de prepararCifras (COD-09).
+        // casaría con el reduceMovimiento() de prepararCifras.
         $this->assertMatchesRegularExpression(
             '/behavior:\s*reduceMovimiento\(\)\s*\?\s*\'auto\'\s*:\s*\'smooth\'/',
             $this->bloqueDeAlpine($js, 'bandaEstablecimientos'),

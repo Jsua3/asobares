@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
- * HOME-05/06: el banco visual de la portada tiene que existir, resolverse
+ * El banco visual de la portada tiene que existir, resolverse
  * en el orden foto real → asset editorial → fallback gráfico, y no
  * pintarse con las portadas de relleno del demo.
  *
