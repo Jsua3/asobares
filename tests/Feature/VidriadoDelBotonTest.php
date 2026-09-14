@@ -250,7 +250,7 @@ class VidriadoDelBotonTest extends TestCase
         $inicio = strpos($css, '.cta-vivo {');
         $this->assertNotFalse($inicio, '`.cta-vivo` ya no existe en app.css.');
 
-        $fin = strpos($css, '.video-marquesina', $inicio);
+        $fin = strpos($css, '.hero-video-respaldo', $inicio);
         $this->assertNotFalse($fin);
 
         return substr($css, $inicio, $fin - $inicio);

@@ -1547,12 +1547,6 @@
         transition-duration: var(--duracion-vidriado-ida);
     }
 
-    .video-marquesina {
-        box-shadow:
-            var(--asb-sombra-tarjeta),
-            0 24px 70px rgb(238 65 55 / 0.1);
-    }
-
     .hero-video-respaldo {
         background:
             radial-gradient(circle at 74% 18%, rgb(238 65 55 / 0.28), transparent 30%),
