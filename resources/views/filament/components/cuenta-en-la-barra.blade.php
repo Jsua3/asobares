@@ -1,11 +1,9 @@
 @php
     /**
-     * El módulo de cuenta, al pie de la barra lateral (D-L21).
-     *
-     * Baja aquí desde la parte superior por dos razones que Sua nombró el 7 sep:
-     * la barra necesitaba el tercer módulo que le faltaba, y la cuenta necesitaba
-     * el nombre y el rango que el círculo de iniciales no mostraba. Es el mismo
-     * chip que la barra pública de escritorio, girado al pie.
+     * El módulo de cuenta del panel: avatar, nombre y rango del usuario en un
+     * chip, como el de la barra pública de escritorio. Se pinta en dos ganchos
+     * —el cromo superior en escritorio y el pie de la barra en el teléfono— y
+     * el CSS apaga con `display: none` la copia que no toca.
      *
      * Es un «disclosure», no un menú ARIA: botón con aria-expanded más el panel
      * que controla. Sin aria-haspopup ni role="menu", que anunciarían navegación

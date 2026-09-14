@@ -1,6 +1,6 @@
 {{-- El envoltorio de Filament es quien coloca el widget en la rejilla del
      tablero (`$attributes->gridColumn(...)`). Sin él, la vista propia se
-     salta el tramo de columnas y cae a una sola pista (7 sep). --}}
+     salta el tramo de columnas y cae a una sola pista. --}}
 <x-filament-widgets::widget>
     <x-panel.vidrio resplandor class="p-5">
         <div class="flex items-center gap-2">

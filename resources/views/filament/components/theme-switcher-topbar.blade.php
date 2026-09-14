@@ -1,19 +1,16 @@
 {{--
-    El control de tema del panel (D-L23, 7 sep 2026).
-
-    Deja de ser un segmentado de dos botones y pasa a tener la misma forma que
-    el del sitio público: un botón redondo que abre un popover con las TRES
-    preferencias. El segmentado no ofrecía «sistema», que hasta hoy solo se
-    alcanzaba desde el menú de usuario de Filament, y ese menú se retiró al
-    bajar la cuenta al pie de la barra (D-L21).
+    El control de tema del panel, con la misma forma que el del sitio público:
+    un botón redondo que abre un popover con las TRES preferencias, incluida
+    «sistema». El menú de usuario de Filament está apagado (`userMenu(false)`),
+    así que este es el único sitio del panel donde se elige.
 
     Es un «disclosure», no un menú ARIA: botón con aria-expanded más el panel
     que controla. Sin aria-haspopup ni role="menu", que anunciarían navegación
     con flechas que este popover no implementa.
 
-    `syncTopbar()` se queda tal cual: es el único escritor de estado por scroll
-    del panel y su guardia lo pinza. Unificarlo con el de la barra lateral es
-    otra decisión, y está anotada como fuera de alcance.
+    `syncTopbar()` es el único escritor de estado por scroll del cromo y su
+    guardia lo pinza; el de la barra lateral vive aparte, en
+    `panel-barra-lateral.js`.
 --}}
 <div
     x-data="{
