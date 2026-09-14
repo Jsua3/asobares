@@ -421,7 +421,11 @@ class BarraLateralTest extends TestCase
         // El cristal es permanente: con el campo de puntos detrás hay algo que
         // refractar y la lámina no se lee como caja.
         $this->assertStringContainsString('opacity: 1;', $this->regla($this->tema(), '.fi-sidebar-group::before'), 'El cristal del apartado tiene que estar puesto, no esperando al scroll.');
-        $this->assertStringContainsString('body[data-barra-estado="scroll"] .fi-sidebar-group', $tema, 'El desplazamiento ya no afirma el cristal con su sombra.');
+        $this->assertStringContainsString(
+            'var(--asb-admin-barra-modulo-sombra)',
+            $this->regla($this->tema(), 'body[data-barra-estado="scroll"] .fi-sidebar-group'),
+            'Al desplazar la lista, el cristal del apartado no gana la sombra que lo despega.'
+        );
     }
 
     /**
