@@ -259,7 +259,7 @@ Las que valen lo mismo que en el demo no están aquí; están en el fichero.
 | `APP_MAINTENANCE_DRIVER` | `cache` (+ `APP_MAINTENANCE_STORE=database`) | Con `file`, `php artisan down` deja en mantenimiento **una** instancia y las demás siguen sirviendo |
 | `QUEUE_CONNECTION` | `sync` | Decisión, no descuido — ver 6.2 |
 | `QUEUE_CONVERSIONS_BY_DEFAULT` | `false` | El seguro de lo anterior — ver 6.2 |
-| `MAIL_MAILER` | `smtp` | `log` **impide arrancar** (escribiría las PQR con datos del ciudadano en el registro). `resend`, `postmark` y `ses` **revientan en ejecución**: sus paquetes no están en `vendor/` — ver 6.3 |
+| `MAIL_MAILER` | `smtp` | `log` **impide arrancar** (escribiría las PQR con datos del ciudadano en el registro). `smtp` y `ses` funcionan con lo instalado; `resend` y `postmark` **revientan en ejecución**: sus paquetes no están en `vendor/` — ver 6.3 |
 | `PAYMENT_DRIVER` | `bold` | La pasarela simulada se niega a existir fuera de local y testing — ver 6.4 |
 | `FILESYSTEM_DISK` / `MEDIA_DISK` | `public` | **Ver el apartado 8, que es el problema abierto de este despliegue** |
 
@@ -273,13 +273,14 @@ a `database` «para hacerlo bien» sin levantar antes un `background-process` en
 generarse: sin error, sin aviso, sin miniaturas. `QUEUE_CONVERSIONS_BY_DEFAULT=false` es
 el seguro contra eso.
 
-### 6.3 El correo: sólo SMTP
+### 6.3 El correo: por SMTP
 
-Laravel Cloud **no incluye correo saliente**. El único transporte instalado que funciona
-sin tocar dependencias es `smtp`. `MAIL_MAILER=resend`, `postmark` o `ses` fallan en
-tiempo de ejecución: en `vendor/symfony/` sólo está `mailer`, sin `postmark-mailer` ni
-`amazon-mailer`, y no está `resend/resend-laravel`. `config/services.php` declara las
-llaves pero ningún transporte las consume.
+Laravel Cloud **no incluye correo saliente**. Sin tocar dependencias funcionan `smtp` y
+`ses`: el transporte SES de Laravel usa `aws/aws-sdk-php`, que ya llega con
+`league/flysystem-aws-s3-v3`. `MAIL_MAILER=resend` o `postmark` fallan en tiempo de
+ejecución: en `vendor/symfony/` no está `postmark-mailer` y no está
+`resend/resend-laravel`. `config/services.php` declara las llaves de los tres, pero solo
+las de `ses` tienen un transporte instalado que las lea.
 
 Resend, Postmark y Brevo publican todos endpoint SMTP, así que se contrata cualquiera con
 la cuenta del gremio y se rellenan `MAIL_HOST`, `MAIL_USERNAME` y `MAIL_PASSWORD`. Con

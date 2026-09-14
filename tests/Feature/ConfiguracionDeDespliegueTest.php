@@ -274,8 +274,10 @@ class ConfiguracionDeDespliegueTest extends TestCase
             'el registro sale por stderr' => ['LOG_STACK=stderr'],
             'la cookie de sesión va segura' => ['SESSION_SECURE_COOKIE=true'],
             'la página de error no se publica' => ['APP_DEBUG=false'],
-            // `resend`, `postmark` y `ses` revientan: no están sus paquetes.
-            'el correo sale por el único transporte instalado' => ['MAIL_MAILER=smtp'],
+            // `smtp` y `ses` funcionan con lo instalado (`ses` usa aws/aws-sdk-php,
+            // que llega con league/flysystem-aws-s3-v3); `resend` y `postmark`
+            // necesitarían paquetes. El entorno remoto sale por SMTP.
+            'el correo sale por smtp' => ['MAIL_MAILER=smtp'],
             'la caché es compartida' => ['CACHE_STORE=database'],
             'el mantenimiento lo ven todas las instancias' => ['APP_MAINTENANCE_DRIVER=cache'],
         ];
@@ -303,8 +305,8 @@ class ConfiguracionDeDespliegueTest extends TestCase
             'TRUSTED_PROXIES' => ['TRUSTED_PROXIES'],
             'SESSION_SECURE_COOKIE' => ['SESSION_SECURE_COOKIE'],
             'VALOR_MENSUALIDAD' => ['VALOR_MENSUALIDAD'],
-            // `VALOR_AFILIACION` salió el 9 sep 2026: esta lista es de «variables
-            // que el código lee», y esa no la leía nadie. Ver `config/pagos.php`.
+            // `VALOR_AFILIACION` no va: esta lista es de «variables que el código
+            // lee», y esa no la lee nadie. Ver `config/pagos.php`.
             'SITIO_INDEXABLE' => ['SITIO_INDEXABLE'],
             'SEED_GALERIA' => ['SEED_GALERIA'],
             'QUEUE_CONVERSIONS_BY_DEFAULT' => ['QUEUE_CONVERSIONS_BY_DEFAULT'],
