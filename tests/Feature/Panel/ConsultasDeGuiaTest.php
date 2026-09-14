@@ -180,10 +180,10 @@ class ConsultasDeGuiaTest extends TestCase
     }
 
     /**
-     * `ConsultaGuiaSeeder` esperaba un nombre exacto por cada municipio de su
-     * lista de pesos y, si `MunicipioSeeder` divergía, lo saltaba con un
-     * `continue` mudo: la serie salía corta y nada lo avisaba. Ahora debe
-     * lanzar en vez de callar el hueco.
+     * `ConsultaGuiaSeeder` espera un nombre exacto por cada municipio de su
+     * lista de pesos. Si `MunicipioSeeder` diverge, un `continue` mudo dejaría
+     * la serie corta sin que nada lo avisara: tiene que lanzar en vez de
+     * callar el hueco.
      */
     public function test_el_seeder_lanza_si_un_municipio_de_pesos_no_existe(): void
     {

@@ -432,10 +432,9 @@ class ModeracionDeBolsasTest extends TestCase
      * Aprobar un perfil del banco **expone el nombre, el teléfono y el correo de
      * una persona a todos los establecimientos afiliados** --lo dice el propio
      * modal de confirmación--. Es la decisión más sensible del panel en materia
-     * de datos personales, y era la única de su clase sin rastro: trece modelos
-     * alimentaban la bitácora y `Aspirante` no. `aprobado_el` guardaba CUÁNDO,
-     * nunca QUIÉN, y retirar el perfil ponía esa columna en nulo, borrando la
-     * única huella que quedaba.
+     * de datos personales, y tiene que dejar rastro como el resto de su clase:
+     * `aprobado_el` guarda CUÁNDO, nunca QUIÉN, y retirar el perfil pone esa
+     * columna en nulo, así que sin la bitácora no quedaría ninguna huella.
      *
      * RF-39 exige bitácora de actividad, y `encargo.md` §9 gobierna esto.
      */
@@ -458,7 +457,7 @@ class ModeracionDeBolsasTest extends TestCase
 
     /**
      * Retirar también, y por el mismo motivo: es la acción que devuelve a
-     * alguien a la invisibilidad y la que borraba `aprobado_el`.
+     * alguien a la invisibilidad y la que pone en nulo `aprobado_el`.
      */
     public function test_retirar_un_perfil_del_banco_queda_en_la_bitacora(): void
     {

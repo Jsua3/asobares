@@ -293,10 +293,10 @@ class TableroTest extends TestCase
     }
 
     /**
-     * «1 altas este mes» era el texto real que producía la base: la
-     * descripción concatenaba el conteo sin pasar por `Str::plural`, la misma
-     * convención que ya usan `directorio/index.blade.php`,
-     * `mi-cuenta/index.blade.php` y el paginador.
+     * «1 altas este mes» es lo que sale si la descripción concatena el conteo
+     * sin pasar por `Str::plural`, la misma convención que usan
+     * `directorio/index.blade.php`, `mi-cuenta/index.blade.php` y el
+     * paginador.
      */
     public function test_las_altas_del_mes_singularizan_con_una_sola_alta(): void
     {
@@ -324,7 +324,7 @@ class TableroTest extends TestCase
 
     /**
      * Mismo defecto de concordancia en la tarjeta de secretaría: «1 PQR
-     * abiertos» tenía el adjetivo en plural fijo, sin importar el conteo.
+     * abiertos» es el adjetivo en plural fijo, sin importar el conteo.
      */
     public function test_los_pqr_abiertos_singularizan_con_uno_solo(): void
     {

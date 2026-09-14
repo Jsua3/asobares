@@ -88,11 +88,9 @@ class ObservatorioBaseVaciaTest extends TestCase
     }
 
     /**
-     * El informe impreso es la única superficie del módulo que no pasaba por
-     * aquí, y es justamente la que se lleva a una alcaldía. Ya distinguía
-     * base vacía de muestra insuficiente —fue el primero en hacerlo—, pero
-     * ninguna prueba lo ejercitaba con la base recién migrada: estaba sin
-     * cubrir, no roto.
+     * El informe impreso es la superficie del módulo que se lleva a una
+     * alcaldía, así que también se ejercita con la base recién migrada: tiene
+     * que distinguir base vacía de muestra insuficiente igual que las gráficas.
      */
     public function test_el_informe_impreso_distingue_la_base_vacia_de_la_muestra_insuficiente(): void
     {

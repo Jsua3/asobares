@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * Las gráficas del panel dejaron de pintar sus etiquetas en un gris fijo.
+ * Las gráficas del panel pintan sus etiquetas con el tema, no con un gris fijo.
  */
 class GraficasDelPanelTest extends TestCase
 {
@@ -39,20 +39,20 @@ class GraficasDelPanelTest extends TestCase
     }
 
     /**
-     * Un clon recien hecho, sin `npm run build`, tiene que poder ejecutar
-     * artisan. Antes de la guarda, `php artisan view:clear` lanzaba
-     * ViteManifestNotFoundException, que es justo el comando que hay que
+     * Un clon recién hecho, sin `npm run build`, tiene que poder ejecutar
+     * artisan. Sin la guarda, `php artisan view:clear` lanzaría
+     * ViteManifestNotFoundException, y es justo el comando que hay que
      * correr ANTES de compilar.
      *
      * No se toca el manifiesto en disco: `Illuminate\Foundation\Vite`
-     * cachea el manifiesto ya leido en una propiedad estatica de clase
-     * (`Vite::$manifests`), y esa cache sobrevive dentro de la misma
-     * peticion de prueba. El panel admin real ya evaluo `Vite::asset()`
+     * cachea el manifiesto ya leído en una propiedad estática de clase
+     * (`Vite::$manifests`), y esa caché sobrevive dentro de la misma
+     * petición de prueba. El panel admin real ya evaluó `Vite::asset()`
      * durante el arranque de consola de esta misma prueba (`Panel::register()`
      * llama a `registerAssets()` porque `php artisan test` corre en
      * consola), así que para cuando el cuerpo de la prueba se ejecuta el
-     * manifiesto real ya esta en esa cache estatica: sobrescribir el
-     * archivo en disco no la invalida, y la prueba no ejercitaria nada.
+     * manifiesto real ya está en esa caché estática: sobrescribir el
+     * archivo en disco no la invalida, y la prueba no ejercitaría nada.
      * En su lugar se sustituye la instancia de Vite en el contenedor por
      * una que lanza sin tocar el sistema de archivos.
      */
@@ -124,8 +124,8 @@ class GraficasDelPanelTest extends TestCase
      * Se afirma sobre el texto del archivo porque el proyecto no tiene banco
      * de pruebas de JavaScript (no hay vitest ni jest en `package.json`), y
      * montarlo para un plugin de 40 líneas no se paga. La verificación real
-     * de que el repintado funciona es el Paso 7 de esta tarea, a ojo en el
-     * navegador y en los dos temas.
+     * de que el repintado funciona es a ojo, en el navegador y en los dos
+     * temas.
      */
     public function test_el_plugin_lee_los_tokens_y_repinta_al_cambiar_de_tema(): void
     {
@@ -145,12 +145,12 @@ class GraficasDelPanelTest extends TestCase
     }
 
     /**
-     * Tarea 15, Paso 7: el enlace «Revisar» de la banda «Te está esperando»
-     * (`<x-panel.cola>`, clase `text-tinta transition-colors`) se quedaba con
-     * el color del tema anterior al cambiar de tema desde el selector real
-     * de Filament. Es el mismo bug de Chromium que ya se cerró en el sitio
-     * público: una transición sobre una propiedad cuyo valor viene de una
-     * custom property no se reinicia cuando esa custom property cambia.
+     * Sin la mordaza, el enlace «Revisar» de la banda «Te está esperando»
+     * (`<x-panel.cola>`, clase `text-tinta transition-colors`) se queda con el
+     * color del tema anterior al cambiar de tema desde el selector real de
+     * Filament. Es el mismo bug de Chromium que `TemaClaroOscuroTest` vigila en
+     * el sitio público: una transición sobre una propiedad cuyo valor viene de
+     * una custom property no se reinicia cuando esa custom property cambia.
      */
     public function test_el_plugin_apaga_las_transiciones_para_no_congelar_colores(): void
     {
@@ -169,8 +169,7 @@ class GraficasDelPanelTest extends TestCase
      * `transition:none !important` se quedaría pegado en todo el panel
      * hasta el siguiente cambio de tema que sí saliera bien. Se afirma sobre
      * la POSICIÓN de las dos líneas en el archivo, no solo su presencia:
-     * las dos ya existían en la versión con el bug, lo que cambió fue el
-     * orden.
+     * las dos pueden estar y en el orden equivocado.
      */
     public function test_la_retirada_de_la_mordaza_no_depende_de_que_las_graficas_se_repinten(): void
     {

@@ -74,7 +74,7 @@ class RanurasDelPluginDeTemaTest extends TestCase
     }
 
     /**
-     * La otra mitad de la convención, y la que no estaba vigilada.
+     * La otra mitad de la convención.
      *
      * El plugin de tema **solo escribe donde ya hay clave**: recorre las
      * opciones y repinta `ticks` y `grid` de cada eje, pero no los inventa. Un
