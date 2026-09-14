@@ -25,8 +25,6 @@ use Tests\TestCase;
  * frase con «quién + verbo + tipo + etiqueta» para que se lea igual venga de
  * donde venga. Esta clase vigila que esa frase siga siendo castellano y que
  * ningún tipo de contenido nuevo acabe leyéndose como «actualizó un registro».
- *
- * No existía ninguna prueba de esta página hasta el 9 de septiembre de 2026.
  */
 class BitacoraTest extends TestCase
 {

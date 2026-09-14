@@ -10,13 +10,12 @@ use App\Panel\SerieDelObservatorio;
  * por área — ver el docblock de
  * `MetricasDelObservatorio::calcularOfertaContraDemanda()`.
  *
- * Con la semilla de hoy hay siete vacantes, siete aspirantes y cuatro
- * postulaciones repartidos en siete áreas. Es justo el argumento
- * institucional que el observatorio existe para sostener ante el gremio y
- * una alcaldía, así que es una de las gráficas que menos puede permitirse
- * fingir una tendencia que la muestra no aguanta — ver el docblock de
- * `SerieDelObservatorio::hayMuestraSuficiente()`: con dos conjuntos de datos,
- * el umbral se le exige al más flaco de los dos, no a su suma.
+ * Es justo el argumento institucional que el observatorio existe para
+ * sostener ante el gremio y una alcaldía, así que es una de las gráficas que
+ * menos puede permitirse fingir una tendencia que la muestra no aguanta — ver
+ * el docblock de `SerieDelObservatorio::hayMuestraSuficiente()`: con dos
+ * conjuntos de datos, el umbral se le exige al más flaco de los dos, no a su
+ * suma.
  */
 class OfertaContraDemanda extends GraficaDelObservatorio
 {

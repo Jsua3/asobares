@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Auth;
  * Banda 1 del tablero: lo que hay que hacer hoy.
  *
  * Va arriba de todo y antes de cualquier cifra. Lo pendiente de aprobación
- * vivía solo en la campanita de notificaciones, y es el trabajo diario de la
- * secretaría: si no está a la vista, no existe.
+ * es el trabajo diario de la secretaría, y el panel no tiene campana de
+ * notificaciones: si no está a la vista, no existe.
  */
 class PendientesDeAprobacion extends Widget
 {

@@ -15,6 +15,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 
 class PublicidadesTable
@@ -35,17 +36,17 @@ class PublicidadesTable
                     ->weight('medium')
                     ->description(fn (Publicidad $registro): ?string => $registro->nombre_comercial),
                 TextColumn::make('ubicacion')
-                    ->label('Ubicacion')
+                    ->label('Ubicación')
                     ->badge()
                     ->sortable(),
                 TextColumn::make('valor')
                     ->label('Valor')
-                    ->formatStateUsing(fn ($state): string => '$'.number_format((float) $state, 0, ',', '.'))
+                    ->formatStateUsing(fn (mixed $state): string => '$'.number_format((float) $state, 0, ',', '.'))
                     ->sortable(),
                 TextColumn::make('fecha_inicio')
                     ->label('Vigencia')
                     ->state(fn (Publicidad $registro): string => $registro->fecha_inicio->format('d/m/Y').' - '.$registro->fecha_fin->format('d/m/Y'))
-                    ->description(fn (Publicidad $registro): string => $registro->visiblePublicamente() ? 'Visible ahora' : 'No visible publicamente')
+                    ->description(fn (Publicidad $registro): string => $registro->visiblePublicamente() ? 'Visible ahora' : 'No visible públicamente')
                     ->sortable(),
                 TextColumn::make('estado')
                     ->label('Estado')
@@ -58,7 +59,7 @@ class PublicidadesTable
                     ->label('Estado')
                     ->options(EstadoPublicidad::class),
                 SelectFilter::make('ubicacion')
-                    ->label('Ubicacion')
+                    ->label('Ubicación')
                     ->options(UbicacionPublicidad::class),
             ])
             ->recordActions([
@@ -83,7 +84,7 @@ class PublicidadesTable
                 ])->label('Acciones'),
             ])
             ->emptyStateHeading('Sin publicidad interna')
-            ->emptyStateDescription('Las pautas pagadas para Inicio y Directorio apareceran aqui.');
+            ->emptyStateDescription('Las pautas pagadas para Inicio y Directorio aparecerán aquí.');
     }
 
     private static function vistaPrevia(): Action
@@ -94,13 +95,13 @@ class PublicidadesTable
             ->color('gray')
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Cerrar')
-            ->modalContent(fn (Publicidad $record) => view('filament.publicidad-preview', ['publicidad' => $record]));
+            ->modalContent(fn (Publicidad $record): View => view('filament.publicidad-preview', ['publicidad' => $record]));
     }
 
     /**
      * Sobre una pauta publicada, volver a pendiente de pago la saca del sitio:
-     * es despublicar, asi que exige el mismo permiso que retirar_publicacion.
-     * authorize() la oculta y ademas la rechaza si se invoca a la fuerza.
+     * es despublicar, así que exige el mismo permiso que retirar_publicacion.
+     * authorize() la oculta y además la rechaza si se invoca a la fuerza.
      */
     private static function marcarPendientePago(): Action
     {
@@ -131,7 +132,7 @@ class PublicidadesTable
     private static function enviarAprobacion(): Action
     {
         return Action::make('enviar_aprobacion')
-            ->label('Enviar a aprobacion')
+            ->label('Enviar a aprobación')
             ->icon('heroicon-o-paper-airplane')
             ->color('warning')
             ->visible(fn (Publicidad $record): bool => in_array($record->estado, [
@@ -154,7 +155,7 @@ class PublicidadesTable
             ->action(function (Publicidad $record): void {
                 if (! $record->puedePublicarse()) {
                     throw ValidationException::withMessages([
-                        'estado' => 'Solo una pauta pagada, con imagen y fechas validas, puede publicarse.',
+                        'estado' => 'Solo una pauta pagada, con imagen y fechas válidas, puede publicarse.',
                     ]);
                 }
 
@@ -187,7 +188,7 @@ class PublicidadesTable
     private static function retirarPublicacion(): Action
     {
         return Action::make('retirar_publicacion')
-            ->label('Retirar publicacion')
+            ->label('Retirar publicación')
             ->icon('heroicon-o-eye-slash')
             ->color('warning')
             ->requiresConfirmation()

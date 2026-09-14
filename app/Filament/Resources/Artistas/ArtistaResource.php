@@ -12,6 +12,7 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class ArtistaResource extends Resource
 {
@@ -19,7 +20,7 @@ class ArtistaResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-musical-note';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Bolsas';
+    protected static string|UnitEnum|null $navigationGroup = 'Bolsas';
 
     protected static ?int $navigationSort = 3;
 
@@ -37,13 +38,6 @@ class ArtistaResource extends Resource
     public static function table(Table $table): Table
     {
         return ArtistasTable::configure($table);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

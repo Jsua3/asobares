@@ -9,20 +9,11 @@ use Tests\TestCase;
 /**
  * Un aviso que nadie puede ver no es un aviso.
  *
- * El 7 de septiembre de 2026 se retiró la campana del panel (D-L22): sus dos
- * líneas --`databaseNotifications()` y su sondeo-- quedaron comentadas en
- * `AdminPanelProvider`, con el argumento de que la banda «Te está esperando» del
- * tablero cuenta mejor lo mismo. Lo que no se retiró fue **quien escribía en esa
- * campana**: `FlujoDeAprobacionObserver` siguió consultando todos los usuarios,
- * preguntándole a la policy por cada uno y guardando una notificación en la base
- * por cada registro enviado a revisión. Trabajo en cada guardado, filas
- * acumulándose, y ninguna pantalla que las lea.
- *
- * Peor que el desperdicio: `FlujoDeAprobacionTest` tenía **cuatro aserciones en
- * verde** sobre esas notificaciones. Verdes, correctas, y sobre algo que el
- * usuario no puede ver desde hace dos días. Es el número trece de la lista de
- * falsos verdes de este proyecto, y salió al construir el aviso de PQR del
- * Acta 08 --que iba a cometer exactamente el mismo error--.
+ * El panel no activa `databaseNotifications()`: lo pendiente lo cuentan la banda
+ * «Te está esperando» del tablero y los contadores del menú. Una notificación de
+ * base escrita sin campana es trabajo en cada guardado y filas que ninguna
+ * pantalla lee, y una prueba que afirme sobre ellas queda en verde sobre algo
+ * que el usuario no ve.
  *
  * Esta clase es la guarda de la pareja. Las dos mitades tienen que moverse
  * juntas: o hay campana y hay quien escriba en ella, o no hay ninguna de las dos.
@@ -72,7 +63,7 @@ class AvisosQueSeVenTest extends TestCase
         $this->assertSame(
             [],
             $escritores,
-            'La campana del panel está apagada (D-L22) y estos archivos siguen escribiendo notificaciones '
+            'La campana del panel está apagada y estos archivos siguen escribiendo notificaciones '
             .'que nadie puede leer: '.implode(', ', $escritores)
             .'. O se enciende `databaseNotifications()` en AdminPanelProvider, o se quita el envío. '
             .'Las dos mitades se mueven juntas.'

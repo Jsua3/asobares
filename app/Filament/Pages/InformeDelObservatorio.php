@@ -104,19 +104,15 @@ class InformeDelObservatorio extends Page
      * en {@see Observatorio::getFooterWidgets()}. Cada `que` viene de
      * `GraficaDelObservatorio::que()` del widget correspondiente —estático,
      * así que se lee sin instanciar el componente— en vez de repetir la
-     * frase aquí: antes vivía escrita a mano en este archivo Y en el widget
-     * flaco correspondiente (ver `resources/views/components/panel/sin-muestra.blade.php`),
-     * sin ninguna prueba que las atara, la misma causa raíz que ya se cerró
-     * para los títulos (ver el punto de abajo). Ahora hay una sola fuente:
-     * el widget.
+     * frase aquí: escrita a mano en este archivo y en el widget flaco (ver
+     * `resources/views/components/panel/sin-muestra.blade.php`), las dos
+     * copias podrían divergir sin que ninguna prueba lo notara. La fuente es
+     * una sola: el widget.
      *
-     * Única fuente de verdad para el título de cada serie: antes vivía
-     * duplicado aquí y en `todosLosIndicadores()`, y un revisor demostró que
-     * las dos copias podían divergir (una se renombraba, la otra no) sin que
-     * ninguna prueba lo notara. `todosLosIndicadores()` ahora deriva de esta
-     * lista en vez de repetir los títulos a mano, así que renombrar una
-     * serie aquí la renombra también en el descargo — no hay un segundo
-     * sitio que se pueda olvidar.
+     * Es también la única fuente del título de cada serie:
+     * `todosLosIndicadores()` deriva de esta lista en vez de repetir los
+     * títulos a mano, así que renombrar una serie aquí la renombra también en
+     * el descargo — no hay un segundo sitio que se pueda olvidar.
      *
      * `clave` es el identificador estable de cada sección en el HTML
      * (`data-serie` en la vista): a diferencia de `titulo`, no cambia si se

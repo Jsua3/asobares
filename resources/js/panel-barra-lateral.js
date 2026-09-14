@@ -1,5 +1,5 @@
 /**
- * El estado de la barra lateral del panel (D-L3 y D-L4).
+ * El estado de la barra lateral del panel.
  *
  * Escribe dos atributos en `<body>` y nada más:
  *
@@ -13,7 +13,7 @@
  * Manda el scroll INTERNO de `.fi-sidebar-nav`, no el del documento. En
  * escritorio la barra es `lg:sticky` y no se mueve con la página, así que
  * compactar por el documento sería efecto sin causa; y la lista desborda casi
- * siempre (medido el 7 sep: 1.312 px de contenido en 1.019 de hueco).
+ * siempre (con todos los apartados, 1.312 px de contenido en 1.019 de hueco).
  *
  * El movimiento reducido se consulta en vivo con `matchMedia` y se escucha su
  * `change`. NO se copia `menosMovimiento()` de la barra pública: esa lee la
@@ -27,7 +27,7 @@ const quieto = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const lista = () => document.querySelector('.fi-sidebar-nav');
 
-/** Qué cantos ocultan lista, para el aviso de D-L15. */
+/** Qué cantos ocultan lista, para el aviso de lista cortada. */
 const bordesDe = (nav) => {
     const desbordado = nav.scrollHeight - nav.clientHeight > HOLGURA;
 
@@ -59,7 +59,7 @@ const sincronizar = () => {
 };
 
 /**
- * El grupo que contiene la página actual no puede quedar plegado (D-L14): quien
+ * El grupo que contiene la página actual no puede quedar plegado: quien
  * entra a Ajustes del sitio no vería ningún ítem marcado en toda la barra,
  * porque «Configuración» nace plegado. Se despliega abriendo el disparador del
  * grupo, que es lo que Filament escucha, en vez de tocarle el almacenamiento.

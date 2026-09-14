@@ -38,9 +38,9 @@ class Asociado extends Model implements HasMedia
      */
     public const array CAMPOS_INTERNOS = [
         'representante',
-        // NIT o cedula del titular. En la base real del gremio 24 de 41 filas
-        // traen cedula de persona natural, no NIT de empresa: es un dato de
-        // identificacion y no se publica jamas.
+        // NIT o cédula del titular. Puede ser la cédula de una persona
+        // natural y no el NIT de una empresa: es un dato de identificación y
+        // no se publica jamás.
         'documento',
         'correo_interno',
         'telefono_interno',
@@ -72,10 +72,8 @@ class Asociado extends Model implements HasMedia
      *
      * `whereLike(caseSensitive: false)` y NO `where(…, 'like', …)`. El `LIKE`
      * de SQLite es insensible a mayúsculas para ASCII y el de PostgreSQL es
-     * sensible: con la forma antigua, buscar «bar merlín» dejaba de encontrar
-     * «Bar Merlín» el día del despliegue, en silencio y sin ningún error.
-     * Medido contra PostgreSQL 17 sobre los diez establecimientos sembrados,
-     * `like '%bar%'` devolvía 4 filas donde `ilike '%bar%'` devuelve 10.
+     * sensible: con `like`, buscar «bar merlín» no encontraría «Bar Merlín»
+     * sobre PostgreSQL, en silencio y sin ningún error.
      *
      * Lo resuelve la gramática del propio Laravel —emite `ilike` en Postgres y
      * `like` en SQLite—, así que no hay que mantener un `match` por driver ni
@@ -133,11 +131,9 @@ class Asociado extends Model implements HasMedia
     /**
      * La propiedad que decide si una foto de la galería sale al sitio.
      *
-     * OBS3-13. El directivo puso la condición al enterarse de que el
-     * propietario subiría fotos: «lo tienen que aprobar ellos, no sea que
-     * pongan imágenes... exóticas» (R23 00:45-01:05). Vive en las propiedades
-     * de medialibrary y no en una columna porque el sujeto de la aprobación
-     * es cada archivo, no la ficha.
+     * El gremio aprueba cada foto que sube el propietario antes de que salga
+     * al sitio. Vive en las propiedades de medialibrary y no en una columna
+     * porque el sujeto de la aprobación es cada archivo, no la ficha.
      */
     public const string FOTO_APROBADA = 'aprobada';
 
@@ -164,15 +160,19 @@ class Asociado extends Model implements HasMedia
     public function fotosAprobadas(): Collection
     {
         return $this->getMedia('galeria')
-            ->filter(fn ($media): bool => (bool) $media->getCustomProperty(self::FOTO_APROBADA, false))
+            ->filter(fn (Media $media): bool => (bool) $media->getCustomProperty(self::FOTO_APROBADA, false))
             ->values();
     }
 
-    /** Las que esperan a la secretaría. Solo las ve el dueño y el panel. */
+    /**
+     * Las que esperan a la secretaría. Solo las ve el dueño y el panel.
+     *
+     * @return Collection<int, Media>
+     */
     public function fotosPendientes(): Collection
     {
         return $this->getMedia('galeria')
-            ->filter(fn ($media): bool => ! (bool) $media->getCustomProperty(self::FOTO_APROBADA, false))
+            ->filter(fn (Media $media): bool => ! (bool) $media->getCustomProperty(self::FOTO_APROBADA, false))
             ->values();
     }
 

@@ -10,9 +10,9 @@ use App\Panel\SerieDelObservatorio;
  * aunque alguna esté en cero — ver el docblock de
  * `MetricasDelObservatorio::calcularCoberturaDeProveedores()` para el porqué.
  *
- * Con la semilla de hoy la base tiene apenas diez proveedores repartidos en
- * siete categorías (n < 30): dibujar barras ahí sugeriría una cobertura que
- * todavía no existe, así que esta gráfica decide no dibujar y lo dice.
+ * Si la serie no alcanza `SerieDelObservatorio::MUESTRA_MINIMA`, dibujar
+ * barras sugeriría una cobertura que todavía no existe, así que la gráfica
+ * no dibuja y lo dice.
  */
 class CoberturaDeProveedores extends GraficaDelObservatorio
 {

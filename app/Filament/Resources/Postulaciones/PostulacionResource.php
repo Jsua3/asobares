@@ -8,6 +8,7 @@ use App\Models\Postulacion;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
+use UnitEnum;
 
 /**
  * Bandeja de supervisión: quién se está postulando y a qué.
@@ -22,7 +23,7 @@ class PostulacionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-inbox-arrow-down';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Bandejas';
+    protected static string|UnitEnum|null $navigationGroup = 'Bandejas';
 
     protected static ?int $navigationSort = 3;
 
@@ -35,13 +36,6 @@ class PostulacionResource extends Resource
     public static function table(Table $table): Table
     {
         return PostulacionesTable::configure($table);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

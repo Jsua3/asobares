@@ -28,11 +28,13 @@ class ConsultaGuia extends Model
 
     protected $fillable = ['municipio_id', 'requisito_apertura_id'];
 
+    /** @return BelongsTo<Municipio, $this> */
     public function municipio(): BelongsTo
     {
         return $this->belongsTo(Municipio::class);
     }
 
+    /** @return BelongsTo<RequisitoApertura, $this> */
     public function requisito(): BelongsTo
     {
         return $this->belongsTo(RequisitoApertura::class, 'requisito_apertura_id');

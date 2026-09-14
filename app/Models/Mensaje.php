@@ -113,10 +113,9 @@ class Mensaje extends Model
             // El cambio de semántica entre SQLite (insensible) y PostgreSQL
             // (sensible) no puede morder aquí: `radicado` no lo escribe nadie.
             // Lo produce siempre este mismo método con el prefijo en
-            // mayúsculas, sus dos únicos llamadores son `ContactoController` y
-            // `MensajeSeeder`, y el campo del panel está `->disabled()`
-            // (MensajeForm.php:33). Verificado además contra PostgreSQL 17:
-            // el consecutivo sale igual en los dos motores.
+            // mayúsculas, sus llamadores fuera de las pruebas son
+            // `ContactoController` y `MensajeSeeder`, y el campo del panel
+            // está deshabilitado en `MensajeForm`.
             //
             // Y si algún día se ensuciara, insensible sería la respuesta
             // equivocada: ampliaría el barrido a radicados de otro prefijo y

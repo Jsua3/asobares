@@ -29,7 +29,11 @@ class EventoForm
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (?string $state, callable $set) => $set('slug', Str::slug((string) $state))),
+                            ->afterStateUpdated(function (?string $state, callable $set, string $operation): void {
+                                if ($operation === 'create') {
+                                    $set('slug', Str::slug((string) $state));
+                                }
+                            }),
                         TextInput::make('slug')
                             ->label('Slug (URL)')
                             ->required()

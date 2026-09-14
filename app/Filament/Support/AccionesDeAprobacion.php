@@ -15,6 +15,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Mail;
 
 /**
@@ -41,8 +42,7 @@ class AccionesDeAprobacion
             ->modalHeading('Publicar este contenido')
             ->modalDescription('Quedará visible en el sitio público de inmediato.')
             ->modalSubmitActionLabel('Sí, publicar')
-            ->visible(fn (Model $registro): bool => $registro->estado !== EstadoPublicacion::Publicado
-                && auth()->user()?->can('publicar', $registro) === true)
+            ->visible(fn (Model $registro): bool => self::puedePublicarse($registro))
             ->action(function (Model $registro): void {
                 self::publicar($registro);
 
@@ -59,10 +59,20 @@ class AccionesDeAprobacion
     }
 
     /**
+     * La condición que oculta cada acción de aprobar y que filtra el lote:
+     * no publicado todavía, y la policy lo permite.
+     */
+    private static function puedePublicarse(Model $registro): bool
+    {
+        return $registro->estado !== EstadoPublicacion::Publicado
+            && auth()->user()?->can('publicar', $registro) === true;
+    }
+
+    /**
      * Un correo del panel no puede tumbar la acción que lo dispara: cuando
      * el transporte falla, el estado ya cambió y la secretaría necesita
-     * terminar y enterarse, no ver el error de Livewire (D-24, bitácora
-     * §33.4). El fallo se reporta al registro. Devuelve si el correo salió.
+     * terminar y enterarse, no ver el error de Livewire. El fallo se reporta
+     * al registro. Devuelve si el correo salió.
      */
     private static function enviar(Closure $envio): bool
     {
@@ -141,8 +151,7 @@ class AccionesDeAprobacion
             ->modalHeading('Publicar esta vacante')
             ->modalDescription('Quedará visible en la bolsa de empleo y le avisamos al establecimiento.')
             ->modalSubmitActionLabel('Sí, publicar')
-            ->visible(fn (Vacante $registro): bool => $registro->estado !== EstadoPublicacion::Publicado
-                && auth()->user()?->can('publicar', $registro) === true)
+            ->visible(fn (Vacante $registro): bool => self::puedePublicarse($registro))
             ->action(function (Vacante $registro): void {
                 self::avisarResultado(
                     'Vacante publicada',
@@ -171,7 +180,7 @@ class AccionesDeAprobacion
             return true;
         }
 
-        return self::enviar(fn () => Mail::to($correos)->send(new VacanteAprobada($registro)));
+        return self::enviar(fn (): ?SentMessage => Mail::to($correos)->send(new VacanteAprobada($registro)));
     }
 
     /**
@@ -205,7 +214,7 @@ class AccionesDeAprobacion
                 $correos = DestinatariosDelAsociado::correos($registro->asociado);
 
                 $correoSalio = $correos === []
-                    || self::enviar(fn () => Mail::to($correos)->send(new VacanteDevuelta($registro)));
+                    || self::enviar(fn (): ?SentMessage => Mail::to($correos)->send(new VacanteDevuelta($registro)));
 
                 self::avisarResultado(
                     'Vacante devuelta al asociado',
@@ -264,8 +273,7 @@ class AccionesDeAprobacion
             ->modalHeading('Publicar esta ficha')
             ->modalDescription('Quedará visible en el sitio público de inmediato.')
             ->modalSubmitActionLabel('Sí, publicar')
-            ->visible(fn (Model $registro): bool => $registro->estado !== EstadoPublicacion::Publicado
-                && auth()->user()?->can('publicar', $registro) === true)
+            ->visible(fn (Model $registro): bool => self::puedePublicarse($registro))
             ->action(function (Model $registro) use ($urlPublica): void {
                 self::avisarResultado(
                     'Ficha publicada',
@@ -289,7 +297,7 @@ class AccionesDeAprobacion
             return true;
         }
 
-        return self::enviar(fn () => Mail::to($registro->correo)->send(
+        return self::enviar(fn (): ?SentMessage => Mail::to($registro->correo)->send(
             new FichaDeBolsaPublicada($registro->nombre, $urlPublica($registro))
         ));
     }
@@ -319,11 +327,11 @@ class AccionesDeAprobacion
     /**
      * Esqueleto común a toda aprobación en lote: para que el lote sea de
      * verdad equivalente a aplicar la acción unitaria a cada registro,
-     * filtra registro por registro con la misma condición que oculta la
-     * acción de fila —estado distinto de publicado, y la policy, que la
-     * visibilidad del botón nunca es la autorización—. Así un «seleccionar
-     * todo» no le reescribe el estado ni reenvía el correo a lo que ya
-     * estaba publicado.
+     * filtra registro por registro con `puedePublicarse()`, la misma
+     * condición que oculta la acción de fila —estado distinto de publicado,
+     * y la policy, que la visibilidad del botón nunca es la autorización—.
+     * Así un «seleccionar todo» no le reescribe el estado ni reenvía el
+     * correo a lo que ya estaba publicado.
      *
      * @param  string  $permiso  p. ej. `publicar_asociado`
      * @param  Closure(Model): mixed  $efecto
@@ -339,8 +347,7 @@ class AccionesDeAprobacion
             ->visible(fn (): bool => auth()->user()?->can($permiso) === true)
             ->action(function (Collection $registros) use ($efecto): void {
                 $publicados = $registros->filter(
-                    fn (Model $registro): bool => $registro->estado !== EstadoPublicacion::Publicado
-                        && auth()->user()?->can('publicar', $registro) === true
+                    fn (Model $registro): bool => self::puedePublicarse($registro)
                 );
 
                 // `false` solo lo devuelve un efecto que intentó un correo y

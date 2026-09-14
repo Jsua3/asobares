@@ -25,11 +25,13 @@ class RequisitoAperturasTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('entidad')
+                    ->label('Entidad')
                     ->searchable(),
                 TextColumn::make('enlace_externo')
+                    ->label('Enlace externo')
                     ->searchable(),
-                // OBS3-10. La columna de arriba enseña la URL; esta dice si
-                // sirve para lo que el gremio pidió. Sin una señal a la vista,
+                // La columna de arriba enseña la URL; esta dice si lleva al
+                // trámite y no solo a la portada. Sin una señal a la vista,
                 // los enlaces a portada se quedan años: no fallan, solo no
                 // llevan a ninguna parte útil.
                 TextColumn::make('enlace_puntual')
@@ -47,18 +49,23 @@ class RequisitoAperturasTable
                     })
                     ->tooltip(fn (RequisitoApertura $requisito): ?string => $requisito->enlaceEsPuntual()
                         ? null
-                        : 'El enlace abre la portada de la entidad. La revisión del 28 de agosto pidió que abra el trámite exacto.'),
+                        : 'El enlace abre la portada de la entidad; debería abrir el trámite exacto.'),
                 TextColumn::make('adjunto')
+                    ->label('Formato oficial (PDF)')
                     ->searchable(),
                 TextColumn::make('adjunto_nombre')
+                    ->label('Nombre del formato')
                     ->searchable(),
                 TextColumn::make('costo_aproximado')
+                    ->label('Costo aproximado')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('orden')
+                    ->label('Orden')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('estado')
+                    ->label('Estado')
                     ->badge()
                     ->searchable(),
                 TextColumn::make('verificado_el')
@@ -79,10 +86,12 @@ class RequisitoAperturasTable
                     ->color(fn (RequisitoApertura $record): string => $record->haCaducado() ? 'danger' : 'gray')
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label('Creado')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label('Actualizado')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -97,7 +106,7 @@ class RequisitoAperturasTable
                     // Junta las dos mitades de la pila de trabajo: lo que nadie
                     // verificó nunca y lo que se verificó hace más de un año.
                     // El borde coincide con RequisitoApertura::necesitaRevision().
-                    ->query(fn (Builder $query): Builder => $query->where(fn (Builder $q) => $q
+                    ->query(fn (Builder $query): Builder => $query->where(fn (Builder $q): Builder => $q
                         ->whereNull('verificado_el')
                         ->orWhere(
                             'verificado_el',

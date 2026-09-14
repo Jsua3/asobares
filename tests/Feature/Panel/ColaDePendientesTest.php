@@ -233,10 +233,10 @@ class ColaDePendientesTest extends TestCase
     /**
      * El botón de la fila llega al mínimo táctil sin engordar el dibujo.
      *
-     * Medido el 10 sep en el panel a 375 px: la pastilla daba 78x34 y el área
-     * de impacto, 78x34 también --no tenía nada que la agrandara--. En el
-     * teléfono esta es la acción principal del tablero y se pulsa con el pulgar
-     * sobre una lista de filas seguidas.
+     * Medido en el panel a 375 px, la pastilla mide 78x34, y sin nada que la
+     * agrande el área de impacto mide lo mismo. En el teléfono esta es la
+     * acción principal del tablero y se pulsa con el pulgar sobre una lista de
+     * filas seguidas.
      *
      * Crece el área y no el borde, que es el mismo recurso de «Afíliate» en la
      * barra pública (34 -> 45 medidos). Seis píxeles por lado y no ocho a

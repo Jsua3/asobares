@@ -31,7 +31,11 @@ class AsociadoForm
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (?string $state, callable $set) => $set('slug', Str::slug((string) $state))),
+                            ->afterStateUpdated(function (?string $state, callable $set, string $operation): void {
+                                if ($operation === 'create') {
+                                    $set('slug', Str::slug((string) $state));
+                                }
+                            }),
                         TextInput::make('slug')
                             ->label('Slug (URL)')
                             ->required()
@@ -62,9 +66,8 @@ class AsociadoForm
                     ->columns(2)
                     ->schema([
                         TextInput::make('direccion')->label('Dirección')->maxLength(255),
-                        // La base real del gremio trae 19 de 41 horarios en
-                        // varias lineas, un renglon por franja. Cabian en un
-                        // TextInput solo mientras los datos eran inventados.
+                        // El horario admite varias franjas, una por renglón:
+                        // por eso es un Textarea y no un TextInput.
                         Textarea::make('horario')->label('Horario')->rows(3)
                             ->placeholder("Lunes a viernes de 6:00 p. m. a 2:00 a. m.\nSabado de 4:00 p. m. a 3:00 a. m."),
                         TextInput::make('whatsapp')->label('WhatsApp')->tel()->maxLength(30),
@@ -111,11 +114,11 @@ class AsociadoForm
                         SpatieMediaLibraryFileUpload::make('galeria')
                             ->label('Galería')
                             ->collection('galeria')
-                            // OBS3-13: lo que carga el gremio nace aprobado --es
-                            // el gremio quien aprueba--. Lo que sube el
+                            // Lo que carga el gremio nace aprobado --es el
+                            // gremio quien aprueba--. Lo que sube el
                             // propietario desde /mi-cuenta nace SIN aprobar, que
-                            // es el defecto del modelo. Sin esta linea, la
-                            // secretaria tendria que moderar sus propias fotos.
+                            // es el defecto del modelo. Sin esta línea, la
+                            // secretaría tendría que moderar sus propias fotos.
                             ->customProperties([Asociado::FOTO_APROBADA => true])
                             ->multiple()
                             ->reorderable()

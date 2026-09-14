@@ -34,9 +34,4 @@ enum EstadoPublicacion: string implements HasColor, HasLabel
             self::Publicado => 'success',
         };
     }
-
-    public function esVisiblePublicamente(): bool
-    {
-        return $this === self::Publicado;
-    }
 }

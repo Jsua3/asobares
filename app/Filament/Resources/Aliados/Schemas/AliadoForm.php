@@ -37,9 +37,9 @@ class AliadoForm
                             ->live()
                             ->helperText('Institucional sale en la banda de arriba de la portada, aparte de las marcas con convenio.'),
 
-                        // OBS3-05. Atar el aliado a un municipio es lo que lo
-                        // convierte en «la alcaldía de X», y lo que activa la
-                        // regla de «a todos o nada» (R21 03:47).
+                        // Atar el aliado a un municipio es lo que lo convierte
+                        // en «la alcaldía de X», y lo que activa la regla de
+                        // «a todos o nada».
                         Select::make('municipio_id')
                             ->label('Alcaldía de')
                             ->relationship('municipio', 'nombre')

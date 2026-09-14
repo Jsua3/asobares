@@ -8,7 +8,6 @@ use Database\Factories\PublicidadFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
@@ -55,11 +54,6 @@ class Publicidad extends Model
                 $publicidad->aprobado_at ??= now();
             }
         });
-    }
-
-    public function aprobador(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'aprobado_por');
     }
 
     public function scopeVigente(Builder $query, ?Carbon $momento = null): Builder
@@ -182,7 +176,7 @@ class Publicidad extends Model
 
         if (! $this->tieneDatosPublicables()) {
             throw ValidationException::withMessages([
-                'estado' => 'Para publicar la pauta debe tener imagen y fechas validas.',
+                'estado' => 'Para publicar la pauta debe tener imagen y fechas válidas.',
             ]);
         }
     }

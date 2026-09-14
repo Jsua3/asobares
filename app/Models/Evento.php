@@ -54,14 +54,13 @@ class Evento extends Model
 
     /**
      * Un evento EN CURSO sigue siendo próximo: lo que decide es cuándo
-     * TERMINA, no cuándo empezó. Mirando sólo `fecha_inicio`, el Congreso
-     * Nacional —tres días, `EventoSeeder`— se mudaba a «Pasados» el minuto uno
-     * de su segundo día, con dos días todavía por delante, y la visitante que
-     * quería inscribirse tenía que ir a buscarlo al archivo.
+     * TERMINA, no cuándo empezó. Mirando sólo `fecha_inicio`, un evento de
+     * varios días pasaría a «Pasados» en su segundo día, con días todavía por
+     * delante, y quien quiere inscribirse tendría que buscarlo en el archivo.
      *
      * `fecha_fin` es nullable, así que el evento de un solo momento se trata
-     * como un rango degenerado vía COALESCE, que hablan igual SQLite —el motor
-     * de este proyecto—, MySQL y Postgres.
+     * como un rango degenerado vía COALESCE, que se escribe igual en SQLite,
+     * MySQL y PostgreSQL.
      */
     public function scopeProximo(Builder $query): Builder
     {
@@ -126,14 +125,12 @@ class Evento extends Model
         }
 
         /*
-         * El `loadCount('inscripciones')` del controlador no servía de nada:
-         * este método re-consultaba siempre. Medido sobre una petición real a
-         * `/eventos/{slug}`: SEIS `select count(*) from inscripciones`, porque
-         * la ficha encadena `cuposDisponibles()` y `admiteInscripciones()`
-         * desde tres puntos distintos y el segundo llama al primero dos veces.
-         *
-         * Ninguna de las seis daba error ni tardaba: es el modo de fallo que
-         * sólo se ve contando consultas.
+         * Usa el `inscripciones_count` que carga el controlador con
+         * `loadCount()` antes de consultar: la ficha encadena
+         * `cuposDisponibles()` y `admiteInscripciones()` desde varios puntos
+         * y el segundo llama al primero dos veces, así que sin este atajo
+         * cada llamada repetiría el `count(*)`. Es un fallo que no da error
+         * ni tarda: solo se ve contando consultas.
          */
         $inscritos = $this->inscripciones_count ?? $this->inscripciones()->count();
 

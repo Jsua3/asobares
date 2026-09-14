@@ -37,18 +37,6 @@ class Municipio extends Model
         return $this->hasMany(RequisitoApertura::class)->orderBy('orden');
     }
 
-    /** @return HasMany<Artista, $this> */
-    public function artistas(): HasMany
-    {
-        return $this->hasMany(Artista::class);
-    }
-
-    /** @return HasMany<Proveedor, $this> */
-    public function proveedores(): HasMany
-    {
-        return $this->hasMany(Proveedor::class);
-    }
-
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
