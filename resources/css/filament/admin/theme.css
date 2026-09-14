@@ -308,10 +308,6 @@
         background-color: var(--asb-admin-carbon);
     }
 
-    .fi-layout {
-        position: relative;
-    }
-
     /*
      * El fondo del contenido deja de pintar sus cuatro degradados (D-L26): eran
      * opacos y tapaban el campo de puntos, que ahora es el fondo de toda la
@@ -727,7 +723,6 @@
         /* Sin rótulo, el chevron no plega nada legible; y el logotipo no cabe
            en 56 px, además de estar ya en el topbar. */
         .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group-collapse-btn,
-        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group-collapse-button,
         .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-header {
             display: none;
         }
@@ -999,7 +994,7 @@
     .fi-sidebar-group {
         position: relative;
         isolation: isolate;
-        margin-block: 1.75rem 0;
+        margin-block: 0.25rem 0.9rem;
         padding: 0.5rem 0.45rem;
         border-radius: var(--asb-admin-barra-modulo-radio);
         transition: box-shadow var(--duracion-entrada) var(--ease-color);
@@ -1063,6 +1058,11 @@
     .fi-sidebar-group-label {
         margin-block-end: 0.5rem;
         padding-inline: 0.6rem;
+        color: var(--asb-admin-barra-tenue);
+        font-size: 0.72rem;
+        font-weight: 650;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
     }
 
     /* Aire entre filas, que hoy no había ninguno. */
@@ -1101,18 +1101,6 @@
         }
     }
 
-    .fi-sidebar-group {
-        margin-block: 0.25rem 0.9rem;
-    }
-
-    .fi-sidebar-group-label {
-        color: var(--asb-admin-barra-tenue);
-        font-size: 0.72rem;
-        font-weight: 650;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-    }
-
     /* La fila sube de 2,72rem a 2,75rem: los 43,52 px de antes quedaban medio
        píxel por debajo del mínimo táctil, medido el 7 sep en las 24 filas. El
        radio baja para que el indicador de 3 px no lo recorte la curva. */
@@ -1130,8 +1118,7 @@
     /* El icono y el rótulo de grupo comparten papel y ahora comparten token:
        eran dos hexadecimales distintos para lo mismo y nadie recordaba por qué. */
     .fi-sidebar .fi-sidebar-item-btn > .fi-icon,
-    .fi-sidebar .fi-sidebar-group-collapse-btn,
-    .fi-sidebar .fi-sidebar-group-collapse-button {
+    .fi-sidebar .fi-sidebar-group-collapse-btn {
         color: var(--asb-admin-barra-tenue);
     }
 
@@ -1610,8 +1597,7 @@
 
         .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover > .fi-icon,
         .fi-sidebar .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover > .fi-sidebar-item-label,
-        .fi-sidebar .fi-sidebar-group-collapse-btn:hover,
-        .fi-sidebar .fi-sidebar-group-collapse-button:hover {
+        .fi-sidebar .fi-sidebar-group-collapse-btn:hover {
             color: var(--asb-admin-barra-activo);
         }
 
@@ -1637,8 +1623,7 @@
      * `outline`, no `box-shadow`, para que el contraste forzado no lo descarte.
      */
     .fi-sidebar .fi-sidebar-item-btn:focus-visible,
-    .fi-sidebar .fi-sidebar-group-collapse-btn:focus-visible,
-    .fi-sidebar .fi-sidebar-group-collapse-button:focus-visible {
+    .fi-sidebar .fi-sidebar-group-collapse-btn:focus-visible {
         outline: 2px solid var(--asb-admin-foco-anillo);
         outline-offset: 2px;
         box-shadow: 0 0 0 4px var(--asb-admin-foco-halo);
