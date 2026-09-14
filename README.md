@@ -37,7 +37,7 @@ bitácora legible; MFA; y dashboard con 6 indicadores.
 
 ## Requisitos
 
-- **PHP 8.3 o superior** con las extensiones `intl`, `gd`, `exif`, `fileinfo`, `mbstring`,
+- **PHP 8.4.1 o superior** con las extensiones `intl`, `gd`, `exif`, `fileinfo`, `mbstring`,
   `openssl`, `curl`, `zip`, `sqlite3` y `pdo_sqlite`.
   `intl` la exige Filament y `gd` las conversiones de imagen: sin ellas la instalación falla.
 - **Composer 2**

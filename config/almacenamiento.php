@@ -12,17 +12,13 @@ return [
     |   público  — portadas de eventos, logos y la galería de cada asociado.
     |              Los sirve el navegador por URL.
     |
-    |              ⚠️ Ojo desde OBS3-13 (31 ago 2026): esto decía «y no hay
-    |              nada que proteger», y era cierto mientras la galería solo
-    |              tuviera fotos que el gremio había cargado y aprobado. Ya no:
-    |              el propietario sube desde /mi-cuenta/fotos y esas fotos
-    |              nacen SIN aprobar. No salen en la ficha pública, pero el
-    |              archivo queda servido por URL, y una foto devuelta por
-    |              «exótica» no se borra al devolverla. El nombre es un ULID y
-    |              no es enumerable, así que es exposición por oscuridad y no
-    |              un agujero abierto — pero la decisión de moverlas al disco
-    |              privado, o de aceptar el riesgo por escrito, está PENDIENTE.
-    |              Ver §30.3 del prompt maestro.
+    |              ⚠️ Las fotos que sube el propietario desde /mi-cuenta/fotos
+    |              nacen SIN aprobar y aun así quedan servidas por URL: no
+    |              salen en la ficha pública, pero el archivo es accesible, y
+    |              una foto devuelta no se borra al devolverla. El nombre es un
+    |              ULID no enumerable, así que es exposición por oscuridad y no
+    |              un agujero abierto. Moverlas al disco privado, o aceptar el
+    |              riesgo por escrito, es una decisión abierta.
     |   privado  — los formatos oficiales de la guía normativa. Los sirve
     |              `GuiaController`, que antes comprueba que el requisito esté
     |              publicado. En el disco público esa comprobación sería

@@ -4,20 +4,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | ¿El sitio se deja indexar por los buscadores? (D-08)
+    | ¿El sitio se deja indexar por los buscadores?
     |--------------------------------------------------------------------------
     |
-    | Mientras el gremio no tenga dominio propio, no. Y no es una precaución
-    | abstracta: hasta el 9 de septiembre de 2026 el sitio servía `Allow: /`,
-    | publicaba su sitemap y clavaba una etiqueta canónica apuntando al host
-    | temporal de Laravel Cloud. Es decir, le decía a Google todos los días que
-    | la versión autorizada de cada página del gremio vive en una dirección
-    | desechable que nadie va a conservar. Cuando llegue el dominio de verdad,
-    | esas URLs ya estarán indexadas y compitiendo con las buenas.
+    | Mientras el gremio no tenga dominio propio, no. Indexar un host temporal
+    | hace que Google tome esas URLs como las canónicas de cada página, y
+    | cuando llegue el dominio definitivo compiten con las suyas.
     |
-    | Va por variable y no por código para que abrirlo el día del dominio
-    | (semana 8 del cronograma) sea poner esto en `true` y redesplegar, sin
-    | tocar un archivo ni pasar por una revisión.
+    | Conmuta dos cosas: `Allow: /` o `Disallow: /` en `robots.txt`, y la
+    | etiqueta `noindex, nofollow` del layout público. La canónica y la línea
+    | `Sitemap:` de `robots.txt` salen siempre.
+    |
+    | Va por variable y no por código para que abrirlo el día del dominio sea
+    | poner esto en `true` y redesplegar, sin tocar un archivo ni pasar por una
+    | revisión.
     |
     | **El valor por defecto es `false` a propósito.** Un despliegue al que se
     | le olvide la variable tiene que quedarse fuera de Google, no dentro:
