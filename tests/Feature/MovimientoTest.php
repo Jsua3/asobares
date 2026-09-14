@@ -288,7 +288,11 @@ class MovimientoTest extends TestCase
         $this->assertStringNotContainsString('--asb-atenuacion-pulsada: 1', $tokens);
     }
 
-    /** El `translateY(-2px)` y el `200ms ease` estaban duplicados literales. */
+    /**
+     * El levante y su duración salen de tokens y no de literales: el
+     * interruptor de movimiento reducido solo puede anular lo que pasa por
+     * `--asb-levante`.
+     */
     public function test_los_portadores_no_repiten_valores_de_movimiento(): void
     {
         $app = File::get(resource_path('css/app.css'));
@@ -297,8 +301,19 @@ class MovimientoTest extends TestCase
         foreach (['app.css' => $app, 'theme.css' => $tema] as $nombre => $contenido) {
             $this->assertStringNotContainsString('translateY(-2px)', $contenido, "{$nombre} cablea el levante.");
             $this->assertStringNotContainsString('200ms ease', $contenido, "{$nombre} cablea la duración.");
-            $this->assertStringContainsString('var(--asb-levante)', $contenido);
         }
+
+        /*
+         * El portador que levanta es `.vidrio-hover`, en el tema del panel; la
+         * tarjeta del sitio público no se eleva. Se afirma sobre la regla y no
+         * sobre la cadena `var(--asb-levante)` suelta, que también casaría con
+         * una declaración que ninguna propiedad lee.
+         */
+        $this->assertMatchesRegularExpression(
+            '/\.vidrio-hover:hover\s*\{[^}]*transform:\s*translateY\(var\(--asb-levante\)\)/',
+            $tema,
+            'El levante de `.vidrio-hover` debe salir del token, o el movimiento reducido no puede anularlo.'
+        );
     }
 
     /**
