@@ -6,10 +6,10 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * El sitio corría con la rampa cruda de Tailwind, que no declara ni un
- * `letter-spacing`, y con un `-0.02em` plano sobre h1..h4 que valía -0,32 px en
- * un título de tarjeta de 16 px y -1,20 px en un hero de 60 px: el mismo número
- * para dos problemas opuestos. La escala óptica lo sustituye tamaño por tamaño.
+ * La rampa cruda de Tailwind no declara ni un `letter-spacing`, y un `-0.02em`
+ * plano sobre h1..h4 vale -0,32 px en un título de tarjeta de 16 px y -1,20 px
+ * en un hero de 60 px: el mismo número para dos problemas opuestos. La escala
+ * óptica lo sustituye tamaño por tamaño.
  *
  * Pero la prueba que de verdad importa es la primera, y no habla de tipografía
  * sino de en qué archivo vive: la escala repinta el sitio público donde está y
@@ -42,7 +42,7 @@ class TipografiaTest extends TestCase
      * golpe, con `--text-sm--line-height` pasando de 20 px fijos a 21,7 px
      * relativos justo debajo de cada celda de tabla, cada etiqueta de
      * formulario y cada ítem de navegación, cuyas alturas de fila y centrados
-     * de icono están calculados contra los 20 px de hoy.
+     * de icono están calculados contra esos 20 px fijos.
      *
      * Y sería invisible en revisión: ninguna prueba del panel mira tipografía.
      * El instinto dice que la tipografía va con la marca, o sea en `tokens.css`
@@ -66,7 +66,7 @@ class TipografiaTest extends TestCase
      * escala óptica es que las dos columnas sean monótonas y que se crucen en
      * el cuerpo. Un retoque suelto —subir un leading porque una tarjeta quedó
      * justa— rompe eso sin romper nada visible, y es exactamente el modo de
-     * fallo que devolvió al sitio al `-0.02em` plano la primera vez.
+     * fallo que devuelve al sitio a un tracking plano.
      *
      * Poppins se sirve en seis pesos estáticos y su woff no trae tabla `fvar`:
      * sin ejes de variación no hay `opsz`, así que `font-optical-sizing` sería

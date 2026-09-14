@@ -15,10 +15,11 @@ use Tests\TestCase;
 /**
  * Recorre TODO el panel, no solo los listados.
  *
- * PanelAdminTest solo abría las páginas índice, y por eso no vio que el
- * login estaba roto. Esta prueba abre además cada formulario de creación,
- * cada formulario de edición con un registro real, las páginas sueltas y
- * el perfil, que es donde se configura el segundo factor.
+ * Abrir solo las páginas índice, como `PanelAdminTest`, no ve una página
+ * suelta que revienta al renderizarse. Esta prueba abre además cada
+ * formulario de creación, cada formulario de edición con un registro real,
+ * las páginas sueltas y el perfil, que es donde se configura el segundo
+ * factor.
  *
  * Es un barrido de humo: no verifica reglas de negocio, verifica que nada
  * reviente al renderizarse.

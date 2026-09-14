@@ -70,8 +70,8 @@ class SitioPublicoTest extends TestCase
     /**
      * El cuerpo del boletín se imprime sin escapar porque viene de un editor
      * enriquecido, así que todo depende de que el saneo corra de verdad.
-     * `symfony/html-sanitizer` está declarado en composer.json por esto: antes
-     * solo llegaba de rebote como dependencia de Filament.
+     * `symfony/html-sanitizer` está declarado en composer.json por esto, y no
+     * se deja llegar de rebote como dependencia de Filament.
      */
     public function test_el_contenido_del_boletin_se_sanea_antes_de_mostrarse(): void
     {
@@ -275,9 +275,9 @@ class SitioPublicoTest extends TestCase
 
     /**
      * `/abre-tu-negocio/formato/{requisito}` también inserta una fila en
-     * `consultas_guia` (ver `GuiaController::descargarFormato`) y hasta ahora
-     * no tenía límite: 40 peticiones seguidas producían 40 filas. El límite es
-     * 10 por minuto (ver el porqué en `routes/web.php`).
+     * `consultas_guia` (ver `GuiaController::descargarFormato`): sin límite, 40
+     * peticiones seguidas producirían 40 filas. El límite es 10 por minuto (ver
+     * el porqué en `routes/web.php`).
      *
      * `ThrottleRequests` va antes que `SubstituteBindings` en la prioridad por
      * defecto de Laravel, así que el límite corta antes de que la ruta
@@ -299,10 +299,10 @@ class SitioPublicoTest extends TestCase
      * Los botones del mapa hablan español.
      *
      * Leaflet pinta su control de zoom con `title` y `aria-label` en inglés
-     * --Zoom in / Zoom out--, así que en un sitio en español el globito salía
-     * en inglés y un lector de pantalla lo anunciaba en inglés. Era el único
-     * texto de interfaz que no salía de nosotros. Comprobado el 10 sep leyendo
-     * los atributos del control ya pintado.
+     * --Zoom in / Zoom out--, así que en un sitio en español el globito sale en
+     * inglés y un lector de pantalla lo anuncia en inglés, aunque es el único
+     * texto de interfaz que no escribimos. Comprobado leyendo los atributos del
+     * control ya pintado.
      *
      * Se apaga el control de fábrica y se añade uno rotulado, en vez de
      * reescribir el DOM después: la opción es de la propia librería y por tanto
@@ -310,7 +310,7 @@ class SitioPublicoTest extends TestCase
      *
      * ⚠️ El guion del mapa vive dentro de un ATRIBUTO de Alpine, así que ni un
      * comentario puede llevar comillas dobles: cierran el atributo y el mapa
-     * desaparece con un `SyntaxError`. Pasó al escribir este arreglo.
+     * desaparece con un `SyntaxError`.
      *
      * Roturas: devolver `zoomControl` a su valor de fábrica; quitar cualquiera
      * de los dos rótulos.
@@ -323,15 +323,13 @@ class SitioPublicoTest extends TestCase
         $this->assertStringContainsString("zoomInTitle: 'Acercar el mapa'", $mapa);
         $this->assertStringContainsString("zoomOutTitle: 'Alejar el mapa'", $mapa);
 
-        // Aquí había una aserción más, que decía vigilar que el guion no
-        // llevara comillas dobles. Se retiró el 10 sep porque NO PODÍA FALLAR:
-        // aislaba el atributo con `x-init="([^"]*)"`, y esa expresión se corta
-        // justo en la primera comilla doble, así que el trozo capturado nunca
-        // contenía ninguna. Comprobado metiendo una a propósito: verde. Una
-        // guardia que no puede ponerse roja es peor que no tenerla, porque
-        // ocupa el sitio de la que sí serviría.
+        // No se vigila aquí que el guion lleve comillas dobles, porque esa
+        // aserción NO PUEDE FALLAR: aislar el atributo con `x-init="([^"]*)"`
+        // corta justo en la primera comilla doble, así que el trozo capturado
+        // nunca contiene ninguna. Una guardia que no puede ponerse roja es peor
+        // que no tenerla, porque ocupa el sitio de la que sí serviría.
         //
-        // La regla sigue viva donde se puede leer: en la cabecera del propio
+        // La regla vive donde se puede leer: en la cabecera del propio
         // componente, con el aviso de que una comilla doble mata el mapa.
     }
 }

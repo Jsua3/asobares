@@ -15,8 +15,9 @@ use Tests\TestCase;
 use Throwable;
 
 /**
- * RUT-04: solo existía `errors/404`. Un 403, 419, 429, 500 o 503 salía con la
- * plantilla del framework, en inglés, con `lang="en"`, sin marca y sin enlace.
+ * Cada código de error que el sitio devuelve tiene su página: sin ella, un
+ * 403, 419, 429, 500 o 503 sale con la plantilla del framework, en inglés, con
+ * `lang="en"`, sin marca y sin enlace.
  *
  * La 403, la 419 y la 429 van sobre el layout público, como la 404. La 500 y
  * la 503 son autónomas y no pueden consultar la base: puede ser justo lo que

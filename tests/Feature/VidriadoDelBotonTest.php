@@ -11,9 +11,8 @@ use Tests\TestCase;
  * Al pulsar, el botón de marca se vidria: el relleno se retira y deja ver lo
  * que hay detrás, desenfocado y con la saturación subida.
  *
- * Lo pidió la dirección al ver la maqueta de movimiento --«que al presionarlo
- * le de efecto transparente»-- y sustituye al brillo especular que se había
- * propuesto primero.
+ * Es el efecto que pidió la dirección del gremio para el botón pulsado: «que
+ * al presionarlo le de efecto transparente».
  *
  * Aquí se vigilan las tres cosas que se pagan caras:
  *
@@ -24,10 +23,10 @@ use Tests\TestCase;
  *    sostiene texto blanco, así que el tinte oscurece hasta marca-950.
  * 2. **Que el relleno no vuelva a una utilidad `bg-*`**, que pisaría al
  *    portador y dejaría el vidriado sin efecto.
- * 3. **Que no se use `color-mix()` con un `calc()` dentro**, que es como se
- *    escribió la primera versión: compilaba, y Lightning CSS la plegaba en el
- *    archivo servido dejando el rótulo con la tinta del estado pulsado
- *    siempre. El fuente estaba bien y el sitio, mal.
+ * 3. **Que no se use `color-mix()` con un `calc()` dentro**: compila, pero
+ *    Lightning CSS lo pliega en el archivo servido y deja el rótulo con la
+ *    tinta del estado pulsado siempre. El fuente dice una cosa y el sitio
+ *    sirve otra.
  */
 class VidriadoDelBotonTest extends TestCase
 {
@@ -139,9 +138,9 @@ class VidriadoDelBotonTest extends TestCase
     }
 
     /**
-     * La trampa que costó una compilación entera: `color-mix()` con un
-     * `calc()` de porcentaje se pliega al minificar y el archivo servido queda
-     * con el primer color a secas. Se prohíbe en todo el bloque del botón.
+     * La trampa del minificador: `color-mix()` con un `calc()` de porcentaje
+     * se pliega al minificar y el archivo servido queda con el primer color a
+     * secas. Se prohíbe en todo el bloque del botón.
      */
     public function test_el_vidriado_no_usa_color_mix_con_calc(): void
     {
