@@ -21,12 +21,11 @@ use Symfony\Component\Mailer\Exception\TransportException;
 use Tests\TestCase;
 
 /**
- * El correo saliente se cae —y en producción estuvo caído desde el primer
- * despliegue, porque el SMTP nunca se contrató (D-07)—, y cuando se cae no
- * puede llevarse por delante la petición que lo disparó: la PQR ya quedó
- * radicada y la postulación ya quedó guardada. El ciudadano necesita su
- * número de radicado más que el acuse, y el establecimiento ve la
- * postulación en su cuenta aunque el aviso no llegue (bitácora §33.4, D-23).
+ * El correo saliente se cae —un proveedor SMTP sin contratar, una credencial
+ * vencida—, y cuando se cae no puede llevarse por delante la petición que lo
+ * disparó: la PQR ya quedó radicada y la postulación ya quedó guardada. El
+ * ciudadano necesita su número de radicado más que el acuse, y el
+ * establecimiento ve la postulación en su cuenta aunque el aviso no llegue.
  *
  * La suite corre con `MAIL_MAILER=array`, que nunca falla, así que estas
  * pruebas apuntan el transporte SMTP de verdad a un puerto cerrado de la
@@ -127,14 +126,13 @@ class CorreoSalienteCaidoTest extends TestCase
         Exceptions::assertReported(TransportException::class);
     }
 
-    // --- El panel (D-24): aprobar y devolver con el mismo transporte caído ---
+    // --- El panel: aprobar y devolver con el mismo transporte caído ---
 
     /**
-     * En el panel el daño era distinto pero de la misma familia: el estado ya
-     * había cambiado cuando el correo lanzaba, y la secretaría veía el error
-     * de Livewire con la vacante publicada por debajo. Ahora la acción
-     * termina, y el aviso del panel dice que el correo no salió en vez de
-     * fingir que sí.
+     * En el panel el daño es distinto pero de la misma familia: el estado ya
+     * cambió cuando el correo lanza, y la secretaría vería el error de
+     * Livewire con la vacante publicada por debajo. La acción termina, y el
+     * aviso del panel dice que el correo no salió en vez de fingir que sí.
      */
     private function entrarComoSecretaria(): void
     {

@@ -301,12 +301,12 @@ class BolsaDeEmpleoTest extends TestCase
      * Un filtro que ofrece opciones sin resultados no filtra: manda a callejones
      * sin salida.
      *
-     * Medido el 9 de septiembre de 2026 sobre la base de demostración: **7 de los
-     * 8 municipios del selector no llevaban a ninguna vacante**. Y en producción,
-     * que es donde importa, era peor: cero vacantes publicadas y **quince
-     * opciones —ocho municipios y siete áreas— que devolvían todas cero**. Quien
-     * llega a la bolsa, que es el módulo que el cliente puso de primero, ve una
-     * caja de filtros que promete cortar algo y no hay nada que cortar.
+     * Armado desde el catálogo y no desde las vacantes, el selector deja **7 de
+     * los 8 municipios de la base de demostración sin ninguna vacante**, y una
+     * bolsa sin vacantes publicadas ofrece **quince opciones —ocho municipios y
+     * siete áreas— que devuelven todas cero**. Quien llega a la bolsa, que es el
+     * módulo que el cliente puso de primero, ve una caja de filtros que promete
+     * cortar algo y no hay nada que cortar.
      *
      * El selector se arma con lo que de verdad hay, y por eso pregunta por
      * `publicado()->vigente()`: las mismas dos condiciones que deciden qué sale
