@@ -104,10 +104,9 @@ class SitemapController
          * vencida manda al visitante a una vacante muerta.
          *
          * Prioridad alta y frecuencia diaria porque es el módulo que más rota:
-         * una oferta vive semanas, no años. La ficha ya trae JSON-LD `JobPosting`
-         * desde que se construyó el módulo, y ese marcado --el que mete una oferta
-         * en Google Jobs-- apenas servía sin la URL en el mapa. Faltaba desde el
-         * principio y era el único detalle público que no estaba aquí.
+         * una oferta vive semanas, no años. La ficha trae JSON-LD `JobPosting`, y
+         * ese marcado --el que mete una oferta en Google Jobs-- apenas sirve sin
+         * la URL en el mapa.
          */
         Vacante::publicado()->vigente()->get()->each(fn (Vacante $vacante): Sitemap => $mapa->add(
             Url::create(route('empleo.show', $vacante))

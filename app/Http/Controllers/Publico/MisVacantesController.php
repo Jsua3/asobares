@@ -19,9 +19,8 @@ use Illuminate\Validation\Rule;
 /**
  * El establecimiento publica y corrige sus propias vacantes.
  *
- * Antes las escribía la oficina «a nombre de» el asociado, que es justo lo
- * que hacía que la bolsa no se moviera: quien tiene la necesidad no tenía
- * cómo publicarla.
+ * No las escribe la oficina «a nombre de» el asociado: quien tiene la
+ * necesidad es quien la publica, y eso es lo que mueve la bolsa.
  */
 class MisVacantesController
 {

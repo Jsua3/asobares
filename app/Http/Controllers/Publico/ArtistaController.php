@@ -41,12 +41,11 @@ class ArtistaController
     /**
      * Los tipos que de verdad tienen ficha publicada, más el elegido.
      *
-     * El desplegable de al lado —«Género musical»— ya salía de las fichas
-     * publicadas, y este seguía recorriendo el enum entero desde la propia
-     * plantilla. Se veía dentro del MISMO formulario: medido contra producción
-     * el 9 de septiembre de 2026, con cero fichas publicadas, «Género musical»
-     * se quedaba correctamente en «Todos los géneros» mientras «Tipo» ofrecía
-     * DJ, Banda, Solista y Otro, las cuatro muertas.
+     * El desplegable de al lado —«Género musical»— sale de las fichas
+     * publicadas, y este sigue el mismo criterio. Recorriendo el enum entero,
+     * con cero fichas publicadas «Género musical» se quedaría en «Todos los
+     * géneros» mientras «Tipo» ofrecería DJ, Banda, Solista y Otro, las cuatro
+     * muertas, dentro del MISMO formulario.
      *
      * Se recorre el enum y no la consulta para conservar el orden declarado, que
      * es el que la oficina espera. Y lo elegido se conserva aunque se quede sin

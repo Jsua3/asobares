@@ -132,7 +132,7 @@ class EventoController
      * Los dos contadores del conmutador. Los pintan DOS páginas —la rejilla de
      * tarjetas y el calendario— y son dos COUNT baratos que aprovechan el
      * índice `['estado','fecha_inicio']`. Se extraen para que no diverjan: el
-     * día que `scopeProximo` vuelva a cambiar, una copia se quedaría atrás.
+     * día que `scopeProximo` cambie, una copia se quedaría atrás.
      *
      * @return array{totalProximos: int, totalPasados: int}
      */
@@ -157,9 +157,9 @@ class EventoController
     {
         abort_unless($evento->estaPublicado(), 404);
 
-        // Comprobar el cupo y luego insertar eran dos pasos sueltos: dos
-        // peticiones simultáneas leían el mismo conteo, las dos lo daban por
-        // bueno y las dos insertaban. Con el último asiento eso es sobreventa,
+        // Comprobar el cupo y luego insertar en dos pasos sueltos deja que dos
+        // peticiones simultáneas lean el mismo conteo, lo den por bueno y
+        // las dos inserten. Con el último asiento eso es sobreventa,
         // y en un evento de pago se cobra por una silla que no existe. El
         // bloqueo de la fila del evento serializa a los competidores, y la
         // comprobación se repite ya dentro del cerrojo.
@@ -190,12 +190,10 @@ class EventoController
         try {
             return redirect()->away($pagos->enlaceDePago($transaccion));
         } catch (Throwable $fallo) {
-            // El entorno remoto arranca con `PAYMENT_DRIVER=bold` y sin llaves
-            // de Bold (§20.5), así que `PasarelaBold::crearEnlaceDePago` lanza
-            // en cuanto alguien pulsa «Inscribirme». Sin este `catch` el
-            // visitante veía una página 500 pelada —con APP_DEBUG=false, sin
-            // ninguna explicación— en una de las dos rutas que la dirección va
-            // a pulsar en la demostración.
+            // Con `PAYMENT_DRIVER=bold` y sin llaves de Bold,
+            // `PasarelaBold::crearEnlaceDePago` lanza en cuanto alguien pulsa
+            // «Inscribirme». Sin este `catch` el visitante vería una página
+            // 500 pelada —con APP_DEBUG=false, sin ninguna explicación—.
             //
             // Mismo trato que en `MiCuentaController::pagarMensualidad`: se
             // registra el fallo, la inscripción y su cobro se quedan

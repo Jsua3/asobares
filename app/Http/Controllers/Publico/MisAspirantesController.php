@@ -12,13 +12,13 @@ use Illuminate\Validation\Rule;
  * Banco de talento: los perfiles que deja cualquiera en /empleo, visibles
  * solo para los establecimientos afiliados.
  *
- * Es de LECTURA. El campo `estado` pertenece a la secretaria y se gestiona
+ * Es de LECTURA. El campo `estado` pertenece a la secretaría y se gestiona
  * desde el panel: si cada uno de los establecimientos pudiera moverlo, dos
- * bares se pisarian el seguimiento del mismo candidato sin enterarse. El
+ * bares se pisarían el seguimiento del mismo candidato sin enterarse. El
  * establecimiento que quiera a alguien lo contacta y ya.
  *
- * Y no se ve todo el que se registra: desde el 8 de septiembre hay que aprobar
- * el perfil antes (`aprobado_el`). Los descartados por el gremio tampoco se
+ * Y no se ve todo el que se registra: hay que aprobar el perfil antes
+ * (`aprobado_el`). Los descartados por el gremio tampoco se
  * muestran: descartar y seguir apareciendo es no haber descartado nada. Las dos
  * condiciones viven juntas en `visibleParaAfiliados`.
  */

@@ -36,19 +36,17 @@ class ContactoController
 
         $mensaje = Mensaje::create($datos);
 
-        // Al gremio también hay que avisarle (Acta 08, A-04). Antes solo se
-        // avisaba a quien escribía: la queja se guardaba y el plazo legal de
-        // quince días hábiles empezaba a correr sin que nadie lo supiera.
+        // Al gremio también hay que avisarle (Acta 08, A-04): sin ese aviso el
+        // plazo legal de quince días hábiles de una PQR corre sin que nadie lo
+        // sepa.
         AvisoDeMensajeAlGremio::enviar($mensaje);
 
         if ($mensaje->esPqr()) {
             // El acuse no puede tumbar la petición: la PQR ya quedó radicada
             // y el ciudadano necesita su número aunque el correo saliente
-            // esté caído, que es como estuvo producción desde el primer
-            // despliegue (D-07, bitácora §33.4). Sin esto veía la página de
-            // error después de que su queja quedara guardada. El fallo se
-            // reporta para que la oficina vea en el registro que los acuses
-            // no están saliendo.
+            // esté caído. Sin esto vería la página de error después de que su
+            // queja quedara guardada. El fallo se reporta para que la oficina
+            // vea en el registro que los acuses no están saliendo.
             $acuseEnviado = rescue(function () use ($mensaje): bool {
                 Mail::to($mensaje->correo)->send(new AcuseDeRadicado($mensaje));
 

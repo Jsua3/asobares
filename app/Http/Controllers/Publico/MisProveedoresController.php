@@ -10,12 +10,12 @@ use Illuminate\Validation\Rule;
 
 /**
  * El directorio de proveedores, con nombres y contactos, es un beneficio de
- * la afiliacion: solo lo ve quien esta adentro.
+ * la afiliación: solo lo ve quien está adentro.
  *
- * La pagina publica /proveedores sigue existiendo y explica que es la bolsa,
+ * La página pública /proveedores sigue existiendo y explica qué es la bolsa,
  * pero sin un solo dato de contacto. Ese reparto es deliberado: cerrar la URL
- * entera habria mandado a un login seco a quien llega desde un buscador, y
- * habria borrado del indice una seccion que hoy trae visitas.
+ * entera mandaría a un login seco a quien llega desde un buscador, y borraría
+ * del índice una sección que trae visitas.
  */
 class MisProveedoresController
 {
@@ -25,7 +25,7 @@ class MisProveedoresController
             'categoria' => ['nullable', Rule::enum(CategoriaProveedor::class)],
         ]);
 
-        // `vigente` implementa la monetizacion: quien no esta al dia no se lista.
+        // `vigente` implementa la monetización: quien no está al día no se lista.
         $consulta = Proveedor::publicado()->vigente()->with('municipio');
 
         if (filled($datos['categoria'] ?? null)) {

@@ -10,11 +10,9 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * Confirma a quien se postuló que su postulación llegó. Antes «postularse»
- * era un enlace de WhatsApp sin rastro; ahora queda registrada, pero hasta
- * el 30 ago 2026 solo se avisaba al establecimiento — el candidato mandaba
- * su formulario y no volvía a saber de él. El gremio lo pidió textualmente
- * en la revisión del 28 de agosto (OBS3-09).
+ * Confirma a quien se postuló que su postulación llegó. Sin este acuse solo
+ * se entera el establecimiento, y el candidato manda su formulario y no
+ * vuelve a saber de él.
  *
  * Se manda siempre que la postulación se crea, exista o no correo del
  * establecimiento: que el gremio no pueda avisarle al bar no es motivo para
