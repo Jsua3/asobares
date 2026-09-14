@@ -1,26 +1,26 @@
 {{--
     Paginador del sitio público.
 
-    Sustituye al que trae Laravel por dos motivos: aquel venía cableado en
+    Sustituye al que trae Laravel por dos motivos: aquel viene cableado en
     grises de Tailwind (2,63:1 sobre el fondo oscuro, más una caja blanca sobre
-    página casi negra) y, sin carpeta `lang/`, mostraba las claves crudas
+    página casi negra) y, sin carpeta `lang/`, muestra las claves crudas
     «pagination.previous» y «pagination.next» junto a un «Showing … results» en
     inglés dentro de un sitio íntegramente en español.
 --}}
 @php
     $pastilla = 'inline-flex min-h-11 min-w-11 items-center justify-center px-4 text-sm font-medium';
     /*
-     * Este renglón es el peor caso del inventario de acuse: para que
-     * `.pulsable` funcione hubo que quitarle TRES utilidades y no una — la de
-     * fundido de color, la de duración y la de curva.
+     * A este renglón le faltan a propósito TRES utilidades y no una —la de
+     * fundido de color, la de duración y la de curva—: con cualquiera de ellas
+     * `.pulsable` deja de acusar el dedo.
      *
-     * Las dos últimas parecían impecables: paréntesis en vez de corchete,
-     * duración por token, y pasan todos los patrones prohibidos de
-     * `MovimientoTest`. Y eran justo las que mataban el acuse. Las utilidades
+     * Las dos últimas parecen impecables —paréntesis en vez de corchete,
+     * duración por token— y pasan todos los patrones prohibidos de
+     * `MovimientoTest`, pero son las que matan el acuse. Las utilidades
      * compilan en `@layer utilities`, que en Tailwind 4 gana siempre a
-     * `@layer components` sin importar la especificidad, así que pisaban la
+     * `@layer components` sin importar la especificidad, así que pisarían la
      * `transition` del portador y con ella la duración cero de su `:active`:
-     * las cinco pastillas bajaban 140 ms tarde. El fundido de color no se
+     * las cinco pastillas bajarían 140 ms tarde. El fundido de color no se
      * pierde, viaja dentro de `.pulsable`.
      *
      * El fondo de hover sí se queda: `.pulsable:active` solo escribe

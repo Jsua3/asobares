@@ -57,8 +57,8 @@ class EventoController
          * domingo de la semana del último día (locale `es`: `startOfWeek` cae
          * en lunes). Los eventos de esos días colgantes hay que traerlos
          * también, o las celdas de relleno mienten diciendo que no pasa nada:
-         * septiembre de 2026 empieza en martes y su primera fila incluye el
-         * lunes 31 de agosto.
+         * un mes que empieza en martes lleva en su primera fila el último
+         * lunes del mes anterior.
          */
         $inicioRejilla = $primerDia->copy()->startOfWeek();
         $finRejilla = $ultimoDia->copy()->endOfWeek();

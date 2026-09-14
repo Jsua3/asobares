@@ -4,7 +4,7 @@
     <div class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
 
         {{-- Saludo. Cerrar sesión vive en el desplegable de la navbar: tenerlo
-             también aquí dejaba dos botones idénticos a la vista. --}}
+             también aquí dejaría dos botones idénticos a la vista. --}}
         <header>
             <p class="text-sm text-apagado">Hola, {{ auth()->user()->name }}</p>
             <h1 class="mt-1 font-display text-3xl font-bold tracking-tight">{{ $asociado->nombre }}</h1>

@@ -11,9 +11,9 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 /**
- * «Quiero aparecer en la bolsa» dejó de ser un mensaje de texto libre que la
- * secretaría tenía que transcribir a mano: la ficha entra ya armada y solo
- * falta aprobarla.
+ * «Quiero aparecer en la bolsa» entra como una ficha ya armada, no como un
+ * mensaje de texto libre que la secretaría tendría que transcribir a mano:
+ * solo falta aprobarla.
  */
 class GuardarSolicitudDeArtistaRequest extends FormRequest
 {

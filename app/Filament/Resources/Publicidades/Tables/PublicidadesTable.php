@@ -41,7 +41,7 @@ class PublicidadesTable
                     ->sortable(),
                 TextColumn::make('valor')
                     ->label('Valor')
-                    ->formatStateUsing(fn (mixed $state): string => '$'.number_format((float) $state, 0, ',', '.'))
+                    ->formatStateUsing(fn (mixed $state): string => pesos($state))
                     ->sortable(),
                 TextColumn::make('fecha_inicio')
                     ->label('Vigencia')

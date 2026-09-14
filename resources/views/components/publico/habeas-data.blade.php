@@ -19,17 +19,17 @@
 
 <div>
     <div class="flex items-start gap-3">
-        {{-- Ya no lleva el anillo de marca-500 al 60 %. Aquí el outline de
-             `app.css` nunca llegó a apagarse, así que el foco cumplía y el
-             anillo solo dibujaba encima suyo un duplicado de 2,21:1, por debajo
-             del 3:1 de WCAG 2.1 §1.4.11. Todo el sitio acusa el foco con la
-             misma regla o no hay forma de medirlo una sola vez. --}}
+        {{-- Sin anillo de marca-500 al 60 %: el outline de `app.css` ya acusa
+             el foco aquí, y ese anillo solo dibujaría encima un duplicado de
+             2,21:1, por debajo del 3:1 de WCAG 2.1 §1.4.11. Todo el sitio acusa
+             el foco con la misma regla o no hay forma de medirlo una sola vez. --}}
         {{-- Envoltorio de 44x44 con margen negativo: la casilla se sigue viendo
              de 16 px y en el mismo píxel —el reparto del margen negativo es
              asimétrico: `-mt-3` y `-mb-3.5` dejan la casilla 2 px más abajo del
-             centro, que es justo el empujón que daba `mt-0.5`— pero el dedo
-             tiene un objetivo de 44 y el cuadrado de 44x44 centrado en la
-             casilla cae DENTRO de la etiqueta, que es lo que se mide.
+             centro, el empujón que la alinea con la primera línea de la
+             etiqueta— pero el dedo tiene un objetivo de 44 y el cuadrado de
+             44x44 centrado en la casilla cae DENTRO de la etiqueta, que es lo
+             que se mide.
 
              Y es un <label>, no un <span>, porque un <span> no es pulsable: el
              envoltorio dibujaría 44 px de área muerta y la medición saldría en

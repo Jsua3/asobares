@@ -18,7 +18,7 @@
     <link rel="canonical" href="{{ url()->current() }}">
 
     {{--
-        Mientras no haya dominio propio, nada de esto se indexa (D-08).
+        Mientras no haya dominio propio, nada de esto se indexa (`SITIO_INDEXABLE`).
 
         Va junto a la canónica a propósito, porque el par es el problema: la
         canónica de arriba resuelve al host temporal de Cloud, así que sin esta
@@ -56,15 +56,15 @@
         venga del disco puede llegar relativa.
 
         ⚠️ **Mientras `SITIO_INDEXABLE` sea falsa, la miniatura no se ve, y no es
-        un defecto.** Con esa variable en falso `robots.txt` sirve `Disallow: /`
-        (D-08), y los rastreadores de WhatsApp y Facebook lo respetan: no
-        descargan la página, así que no hay miniatura por mucha etiqueta que
-        haya. La tarjeta se ve cuando esa variable está en `true`.
+        un defecto.** Con esa variable en falso `robots.txt` sirve `Disallow: /`,
+        y los rastreadores de WhatsApp y Facebook lo respetan: no descargan la
+        página, así que no hay miniatura por mucha etiqueta que haya. La tarjeta
+        se ve cuando esa variable está en `true`.
 
         Dejar pasar solo a los rastreadores de vista previa sin abrir el sitio a
         los buscadores se puede hacer --se les nombra en `robots.txt`--, pero
-        cambia la decisión escrita D-08, así que no se hace sin decidirlo de
-        nuevo por escrito.
+        cambia la decisión escrita de no indexar sin dominio propio, así que no
+        se hace sin decidirlo de nuevo por escrito.
     --}}
     @php($ogImagenFinal = $ogImagen ?: asset('img/og-asobares.jpg'))
     <meta property="og:image" content="{{ Str::startsWith($ogImagenFinal, ['http://', 'https://']) ? $ogImagenFinal : url($ogImagenFinal) }}">
@@ -83,26 +83,26 @@
 
     {{--
         El logo se pide desde el <head> y con prioridad alta, y no es un adorno
-        de rendimiento: es la corrección de un defecto medido.
+        de rendimiento: sin la precarga llega tarde al primer pintado.
 
         Descubierto al vuelo —cuando el analizador llega al <img> de la
-        navbar— no le daba tiempo a descargar y decodificar antes del primer
+        navbar— no da tiempo a descargarlo y decodificarlo antes del primer
         pintado. Medido en los dos temas: en `pagereveal` y en el primer rAF el
-        <img> seguía con `naturalWidth` 0, y no terminaba hasta el evento
-        `load`, ~500 ms después.
+        <img> sigue con `naturalWidth` 0, y no termina hasta el evento `load`,
+        ~500 ms después.
 
         En un sitio de recarga completa eso pasa en CADA navegación, y como
         además hay transiciones de vista, la instantánea de la página nueva se
-        tomaba sin logo: se veía desaparecer y volver a aparecer.
+        tomaría sin logo: se vería desaparecer y volver a aparecer.
 
-        Va emparejado con el cambio de `logo.blade.php`, que dejó de servir el
-        SVG que solo envolvía este PNG. Si algún día cambia el archivo allí,
-        tiene que cambiar aquí o la precarga deja de servir para nada.
+        Va emparejado con `logo.blade.php`, que sirve este mismo PNG y no un SVG
+        que lo envuelva. Si algún día cambia el archivo allí, tiene que cambiar
+        aquí o la precarga deja de servir para nada.
     --}}
     <link rel="preload" as="image" href="{{ asset('img/logo-asobares.png') }}" fetchpriority="high">
     {{-- El isotipo lo pinta la barra al hacer scroll en los dos anchos, y con
          sesión en móvil desde el primer pintado: se precarga siempre, o el
-         primer cruce parpadea (defecto medido en la bitácora). --}}
+         primer cruce parpadea. --}}
     <link rel="preload" as="image" href="{{ asset('img/monograma-asobares.png') }}">
     {{-- El valor claro es el que corresponde al marcado servido: sin la clase
          `.dark` el CSS pinta el tema claro. El script de abajo lo corrige al
@@ -144,7 +144,7 @@
 
                 // Cualquier cosa que no sea 'light' ni 'dark' —incluido un
                 // valor corrupto de otra versión— se trata como 'system', que
-                // es el comportamiento por defecto; antes caía en claro.
+                // es el comportamiento por defecto.
                 const oscuro = preferencia === 'dark'
                     || (preferencia !== 'light' && consultaSistema.matches);
 
@@ -169,7 +169,7 @@
                  * queda congelada en el color del tema anterior. Como medio
                  * sitio lleva `transition-colors`, sin esta mordaza los
                  * enlaces de la navbar y los bordes de las tarjetas se
-                 * quedaban con el tema viejo hasta recargar.
+                 * quedarían con el tema viejo hasta recargar.
                  *
                  * De paso evita que el cambio de tema se vea como un barrido
                  * de 200 ms por toda la página.

@@ -66,7 +66,7 @@ class MisFotosController
          * En una petición HTTP de verdad no debería ocurrir, pero un tope que
          * depende de que nadie haya tocado el modelo antes no es un tope.
          */
-        if ($asociado->media()->where('collection_name', 'galeria')->count() >= self::MAXIMO_POR_ESTABLECIMIENTO) {
+        if ($asociado->media()->where('collection_name', Asociado::COLECCION_GALERIA)->count() >= self::MAXIMO_POR_ESTABLECIMIENTO) {
             return back()->withErrors([
                 'foto' => 'Ya tienes '.self::MAXIMO_POR_ESTABLECIMIENTO.' fotos. Borra alguna antes de subir otra.',
             ]);
@@ -91,7 +91,7 @@ class MisFotosController
                 Asociado::FOTO_APROBADA => false,
                 'subida_por' => $request->user()->getKey(),
             ])
-            ->toMediaCollection('galeria');
+            ->toMediaCollection(Asociado::COLECCION_GALERIA);
 
         return back()->with('exito', 'Foto enviada. El gremio la revisa antes de que salga en tu ficha.');
     }
@@ -114,7 +114,7 @@ class MisFotosController
         abort_unless(
             $media->model_type === Asociado::class
                 && (int) $media->model_id === $asociado->getKey()
-                && $media->collection_name === 'galeria',
+                && $media->collection_name === Asociado::COLECCION_GALERIA,
             404
         );
 

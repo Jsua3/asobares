@@ -35,9 +35,9 @@ class AsociadosPorMunicipio extends ChartWidget
             'datasets' => [[
                 'label' => 'Asociados',
                 'data' => $municipios->pluck('asociados_count')->all(),
-                // Pub Red como relleno funciona en los dos temas; lo que no
-                // seguía el tema eran ticks y rejilla, y de eso se encarga el
-                // plugin `panel-graficas.js`.
+                // Pub Red como relleno funciona en los dos temas; los ticks y la
+                // rejilla sí dependen del tema, y de eso se encarga el plugin
+                // `panel-graficas.js`.
                 'backgroundColor' => '#EE4137',
                 'borderRadius' => 6,
             ]],

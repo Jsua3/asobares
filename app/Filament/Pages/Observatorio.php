@@ -135,9 +135,7 @@ class Observatorio extends Page
     /** Recaudo acumulado de los últimos dieciocho meses, en pesos. */
     public function recaudoDelPeriodo(): string
     {
-        $total = array_sum($this->metricas()->saludFinanciera()->series['Recaudo (COP)'] ?? []);
-
-        return '$'.number_format((float) $total, 0, ',', '.');
+        return pesos(array_sum($this->metricas()->saludFinanciera()->series['Recaudo (COP)'] ?? []));
     }
 
     /** Tasa de mora de hoy, formateada como porcentaje. */

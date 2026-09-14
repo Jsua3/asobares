@@ -15,16 +15,15 @@ use Illuminate\Support\Str;
  * INICIATIVAS MÁS IMPORTANTES — lo que Asobares ya tiene en marcha para
  * cumplir el sueño». De ahí salen los cinco nombres, los cinco resúmenes y
  * los cinco estados, uno por uno. (El PDF es un escaneo sin capa de texto:
- * se leyó extrayendo las imágenes de página incrustadas.)
+ * se lee extrayendo las imágenes de página incrustadas.)
  *
- * ⚠️ **Los `descripcion` largos que había aquí eran ampliación editorial, no
- * del TED.** Afirmaban cosas que la lámina no dice --que Vibrarte es «el
- * primer distrito de experiencia del departamento», qué criterios exactos
- * certifica Bares Verdes, qué revisa Blindando tu Negocio-- y en un esquema
- * que no marca la procedencia de cada fila eso se vuelve indistinguible de un
- * dato del gremio. Ahora cada descripción se queda dentro de lo que dicen el
- * TED y, para «Blindando tu Negocio», el documento de la jornada con la
- * Alcaldía. Ampliarlas es trabajo del gremio desde el panel.
+ * ⚠️ **Cada `descripcion` se queda dentro de lo que dicen el TED y, para
+ * «Blindando tu Negocio», el documento de la jornada con la Alcaldía.** Ir
+ * más allá --que Vibrarte es «el primer distrito de experiencia del
+ * departamento», qué criterios exactos certifica Bares Verdes, qué revisa
+ * Blindando tu Negocio-- es ampliación editorial, y en un esquema que no marca
+ * la procedencia de cada fila se vuelve indistinguible de un dato del gremio.
+ * Ampliarlas es trabajo del gremio desde el panel.
  *
  * La lámina rotula la quinta como «Diplomado Gerencia de Bares»; aquí lleva
  * la preposición porque el slug ya está publicado y cambiarlo dejaría la

@@ -165,7 +165,7 @@ class ModerarFotos extends Page implements HasTable
     {
         return Media::query()
             ->where('model_type', Asociado::class)
-            ->where('collection_name', 'galeria')
+            ->where('collection_name', Asociado::COLECCION_GALERIA)
             ->where(fn (Builder $q): Builder => $q
                 ->whereJsonDoesntContain('custom_properties->'.Asociado::FOTO_APROBADA, true)
                 ->orWhereJsonDoesntContainKey('custom_properties->'.Asociado::FOTO_APROBADA));

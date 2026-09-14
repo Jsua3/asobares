@@ -70,11 +70,11 @@
     @endpush
 @endonce
 
-{{-- `relative z-0` no es decoracion: Leaflet apila sus paneles internos hasta
+{{-- `relative z-0` no es decoración: Leaflet apila sus paneles internos hasta
      z-index 800 y `.leaflet-container` no crea contexto de apilamiento propio,
-     asi que esos 800 competian en la raiz contra el `z-40` de la barra. Medido:
-     con el mapa en pantalla, abrir el menu movil dejaba los botones de zoom del
-     mapa POR ENCIMA de las filas del menu, y el clic se lo llevaba el mapa.
+     así que sin él esos 800 compiten en la raíz contra el `z-40` de la barra.
+     Medido: con el mapa en pantalla, los botones de zoom del mapa quedan POR
+     ENCIMA de las filas del menú móvil abierto, y el clic se lo lleva el mapa.
      Con un contexto propio a z-0, los 800 de Leaflet se quedan dentro. --}}
 <div {{ $attributes->merge(['class' => "relative z-0 overflow-hidden rounded-2xl border border-linea {$alto}"]) }}
      x-data

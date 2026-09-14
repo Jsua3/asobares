@@ -2122,7 +2122,7 @@
          * cristal: 84 % en vez de 94. Es el SUELO medido sobre el peor
          * fondo posible —contenido negro con el velo de cierre de Filament
          * encima—: ahí el rótulo del ítem activo da 4,61:1, y al 80 % cae a
-         * 4,23 y ya no pasa. Debajo hay página de verdad, no una superficie
+         * 4,23 y no pasa. Debajo hay página de verdad, no una superficie
          * conocida, y por eso este velo no se calibra como el del módulo.
          */
         --asb-admin-barra-velo-cajon: color-mix(in oklab, var(--asb-superficie) 84%, transparent);
