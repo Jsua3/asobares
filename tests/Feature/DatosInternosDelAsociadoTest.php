@@ -13,13 +13,12 @@ use Tests\TestCase;
 /**
  * La frontera entre lo que el gremio sabe y lo que el sitio publica.
  *
- * `Asociado::CAMPOS_INTERNOS` y `datosPublicos()` existían desde el primer día
- * y **no los ejercitaba ninguna prueba**: eran una declaración de intenciones.
- * Mientras el directorio se llenaba con datos inventados por el sembrador eso
- * no costaba nada. Con la base real del gremio cargada, cada campo interno es
- * un dato de una persona concreta: la cédula del propietario y la valoración
- * comercial que la oficina escribió sobre su negocio —«Mala puntación en
- * plataformas digitales» es una frase textual del archivo—.
+ * `Asociado::CAMPOS_INTERNOS` y `datosPublicos()` son esa frontera, y sin una
+ * prueba que los ejercite serían una declaración de intenciones. Con la base
+ * real del gremio cargada, cada campo interno es un dato de una persona
+ * concreta: la cédula del propietario y la valoración comercial que la oficina
+ * escribió sobre su negocio —«Mala puntación en plataformas digitales» es una
+ * frase textual del archivo—.
  *
  * Estas pruebas convierten la intención en guardia: si alguien añade un campo
  * interno a una vista pública, o crea un campo interno nuevo y olvida

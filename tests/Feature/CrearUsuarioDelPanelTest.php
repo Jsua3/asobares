@@ -13,10 +13,9 @@ use Tests\TestCase;
 /**
  * El alta de cuentas del panel fuera del sembrador del demo.
  *
- * Existe porque el sitio quedó desplegado sin ninguna forma legítima de entrar
- * a `/admin`: `UsuarioSeeder` se niega a correr en producción --y hace bien,
- * porque publica `Asobares2026*`, que está en el README de un repositorio
- * **público**-- y no había alternativa.
+ * Existe porque en producción no hay otra forma legítima de entrar a `/admin`:
+ * `UsuarioSeeder` se niega a correr allí --y hace bien, porque publica
+ * `Asobares2026*`, que está en el README de un repositorio **público**--.
  */
 class CrearUsuarioDelPanelTest extends TestCase
 {
@@ -86,12 +85,11 @@ class CrearUsuarioDelPanelTest extends TestCase
     /**
      * El mensaje de error tiene que decir QUÉ falla, no solo que algo falla.
      *
-     * Esto se paga en producción: la primera vez que corrió en Cloud, el
-     * comando devolvió exactamente «La contraseña» y exit 1. Parecía una clave
-     * débil; lo que pasaba era que llegaba vacía. La causa era que «La
-     * contraseña» se pasó como tercer argumento de `validator()` --que es
-     * `$messages`-- en vez de cuarto --que es `$attributes`--, así que
-     * sustituía el texto de todas las reglas.
+     * Pasar «La contraseña» como tercer argumento de `validator()` --que es
+     * `$messages`-- en vez de cuarto --que es `$attributes`-- sustituye el
+     * texto de todas las reglas: el comando responde exactamente «La
+     * contraseña» y exit 1, que parece una clave débil cuando lo que pasa es
+     * que llega vacía.
      */
     public function test_el_error_dice_que_regla_se_incumplio(): void
     {
@@ -108,7 +106,7 @@ class CrearUsuarioDelPanelTest extends TestCase
      *
      * `isInteractive()` no sirve para detectarlo: en el ejecutor remoto de
      * Laravel Cloud devuelve `true` sin que haya terminal, la pregunta sale
-     * vacía y el comando seguía adelante. Lo que decide es si al final hay
+     * vacía y el comando seguiría adelante. Lo que decide es si al final hay
      * contraseña.
      */
     public function test_sin_contrasena_avisa_de_la_variable_de_entorno(): void
@@ -124,10 +122,10 @@ class CrearUsuarioDelPanelTest extends TestCase
 
     /**
      * El fallo que dejaría la cuenta encerrada. Las direcciones del demo son
-     * `.test` --dominio reservado que por definición no recibe correo-- y no
-     * hay proveedor SMTP contratado (§29.1): con el segundo factor por correo
-     * encendido, Filament pide un código que no va a llegar nunca y no hay
-     * forma de entrar aunque la contraseña sea correcta.
+     * `.test` --dominio reservado que por definición no recibe correo-- y el
+     * correo saliente puede no estar configurado: con el segundo factor por
+     * correo encendido, Filament pide un código que no va a llegar nunca y no
+     * hay forma de entrar aunque la contraseña sea correcta.
      */
     public function test_nunca_deja_encendido_el_segundo_factor_por_correo(): void
     {

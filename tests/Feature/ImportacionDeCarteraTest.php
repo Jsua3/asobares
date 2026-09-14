@@ -42,8 +42,8 @@ class ImportacionDeCarteraTest extends TestCase
 
     /**
      * El archivo llega del computador de la contadora y puede venir en formato
-     * colombiano o inglés. Antes se borraban todos los puntos, así que
-     * «1250.75» se importaba como 125.075: cada saldo multiplicado por cien.
+     * colombiano o inglés. Borrar todos los puntos convertiría «1250.75» en
+     * 125.075: cada saldo multiplicado por cien.
      *
      * @param  array{0: string, 1: string}  $caso
      */

@@ -12,19 +12,14 @@ use Tests\TestCase;
 /**
  * Ningún ajuste que el panel ofrece editar puede no cambiar nada.
  *
- * RNF-09 dice que nada esté quemado en el código, y de ahí salen los 197 ajustes
- * de «Ajustes del sitio». La cara B de esa regla no la vigilaba nadie: un ajuste
- * **sembrado y que ninguna vista lee** es peor que no tenerlo, porque la oficina
- * lo cambia, guarda, ve el aviso verde y el sitio se queda igual. No hay error,
- * no hay pista, y la confianza en el panel se cae entera.
+ * RNF-09 dice que nada esté quemado en el código, y de ahí salen los ajustes de
+ * «Ajustes del sitio». Esta es la cara B de esa regla: un ajuste **sembrado y
+ * que ninguna vista lee** es peor que no tenerlo, porque la oficina lo cambia,
+ * guarda, ve el aviso verde y el sitio se queda igual. No hay error, no hay
+ * pista, y la confianza en el panel se cae entera.
  *
- * La auditoría del 9 de septiembre de 2026 encontró tres así: `hero_subtitulo`
- * (un párrafo entero que ninguna vista pintaba), `cifra_afiliados` --por el que
- * el expediente afirmaba «el sitio dice 60» cuando el sitio no decía nada-- y
- * `contacto_correo_destino`, etiquetado «Correo que recibe los formularios»
- * cuando ningún formulario lo leía.
- *
- * Comprobada en rojo devolviendo cualquiera de los tres al sembrador.
+ * Rotura: devolver al sembrador un ajuste que ninguna vista lee, como
+ * `hero_subtitulo` o `cifra_afiliados`.
  */
 class AjustesQueSirvenParaAlgoTest extends TestCase
 {
@@ -90,8 +85,8 @@ class AjustesQueSirvenParaAlgoTest extends TestCase
      * Quitar una clave del sembrador no la quita de la base, y el panel arma su
      * formulario **desde la base** (`AjustesDelSitio::form`, `Setting::query()`).
      * Sin esta limpieza, un ajuste retirado sigue apareciéndole a la oficina en
-     * producción para siempre: el mismo defecto que se venía a arreglar, ahora
-     * sin nadie que lo pueda encontrar leyendo el código.
+     * producción para siempre: el mismo defecto de arriba, y sin nadie que lo
+     * pueda encontrar leyendo el código.
      *
      * La lista es explícita y no «todo lo que no esté en el sembrador» a
      * propósito: un borrado por diferencia sobre datos reales es un modo de
@@ -123,8 +118,8 @@ class AjustesQueSirvenParaAlgoTest extends TestCase
 
     /**
      * Los trece textos que el rediseño editorial de la portada y del directorio
-     * dejó sin vista (SUITE-01, 13 sep 2026). Salir del sembrador no basta: sin
-     * estar en `JUBILADOS`, producción los sigue ofreciendo en el panel.
+     * dejó sin vista. Salir del sembrador no basta: sin estar en `JUBILADOS`,
+     * producción los sigue ofreciendo en el panel.
      *
      * La lista va escrita aquí y no leída del sembrador a propósito: quitar una
      * clave de `JUBILADOS` tiene que ponerse rojo.

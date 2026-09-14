@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * HOME-FINAL-04: la franja de Eventos de la portada solo pinta agenda real,
- * con enlaces de detalle y secuencia, sin mezclar iniciativas ni empleo.
+ * La franja de Eventos de la portada solo pinta agenda real, con enlaces de
+ * detalle y secuencia, sin mezclar iniciativas ni empleo.
  *
  * Roturas: href="#"; devolver la tarjeta de vacantes; pintar un único
  * protagonista cuando hay tres próximos; controles sin nombre accesible.
@@ -48,8 +48,8 @@ class EventosEditorialesDeLaPortadaTest extends TestCase
         $this->assertStringNotContainsString('href="'.route('empleo.index').'"', $seccion);
         $this->assertStringNotContainsString('href="'.route('quienes-somos').'#iniciativas"', $seccion);
         $this->assertStringNotContainsString('Ver vacantes', $seccion);
-        // Literal y no ajuste(): portada_empleo_titulo se jubiló el 13 sep, y
-        // una aguja vacía hace fallar assertStringNotContainsString siempre.
+        // Literal y no ajuste(): portada_empleo_titulo está jubilado, y una
+        // aguja vacía hace fallar assertStringNotContainsString siempre.
         $this->assertStringNotContainsString('Bolsa de empleo', $seccion);
         $this->assertStringNotContainsString(ajuste('iniciativas_titulo'), $seccion);
 
@@ -58,8 +58,8 @@ class EventosEditorialesDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('aria-label="Ver el evento siguiente"', $seccion);
 
         // Los puntos solo pintan un número con aria-hidden: sin aria-label
-        // son botones sin nombre (MUT-06). `\s` y no `\b` delante del atributo:
-        // `\b` también casa tras `:` y aceptaba un `:aria-label` sin nombre servido.
+        // son botones sin nombre. `\s` y no `\b` delante del atributo: `\b`
+        // también casa tras `:` y aceptaría un `:aria-label` sin nombre servido.
         $this->assertSame(
             $proximos->count(),
             preg_match_all('/<button\b(?=[^>]*home-editorial-eventos__punto)(?=[^>]*\saria-label="Ir al evento )[^>]*>/', $seccion),

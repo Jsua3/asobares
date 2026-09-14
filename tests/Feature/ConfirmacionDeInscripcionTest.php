@@ -17,10 +17,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * «Ninguna inscripción se confirma sin una transacción aprobada» era una regla
- * escrita en el texto de ayuda del formulario, no en el código: el selector de
- * estado del panel era editable, así que la secretaría podía marcar
- * «Confirmada» a mano y regalar un cupo de un evento de pago.
+ * «Ninguna inscripción se confirma sin una transacción aprobada» no puede ser
+ * solo una regla escrita en el texto de ayuda del formulario: con el selector
+ * de estado del panel editable, la secretaría podría marcar «Confirmada» a mano
+ * y regalar un cupo de un evento de pago.
  */
 class ConfirmacionDeInscripcionTest extends TestCase
 {
@@ -33,7 +33,7 @@ class ConfirmacionDeInscripcionTest extends TestCase
 
         // El cerrojo vigila a quien escribe con sesión abierta en el panel:
         // las semillas, los comandos y el webhook de la pasarela pasan por
-        // otro camino. La secretaría es justo el rol del hallazgo.
+        // otro camino. La secretaría es justo el rol que podría confirmar a mano.
         $secretaria = User::factory()->create();
         $secretaria->syncRoles([User::ROL_SUBADMIN]);
         $this->actingAs($secretaria->fresh());

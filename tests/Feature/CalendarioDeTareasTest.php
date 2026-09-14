@@ -11,15 +11,14 @@ use Tests\TestCase;
 /**
  * Que las tres purgas de datos personales sigan teniendo quien las dispare.
  *
- * Las purgas estaban escritas, configuradas y probadas --`DepuracionDeBolsasTest`,
+ * Las purgas están escritas, configuradas y probadas --`DepuracionDeBolsasTest`,
  * `DepuracionDeMensajesTest` y `DepuracionDeInscripcionesTest` verifican que
- * BORRAN bien-- pero ninguna prueba miraba si alguien las LLAMA. Borrar las tres
- * líneas de `routes/console.php` dejaba la suite entera en verde y el sitio
+ * BORRAN bien-- pero esas pruebas no miran si alguien las LLAMA. Borrar las tres
+ * líneas de `routes/console.php` dejaría la suite entera en verde y el sitio
  * incumpliendo en silencio la Ley 1581 y lo que promete `/politica-de-datos`:
  * «Pasado cada plazo, el borrado es automático».
  *
- * Esta clase es esa guarda. Comprobada en rojo el 9 de septiembre de 2026
- * comentando las tres tareas del calendario.
+ * Esta clase es esa guarda. Rotura: comentar las tres tareas del calendario.
  *
  * ⚠️ Lo que esta prueba NO puede comprobar, y hay que verificar a mano: que el
  * entorno de producción ejecute `schedule:run` cada minuto. En Laravel Cloud eso

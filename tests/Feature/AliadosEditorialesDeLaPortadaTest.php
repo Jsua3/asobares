@@ -13,8 +13,8 @@ use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
- * HOME-FINAL-07: la portada muestra aliados como franja institucional,
- * no como listado administrativo ni como detalle de convenio.
+ * La portada muestra aliados como franja institucional, no como listado
+ * administrativo ni como detalle de convenio.
  *
  * Roturas: pintar detalle_convenio; href="#"; placeholder abstracto;
  * mezclar niveles; mostrar borradores; inventar destino.
@@ -148,7 +148,7 @@ class AliadosEditorialesDeLaPortadaTest extends TestCase
     }
 
     /**
-     * MUT-12: la prueba de arriba solo crea aliados con logo null y busca la
+     * La prueba de arriba solo crea aliados con logo null y busca la
      * palabra esImagenDeRelleno en el archivo. Aquí se ejerce el filtro: un
      * logo que no está en el disco y uno de relleno del demo (md5.png, aunque
      * exista) caen al nombre sin <img>; uno real sí se pinta, para que la

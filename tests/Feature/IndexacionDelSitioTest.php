@@ -8,12 +8,11 @@ use Tests\TestCase;
 /**
  * Mientras el gremio no tenga dominio propio, el sitio no se deja indexar.
  *
- * D-08 llevaba semanas anotada como «decidir `noindex` antes del lanzamiento»,
- * y leerla así escondía lo importante: el daño **se estaba haciendo ya**. El
- * sitio servía `Allow: /`, publicaba su sitemap y --lo peor-- clavaba una
- * etiqueta canónica apuntando a `asobares-production-0jhdcz.laravel.cloud`. O
- * sea, le decía a Google todos los días que la versión autorizada de cada
- * página del gremio vive en un host desechable que nadie va a conservar.
+ * Dejar el `noindex` para el lanzamiento esconde lo importante: el daño **se hace
+ * ya**. Un sitio que sirve `Allow: /`, publica su sitemap y --lo peor-- clava una
+ * etiqueta canónica apuntando al host provisional de Laravel Cloud le dice a
+ * Google todos los días que la versión autorizada de cada página del gremio
+ * vive en un host desechable que nadie va a conservar.
  *
  * La decisión se gobierna con una variable y no con un cambio de código, para
  * que abrirlo el día del dominio sea poner `SITIO_INDEXABLE=true` y redesplegar.

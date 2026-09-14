@@ -13,20 +13,17 @@ use Tests\TestCase;
 /**
  * El indicador de foco es el RNF-12, no un pulido.
  *
- * `app.css` declaraba desde el principio un `:focus-visible` que cumple, y aun
- * así los formularios del sitio llevaban seis meses sin indicador válido: dos
- * vistas escribían `focus:outline-none`, que compila en `@layer utilities` y
- * gana a `@layer base` por orden de capa —sin que la especificidad entre en
- * juego—, y lo cambiaban por un anillo translúcido de 2,21:1. El resultado no
- * era «sin foco», que se habría denunciado el primer día: era un foco de 2,21:1,
- * visible lo justo para que nadie mirara y por debajo del 3:1 de WCAG 2.1
- * §1.4.11.
+ * `app.css` declara un `:focus-visible` que cumple, y basta una vista con
+ * `focus:outline-none` para anularlo: compila en `@layer utilities` y gana a
+ * `@layer base` por orden de capa —sin que la especificidad entre en juego—.
+ * Si además lo cambia por un anillo translúcido de 2,21:1, el resultado no es
+ * «sin foco», que se denunciaría el primer día: es un foco de 2,21:1, visible
+ * lo justo para que nadie mire y por debajo del 3:1 de WCAG 2.1 §1.4.11.
  *
- * Ninguna prueba del repositorio miraba el foco ni renderizaba
- * `<x-publico.campo>`, y por eso la brecha convivió con la suite en verde. Esta
- * clase es lo que impide que se reabra: dos guardias estructurales que barren
- * las vistas, una numérica que mide con la fórmula de WCAG, y dos que fijan el
- * comportamiento del componente.
+ * Una brecha así convive con la suite en verde si ninguna prueba mira el foco
+ * ni renderiza `<x-publico.campo>`. Esta clase es lo que impide que se abra:
+ * dos guardias estructurales que barren las vistas, una numérica que mide con
+ * la fórmula de WCAG, y dos que fijan el comportamiento del componente.
  */
 class FocoVisibleTest extends TestCase
 {
@@ -60,11 +57,10 @@ class FocoVisibleTest extends TestCase
 
     /**
      * Barre `resources/views` ENTERA y no los siete directorios de
-     * `MovimientoTest`. La segunda ocurrencia de `focus:outline-none` —el select
-     * de postulaciones de `mi-cuenta/vacantes/show`— es justo la que ningún
-     * documento registraba, porque la auditoría se detuvo en el componente. Un
-     * barrido con lista de directorios vuelve a dejar fuera lo que se añada
-     * mañana en un directorio nuevo.
+     * `MovimientoTest`: un `focus:outline-none` puede vivir fuera de los
+     * componentes —en el select de postulaciones de `mi-cuenta/vacantes/show`,
+     * por ejemplo—, y un barrido con lista de directorios deja fuera lo que se
+     * añada mañana en un directorio nuevo.
      */
     public function test_ninguna_vista_anula_el_indicador_de_foco(): void
     {
@@ -103,11 +99,10 @@ class FocoVisibleTest extends TestCase
      * `outline-offset` hace que el trazo se dibuje SOBRE el contenedor, que unas
      * veces es la página y otras una `.tarjeta`.
      *
-     * Recalculado en esta sesión contra `--color-marca-500: #ee4137`: 3,4900 /
-     * 3,8555 / 5,1496 / 4,9161. El peor de los cuatro es el claro sobre
-     * `--asb-fondo`, y le sobra un 16 % sobre el mínimo: no es un aprobado
-     * raspado, pero tampoco tanto margen como para que un rojo un punto más
-     * claro siga pasando.
+     * Medido contra `--color-marca-500: #ee4137`: 3,4900 / 3,8555 / 5,1496 /
+     * 4,9161. El peor de los cuatro es el claro sobre `--asb-fondo`, y le sobra
+     * un 16 % sobre el mínimo: no es un aprobado raspado, pero tampoco tanto
+     * margen como para que un rojo un punto más claro siga pasando.
      */
     public function test_el_indicador_de_foco_alcanza_3_a_1_en_los_dos_temas(): void
     {
@@ -223,10 +218,10 @@ class FocoVisibleTest extends TestCase
 
         /*
          * Y la calibración, que es lo que impide que esta prueba pase por estar
-         * vacía. Fija el número histórico: el anillo que el sitio llevaba puesto
-         * daba 2,21:1 sobre el fondo claro. Si algún día esta línea empieza a
-         * fallar es que la paleta cambió, y entonces hay que rehacer las cifras
-         * de arriba antes de fiarse del barrido.
+         * vacía. Fija un valor conocido: el anillo translúcido al 60 % da 2,21:1
+         * sobre el fondo claro. Si algún día esta línea empieza a fallar es que
+         * la paleta cambió, y entonces hay que rehacer las cifras de arriba antes
+         * de fiarse del barrido.
          */
         $this->assertSame(
             1,
@@ -243,11 +238,11 @@ class FocoVisibleTest extends TestCase
     // --- D y E. El componente ---
 
     /**
-     * La ayuda del campo nunca estuvo asociada al control: `aria-describedby`
-     * solo se emitía al errar, así que las once ayudas del sitio no existían
-     * para un lector de pantalla ni cuando se veían en pantalla (SC 1.3.1). Y al
-     * fallar la validación, la ayuda desaparecía: la persona perdía justo la
-     * instrucción que acababa de incumplir.
+     * La ayuda del campo se asocia al control siempre, no solo al errar: con
+     * `aria-describedby` solo en el error, las ayudas del sitio no existirían
+     * para un lector de pantalla ni cuando se ven en pantalla (SC 1.3.1). Y la
+     * ayuda sobrevive a un fallo de validación: si desapareciera, la persona
+     * perdería justo la instrucción que acaba de incumplir.
      */
     public function test_el_campo_asocia_la_ayuda_y_el_error_con_el_control(): void
     {
@@ -275,7 +270,7 @@ class FocoVisibleTest extends TestCase
             $conError
         );
 
-        // El corazón del arreglo: la ayuda SOBREVIVE al error.
+        // Lo esencial: la ayuda SOBREVIVE al error.
         $this->assertStringContainsString('Te avisamos por aqui.', $conError);
         $this->assertStringContainsString('Ese correo no parece valido.', $conError);
     }

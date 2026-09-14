@@ -12,11 +12,11 @@ use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
 
 /**
- * G12 (Ley 1581): las inscripciones a eventos guardaban nombre, correo y
- * teléfono sin ningún plazo. El fin autorizado —participar en el evento— se
- * agota cuando el evento pasa; el registro contable del pago no se pierde,
- * porque `transacciones.inscripcion_id` es `nullOnDelete`: la transacción
- * (referencia, monto, estado) sobrevive sin el dato personal.
+ * Ley 1581: las inscripciones a eventos guardan nombre, correo y teléfono, y
+ * el fin autorizado —participar en el evento— se agota cuando el evento pasa;
+ * el registro contable del pago no se pierde: `transacciones.inscripcion_id`
+ * es `nullOnDelete`, así que la transacción (referencia, monto, estado)
+ * sobrevive sin el dato personal.
  */
 class DepuracionDeInscripcionesTest extends TestCase
 {

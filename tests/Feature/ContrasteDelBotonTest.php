@@ -11,16 +11,16 @@ use Tests\TestCase;
  *
  * Pub Red #EE4137 con rótulo blanco da **3,86:1**, y RNF-12 pide 4,5:1 para
  * texto normal. Los botones de acción del sitio --«Afíliate», «Enviar»,
- * «Filtrar», la página actual del paginador, la insignia «Destacado»-- lo
- * llevaban, así que el rótulo más importante de la página no cumplía. Y fallaba
- * en los DOS temas: el relleno del botón es el mismo rojo en claro y en oscuro,
- * de modo que el contraste no depende del fondo de la página.
+ * «Filtrar», la página actual del paginador, la insignia «Destacado»-- con ese
+ * relleno dejarían el rótulo más importante de la página por debajo del
+ * mínimo, y en los DOS temas: el relleno del botón es el mismo rojo en claro y
+ * en oscuro, de modo que el contraste no depende del fondo de la página.
  *
  * `--asb-accion` (marca 600) da 4,83:1 y su hover (marca 700) 6,52:1.
  *
- * Es la misma decisión que `tokens.css` ya había tomado para el caso contrario
- * --texto rojo sobre fondo claro, que usa marca 700 y no Pub Red-- aplicada
- * ahora al blanco sobre rojo.
+ * Es la misma decisión que `tokens.css` toma para el caso contrario --texto
+ * rojo sobre fondo claro, que usa marca 700 y no Pub Red-- aplicada al blanco
+ * sobre rojo.
  *
  * ⚠️ **Esto no persigue a `bg-marca-500` en general.** El rojo de marca se
  * queda donde no hay texto encima: puntos indicadores, tintes al 15 %, el

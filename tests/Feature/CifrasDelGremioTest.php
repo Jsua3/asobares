@@ -13,7 +13,7 @@ use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
- * La franja «El gremio en cifras» de la portada (D-25, opción 1; Acta 05).
+ * La franja «El gremio en cifras» de la portada (Acta 05).
  *
  * Cuatro cifras del capítulo que la oficina teclea en el panel cada quince
  * días con el archivo de la contadora. Tres reglas: vacía no se pinta —el
@@ -158,9 +158,9 @@ class CifrasDelGremioTest extends TestCase
 
     /**
      * `SettingSeeder` hace `updateOrCreate`: volver a sembrar —para añadir
-     * un texto nuevo, por ejemplo— devolvía las cifras a vacío y la franja
-     * desaparecía sin aviso. Las cifras las escribe la oficina, no el
-     * sembrador (D-14 sigue abierta para el resto de ajustes).
+     * un texto nuevo, por ejemplo— devolvería las cifras a vacío y la franja
+     * desaparecería sin aviso. Las cifras las escribe la oficina, no el
+     * sembrador.
      */
     public function test_resembrar_no_pisa_las_cifras_que_tecleo_la_oficina(): void
     {

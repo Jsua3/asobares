@@ -88,13 +88,13 @@ class FormulariosPublicosTest extends TestCase
         Mail::assertNothingOutgoing();
     }
 
-    // --- Vuelta anclada tras un error de validación (RUT-03) ---
+    // --- Vuelta anclada tras un error de validación ---
 
     /**
-     * La redirección de validación volvía a la URL previa sin ancla: en un
-     * teléfono el formulario del evento queda pantalla y media por debajo del
-     * hero, y la persona no veía ningún error. Se envía desde la propia ficha
-     * para que la URL previa exista y la prueba distinga el ancla.
+     * Una redirección de validación a la URL previa sin ancla esconde el error:
+     * en un teléfono el formulario del evento queda pantalla y media por debajo
+     * del hero. Se envía desde la propia ficha para que la URL previa exista y
+     * la prueba distinga el ancla.
      */
     public function test_una_inscripcion_invalida_vuelve_anclada_al_formulario_del_evento(): void
     {
@@ -179,7 +179,7 @@ class FormulariosPublicosTest extends TestCase
         $this->assertNotNull($aspirante->consentimiento_at);
     }
 
-    // --- Política de datos (B3: el consentimiento cubre lo que el sistema hace de verdad) ---
+    // --- Política de datos (el consentimiento cubre lo que el sistema hace de verdad) ---
 
     public function test_la_politica_de_datos_explica_la_entrega_a_terceros_al_postularse(): void
     {
@@ -411,7 +411,7 @@ class FormulariosPublicosTest extends TestCase
     }
 
     /**
-     * B2: el asociado publica su propia vacante, y el afiliado recién
+     * El asociado publica su propia vacante, y el afiliado recién
      * llegado —con la ficha todavía pendiente de aprobación— es justo quien
      * más rápido publica una. Enlazar su ficha desde el muro daría un 404,
      * así que se muestra el nombre como texto plano.
@@ -458,7 +458,7 @@ class FormulariosPublicosTest extends TestCase
         $respuesta->assertSee(route('directorio.show', $asociado), escape: false);
     }
 
-    // --- Selects obligatorios (N3: sin opción vacía, el navegador preselecciona la primera) ---
+    // --- Selects obligatorios (sin opción vacía, el navegador preselecciona la primera) ---
 
     public function test_la_inscripcion_de_artistas_antepone_una_opcion_vacia_a_sus_selects_obligatorios(): void
     {
@@ -586,8 +586,8 @@ class FormulariosPublicosTest extends TestCase
     }
 
     /**
-     * PANEL-06: `Str::plural('mes', 3)` pluraliza en inglés y devolvía «mes»,
-     * así que la tarjeta de mora decía «Debes 3 mes».
+     * `Str::plural('mes', 3)` pluraliza en inglés y devuelve «mes»: con él, la
+     * tarjeta de mora diría «Debes 3 mes».
      */
     #[DataProvider('mesesDeMora')]
     public function test_la_tarjeta_de_mora_concuerda_los_meses_en_espanol(int $meses, string $palabra): void

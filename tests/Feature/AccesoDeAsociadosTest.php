@@ -14,13 +14,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Los contactos de proveedores y el banco de talento dejaron de ser publicos:
- * son la contraprestacion de la cuota, no contenido de vitrina.
+ * Los contactos de proveedores y el banco de talento no son públicos: son la
+ * contraprestación de la cuota, no contenido de vitrina.
  *
- * Lo que se fija aqui es la frontera, que es lo unico que no se puede
- * comprobar mirando la pagina: que un anonimo no llegue, que un afiliado si,
- * que el equipo del gremio siga entrando por el panel y no por aqui, y --lo
- * mas facil de romper sin darse cuenta-- que la pagina publica que quedo en
+ * Lo que se fija aquí es la frontera, que es lo único que no se puede
+ * comprobar mirando la página: que un anónimo no llegue, que un afiliado sí,
+ * que el equipo del gremio siga entrando por el panel y no por aquí, y --lo
+ * más fácil de romper sin darse cuenta-- que la página pública que sigue en
  * pie no filtre ni un correo.
  */
 class AccesoDeAsociadosTest extends TestCase
@@ -87,8 +87,8 @@ class AccesoDeAsociadosTest extends TestCase
 
     /**
      * El equipo del gremio no entra por /mi-cuenta: tiene el panel. No es un
-     * 403 seco sino la vista que explica que sesion hay abierta, porque llegar
-     * aqui con la sesion del panel pasa en cada demostracion.
+     * 403 seco sino la vista que explica qué sesión hay abierta, porque llegar
+     * aquí con la sesión del panel pasa en cada demostración.
      */
     public function test_el_equipo_del_gremio_no_entra_por_la_cuenta_del_afiliado(): void
     {
@@ -104,7 +104,7 @@ class AccesoDeAsociadosTest extends TestCase
             ->assertForbidden();
     }
 
-    // --- Lo que la cara publica ya no puede decir ---
+    // --- Lo que la cara pública no puede decir ---
 
     public function test_la_pagina_publica_de_proveedores_sigue_abierta_y_no_filtra_contactos(): void
     {
@@ -123,9 +123,9 @@ class AccesoDeAsociadosTest extends TestCase
     }
 
     /**
-     * La pagina publica sigue indexable a proposito: cerrar la URL entera
-     * habria mandado a un login seco a quien llega desde un buscador. Lo que
-     * si tiene que hacer es contar cuantos hay, que es el argumento de venta.
+     * La página pública sigue indexable a propósito: cerrar la URL entera
+     * mandaría a un login seco a quien llega desde un buscador. Lo que sí
+     * tiene que hacer es contar cuántos hay, que es el argumento de venta.
      */
     public function test_la_pagina_publica_cuenta_los_proveedores_sin_nombrarlos(): void
     {
@@ -156,9 +156,9 @@ class AccesoDeAsociadosTest extends TestCase
     }
 
     /**
-     * Hasta el 8 de septiembre, quien dejaba su perfil en /empleo quedaba
-     * visible para todos los establecimientos afiliados en el mismo segundo,
-     * sin que nadie lo mirara. Son datos personales de un tercero.
+     * Sin esta aprobación, quien deja su perfil en /empleo quedaría visible
+     * para todos los establecimientos afiliados en el mismo segundo, sin que
+     * nadie lo mire. Son datos personales de un tercero.
      */
     public function test_el_banco_no_muestra_a_quien_la_secretaria_no_ha_aprobado(): void
     {
@@ -173,29 +173,19 @@ class AccesoDeAsociadosTest extends TestCase
     }
 
     /**
-     * Misma regla que una vacante publicada que su dueño edita: si el contenido
-     * cambia despues de aprobado, vuelve a la cola. Si no, aprobar una vez seria
-     * una llave para cambiar el perfil por cualquier otra cosa.
-     */
-    /**
-     * ⚠️ Esta prueba cambió de contenido el 9 de septiembre de 2026, y conviene
-     * saber por qué.
+     * **Un perfil ya aprobado no se toca desde el formulario público**: ni se
+     * sobrescribe ni se desaprueba. Para cambiarlo hay que escribirle al
+     * gremio, y la secretaría lo edita desde el panel.
      *
-     * Antes afirmaba que volver a enviar el formulario sobrescribía el perfil y
-     * lo devolvía a revisión. La intención era buena --que aprobar una vez no
-     * fuera una llave para cambiar el perfil por cualquier otra cosa sin que
-     * nadie lo mirara-- pero el mecanismo abría un agujero: la clave de
+     * La alternativa obvia --que reenviar el formulario sobrescriba el perfil y
+     * lo devuelva a revisión, para que aprobar una vez no sea una llave para
+     * cambiarlo por cualquier otra cosa-- abre un agujero: la clave de
      * `updateOrCreate` es un CORREO QUE TECLEA UN ANÓNIMO, sin verificación
-     * ninguna. Con eso, quien conociera el correo de alguien del banco podía
+     * ninguna. Con eso, quien conociera el correo de alguien del banco podría
      * reescribirle nombre, teléfono y cargo --desviando a los establecimientos
      * hacia otro número-- y, peor, sacarlo del banco con solo enviar el
-     * formulario, porque cada envío ponía `aprobado_el` en nulo. A seis envíos
-     * por minuto, vaciar el banco entero era cuestión de rato.
-     *
-     * La regla nueva cumple la misma intención y cierra el agujero: **un perfil
-     * ya aprobado no se toca desde el formulario público**. Ni se sobrescribe ni
-     * se desaprueba. Para cambiarlo hay que escribirle al gremio, y la
-     * secretaría lo edita desde el panel.
+     * formulario, porque cada envío pondría `aprobado_el` en nulo. A seis
+     * envíos por minuto, vaciar el banco entero sería cuestión de rato.
      */
     public function test_un_perfil_ya_aprobado_no_se_puede_sobrescribir_desde_el_formulario(): void
     {
@@ -222,9 +212,9 @@ class AccesoDeAsociadosTest extends TestCase
     }
 
     /**
-     * El daño más barato del agujero anterior: no hacía falta ni suplantar a
-     * nadie, bastaba con enviar el formulario con el correo de la víctima para
-     * que `aprobado_el` volviera a nulo y su perfil desapareciera del banco.
+     * El daño más barato de ese agujero: no hace falta ni suplantar a nadie,
+     * basta con enviar el formulario con el correo de la víctima para que
+     * `aprobado_el` vuelva a nulo y su perfil desaparezca del banco.
      */
     public function test_un_tercero_no_puede_sacar_del_banco_a_un_perfil_aprobado(): void
     {
@@ -296,14 +286,14 @@ class AccesoDeAsociadosTest extends TestCase
         );
     }
 
-    // --- Artistas: el contacto tambien es contraprestacion de la cuota ---
+    // --- Artistas: el contacto también es contraprestación de la cuota ---
 
     /**
-     * La ficha del artista NO se vacia como se vacio la de proveedores, y la
-     * diferencia es deliberada: el escaparate --nombre, foto, genero, video--
-     * es lo que el artista viene a buscar al inscribirse, y sacarlo del indice
-     * le quitaria el motivo. Lo que se va detras de la sesion es el contacto,
-     * que es lo que el afiliado paga.
+     * La ficha del artista NO se vacía como la de proveedores, y la diferencia
+     * es deliberada: el escaparate --nombre, foto, género, video-- es lo que el
+     * artista viene a buscar al inscribirse, y sacarlo del índice le quitaría
+     * el motivo. Lo que se va detrás de la sesión es el contacto, que es lo que
+     * el afiliado paga.
      */
     public function test_la_ficha_publica_del_artista_conserva_el_escaparate_pero_no_el_contacto(): void
     {
@@ -355,8 +345,8 @@ class AccesoDeAsociadosTest extends TestCase
     }
 
     /**
-     * El directorio del afiliado no es una puerta trasera a la moderacion: lo
-     * que la secretaria no ha aprobado no se ve aqui tampoco.
+     * El directorio del afiliado no es una puerta trasera a la moderación: lo
+     * que la secretaría no ha aprobado no se ve aquí tampoco.
      */
     public function test_un_artista_sin_aprobar_no_sale_en_el_directorio_del_afiliado(): void
     {

@@ -18,9 +18,9 @@ use Tests\TestCase;
  * el sitio y no se puede editar desde ningún lado: RNF-09 roto sin que nada
  * se ponga rojo.
  *
- * La auditoría del 13 de septiembre de 2026 encontró ocho así (COD-04), todos
- * de la portada editorial: cuatro subtítulos de sección, la frase y el botón
- * del cierre, y el rótulo y el pie de la pauta.
+ * El caso típico es un texto de la portada editorial --un subtítulo de
+ * sección, la frase o el botón del cierre, el rótulo o el pie de la pauta-- que
+ * entra en la vista con su respaldo y no en el sembrador.
  *
  * No toca la base: lee las vistas del disco y el sembrador por reflexión.
  */

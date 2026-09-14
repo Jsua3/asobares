@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * HOME-07.2: la cinta es una barra editorial de navegación — isotipo fijo,
- * rótulos cortos y destinos reales. El CTA no se vuelve a tocar.
+ * La cinta es una barra editorial de navegación — isotipo fijo, rótulos
+ * cortos y destinos reales.
  *
  * Roturas: devolver el fondo rojo; meter el logo en el track; href="#";
  * volver a los rótulos largos en mayúsculas.
@@ -82,8 +82,8 @@ class CintaEditorialDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('img/monograma-asobares.png', $cinta);
         $this->assertStringContainsString('href="'.route('inicio').'"', $cinta);
 
-        // MUT-07: el enlace a inicio solo contiene el isotipo, así que su
-        // nombre es el alt; y un <aside> sin etiqueta no se distingue de
+        // El enlace a inicio solo contiene el isotipo, así que su nombre
+        // accesible es el alt; y un <aside> sin etiqueta no se distingue de
         // otros complementarios.
         $nombreDelSitio = (string) ajuste('sitio_nombre');
 

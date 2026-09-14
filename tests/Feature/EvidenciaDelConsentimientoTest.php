@@ -22,13 +22,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * G12 (Ley 1581): el consentimiento se guardaba sin evidencia. Un booleano y
- * una fecha no responden lo que la SIC pregunta ante un reclamo del titular:
- * desde dónde se autorizó, con qué navegador y qué versión de la política
- * estaba publicada al aceptar. El sello vive en un único trait
- * (`ProtegeFormularioPublico`), así que la evidencia cubre los seis
- * formularios públicos a la vez — y aquí se verifica en cada uno, porque un
- * formulario que dejara de usar el trait perdería la constancia en silencio.
+ * Ley 1581: un booleano y una fecha no bastan como evidencia del
+ * consentimiento, porque no responden lo que la SIC pregunta ante un reclamo
+ * del titular: desde dónde se autorizó, con qué navegador y qué versión de la
+ * política estaba publicada al aceptar. El sello vive en un único trait
+ * (`ProtegeFormularioPublico`), que usan los siete formularios públicos; aquí
+ * se verifica en seis de ellos, uno por uno, porque un formulario que dejara
+ * de usar el trait perdería la constancia en silencio.
  */
 class EvidenciaDelConsentimientoTest extends TestCase
 {
@@ -144,9 +144,9 @@ class EvidenciaDelConsentimientoTest extends TestCase
     }
 
     /**
-     * La política publicada tiene que decir lo que el sistema hace de verdad
-     * (G12): los plazos se leen de la configuración, no de un texto que se
-     * quede viejo cuando alguien cambie una variable.
+     * La política publicada tiene que decir lo que el sistema hace de verdad:
+     * los plazos se leen de la configuración, no de un texto que se quede
+     * viejo cuando alguien cambie una variable.
      */
     public function test_la_politica_publica_los_plazos_reales_de_retencion(): void
     {

@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Vite;
 use Tests\TestCase;
 
 /**
- * DIR-01: el Directorio carga la capa editorial híbrida sin perder
- * filtros, pestañas ni destinos reales.
+ * El Directorio carga la capa editorial híbrida sin perder filtros, pestañas ni
+ * destinos reales.
  */
 class DirectorioEditorialHibridoTest extends TestCase
 {
@@ -24,9 +24,9 @@ class DirectorioEditorialHibridoTest extends TestCase
 
         $this->assertStringContainsString('directorio-editorial', $html);
         /*
-         * SUITE-02: la hoja se busca por la URL que Vite resuelve y no por el
-         * literal `directorio-editorial.css`, que solo existe con public/hot:
-         * tras `npm run build` el archivo lleva hash y la prueba fallaba sin
+         * La hoja se busca por la URL que Vite resuelve y no por el literal
+         * `directorio-editorial.css`, que solo existe con public/hot: tras
+         * `npm run build` el archivo lleva hash y la prueba fallaría sin
          * defecto. Rotura: quitar el @vite de la hoja del directorio.
          */
         $this->assertStringContainsString(
@@ -91,10 +91,10 @@ class DirectorioEditorialHibridoTest extends TestCase
     }
 
     /**
-     * MUT-08: los ids del panel y de la hoja sobreviven aunque se vacíen, y
-     * «Buscar por nombre» sale dos veces, así que buscar literales no
-     * protegía los filtros. Aquí se cuenta el formulario dentro de cada
-     * contenedor y se sigue el cableado del botón móvil hasta la hoja.
+     * Los ids del panel y de la hoja sobreviven aunque se vacíen, y «Buscar
+     * por nombre» sale dos veces, así que buscar literales no protege los
+     * filtros. Aquí se cuenta el formulario dentro de cada contenedor y se
+     * sigue el cableado del botón móvil hasta la hoja.
      *
      * Roturas: borrar el <x-publico.filtros-directorio> de la hoja móvil;
      * borrar el del panel de escritorio; quitar x-on:click="abrirDrawer()"

@@ -14,8 +14,8 @@ use Tests\TestCase;
 /**
  * La guardia del despliegue remoto (riesgo R-14).
  *
- * Todo lo que hay aquí se rompió alguna vez sin que nadie se enterara, o se
- * habría roto en el primer despliegue. Son tres familias:
+ * Lo que se vigila aquí falla sin avisar: la suite local sigue verde y el
+ * defecto solo asoma en el entorno remoto. Son tres familias:
  *
  * 1. La coraza de configuración: qué se endurece y en qué entornos.
  * 2. La semántica que cambia entre SQLite y PostgreSQL. Ojo: la suite corre
@@ -43,9 +43,9 @@ class ConfiguracionDeDespliegueTest extends TestCase
     // -----------------------------------------------------------------------
 
     /**
-     * La coraza estaba atada a `production` mientras el hosting no existía. El
-     * entorno de Laravel Cloud se llama `staging` (§20.5), así que el único
-     * entorno realmente expuesto era justo el que no se endurecía.
+     * La coraza no se ata solo a `production`: el entorno de Laravel Cloud se
+     * llama `staging`, y atarla a `production` dejaría sin endurecer justo el
+     * entorno expuesto.
      *
      * @return array<string, array{string}>
      */
@@ -91,10 +91,9 @@ class ConfiguracionDeDespliegueTest extends TestCase
 
     /**
      * `MAIL_MAILER=log` escribe el cuerpo de cada PQR —con el nombre, el
-     * correo y el teléfono del ciudadano— en el registro. El §20.5.3 lo
-     * proponía como modo de emergencia mientras no hubiera proveedor de
-     * correo; se mantiene el rechazo y se despliega con SMTP desde el primer
-     * día. Los códigos MFA se leen por `stderr`, que no arrastra las PQR.
+     * correo y el teléfono del ciudadano— en el registro. Es tentador como modo
+     * de emergencia sin proveedor de correo, y se rechaza igual: se despliega
+     * con SMTP. Los códigos MFA se leen por `stderr`, que no arrastra las PQR.
      */
     #[DataProvider('entornosExpuestos')]
     public function test_fuera_de_local_no_se_arranca_escribiendo_las_pqr_en_el_registro(string $entorno): void
@@ -212,10 +211,9 @@ class ConfiguracionDeDespliegueTest extends TestCase
     // -----------------------------------------------------------------------
 
     /**
-     * De los veinte sembradores sólo `UsuarioSeeder` se negaba en producción.
-     * `db:seed --force` habría inyectado establecimientos, PQR con datos
-     * personales ficticios y pagos aprobados falsos en el directorio real del
-     * gremio.
+     * Los datos de demostración no entran en producción: ahí `db:seed --force`
+     * inyectaría establecimientos, PQR con datos personales ficticios y pagos
+     * aprobados falsos en el directorio real del gremio.
      */
     public function test_los_datos_de_demostracion_no_entran_en_produccion(): void
     {
@@ -243,8 +241,8 @@ class ConfiguracionDeDespliegueTest extends TestCase
     }
 
     /**
-     * El `.svg` de la marca del panel eran 49 KB de un PNG envuelto en base64
-     * con el MIME mal escrito. El sitio público ya usaba el PNG de verdad.
+     * El `.svg` de la marca son 49 KB de un PNG envuelto en base64 con el MIME
+     * mal escrito. El panel usa el PNG de verdad, igual que el sitio público.
      */
     public function test_el_panel_usa_el_logo_png_y_no_el_falso_vector(): void
     {
@@ -256,7 +254,9 @@ class ConfiguracionDeDespliegueTest extends TestCase
 
     /**
      * El fichero que se copia y pega en las variables del entorno remoto. Cada
-     * línea de aquí abajo es un despliegue que se cayó o se habría caído.
+     * línea de aquí abajo fija un valor del que depende el entorno remoto y que
+     * la suite local no ejercita: la etiqueta de cada caso dice qué garantiza,
+     * y el comentario, cuando lo hay, qué se rompe sin ella.
      *
      * @return array<string, array{string}>
      */
@@ -274,8 +274,10 @@ class ConfiguracionDeDespliegueTest extends TestCase
             'el registro sale por stderr' => ['LOG_STACK=stderr'],
             'la cookie de sesión va segura' => ['SESSION_SECURE_COOKIE=true'],
             'la página de error no se publica' => ['APP_DEBUG=false'],
-            // `resend`, `postmark` y `ses` revientan: no están sus paquetes.
-            'el correo sale por el único transporte instalado' => ['MAIL_MAILER=smtp'],
+            // `smtp` y `ses` funcionan con lo instalado (`ses` usa aws/aws-sdk-php,
+            // que llega con league/flysystem-aws-s3-v3); `resend` y `postmark`
+            // necesitarían paquetes. El entorno remoto sale por SMTP.
+            'el correo sale por smtp' => ['MAIL_MAILER=smtp'],
             'la caché es compartida' => ['CACHE_STORE=database'],
             'el mantenimiento lo ven todas las instancias' => ['APP_MAINTENANCE_DRIVER=cache'],
         ];
@@ -292,8 +294,8 @@ class ConfiguracionDeDespliegueTest extends TestCase
     }
 
     /**
-     * Las variables que el código lee y que no estaban declaradas en ninguna
-     * parte: quien montara el entorno no tenía forma de saber que existían.
+     * Las variables que el código lee: si un ejemplo no las declara, quien
+     * monte el entorno no tiene forma de saber que existen.
      *
      * @return array<string, array{string}>
      */
@@ -303,12 +305,14 @@ class ConfiguracionDeDespliegueTest extends TestCase
             'TRUSTED_PROXIES' => ['TRUSTED_PROXIES'],
             'SESSION_SECURE_COOKIE' => ['SESSION_SECURE_COOKIE'],
             'VALOR_MENSUALIDAD' => ['VALOR_MENSUALIDAD'],
-            // `VALOR_AFILIACION` salió el 9 sep 2026: esta lista es de «variables
-            // que el código lee», y esa no la leía nadie. Ver `config/pagos.php`.
+            // `VALOR_AFILIACION` no va: esta lista es de «variables que el código
+            // lee», y esa no la lee nadie. Ver `config/pagos.php`.
             'SITIO_INDEXABLE' => ['SITIO_INDEXABLE'],
             'SEED_GALERIA' => ['SEED_GALERIA'],
             'QUEUE_CONVERSIONS_BY_DEFAULT' => ['QUEUE_CONVERSIONS_BY_DEFAULT'],
             'MEDIA_DISK' => ['MEDIA_DISK'],
+            'DISCO_PUBLICO' => ['DISCO_PUBLICO'],
+            'DISCO_PRIVADO' => ['DISCO_PRIVADO'],
         ];
     }
 
@@ -325,8 +329,8 @@ class ConfiguracionDeDespliegueTest extends TestCase
     }
 
     /**
-     * El runbook es la mitad entregable de este trabajo: si desaparece, el
-     * despliegue vuelve a ser una tarde de sorpresas.
+     * El runbook es la mitad entregable del despliegue: sin él, desplegar es una
+     * tarde de sorpresas.
      */
     public function test_el_runbook_existe_y_avisa_de_lo_que_muerde(): void
     {
@@ -338,21 +342,21 @@ class ConfiguracionDeDespliegueTest extends TestCase
     }
 
     /**
-     * La trampa que le costó media jornada a la Persona 2 el 19 de agosto: su
-     * PHP (Herd Lite) no trae `intl` ni `gd`, y la suite le devolvió 194
-     * pruebas rotas 350 segundos después en vez de un error inmediato.
+     * Un PHP sin `intl` ni `gd` —Herd Lite, por ejemplo— tiene que fallar al
+     * instalar y no a mitad de la suite, que le devuelve 194 pruebas rotas 350
+     * segundos después en vez de un error inmediato.
      *
-     * La causa está medida, y NO es la que parecía: `ext-intl` ya venía
-     * exigida de forma transitiva por `filament/support`, pero `ext-gd` no la
-     * pide NADIE en todo el árbol de dependencias —`spatie/image` acepta
-     * Imagick como alternativa— y la raíz solo declaraba `php: ^8.3`. Con el
-     * `vendor/` ya instalado, `composer install` ni siquiera vuelve a mirar.
+     * La causa está medida, y NO es la que parece: `ext-intl` llega exigida de
+     * forma transitiva por `filament/support`, pero `ext-gd` no la pide NADIE
+     * en todo el árbol de dependencias —`spatie/image` acepta Imagick como
+     * alternativa—. Con el `vendor/` ya instalado, `composer install` ni
+     * siquiera vuelve a mirar.
      *
      * Declararlas en la raíz las sube al bloque `platform` del `composer.lock`,
      * que es lo que leen `composer install` y `composer check-platform-reqs`:
      * el fallo pasa de 350 segundos disfrazados a un mensaje con el nombre de
-     * la extensión que falta. El README ya las exigía en prosa desde el
-     * principio; esto es hacer que el gestor de paquetes las exija también.
+     * la extensión que falta. El README las exige en prosa; así las exige
+     * también el gestor de paquetes.
      *
      * @return array<string, array{string}>
      */

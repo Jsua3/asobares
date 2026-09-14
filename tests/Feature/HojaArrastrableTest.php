@@ -9,10 +9,9 @@ use Tests\TestCase;
 /**
  * La hoja del teléfono se cierra con el dedo.
  *
- * Las dos hojas de la barra inferior --«Bolsas» y «El gremio»-- están a un
- * dedo del pulgar y eran lo único del sitio que se abría y se cerraba sin
- * poder empujarse. Ahora siguen al dedo 1:1, resisten con goma hacia arriba y
- * al soltar proyectan el momento para decidir si se van.
+ * Las dos hojas de la barra inferior --«Bolsas» y «El gremio»-- están al
+ * alcance del pulgar, así que siguen al dedo 1:1, resisten con goma hacia
+ * arriba y al soltar proyectan el momento para decidir si se van.
  *
  * Lo que estas guardas protegen son las cuatro decisiones que se pagan caras
  * si alguien las deshace sin saber por qué:
@@ -45,11 +44,10 @@ class HojaArrastrableTest extends TestCase
      *
      * No es un lujo: una expresión regular con `.*?` y el modificador `s` se
      * sale del método sin avisar y encuentra la línea que busca en cualquier
-     * otro sitio del archivo. Así se escribió primero la guarda de
-     * `test_reabrir_corta_el_cierre_que_estuviera_en_vuelo`, y al mutarla
-     * --quitando `pararElReloj()` de `abrir()`-- SIGUIÓ PASANDO, porque
-     * encontraba esa misma llamada más abajo, en `tomarLaHoja()`. Un falso
-     * verde de manual, el decimocuarto de este proyecto.
+     * otro sitio del archivo. Con una regex así, la guarda de
+     * `test_reabrir_corta_el_cierre_que_estuviera_en_vuelo` SEGUIRÍA PASANDO
+     * al quitar `pararElReloj()` de `abrir()`, porque encontraría esa misma
+     * llamada más abajo, en `tomarLaHoja()`: un falso verde de manual.
      */
     private function cuerpoDe(string $metodo): string
     {
@@ -194,11 +192,11 @@ class HojaArrastrableTest extends TestCase
      *
      * El 0,998 por defecto multiplica la velocidad por 499 y está calibrado
      * para una lista que se desplaza miles de píxeles. La hoja mide 155.
-     * Medido el 9 sep 2026 sobre «Bolsas»: un arrastre suave de 40 px da unos
-     * 143 px/s, que con 0,998 proyectan 71 px y llevan el reposo a 111 --la
-     * hoja se CERRABA con un tirón corto y suave--. Con 0,99 esos mismos
-     * 143 px/s proyectan 14 px y vuelve a abrirse, mientras que un golpe real
-     * de 45 px en 34 ms (1351 px/s medidos) proyecta 134 px y la cierra.
+     * Medido sobre «Bolsas»: un arrastre suave de 40 px da unos 143 px/s, que
+     * con 0,998 proyectan 71 px y llevan el reposo a 111 --la hoja se CERRARÍA
+     * con un tirón corto y suave--. Con 0,99 esos mismos 143 px/s proyectan
+     * 14 px y vuelve a abrirse, mientras que un golpe real de 45 px en 34 ms
+     * (1351 px/s medidos) proyecta 134 px y la cierra.
      *
      * Rotura: volver a `proyectar(velocidad)` a secas.
      */

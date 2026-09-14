@@ -14,23 +14,21 @@ use Tests\TestCase;
 /**
  * La cola de moderación de fotos, y el defecto que solo existe en PostgreSQL.
  *
- * La primera versión de `ModerarFotos::consultaBase()` filtraba con
- * `whereNot(whereJsonContains(…, true))`. En SQLite funciona; en PostgreSQL
- * NO, y PostgreSQL es donde corre el sitio:
+ * Filtrar `ModerarFotos::consultaBase()` con `whereNot(whereJsonContains(…,
+ * true))` funciona en SQLite y NO en PostgreSQL, que es donde corre el sitio:
  *
  *   not (("custom_properties"->'aprobada')::jsonb @> 'true')
  *
  * Sobre una fila sin la clave, `->` da NULL, `NULL @> 'true'` da NULL, `not
- * NULL` da NULL y el `WHERE` descarta la fila. La foto que más falta hacía
- * moderar --la que nadie marcó, que es el estado de todo lo anterior a la
- * migración de relleno-- era justo la que no aparecía en la cola.
+ * NULL` da NULL y el `WHERE` descarta la fila. La foto que más falta hace
+ * moderar --la que nadie ha marcado-- sería justo la que no aparece en la cola.
  *
  * ⚠️ **Estas pruebas afirman sobre la SQL generada, no sobre el resultado**, y
  * es deliberado. Lo manda el §15 del runbook para este caso exacto: la suite
  * corre en SQLite (`phpunit.xml` fija `:memory:`), donde el defecto no se
  * reproduce, así que una prueba de comportamiento **saldría verde con el
- * código roto**. Se comprobó: volver a `whereNot` deja en verde cualquier
- * aserción sobre conteo de filas. Habría sido el falso verde número trece.
+ * código roto**: con `whereNot`, cualquier aserción sobre conteo de filas
+ * sigue en verde.
  *
  * `toSql()` compila la gramática sin abrir conexión, así que esto corre en
  * cualquier máquina sin PostgreSQL instalado y sin omitir nada.
@@ -52,7 +50,7 @@ class ColaDeFotosTest extends TestCase
     }
 
     /**
-     * El corazón del arreglo: en PostgreSQL la condición tiene que contemplar
+     * Lo esencial: en PostgreSQL la condición tiene que contemplar
      * la clave AUSENTE, y eso se ve porque aparece el `coalesce` que Laravel
      * emite para `whereJsonDoesntContainKey`. Sin esa rama, la lógica
      * trivaluada se come la fila.

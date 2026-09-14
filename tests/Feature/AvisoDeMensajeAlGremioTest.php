@@ -26,17 +26,16 @@ use Tests\TestCase;
 /**
  * Que al gremio le avisen cuando entra un mensaje (Acta 08, A-04).
  *
- * Hasta el 9 de septiembre de 2026 el formulario de contacto guardaba el
- * mensaje y, si era PQR, le mandaba el acuse **al ciudadano**. Al gremio no le
- * avisaba nadie: la única señal era una tarjeta del tablero, o sea que alguien
- * tenía que entrar al panel y mirar. Una PQR tiene plazo legal de respuesta de
- * quince días hábiles (Ley 1755 de 2015) y el reloj corría sin que nadie lo
- * viera.
+ * El formulario de contacto guarda el mensaje y, si es PQR, le manda el acuse
+ * **al ciudadano**. Sin un aviso al gremio, la única señal sería una tarjeta del
+ * tablero, o sea que alguien tendría que entrar al panel y mirar. Una PQR tiene
+ * plazo legal de respuesta de quince días hábiles (Ley 1755 de 2015) y el reloj
+ * corre aunque nadie lo vea.
  *
- * Y el ajuste `contacto_correo_destino` --que el panel ofrece editar con la
- * etiqueta «Correo que recibe los formularios»-- no lo leía **ni una sola línea
- * del proyecto**: la oficina podía cambiarlo, guardarlo y ver el aviso verde sin
- * que cambiara nada.
+ * El aviso va a `contacto_correo_destino`, el ajuste que el panel ofrece editar
+ * con la etiqueta «Correo que recibe los formularios»: si ninguna línea del
+ * proyecto lo leyera, la oficina podría cambiarlo, guardarlo y ver el aviso
+ * verde sin que cambiara nada.
  */
 class AvisoDeMensajeAlGremioTest extends TestCase
 {
