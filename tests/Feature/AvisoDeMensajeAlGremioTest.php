@@ -180,9 +180,9 @@ class AvisoDeMensajeAlGremioTest extends TestCase
     // --- El aviso no manda sobre la petición ---
 
     /**
-     * §9, D-23: el correo saliente no tumba la petición que lo dispara. La PQR ya
-     * quedó radicada y el ciudadano necesita su número aunque el transporte esté
-     * caído --que es como ha estado producción desde el primer despliegue--.
+     * El correo saliente no tumba la petición que lo dispara. La PQR ya quedó
+     * radicada y el ciudadano necesita su número aunque el transporte esté
+     * caído.
      */
     public function test_si_el_aviso_falla_la_pqr_queda_radicada_igual(): void
     {
