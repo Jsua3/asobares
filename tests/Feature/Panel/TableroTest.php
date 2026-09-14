@@ -393,13 +393,12 @@ class TableroTest extends TestCase
      * `discoverWidgets(in: app_path('Filament/Widgets'))` recorre
      * subdirectorios: sin que las gráficas de `Observatorio/` opten por
      * quedar fuera (`GraficaDelObservatorio::$isDiscovered = false`), las
-     * seis se colaban en el tablero con sus `$sort` (1–6) intercalados entre
-     * los del tablero (0–4) — Pendientes → Presencia → Resumen → Composición
-     * → Recaudo → …, rompiendo las tres bandas que el tablero documenta como
+     * seis entrarían en el tablero con sus `$sort` intercalados entre los de
+     * los widgets propios, rompiendo las bandas que el tablero documenta como
      * su razón de existir y doblando su coste de consultas.
      *
      * Se afirma el conjunto exacto, no solo la ausencia del observatorio: un
-     * tablero al que le falte uno de los cinco widgets propios también sería
+     * tablero al que le falte uno de sus nueve widgets propios también sería
      * un defecto, y `assertEqualsCanonicalizing` lo atrapa igual que atrapa
      * una fuga del observatorio.
      */
@@ -416,8 +415,8 @@ class TableroTest extends TestCase
                 RecaudoMensual::class,
                 AsociadosPorMunicipio::class,
                 UltimasTransacciones::class,
-                // Las tres del flujo del sitio (Acta 08, A-03, 9 sep 2026):
-                // los números, la curva y por dónde entra la gente.
+                // Las del flujo del sitio (Acta 08, A-03): los números, la
+                // curva, por dónde entra la gente y qué mira una vez dentro.
                 EntradasAlSitio::class,
                 VisitasDelSitio::class,
                 PorDondeEntranAlSitio::class,
@@ -541,8 +540,8 @@ class TableroTest extends TestCase
      * sale de una plantilla de Filament. Quien coloca cada widget en la rejilla
      * es `x-filament-widgets::widget`, que llama a `gridColumn()` con el tramo
      * del widget: sin ese envoltorio la vista se salta el tramo y, con la
-     * rejilla de 6 columnas del 7 sep, quedaba a un sexto de fila con el texto
-     * y el botón montados uno sobre otro.
+     * rejilla de 6 columnas, quedaría a un sexto de fila con el texto y el
+     * botón montados uno sobre otro.
      * Rotura: quitar el envoltorio y dejar la tarjeta de vidrio como raíz.
      */
     public function test_la_vista_de_pendientes_conserva_su_sitio_en_la_rejilla(): void

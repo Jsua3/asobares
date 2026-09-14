@@ -82,10 +82,9 @@ class RanurasDelPluginDeTemaTest extends TestCase
      * queda con el color de fábrica de Chart.js y deja de seguir el tema, que
      * en el modo oscuro significa texto casi negro sobre fondo casi negro.
      *
-     * El §18.6 del expediente lo tenía anotado como deuda: la presencia por
-     * eje estaba probada en los widgets del observatorio y **no** en los del
-     * tablero. Esta guardia la exige en los dos sitios y en los que vengan,
-     * porque barre el directorio entero igual que la de arriba.
+     * `ObservatorioTest` prueba la presencia por eje solo en los widgets del
+     * observatorio. Esta guardia la exige también en los del tablero y en los
+     * que vengan, porque barre el directorio entero igual que la de arriba.
      *
      * `grid => ['display' => false]` cumple: la clave existe, el plugin
      * escribe en ella y la rejilla sigue oculta. Lo que no cumple es la
