@@ -173,6 +173,11 @@ class TableroTest extends TestCase
      */
     public function test_el_recaudo_mensual_agrega_en_una_sola_consulta(): void
     {
+        // La prueba y el widget leen el mes de `now()` por separado: con el
+        // reloj corriendo, una ejecución que cruce el cambio de mes los
+        // desalinea.
+        $this->freezeTime();
+
         foreach (range(1, (int) now()->format('n')) as $mes) {
             Transaccion::create([
                 'referencia' => Transaccion::generarReferencia(),

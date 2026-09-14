@@ -24,6 +24,13 @@ class VigenciaEnElPanelTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Las pruebas construyen el borde de revisión con `now()` y el filtro
+        // y el modelo lo recalculan con su propio `now()`: si la ejecución
+        // cruza la medianoche entre las dos lecturas, el borde se mueve un día.
+        // Mismo criterio que `VigenciaDeLaGuiaTest`.
+        $this->freezeTime();
+
         $this->seed(RolYPermisoSeeder::class);
     }
 
