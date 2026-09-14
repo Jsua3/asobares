@@ -22,9 +22,9 @@ class SolicitudesDeBolsaTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * El directorio con las fichas dejo de ser publico: lo lee el afiliado
-     * desde su cuenta. De la puerta se encarga AccesoDeAsociadosTest; aqui se
-     * necesita a alguien que la cruce.
+     * El directorio con las fichas no es público: lo lee el afiliado desde su
+     * cuenta. De la puerta se encarga AccesoDeAsociadosTest; aquí se necesita
+     * a alguien que la cruce.
      */
     private function afiliado(): User
     {

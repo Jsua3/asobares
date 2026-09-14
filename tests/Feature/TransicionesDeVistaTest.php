@@ -17,11 +17,11 @@ use Tests\TestCase;
  * la página. Sin error de consola, sin nada roto a la vista y sin ninguna forma
  * de enterarse salvo mirar una navegación a cámara lenta.
  *
- * El sitio emite estos nombres desde cuatro secciones y hasta hoy la única
- * defensa era acordarse. El calendario es la sección con más superficie para
- * pisarse —la rejilla de escritorio y la agenda de móvil coexisten en el DOM, y
- * un evento de tres días ocupa tres casillas—, así que la guardia nace con él
- * pero protege sobre todo a las cuatro que ya estaban.
+ * El sitio emite estos nombres desde varias secciones, y sin esta guardia la
+ * única defensa sería acordarse. El calendario es la sección con más
+ * superficie para pisarse —la rejilla de escritorio y la agenda de móvil
+ * coexisten en el DOM, y un evento de tres días ocupa tres casillas—, pero la
+ * guardia protege a todas por igual.
  *
  * Se mide sobre el HTML RENDERIZADO y no sobre las plantillas a propósito: el
  * defecto no está en el archivo, está en cuántas veces el bucle lo imprime.

@@ -7,10 +7,11 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * El frontend llegó a tener 160 `hover:` sin puerta táctil, cero `:active` en
- * todo el repositorio y una sola curva escrita a mano que además era la
- * prohibida. Nada de eso fue descuido: fue que ningún sitio decía cómo se
- * escribe el movimiento. Esta guardia lo dice, y falla cuando se improvisa.
+ * Cómo se escribe el movimiento del sitio: curvas, duraciones y
+ * desplazamientos en tokens, puerta táctil alrededor de todo `:hover` que
+ * mueve y un portador de acuse para cada forma de control. Sin una regla
+ * escrita cada vista decide por su cuenta; esta guardia la escribe y falla
+ * cuando se improvisa.
  */
 class MovimientoTest extends TestCase
 {
@@ -28,11 +29,9 @@ class MovimientoTest extends TestCase
         // Duraciones: la escala codifica que la salida es más rápida que la
         // entrada (160 < 200) y que nada de interfaz pasa de 300 ms, con dos
         // excepciones con nombre: el asentamiento del resorte de los popovers
-        // (spec del 3 sep 2026, D7) y el cambio de estado de la barra, un
-        // punto más lento a petición de Sua (5 sep). La barra lateral de tema
-        // y su reloj se retiraron el 6 sep con la Parte II. Un resorte
-        // «llega» hacia los 250 ms; el resto es la cola que se asienta, y
-        // cortarla es quitarle el rebote.
+        // y el cambio de estado de la barra, un punto más lento a propósito.
+        // Un resorte «llega» hacia los 250 ms; el resto es la cola que se
+        // asienta, y cortarla es quitarle el rebote.
         $this->assertStringContainsString('--duracion-instante: 100ms', $tokens);
         $this->assertStringContainsString('--duracion-boton: 140ms', $tokens);
         $this->assertStringContainsString('--duracion-salida: 160ms', $tokens);
@@ -50,9 +49,9 @@ class MovimientoTest extends TestCase
 
     /**
      * Tailwind por defecto funde en 150 ms con `cubic-bezier(0.4, 0, 0.2, 1)`,
-     * y ahí caían 21 de las 22 `transition-colors` del sitio público: las que
-     * no escriben `duration-*` no caen en los tokens, caen en el default. Se
-     * cierra declarando el default con los tokens, no editando 21 vistas.
+     * y ahí cae toda `transition-colors` que no escriba `duration-*`: no llega
+     * a los tokens, llega al default. Por eso se declara el default con los
+     * tokens en vez de repetir la duración en cada vista.
      *
      * La UBICACIÓN es la mitad de la prueba. `--default-transition-*` es
      * variable de Tailwind, no nuestra, y `tokens.css` lo importa también el
@@ -182,9 +181,9 @@ class MovimientoTest extends TestCase
 
     /**
      * En táctil un `:hover` con `transform` se queda pegado tras el toque: la
-     * tarjeta del directorio se quedaba elevada y con borde rojo, como si
-     * estuviera seleccionada. La puerta va alrededor del bloque `:hover`, no
-     * de la declaración `transition`.
+     * tarjeta queda elevada y con borde rojo, como si estuviera seleccionada.
+     * La puerta va alrededor del bloque `:hover`, no de la declaración
+     * `transition`.
      */
     public function test_todo_hover_con_transform_tiene_puerta_tactil(): void
     {
@@ -205,7 +204,10 @@ class MovimientoTest extends TestCase
         }
     }
 
-    /** Cero `:active` en todo el repositorio era la mayor pérdida por línea. */
+    /**
+     * Sin un `:active`, un botón no acusa el dedo: el portador tiene que
+     * existir.
+     */
     public function test_existe_el_portador_del_acuse_de_pulsacion(): void
     {
         $app = File::get(resource_path('css/app.css'));
@@ -218,10 +220,10 @@ class MovimientoTest extends TestCase
     }
 
     /**
-     * `.pulsable` acusaba el dedo en 43 botones y nada más: encoger un 3 % una
+     * `.pulsable` encoge un 3 % al pulsar, y eso solo sirve en un botón: en una
      * fila de 350 px se lee como una arruga y sobre texto en prosa saca las
-     * letras de la rejilla de píxeles. De ahí que sean tres portadores y no
-     * uno, cada uno con la respuesta que le corresponde a su forma.
+     * letras de la rejilla de píxeles. De ahí que haya tres portadores más,
+     * cada uno con la respuesta que le corresponde a su forma.
      *
      * Lo que se vigila aquí no es que existan —eso se ve— sino las tres cosas
      * que se pierden en silencio si alguien los reescribe:
@@ -235,7 +237,7 @@ class MovimientoTest extends TestCase
          * 1. `.tarjeta-pulsable` declara la transición COMPLETA y viaja junto a
          *    `.tarjeta-hover`. Dos atajos `transition` sobre el mismo elemento
          *    no se suman: gana el último de la capa. Si alguien recorta este a
-         *    `transform`, el fundido del borde a rojo muere en las diez
+         *    `transform`, el fundido del borde a rojo muere en todas las
          *    tarjetas sin ningún error.
          */
         $this->assertMatchesRegularExpression(
@@ -288,7 +290,11 @@ class MovimientoTest extends TestCase
         $this->assertStringNotContainsString('--asb-atenuacion-pulsada: 1', $tokens);
     }
 
-    /** El `translateY(-2px)` y el `200ms ease` estaban duplicados literales. */
+    /**
+     * El levante y su duración salen de tokens y no de literales: el
+     * interruptor de movimiento reducido solo puede anular lo que pasa por
+     * `--asb-levante`.
+     */
     public function test_los_portadores_no_repiten_valores_de_movimiento(): void
     {
         $app = File::get(resource_path('css/app.css'));
@@ -297,8 +303,22 @@ class MovimientoTest extends TestCase
         foreach (['app.css' => $app, 'theme.css' => $tema] as $nombre => $contenido) {
             $this->assertStringNotContainsString('translateY(-2px)', $contenido, "{$nombre} cablea el levante.");
             $this->assertStringNotContainsString('200ms ease', $contenido, "{$nombre} cablea la duración.");
-            $this->assertStringContainsString('var(--asb-levante)', $contenido);
         }
+
+        /*
+         * El portador que levanta es `.vidrio-hover`, en el tema del panel; la
+         * tarjeta del sitio público no se eleva. Se afirma sobre la regla, con
+         * los comentarios quitados, y no sobre la cadena `var(--asb-levante)`
+         * suelta: también casaría con una declaración comentada o que ninguna
+         * propiedad lee.
+         */
+        $temaSinComentarios = (string) preg_replace('#/\*.*?\*/#s', '', $tema);
+
+        $this->assertMatchesRegularExpression(
+            '/\.vidrio-hover:hover\s*\{[^}]*transform:\s*translateY\(var\(--asb-levante\)\)/',
+            $temaSinComentarios,
+            'El levante de `.vidrio-hover` debe salir del token, o el movimiento reducido no puede anularlo.'
+        );
     }
 
     /**
@@ -344,8 +364,7 @@ class MovimientoTest extends TestCase
              * `transform`, sino a las propiedades independientes `translate`,
              * `scale` y `rotate`. Una transición que solo declara `transform`
              * no anima ninguna de las tres: la opacidad funde y la geometría
-             * salta, sin ningún error visible. Los tres desplegables del
-             * sitio estuvieron así.
+             * salta, sin ningún error visible.
              *
              * Se permite nombrar `transform` si además se nombra `translate`,
              * porque entonces quien lo escribió sabía que son distintas.
@@ -373,7 +392,7 @@ class MovimientoTest extends TestCase
     /**
      * El portador que arregla la trampa de arriba tiene que existir y tiene
      * que nombrar las cuatro propiedades. Si alguien lo recorta a `transform`
-     * volvemos al punto de partida con la guardia en verde.
+     * vuelve la trampa con la guardia en verde.
      */
     public function test_el_portador_de_los_desplegables_cubre_las_propiedades_reales(): void
     {
@@ -399,11 +418,9 @@ class MovimientoTest extends TestCase
      * Todos los desplegables tienen que usar el portador. Si uno se queda con
      * su propia lista, se mueve distinto que los demás y nadie lo nota.
      *
-     * Eran tres (menú móvil, hamburguesa y menú de usuario); con la
-     * reagrupación de la barra fueron cinco, y desde el 6 sep son el menú de
-     * usuario y el componente de grupo, que pinta los dos grupos de escritorio
-     * y las dos hojas del móvil. La barra ya no lleva ningún x-transition
-     * propio: la hamburguesa y el panel se retiraron con la Parte II.
+     * Los pintan dos vistas: el menú de usuario y el componente de grupo, que
+     * dibuja los dos grupos de escritorio y las dos hojas del móvil. La barra
+     * no lleva ningún `x-transition` propio.
      */
     public function test_los_desplegables_usan_el_portador(): void
     {
@@ -424,8 +441,8 @@ class MovimientoTest extends TestCase
     }
 
     /**
-     * La dispersión no fue descuido de nadie: fue que 39 archivos decidían por
-     * su cuenta. Esta prueba es la que hace que el sistema sobreviva a la
+     * Una vista que decide su propio movimiento se aparta del sistema sin que
+     * nada falle. Esta prueba es la que hace que el sistema sobreviva a la
      * siguiente persona que edite una vista con prisa.
      */
     public function test_ninguna_vista_improvisa_movimiento(): void
@@ -458,7 +475,7 @@ class MovimientoTest extends TestCase
                     $veces = preg_match_all($patron, $contenido, $coincidencias);
 
                     /*
-                     * Desde que hay un patrón con el modificador `/u`, este
+                     * Como hay un patrón con el modificador `/u`, este
                      * barrido puede fallar en vez de no encontrar nada: sobre
                      * un archivo que no sea UTF-8 válido, `preg_match_all`
                      * devuelve `false`, y `false > 0` es falso. El archivo se
@@ -501,16 +518,14 @@ class MovimientoTest extends TestCase
     }
 
     /**
-     * La cadena de submit primario estaba repetida IDÉNTICA ocho veces, y de
-     * los 34 botones primarios 18 tenían `transition-colors` y 16 no: dos
-     * botones iguales en padding y color se comportaban distinto al pasar el
-     * ratón. Un componente es la única forma de que eso no vuelva a pasar.
+     * Un solo componente para los botones de acción: con la cadena copiada en
+     * cada vista, dos botones iguales en relleno y color acaban comportándose
+     * distinto al pasar el ratón.
      *
-     * Ya no se afirma `duration-(--duracion-boton)` en el HTML renderizado:
-     * la transición de color salió del portador (`$base`) y ahora vive
-     * completa dentro de `.pulsable`, en `app.css`, para que la capa de
-     * utilidades de Tailwind no vuelva a pisarla. Esa guardia la cubre
-     * `test_el_boton_no_reintroduce_la_utilidad_que_pisa_al_portador`.
+     * No se afirma `duration-(--duracion-boton)` en el HTML renderizado: la
+     * transición de color vive completa dentro de `.pulsable`, en `app.css`,
+     * para que la capa de utilidades de Tailwind no la pise. Esa guardia la
+     * cubre `test_el_boton_no_reintroduce_la_utilidad_que_pisa_al_portador`.
      */
     public function test_el_boton_rinde_las_dos_variantes_con_acuse_de_pulsacion(): void
     {
@@ -521,12 +536,10 @@ class MovimientoTest extends TestCase
         $this->assertStringContainsString('Enviar solicitud', $primaria);
         $this->assertStringContainsString('<button', $primaria);
         $this->assertStringContainsString('type="submit"', $primaria);
-        // `cta-vivo` y ya no una utilidad de fondo. Dos cambios del 9 sep 2026
-        // pasaron por aquí: Pub Red puro con rótulo blanco daba 3,86:1 y el
-        // relleno se fue a marca 600 (`ContrasteDelBotonTest`), y después ese
-        // relleno salió del marcado entero para poder vidriarse al pulsar
-        // (`VidriadoDelBotonTest`). Aquí solo se afirma que el componente
-        // sigue emitiendo el portador del botón lleno.
+        // El relleno no es una utilidad de fondo sino `cta-vivo`: vive en el
+        // portador para poder vidriarse al pulsar (`VidriadoDelBotonTest`), y
+        // su contraste lo mide `ContrasteDelBotonTest`. Aquí solo se afirma
+        // que el componente emite el portador del botón lleno.
         $this->assertStringContainsString('cta-vivo', $primaria);
         $this->assertStringContainsString('pulsable', $primaria);
 
@@ -540,7 +553,7 @@ class MovimientoTest extends TestCase
         $this->assertStringNotContainsString('cta-vivo', $contorno);
 
         // El contorno sobre fondo oscuro (la portada a pantalla completa):
-        // tinta sobre video negro era un botón invisible. Rotura: quitar la
+        // tinta sobre video negro es un botón invisible. Rotura: quitar la
         // variante `contorno-claro` del match.
         $claro = Blade::render(
             '<x-publico.boton variante="contorno-claro" href="/afiliate">Afíliate</x-publico.boton>'
@@ -564,10 +577,10 @@ class MovimientoTest extends TestCase
     /**
      * `.pulsable` vive en `@layer components`, y en Tailwind 4 una utilidad
      * de `@layer utilities` gana siempre a `@layer components` sin importar
-     * especificidad. Si `transition-colors` volviera al portador, pisaría
-     * de nuevo la transición de color de `.pulsable` — y con ella su
-     * `transition-duration: 0ms` del `:active` — en los 43 botones del
-     * sitio, tal como pasaba antes de este arreglo.
+     * especificidad. Si `transition-colors` entrara en el componente,
+     * pisaría la transición de color de `.pulsable` —y con ella su
+     * `transition-duration: 0ms` del `:active`— en todos los botones del
+     * sitio.
      */
     public function test_el_boton_no_reintroduce_la_utilidad_que_pisa_al_portador(): void
     {
@@ -576,7 +589,10 @@ class MovimientoTest extends TestCase
         $this->assertStringNotContainsString('transition-colors', $componente);
     }
 
-    /** Nueve botones de envío llevaban `w-full ... sm:w-auto`: debe pasar. */
+    /**
+     * Las clases de maquetación del llamador (`w-full sm:w-auto`) llegan al
+     * botón.
+     */
     public function test_el_boton_deja_pasar_las_clases_de_maquetacion(): void
     {
         $html = Blade::render(
@@ -589,12 +605,12 @@ class MovimientoTest extends TestCase
     }
 
     /**
-     * El prop se llama `tipo`, pero el atributo HTML nativo es `type`. Si la
-     * Task 11 traduce mecánicamente un `<button type="button">` y escribe
-     * `type="button"` en la etiqueta del componente, ese atributo llegaba por
-     * `$attributes` y convivía con el que el componente emitía a mano: el
-     * navegador se quedaba con la primera ocurrencia (`type="submit"`, el
-     * default fijo) y descartaba la del llamador sin ningún error visible.
+     * El prop se llama `tipo`, pero el atributo HTML nativo es `type`. Quien
+     * traduzca un `<button type="button">` escribirá `type="button"` en la
+     * etiqueta del componente; si ese atributo llegara por `$attributes` y
+     * conviviera con el que el componente emite, el navegador se quedaría con
+     * la primera ocurrencia (`type="submit"`, el valor por defecto) y
+     * descartaría la del llamador sin ningún error visible.
      */
     public function test_el_atributo_type_del_llamador_sobrescribe_el_tipo_por_defecto(): void
     {
@@ -616,7 +632,7 @@ class MovimientoTest extends TestCase
 
     /**
      * La alerta es el único acuse de recibo del sitio tras enviar un
-     * formulario, y aparecía de golpe. Entra por `transition` +
+     * formulario, y no puede aparecer de golpe. Entra por `transition` +
      * `@starting-style` y no por keyframes: así la cubre la mordaza del
      * cambio de tema, que apaga `transition` pero no `animation`.
      *
@@ -647,11 +663,11 @@ class MovimientoTest extends TestCase
     }
 
     /**
-     * El servidor ya se protege del doble cobro con la idempotencia de 24 h de
-     * `MiCuentaController::cobroVigente`. Lo que faltaba era que la interfaz lo
-     * contara: se pulsaba «Pagar ahora», no pasaba nada visible, y se volvía a
-     * pulsar. En la pasarela hay que deshabilitar LOS DOS botones, no solo el
-     * pulsado: viven en el mismo formulario.
+     * El servidor se protege del doble cobro con la idempotencia de 24 h de
+     * `MiCuentaController::cobroVigente`, y la interfaz tiene que contarlo: si
+     * al pulsar «Pagar ahora» no pasa nada visible, se vuelve a pulsar. En la
+     * pasarela hay que deshabilitar LOS DOS botones, no solo el pulsado: viven
+     * en el mismo formulario.
      */
     public function test_los_botones_que_cobran_acusan_el_envio(): void
     {
@@ -721,8 +737,7 @@ class MovimientoTest extends TestCase
      *
      * Las variables no son un extra. El paginador declara su lista una sola vez
      * en `$enlace` y la pinta cinco veces: un barrido que solo mirara
-     * `class="..."` no vería la única línea del repositorio donde había que
-     * quitar TRES utilidades en vez de una.
+     * `class="..."` no vería la lista que alimenta todos sus anclajes.
      *
      * @return list<string>
      */
@@ -792,7 +807,7 @@ class MovimientoTest extends TestCase
 
     /**
      * Un portador y una utilidad de transición en el mismo elemento: el modo de
-     * fallo que no da ningún error y ya costó cinco rondas.
+     * fallo que no da ningún error.
      *
      * En Tailwind 4 una utilidad de `@layer utilities` gana SIEMPRE a un
      * portador de `@layer components`, sin importar la especificidad. Así que
@@ -804,7 +819,6 @@ class MovimientoTest extends TestCase
      * La peor de las tres es `duration-(--duracion-boton)`: usa el paréntesis,
      * usa el token y pasa todos los patrones prohibidos de arriba. Parece
      * exactamente lo que el proyecto pide escribir, y es la que mata el acuse.
-     * Estuvo en el paginador, que alimenta cinco anclajes en ocho vistas.
      *
      * Se barre en dos pasadas porque el defecto puede esconderse en dos sitios:
      * por LISTA (que alcanza a la variable PHP del paginador, fuera de toda
@@ -900,15 +914,12 @@ class MovimientoTest extends TestCase
     }
 
     /**
-     * Las once filas de los dos desplegables cambiaron de dueño: su fondo de
-     * hover se mudó de la vista al portador, porque en la vista pisaba al
-     * `:active`. Si alguien devuelve la utilidad, la prueba de arriba lo caza;
-     * si alguien quita el portador y se olvida de devolverla, esas filas se
-     * quedan sin ningún hover en escritorio y no lo caza nadie. Esto es esa
-     * segunda mitad.
-     *
-     * Las seis filas de los dos grupos nuevos de la barra nacieron ya con esta
-     * regla, y entran aquí para que no puedan salirse de ella.
+     * El fondo de hover de las filas de los desplegables vive en el portador y
+     * no en la vista, porque en la vista pisaría al `:active`. Si alguien
+     * devuelve la utilidad, la prueba de arriba lo caza; si alguien quita el
+     * portador sin devolverla, esas filas se quedan sin ningún hover en
+     * escritorio y no lo caza nadie. Esto es esa segunda mitad, para las filas
+     * de la barra, del menú de usuario y de los grupos.
      */
     public function test_las_filas_de_los_dos_desplegables_ceden_su_hover_al_portador(): void
     {
@@ -936,9 +947,9 @@ class MovimientoTest extends TestCase
     }
 
     /**
-     * El paginador aparte, porque es el peor caso del inventario y el único
-     * donde había que quitar tres utilidades y no una. Vale la pena que el
-     * mensaje de fallo las nombre en vez de que salgan en una lista genérica.
+     * El paginador aparte, porque son tres las utilidades de reloj que pueden
+     * pisarlo, y vale la pena que el mensaje de fallo las nombre en vez de que
+     * salgan en una lista genérica.
      */
     public function test_la_paginacion_acusa_el_dedo_y_no_recupera_su_reloj_propio(): void
     {

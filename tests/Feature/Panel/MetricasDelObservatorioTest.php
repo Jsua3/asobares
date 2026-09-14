@@ -173,11 +173,10 @@ class MetricasDelObservatorioTest extends TestCase
     }
 
     /**
-     * El estado vacío decía «hoy hay n = 762 registros y hacen falta al menos
-     * 30 para afirmar algo», que es una contradicción delante de un
-     * directivo: 762 es mayor que 30. Venía de imprimir el `n` combinado
-     * mientras la decisión ya se tomaba por conjunto. Lo que hay que nombrar
-     * es la señal que de verdad no llega.
+     * El estado vacío nombra la señal que de verdad no llega. Imprimir el `n`
+     * combinado mientras la decisión se toma por conjunto produce «hay n = 762
+     * registros y hacen falta al menos 30 para afirmar algo», que es una
+     * contradicción delante de un directivo: 762 es mayor que 30.
      */
     public function test_el_rotulo_de_la_muestra_que_decide_nombra_el_conjunto_mas_flaco(): void
     {
@@ -265,10 +264,11 @@ class MetricasDelObservatorioTest extends TestCase
     }
 
     /**
-     * La relacion entre etiquetas y n es un OR: si cualquiera de los dos falta,
-     * la serie esta vacia. Sin esta prueba, un cambio futuro de `||` a `&&`
-     * pasaria desapercibido: el observatorio dibujaria un grafico de nada.
-     * Este caso asinmetrico fija que etiquetas presentes pero n=0 sigue siendo vacia.
+     * La relación entre etiquetas y n es un OR: si cualquiera de los dos falta,
+     * la serie está vacía. Sin esta prueba, un cambio futuro de `||` a `&&`
+     * pasaría desapercibido: el observatorio dibujaría un gráfico de nada.
+     * Este caso asimétrico fija que etiquetas presentes pero n=0 sigue siendo
+     * vacía.
      */
     public function test_con_etiquetas_pero_sin_muestra_esta_vacia(): void
     {
@@ -283,10 +283,10 @@ class MetricasDelObservatorioTest extends TestCase
     }
 
     /**
-     * La relacion entre etiquetas y n es un OR: si cualquiera de los dos falta,
-     * la serie esta vacia. Sin esta prueba, un cambio futuro de `||` a `&&`
-     * pasaria desapercibido: el observatorio dibujaria un grafico de nada.
-     * Este caso asinmetrico fija que sin etiquetas pero n>0 sigue siendo vacia.
+     * La relación entre etiquetas y n es un OR: si cualquiera de los dos falta,
+     * la serie está vacía. Sin esta prueba, un cambio futuro de `||` a `&&`
+     * pasaría desapercibido: el observatorio dibujaría un gráfico de nada.
+     * Este caso asimétrico fija que sin etiquetas pero n>0 sigue siendo vacía.
      */
     public function test_sin_etiquetas_pero_con_muestra_esta_vacia(): void
     {
@@ -305,10 +305,8 @@ class MetricasDelObservatorioTest extends TestCase
      * usaran números distintos, la misma cifra sería «muestra pequeña» en una
      * tarjeta y suficiente en la gráfica de al lado.
      *
-     * Se prueba por comportamiento y no buscando el número en el archivo:
-     * después del paso 4 ese archivo ya no contiene el literal, sino la
-     * referencia a la constante. Una aserción sobre el texto fallaría justo
-     * después del arreglo que pretende verificar.
+     * Se prueba por comportamiento y no buscando el número en el archivo: el
+     * componente no contiene el literal, sino la referencia a la constante.
      */
     public function test_la_tarjeta_kpi_marca_muestra_pequena_con_el_mismo_umbral(): void
     {
@@ -415,13 +413,13 @@ class MetricasDelObservatorioTest extends TestCase
      * es lo que la interfaz tiene que poder decir. Si algún día la semilla
      * crece, esta prueba cambia de sentido: afirma la regla, no el número.
      *
-     * `presenciaPorMunicipio()` pasó de «suficiente» a «insuficiente» con el
-     * arreglo de `SerieDelObservatorio::hayMuestraSuficiente()`: antes n=762
-     * (la suma de asociados, vacantes y consultas) sellaba la serie entera,
-     * aunque el conjunto «Vacantes» descansara sobre apenas 6 observaciones
-     * — el mismo número que el módulo declara insuficiente en cualquier otra
-     * gráfica. Ahora el umbral se exige a cada conjunto por separado, y
-     * «Asociados» (24) y «Vacantes» (6) no lo alcanzan por sí solos.
+     * `presenciaPorMunicipio()` es insuficiente aunque su n combinado sea 762
+     * (la suma de asociados, vacantes y consultas):
+     * `SerieDelObservatorio::hayMuestraSuficiente()` exige el umbral a cada
+     * conjunto por separado, y «Asociados» (24) y «Vacantes» (6) no lo
+     * alcanzan por sí solos. Sumarlos dejaría pasar por suficiente una serie
+     * que descansa sobre 6 observaciones, el mismo número que el módulo
+     * declara insuficiente en cualquier otra gráfica.
      */
     public function test_las_metricas_declaran_si_tienen_muestra_suficiente(): void
     {

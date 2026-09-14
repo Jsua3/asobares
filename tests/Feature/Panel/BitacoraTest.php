@@ -88,8 +88,8 @@ class BitacoraTest extends TestCase
     /**
      * Una incidencia de pago es de lo poco que alguien tiene que entender sin
      * abrir la transacción: la pasarela notificó una cosa sobre un cobro que ya
-     * estaba resuelto en otra (SEG-02). Con la frase genérica se leía «El
-     * sistema actualizó un registro», que es tanto como no avisar.
+     * estaba resuelto en otra. Con la frase genérica se leería «El sistema
+     * actualizó un registro», que es tanto como no avisar.
      */
     public function test_una_incidencia_de_pago_se_lee_con_su_propia_descripcion(): void
     {

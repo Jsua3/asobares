@@ -10,9 +10,9 @@ use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 use Tests\TestCase;
 
 /**
- * SEG-04: el panel edita el cuerpo de la noticia en un Textarea de texto
- * plano, y la ficha lo pintaba como HTML. Los párrafos que la oficina separa
- * con una línea en blanco salían como un solo bloque.
+ * El panel edita el cuerpo de la noticia en un Textarea de texto plano, y la
+ * ficha no puede pintarlo como HTML a secas: los párrafos que la oficina
+ * separa con una línea en blanco saldrían como un solo bloque.
  */
 class ParrafosDelBoletinTest extends TestCase
 {
@@ -83,7 +83,7 @@ class ParrafosDelBoletinTest extends TestCase
 
     /**
      * Un marcador entre ángulos es texto, no una etiqueta. Tomado por HTML, el
-     * saneado se comía todo lo que venía detrás, párrafos incluidos.
+     * saneado se comería todo lo que viene detrás, párrafos incluidos.
      */
     public function test_un_marcador_entre_angulos_no_se_come_el_resto_del_texto(): void
     {

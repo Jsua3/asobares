@@ -13,18 +13,15 @@ use Tests\TestCase;
 /**
  * El día 1 en producción: base recién migrada, sin un solo asociado, vacante,
  * consulta, proveedor ni transacción. Ninguna de las seis gráficas tiene
- * dato que dibujar, y `estaVacia()` —que ya distinguía este caso del de
- * «hay datos pero no alcanzan muestra» en el informe impreso— no se invocaba
- * desde ninguna pantalla: las tres gráficas «sólidas» de entonces rendían un
- * `<canvas>` en blanco, sin texto, porque `ChartWidget::isEmpty()` de fábrica
- * no detectaba nada raro en un arreglo `datasets` con la forma correcta
- * aunque sus valores fueran todos vacíos.
+ * dato que dibujar, y `ChartWidget::isEmpty()` de fábrica no ve vacío un
+ * arreglo `datasets` con la forma correcta aunque todos sus valores lo estén:
+ * por sí solo dejaría un `<canvas>` en blanco, sin texto.
  *
- * Con `GraficaDelObservatorio::isEmpty()` basado en `hayMuestraSuficiente()`
- * (que ya es falso con n = 0) y `sin-muestra.blade.php` ramificando por
- * `estaVacia()`, las seis gráficas caen en el mismo estado vacío legible que
- * ya usaba el informe: «Todavía no hay datos que mostrar», no «hoy hay n = 0
- * y hacen falta 30».
+ * Por eso `GraficaDelObservatorio::isEmpty()` se apoya en
+ * `hayMuestraSuficiente()`, que ya es falso con n = 0, y
+ * `sin-muestra.blade.php` separa por `estaVacia()` para decir «Todavía no
+ * hay datos que mostrar», igual que el informe impreso, en vez de un «n = 0»
+ * frente a un mínimo de 30.
  */
 class ObservatorioBaseVaciaTest extends TestCase
 {
@@ -88,11 +85,9 @@ class ObservatorioBaseVaciaTest extends TestCase
     }
 
     /**
-     * El informe impreso es la única superficie del módulo que no pasaba por
-     * aquí, y es justamente la que se lleva a una alcaldía. Ya distinguía
-     * base vacía de muestra insuficiente —fue el primero en hacerlo—, pero
-     * ninguna prueba lo ejercitaba con la base recién migrada: estaba sin
-     * cubrir, no roto.
+     * El informe impreso es la superficie del módulo que se lleva a una
+     * alcaldía, así que también se ejercita con la base recién migrada: tiene
+     * que distinguir base vacía de muestra insuficiente igual que las gráficas.
      */
     public function test_el_informe_impreso_distingue_la_base_vacia_de_la_muestra_insuficiente(): void
     {

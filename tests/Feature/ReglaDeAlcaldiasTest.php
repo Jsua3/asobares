@@ -11,12 +11,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * «A todos o nada» (OBS3-05).
+ * «A todos o nada».
  *
- * El directivo cortó en seco la idea de darle un espacio a las alcaldías junto
- * a los otros aliados institucionales: «es para no abrir susceptibilidades...
- * no le toca nombrarlos a todos, porque uno no se nombre» (R21 03:41-03:44),
- * «a todos o nada» (R21 03:47). Es una instrucción política, no estética.
+ * Las alcaldías no salen junto a los otros aliados institucionales si no
+ * salen todas: nombrar a unas abre susceptibilidades con la que falte. Es
+ * una instrucción política del gremio, no estética.
  *
  * El acta pide «documentarla para que nadie la rompa después». Documentar no
  * basta: quien la rompa lo hará sin haberla leído, cargando una alcaldía un

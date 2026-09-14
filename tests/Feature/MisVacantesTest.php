@@ -54,9 +54,9 @@ class MisVacantesTest extends TestCase
     }
 
     /**
-     * El aviso decía «seis meses» a mano mientras la política lee el plazo de
-     * la configuración: divergían en cuanto alguien cambiara la variable
-     * (cabo suelto anotado en la v6). Ahora los dos leen del mismo sitio.
+     * El aviso y la política leen el plazo del mismo sitio, la configuración:
+     * con «seis meses» escrito a mano en el aviso, divergirían en cuanto
+     * alguien cambiara la variable.
      */
     public function test_el_aviso_de_retencion_publica_el_plazo_de_la_configuracion(): void
     {

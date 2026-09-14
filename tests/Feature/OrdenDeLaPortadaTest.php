@@ -9,14 +9,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * El bloque de destacados de la portada sale de un cupo alfabético (OBS3-06).
+ * El bloque de destacados de la portada sale de un cupo alfabético.
  *
- * El directivo se paró justo en esto mirando la portada: «¿por qué está
- * colina primero, por qué mirador... o simplemente un aleatorio?» (R21
- * 06:11-06:17), y pidió «que sea en orden alfabético» (R21 06:24).
+ * Es una decisión del gremio: con cualquier otro criterio, quien mira la
+ * portada pregunta por qué un establecimiento sale antes que otro, y el
+ * orden alfabético no favorece a nadie.
  *
- * La franja ya no recorta a tres fijos: gira el cupo en presentación. Lo
- * que no puede volver es elegir el cupo por `updated_at` ni por RANDOM().
+ * La franja gira el cupo en presentación. Lo que no puede elegir el cupo es
+ * `updated_at` ni RANDOM().
  */
 class OrdenDeLaPortadaTest extends TestCase
 {
@@ -40,8 +40,8 @@ class OrdenDeLaPortadaTest extends TestCase
      *
      * «Érase» está ahí a propósito. Con solo «Ámbar» el orden de bytes es
      * el español girado una posición, y la banda gira: la portada sin
-     * `ordenarEnEspanol` pasaba por una rotación válida (COD-08). Una tilde
-     * en medio del alfabeto rompe esa coincidencia.
+     * `ordenarEnEspanol` pasaría por una rotación válida. Una tilde en medio
+     * del alfabeto rompe esa coincidencia.
      */
     public function test_los_destacados_salen_en_orden_alfabetico_espanol(): void
     {
@@ -140,9 +140,9 @@ class OrdenDeLaPortadaTest extends TestCase
     }
 
     /**
-     * El defecto que el orden viejo tenía y nadie había nombrado: editar una
-     * ficha desde el panel la metía en la portada. Quien corrigiera un
-     * teléfono cambiaba qué establecimientos se ven, sin saberlo.
+     * Con un orden por `updated_at`, editar una ficha desde el panel la mete
+     * en la portada: quien corrige un teléfono cambia qué establecimientos se
+     * ven, sin saberlo.
      */
     public function test_editar_una_ficha_no_la_mete_en_la_portada(): void
     {

@@ -9,13 +9,12 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * Los títulos de sección de la portada se editan desde el panel (OBS3-01).
+ * Los textos propios de la portada se editan desde el panel.
  *
- * En la revisión del 28 de agosto se le dijo al gremio que «toda la página es
- * completamente editable» (R22 02:53) mientras siete títulos estaban cableados
- * en `publico/inicio.blade.php` — justo en la pantalla que estaban mirando. El
- * `SettingSeeder` ya declaraba la regla en su cabecera: «si un texto se ve en
- * el sitio público, se edita aquí desde el panel, nunca en una vista Blade».
+ * Al gremio se le promete que toda la página es editable, y un título
+ * cableado en la vista lo desmiente justo en la pantalla que más se mira.
+ * `SettingSeeder` declara la regla en su cabecera: «si un texto se ve en el
+ * sitio público, se edita aquí desde el panel, nunca en una vista Blade».
  * Esta prueba es lo que la convierte en algo que se puede incumplir en rojo.
  */
 class PortadaEditableTest extends TestCase
@@ -23,12 +22,10 @@ class PortadaEditableTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Claves de texto propio de la portada que esta vista todavía pinta.
-     * `portada_empleo_*` salió de Eventos en HOME-FINAL-04.
-     * `portada_videos_intro` y `portada_videos_proxima_*` salieron de
-     * «en movimiento» en HOME-FINAL-05: prometían clips que no hay.
-     * Los cuatro subtítulos y los dos textos del cierre entraron con la
-     * portada editorial leyendo un respaldo que nadie sembraba (COD-04).
+     * Claves de texto propio que pinta la portada. Los subtítulos y los dos
+     * textos del cierre están aquí porque la portada editorial los lee de
+     * `ajustes`: sin sembrarlos, la vista cae en su respaldo y el panel no
+     * puede cambiarlos.
      */
     private const array TITULOS = [
         'portada_cifras_subtitulo',
@@ -127,10 +124,10 @@ class PortadaEditableTest extends TestCase
     }
 
     /**
-     * OBS3-01, el señalamiento textual: «lo que gana es como si estuviéramos
-     * vendiendo una lotería» (R22 03:05). No basta con que el ajuste exista —
-     * el valor sembrado, que es el que verá el gremio en la próxima demo, no
-     * puede seguir siendo el que le sonó horrible.
+     * El título de los beneficios no puede sonar a premio: el gremio rechazó
+     * «lo que gana» porque se lee «como si estuviéramos vendiendo una
+     * lotería». No basta con que el ajuste exista: el valor sembrado es el que
+     * se ve mientras nadie lo edite.
      */
     public function test_la_portada_ya_no_titula_los_beneficios_como_lo_que_gana(): void
     {
@@ -142,9 +139,9 @@ class PortadaEditableTest extends TestCase
     /**
      * Guardia estructural, hermana de la de `TemaClaroOscuroTest`.
      *
-     * Existe porque la prueba de comportamiento solo vigila las diez claves
-     * que YA existen: un texto nuevo aniadido cableado maniana pasaria por
-     * delante de ella sin despeinarla. Esta mira la vista, no la respuesta.
+     * Existe porque la prueba de comportamiento solo vigila las claves que YA
+     * existen: un texto nuevo añadido cableado mañana pasaría por delante de
+     * ella sin despeinarla. Esta mira la vista, no la respuesta.
      *
      * La regla, aplicada a `<h2>` y `<p>`: o el cuerpo interpola algo con
      * llaves dobles, o contiene marcado anidado --un enlace, un icono, un

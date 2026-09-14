@@ -14,8 +14,8 @@ use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
- * RF-40. El campo de contraseña sólo tenía longitud máxima, así que nada
- * impedía dejar una sola letra guardando la cuenta que gobierna los pagos.
+ * RF-40. Con solo una longitud máxima en el campo de contraseña, nada
+ * impediría dejar una sola letra guardando la cuenta que gobierna los pagos.
  */
 class PoliticaDeContrasenasTest extends TestCase
 {

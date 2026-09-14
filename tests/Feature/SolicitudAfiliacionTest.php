@@ -155,11 +155,11 @@ class SolicitudAfiliacionTest extends TestCase
     }
 
     /**
-     * RUT-03. La redirección de validación volvía a la URL previa sin ancla, y
-     * en un teléfono el formulario empieza tres pantallas más abajo: la
-     * persona aterrizaba en el hero sin ver ningún error y creía que no había
-     * pasado nada. Se envía desde la propia página para que la URL previa
-     * exista y la prueba distinga el ancla, no un redirect a la portada.
+     * Una redirección de validación que vuelve a la URL previa sin ancla deja
+     * a la persona en el hero: en un teléfono el formulario empieza tres
+     * pantallas más abajo, no ve ningún error y cree que no ha pasado nada.
+     * Se envía desde la propia página para que la URL previa exista y la
+     * prueba distinga el ancla, no un redirect a la portada.
      */
     public function test_un_envio_invalido_vuelve_anclado_al_formulario(): void
     {

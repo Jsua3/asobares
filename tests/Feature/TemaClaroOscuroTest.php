@@ -13,7 +13,7 @@ use Tests\TestCase;
 
 /**
  * El sitio público se puede ver en claro o en oscuro, y el control vive en la
- * barra de navegación, en los dos anchos (desde el 6 sep 2026).
+ * barra de navegación, en los dos anchos.
  */
 class TemaClaroOscuroTest extends TestCase
 {
@@ -34,12 +34,11 @@ class TemaClaroOscuroTest extends TestCase
     }
 
     /**
-     * `app.css` declara `--font-sans: 'Poppins', ...` pero nada enlazaba el
-     *
-     * @font-face compilado por `bunny('Poppins', ...)` en vite.config.js:
-     * medido en navegador, Poppins resolvía por fallback y no se
-     * renderizaba (el mismo defecto que tenía el panel, ver
-     * TemaDelPanelTest). El layout público debe traer `Vite::fonts()`.
+     * `app.css` declara `--font-sans: 'Poppins', ...`, pero sin enlazar la hoja
+     * que compila `bunny('Poppins', ...)` en vite.config.js Poppins resuelve
+     * por fallback y no se renderiza: medido en navegador, y es el mismo
+     * defecto que `TemaDelPanelTest` vigila en el panel. El layout público
+     * debe traer `Vite::fonts()`.
      */
     public function test_el_sitio_publico_enlaza_la_hoja_de_fuentes_real(): void
     {
@@ -67,9 +66,9 @@ class TemaClaroOscuroTest extends TestCase
     }
 
     /**
-     * Chromium congela toda propiedad con `transition` cuya valor venga de una
+     * Chromium congela toda propiedad con `transition` cuyo valor venga de una
      * custom property cuando esa property cambia. Sin la mordaza, cambiar de
-     * tema en vivo dejaba los enlaces de la navbar y los bordes de las
+     * tema en vivo dejaría los enlaces de la navbar y los bordes de las
      * tarjetas con el color del tema anterior hasta recargar la página.
      */
     public function test_el_cambio_en_vivo_apaga_las_transiciones_para_no_congelar_colores(): void
@@ -82,15 +81,12 @@ class TemaClaroOscuroTest extends TestCase
     }
 
     /**
-     * Hasta el 3 sep 2026 esta prueba prohibía «Sistema» a propósito (OBS3-03:
-     * el sitio arranca en el tema del dispositivo, y el selector solo ofrecía
-     * forzar uno). Sua decidió ese día que el popover de la barra de
-     * escritorio ofrezca las tres: el arranque sigue siendo el del
-     * dispositivo; lo que cambia es que se puede VOLVER a él tras forzar uno.
-     * Anotado en encargo.md §13.
+     * El sitio arranca en el tema del dispositivo, y el selector ofrece las
+     * tres opciones: «Sistema» es lo que permite VOLVER a ese arranque después
+     * de forzar uno. La decisión está anotada en el §13 del encargo.
      *
      * Las tres cadenas las emite un solo control: el popover de la barra, que
-     * desde el 6 sep es el mismo en los dos anchos.
+     * es el mismo en los dos anchos.
      */
     public function test_el_selector_ofrece_claro_oscuro_y_sistema(): void
     {
@@ -107,9 +103,9 @@ class TemaClaroOscuroTest extends TestCase
     }
 
     /**
-     * Desde el 6 sep 2026 (Parte II, D-M6 y D-M17) el tema vive en la barra en
-     * los dos anchos: la barra lateral de móvil se retiró. Rotura: esconder
-     * el botón de tema bajo 64rem con `hidden lg:flex`.
+     * El tema vive en la barra en los dos anchos: no hay barra lateral de móvil
+     * que lo lleve. Rotura: esconder el botón de tema bajo 64rem con
+     * `hidden lg:flex`.
      */
     public function test_el_control_de_tema_vive_en_la_navbar_en_los_dos_anchos(): void
     {

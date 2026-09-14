@@ -137,7 +137,7 @@ class PublicidadInternaTest extends TestCase
         try {
             $publicidad->update(['estado' => EstadoPublicidad::Publicada]);
         } catch (ValidationException) {
-            // La proteccion vive en el modelo, no solo en el boton.
+            // La protección vive en el modelo, no solo en el botón.
         }
 
         $this->assertSame(EstadoPublicidad::Pagada, $publicidad->fresh()->estado);
@@ -146,7 +146,7 @@ class PublicidadInternaTest extends TestCase
 
     /**
      * Devolver a pendiente de pago una pauta publicada la saca de Inicio y del
-     * Directorio: es despublicar, y eso solo lo decide la direccion (PERM-01).
+     * Directorio: es despublicar, y eso solo lo decide la dirección.
      */
     public function test_la_secretaria_no_ve_marcar_pendiente_de_pago_sobre_una_pauta_publicada(): void
     {
@@ -184,8 +184,8 @@ class PublicidadInternaTest extends TestCase
         Livewire::test(ListPublicidades::class)
             ->assertActionVisible(TestAction::make('marcar_pendiente_pago')->table($publicada));
 
-        // La misma via cruda que usa la prueba de la secretaria: si aqui actua,
-        // alli no pasa en verde por una llamada que nunca llega a la accion.
+        // La misma vía cruda que usa la prueba de la secretaría: si aquí actúa,
+        // allí no pasa en verde por una llamada que nunca llega a la acción.
         $this->invocarAccionDeFilaSinAyudante('marcar_pendiente_pago', $publicada);
 
         $publicada = $publicada->fresh();
@@ -260,8 +260,8 @@ class PublicidadInternaTest extends TestCase
             Livewire::test(ListPublicidades::class)
                 ->callAction(TestAction::make('publicar')->table($publicidad));
         } catch (\Throwable) {
-            // Filament captura la validacion en algunas versiones y en otras
-            // la expone como excepcion. El contrato es que no publique.
+            // Filament captura la validación en algunas versiones y en otras
+            // la expone como excepción. El contrato es que no publique.
         }
 
         $this->assertNotSame(EstadoPublicidad::Publicada, $publicidad->fresh()->estado);
@@ -360,8 +360,8 @@ class PublicidadInternaTest extends TestCase
     }
 
     /**
-     * Invoca una accion de fila por Livewire crudo. callAction() exige antes que
-     * la accion sea visible, asi que no ejercita la defensa del servidor.
+     * Invoca una acción de fila por Livewire crudo. callAction() exige antes que
+     * la acción sea visible, así que no ejercita la defensa del servidor.
      */
     private function invocarAccionDeFilaSinAyudante(string $accion, Publicidad $publicidad): void
     {

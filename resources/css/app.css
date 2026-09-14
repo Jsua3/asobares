@@ -203,7 +203,6 @@
     @media (hover: hover) and (pointer: fine) {
         .tarjeta-hover:hover {
             border-color: rgb(238 65 55 / 0.45);
-            --asb-levante-estable: var(--asb-levante);
             box-shadow:
                 var(--asb-sombra-tarjeta),
                 0 14px 34px rgb(238 65 55 / 0.08);
@@ -1545,12 +1544,6 @@
         /* Sólido no se ve el canto; cristal sin filo no se lee como material. */
         box-shadow: inset 0 0 0 1px var(--asb-filo-vidriado);
         transition-duration: var(--duracion-vidriado-ida);
-    }
-
-    .video-marquesina {
-        box-shadow:
-            var(--asb-sombra-tarjeta),
-            0 24px 70px rgb(238 65 55 / 0.1);
     }
 
     .hero-video-respaldo {

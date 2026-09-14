@@ -133,9 +133,9 @@ class VigenciaEnElPanelTest extends TestCase
      * Declarar «verifiqué esto contra la Alcaldía» es una afirmación de
      * autoridad sobre información legal. No hace falta un permiso nuevo: el
      * FlujoDeAprobacionObserver ya devuelve a pendiente cualquier edición de
-     * la secretaría sobre algo publicado. Lo que faltaba es que esa protección
-     * dejara de ser incidental — una guarda que nadie comprueba se rompe el
-     * día que alguien añade un atajo.
+     * la secretaría sobre algo publicado. Esta prueba hace que esa protección
+     * deje de ser incidental: una guarda que nadie comprueba se rompe el día
+     * que alguien añade un atajo.
      */
     public function test_la_secretaria_que_feche_un_publicado_lo_devuelve_a_pendiente(): void
     {

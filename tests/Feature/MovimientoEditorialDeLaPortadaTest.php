@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * HOME-FINAL-05: la franja «ASOBARES en movimiento» es una transición
- * editorial, no una promesa de clips ni un segundo protagonista.
+ * La franja «ASOBARES en movimiento» es una transición editorial, no una
+ * promesa de clips ni un segundo protagonista.
  *
  * Roturas: devolver «Próxima pieza»; href="#"; quitar un acceso real;
  * volver a pintar la intro de banda audiovisual.

@@ -134,16 +134,15 @@ class ObservatorioTest extends TestCase
     /**
      * `InformeDelObservatorio::series()` lee el `que` de cada serie desde el
      * `que()` estático del widget correspondiente en vez de repetir la frase
-     * a mano: antes vivía escrita dos veces (aquí y en el widget flaco) sin
-     * ninguna prueba que las atara.
+     * a mano en el informe.
      *
      * Lo que esta prueba demuestra es DIVERGENCIA: que las dos frases no se
      * separen. No detecta que alguien vuelva a escribir a mano en el informe
-     * la misma cadena que ya devuelve el widget —eso pasa en verde, se
-     * comprobó— y no puede detectarlo comparando valores. La duplicación
-     * idéntica es un problema de lectura del código; la divergencia es el que
-     * llega al lector del informe con dos frases distintas para el mismo
-     * dato, y es el que se vigila aquí.
+     * la misma cadena que ya devuelve el widget —eso pasa en verde— y no
+     * puede detectarlo comparando valores. La duplicación idéntica es un
+     * problema de lectura del código; la divergencia es el que llega al
+     * lector del informe con dos frases distintas para el mismo dato, y es el
+     * que se vigila aquí.
      */
     public function test_el_que_del_informe_es_el_mismo_que_el_de_su_widget(): void
     {
@@ -279,12 +278,12 @@ class ObservatorioTest extends TestCase
      * estado vacío se quedó pegado y el observatorio nunca enseñará empleo.
      *
      * Empuja los DOS lados —demanda (vacantes) y oferta (aspirantes)— por
-     * encima del umbral, no solo uno: desde el arreglo de
-     * `SerieDelObservatorio::hayMuestraSuficiente()` (ver su docblock),
-     * empujar un solo conjunto ya no basta para que la serie completa se
-     * declare con muestra suficiente. Es justo el fallo que ese arreglo
-     * cierra, así que esta prueba tiene que demostrar el caso real: los dos
-     * conjuntos con muestra propia, no uno prestándole la suya al otro.
+     * encima del umbral, no solo uno:
+     * `SerieDelObservatorio::hayMuestraSuficiente()` (ver su docblock) exige
+     * muestra a cada conjunto, así que empujar uno solo no basta para que la
+     * serie completa se declare con muestra suficiente. Esta prueba tiene que
+     * demostrar el caso real: los dos conjuntos con muestra propia, no uno
+     * prestándole la suya al otro.
      */
     public function test_la_misma_visualizacion_dibuja_en_cuanto_hay_muestra(): void
     {
@@ -345,26 +344,25 @@ class ObservatorioTest extends TestCase
      * serie sin muestra suficiente lleva el aviso pegado a su propia
      * sección, y la serie con muestra suficiente no lo lleva en la suya.
      * Para eso hace falta un caso de cada tipo en el mismo render:
-     * `coberturaDeProveedores()` ya no alcanza con la semilla por defecto
+     * `coberturaDeProveedores()` no alcanza con la semilla por defecto
      * (ver el docblock de `CoberturaDeProveedores`, n = 10), y se empuja
      * `ofertaContraDemanda()` por encima del umbral con vacantes Y
-     * aspirantes reales de una sola categoría —los dos lados, no solo
-     * uno: desde el arreglo de `SerieDelObservatorio::hayMuestraSuficiente()`
-     * empujar un solo conjunto ya no basta— mismo mecanismo que
+     * aspirantes reales de una sola categoría —los dos lados, no solo uno:
+     * `SerieDelObservatorio::hayMuestraSuficiente()` exige muestra a cada
+     * conjunto—, mismo mecanismo que
      * `test_la_misma_visualizacion_dibuja_en_cuanto_hay_muestra`.
      *
      * `extraerSeccionDeSerie()` acota cada sección por su propio
      * `data-serie` hasta su propio `</section>` — no por el título de la
-     * SIGUIENTE serie, como hacía la primera versión de esta prueba. Con
-     * títulos como delimitador, un revisor demostró que renombrar el título
-     * de otra serie (sin tocar el aviso de nadie) podía desplazar el "hasta"
-     * varias secciones más abajo: el recorte se tragaba media página, el
-     * aviso seguía cayendo dentro por pura casualidad, y la prueba pasaba
-     * sin haber comprobado nada. `data-serie` no es texto visible que pueda
-     * reaparecer en el descargo del pie, así que no tiene ese problema; y el
-     * `assertLessThan` de abajo es la segunda red: si algún día el recorte
-     * volviera a inflarse por cualquier otra vía, el tamaño lo delata aunque
-     * el contenido, por casualidad, siguiera pasando.
+     * SIGUIENTE serie. Con títulos como delimitador, renombrar el título de
+     * otra serie (sin tocar el aviso de nadie) puede desplazar el "hasta"
+     * varias secciones más abajo: el recorte se traga media página, el aviso
+     * sigue cayendo dentro por pura casualidad, y la prueba pasa sin haber
+     * comprobado nada. `data-serie` no es texto visible que pueda reaparecer
+     * en el descargo del pie, así que no tiene ese problema; y el
+     * `assertLessThan` de abajo es la segunda red: si el recorte se inflara
+     * por cualquier otra vía, el tamaño lo delata aunque el contenido, por
+     * casualidad, siguiera pasando.
      */
     public function test_el_aviso_de_muestra_insuficiente_va_pegado_a_su_serie_y_no_a_la_que_si_alcanza(): void
     {
@@ -504,10 +502,10 @@ class ObservatorioTest extends TestCase
     }
 
     /**
-     * El estado vacío se contradecía en pantalla: «hoy hay n = 762 registros
-     * y hacen falta al menos 30». Quien lo lee tiene razón en desconfiar —762
-     * es mayor que 30— y este módulo existe justo para aguantar esa pregunta.
-     * El total no era lo que fallaba; fallaba una de las tres señales.
+     * El estado vacío no puede contradecirse en pantalla: «hay n = 762
+     * registros y hacen falta al menos 30» invita a desconfiar —762 es mayor
+     * que 30— y este módulo existe justo para aguantar esa pregunta. Lo que no
+     * llega no es el total, sino una de las tres señales.
      */
     public function test_el_estado_vacio_nombra_la_senal_que_no_llega_y_no_el_total(): void
     {
@@ -532,12 +530,10 @@ class ObservatorioTest extends TestCase
      * Una barra tiene que verse sobre la superficie donde se dibuja, y este
      * panel es bicromático: son DOS superficies, no una.
      *
-     * La versión anterior de esta prueba prohibía una sola cadena —el Ambient
-     * White con el que «Otros» quedaba invisible en claro— y por eso no
-     * vigilaba nada más: repintar «Otros» de blanco puro, que es peor que el
-     * bug original, la dejaba en verde. Mientras tanto Wine, Pub Grey y Pub
-     * Black seguían por debajo de 3:1 sobre el fondo oscuro, y Pub Black era
-     * literalmente el color de ese fondo.
+     * Prohibir un color concreto no basta: repintar una serie de blanco puro
+     * en claro, o dejar Wine, Pub Grey o Pub Black por debajo de 3:1 sobre el
+     * fondo oscuro —Pub Black es literalmente el color de ese fondo—, pasaría
+     * en verde.
      *
      * Mide contraste WCAG de verdad, sobre las SIETE ranuras y contra la
      * superficie de cada tema, leyendo `tokens.css` en vez de copiar la
@@ -577,12 +573,11 @@ class ObservatorioTest extends TestCase
      * Ninguna gráfica de varias series puede cablear sus colores a mano, y
      * cada una declara ranuras distintas entre sí.
      *
-     * Recorre TODAS las gráficas del observatorio, no una: `PresenciaPorMunicipio`
-     * y `DemandaLaboralPorArea` cablearon cada una por su lado la misma
-     * paleta pensada para fondo claro, y arreglar solo la segunda habría
-     * dejado a Wine invisible en la primera. Una gráfica de una sola serie no
-     * entra: su relleno es el acento de marca, que sí funciona en los dos
-     * temas.
+     * Recorre TODAS las gráficas del observatorio, no una: dos gráficas que
+     * cablearan por su lado la misma paleta pensada para fondo claro
+     * necesitarían el mismo arreglo, y arreglar solo una dejaría a Wine
+     * invisible en la otra. Una gráfica de una sola serie no entra: su
+     * relleno es el acento de marca, que sí funciona en los dos temas.
      */
     public function test_ninguna_grafica_de_varias_series_cablea_sus_colores(): void
     {

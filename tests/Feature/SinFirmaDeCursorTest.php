@@ -12,12 +12,12 @@ use Throwable;
  *
  * El editor Cursor añade `Co-authored-by: Cursor <cursoragent@cursor.com>` a
  * los commits de su agente, y GitHub lista esa dirección como contribuidora
- * del repositorio. Hasta el corte la llevaban 26 commits: nueve ya en
- * producción y diecisiete en `cierre/asobares-final`. Quitarla de ahí exigía
- * reescribir `main` a la fuerza, redesplegar y romper los hashes que citan el
- * estado y la bitácora, así que Sua decidió no reescribir y cortarla: la
- * atribución se apaga en Cursor (Settings → Git & Pull Requests → Commit
- * Attribution) y esta guardia vigila que ningún commit posterior la traiga.
+ * del repositorio. Los commits anteriores al corte la llevan y se quedan como
+ * están: quitarla exigiría reescribir `main` a la fuerza, redesplegar y romper
+ * los hashes que cita la documentación del proyecto. Por eso la historia no se
+ * reescribe: la atribución se apaga en Cursor (Settings → Git & Pull Requests
+ * → Commit Attribution) y esta guardia vigila que ningún commit posterior la
+ * traiga.
  *
  * Solo mira la firma de Cursor. El `Co-Authored-By` de las sesiones de Claude
  * Code es una convención distinta y no entra aquí.
