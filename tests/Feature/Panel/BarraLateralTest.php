@@ -194,7 +194,7 @@ class BarraLateralTest extends TestCase
 
         // Lo que separa no es un canto: la barra no tiene fondo ni sombra
         // propios y el campo de puntos es continuo por debajo.
-        $this->assertStringNotContainsString('border-inline-end', $elemento, 'La barra no puede separarse con un canto: se une con la sombra de su pseudoelemento.');
+        $this->assertStringNotContainsString('border-inline-end', $elemento, 'La barra no puede separarse con un canto.');
 
         // Lo único que dibuja `::after` es el resplandor de la esquina: la barra
         // es continua con el contenido y ahí no va nada que separe.
