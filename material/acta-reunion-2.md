@@ -2,7 +2,7 @@
 
 **Fecha:** jueves 31 de julio de 2026, 2:00 p. m. · **Lugar:** Discoteca El Balcón de la 14, Armenia
 **Asistentes:** Natalia Gutiérrez (directora ejecutiva), directivo del capítulo (presumiblemente Jorge Iván Botero, presidente — **confirmar nombre y cargo**), Juan José Sua y compañera de práctica.
-**Fuente:** transcripción automática de 3 audios de la compañera (ver `transcripcion-reunion-2.md`). Citas entre «» son aproximadas por calidad del audio.
+**Fuente:** transcripción automática de 3 audios de la compañera, que no se versiona porque contiene datos personales. Citas entre «» son aproximadas por calidad del audio.
 
 ---
 

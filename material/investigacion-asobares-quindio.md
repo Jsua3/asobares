@@ -70,5 +70,5 @@ Fuente: Observatorio Económico de Asobares (post de @asobaresquindio, ~20 jul 2
 - https://asobares.org/con-pasos-firmes-avanza-armenia-24-horas/ (feb 2025)
 - https://asobares.org/armenia-potencia-su-destino-turistico/ (dic 2024, comité de turismo)
 - ⚠️ Caídos (404): noticias de armenia.gov.co sobre Expobar 2026 y Armenia 24.
-- Reuniones con el gremio: `transcripcion-reunion-1.md` (28 jul), `transcripcion-reunion-2.md` + `acta-reunion-2.md` (31 jul; transcripciones automáticas — contrastar nombres y cifras).
+- Reuniones con el gremio: 28 jul y 31 jul, con `acta-reunion-2.md` para la segunda (transcripciones automáticas que no se versionan porque contienen datos personales — contrastar nombres y cifras).
 - Pagos: **Bold ya contratada por el gremio** (Reunión 1 y 2); soporta PSE. Tarifas de referencia del mercado (confirmar con proveedor): Wompi ≈2,99%+$900 tarjetas / ≈1,99%+$900 PSE-Nequi; PayU ≈3,49%+$900 / ≈2,49%+$900 PSE; Bold ≈2,7–3,4% según método. Sin costo mensual. Todas exigen RUT, cámara de comercio y cuenta bancaria del gremio (**Itaú**) — documentos aún pendientes de entrega.
