@@ -39,6 +39,14 @@ class DirectorioEditorialHibridoTest extends TestCase
         $this->assertStringContainsString('href="#resultados"', $html);
         $this->assertStringContainsString('id="directorio-filtros-panel"', $html);
         $this->assertStringContainsString('id="directorio-filtros-drawer"', $html);
+        $this->assertStringContainsString('id="campo-q-desktop"', $html);
+        $this->assertStringContainsString('id="campo-q-mobile"', $html);
+        $this->assertStringContainsString('id="campo-municipio-desktop"', $html);
+        $this->assertStringContainsString('id="campo-municipio-mobile"', $html);
+        $this->assertStringContainsString('id="campo-categoria-desktop"', $html);
+        $this->assertStringContainsString('id="campo-categoria-mobile"', $html);
+        $this->assertSame(1, substr_count($html, 'id="campo-q-desktop"'));
+        $this->assertSame(1, substr_count($html, 'id="campo-q-mobile"'));
         $this->assertStringContainsString('id="resultados"', $html);
         $this->assertStringContainsString('Buscar por nombre', $html);
         $this->assertStringContainsString('Tarjetas', $html);
@@ -54,6 +62,20 @@ class DirectorioEditorialHibridoTest extends TestCase
             $html,
             'el Directorio no carga la hoja de la portada'
         );
+    }
+
+    public function test_el_drawer_movil_bloquea_el_fondo_y_administra_el_foco(): void
+    {
+        $vista = File::get(resource_path('views/publico/directorio/index.blade.php'));
+
+        $this->assertStringContainsString('class="fixed inset-0 z-[80]"', $vista);
+        $this->assertStringContainsString('aria-modal="true"', $vista);
+        $this->assertStringContainsString('x-ref="drawerFiltros"', $vista);
+        $this->assertStringContainsString('tabindex="-1"', $vista);
+        $this->assertStringContainsString('retenerFocoDrawer($event)', $vista);
+        $this->assertStringContainsString('Array.from(this.$refs.drawerFiltros.querySelectorAll', $vista);
+        $this->assertStringContainsString('disparadorDrawer?.focus()', $vista);
+        $this->assertStringContainsString('backdrop-blur-sm', $vista);
     }
 
     public function test_el_hero_sigue_obedeciendo_el_titulo_editable(): void
@@ -74,6 +96,9 @@ class DirectorioEditorialHibridoTest extends TestCase
         $this->assertStringContainsString('.directorio-editorial-hero', $css);
         $this->assertStringContainsString('@media (prefers-reduced-motion: reduce)', $css);
         $this->assertStringContainsString('@media (prefers-reduced-transparency: reduce)', $css);
+        $this->assertStringContainsString('rgb(11 9 10 / 0.9)', $css);
+        $this->assertStringContainsString('rgb(255 248 241 / 0.86)', $css);
+        $this->assertStringContainsString('rgb(255 248 241 / 0.9)', $css);
         $this->assertStringContainsString('resources/css/directorio-editorial.css', $vite);
         $this->assertStringContainsString("@vite(['resources/css/directorio-editorial.css'])", $vista);
         $this->assertStringNotContainsString('home-editorial.css', $vista);
@@ -125,8 +150,9 @@ class DirectorioEditorialHibridoTest extends TestCase
         $componente = $xpath->query('ancestor::*[@x-data][1]', $boton->item(0))->item(0);
         $this->assertNotNull($componente, 'el botón no vive dentro de un componente de Alpine');
         $this->assertTrue($componente->contains($hoja), 'el botón y la hoja no comparten componente');
+        $this->assertStringContainsString('disparadorDrawer = document.activeElement', $componente->getAttribute('x-data'), 'abrirDrawer() no conserva el disparador para devolver el foco');
         $this->assertMatchesRegularExpression(
-            '/abrirDrawer\(\) \{\s*this\.drawerAbierto = true;/',
+            '/abrirDrawer\(\) \{.*this\.drawerAbierto = true;/s',
             $componente->getAttribute('x-data'),
             'abrirDrawer() no abre la hoja'
         );

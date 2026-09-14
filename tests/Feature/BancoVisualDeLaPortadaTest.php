@@ -25,12 +25,12 @@ class BancoVisualDeLaPortadaTest extends TestCase
 
     /** @var list<string> */
     private const array ASSETS = [
-        'img/home/establecimiento-01.png',
-        'img/home/establecimiento-02.png',
-        'img/home/establecimiento-03.png',
-        'img/home/beneficios-gremio.png',
+        'img/home/establecimiento-01.webp',
+        'img/home/establecimiento-02.webp',
+        'img/home/establecimiento-03.webp',
+        'img/home/beneficios-gremio.webp',
         'videos/asobares-institucional.jpg',
-        'img/home/cta-afiliacion.png',
+        'img/home/cta-afiliacion.webp',
         'img/home/publicidad-fallback.png',
     ];
 
@@ -61,15 +61,15 @@ class BancoVisualDeLaPortadaTest extends TestCase
 
         $this->assertSame(
             [
-                'img/home/establecimiento-01.png',
-                'img/home/establecimiento-02.png',
-                'img/home/establecimiento-03.png',
+                'img/home/establecimiento-01.webp',
+                'img/home/establecimiento-02.webp',
+                'img/home/establecimiento-03.webp',
             ],
             config('home_banco.establecimientos')
         );
-        $this->assertSame('img/home/beneficios-gremio.png', config('home_banco.beneficios'));
+        $this->assertSame('img/home/beneficios-gremio.webp', config('home_banco.beneficios'));
         $this->assertSame('videos/asobares-institucional.jpg', config('home_banco.evento'));
-        $this->assertSame('img/home/cta-afiliacion.png', config('home_banco.cta'));
+        $this->assertSame('img/home/cta-afiliacion.webp', config('home_banco.cta'));
         $this->assertSame('img/home/publicidad-fallback.png', config('home_banco.publicidad'));
     }
 
@@ -92,12 +92,12 @@ class BancoVisualDeLaPortadaTest extends TestCase
 
         $this->assertStringContainsString(
             'portada-real-home.jpg',
-            (string) urlDeFotoDeLaHome('asociados/portada-real-home.jpg', 'img/home/establecimiento-01.png')
+            (string) urlDeFotoDeLaHome('asociados/portada-real-home.jpg', 'img/home/establecimiento-01.webp')
         );
 
         $this->assertStringContainsString(
-            'img/home/establecimiento-01.png',
-            (string) urlDeFotoDeLaHome('asociados/'.md5('destacado-relleno-home').'.png', 'img/home/establecimiento-01.png')
+            'img/home/establecimiento-01.webp',
+            (string) urlDeFotoDeLaHome('asociados/'.md5('destacado-relleno-home').'.png', 'img/home/establecimiento-01.webp')
         );
 
         $this->assertNull(urlDeFotoDeLaHome(null, 'img/home/no-existe.png'));
@@ -111,8 +111,8 @@ class BancoVisualDeLaPortadaTest extends TestCase
 
         $this->assertStringContainsString('home-editorial-establecimiento__fallback', $html);
         $this->assertStringNotContainsString('img/home/establecimiento-', $html);
-        $this->assertStringContainsString('img/home/beneficios-gremio.png', $html);
-        $this->assertStringContainsString('img/home/cta-afiliacion.png', $html);
+        $this->assertStringContainsString('img/home/beneficios-gremio.webp', $html);
+        $this->assertStringContainsString('img/home/cta-afiliacion.webp', $html);
     }
 
     public function test_una_foto_portada_real_no_se_sustituye_por_el_banco(): void
@@ -210,5 +210,26 @@ class BancoVisualDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('.dark .home-editorial', $css);
         $this->assertStringContainsString('#f5f2ee', $css, 'El modo claro tiene que declarar un fondo marfil, no reutilizar el grafito.');
         $this->assertStringContainsString('#080808', $css, 'El modo oscuro tiene que conservar el grafito.');
+    }
+
+    public function test_home_editorial_no_emite_otra_base_de_tailwind(): void
+    {
+        $css = File::get(resource_path('css/home-editorial.css'));
+
+        $this->assertStringNotContainsString("@import 'tailwindcss'", $css);
+        $this->assertStringNotContainsString('@source ', $css);
+        $this->assertStringNotContainsString('--font-sans:', $css);
+    }
+
+    public function test_home_corrige_overflow_contraste_y_foco_sin_tocar_navbar(): void
+    {
+        $css = File::get(resource_path('css/home-editorial.css'));
+
+        $this->assertMatchesRegularExpression('/\.home-editorial-respalda\s*\{[^}]*overflow:\s*clip;/s', $css);
+        $this->assertMatchesRegularExpression('/\.home-editorial-cinta__pista:focus-within\s*\{[^}]*mask-image:\s*none;/s', $css);
+        $this->assertMatchesRegularExpression('/\.home-editorial-cinta a:focus-visible\s*\{[^}]*z-index:\s*5;/s', $css);
+        $this->assertMatchesRegularExpression('/\.home-editorial \.home-editorial-hero-secundario\s*\{[^}]*rgb\(255 255 255 \/ 0\.68\)/s', $css);
+        $this->assertMatchesRegularExpression('/\.home-editorial \.home-editorial-video-nota\s*\{[^}]*rgb\(255 255 255 \/ 0\.72\)/s', $css);
+        $this->assertMatchesRegularExpression('/\.home-editorial-cta \.home-editorial-eyebrow\s*\{[^}]*rgb\(255 255 255 \/ 0\.78\)/s', $css);
     }
 }

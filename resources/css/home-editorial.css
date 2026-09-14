@@ -1,8 +1,3 @@
-@import 'tailwindcss';
-
-@source '../views/components/publico/home/**/*.blade.php';
-@source '../views/publico/inicio.blade.php';
-
 /*
  * HOME-05 — tokens locales de la portada.
  *
@@ -162,20 +157,23 @@ html:not(.dark) .home-editorial .hero-portada .hero-medio::after {
     max-width: 22rem;
     font-size: clamp(1rem, 1.6vw, 1.125rem);
     line-height: 1.45;
-    color: rgb(255 255 255 / 0.78);
+    color: rgb(255 255 255 / 0.86);
+    text-shadow: 0 1px 18px rgb(0 0 0 / 0.36);
 }
 
 .home-editorial .home-editorial-hero-secundario {
     font-size: 0.8125rem;
     line-height: 1.45;
-    color: rgb(255 255 255 / 0.42);
+    color: rgb(255 255 255 / 0.68);
+    text-shadow: 0 1px 14px rgb(0 0 0 / 0.35);
 }
 
 .home-editorial .home-editorial-video-nota {
-    border-color: rgb(255 255 255 / 0.12);
+    border-color: rgb(255 255 255 / 0.22);
     font-size: 0.6875rem;
-    color: rgb(255 255 255 / 0.42);
-    opacity: 0.72;
+    color: rgb(255 255 255 / 0.72);
+    opacity: 0.86;
+    text-shadow: 0 1px 14px rgb(0 0 0 / 0.35);
 }
 
 /* —— Cinta editorial (vidrio cálido, isotipo fijo) —— */
@@ -310,6 +308,7 @@ html:not(.dark) .home-editorial .hero-portada .hero-medio::after {
     flex: 1 1 0;
     min-width: 0;
     overflow: hidden;
+    contain: inline-size;
     display: flex;
     align-items: center;
     container-type: inline-size;
@@ -327,6 +326,11 @@ html:not(.dark) .home-editorial .hero-portada .hero-medio::after {
         #000 calc(100% - 48px),
         transparent 100%
     );
+}
+
+.home-editorial-cinta__pista:focus-within {
+    -webkit-mask-image: none;
+    mask-image: none;
 }
 
 .home-editorial-cinta__velo {
@@ -411,8 +415,11 @@ html:not(.dark) .home-editorial .hero-portada .hero-medio::after {
 }
 
 .home-editorial-cinta a:focus-visible {
+    position: relative;
+    z-index: 5;
     outline-color: var(--cinta-tinta);
-    outline-offset: 3px;
+    outline-offset: 4px;
+    background: var(--cinta-fondo);
 }
 
 .home-editorial-cinta__sep {
@@ -802,6 +809,7 @@ html:not(.dark) .home-editorial-establecimiento__overlay {
 .home-editorial-respalda {
     position: relative;
     isolation: isolate;
+    overflow: clip;
     background:
         radial-gradient(ellipse 70% 60% at 18% 20%, rgb(238 65 55 / 0.07), transparent 52%),
         linear-gradient(180deg, #0c0b0b 0%, #101010 58%, #0b0b0b 100%);
@@ -1183,11 +1191,12 @@ html:not(.dark) .home-editorial-evento:not(.is-activo) .home-editorial-evento__f
 
 .home-editorial-evento__tipo {
     border-radius: 9999px;
-    background: rgb(238 65 55 / 0.92);
+    background: rgb(120 21 17 / 0.96);
     padding: 0.2rem 0.6rem;
     font-size: 0.68rem;
     font-weight: 600;
     letter-spacing: 0.04em;
+    color: #fff8f6;
 }
 
 .home-editorial-evento__titulo {
@@ -1217,7 +1226,7 @@ html:not(.dark) .home-editorial-evento:not(.is-activo) .home-editorial-evento__f
 
 .home-editorial-eventos__control {
     position: absolute;
-    top: calc(50% - 1.75rem);
+    top: 1rem;
     z-index: 2;
     display: inline-flex;
     width: 2.5rem;
@@ -1238,11 +1247,11 @@ html:not(.dark) .home-editorial-eventos__control {
 }
 
 .home-editorial-eventos__control--prev {
-    left: 0.55rem;
+    right: 3.75rem;
 }
 
 .home-editorial-eventos__control--next {
-    right: 0.55rem;
+    right: 1rem;
 }
 
 .home-editorial-eventos__control:focus-visible {
@@ -1874,6 +1883,11 @@ a.home-editorial-aliados__marca:focus-visible {
 html:not(.dark) .home-editorial-cta {
     box-shadow: inset 0 2.75rem 2.2rem -2.2rem rgb(8 8 8 / 0.55);
     border-top-color: rgb(23 17 15 / 0.14);
+}
+
+.home-editorial-cta .home-editorial-eyebrow {
+    color: rgb(255 255 255 / 0.78);
+    text-shadow: 0 1px 18px rgb(0 0 0 / 0.42);
 }
 
 html:not(.dark) .home-editorial-cta__velo {
