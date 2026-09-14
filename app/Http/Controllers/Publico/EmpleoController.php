@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
@@ -214,7 +213,9 @@ class EmpleoController
             return;
         }
 
-        rescue(fn (): ?SentMessage => Mail::to($correos)->send(new NuevaPostulacion($postulacion)));
+        rescue(function () use ($correos, $postulacion): void {
+            Mail::to($correos)->send(new NuevaPostulacion($postulacion));
+        });
     }
 
     /**
@@ -224,7 +225,9 @@ class EmpleoController
      */
     private function confirmarAlPostulante(Postulacion $postulacion): void
     {
-        rescue(fn (): ?SentMessage => Mail::to($postulacion->correo)->send(new AcuseDePostulacion($postulacion)));
+        rescue(function () use ($postulacion): void {
+            Mail::to($postulacion->correo)->send(new AcuseDePostulacion($postulacion));
+        });
     }
 
     public function registrarAspirante(GuardarAspiranteRequest $request): RedirectResponse
