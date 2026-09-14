@@ -101,9 +101,10 @@ class AvisoDeMensajeAlGremioTest extends TestCase
 
     /**
      * Al buzón del gremio llega un único correo por mensaje, y ese correo no
-     * copia el nombre, el correo, el teléfono ni el texto de quien escribe:
-     * remite al panel, que es el único sitio que sabe borrar esos datos cuando
-     * vence su plazo.
+     * copia el nombre, el correo, el teléfono ni el texto de quien escribe, ni
+     * en el cuerpo ni en el asunto, ni responde a su dirección: remite al
+     * panel, que es el único sitio que sabe borrar esos datos cuando vence su
+     * plazo.
      */
     #[DataProvider('tiposDelFormularioDeContacto')]
     public function test_al_buzon_del_gremio_llega_un_solo_correo_sin_datos_personales(TipoMensaje $tipo): void
@@ -135,6 +136,16 @@ class AvisoDeMensajeAlGremioTest extends TestCase
         $aviso->assertDontSeeInText('3145559876');
         $aviso->assertDontSeeInHtml('cuatro de la madrugada');
         $aviso->assertDontSeeInText('cuatro de la madrugada');
+
+        $asunto = $aviso->envelope()->subject;
+
+        foreach (['Ciudadana Preocupada', 'ciudadana@ejemplo.test', '3145559876', 'cuatro de la madrugada'] as $dato) {
+            $this->assertStringNotContainsString($dato, $asunto, 'El asunto del aviso tampoco puede llevar datos de quien escribe.');
+        }
+
+        $this->assertFalse($aviso->hasReplyTo('ciudadana@ejemplo.test'), 'Responder al aviso no puede escribirle al ciudadano desde el buzón.');
+        $this->assertFalse($aviso->hasCc('ciudadana@ejemplo.test'));
+        $this->assertFalse($aviso->hasBcc('ciudadana@ejemplo.test'));
     }
 
     /** Un mensaje de contacto corriente también se avisa: la bandeja es la misma. */
