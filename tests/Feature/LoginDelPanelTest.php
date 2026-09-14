@@ -169,10 +169,10 @@ class LoginDelPanelTest extends TestCase
     }
 
     /**
-     * Registrar los proveedores sólo los OFRECÍA: como ambos son opcionales
-     * por usuario, quien nunca entraba a su perfil a activarlos seguía
-     * entrando con la contraseña sola, y este panel gobierna los pagos, la
-     * cartera y los datos personales de los afiliados.
+     * Registrar los proveedores solo los OFRECE: como ambos son opcionales por
+     * usuario, quien no entrara a su perfil a activarlos seguiría entrando con
+     * la contraseña sola, y este panel gobierna los pagos, la cartera y los
+     * datos personales de los afiliados.
      */
     public function test_el_segundo_factor_es_obligatorio_en_el_panel(): void
     {

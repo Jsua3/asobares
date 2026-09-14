@@ -9,10 +9,9 @@ use Tests\TestCase;
 /**
  * La hoja del teléfono se cierra con el dedo.
  *
- * Las dos hojas de la barra inferior --«Bolsas» y «El gremio»-- están a un
- * dedo del pulgar y eran lo único del sitio que se abría y se cerraba sin
- * poder empujarse. Ahora siguen al dedo 1:1, resisten con goma hacia arriba y
- * al soltar proyectan el momento para decidir si se van.
+ * Las dos hojas de la barra inferior --«Bolsas» y «El gremio»-- están al
+ * alcance del pulgar, así que siguen al dedo 1:1, resisten con goma hacia
+ * arriba y al soltar proyectan el momento para decidir si se van.
  *
  * Lo que estas guardas protegen son las cuatro decisiones que se pagan caras
  * si alguien las deshace sin saber por qué:
@@ -195,9 +194,9 @@ class HojaArrastrableTest extends TestCase
      * para una lista que se desplaza miles de píxeles. La hoja mide 155.
      * Medido sobre «Bolsas»: un arrastre suave de 40 px da unos 143 px/s, que
      * con 0,998 proyectan 71 px y llevan el reposo a 111 --la hoja se CERRARÍA
-     * con un tirón corto y suave--. Con 0,99 esos mismos
-     * 143 px/s proyectan 14 px y vuelve a abrirse, mientras que un golpe real
-     * de 45 px en 34 ms (1351 px/s medidos) proyecta 134 px y la cierra.
+     * con un tirón corto y suave--. Con 0,99 esos mismos 143 px/s proyectan
+     * 14 px y vuelve a abrirse, mientras que un golpe real de 45 px en 34 ms
+     * (1351 px/s medidos) proyecta 134 px y la cierra.
      *
      * Rotura: volver a `proyectar(velocidad)` a secas.
      */

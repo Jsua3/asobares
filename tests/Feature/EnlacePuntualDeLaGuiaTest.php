@@ -18,10 +18,11 @@ use Tests\TestCase;
  * su razón no es estética: llegar a ese registro es difícil, y hay personas
  * que no se llevan bien con la tecnología.
  *
- * ⚠️ Las URL exactas son insumo del gremio y todavía no existen: los trámites
- * sembrados apuntan a dominio pelado, y el documento de fuente oficial tampoco
- * las trae. Inventar direcciones de trámites legales choca con la regla del
- * encargo: en producción solo entra contenido de documento oficial del gremio.
+ * ⚠️ Las URL exactas son insumo del gremio y todavía no existen: de las ocho
+ * fichas sembradas, las tres que traen enlace apuntan a dominio pelado, y el
+ * documento de fuente oficial tampoco las trae. Inventar direcciones de
+ * trámites legales choca con la regla del encargo: en producción solo entra
+ * contenido de documento oficial del gremio.
  *
  * Así que lo que se construye aquí es la otra mitad: el sitio distingue las
  * dos cosas y no promete la que no tiene, y el día que lleguen las URL la

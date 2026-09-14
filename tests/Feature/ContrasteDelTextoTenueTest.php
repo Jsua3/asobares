@@ -14,7 +14,7 @@ use Tests\TestCase;
  * Medido en Chromium sobre la portada servida, con los fondos que resuelven a
  * un color sólido: con el token a 4,32:1 contra `--asb-superficie`, **quince de
  * los diecisiete elementos medibles quedan por debajo del 4,5:1** que exige
- * RNF-12 para texto normal. En claro no pasa: el mínimo de los diecisiete es
+ * RNF-12 para texto normal. En claro no ocurre: el mínimo de los diecisiete es
  * 6,94:1.
  *
  * Esta guarda vuelve a MEDIR leyendo `tokens.css`, en vez de fiarse de que
@@ -25,7 +25,7 @@ use Tests\TestCase;
  * `--asb-superficie-alta` es la más clara de las tres y por tanto el peor caso
  * para un texto gris, y es la que llevan las tarjetas del directorio y los
  * módulos de la portada. Medir solo contra `--asb-fondo` deja pasar un token
- * de 4,32:1 como ese, que ahí da 4,53:1 y parece cumplir.
+ * que ahí da 4,53:1 y parece cumplir, y contra `--asb-superficie` da 4,32:1.
  */
 class ContrasteDelTextoTenueTest extends TestCase
 {
@@ -64,9 +64,9 @@ class ContrasteDelTextoTenueTest extends TestCase
     }
 
     /**
-     * El tema claro no se tocó al corregir el oscuro, y esta guarda existe para
-     * que no se toque por descuido: es fácil «arreglar» un token en `:root`
-     * creyendo que se arregla el oscuro, porque `.dark` hereda de ahí.
+     * Esta guarda impide que el tema claro se estropee por descuido: es fácil
+     * «arreglar» un token en `:root` creyendo que se arregla el oscuro, porque
+     * `.dark` hereda de ahí.
      */
     public function test_el_texto_tenue_del_tema_claro_sigue_cumpliendo_aa(): void
     {
