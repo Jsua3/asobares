@@ -31,9 +31,9 @@ if (! function_exists('ordenarEnEspanol')) {
      *
      * `ORDER BY nombre` en SQLite usa colación BINARIA: 'Z' es 0x5A y 'Á' es
      * 0xC3 0x81, así que «Zorba» sale antes que «Ámbar». En un sitio en
-     * español eso se lee como desorden --que es exactamente la queja que
-     * originó OBS3-06-- y encima cambia entre motores: MySQL con
-     * `utf8mb4_unicode_ci` sí ordena bien, así que el defecto aparecería en
+     * español eso se lee como desorden, y encima depende de la colación del
+     * motor: el PostgreSQL local ordena por bytes igual que SQLite, pero otro
+     * con colación de idioma ordena bien, así que el defecto puede verse en
      * desarrollo y no en producción, o al revés.
      *
      * Se usa sobre colecciones ya acotadas (la portada trae seis). Para una

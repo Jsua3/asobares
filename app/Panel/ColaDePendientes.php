@@ -20,8 +20,8 @@ use Illuminate\Support\Facades\Gate;
 /**
  * Qué tiene pendiente de aprobar quien acaba de entrar al panel.
  *
- * Se pregunta a la **policy** y no al rol, igual que hace
- * `FlujoDeAprobacionObserver::avisarAQuienAprueba()`. Así la secretaría ve
+ * Se pregunta a la **policy** (`publicar`) y no al rol, igual que
+ * `FlujoDeAprobacionObserver`. Así la secretaría ve
  * las tres bolsas —que sí aprueba—, la dirección ve el contenido que redacta
  * la secretaría, y el día que cambie una policy la cola la sigue sin que haya
  * que tocar nada aquí.

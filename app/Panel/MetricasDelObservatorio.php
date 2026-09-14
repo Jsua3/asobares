@@ -23,8 +23,8 @@ use Illuminate\Support\Facades\DB;
  *
  * Cada método agrega en SQL y devuelve una {@see SerieDelObservatorio}: los
  * datos y el tamaño de muestra que los sostiene. Nada de traer modelos a
- * memoria para contarlos con `groupBy` de Collection — este proyecto ya tuvo
- * que corregirlo una vez (ver `RecaudoMensual`).
+ * memoria para contarlos con `groupBy` de Collection, igual que en
+ * `RecaudoMensual`.
  *
  * Solo cuenta lo publicado donde el modelo tiene estado editorial: un
  * asociado, una vacante o un proveedor en borrador no es presencia del
@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\DB;
  */
 class MetricasDelObservatorio
 {
-    /** Abreviaturas de mes en español: el locale de la app es `en`, así que no basta con Carbon. */
+    /** Abreviaturas de mes fijas en español: no dependen del locale ni de las traducciones de Carbon. */
     private const array MESES = [
         1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun',
         7 => 'Jul', 8 => 'Ago', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic',

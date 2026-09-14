@@ -26,19 +26,23 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Rotar la contraseña de un afiliado desde el panel tiene que cerrar la
         // sesión que alguien tuviera abierta con la clave vieja. Lo fija
-        // `InvalidacionDeSesionTest`, que se comprobó en rojo sin esta línea.
+        // `InvalidacionDeSesionTest`.
         $middleware->web(append: [AuthenticateSession::class]);
 
         // En `web` y no global: cuenta páginas servidas, no descargas ni
-        // webhooks. Qué queda dentro del sitio y qué no lo decide el propio
-        // middleware por el nombre de la ruta, porque el panel comparte grupo.
+        // webhooks. Qué es una página lo decide el propio middleware por el
+        // `Content-Type` de la respuesta; el panel arma su propia pila y no
+        // pasa por este grupo.
         $middleware->web(append: [ContarVisitaDelSitio::class]);
 
-        // El hosting de producción todavía no está decidido. Cuando se elija,
-        // TRUSTED_PROXIES debe listar las IPs del balanceador (o `*` si el
-        // proveedor no las publica): sin esto todas las peticiones parecen
-        // venir de la misma IP —los límites por IP colapsan en un solo cubo—
-        // y las URLs se generan en http, incluida la que recibe Bold.
+        // TRUSTED_PROXIES lista las IPs del balanceador, o `*` si el proveedor
+        // no las publica, que es el caso de Laravel Cloud. Sin esto todas las
+        // peticiones parecen venir de la misma IP —los límites por IP colapsan
+        // en un solo cubo— y las URLs se generan en http, incluida la que
+        // recibe Bold.
+        //
+        // `env()` y no `config()`: este callback corre al resolver el kernel
+        // HTTP, antes de que la aplicación cargue su configuración.
         $proxies = env('TRUSTED_PROXIES');
 
         if (filled($proxies)) {
