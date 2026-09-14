@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * Los cinco beneficios oficiales se leen como lista editorial,
- * no como tarjetas sueltas, y el CTA sigue yendo a afiliación.
+ * Los cinco beneficios oficiales se leen como lista editorial, no como tarjetas
+ * sueltas, y el CTA sigue yendo a afiliación.
  *
  * Roturas: inventar un sexto beneficio; href="#"; quitar el sello; volver a
  * poner el CTA delante de la lista en el DOM.

@@ -8,9 +8,8 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * El hero sigue siendo el video institucional, con el
- * titular y el concepto actuales. La animación es editorial y se apaga
- * si pidieron menos movimiento.
+ * El hero sigue siendo el video institucional, con el titular y el concepto
+ * actuales. La animación es editorial y se apaga si pidieron menos movimiento.
  *
  * Roturas: sustituir el video; cablear un segundo mecanismo de video;
  * quitar los CTA; animar el titular sin respetar reduced-motion.
@@ -32,9 +31,9 @@ class HeroEditorialDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('videos/asobares-institucional.mp4', $html);
         $this->assertStringContainsString('videos/asobares-institucional.jpg', $html);
 
-        // La ruta también vive en el atributo poster del <video>,
-        // que es una capa invisible hasta que carga y no arranca con
-        // movimiento reducido. La foto fija tiene que ser la <img>.
+        // La ruta también vive en el atributo poster del <video>, que es una
+        // capa invisible hasta que carga y no arranca con movimiento reducido.
+        // La foto fija tiene que ser la <img>.
         $this->assertMatchesRegularExpression(
             '/<div class="hero-video-fondo">\s*<img src="[^"]*videos\/asobares-institucional\.jpg"/',
             $html,

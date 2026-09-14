@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * Las cuatro cifras del Observatorio conservan su
- * representación colombiana y se animan una vez al entrar en viewport.
+ * Las cuatro cifras del Observatorio conservan su representación colombiana y
+ * se animan una vez al entrar en viewport.
  *
  * Roturas: cambiar 12,65 % / $2.104.124 / 72,82 % / 35,28 %; animar
  * siempre aunque pidan menos movimiento; añadir una librería de números.

@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Vite;
 use Tests\TestCase;
 
 /**
- * El Directorio carga la capa editorial híbrida sin perder
- * filtros, pestañas ni destinos reales.
+ * El Directorio carga la capa editorial híbrida sin perder filtros, pestañas ni
+ * destinos reales.
  */
 class DirectorioEditorialHibridoTest extends TestCase
 {
@@ -93,8 +93,8 @@ class DirectorioEditorialHibridoTest extends TestCase
     /**
      * Los ids del panel y de la hoja sobreviven aunque se vacíen, y «Buscar
      * por nombre» sale dos veces, así que buscar literales no protege los
-     * filtros. Aquí se cuenta el formulario dentro de cada
-     * contenedor y se sigue el cableado del botón móvil hasta la hoja.
+     * filtros. Aquí se cuenta el formulario dentro de cada contenedor y se
+     * sigue el cableado del botón móvil hasta la hoja.
      *
      * Roturas: borrar el <x-publico.filtros-directorio> de la hoja móvil;
      * borrar el del panel de escritorio; quitar x-on:click="abrirDrawer()"

@@ -11,12 +11,12 @@ use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
- * El banco visual de la portada tiene que existir, resolverse
- * en el orden foto real → asset editorial → fallback gráfico, y no
- * pintarse con las portadas de relleno del demo.
+ * El banco visual de la portada tiene que existir, resolverse en el orden foto
+ * real → asset editorial → fallback gráfico, y no pintarse con las portadas de
+ * relleno del demo.
  *
- * Roturas: borrar un asset de `public/img/home/` o `public/videos/`; volver a pintar
- * `foto_portada` del generador por encima del banco; cablear el Hero
+ * Roturas: borrar un asset de `public/img/home/` o `public/videos/`; volver a
+ * pintar `foto_portada` del generador por encima del banco; cablear el Hero
  * como respaldo de publicidad.
  */
 class BancoVisualDeLaPortadaTest extends TestCase

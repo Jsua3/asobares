@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * La franja de Eventos de la portada solo pinta agenda real,
- * con enlaces de detalle y secuencia, sin mezclar iniciativas ni empleo.
+ * La franja de Eventos de la portada solo pinta agenda real, con enlaces de
+ * detalle y secuencia, sin mezclar iniciativas ni empleo.
  *
  * Roturas: href="#"; devolver la tarjeta de vacantes; pintar un único
  * protagonista cuando hay tres próximos; controles sin nombre accesible.

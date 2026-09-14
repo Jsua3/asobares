@@ -99,11 +99,10 @@ class FocoVisibleTest extends TestCase
      * `outline-offset` hace que el trazo se dibuje SOBRE el contenedor, que unas
      * veces es la página y otras una `.tarjeta`.
      *
-     * Medido contra `--color-marca-500: #ee4137`: 3,4900 /
-     * 3,8555 / 5,1496 / 4,9161. El peor de los cuatro es el claro sobre
-     * `--asb-fondo`, y le sobra un 16 % sobre el mínimo: no es un aprobado
-     * raspado, pero tampoco tanto margen como para que un rojo un punto más
-     * claro siga pasando.
+     * Medido contra `--color-marca-500: #ee4137`: 3,4900 / 3,8555 / 5,1496 /
+     * 4,9161. El peor de los cuatro es el claro sobre `--asb-fondo`, y le sobra
+     * un 16 % sobre el mínimo: no es un aprobado raspado, pero tampoco tanto
+     * margen como para que un rojo un punto más claro siga pasando.
      */
     public function test_el_indicador_de_foco_alcanza_3_a_1_en_los_dos_temas(): void
     {

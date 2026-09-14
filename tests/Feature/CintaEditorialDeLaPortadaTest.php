@@ -82,8 +82,8 @@ class CintaEditorialDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('img/monograma-asobares.png', $cinta);
         $this->assertStringContainsString('href="'.route('inicio').'"', $cinta);
 
-        // El enlace a inicio solo contiene el isotipo, así que su
-        // nombre es el alt; y un <aside> sin etiqueta no se distingue de
+        // El enlace a inicio solo contiene el isotipo, así que su nombre
+        // accesible es el alt; y un <aside> sin etiqueta no se distingue de
         // otros complementarios.
         $nombreDelSitio = (string) ajuste('sitio_nombre');
 
