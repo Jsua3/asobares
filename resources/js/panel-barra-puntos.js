@@ -2,9 +2,8 @@
  * El campo de puntos del fondo de TODA la interfaz.
  *
  * Un fondo de puntos que se apartan del cursor, en la barra y en el panel
- * entero. Se dibuja en un `<canvas>` y no con
- * nodos, porque con 18 px de paso una pantalla de 1.920 por 1.080 son más de
- * seis mil puntos.
+ * entero. Se dibuja en un `<canvas>` y no con nodos, porque con 18 px de paso
+ * una pantalla de 1.920 por 1.080 son más de seis mil puntos.
  *
  * Tres reglas que vienen de la decisión y no se tocan sin cambiarla:
  *
@@ -16,8 +15,8 @@
  *    entra en ninguna cuenta de contraste.
  *
  * El bucle solo corre mientras hay algo que mover: con el puntero dentro, o
- * mientras los puntos vuelven a su sitio. Sin eso sería un `requestAnimationFrame`
- * eterno en una pantalla que casi siempre está quieta.
+ * mientras los puntos vuelven a su sitio. Sin eso sería un
+ * `requestAnimationFrame` eterno en una pantalla que casi siempre está quieta.
  */
 const PASO = 18;
 const RADIO_PUNTO = 1.1;

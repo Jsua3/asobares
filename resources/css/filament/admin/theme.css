@@ -80,11 +80,11 @@
     --asb-admin-sidebar-ancho: 15.75rem;
 
     /*
-     * La barra lateral (Parte III de la spec). Prefijo
-     * propio para que nunca se confundan con los de las dos barras públicas, y
-     * declarados aquí una sola vez: un token declarado dos veces deja sin
-     * efecto a la media que lo reasigna, que es el defecto que
-     * `--asb-vidrio-desenfoque` arrastraba en este mismo archivo.
+     * La barra lateral (Parte III de la spec). Prefijo propio para que nunca
+     * se confundan con los de las dos barras públicas, y declarados aquí una
+     * sola vez: un token declarado dos veces deja sin efecto a la media que lo
+     * reasigna, que es el defecto que `--asb-vidrio-desenfoque` arrastraba en
+     * este mismo archivo.
      *
      * El velo se calibró con `MideContraste` sobre la superficie y el
      * fondo del panel, con el halo compuesto encima en su punto más intenso:
@@ -102,8 +102,8 @@
 
     /*
      * Los dos oficios del rojo. La LUZ va en esta dirección: rojo claro en el
-     * tema claro, rojo oscuro en el oscuro. Nunca es
-     * valor de `color`: solo alimenta filo, halo y resplandor.
+     * tema claro, rojo oscuro en el oscuro. Nunca es valor de `color`: solo
+     * alimenta filo, halo y resplandor.
      */
     --asb-admin-barra-luz: #ff6a5e;
     --asb-admin-barra-halo: color-mix(in oklab, var(--asb-admin-barra-luz) 12%, transparent);
@@ -318,8 +318,8 @@
      * El lavado del resplandor va TAMBIÉN aquí, y arriba del todo en la pila.
      * La capa de página ya pasa por detrás, pero el blanco al 78 % del topbar
      * la diluye lo bastante como para que se vea un escalón justo debajo del
-     * logotipo. Con el mismo token y el mismo
-     * ancho que la capa de página, las dos no pueden separarse.
+     * logotipo. Con el mismo token y el mismo ancho que la capa de página, las
+     * dos no pueden separarse.
      */
     .fi-topbar {
         min-height: var(--asb-admin-topbar-alto);
@@ -423,8 +423,8 @@
      * Sin `box-shadow` en el elemento a propósito: Filament le aplica
      * `lg:shadow-none` desde una capa que gana, así que una sombra declarada
      * aquí se anula en escritorio sin avisar: el valor computado sale en
-     * `rgba(0,0,0,0) 0 0 0 0`. La sombra de la
-     * unión la dibuja el pseudoelemento, que nadie nos pisa.
+     * `rgba(0,0,0,0) 0 0 0 0`. La sombra de la unión la dibuja el
+     * pseudoelemento, que nadie nos pisa.
      */
     /*
      * Sin `position` a propósito. Filament declara la barra `fixed` y solo la
@@ -476,9 +476,9 @@
      * Nada separa la barra del contenido: la interfaz es continua.
      *
      * Una línea de un píxel, un filo rojo o una franja difusa se leen igual,
-     * como un corte vertical. Lo que marca la zona de la
-     * barra es su resplandor, y lo que la ordena son los cristales de sus
-     * apartados; el fondo es continuo por debajo de todo.
+     * como un corte vertical. Lo que marca la zona de la barra es su
+     * resplandor, y lo que la ordena son los cristales de sus apartados; el
+     * fondo es continuo por debajo de todo.
      *
      * Aquí solo queda el resplandor de la esquina superior, que es de donde
      * nace la luz y no separa nada.
@@ -677,7 +677,7 @@
         }
 
         /* Sin rótulo, el chevron no plega nada legible; y el logotipo no cabe
-           en 56 px, además de estar ya en el topbar. */
+           en un módulo de 48 px, además de estar ya en el topbar. */
         .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group-collapse-btn,
         .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-header {
             display: none;
@@ -826,9 +826,9 @@
         }
 
         /*
-         * La insignia se vuelve PUNTO. El contador no se lee en 56 px, pero la
-         * señal de que hay pendientes hace las veces de la campana que el panel
-         * no tiene, y esa no se pierde.
+         * La insignia se vuelve PUNTO. El contador no se lee en un módulo de
+         * 48 px, pero la señal de que hay pendientes hace las veces de la
+         * campana que el panel no tiene, y esa no se pierde.
          */
         .fi-sidebar:not(.fi-sidebar-open) .fi-badge {
             position: absolute;
@@ -1091,8 +1091,8 @@
      *
      * Ojo con el riel: ahí el rótulo se esconde entero por recorte visual
      * (la regla del riel, en la media del teléfono), no por `display: none`,
-     * para que los enlaces conserven su
-     * nombre accesible. Esta regla no lo toca.
+     * para que los enlaces conserven su nombre accesible. Esta regla no lo
+     * toca.
      */
     .fi-sidebar .fi-sidebar-item-label {
         color: var(--asb-admin-barra-tinta);
@@ -2108,7 +2108,7 @@
 
 /*
  * El lavado del resplandor se estrecha con la zona: 13 rem sobre una
- * pantalla de 375 px cubren más de la mitad, y ahí la zona es un riel de 3,5.
+ * pantalla de 375 px cubren más de la mitad, y ahí la zona es un riel de 4.
  *
  * Fuera de `@layer components` como todo lo que reasigna tokens: dentro de la
  * capa perdería contra el `:root` sin capa de este mismo archivo.

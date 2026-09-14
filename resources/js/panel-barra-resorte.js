@@ -2,9 +2,9 @@
  * El resorte de los iconos del riel.
  *
  * Al desplazar la lista, los botones llegan con un resorte que sigue el
- * movimiento de quien la usa. Lo que se
- * mueve responde al GESTO y no a un reloj: cada icono se retrasa respecto al
- * dedo y llega con muelle, y tanto más cuanto más rápido se desplaza la lista.
+ * movimiento de quien la usa. Lo que se mueve responde al GESTO y no a un
+ * reloj: cada icono se retrasa respecto al dedo y llega con muelle, y tanto
+ * más cuanto más rápido se desplaza la lista.
  * Eso es manipulación directa; una transición CSS no puede hacerlo, porque no
  * sabe a qué velocidad va la mano.
  *
@@ -46,9 +46,8 @@ let corriendo = false;
  * Lo que se mueve son los MÓDULOS, no lo que hay dentro. Si se movieran las
  * filas, el indicador rojo del apartado activo se quedaría quieto mientras su
  * fila se desplaza, porque el indicador lo pinta el módulo y la fila iría por
- * su cuenta. Un módulo es un grupo o, para los
- * destinos sin grupo como «Tablero», el ítem suelto que Filament pinta
- * directamente en la lista.
+ * su cuenta. Un módulo es un grupo o, para los destinos sin grupo como
+ * «Tablero», el ítem suelto que Filament pinta directamente en la lista.
  */
 const encontrar = () => [...document.querySelectorAll('.fi-sidebar-group, .fi-sidebar-nav > .fi-sidebar-item')];
 
