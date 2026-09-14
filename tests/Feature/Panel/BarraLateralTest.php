@@ -328,7 +328,7 @@ class BarraLateralTest extends TestCase
         // respire, sabiendo el coste (la lista pasa de 1.216 a 1.312 px y se
         // corta el 22 % en vez del 16 % a 1.019 de hueco). Bajarla otra vez
         // deshace esa decisión sin que nadie se entere.
-        $this->assertSame(48.0, $enPixeles, "La fila declara {$alto[1]}rem: la decisión del 7 sep fue 3rem, o sea 48 px.");
+        $this->assertSame(48.0, $enPixeles, "La fila declara {$alto[1]}rem y la decisión es 3rem, o sea 48 px.");
 
         $this->assertStringContainsString(
             'min-height: var(--asb-admin-barra-fila-alto);',
@@ -677,7 +677,7 @@ class BarraLateralTest extends TestCase
         $this->assertStringNotContainsString(
             'var(--asb-admin-barra-resplandor)',
             $enLaBarra,
-            'El resplandor volvió a la barra: ahí nace debajo del topbar y Sua ve el corte otra vez.'
+            'El resplandor está en la barra: ahí nace debajo del topbar y se ve como un corte.'
         );
 
         // El ancho del lavado es una longitud y no un porcentaje: la capa mide
@@ -974,7 +974,7 @@ class BarraLateralTest extends TestCase
         // Y el cristal de los apartados es más transparente en el teléfono.
         $this->assertNotFalse(
             strpos($movil, '--asb-admin-barra-velo:'),
-            'El cristal del apartado no se aclara en el teléfono, que es lo que Sua pidió al quitarle el suelo al riel.'
+            'El cristal del apartado no se aclara en el teléfono, donde el riel no tiene suelo.'
         );
 
         // La transición es del ANCHO y declarada a mano: `transition-all` de

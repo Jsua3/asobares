@@ -90,7 +90,7 @@ class BeneficiosPorAlcanceTest extends TestCase
         $this->assertMatchesRegularExpression(
             '/class="[^"]*'.self::SELLO.'[^"]*text-apagado[^"]*"/u',
             $contenido,
-            'El sello de alcance perdió `text-apagado`, que es el token cuyo contraste (4,53:1) se midió. '
+            'El sello de alcance perdió `text-apagado`, el token cuyo contraste mide ContrasteDelTextoTenueTest. '
             .'Si se cambia el color hay que volver a medirlo, no suponerlo.'
         );
 
