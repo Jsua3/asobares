@@ -9,14 +9,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Los dos niveles de aliado en la portada (OBS3-04).
+ * Los dos niveles de aliado en la portada.
  *
- * El directivo pidió un bloque de aliados institucionales --Asobares Colombia,
- * la Cámara de Comercio, el Comité Intergremial y la Gobernación-- separado de
- * las marcas con convenio (`R21 02:19–03:26`), y el §27.5 lo eleva a regla de
- * contenido: «institucionales por encima de los comerciales, y con tratamiento
- * visual distinto». Hasta hoy la tabla no distinguía y todo caía en una sola
- * tira de logos, que dice que una licorera y la Gobernación son lo mismo.
+ * El gremio separa los aliados institucionales --Asobares Colombia, la Cámara
+ * de Comercio, el Comité Intergremial y la Gobernación-- de las marcas con
+ * convenio, y la regla de contenido es «institucionales por encima de los
+ * comerciales, y con tratamiento visual distinto». Una sola tira de logos
+ * diría que una licorera y la Gobernación son lo mismo.
  *
  * «Por encima» es la parte que se puede romper sin que se note leyendo, así
  * que es la que más se prueba aquí.

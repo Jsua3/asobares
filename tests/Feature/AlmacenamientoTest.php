@@ -15,7 +15,7 @@ use Tests\TestCase;
  *    suba el gremio desde el panel —portadas, galerías y los formatos oficiales
  *    de la guía normativa— desaparece en el siguiente despliegue. En local no
  *    se nota jamás, que es lo que lo hace peligroso. Por eso los puntos de
- *    subida ya no nombran su disco a mano: lo eligen por configuración, y estas
+ *    subida no nombran su disco a mano: lo eligen por configuración, y estas
  *    pruebas vigilan que siga siendo así.
  *
  * 2. Al mover esos archivos a un bucket, la separación entre lo público y lo

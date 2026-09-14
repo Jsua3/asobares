@@ -10,18 +10,14 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
- * El WhatsApp institucional no promete lo que no cumple (OBS3-14).
+ * El WhatsApp institucional no promete lo que no cumple.
  *
- * El directivo preguntó por el enlace de WhatsApp: «¿si ese tiene respuesta?»
- * (R21 11:15) y pidió «hay que automatizarlo, para que quede automático» (R21
- * 11:21-11:24). En la misma mesa quedó claro de quién es esa tarea: «eso me
- * toca decir» (R21 11:28).
- *
- * Automatizar WhatsApp NO es código de esta plataforma --es WhatsApp Business,
- * una cuenta y una configuración del gremio-- y el §27.2 lo cierra así:
- * «decirlo así y no prometer nada». Lo que sí estaba en nuestra mano era dejar
- * de insinuarlo: el botón decía «Escribirnos YA por WhatsApp», y ese «ya» es
- * lo que hace que el silencio de una noche se lea como abandono.
+ * El gremio quiere que el WhatsApp responda solo, pero automatizarlo NO es
+ * código de esta plataforma --es WhatsApp Business, una cuenta y una
+ * configuración del gremio--, y la regla es «decirlo así y no prometer nada».
+ * Lo que sí está en manos del sitio es no insinuarlo: un botón que diga
+ * «Escribirnos YA por WhatsApp» hace que el silencio de una noche se lea como
+ * abandono.
  */
 class AvisoDelWhatsappTest extends TestCase
 {
@@ -64,7 +60,7 @@ class AvisoDelWhatsappTest extends TestCase
 
     /**
      * La guardia: que no vuelva ningún «ya», «al instante» o «inmediato»
-     * pegado al WhatsApp. Es la promesa concreta que se retiró, y volvería
+     * pegado al WhatsApp. Es la promesa concreta que el sitio no hace, y volvería
      * sola en cuanto alguien quiera que el botón suene más enérgico.
      */
     public function test_ninguna_vista_promete_respuesta_inmediata_por_whatsapp(): void
@@ -77,10 +73,9 @@ class AvisoDelWhatsappTest extends TestCase
 
         $hallazgos = [];
 
-        // Los dos árboles: las páginas y los componentes. Hasta el 8 de
-        // septiembre esto solo miraba `views/publico`, así que el WhatsApp del
-        // pie --y el del botón flotante, que nació ese día-- quedaban fuera de
-        // la guardia sin que se notara.
+        // Los dos árboles: las páginas y los componentes. El WhatsApp del pie y
+        // el del botón flotante viven en `views/components`: mirar solo
+        // `views/publico` los dejaría fuera de la guardia sin que se notara.
         $vistas = [
             ...File::allFiles(resource_path('views/publico')),
             ...File::allFiles(resource_path('views/components')),

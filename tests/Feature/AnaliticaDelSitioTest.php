@@ -192,13 +192,11 @@ class AnaliticaDelSitioTest extends TestCase
     /**
      * El gremio mirando su propio sitio no es tráfico del sitio.
      *
-     * El middleware no miraba quién pedía la página, solo qué ruta era. Así que
-     * la dirección y la secretaría, que entran a diario y revisan la portada
-     * cada vez que cambian un texto, contaban como público. Con el tráfico real
-     * que tiene el sitio hoy —tres páginas servidas en producción el 9 de
-     * septiembre, y eran de esta sesión— el equipo del gremio sería la mayoría
-     * de la gráfica, y la dirección estaría leyendo su propia navegación como
-     * interés de la gente.
+     * El middleware mira quién pide la página, no solo qué ruta es. La
+     * dirección y la secretaría entran a diario y revisan la portada cada vez
+     * que cambian un texto: con el poco tráfico real que tiene el sitio, el
+     * equipo del gremio sería la mayoría de la gráfica, y la dirección estaría
+     * leyendo su propia navegación como interés de la gente.
      *
      * El criterio es «quién puede entrar al panel», no «quién tiene sesión»:
      * un afiliado **sí** es público —es a quien el sitio sirve— y se sigue
@@ -300,9 +298,9 @@ class AnaliticaDelSitioTest extends TestCase
         sort($columnas);
 
         $this->assertSame(
-            // `entradas` entró el 9 sep 2026 (Acta 08, A-03) y es otro contador,
-            // no un dato de nadie: el `Referer` que decide si suma se mira y no
-            // se guarda, igual que el navegador.
+            // `entradas` (Acta 08, A-03) es otro contador, no un dato de nadie:
+            // el `Referer` que decide si suma se mira y no se guarda, igual que
+            // el navegador.
             ['created_at', 'dia', 'entradas', 'id', 'ruta', 'total', 'updated_at'],
             $columnas,
             'La tabla de visitas ganó una columna. Si guarda IP, navegador o sesión deja de ser un agregado y entra en la Ley 1581.'
