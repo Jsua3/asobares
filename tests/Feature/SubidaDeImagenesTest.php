@@ -72,6 +72,8 @@ class SubidaDeImagenesTest extends TestCase
 
     public function test_subir_la_galeria_crea_las_conversiones_webp(): void
     {
+        Storage::fake('public');
+
         $asociado = Asociado::factory()->publicado()->create();
 
         Livewire::test(EditAsociado::class, ['record' => $asociado->getRouteKey()])
