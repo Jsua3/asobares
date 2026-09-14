@@ -15,7 +15,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Mail;
 
 /**
@@ -180,7 +179,9 @@ class AccionesDeAprobacion
             return true;
         }
 
-        return self::enviar(fn (): ?SentMessage => Mail::to($correos)->send(new VacanteAprobada($registro)));
+        return self::enviar(function () use ($correos, $registro): void {
+            Mail::to($correos)->send(new VacanteAprobada($registro));
+        });
     }
 
     /**
@@ -214,7 +215,9 @@ class AccionesDeAprobacion
                 $correos = DestinatariosDelAsociado::correos($registro->asociado);
 
                 $correoSalio = $correos === []
-                    || self::enviar(fn (): ?SentMessage => Mail::to($correos)->send(new VacanteDevuelta($registro)));
+                    || self::enviar(function () use ($correos, $registro): void {
+                        Mail::to($correos)->send(new VacanteDevuelta($registro));
+                    });
 
                 self::avisarResultado(
                     'Vacante devuelta al asociado',
@@ -297,9 +300,11 @@ class AccionesDeAprobacion
             return true;
         }
 
-        return self::enviar(fn (): ?SentMessage => Mail::to($registro->correo)->send(
-            new FichaDeBolsaPublicada($registro->nombre, $urlPublica($registro))
-        ));
+        return self::enviar(function () use ($registro, $urlPublica): void {
+            Mail::to($registro->correo)->send(
+                new FichaDeBolsaPublicada($registro->nombre, $urlPublica($registro))
+            );
+        });
     }
 
     /**
