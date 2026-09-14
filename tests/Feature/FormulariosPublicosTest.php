@@ -179,7 +179,7 @@ class FormulariosPublicosTest extends TestCase
         $this->assertNotNull($aspirante->consentimiento_at);
     }
 
-    // --- Política de datos (B3: el consentimiento cubre lo que el sistema hace de verdad) ---
+    // --- Política de datos (el consentimiento cubre lo que el sistema hace de verdad) ---
 
     public function test_la_politica_de_datos_explica_la_entrega_a_terceros_al_postularse(): void
     {
@@ -458,7 +458,7 @@ class FormulariosPublicosTest extends TestCase
         $respuesta->assertSee(route('directorio.show', $asociado), escape: false);
     }
 
-    // --- Selects obligatorios (N3: sin opción vacía, el navegador preselecciona la primera) ---
+    // --- Selects obligatorios (sin opción vacía, el navegador preselecciona la primera) ---
 
     public function test_la_inscripcion_de_artistas_antepone_una_opcion_vacia_a_sus_selects_obligatorios(): void
     {

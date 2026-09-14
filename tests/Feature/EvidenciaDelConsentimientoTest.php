@@ -144,9 +144,9 @@ class EvidenciaDelConsentimientoTest extends TestCase
     }
 
     /**
-     * La política publicada tiene que decir lo que el sistema hace de verdad
-     * (G12): los plazos se leen de la configuración, no de un texto que se
-     * quede viejo cuando alguien cambie una variable.
+     * La política publicada tiene que decir lo que el sistema hace de verdad:
+     * los plazos se leen de la configuración, no de un texto que se quede
+     * viejo cuando alguien cambie una variable.
      */
     public function test_la_politica_publica_los_plazos_reales_de_retencion(): void
     {

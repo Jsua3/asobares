@@ -45,11 +45,10 @@ class HojaArrastrableTest extends TestCase
      *
      * No es un lujo: una expresión regular con `.*?` y el modificador `s` se
      * sale del método sin avisar y encuentra la línea que busca en cualquier
-     * otro sitio del archivo. Así se escribió primero la guarda de
-     * `test_reabrir_corta_el_cierre_que_estuviera_en_vuelo`, y al mutarla
-     * --quitando `pararElReloj()` de `abrir()`-- SIGUIÓ PASANDO, porque
-     * encontraba esa misma llamada más abajo, en `tomarLaHoja()`. Un falso
-     * verde de manual, el decimocuarto de este proyecto.
+     * otro sitio del archivo. Con una regex así, la guarda de
+     * `test_reabrir_corta_el_cierre_que_estuviera_en_vuelo` SEGUIRÍA PASANDO
+     * al quitar `pararElReloj()` de `abrir()`, porque encontraría esa misma
+     * llamada más abajo, en `tomarLaHoja()`: un falso verde de manual.
      */
     private function cuerpoDe(string $metodo): string
     {
