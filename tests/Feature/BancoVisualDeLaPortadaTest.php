@@ -158,9 +158,13 @@ class BancoVisualDeLaPortadaTest extends TestCase
 
         $evento = Evento::publicado()->proximo()->first();
 
-        if ($evento === null || ! esImagenDeRelleno($evento->imagen)) {
-            $this->markTestSkipped('No hay evento próximo con portada de relleno para comprobar el banco.');
-        }
+        // Si el sembrador deja de traer este caso, la prueba se pone roja:
+        // omitirse en silencio escondería que ya no comprueba nada.
+        $this->assertNotNull($evento, 'El sembrador ya no deja ningún evento próximo publicado: la prueba perdió su caso.');
+        $this->assertTrue(
+            esImagenDeRelleno($evento->imagen),
+            "El evento próximo del sembrador ya no trae portada de relleno ({$evento->imagen}): la prueba perdió su caso."
+        );
 
         $html = $this->get('/')->assertOk()->getContent();
 
@@ -175,11 +179,11 @@ class BancoVisualDeLaPortadaTest extends TestCase
 
     public function test_la_publicidad_sin_archivo_no_reusa_el_hero(): void
     {
-        $css = File::get(resource_path('views/components/publico/home/publicidad.blade.php'));
+        $publicidad = File::get(resource_path('views/components/publico/home/publicidad.blade.php'));
         $hero = File::get(resource_path('views/components/publico/home/hero.blade.php'));
 
-        $this->assertStringContainsString("config('home_banco.publicidad'", $css);
-        $this->assertStringNotContainsString('videos/asobares-institucional', $css);
+        $this->assertStringContainsString("config('home_banco.publicidad'", $publicidad);
+        $this->assertStringNotContainsString('videos/asobares-institucional', $publicidad);
         $this->assertStringContainsString('videos/asobares-institucional', $hero);
     }
 
