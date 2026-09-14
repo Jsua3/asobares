@@ -57,7 +57,7 @@ class CarterasTable
             ->filters([
                 Filter::make('en_mora')
                     ->label('Solo en mora')
-                    ->query(fn (Builder $query): Builder => $query->where('meses_mora', '>', 0)),
+                    ->query(fn (Builder $query): Builder => $query->enMora()),
             ])
             ->recordActions([])
             ->toolbarActions([])
