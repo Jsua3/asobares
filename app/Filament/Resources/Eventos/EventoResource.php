@@ -12,6 +12,7 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class EventoResource extends Resource
 {
@@ -19,7 +20,7 @@ class EventoResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Contenido';
+    protected static string|UnitEnum|null $navigationGroup = 'Contenido';
 
     protected static ?int $navigationSort = 2;
 

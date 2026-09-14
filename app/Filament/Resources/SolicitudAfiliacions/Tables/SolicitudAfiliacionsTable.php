@@ -20,6 +20,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use LogicException;
 
 class SolicitudAfiliacionsTable
 {
@@ -180,7 +181,7 @@ class SolicitudAfiliacionsTable
                         auth()->user(),
                         $data['gestion_notas'] ?? null
                     );
-                } catch (\LogicException $excepcion) {
+                } catch (LogicException $excepcion) {
                     Notification::make()
                         ->title('No se pudo aprobar')
                         ->body($excepcion->getMessage())
@@ -256,7 +257,7 @@ class SolicitudAfiliacionsTable
             ->action(function (SolicitudAfiliacion $record): void {
                 try {
                     $correoSalio = app(ReenviarEnlaceAccesoAsociado::class)($record);
-                } catch (\LogicException $excepcion) {
+                } catch (LogicException $excepcion) {
                     Notification::make()
                         ->title('No se pudo reenviar')
                         ->body($excepcion->getMessage())

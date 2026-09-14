@@ -48,7 +48,7 @@ class PaginasMasVisitadas extends ChartWidget
         return [
             'datasets' => [[
                 'label' => 'Páginas servidas',
-                'data' => $filas->pluck('total')->map(fn ($total): int => (int) $total)->all(),
+                'data' => $filas->pluck('total')->map(fn (mixed $total): int => (int) $total)->all(),
             ]],
             'labels' => $filas->pluck('ruta')->map(fn (string $ruta): string => $this->etiqueta($ruta))->all(),
         ];

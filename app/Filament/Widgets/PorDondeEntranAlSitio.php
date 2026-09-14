@@ -74,7 +74,7 @@ class PorDondeEntranAlSitio extends ChartWidget
         return [
             'datasets' => [[
                 'label' => 'Entradas',
-                'data' => $filas->pluck('entradas')->map(fn ($entradas): int => (int) $entradas)->all(),
+                'data' => $filas->pluck('entradas')->map(fn (mixed $entradas): int => (int) $entradas)->all(),
             ]],
             'labels' => $filas->pluck('ruta')->map(fn (string $ruta): string => $this->etiqueta($ruta))->all(),
         ];

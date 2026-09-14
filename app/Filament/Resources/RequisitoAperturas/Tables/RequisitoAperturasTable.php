@@ -106,7 +106,7 @@ class RequisitoAperturasTable
                     // Junta las dos mitades de la pila de trabajo: lo que nadie
                     // verificó nunca y lo que se verificó hace más de un año.
                     // El borde coincide con RequisitoApertura::necesitaRevision().
-                    ->query(fn (Builder $query): Builder => $query->where(fn (Builder $q) => $q
+                    ->query(fn (Builder $query): Builder => $query->where(fn (Builder $q): Builder => $q
                         ->whereNull('verificado_el')
                         ->orWhere(
                             'verificado_el',

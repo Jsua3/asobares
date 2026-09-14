@@ -9,6 +9,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Spatie\Permission\Models\Role;
 
 class UsersTable
 {
@@ -54,7 +55,7 @@ class UsersTable
                 SelectFilter::make('roles')
                     ->label('Rol')
                     ->relationship('roles', 'name')
-                    ->getOptionLabelFromRecordUsing(fn ($record): string => self::ROLES[$record->name] ?? $record->name),
+                    ->getOptionLabelFromRecordUsing(fn (Role $record): string => self::ROLES[$record->name] ?? $record->name),
             ])
             ->recordActions([
                 EditAction::make()->label('Editar'),

@@ -53,7 +53,7 @@ class VisitasDelSitio extends ChartWidget
             ->selectRaw('dia, sum(total) as total, sum(entradas) as entradas')
             ->groupBy('dia')
             ->get()
-            ->mapWithKeys(fn ($fila): array => [substr((string) $fila->dia, 0, 10) => [
+            ->mapWithKeys(fn (VisitaDiaria $fila): array => [substr((string) $fila->dia, 0, 10) => [
                 'total' => (int) $fila->total,
                 'entradas' => (int) $fila->entradas,
             ]]);

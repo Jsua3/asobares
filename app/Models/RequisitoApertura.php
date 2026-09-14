@@ -156,7 +156,7 @@ class RequisitoApertura extends Model
      */
     public function scopeVigente(Builder $query): Builder
     {
-        return $query->where(fn (Builder $q) => $q
+        return $query->where(fn (Builder $q): Builder => $q
             ->whereNull('vigente_hasta')
             ->orWhere('vigente_hasta', '>=', now()->toDateString()));
     }

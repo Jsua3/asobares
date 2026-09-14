@@ -12,6 +12,7 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class ProveedorResource extends Resource
 {
@@ -19,7 +20,7 @@ class ProveedorResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-truck';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Bolsas';
+    protected static string|UnitEnum|null $navigationGroup = 'Bolsas';
 
     protected static ?int $navigationSort = 4;
 

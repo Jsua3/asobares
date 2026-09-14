@@ -164,15 +164,19 @@ class Asociado extends Model implements HasMedia
     public function fotosAprobadas(): Collection
     {
         return $this->getMedia('galeria')
-            ->filter(fn ($media): bool => (bool) $media->getCustomProperty(self::FOTO_APROBADA, false))
+            ->filter(fn (Media $media): bool => (bool) $media->getCustomProperty(self::FOTO_APROBADA, false))
             ->values();
     }
 
-    /** Las que esperan a la secretaría. Solo las ve el dueño y el panel. */
+    /**
+     * Las que esperan a la secretaría. Solo las ve el dueño y el panel.
+     *
+     * @return Collection<int, Media>
+     */
     public function fotosPendientes(): Collection
     {
         return $this->getMedia('galeria')
-            ->filter(fn ($media): bool => ! (bool) $media->getCustomProperty(self::FOTO_APROBADA, false))
+            ->filter(fn (Media $media): bool => ! (bool) $media->getCustomProperty(self::FOTO_APROBADA, false))
             ->values();
     }
 

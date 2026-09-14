@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Models\Municipio;
 use App\Panel\RanuraDeTema;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Database\Eloquent\Builder;
 
 class AsociadosPorMunicipio extends ChartWidget
 {
@@ -26,7 +27,7 @@ class AsociadosPorMunicipio extends ChartWidget
 
     protected function getData(): array
     {
-        $municipios = Municipio::withCount(['asociados' => fn ($query) => $query->publicado()])
+        $municipios = Municipio::withCount(['asociados' => fn (Builder $query): Builder => $query->publicado()])
             ->orderByDesc('asociados_count')
             ->get();
 

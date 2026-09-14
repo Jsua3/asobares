@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Panel\ColaDePendientes;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -106,7 +107,7 @@ class ResumenDelGremio extends StatsOverviewWidget
             ->where('fecha_afiliacion', '>=', $inicioDeMes->toDateString())
             ->count();
 
-        $conPresencia = Municipio::whereHas('asociados', fn ($q) => $q->publicado())->count();
+        $conPresencia = Municipio::whereHas('asociados', fn (Builder $asociados): Builder => $asociados->publicado())->count();
 
         return [
             Stat::make('Recaudado este mes', $this->pesos($recaudado))

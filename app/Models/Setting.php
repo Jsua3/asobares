@@ -24,8 +24,12 @@ class Setting extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn () => self::olvidarCache());
-        static::deleted(fn () => self::olvidarCache());
+        static::saved(function (): void {
+            self::olvidarCache();
+        });
+        static::deleted(function (): void {
+            self::olvidarCache();
+        });
     }
 
     /**

@@ -124,7 +124,7 @@ class AjustesDelSitio extends Page implements HasSchemas
                 $secciones[] = Section::make($seccion)
                     ->description($descripcion)
                     ->columns(2)
-                    ->schema($ajustes->map(fn (Setting $ajuste) => $this->campo($ajuste))->all());
+                    ->schema($ajustes->map(fn (Setting $ajuste): TextInput|Textarea => $this->campo($ajuste))->all());
             }
 
             if ($secciones !== []) {

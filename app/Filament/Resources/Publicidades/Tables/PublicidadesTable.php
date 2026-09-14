@@ -15,6 +15,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 
 class PublicidadesTable
@@ -40,7 +41,7 @@ class PublicidadesTable
                     ->sortable(),
                 TextColumn::make('valor')
                     ->label('Valor')
-                    ->formatStateUsing(fn ($state): string => '$'.number_format((float) $state, 0, ',', '.'))
+                    ->formatStateUsing(fn (mixed $state): string => '$'.number_format((float) $state, 0, ',', '.'))
                     ->sortable(),
                 TextColumn::make('fecha_inicio')
                     ->label('Vigencia')
@@ -94,7 +95,7 @@ class PublicidadesTable
             ->color('gray')
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Cerrar')
-            ->modalContent(fn (Publicidad $record) => view('filament.publicidad-preview', ['publicidad' => $record]));
+            ->modalContent(fn (Publicidad $record): View => view('filament.publicidad-preview', ['publicidad' => $record]));
     }
 
     /**

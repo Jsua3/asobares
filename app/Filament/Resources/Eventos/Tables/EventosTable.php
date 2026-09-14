@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Eventos\Tables;
 use App\Enums\EstadoPublicacion;
 use App\Enums\TipoEvento;
 use App\Filament\Support\AccionesDeAprobacion;
+use App\Models\Evento;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -30,7 +31,7 @@ class EventosTable
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
-                    ->description(fn ($record): ?string => $record->lugar),
+                    ->description(fn (Evento $record): ?string => $record->lugar),
                 TextColumn::make('tipo')
                     ->label('Tipo')
                     ->badge()
@@ -41,7 +42,7 @@ class EventosTable
                     ->sortable(),
                 TextColumn::make('precio')
                     ->label('Precio')
-                    ->formatStateUsing(fn ($state): string => (float) $state === 0.0
+                    ->formatStateUsing(fn (mixed $state): string => (float) $state === 0.0
                         ? 'Gratuito'
                         : '$'.number_format((float) $state, 0, ',', '.'))
                     ->sortable(),
