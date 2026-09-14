@@ -10,6 +10,7 @@ use App\Models\RequisitoApertura;
 use App\Models\User;
 use Database\Seeders\RolYPermisoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -177,12 +178,22 @@ class VigenciaEnElPanelTest extends TestCase
         $municipio = Municipio::factory()->create();
         $meses = RequisitoApertura::MESES_HASTA_REVISION;
 
+        // `NoOverflow` como `necesitaRevision()`: ver `VentanaDeMesesTest`.
+        $borde = now()->subMonthsNoOverflow($meses)->toDateString();
+
         $justoEnElBorde = RequisitoApertura::factory()->publicado()
-            // `NoOverflow` como `necesitaRevision()`: ver `VentanaDeMesesTest`.
-            ->verificado(now()->subMonthsNoOverflow($meses)->toDateString())
+            ->verificado($borde)
             ->create(['municipio_id' => $municipio->id]);
 
-        $this->assertFalse($justoEnElBorde->necesitaRevision());
+        // SQLite guarda el `date` casteado con la hora pegada, y comparada como
+        // cadena contra «Y-m-d» esa forma no distingue `<` de `<=`: el borde
+        // pasaría con los dos. Se deja la fecha como la guarda una columna DATE,
+        // que es la forma en la que un borde corrido sí cambia el resultado.
+        DB::table('requisitos_apertura')
+            ->where('id', $justoEnElBorde->id)
+            ->update(['verificado_el' => $borde]);
+
+        $this->assertFalse($justoEnElBorde->fresh()->necesitaRevision());
 
         Livewire::test(ListRequisitoAperturas::class)
             ->filterTable('necesita_revision')
