@@ -62,7 +62,7 @@ class GuardarSolicitudDeArtistaRequest extends FormRequest
                 'video_url', 'whatsapp', 'correo', 'instagram_url', 'municipio_id',
             ]),
             'slug' => $this->slugDisponible($this->string('nombre')->toString()),
-            'foto' => $this->file('foto')?->store('artistas', 'public'),
+            'foto' => $this->file('foto')?->store('artistas', config('almacenamiento.publico')),
             'estado' => EstadoPublicacion::PendienteAprobacion,
             ...$this->selloDeConsentimiento(),
         ];

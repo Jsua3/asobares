@@ -85,8 +85,8 @@ class PasarelaBold implements PasarelaDePago
      * Bold firma cada notificación y la envía en el encabezado `x-bold-signature`.
      *
      * El orden importa y no es el habitual: primero se codifica el cuerpo CRUDO
-     * en Base64, y sobre ese texto se aplica HMAC-SHA256 con la llave de
-     * identidad. El resultado se compara en HEXADECIMAL, no en Base64.
+     * en Base64, y sobre ese texto se aplica HMAC-SHA256 con la llave secreta
+     * (`BOLD_SECRET`). El resultado se compara en HEXADECIMAL, no en Base64.
      * Ver https://developers.bold.co/webhook.
      */
     public function firmaValida(Request $request): bool

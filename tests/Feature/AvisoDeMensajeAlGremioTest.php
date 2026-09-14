@@ -17,8 +17,10 @@ use App\Models\User;
 use Database\Seeders\RolYPermisoSeeder;
 use Database\Seeders\SettingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -89,6 +91,53 @@ class AvisoDeMensajeAlGremioTest extends TestCase
         );
     }
 
+    /** @return array<string, array{TipoMensaje}> */
+    public static function tiposDelFormularioDeContacto(): array
+    {
+        return [
+            'PQR' => [TipoMensaje::Pqr],
+            'contacto' => [TipoMensaje::Contacto],
+        ];
+    }
+
+    /**
+     * Al buzón del gremio llega un único correo por mensaje, y ese correo no
+     * copia el nombre, el correo, el teléfono ni el texto de quien escribe:
+     * remite al panel, que es el único sitio que sabe borrar esos datos cuando
+     * vence su plazo.
+     */
+    #[DataProvider('tiposDelFormularioDeContacto')]
+    public function test_al_buzon_del_gremio_llega_un_solo_correo_sin_datos_personales(TipoMensaje $tipo): void
+    {
+        Setting::query()->where('clave', 'contacto_correo_destino')->update(['valor' => 'bandeja@gremio.test']);
+        Setting::olvidarCache();
+
+        $this->post(route('contacto.store'), [
+            'nombre' => 'Ciudadana Preocupada',
+            'correo' => 'ciudadana@ejemplo.test',
+            'telefono' => '3145559876',
+            'mensaje' => 'El bar de la esquina cierra a las cuatro de la madrugada.',
+            'tipo' => $tipo->value,
+            'acepta_datos' => '1',
+        ])->assertRedirect();
+
+        $alBuzon = Mail::sent(Mailable::class, fn (Mailable $correo): bool => $correo->hasTo('bandeja@gremio.test'));
+
+        $this->assertCount(1, $alBuzon, 'Al buzón del gremio tiene que llegar exactamente un correo por mensaje.');
+
+        $aviso = $alBuzon->first();
+
+        $this->assertInstanceOf(MensajeRecibido::class, $aviso);
+        $aviso->assertDontSeeInHtml('Ciudadana Preocupada');
+        $aviso->assertDontSeeInText('Ciudadana Preocupada');
+        $aviso->assertDontSeeInHtml('ciudadana@ejemplo.test');
+        $aviso->assertDontSeeInText('ciudadana@ejemplo.test');
+        $aviso->assertDontSeeInHtml('3145559876');
+        $aviso->assertDontSeeInText('3145559876');
+        $aviso->assertDontSeeInHtml('cuatro de la madrugada');
+        $aviso->assertDontSeeInText('cuatro de la madrugada');
+    }
+
     /** Un mensaje de contacto corriente también se avisa: la bandeja es la misma. */
     public function test_un_mensaje_de_contacto_corriente_tambien_avisa(): void
     {
@@ -136,9 +185,9 @@ class AvisoDeMensajeAlGremioTest extends TestCase
     // --- El aviso no manda sobre la petición ---
 
     /**
-     * §9, D-23: el correo saliente no tumba la petición que lo dispara. La PQR ya
-     * quedó radicada y el ciudadano necesita su número aunque el transporte esté
-     * caído --que es como ha estado producción desde el primer despliegue--.
+     * El correo saliente no tumba la petición que lo dispara. La PQR ya quedó
+     * radicada y el ciudadano necesita su número aunque el transporte esté
+     * caído.
      */
     public function test_si_el_aviso_falla_la_pqr_queda_radicada_igual(): void
     {

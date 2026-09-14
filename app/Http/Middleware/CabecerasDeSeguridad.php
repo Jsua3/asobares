@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Las cabeceras que el sitio no emitía en ninguna respuesta.
+ * Cabeceras de seguridad que se añaden a toda respuesta que no las traiga.
  *
  * La que más rinde aquí es `nosniff`. La galería de asociados se sirve desde
  * /storage, y sin ella el navegador puede adivinar el tipo de un archivo por

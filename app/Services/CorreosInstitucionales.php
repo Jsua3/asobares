@@ -8,7 +8,7 @@ use Throwable;
 
 class CorreosInstitucionales
 {
-    public function destinatario(string $flujo = 'general'): ?string
+    public function destinatario(): ?string
     {
         $correo = trim((string) ajuste('contacto_correo_destino'));
 
@@ -19,9 +19,9 @@ class CorreosInstitucionales
         return filter_var($correo, FILTER_VALIDATE_EMAIL) ? $correo : null;
     }
 
-    public function enviar(Mailable $correo, string $flujo = 'general'): bool
+    public function enviar(Mailable $correo): bool
     {
-        $destinatario = $this->destinatario($flujo);
+        $destinatario = $this->destinatario();
 
         if ($destinatario === null) {
             return false;

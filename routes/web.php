@@ -41,7 +41,7 @@ Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/robots.txt', function (): Response {
     $lineas = [
         'User-agent: *',
-        // Mientras no haya dominio propio, el sitio no se deja indexar (D-08):
+        // Mientras no haya dominio propio, el sitio no se deja indexar:
         // lo que se indexe hoy queda apuntando al host temporal de Cloud.
         // `config/sitio.php` explica por qué el valor por defecto es cerrado.
         config('sitio.indexable') ? 'Allow: /' : 'Disallow: /',
@@ -81,9 +81,9 @@ Route::get('/abre-tu-negocio', [GuiaController::class, 'index'])
 // Descargar un formato también escribe en consultas_guia (ver el
 // controlador), pero es una acción más deliberada y menos repetitiva que
 // elegir municipio: nadie baja 30 formatos por minuto de verdad, y cada guía
-// solo trae dos o tres. 10,1 iguala el límite que ya usan las otras
-// escrituras ocasionales del sitio (resolver el pago simulado) y sobra para
-// bajar todos los formatos de una guía real sin rebotar a nadie.
+// solo trae dos o tres. Diez por minuto, lo mismo que la otra escritura
+// ocasional del sitio (resolver el pago simulado), sobra para bajar todos los
+// formatos de una guía real sin rebotar a nadie.
 Route::get('/abre-tu-negocio/formato/{requisito}', [GuiaController::class, 'descargarFormato'])
     ->middleware('throttle:guia-formato')
     ->name('guia.formato');
@@ -170,31 +170,25 @@ Route::middleware(['auth', 'rol.asociado'])->group(function (): void {
         ->middleware('throttle:mi-cuenta-pagar')
         ->name('mi-cuenta.pagar');
 
-    // Fotos del establecimiento: las sube el duenio, las aprueba el gremio
-    // (OBS3-13). El limite de subida es bajo a proposito: son doce fotos como
-    // maximo por ficha y cada una pasa por revision humana.
+    // Fotos del establecimiento: las sube el dueño y las aprueba el gremio.
     Route::get('/mi-cuenta/fotos', [MisFotosController::class, 'index'])->name('mi-cuenta.fotos.index');
     Route::post('/mi-cuenta/fotos', [MisFotosController::class, 'store'])
-        // Por encima del maximo por establecimiento a proposito: con un
-        // limite menor, un afiliado que suba sus doce fotos de una sentada
-        // --que es lo natural el dia que estrena la funcion-- se choca contra
-        // un 429 a mitad de camino. Lo destapo la prueba del maximo.
+        // Treinta por minuto, por encima del tope de doce fotos por ficha a
+        // propósito: con un límite menor, un afiliado que suba sus doce fotos
+        // de una sentada chocaría contra un 429 a mitad de camino.
         ->middleware('throttle:mi-cuenta-fotos-subir')
         ->name('mi-cuenta.fotos.store');
     Route::delete('/mi-cuenta/fotos/{media}', [MisFotosController::class, 'destroy'])
         ->middleware('throttle:mi-cuenta-fotos-borrar')
         ->name('mi-cuenta.fotos.destroy');
 
-    // Beneficios que dejaron de ser publicos. El directorio de proveedores
-    // vivia en /proveedores y el banco de talento no tenia pantalla: los datos
-    // de contacto de unos y otros son la contraprestacion de la cuota, asi que
-    // se entregan detras de la sesion. La cara publica de /proveedores sigue
-    // existiendo, pero sin un solo contacto.
+    // Beneficios detrás de la sesión: los datos de contacto de proveedores,
+    // artistas y aspirantes son la contraprestación de la cuota. La cara
+    // pública de /proveedores existe, pero sin un solo contacto.
     //
-    // Los artistas se sumaron el 8 sep por el mismo criterio, con una salvedad:
-    // su ficha publica NO se vacia. El escaparate --nombre, foto, genero,
-    // video-- es lo que el artista busca al inscribirse; lo que se muda aqui es
-    // solo el contacto.
+    // Los artistas, con una salvedad: su ficha pública NO se vacía. El
+    // escaparate --nombre, foto, género, video-- es lo que el artista busca al
+    // inscribirse; lo que se muda aquí es solo el contacto.
     Route::get('/mi-cuenta/proveedores', [MisProveedoresController::class, 'index'])->name('mi-cuenta.proveedores.index');
     Route::get('/mi-cuenta/artistas', [MisArtistasController::class, 'index'])->name('mi-cuenta.artistas.index');
     Route::get('/mi-cuenta/aspirantes', [MisAspirantesController::class, 'index'])->name('mi-cuenta.aspirantes.index');

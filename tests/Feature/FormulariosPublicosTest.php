@@ -6,9 +6,8 @@ use App\Enums\CargoDelSector;
 use App\Enums\EstadoPublicacion;
 use App\Enums\TipoMensaje;
 use App\Mail\AcuseDeRadicado;
-use App\Mail\NuevaPqr;
+use App\Mail\MensajeRecibido;
 use App\Mail\NuevaSolicitudAfiliacion;
-use App\Mail\NuevoMensajeContacto;
 use App\Models\Aliado;
 use App\Models\Asociado;
 use App\Models\Aspirante;
@@ -25,6 +24,7 @@ use App\Models\Vacante;
 use App\Support\Formulario;
 use Database\Seeders\RolYPermisoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -56,6 +56,36 @@ class FormulariosPublicosTest extends TestCase
         ])->assertSessionHasErrors('acepta_datos');
 
         $this->assertSame(0, Inscripcion::count(), 'Sin autorización no se guarda nada.');
+    }
+
+    /**
+     * La inscripción gratuita no manda ningún correo, así que el aviso que ve
+     * la persona no puede prometerle una confirmación que nunca va a llegar.
+     */
+    public function test_la_inscripcion_gratuita_no_promete_un_correo_que_no_se_envia(): void
+    {
+        Mail::fake();
+
+        $evento = Evento::create([
+            'titulo' => 'Capacitación de prueba',
+            'slug' => 'capacitacion-de-prueba',
+            'fecha_inicio' => now()->addDays(10),
+            'precio' => 0,
+            'permite_inscripcion' => true,
+            'estado' => EstadoPublicacion::Publicado,
+        ]);
+
+        $this->post(route('eventos.inscribir', $evento), [
+            'nombre' => 'Laura Gómez',
+            'correo' => 'laura@ejemplo.test',
+            'telefono' => '3145520000',
+            'acepta_datos' => '1',
+        ])
+            ->assertRedirect(route('eventos.show', $evento))
+            ->assertSessionHas('exito', 'Tu inscripción a «Capacitación de prueba» quedó registrada.');
+
+        $this->assertSame(1, Inscripcion::count());
+        Mail::assertNothingOutgoing();
     }
 
     // --- Vuelta anclada tras un error de validación (RUT-03) ---
@@ -199,8 +229,14 @@ class FormulariosPublicosTest extends TestCase
 
     // --- PQR y radicado ---
 
+    /**
+     * El radicado lleva el año. El reloj se fija en el último segundo del año
+     * y el año esperado se escribe tal cual: si la prueba lo calculara con su
+     * propio `now()`, no vería un radicado sellado con el año siguiente.
+     */
     public function test_una_pqr_genera_radicado_consecutivo_y_envia_acuse(): void
     {
+        $this->travelTo(Carbon::parse('2026-12-31 23:59:59'));
         Mail::fake();
         $this->correoInstitucional('oficina@asobares.test');
 
@@ -215,17 +251,16 @@ class FormulariosPublicosTest extends TestCase
         }
 
         $radicados = Mensaje::whereNotNull('radicado')->orderBy('id')->pluck('radicado')->all();
-        $anio = now()->year;
 
         $this->assertSame(
-            ["PQR-{$anio}-0001", "PQR-{$anio}-0002", "PQR-{$anio}-0003"],
+            ['PQR-2026-0001', 'PQR-2026-0002', 'PQR-2026-0003'],
             $radicados,
             'Los radicados deben ser consecutivos y sin saltos.'
         );
 
         Mail::assertSent(AcuseDeRadicado::class, 3);
-        Mail::assertSent(NuevaPqr::class, 3);
-        Mail::assertSent(NuevaPqr::class, fn (NuevaPqr $correo): bool => $correo->hasTo('oficina@asobares.test'));
+        Mail::assertSent(MensajeRecibido::class, 3);
+        Mail::assertSent(MensajeRecibido::class, fn (MensajeRecibido $correo): bool => $correo->hasTo('oficina@asobares.test'));
     }
 
     public function test_un_mensaje_de_contacto_normal_no_recibe_radicado(): void
@@ -242,7 +277,7 @@ class FormulariosPublicosTest extends TestCase
         ]);
 
         $this->assertNull(Mensaje::firstOrFail()->radicado);
-        Mail::assertSent(NuevoMensajeContacto::class, fn (NuevoMensajeContacto $correo): bool => $correo->hasTo('oficina@asobares.test'));
+        Mail::assertSent(MensajeRecibido::class, fn (MensajeRecibido $correo): bool => $correo->hasTo('oficina@asobares.test'));
     }
 
     public function test_la_afiliacion_se_guarda_como_solicitud_estructurada(): void

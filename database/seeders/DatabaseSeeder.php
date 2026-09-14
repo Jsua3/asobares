@@ -9,16 +9,16 @@ class DatabaseSeeder extends Seeder
     /**
      * Los datos de demostración no entran en producción.
      *
-     * De los veinte sembradores sólo `UsuarioSeeder` se negaba por su cuenta.
-     * Los demás corrían sin freno con `db:seed --force`: `MensajeSeeder`
-     * inserta PQR ficticias con nombre, correo y teléfono —y consume
-     * radicados del consecutivo anual de verdad—, `TransaccionSeeder` inserta
-     * pagos aprobados que la conciliación y el widget de recaudo suman, y
-     * `AsociadoSeeder` publica establecimientos inventados en el directorio.
+     * De los diecinueve sembradores, solo `UsuarioSeeder` se niega también
+     * por su cuenta. Sin esta guardia los demás correrían con
+     * `db:seed --force`: `MensajeSeeder` inserta PQR ficticias con nombre,
+     * correo y teléfono —y consume radicados del consecutivo anual de
+     * verdad—, `TransaccionSeeder` inserta pagos aprobados que la conciliación
+     * y el widget de recaudo suman, y `AsociadoSeeder` publica
+     * establecimientos inventados en el directorio.
      *
-     * La guardia va aquí y no en cada sembrador porque cubre los veinte de
-     * una sola vez y no toca la suite: ninguna prueba invoca `DatabaseSeeder`
-     * en producción, y las que siembran llaman a los sembradores sueltos.
+     * La guardia va aquí y no en cada sembrador porque cubre los diecinueve
+     * de una sola vez. La fija `ConfiguracionDeDespliegueTest`.
      */
     public function run(): void
     {

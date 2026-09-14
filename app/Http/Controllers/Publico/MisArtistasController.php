@@ -9,15 +9,15 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 /**
- * El contacto del artista es contraprestacion de la cuota, igual que el del
- * proveedor: quien contrata musica en vivo en el Quindio es el establecimiento
- * afiliado, asi que el telefono se entrega detras de la sesion.
+ * El contacto del artista es contraprestación de la cuota, igual que el del
+ * proveedor: quien contrata música en vivo en el Quindío es el establecimiento
+ * afiliado, así que el teléfono se entrega detrás de la sesión.
  *
  * La diferencia con proveedores es deliberada y conviene no borrarla: la ficha
- * publica del artista NO se vacia. Nombre, foto, genero y video siguen siendo
- * publicos e indexables, porque el escaparate es lo que el artista viene a
- * buscar cuando se inscribe; sacarlo del indice le quitaria el motivo. Lo unico
- * que se muda aqui es el contacto.
+ * pública del artista NO se vacía. Nombre, foto, género y video siguen siendo
+ * públicos e indexables, porque el escaparate es lo que el artista viene a
+ * buscar cuando se inscribe; sacarlo del índice le quitaría el motivo. Lo único
+ * que se muda aquí es el contacto.
  */
 class MisArtistasController
 {

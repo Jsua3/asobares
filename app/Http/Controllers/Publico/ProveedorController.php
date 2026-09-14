@@ -10,19 +10,19 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 
 /**
- * Cara publica de la bolsa de proveedores.
+ * Cara pública de la bolsa de proveedores.
  *
- * Explica que es y cuanto hay, y no entrega ni un nombre ni un contacto: eso
- * vive en `MisProveedoresController`, detras de la sesion del afiliado. La
- * URL sigue siendo publica a proposito, para no perder el indice ni mandar a
+ * Explica qué es y cuánto hay, y no entrega ni un nombre ni un contacto: eso
+ * vive en `MisProveedoresController`, detrás de la sesión del afiliado. La
+ * URL sigue siendo pública a propósito, para no perder el índice ni mandar a
  * un login seco a quien llega desde un buscador.
  */
 class ProveedorController
 {
     public function index(): View
     {
-        // Solo el recuento por categoria: numeros, nunca filas. Cualquier dato
-        // que se agregue aqui hay que mirarlo dos veces, porque esta pagina la
+        // Solo el recuento por categoría: números, nunca filas. Cualquier dato
+        // que se agregue aquí hay que mirarlo dos veces, porque esta página la
         // lee cualquiera.
         $conteos = Proveedor::publicado()
             ->vigente()

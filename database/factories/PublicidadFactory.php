@@ -55,9 +55,4 @@ class PublicidadFactory extends Factory
     {
         return $this->state(['ubicacion' => UbicacionPublicidad::Inicio]);
     }
-
-    public function enDirectorio(): static
-    {
-        return $this->state(['ubicacion' => UbicacionPublicidad::Directorio]);
-    }
 }

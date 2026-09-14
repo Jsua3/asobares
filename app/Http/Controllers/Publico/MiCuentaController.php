@@ -42,7 +42,7 @@ class MiCuentaController
     {
         $asociado = $request->user()->asociado;
 
-        abort_if($asociado === null, 403);
+        abort_if($asociado === null, 403, 'Tu usuario todavía no está vinculado a un establecimiento.');
 
         $cartera = $asociado->cartera;
 

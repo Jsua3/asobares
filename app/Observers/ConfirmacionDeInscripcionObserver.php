@@ -11,13 +11,13 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * «Ninguna inscripción se confirma sin una transacción aprobada», la regla
- * dura de `RegistroDePagos`, vivía sólo en el texto de ayuda del formulario.
+ * dura de `RegistroDePagos`, se hace cumplir en el modelo.
  *
- * El selector de estado del panel era editable, así que la secretaría podía
- * marcar «Confirmada» a mano y regalar un cupo de un evento de pago: la
- * transacción nunca existía, el cupo se consumía y la conciliación quedaba
- * descuadrada. Aquí la regla pasa al modelo, donde no la salta ni una
- * petición manipulada ni un comando.
+ * El selector de estado del panel es editable: sin esto, la secretaría podría
+ * marcar «Confirmada» a mano y regalar un cupo de un evento de pago. La
+ * transacción no existiría, el cupo se consumiría y la conciliación quedaría
+ * descuadrada. En el modelo no la salta ninguna petición hecha con sesión,
+ * manipulada o no.
  */
 class ConfirmacionDeInscripcionObserver
 {
