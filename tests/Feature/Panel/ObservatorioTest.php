@@ -88,20 +88,14 @@ class ObservatorioTest extends TestCase
     }
 
     /**
-     * Reemplaza a `test_las_tres_visualizaciones_solidas_dibujan_y_rotulan_su_muestra`,
-     * la prueba que dejó pasar el Crítico 1: decía «dibujan» en su nombre y
-     * solo comprobaba `assertSee('n = ')` sobre una lista de tres gráficas
-     * escrita a mano, sin mirar canvas ni estado vacío. Esa lista incluía
-     * `ComposicionDelSector` con n = 24 (bajo el umbral) y la daba por
-     * «sólida» igual.
-     *
-     * Esta versión afirma lo que promete —canvas visible cuando la muestra
-     * alcanza, estado vacío cuando no— para las SEIS gráficas, y deriva
-     * cuáles deberían dibujar del umbral en vivo: lee la serie real de cada
-     * widget por reflexión (`serie()`, protegido) y le pregunta
-     * `hayMuestraSuficiente()`, en vez de repetir una lista de nombres que
-     * alguien tendría que recordar mover el día que una muestra cruce el
-     * umbral en cualquier dirección.
+     * Afirma lo que promete —canvas visible cuando la muestra alcanza, estado
+     * vacío cuando no— para las SEIS gráficas: una prueba que solo busque
+     * `n = ` en una lista escrita a mano da por sólida una gráfica bajo el
+     * umbral. Y deriva cuáles deberían dibujar del umbral en vivo: lee la
+     * serie real de cada widget por reflexión (`serie()`, protegido) y le
+     * pregunta `hayMuestraSuficiente()`, en vez de repetir una lista de
+     * nombres que alguien tendría que recordar mover el día que una muestra
+     * cruce el umbral en cualquier dirección.
      *
      * El wrapper del canvas de `chart-widget.blade.php` (vendor/filament)
      * siempre imprime el `<canvas>` en el HTML, esté vacío o no: solo lo
