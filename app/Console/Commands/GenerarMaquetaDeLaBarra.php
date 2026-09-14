@@ -8,16 +8,15 @@ use Illuminate\Support\Facades\File;
 /**
  * Genera la maqueta con la que se mide la barra lateral del panel.
  *
- * Existe por una razón concreta: el panel exige segundo factor, así que
- * ninguna sesión automatizada lo abre, y sin poder verla se entregaron dos
- * regresiones visuales seguidas (bitácora §44.3). La maqueta reproduce el
- * marcado que Filament pinta —incluido el botón de plegado del grupo, sin el
- * cual no reprodujo el defecto del canto derecho del 8 sep— con la hoja
- * compilada de verdad, resuelta por `manifest.json`.
+ * Existe porque el panel exige segundo factor y ninguna sesión automatizada
+ * lo abre: sin maqueta, la barra no se puede ver ni medir. Reproduce el
+ * marcado que Filament pinta —incluido el botón de plegado de cada grupo, sin
+ * el cual el canto derecho no se mide como en el panel— con la hoja compilada
+ * de verdad, resuelta por `manifest.json`.
  *
- * No se versiona: vive en `public/_medicion/`, se regenera en cada
- * verificación y se borra al terminar. Lo que se versiona es este comando,
- * que es lo que la hace reproducible.
+ * No se versiona: vive en `public/_medicion/`, que está en `.gitignore`.
+ * `BarraLateralTest` la borra al terminar; generada a mano, hay que borrarla.
+ * Lo que se versiona es este comando, que es lo que la hace reproducible.
  */
 class GenerarMaquetaDeLaBarra extends Command
 {
@@ -123,9 +122,9 @@ class GenerarMaquetaDeLaBarra extends Command
     {
         /*
          * «Tablero» va SUELTO, sin grupo, porque así lo pinta Filament: un
-         * `.fi-sidebar-item` directo en la lista. Sin él la maqueta no reproducía
-         * el defecto que Sua vio el 8 sep, con ese destino pegado al canto y sin
-         * cristal mientras los demás flotaban.
+         * `.fi-sidebar-item` directo en la lista. Sin él la maqueta no mide si un
+         * destino fuera de grupo queda pegado al canto y sin cristal mientras los
+         * demás flotan.
          */
         $lista = '<li class="fi-sidebar-item fi-active"><a class="fi-sidebar-item-btn" href="#" aria-current="page">'
             .$this->icono().'<span class="fi-sidebar-item-label">Tablero</span></a></li>';
@@ -144,8 +143,6 @@ class GenerarMaquetaDeLaBarra extends Command
                     .'<span class="fi-sidebar-item-label">'.e($destino).'</span></a></li>';
             }
 
-            // El botón de plegado no es adorno: sin él la maqueta no reprodujo
-            // el defecto del canto derecho que Sua vio el 8 sep.
             $lista .= '<li class="fi-sidebar-group fi-collapsible"><div class="fi-sidebar-group-btn">'
                 .'<span class="fi-sidebar-group-label">'.e($rotulo).'</span>'
                 .'<button type="button" class="fi-icon-btn fi-sidebar-group-collapse-btn" aria-expanded="true">'.$this->chevron().'</button>'
@@ -167,7 +164,7 @@ class GenerarMaquetaDeLaBarra extends Command
         /*
          * ANTES de la hoja compilada a propósito: lo de aquí solo rellena lo que
          * el panel real trae de otro sitio, y nunca puede pisar al tema. Yendo
-         * después tapaba, por ejemplo, el `display: none` del chevron en el riel.
+         * después taparía, por ejemplo, el `display: none` del chevron en el riel.
          */
         [x-cloak] { display: none !important; }
         body { margin: 0; min-height: 100vh; background: {$fondo}; }
@@ -181,9 +178,9 @@ class GenerarMaquetaDeLaBarra extends Command
         /*
          * Aquí NO se declara el posicionamiento de la barra ni el de la lista.
          * La hoja compilada trae el CSS de Filament, así que declararlo aquí lo
-         * tapaba: la maqueta medía su propio invento y no el panel. Es lo que
-         * escondió durante dos días que `position: relative` estaba pisando al
-         * `fixed` de Filament (D-L29).
+         * taparía y la maqueta mediría su propio invento y no el panel: no vería,
+         * por ejemplo, un `position: relative` del tema que pise el `fixed` de
+         * Filament.
          */
         .fi-sidebar-group-items { list-style: none; margin: 0; padding: 0; }
         .fi-sidebar-group-btn { display: flex; align-items: center; gap: .5rem; }
