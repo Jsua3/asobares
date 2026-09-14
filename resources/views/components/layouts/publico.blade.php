@@ -83,26 +83,26 @@
 
     {{--
         El logo se pide desde el <head> y con prioridad alta, y no es un adorno
-        de rendimiento: sin la precarga llega tarde al primer pintado.
+        de rendimiento: es la corrección de un defecto medido.
 
         Descubierto al vuelo —cuando el analizador llega al <img> de la
-        navbar— no da tiempo a descargarlo y decodificarlo antes del primer
+        navbar— no le daba tiempo a descargar y decodificar antes del primer
         pintado. Medido en los dos temas: en `pagereveal` y en el primer rAF el
-        <img> sigue con `naturalWidth` 0, y no termina hasta el evento `load`,
-        ~500 ms después.
+        <img> seguía con `naturalWidth` 0, y no terminaba hasta el evento
+        `load`, ~500 ms después.
 
         En un sitio de recarga completa eso pasa en CADA navegación, y como
         además hay transiciones de vista, la instantánea de la página nueva se
-        tomaría sin logo: se vería desaparecer y volver a aparecer.
+        tomaba sin logo: se veía desaparecer y volver a aparecer.
 
-        Va emparejado con `logo.blade.php`, que sirve este mismo PNG y no un SVG
-        que lo envuelva. Si algún día cambia el archivo allí, tiene que cambiar
-        aquí o la precarga deja de servir para nada.
+        Va emparejado con el cambio de `logo.blade.php`, que dejó de servir el
+        SVG que solo envolvía este PNG. Si algún día cambia el archivo allí,
+        tiene que cambiar aquí o la precarga deja de servir para nada.
     --}}
     <link rel="preload" as="image" href="{{ asset('img/logo-asobares.png') }}" fetchpriority="high">
     {{-- El isotipo lo pinta la barra al hacer scroll en los dos anchos, y con
          sesión en móvil desde el primer pintado: se precarga siempre, o el
-         primer cruce parpadea. --}}
+         primer cruce parpadea (defecto medido en la bitácora). --}}
     <link rel="preload" as="image" href="{{ asset('img/monograma-asobares.png') }}">
     {{-- El valor claro es el que corresponde al marcado servido: sin la clase
          `.dark` el CSS pinta el tema claro. El script de abajo lo corrige al
@@ -144,7 +144,7 @@
 
                 // Cualquier cosa que no sea 'light' ni 'dark' —incluido un
                 // valor corrupto de otra versión— se trata como 'system', que
-                // es el comportamiento por defecto.
+                // es el comportamiento por defecto; antes caía en claro.
                 const oscuro = preferencia === 'dark'
                     || (preferencia !== 'light' && consultaSistema.matches);
 
@@ -169,7 +169,7 @@
                  * queda congelada en el color del tema anterior. Como medio
                  * sitio lleva `transition-colors`, sin esta mordaza los
                  * enlaces de la navbar y los bordes de las tarjetas se
-                 * quedarían con el tema viejo hasta recargar.
+                 * quedaban con el tema viejo hasta recargar.
                  *
                  * De paso evita que el cambio de tema se vea como un barrido
                  * de 200 ms por toda la página.
