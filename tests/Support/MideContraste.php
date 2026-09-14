@@ -3,21 +3,14 @@
 namespace Tests\Support;
 
 /**
- * La fórmula de contraste de WCAG 2.1, en un solo sitio.
+ * La fórmula de contraste de WCAG 2.1, en un solo sitio. Dos copias pueden
+ * separarse sin que nadie lo note —el 0.03928 del umbral, el 0.05 del término
+ * aditivo— y la que se quede atrás daría por buenos colores que ya no lo son.
  *
- * Vivía copiada dentro de `ObservatorioTest`, que la usa para vigilar que la
- * serie de las gráficas del panel se despegue de su superficie. `FocoVisibleTest`
- * necesita exactamente la misma cuenta para el indicador de foco del sitio
- * público, y una segunda copia es una segunda oportunidad de que las dos se
- * separen sin que nadie lo note: el día que una se corrija —el 0.03928 del
- * umbral, el 0.05 del término aditivo— la otra seguiría midiendo con la de
- * antes y dando por buenos colores que ya no lo son.
- *
- * `componer()` no estaba en la copia original y es lo que hace medible un
- * indicador translúcido: un `box-shadow` o un borde con alfa no se compara
- * contra nada, porque el color que se ve no es el declarado sino el que resulta
- * de mezclarlo con lo que tiene detrás. Es la cuenta que hace el navegador y la
- * única forma honesta de decir si un `ring-marca-500/60` cumple el 3:1.
+ * `componer()` es lo que hace medible un color translúcido: un `box-shadow`, un
+ * borde o un velo con alfa no se compara contra nada, porque el color que se ve
+ * no es el declarado sino el que resulta de mezclarlo con lo que tiene detrás.
+ * Es la cuenta que hace el navegador.
  */
 trait MideContraste
 {

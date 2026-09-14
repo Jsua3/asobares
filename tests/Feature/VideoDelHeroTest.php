@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 use Tests\TestCase;
+use Throwable;
 
 /**
  * El video institucional del hero (OBS3-02, D-22).
@@ -47,6 +48,19 @@ class VideoDelHeroTest extends TestCase
      */
     public function test_el_video_y_su_poster_viajan_en_el_repositorio(): void
     {
+        // Sin `git` o fuera de un repositorio, `ls-files` falla y el mensaje
+        // diría que el video no viaja, que es falso: la prueba se omite. Las
+        // de peso siguen corriendo.
+        try {
+            $repositorio = Process::path(base_path())->run(['git', 'rev-parse', '--git-dir']);
+        } catch (Throwable) {
+            $repositorio = null;
+        }
+
+        if ($repositorio === null || ! $repositorio->successful()) {
+            $this->markTestSkipped('Sin `git` o sin repositorio en esta máquina: no se puede comprobar el índice.');
+        }
+
         foreach ([self::VIDEO, self::POSTER] as $relativa) {
             $resultado = Process::path(base_path())
                 ->run(['git', 'ls-files', '--error-unmatch', 'public/'.$relativa]);

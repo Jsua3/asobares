@@ -7,7 +7,7 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class AjustesDelSitioFaseDosTest extends TestCase
+class AjustesDeLasPaginasPublicasTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -30,10 +30,10 @@ class AjustesDelSitioFaseDosTest extends TestCase
         $this->seed(DatabaseSeeder::class);
     }
 
-    public function test_las_paginas_publicas_de_fase_dos_obedecen_a_sus_ajustes(): void
+    public function test_las_paginas_publicas_obedecen_a_sus_ajustes(): void
     {
         foreach (self::PAGINAS as $indice => [$ruta, $clave]) {
-            $valor = "TEXTO EDITABLE FASE DOS {$indice}";
+            $valor = "TEXTO EDITABLE DE LA PAGINA {$indice}";
             $ajuste = Setting::query()->where('clave', $clave)->first();
 
             $this->assertNotNull($ajuste, "El ajuste «{$clave}» no está sembrado.");

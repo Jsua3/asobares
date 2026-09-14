@@ -7,6 +7,7 @@ use App\Models\Asociado;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Tests\TestCase;
 
@@ -100,6 +101,10 @@ class ColaDeFotosTest extends TestCase
      */
     public function test_la_cola_trae_lo_pendiente_y_no_lo_aprobado(): void
     {
+        // La galería vive en el disco público: sin fingirlo, cada ejecución
+        // deja fotos y conversiones en `storage/app/public` de la máquina.
+        Storage::fake(config('almacenamiento.publico'));
+
         $asociado = Asociado::factory()->publicado()->create();
 
         $archivo = UploadedFile::fake()->image('foto.jpg', 1200, 800);

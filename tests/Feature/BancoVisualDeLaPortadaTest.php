@@ -34,6 +34,22 @@ class BancoVisualDeLaPortadaTest extends TestCase
         'img/home/publicidad-fallback.png',
     ];
 
+    /**
+     * El sembrador y estas pruebas escriben portadas en el disco público, y
+     * `esImagenDeRelleno()` le pregunta a ese disco si el archivo existe. Con
+     * el disco real, lo que deja una ejecución lo ve la siguiente y se queda en
+     * `storage/app/public` de la máquina. El sembrador escribe en `public` y
+     * los helpers leen `almacenamiento.publico`: se fingen los dos.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        foreach (array_unique(['public', config('almacenamiento.publico')]) as $disco) {
+            Storage::fake($disco);
+        }
+    }
+
     public function test_los_assets_del_banco_existen_y_estan_mapeados(): void
     {
         foreach (self::ASSETS as $ruta) {
@@ -66,13 +82,13 @@ class BancoVisualDeLaPortadaTest extends TestCase
         $this->assertTrue(esImagenDeRelleno($relleno));
         $this->assertTrue(esImagenDeRelleno('asociados/no-existe.jpg'));
 
-        Storage::disk('public')->put('asociados/portada-real-home.jpg', 'jpeg-de-verdad');
+        Storage::disk(config('almacenamiento.publico'))->put('asociados/portada-real-home.jpg', 'jpeg-de-verdad');
         $this->assertFalse(esImagenDeRelleno('asociados/portada-real-home.jpg'));
     }
 
     public function test_la_cadena_elige_foto_real_luego_editorial_luego_nada(): void
     {
-        Storage::disk('public')->put('asociados/portada-real-home.jpg', 'jpeg-de-verdad');
+        Storage::disk(config('almacenamiento.publico'))->put('asociados/portada-real-home.jpg', 'jpeg-de-verdad');
 
         $this->assertStringContainsString(
             'portada-real-home.jpg',
@@ -105,7 +121,7 @@ class BancoVisualDeLaPortadaTest extends TestCase
 
         Asociado::query()->update(['destacado' => false]);
 
-        Storage::disk('public')->put(
+        Storage::disk(config('almacenamiento.publico'))->put(
             'asociados/portada-real-home.jpg',
             File::get(public_path('img/og-asobares.jpg'))
         );
@@ -142,9 +158,13 @@ class BancoVisualDeLaPortadaTest extends TestCase
 
         $evento = Evento::publicado()->proximo()->first();
 
-        if ($evento === null || ! esImagenDeRelleno($evento->imagen)) {
-            $this->markTestSkipped('No hay evento próximo con portada de relleno para comprobar el banco.');
-        }
+        // Si el sembrador deja de traer este caso, la prueba se pone roja:
+        // omitirse en silencio escondería que ya no comprueba nada.
+        $this->assertNotNull($evento, 'El sembrador ya no deja ningún evento próximo publicado: la prueba perdió su caso.');
+        $this->assertTrue(
+            esImagenDeRelleno($evento->imagen),
+            "El evento próximo del sembrador ya no trae portada de relleno ({$evento->imagen}): la prueba perdió su caso."
+        );
 
         $html = $this->get('/')->assertOk()->getContent();
 
@@ -159,11 +179,11 @@ class BancoVisualDeLaPortadaTest extends TestCase
 
     public function test_la_publicidad_sin_archivo_no_reusa_el_hero(): void
     {
-        $css = File::get(resource_path('views/components/publico/home/publicidad.blade.php'));
+        $publicidad = File::get(resource_path('views/components/publico/home/publicidad.blade.php'));
         $hero = File::get(resource_path('views/components/publico/home/hero.blade.php'));
 
-        $this->assertStringContainsString("config('home_banco.publicidad'", $css);
-        $this->assertStringNotContainsString('videos/asobares-institucional', $css);
+        $this->assertStringContainsString("config('home_banco.publicidad'", $publicidad);
+        $this->assertStringNotContainsString('videos/asobares-institucional', $publicidad);
         $this->assertStringContainsString('videos/asobares-institucional', $hero);
     }
 

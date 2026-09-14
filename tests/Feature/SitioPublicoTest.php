@@ -10,6 +10,7 @@ use App\Models\Noticia;
 use App\Models\Vacante;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -184,9 +185,14 @@ class SitioPublicoTest extends TestCase
      */
     public function test_el_sitemap_lista_el_calendario_del_mes_en_curso(): void
     {
+        // Reloj congelado en el último segundo del año: sin congelar, la prueba
+        // y el controlador leen la fecha en momentos distintos, y una ejecución
+        // que cruce la medianoche de fin de mes compara meses distintos.
+        $this->travelTo(Carbon::create(2026, 12, 31, 23, 59, 59));
+
         $respuesta = $this->get('/sitemap.xml')->assertSuccessful();
 
-        $respuesta->assertSee(route('eventos.calendario', [now()->year, now()->format('m')]), escape: false);
+        $respuesta->assertSee(route('eventos.calendario', [2026, '12']), escape: false);
         $respuesta->assertDontSee(route('eventos.calendario.hoy').'<', escape: false);
     }
 
