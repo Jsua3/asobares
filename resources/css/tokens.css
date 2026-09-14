@@ -179,7 +179,7 @@
     --asb-serie-7: #7d7779; /* Noche 400 */
 
     /* Estados. Los recuadros de éxito y aviso del tema oscuro van sobre negro
-       (verde 950 al 30 %); en claro hay que invertirlos o quedan ilegibles. */
+       (tonos 900 al 30 %); en claro hay que invertirlos o quedan ilegibles. */
     /* Emerald 800 y no 700: sobre `exito-fondo` el 700 se quedaba en 4.35:1 y
        la insignia «En ejecución» del inicio no llegaba a AA. */
     --asb-exito: #065f46;

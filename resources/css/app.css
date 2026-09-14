@@ -158,11 +158,11 @@
 
     /*
      * Los titulares del gremio van en Poppins Bold/Black. El apretado lo pone
-     * ahora la escala de arriba, tamaño por tamaño: aquí había un `-0.02em`
-     * plano para toda la horquilla de 16 a 60 px, que es exactamente el valor
-     * único que la escala viene a sustituir. Su gemelo de
-     * `filament/admin/theme.css` se queda: allí no hay escala y el plano sigue
-     * siendo lo correcto para una interfaz densa sin titulares grandes.
+     * la escala de arriba, tamaño por tamaño, y no un tracking plano para toda
+     * la horquilla de 16 a 60 px: un valor único no compensa tamaños tan
+     * distintos. El panel, en `filament/admin/theme.css`, sí usa uno plano:
+     * allí no hay escala y es lo correcto para una interfaz densa sin
+     * titulares grandes.
      */
     h1,
     h2,
@@ -1606,7 +1606,7 @@
      * Dos medias que NO se solapan, en vez de una base con anulación: en el CSS
      * compilado de este proyecto el orden no es nuestro --lightningcss aplana
      * las capas, agrupa las medias y mueve reglas--, así que dos reglas de la
-     * misma especificidad no se resuelven como están escritas (bitácora §45).
+     * misma especificidad no se resuelven como están escritas.
      */
     .asb-whatsapp-flotante {
         position: fixed;

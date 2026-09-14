@@ -24,12 +24,12 @@
 
     $estilos = match ($variante) {
         'contorno' => 'border border-linea-fuerte text-tinta hover:border-marca-500/50 hover:bg-superficie-alta',
-        // Para fondos oscuros, como el video de la portada: el contorno de
-        // tinta era un botón invisible sobre negro. El color va en el
+        // Para fondos oscuros, como el video de la portada: un contorno de
+        // tinta sería invisible sobre negro. El color va en el
         // portador `.contorno-claro` de app.css y no en utilidades: el blanco
         // fijo no sigue al tema y la guardia de tema lo prohíbe aquí.
         'contorno-claro' => 'border contorno-claro',
-        // El relleno, el hover y la tinta viven en `.cta-vivo` (app.css) y ya no
+        // El relleno, el hover y la tinta viven en `.cta-vivo` (app.css) y no
         // en utilidades, por lo mismo que `contorno-claro`: al pulsar el botón
         // se vidria —el relleno se retira y deja ver lo de detrás— y eso pide un
         // fondo que dependa del estado. Una utilidad `bg-*` de
