@@ -104,12 +104,12 @@ class ProveedorSeeder extends Seeder
             $proveedor['estado'] ??= EstadoPublicacion::Publicado;
 
             /*
-             * OBS3-12. La demostración enseña los TRES estados de verificación
-             * a propósito, no todos verificados: la queja del gremio fue de
-             * datos muertos --«ya no existe, ya no contestan» (R22 04:19)-- y
-             * una bolsa donde todo aparece confirmado no enseña que el sitio
-             * sabe distinguir. Uno de cada tres queda sin verificar, y el
-             * segundo de cada tres con la verificación vencida.
+             * La demostración enseña los TRES estados de verificación a
+             * propósito, no todos verificados: el problema de una bolsa es el
+             * contacto muerto que ya no contesta, y una bolsa donde todo
+             * aparece confirmado no enseña que el sitio sabe distinguir. Uno de
+             * cada tres queda sin verificar, y el segundo de cada tres con la
+             * verificación vencida.
              */
             $proveedor += match ($indice % 3) {
                 0 => [

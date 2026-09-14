@@ -27,22 +27,19 @@ class SettingSeeder extends Seeder
      * @var list<string>
      */
     private const array JUBILADOS = [
-        // 9 sep 2026. `hero_resumen_corto` hace ese trabajo desde el rediseño del
-        // hero; este párrafo se quedó sembrado y ninguna vista lo pintaba.
+        // `hero_resumen_corto` hace este trabajo; ninguna vista pinta este
+        // párrafo.
         'hero_subtitulo',
 
-        // 9 sep 2026. Ninguna vista lo pintaba, así que el sitio nunca dijo «60»
-        // --el expediente afirmaba que sí (D-18)--. Y publicar una cifra de
-        // afiliados que la base no sostiene (48 filas) va contra la regla de que
-        // en producción solo entra lo que salga de un documento oficial. El día
-        // que el gremio fije la cifra, entra con su fuente y su vista.
+        // Ninguna vista lo pinta, y publicar una cifra de afiliados que la base
+        // no sostiene va contra la regla de que en producción solo entra lo que
+        // salga de un documento oficial. El día que el gremio fije la cifra,
+        // entra con su fuente y su vista.
         'cifra_afiliados',
 
-        // 13 sep 2026 (SUITE-01). El rediseño editorial de la portada (10-12 sep,
-        // 9a9e683, 0de6d48 y 0411335) quitó la tarjeta de empleo y la banda de
-        // tres videos con su «próxima pieza»: prometían clips que no hay
-        // (HOME-FINAL-04 y 05). Las vistas dejaron de leerlas y el sembrador las
-        // siguió ofreciendo. El diseño se queda como está, así que salen ellas.
+        // La portada editorial no tiene la tarjeta de empleo ni la banda de tres
+        // videos con su «próxima pieza», que prometería clips que no hay.
+        // Ninguna vista lee estas claves.
         'portada_empleo_titulo',
         'portada_empleo_texto',
         'portada_videos_intro',
@@ -56,8 +53,8 @@ class SettingSeeder extends Seeder
         'portada_videos_proxima_rotulo',
         'portada_videos_proxima_texto',
 
-        // 13 sep 2026 (SUITE-01). La cabecera editorial del directorio (11 sep,
-        // 6d071c2) dejó de pintar la entradilla bajo el título.
+        // La cabecera editorial del directorio no pinta entradilla bajo el
+        // título.
         'directorio_intro',
     ];
 
@@ -69,8 +66,8 @@ class SettingSeeder extends Seeder
             // Las cifras del gremio las escribe la oficina, no este archivo:
             // se crean si faltan y no se vuelven a tocar. Con `updateOrCreate`
             // un resembrado —para añadir un texto nuevo, por ejemplo— las
-            // devolvía a vacío y la franja desaparecía sin aviso. D-14 sigue
-            // abierta para el resto, que sí se sobrescribe a propósito.
+            // devolvería a vacío y la franja desaparecería sin aviso. El resto
+            // sí se sobrescribe a propósito.
             if ($ajuste['grupo'] === CifrasDelGremio::GRUPO) {
                 Setting::firstOrCreate(['clave' => $ajuste['clave']], $ajuste);
 
@@ -87,12 +84,10 @@ class SettingSeeder extends Seeder
         return [
             // --- Identidad (lema oficial del capítulo) ---
             $this->texto('sitio_nombre', 'ASOBARES Capítulo Quindío', 'identidad', 'Nombre del sitio'),
-            // 9 sep 2026. Decía «La noche construye territorio», que lo escribió
-            // este equipo. El lema del gremio es este, y cierra la última lámina
-            // de «Presentación Asobares actualizada.pdf» entre comillas. Se ve en
-            // el pie de todo el sitio, en el título de la portada y sobre el hero
-            // de «Quiénes somos», así que era el texto propio más repetido que
-            // quedaba en producción.
+            // Lema oficial del gremio: cierra entre comillas la última lámina de
+            // «Presentación Asobares actualizada.pdf». Se ve en el pie de todo el
+            // sitio, en el título de la portada y sobre el hero de «Quiénes
+            // somos».
             $this->texto('sitio_eslogan', 'Construyendo un Quindío nocturno', 'identidad', 'Lema del capítulo'),
             $this->texto('sitio_descripcion_corta', 'El gremio que representa, fortalece y dinamiza el sector nocturno, gastronómico y de entretenimiento del Quindío.', 'identidad', 'Descripción corta'),
             $this->largo('sitio_descripcion', 'Asociación de Bares de Colombia, Capítulo Quindío. Representamos a bares, gastrobares, cafés y discotecas del departamento ante las instituciones, y acompañamos a quien quiere abrir su establecimiento.', 'identidad', 'Descripción para buscadores'),
@@ -110,11 +105,8 @@ class SettingSeeder extends Seeder
             $this->largo('cta_final_texto', 'Afiliarte toma una conversación. Representación ante las instituciones, descuentos en derechos de autor, formación y orientación jurídica sin costo.', 'inicio', 'Texto del cierre'),
 
             /*
-             * Los títulos de cada sección de la portada. Estaban cableados en
-             * `publico/inicio.blade.php` mientras el resto del contenido ya
-             * salía de aquí, así que la afirmación que se le hizo al gremio en
-             * la revisión del 28 de agosto —«toda la página es completamente
-             * editable», R22 02:53— era falsa justo en lo que estaban mirando.
+             * Los títulos de cada sección de la portada, editables desde el
+             * panel como el resto del contenido (RNF-09).
              *
              * Van con prefijo `portada_` porque `guia_titulo` y `empleo_titulo`
              * ya existen para las páginas de la guía y de la bolsa: son otros
@@ -123,33 +115,31 @@ class SettingSeeder extends Seeder
             $this->texto('portada_cifras_titulo', 'La noche en cifras · Observatorio Económico', 'inicio', 'Portada · título de la franja de cifras'),
             $this->texto('portada_guia_titulo', 'Abre tu negocio', 'inicio', 'Portada · título de la tarjeta de la guía'),
             $this->texto('portada_destacados_titulo', 'La noche del Quindío', 'inicio', 'Portada · título de los establecimientos destacados'),
-            // OBS3-01: «Lo que gana tu establecimiento» le sonó al directivo
-            // «como si estuviéramos vendiendo una lotería» (R22 03:05).
+            // No «Lo que gana tu establecimiento»: al gremio le suena a vender
+            // una lotería.
             $this->texto('portada_beneficios_titulo', 'Beneficios de pertenecer al gremio', 'inicio', 'Portada · título de beneficios'),
             $this->texto('portada_beneficios_intro', 'Cinco beneficios concretos por estar afiliado al capítulo.', 'inicio', 'Portada · entradilla de beneficios'),
-            // ⚠️ Prometía «costos y los formatos oficiales listos para
-            // descargar», y la guía ya no tiene ni lo uno ni lo otro: los
-            // costos eran inventados y los formatos eran PDF rotulados
-            // «Formato de ejemplo», y ambos se retiraron. Una tarjeta de
-            // portada que promete lo que la página siguiente no da es la misma
-            // clase de defecto que el «ya» del WhatsApp (OBS3-14).
+            // ⚠️ No promete costos ni formatos para descargar: la guía no
+            // publica ni lo uno ni lo otro. Una tarjeta de portada que promete lo
+            // que la página siguiente no da es la misma clase de defecto que
+            // prometer respuesta inmediata por WhatsApp.
             $this->largo('portada_guia_texto', 'Los requisitos reales para abrir un establecimiento, con la lista de lo que pide cada entidad, a quién se le pide y qué documento sale de ahí.', 'inicio', 'Portada · texto de la tarjeta de la guía'),
             $this->texto('portada_destacados_texto', 'Algunos de los establecimientos afiliados al gremio.', 'inicio', 'Portada · pie de los destacados'),
             $this->texto('portada_eventos_titulo', 'Próximos eventos del gremio', 'inicio', 'Portada · título de eventos'),
             $this->texto('portada_aliados_titulo', 'Aliados del capítulo', 'inicio', 'Portada · título de aliados'),
-            // OBS3-04: las dos bandas de aliados llevan rótulo propio.
+            // Las dos bandas de aliados llevan rótulo propio.
             $this->texto('portada_aliados_institucionales', 'Respaldo institucional', 'inicio', 'Portada · rótulo de aliados institucionales'),
             $this->texto('portada_aliados_comerciales', 'Convenios para afiliados', 'inicio', 'Portada · rótulo de aliados comerciales'),
             $this->texto('portada_videos_rotulo', 'ASOBARES en movimiento', 'inicio', 'Portada · rótulo de videos'),
             $this->texto('portada_videos_titulo', 'Historias cortas para sentir el gremio.', 'inicio', 'Portada · título de videos'),
 
             /**
-             * Los textos que la portada editorial (10-12 sep 2026) lee con
-             * `ajuste('clave', 'respaldo')` y nadie sembraba (COD-04): sin
-             * fila en la base el panel no los ofrecía, así que la portada
-             * pintaba el respaldo y la oficina no tenía cómo cambiarlo.
+             * Los textos que la portada editorial lee con
+             * `ajuste('clave', 'respaldo')`: sin fila en la base el panel no los
+             * ofrece, así que la portada pintaría el respaldo y la oficina no
+             * tendría cómo cambiarlo.
              *
-             * ⚠️ Procedencia (D-14): el valor es el texto de respaldo EXACTO de
+             * ⚠️ Procedencia: el valor es el texto de respaldo EXACTO de
              * cada vista de `components/publico/home/`, escrito por el equipo.
              * No sale de ningún documento oficial del gremio. Se siembra igual
              * para que la portada no cambie ni una letra y el texto pase a
@@ -196,14 +186,13 @@ class SettingSeeder extends Seeder
             $this->texto('cifra_jovenes', '35,28 %', 'cifras', 'Trabajadores de 28 años o menos'),
             $this->texto('cifra_jovenes_detalle', 'de los trabajadores tiene 28 años o menos', 'cifras', 'Detalle de juventud'),
 
-            // --- El gremio en cifras (D-25, Acta 05): las teclea la oficina ---
+            // --- El gremio en cifras (Acta 05): las teclea la oficina ---
             $this->texto(CifrasDelGremio::CLAVE_TITULO, 'El gremio en cifras', 'inicio', 'Portada · título de la franja de cifras del gremio'),
             ...$this->cifrasDelGremio(),
 
             // --- Quiénes somos ---
-            // OBS3-11. Los quince textos de «Quiénes somos» que estaban
-            // cableados. Si Natalia va a entregar la redaccion propia del
-            // capitulo, la pagina tiene que aceptarla sin tocar codigo.
+            // Los quince textos de «Quiénes somos», editables para
+            // que la redacción propia del capítulo entre sin tocar código.
             $this->texto('quienes_titulo_historia', 'Cómo nació el capítulo', 'institucional', 'Quiénes somos · título de la historia'),
             $this->texto('quienes_titulo_que_hacemos', 'Qué hace el gremio', 'institucional', 'Quiénes somos · título de qué hace el gremio'),
             $this->texto('quienes_titulo_barreras', 'Lo que hoy nos frena', 'institucional', 'Quiénes somos · título de las barreras'),
@@ -220,23 +209,20 @@ class SettingSeeder extends Seeder
             $this->texto('quienes_cargo_presidente', 'Presidente', 'institucional', 'Quiénes somos · cargo del presidente'),
             $this->texto('quienes_cargo_directora', 'Directora ejecutiva', 'institucional', 'Quiénes somos · cargo de la directora'),
             $this->largo('quienes_historia', 'Somos una organización gremial que nace en Bogotá y llega al Quindío con la necesidad de afianzar la relación TURISMO – NOCHE. El capítulo se fundó el 14 de agosto de 2024 en Armenia y reúne a bares, gastrobares, cafés y discotecas del departamento alrededor de una idea simple: la vida nocturna es una industria que genera empleo, paga impuestos y merece ser tratada como tal.', 'institucional', 'Historia'),
-            // 9 sep 2026. Es el subtítulo del hero de «Quiénes somos», o sea lo
-            // primero que se lee al entrar a la página que explica el gremio, y
-            // hasta hoy lo había redactado este equipo. La lámina 2 de la
-            // presentación institucional trae la propuesta de valor del propio
-            // gremio: entra tal cual, sin resumir y sin «mejorar» (§17.2 del
-            // encargo). Por eso cambia también la etiqueta que ve la oficina:
-            // ya no es nuestra misión redactada, es su propuesta de valor.
+            // Subtítulo del hero de «Quiénes somos», lo primero que se lee en la
+            // página que explica el gremio. Es la propuesta de valor del propio
+            // gremio, de la lámina 2 de la presentación institucional: entra tal
+            // cual, sin resumir y sin «mejorar» (§17.2 del encargo), y por eso
+            // la etiqueta que ve la oficina es «Propuesta de valor».
             $this->largo('quienes_mision', 'En Asobares Capítulo Quindío nos comprometemos a ser un aliado estratégico de los empresarios y establecimientos de la vida nocturna, brindando oportunidades de crecimiento, innovación y conexión para impulsar el desarrollo del sector turístico como un producto nocturno.', 'institucional', 'Propuesta de valor'),
             $this->largo('quienes_que_hacemos', 'Trabajamos por una vida nocturna más diversa y por la dignificación del sector, para consolidarnos como el corazón nocturno del Eje Cafetero. Gestionamos con las Secretarías de Salud, Gobierno y Planeación; negociamos tarifas de derechos de autor; formamos a los equipos de nuestros afiliados; y construimos la guía normativa por municipio que hoy no tiene ningún otro gremio del país.', 'institucional', 'Qué hacemos'),
             $this->texto('quienes_vision', 'Hacia la transformación del Quindío en un paraíso nocturno seguro', 'institucional', 'Visión'),
-            // 9 sep 2026. Decía «Jorge Iván Botero Ángel»: los dos apellidos
-            // estaban al revés. La invitación a los ponentes del foro nocturno
-            // (jul 2025, «Apoyos ejecutivos/INVITACION PONENTES FORO NOCTURNO.docx»)
-            // la firma él mismo como «Jorge Iván Ángel Botero · Presidente
-            // Asobares Quindío». Es el nombre de una persona real en una página
-            // pública con el nombre del gremio encima: no se toca sin documento,
-            // y ahora hay uno firmado por el interesado.
+            // Nombre como lo firma el propio presidente en la invitación a los
+            // ponentes del foro nocturno (jul 2025, «Apoyos ejecutivos/INVITACION
+            // PONENTES FORO NOCTURNO.docx»): «Jorge Iván Ángel Botero ·
+            // Presidente Asobares Quindío». Es el nombre de una persona real en
+            // una página pública con el nombre del gremio encima: no se toca sin
+            // documento.
             $this->texto('quienes_presidente', 'Jorge Iván Ángel Botero', 'institucional', 'Presidente'),
             $this->texto('quienes_directora', 'Natalia Gutiérrez', 'institucional', 'Directora ejecutiva'),
             $this->texto('quienes_fundacion', '14 de agosto de 2024', 'institucional', 'Fecha de fundación'),
@@ -251,15 +237,14 @@ class SettingSeeder extends Seeder
 
             $this->largo('quienes_estrategia_armenia', 'Armenia Nocturna es la propuesta del capítulo para la ciudad: articular a la Secretaría de Gobierno y a la de Desarrollo Económico alrededor de una vida económica nocturna regulada, segura y reconocida como industria.', 'institucional', 'Estrategia Armenia Nocturna'),
             $this->largo('quienes_programas_nacionales', "Tardeo en la ciudad\nMi destino, tu noche\nLa ruta del coctel\nPregunta por Ángela", 'institucional', 'Programas de la Nacional que aterriza el capítulo'),
-            // 9 sep 2026. La lámina 3 de la presentación institucional respalda
-            // al capítulo con dos cifras del gremio nacional: 17 capítulos y
-            // 2.500 afiliados. El bloque «Somos el capítulo regional de Asobares
-            // Colombia» lo afirmaba sin enseñar de qué tamaño es ese respaldo.
+            // La lámina 3 de la presentación institucional respalda al capítulo
+            // con dos cifras del gremio nacional: 17 capítulos y 2.500 afiliados.
+            // El bloque «Somos el capítulo regional de Asobares Colombia» enseña
+            // así de qué tamaño es ese respaldo.
             //
-            // ⚠️ Son cifras NACIONALES y no reabren D-18, que es la cifra de
-            // afiliados DEL QUINDÍO --el sitio decía 60, la base tiene 48 y nadie
-            // lo ha zanjado--. `cifra_afiliados` se jubiló por eso y sigue en la
-            // lista de jubilados de arriba.
+            // ⚠️ Son cifras NACIONALES, no la cifra de afiliados DEL QUINDÍO, que
+            // no tiene documento: por eso `cifra_afiliados` está en la lista de
+            // jubilados de arriba.
             // Cifra y rótulo por separado, como las cuatro de la portada
             // (`CifrasDelGremio`): la oficina cambia el número sin pelearse con
             // un texto, y el rótulo es editable porque también se ve.
@@ -272,12 +257,11 @@ class SettingSeeder extends Seeder
             // --- Contacto ---
             $this->texto('contacto_correo', 'asobaresquindio@asobares.org', 'contacto', 'Correo'),
             $this->texto('contacto_whatsapp', '573215549513', 'contacto', 'WhatsApp (formato internacional)'),
-            // OBS3-14. El directivo pregunto «¿ese tiene respuesta?» y pidio
-            // automatizarlo (R21 11:15-11:21). Automatizar WhatsApp no es
-            // codigo de esta plataforma --es WhatsApp Business, del gremio--,
-            // asi que lo que si esta en nuestra mano es no prometerlo. El
-            // texto es editable para que el gremio ponga su horario real el
-            // dia que lo tenga, o lo cambie entero si automatiza de verdad.
+            // Automatizar WhatsApp no es código de esta plataforma --es WhatsApp
+            // Business, del gremio--, así que lo que sí está en nuestra mano es
+            // no prometerlo. El texto es editable para que el gremio ponga su
+            // horario real el día que lo tenga, o lo cambie entero si automatiza
+            // de verdad.
             $this->texto('contacto_whatsapp_aviso', 'Te responde una persona del equipo, no un contestador automático.', 'contacto', 'Aviso bajo el WhatsApp'),
             $this->texto('contacto_whatsapp_visible', '321 5549513', 'contacto', 'WhatsApp para mostrar'),
             $this->texto('contacto_instagram', 'asobaresquindio', 'contacto', 'Usuario de Instagram'),
@@ -295,14 +279,13 @@ class SettingSeeder extends Seeder
             $this->texto('directorio_titulo', 'Directorio de establecimientos', 'directorio', 'Título del directorio'),
 
             // --- Guía normativa ---
-            // OBS3-10. Dos rotulos porque el enlace no siempre cumple lo mismo.
+            // Dos rótulos porque el enlace no siempre cumple lo mismo.
             $this->texto('guia_enlace_puntual', 'Ir al trámite', 'guia', 'Guía · enlace que abre el trámite exacto'),
             $this->texto('guia_enlace_portada', 'Sitio de la entidad', 'guia', 'Guía · enlace que solo abre el portal'),
             $this->texto('guia_titulo', 'Abre tu negocio sin que te lo cierren', 'guia', 'Título de la guía'),
-            // Misma corrección que en `portada_guia_texto`: prometía «cuánto
-            // cuesta y qué formato tienes que descargar», y la guía no tiene
-            // costos ni formatos. Los tendrá cuando el gremio los cargue; ese
-            // día se edita esta línea desde el panel, que es donde vive.
+            // Igual que `portada_guia_texto`, no promete costos ni formatos: la
+            // guía no los tiene. Los tendrá cuando el gremio los cargue; ese día
+            // se edita esta línea desde el panel, que es donde vive.
             $this->largo('guia_intro', 'La normatividad cambia de un municipio a otro. Escoge el tuyo y revisa, entidad por entidad, qué te van a pedir y ante quién se tramita.', 'guia', 'Introducción de la guía'),
             $this->largo('guia_descargo', 'Esta guía es orientativa y se actualiza con la información que cada entidad entrega al gremio. Los requisitos, costos y formatos pueden cambiar sin aviso: verifica siempre directamente con la entidad competente antes de iniciar tu trámite.', 'guia', 'Texto de descargo'),
             $this->largo('guia_selector_ayuda', 'Estamos levantando la guía municipio por municipio con la información que cada entidad entrega al gremio. Si falta el tuyo, escríbenos.', 'guia', 'Ayuda bajo el selector de municipio'),
@@ -325,13 +308,13 @@ class SettingSeeder extends Seeder
             // --- Artistas y proveedores ---
             $this->texto('artistas_titulo', 'Directorio de artistas', 'artistas', 'Título de artistas'),
             $this->largo('artistas_intro', 'DJs, bandas y solistas de la región. Son las once de la noche, se te cayó el DJ y necesitas uno: aquí está su género, su contacto y un video para escucharlo antes de llamar.', 'artistas', 'Introducción de artistas'),
-            // OBS3-08. El acta ofrecía dos redacciones --«a convenir» o
-            // «según el evento»--, así que la decide el gremio desde el panel.
+            // Hay dos redacciones posibles --«a convenir» o «según el evento»--,
+            // así que la decide el gremio desde el panel.
             $this->texto('artistas_tarifa_leyenda', 'A convenir', 'artistas', 'Artistas · leyenda en lugar de la tarifa'),
             $this->texto('artistas_bloque_titulo', '¿Eres DJ, banda o solista?', 'artistas', 'Título del bloque de inscripción'),
             $this->largo('artistas_bloque_texto', 'Inscríbete gratis en la bolsa de artistas del gremio y aparece cuando un establecimiento busque música para su noche.', 'artistas', 'Texto del bloque de inscripción'),
             $this->texto('artistas_bloque_cta', 'Inscribirme en la bolsa', 'artistas', 'Botón del bloque de inscripción'),
-            // OBS3-12. Los tres estados de la verificacion de un proveedor.
+            // Los tres estados de la verificación de un proveedor.
             $this->texto('proveedores_verificado', 'Contacto verificado el', 'proveedores', 'Proveedores · rótulo de verificado'),
             $this->texto('proveedores_verificacion_vieja', 'Sin confirmar desde', 'proveedores', 'Proveedores · rótulo de verificación vencida'),
             $this->texto('proveedores_sin_verificar', 'El gremio no ha confirmado este contacto', 'proveedores', 'Proveedores · rótulo de sin verificar'),

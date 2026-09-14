@@ -16,30 +16,27 @@ use Illuminate\Database\Seeder;
  * ⚠️ **Todo lo que hay aquí sale de un documento oficial del gremio.** Los
  * comerciales son los de «BENEFICIOS AFILIADOS» (`material/nuevomaterial/`),
  * páginas «ALIADOS ESTRATÉGICOS», con sus condiciones y sus contactos tal
- * como los publica ASOBARES a sus afiliados. Antes había aquí cinco marcas
- * inventadas --Licorera del Quindío, Contingentix, Distribuidora Andina de
- * Alimentos, Sonido Pro Eje Cafetero y Seguros Nocturna-- con descuentos
- * igualmente inventados y URLs a `ejemplo.test`. Se retiraron: el esquema no
- * marca de dónde vino cada fila, así que en cuanto la oficina empiece a
- * editar nadie sabrá distinguir lo sembrado de lo real. **No vuelvas a meter
- * un aliado que no puedas señalar en un documento.**
+ * como los publica ASOBARES a sus afiliados. El esquema no marca de dónde vino
+ * cada fila, así que en cuanto la oficina empiece a editar nadie sabrá
+ * distinguir lo sembrado de lo real. **No metas un aliado que no puedas
+ * señalar en un documento.**
  */
 class AliadoSeeder extends Seeder
 {
-    /** De dónde sale cada condición, para quien audite esto en octubre. */
+    /** De dónde sale cada condición, para quien lo audite. */
     public const string FUENTE_COMERCIALES = 'BENEFICIOS AFILIADOS · ASOBARES — «Aliados estratégicos»';
 
     public function run(GeneradorImagen $imagenes): void
     {
-        // OBS3-04. Los cuatro que nombro el directivo, en ese orden
-        // (`R21 02:19-03:26`). Son entidades, no marcas: respaldan al gremio
-        // en vez de venderle a sus afiliados, y por eso ninguna lleva
-        // `detalle_convenio` --no hay descuento que enseniarle al afiliado--.
+        // Los cuatro que nombró el gremio, en ese orden. Son entidades, no
+        // marcas: respaldan al gremio en vez de venderle a sus afiliados, y
+        // por eso ninguna lleva `detalle_convenio` --no hay descuento que
+        // enseñarle al afiliado--.
         //
         // OJO: los logos son de relleno, como los del resto de la
-        // demostracion. Conseguir los oficiales en buena resolucion es un
-        // insumo del gremio (Bloque D), y publicar el logo real de una
-        // entidad publica sin tenerlo es peor que un rectangulo gris.
+        // demostración. Conseguir los oficiales en buena resolución es un
+        // insumo del gremio, y publicar el logo real de una entidad pública
+        // sin tenerlo es peor que un rectángulo gris.
         $institucionales = [
             [
                 'nombre' => 'Asobares Colombia',

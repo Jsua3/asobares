@@ -39,9 +39,9 @@ class ConsultaGuiaSeeder extends Seeder
         $filas = [];
 
         foreach (self::PESOS as $nombre => $peso) {
-            // `?? null` + `continue` dejaba un hueco mudo en el mapa de
-            // calor si un nombre divergía de `MunicipioSeeder`: la serie
-            // salía corta y nada lo avisaba. Mejor romper el seed que
+            // `?? null` + `continue` dejaría un hueco mudo en el mapa de
+            // calor si un nombre divergiera de `MunicipioSeeder`: la serie
+            // saldría corta y nada lo avisaría. Mejor romper el seed que
             // servir un observatorio con un municipio invisible.
             $municipioId = $municipios[$nombre] ?? throw new RuntimeException(
                 "ConsultaGuiaSeeder espera el municipio «{$nombre}», que no existe en la tabla municipios. "
@@ -49,10 +49,10 @@ class ConsultaGuiaSeeder extends Seeder
             );
 
             foreach (range(0, 17) as $mesesAtras) {
-                // El divisor y el suelo van juntos a proposito: con `/10` y sin suelo, un
-                // peso de 6 daba round(0,64)=1 y round(1,2)=1, o sea dieciocho meses
-                // planos. El suelo de 2 garantiza que hasta el municipio mas pequeno
-                // duplique a lo largo de la serie, que es lo que la grafica tiene que
+                // El divisor y el suelo van juntos a propósito: con `/10` y sin suelo, un
+                // peso de 6 da round(0,64)=1 y round(1,2)=1, o sea dieciocho meses
+                // planos. El suelo de 2 garantiza que hasta el municipio más pequeño
+                // duplique a lo largo de la serie, que es lo que la gráfica tiene que
                 // poder mostrar.
                 $crecimiento = 1 + ((17 - $mesesAtras) / 17);
                 $base = max($peso / 4, 2);

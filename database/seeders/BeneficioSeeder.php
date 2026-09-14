@@ -13,8 +13,7 @@ use Illuminate\Database\Seeder;
  * AFILIADOS» (`material/nuevomaterial/`), que es el documento que ASOBARES
  * entrega a sus afiliados: de ahí salen las cifras --16,6 % y 8,3 % con OSA,
  * 6 % con Sayco-- y los nombres de las mesas en las que el gremio se sienta.
- * Antes decían lo mismo en general, pero con detalles que el documento no
- * respalda.
+ * Ningún detalle que el documento no respalde.
  */
 class BeneficioSeeder extends Seeder
 {
