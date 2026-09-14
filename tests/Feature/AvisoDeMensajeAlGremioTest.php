@@ -102,8 +102,9 @@ class AvisoDeMensajeAlGremioTest extends TestCase
 
     /**
      * Al buzón del gremio llega un único correo por mensaje, y ese correo no
-     * copia el texto ni el teléfono de quien escribe: remite al panel, que es
-     * el único sitio que sabe borrar esos datos cuando vence su plazo.
+     * copia el nombre, el correo, el teléfono ni el texto de quien escribe:
+     * remite al panel, que es el único sitio que sabe borrar esos datos cuando
+     * vence su plazo.
      */
     #[DataProvider('tiposDelFormularioDeContacto')]
     public function test_al_buzon_del_gremio_llega_un_solo_correo_sin_datos_personales(TipoMensaje $tipo): void
@@ -127,6 +128,10 @@ class AvisoDeMensajeAlGremioTest extends TestCase
         $aviso = $alBuzon->first();
 
         $this->assertInstanceOf(MensajeRecibido::class, $aviso);
+        $aviso->assertDontSeeInHtml('Ciudadana Preocupada');
+        $aviso->assertDontSeeInText('Ciudadana Preocupada');
+        $aviso->assertDontSeeInHtml('ciudadana@ejemplo.test');
+        $aviso->assertDontSeeInText('ciudadana@ejemplo.test');
         $aviso->assertDontSeeInHtml('3145559876');
         $aviso->assertDontSeeInText('3145559876');
         $aviso->assertDontSeeInHtml('cuatro de la madrugada');
