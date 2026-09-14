@@ -43,8 +43,13 @@
                             $fotoEvento = urlDeFotoDeLaHome($evento->imagen);
                             $mesCorto = mb_strtoupper(rtrim($evento->fecha_inicio->translatedFormat('M'), '.'));
                         @endphp
-                        <article class="home-editorial-evento {{ $indice === 0 ? 'is-activo' : '' }}"
-                                 @if ($haySecuencia) :class="indice === {{ $indice }} && 'is-activo'" @endif>
+                        <article class="home-editorial-evento {{ ! $haySecuencia && $indice === 0 ? 'is-activo' : '' }}"
+                                 @if ($haySecuencia)
+                                     :class="indice === {{ $indice }} && 'is-activo'"
+                                     :aria-current="indice === {{ $indice }} ? 'true' : 'false'"
+                                 @elseif ($indice === 0)
+                                     aria-current="true"
+                                 @endif>
                             <a href="{{ route('eventos.show', $evento) }}" class="home-editorial-evento__enlace tarjeta-pulsable">
                                 <div class="home-editorial-evento__foto">
                                     @if ($fotoEvento)

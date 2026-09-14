@@ -88,16 +88,50 @@
              x-data="{
                  panelVisible: true,
                  drawerAbierto: false,
+                 disparadorDrawer: null,
                  abrirDrawer() {
+                     this.disparadorDrawer = document.activeElement instanceof HTMLElement ? document.activeElement : null;
                      this.drawerAbierto = true;
                      document.body.classList.add('overflow-hidden');
+                     this.$nextTick(() => {
+                         const objetivo = this.$refs.drawerFiltros?.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex=\'-1\'])');
+                         objetivo?.focus();
+                     });
                  },
                  cerrarDrawer() {
                      this.drawerAbierto = false;
                      document.body.classList.remove('overflow-hidden');
+                     this.$nextTick(() => this.disparadorDrawer?.focus());
+                 },
+                 retenerFocoDrawer(evento) {
+                     if (! this.drawerAbierto || ! this.$refs.drawerFiltros) {
+                         return;
+                     }
+
+                     const focables = Array.from(this.$refs.drawerFiltros.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex=\'-1\'])'))
+                         .filter((elemento) => ! elemento.disabled && elemento.offsetParent !== null);
+
+                     if (focables.length === 0) {
+                         evento.preventDefault();
+                         this.$refs.drawerFiltros.focus();
+
+                         return;
+                     }
+
+                     const primero = focables[0];
+                     const ultimo = focables[focables.length - 1];
+
+                     if (evento.shiftKey && document.activeElement === primero) {
+                         evento.preventDefault();
+                         ultimo.focus();
+                     } else if (! evento.shiftKey && document.activeElement === ultimo) {
+                         evento.preventDefault();
+                         primero.focus();
+                     }
                  },
              }"
-             x-on:keydown.escape.window="if (drawerAbierto) cerrarDrawer()">
+             x-on:keydown.escape.window="if (drawerAbierto) cerrarDrawer()"
+             x-on:keydown.tab.window="retenerFocoDrawer($event)">
 
             <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
 
@@ -142,6 +176,7 @@
                                 :vista="$vista"
                                 :hay-filtros="$hayFiltros"
                                 :listado="$listado"
+                                sufijo-id="desktop"
                                 class="directorio-editorial-filtros vidrio grid gap-4 p-5" />
                         </div>
                     </div>
@@ -172,9 +207,9 @@
                     <div class="lg:hidden"
                          x-show="drawerAbierto"
                          x-cloak
-                         class="fixed inset-0 z-50"
+                         class="fixed inset-0 z-[80]"
                          role="presentation">
-                        <div class="absolute inset-0 bg-fondo/70"
+                        <div class="absolute inset-0 bg-fondo/75 backdrop-blur-sm"
                              x-on:click="cerrarDrawer()"
                              x-show="drawerAbierto"
                              x-transition:enter="transicion-desplegable ease-out duration-(--duracion-entrada)"
@@ -186,9 +221,11 @@
                              aria-hidden="true"></div>
 
                         <div id="directorio-filtros-drawer"
+                             x-ref="drawerFiltros"
                              role="dialog"
                              aria-modal="true"
                              aria-labelledby="directorio-filtros-titulo"
+                             tabindex="-1"
                              x-show="drawerAbierto"
                              x-transition:enter="transicion-desplegable ease-rebote-vivo duration-(--duracion-rebote)"
                              x-transition:enter-start="opacity-0 translate-y-full"
@@ -216,6 +253,7 @@
                                 :vista="$vista"
                                 :hay-filtros="$hayFiltros"
                                 :listado="$listado"
+                                sufijo-id="mobile"
                                 class="directorio-editorial-filtros grid gap-4" />
                         </div>
                     </div>

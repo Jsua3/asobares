@@ -5,6 +5,7 @@
     'vista',
     'hayFiltros',
     'listado',
+    'sufijoId' => 'desktop',
 ])
 
 {{-- GET para que la URL se pueda compartir. El action y el #resultados viven
@@ -14,15 +15,18 @@
     <input type="hidden" name="vista" value="{{ $vista }}">
 
     <x-publico.campo nombre="q" etiqueta="Buscar por nombre" placeholder="Ej.: La Cava"
-                     :valor="$filtros['q'] ?? null" />
+                     :valor="$filtros['q'] ?? null"
+                     id="campo-q-{{ $sufijoId }}" />
 
     <x-publico.campo nombre="municipio" etiqueta="Municipio" tipo="select"
                      :valor="$filtros['municipio'] ?? null"
-                     :opciones="['' => 'Todos los municipios'] + $municipios->pluck('nombre', 'slug')->all()" />
+                     :opciones="['' => 'Todos los municipios'] + $municipios->pluck('nombre', 'slug')->all()"
+                     id="campo-municipio-{{ $sufijoId }}" />
 
     <x-publico.campo nombre="categoria" etiqueta="Categoría" tipo="select"
                      :valor="$filtros['categoria'] ?? null"
-                     :opciones="['' => 'Todas las categorías'] + $categorias->pluck('nombre', 'slug')->all()" />
+                     :opciones="['' => 'Todas las categorías'] + $categorias->pluck('nombre', 'slug')->all()"
+                     id="campo-categoria-{{ $sufijoId }}" />
 
     <div class="flex items-end gap-2">
         <x-publico.boton class="flex-1">

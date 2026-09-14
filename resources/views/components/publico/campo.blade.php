@@ -8,6 +8,7 @@
     'opciones' => null,
     'filas' => 4,
     'valor' => null,
+    'id' => null,
 ])
 
 @php
@@ -17,7 +18,7 @@
     // de errores en cabecera, la heurística de autorrelleno del navegador y
     // cualquier selector de prueba. Colisionaría si una página repitiera un
     // `nombre`; hoy ninguna lo hace y `FocoVisibleTest` lo vigila.
-    $id = 'campo-'.Str::slug(str_replace(['[', ']', '.'], ['-', '', '-'], $nombre));
+    $id = $id ?: 'campo-'.Str::slug(str_replace(['[', ']', '.'], ['-', '', '-'], $nombre));
     $hayError = $errors->has($nombre);
 
     // `aria-describedby` admite varios ids separados por espacio. Hasta hoy solo

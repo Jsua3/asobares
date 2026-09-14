@@ -91,6 +91,10 @@ class EventosEditorialesDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('scroll-snap', $bloque);
         $this->assertStringContainsString('@media (prefers-reduced-motion: reduce)', $css);
         $this->assertStringContainsString('.home-editorial-evento__img', $css);
+        $this->assertStringContainsString('top: 1rem;', $bloque);
+        $this->assertStringContainsString('right: 3.75rem;', $bloque);
+        $this->assertStringContainsString('right: 1rem;', $bloque);
+        $this->assertStringContainsString('rgb(120 21 17 / 0.96)', $bloque);
     }
 
     public function test_asobares_en_movimiento_sigue_fuera_de_la_franja_de_eventos(): void
@@ -107,6 +111,16 @@ class EventosEditorialesDeLaPortadaTest extends TestCase
         $this->assertStringNotContainsString("config('home_banco.evento')", $vista);
         $this->assertStringContainsString('route(\'eventos.show\'', $vista);
         $this->assertStringNotContainsString('route(\'empleo.index\')', $vista);
+    }
+
+    public function test_el_carrusel_no_deja_una_tarjeta_activa_estatica_cuando_hay_secuencia(): void
+    {
+        $vista = File::get(resource_path('views/components/publico/home/actualidad.blade.php'));
+
+        $this->assertStringContainsString("! \$haySecuencia && \$indice === 0 ? 'is-activo' : ''", $vista);
+        $this->assertStringContainsString(":class=\"indice === {{ \$indice }} && 'is-activo'\"", $vista);
+        $this->assertStringContainsString(':aria-current="indice === {{ $indice }} ? \'true\' : \'false\'"', $vista);
+        $this->assertStringNotContainsString("{{ \$indice === 0 ? 'is-activo' : '' }}", $vista);
     }
 
     private function seccionDeEventos(string $html): string

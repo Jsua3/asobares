@@ -79,16 +79,16 @@
     background:
         linear-gradient(
             105deg,
-            rgb(11 9 10 / 0.82) 0%,
-            rgb(11 9 10 / 0.48) 38%,
-            rgb(11 9 10 / 0.12) 68%,
+            rgb(11 9 10 / 0.9) 0%,
+            rgb(11 9 10 / 0.58) 38%,
+            rgb(11 9 10 / 0.18) 68%,
             rgb(11 9 10 / 0.04) 100%
         ),
         linear-gradient(
             180deg,
-            rgb(11 9 10 / 0.22) 0%,
+            rgb(11 9 10 / 0.28) 0%,
             transparent 42%,
-            rgb(11 9 10 / 0.42) 100%
+            rgb(11 9 10 / 0.5) 100%
         );
 }
 
@@ -127,7 +127,8 @@
     font-weight: 600;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: rgb(246 241 235 / 0.72);
+    color: rgb(255 248 241 / 0.86);
+    text-shadow: 0 1px 16px rgb(0 0 0 / 0.42);
 }
 
 .directorio-editorial-hero__cuerpo h1 {
@@ -159,7 +160,8 @@
     max-width: 34rem;
     font-size: 1rem;
     line-height: 1.55;
-    color: rgb(246 241 235 / 0.82);
+    color: rgb(255 248 241 / 0.9);
+    text-shadow: 0 1px 18px rgb(0 0 0 / 0.4);
     text-wrap: pretty;
 }
 

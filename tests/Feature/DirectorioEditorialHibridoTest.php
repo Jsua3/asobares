@@ -22,12 +22,20 @@ class DirectorioEditorialHibridoTest extends TestCase
         $html = $this->get(route('directorio.index'))->assertOk()->getContent();
 
         $this->assertStringContainsString('directorio-editorial', $html);
-        $this->assertStringContainsString('directorio-editorial.css', $html);
+        $this->assertStringContainsString('directorio-editorial-', $html);
         $this->assertStringContainsString('Encuentra dónde vive la noche.', $html);
         $this->assertStringContainsString('Explorar establecimientos', $html);
         $this->assertStringContainsString('href="#resultados"', $html);
         $this->assertStringContainsString('id="directorio-filtros-panel"', $html);
         $this->assertStringContainsString('id="directorio-filtros-drawer"', $html);
+        $this->assertStringContainsString('id="campo-q-desktop"', $html);
+        $this->assertStringContainsString('id="campo-q-mobile"', $html);
+        $this->assertStringContainsString('id="campo-municipio-desktop"', $html);
+        $this->assertStringContainsString('id="campo-municipio-mobile"', $html);
+        $this->assertStringContainsString('id="campo-categoria-desktop"', $html);
+        $this->assertStringContainsString('id="campo-categoria-mobile"', $html);
+        $this->assertSame(1, substr_count($html, 'id="campo-q-desktop"'));
+        $this->assertSame(1, substr_count($html, 'id="campo-q-mobile"'));
         $this->assertStringContainsString('id="resultados"', $html);
         $this->assertStringContainsString('Buscar por nombre', $html);
         $this->assertStringContainsString('Tarjetas', $html);
@@ -36,6 +44,20 @@ class DirectorioEditorialHibridoTest extends TestCase
         $this->assertStringContainsString('Bruma Gastrobar', $html);
         $this->assertStringNotContainsString('tarjeta-escena', $html);
         $this->assertStringNotContainsString('home-editorial.css', $html);
+    }
+
+    public function test_el_drawer_movil_bloquea_el_fondo_y_administra_el_foco(): void
+    {
+        $vista = File::get(resource_path('views/publico/directorio/index.blade.php'));
+
+        $this->assertStringContainsString('class="fixed inset-0 z-[80]"', $vista);
+        $this->assertStringContainsString('aria-modal="true"', $vista);
+        $this->assertStringContainsString('x-ref="drawerFiltros"', $vista);
+        $this->assertStringContainsString('tabindex="-1"', $vista);
+        $this->assertStringContainsString('retenerFocoDrawer($event)', $vista);
+        $this->assertStringContainsString('Array.from(this.$refs.drawerFiltros.querySelectorAll', $vista);
+        $this->assertStringContainsString('disparadorDrawer?.focus()', $vista);
+        $this->assertStringContainsString('backdrop-blur-sm', $vista);
     }
 
     public function test_el_hero_sigue_obedeciendo_el_titulo_editable(): void
@@ -56,6 +78,9 @@ class DirectorioEditorialHibridoTest extends TestCase
         $this->assertStringContainsString('.directorio-editorial-hero', $css);
         $this->assertStringContainsString('@media (prefers-reduced-motion: reduce)', $css);
         $this->assertStringContainsString('@media (prefers-reduced-transparency: reduce)', $css);
+        $this->assertStringContainsString('rgb(11 9 10 / 0.9)', $css);
+        $this->assertStringContainsString('rgb(255 248 241 / 0.86)', $css);
+        $this->assertStringContainsString('rgb(255 248 241 / 0.9)', $css);
         $this->assertStringContainsString('resources/css/directorio-editorial.css', $vite);
         $this->assertStringContainsString("@vite(['resources/css/directorio-editorial.css'])", $vista);
         $this->assertStringNotContainsString('home-editorial.css', $vista);
