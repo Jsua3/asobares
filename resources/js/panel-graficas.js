@@ -18,37 +18,47 @@
  * ese global de forma fiable.
  */
 
-const graficas = new Set()
+const graficas = new Set();
 
 const leerToken = (nombre) =>
-    getComputedStyle(document.documentElement).getPropertyValue(nombre).trim()
+    getComputedStyle(document.documentElement).getPropertyValue(nombre).trim();
 
 const plugin = {
     id: 'asobaresTema',
 
     start(grafica) {
-        graficas.add(grafica)
+        graficas.add(grafica);
     },
 
     stop(grafica) {
-        graficas.delete(grafica)
+        graficas.delete(grafica);
     },
 
     beforeUpdate(grafica) {
-        const tinta = leerToken('--asb-tinta')
-        const linea = leerToken('--asb-linea')
+        const tinta = leerToken('--asb-tinta');
+        const linea = leerToken('--asb-linea');
 
-        if (! tinta) return
+        if (! tinta) {
+            return;
+        }
 
-        grafica.options.color = tinta
+        grafica.options.color = tinta;
 
-        const leyenda = grafica.options.plugins?.legend?.labels
-        if (leyenda) leyenda.color = tinta
+        const leyenda = grafica.options.plugins?.legend?.labels;
+        if (leyenda) {
+            leyenda.color = tinta;
+        }
 
         for (const eje of Object.values(grafica.options.scales ?? {})) {
-            if (eje.ticks) eje.ticks.color = tinta
-            if (eje.grid) eje.grid.color = linea
-            if (eje.border) eje.border.color = linea
+            if (eje.ticks) {
+                eje.ticks.color = tinta;
+            }
+            if (eje.grid) {
+                eje.grid.color = linea;
+            }
+            if (eje.border) {
+                eje.border.color = linea;
+            }
         }
 
         /*
@@ -58,16 +68,20 @@ const plugin = {
          * se queda el hexadecimal de reserva en vez de pintar transparente.
          */
         for (const conjunto of grafica.data?.datasets ?? []) {
-            if (! conjunto.asobaresSerie) continue
+            if (! conjunto.asobaresSerie) {
+                continue;
+            }
 
-            const relleno = leerToken(`--asb-serie-${conjunto.asobaresSerie}`)
-            if (relleno) conjunto.backgroundColor = relleno
+            const relleno = leerToken(`--asb-serie-${conjunto.asobaresSerie}`);
+            if (relleno) {
+                conjunto.backgroundColor = relleno;
+            }
         }
     },
-}
+};
 
-window.filamentChartJsPlugins ??= []
-window.filamentChartJsPlugins.push(plugin)
+window.filamentChartJsPlugins ??= [];
+window.filamentChartJsPlugins.push(plugin);
 
 /*
  * Chromium no reinicia una transición cuando lo que cambia es la custom
@@ -82,10 +96,10 @@ window.filamentChartJsPlugins.push(plugin)
  * MutationObserver que ya repinta las gráficas en vez de envolver el cambio
  * como hace el sitio público.
  */
-const mordaza = document.createElement('style')
-mordaza.textContent = '*,*::before,*::after{transition:none !important}'
+const mordaza = document.createElement('style');
+mordaza.textContent = '*,*::before,*::after{transition:none !important}';
 
-const quitarMordaza = () => mordaza.remove()
+const quitarMordaza = () => mordaza.remove();
 
 /*
  * Filament conmuta la clase `dark` en <html>. Chart.js no redibuja por eso
@@ -93,8 +107,8 @@ const quitarMordaza = () => mordaza.remove()
  * del tema anterior hasta que algo más la fuerce a repintar.
  */
 new MutationObserver(() => {
-    document.head.appendChild(mordaza)
-    void document.documentElement.offsetHeight
+    document.head.appendChild(mordaza);
+    void document.documentElement.offsetHeight;
 
     /*
      * La retirada se programa ANTES de tocar las gráficas, y no depende de
@@ -112,8 +126,8 @@ new MutationObserver(() => {
      * segundo plano (el caso real es el evento `storage` entre /admin y el
      * sitio) y el navegador no ejecuta requestAnimationFrame.
      */
-    requestAnimationFrame(() => requestAnimationFrame(quitarMordaza))
-    setTimeout(quitarMordaza, 250)
+    requestAnimationFrame(() => requestAnimationFrame(quitarMordaza));
+    setTimeout(quitarMordaza, 250);
 
     /*
      * update() en modo normal, no update('none'): «none» es un modo directo
@@ -125,8 +139,8 @@ new MutationObserver(() => {
      * canvas, no leyendo el código. Tampoco anima: el componente de
      * Filament fija animation.duration en 0 para todas las gráficas.
      */
-    graficas.forEach((grafica) => grafica.update())
+    graficas.forEach((grafica) => grafica.update());
 }).observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['class'],
-})
+});
