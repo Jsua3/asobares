@@ -309,6 +309,8 @@ class ConfiguracionDeDespliegueTest extends TestCase
             'SEED_GALERIA' => ['SEED_GALERIA'],
             'QUEUE_CONVERSIONS_BY_DEFAULT' => ['QUEUE_CONVERSIONS_BY_DEFAULT'],
             'MEDIA_DISK' => ['MEDIA_DISK'],
+            'DISCO_PUBLICO' => ['DISCO_PUBLICO'],
+            'DISCO_PRIVADO' => ['DISCO_PRIVADO'],
         ];
     }
 
