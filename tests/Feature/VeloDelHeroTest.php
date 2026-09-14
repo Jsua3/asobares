@@ -8,13 +8,11 @@ use Tests\Support\MideContraste;
 use Tests\TestCase;
 
 /**
- * El velo del hero con imagen de fondo (OBS3-02).
+ * El velo del hero con imagen de fondo.
  *
- * El directivo pidió fondo con vida --«el banner que va moviéndose o el video,
- * algo que le genere vida», R21 05:22-- y en la misma frase puso el límite:
- * «no sea que afecte la visibilidad de las letras» (R21 05:35). El §27.8 lo
- * convierte en prohibición: no se mete imagen de fondo en el hero sin
- * comprobar el contraste en los dos temas.
+ * El gremio quiere un fondo con vida con un límite: «no sea que afecte la
+ * visibilidad de las letras». De ahí la prohibición: no se mete imagen de
+ * fondo en el hero sin comprobar el contraste en los dos temas.
  *
  * Comprobarlo una vez no sirve, porque la imagen la elige otra persona más
  * tarde y puede ser cualquiera. Por eso lo que se prueba aquí no es «esta foto
@@ -115,7 +113,7 @@ class VeloDelHeroTest extends TestCase
      * El velo y la imagen viven en la misma clase a propósito: no se puede
      * pintar el fondo sin arrastrar el velo detrás. Si alguien los separa
      * --por ejemplo moviendo el `::after` a una clase aparte que haya que
-     * recordar poner-- vuelve el riesgo que el §27.8 prohíbe.
+     * recordar poner-- vuelve el riesgo de un texto sin contraste sobre la foto.
      */
     public function test_el_velo_es_inseparable_de_la_capa_de_medio(): void
     {

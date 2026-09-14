@@ -15,15 +15,11 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Tests\TestCase;
 
 /**
- * El propietario sube fotos y el gremio las aprueba (OBS3-13).
+ * El propietario sube fotos y el gremio las aprueba.
  *
- * En la demostración del 28 de agosto se afirmó que el afiliado sube fotos y
- * el gremio modera (`R23 00:48`), y el directivo puso la condición: «lo tienen
- * que aprobar ellos, no sea que pongan imágenes… exóticas» (R23 00:45-01:05).
- * El §27.3 punto 5 destapó que nada de eso existía: el flujo de aprobación era
- * el del estado del registro, no el de una carga del propietario, porque el
- * propietario no cargaba nada. Había que construir la carga antes de poder
- * moderarla.
+ * La condición es del gremio: lo que sube un afiliado no sale al sitio hasta
+ * que alguien de la oficina lo mire. Por eso la foto lleva su propia marca de
+ * aprobación, que no es el estado de publicación del registro.
  */
 class MisFotosTest extends TestCase
 {
@@ -38,7 +34,7 @@ class MisFotosTest extends TestCase
         // El limitador de peticiones cuenta por IP y vive en la cache, que NO
         // se reinicia entre pruebas: sin esto, las subidas de un caso se
         // suman a las del siguiente y la clase entera empieza a devolver 429
-        // segun el orden en que corran. Es estado global, no del caso.
+        // según el orden en que corran. Es estado global, no del caso.
         Cache::flush();
     }
 
@@ -68,13 +64,10 @@ class MisFotosTest extends TestCase
     /**
      * La política, ejercida DIRECTAMENTE.
      *
-     * Esta prueba existe porque la de abajo no la protegía: comprueba que
-     * `destroy` devuelve 404, y ese 404 lo produce la comprobación de
-     * propiedad del propio controlador, no la política. Se descubrió mutando
-     * --abrir la política a «por permiso o por propiedad», que es literalmente
-     * la fuga del v6, dejaba la clase entera en verde--. El docblock prometía
-     * lo que no probaba, que es la forma de falso verde que este proyecto ya
-     * pagó once veces.
+     * La prueba de abajo no la protege: comprueba que `destroy` devuelve 404,
+     * y ese 404 lo produce la comprobación de propiedad del propio
+     * controlador, no la política. Sin esta, abrir la política a «por permiso
+     * o por propiedad» deja la clase entera en verde.
      *
      * `view` concede por permiso *o* por propiedad. Aquí no: solo propiedad.
      */
@@ -147,7 +140,7 @@ class MisFotosTest extends TestCase
     }
 
     /**
-     * El corazón de OBS3-13: lo que sube el propietario NO sale hasta que
+     * El corazón del flujo: lo que sube el propietario NO sale hasta que
      * alguien del gremio lo mire. Sin esto la moderación es un adorno.
      */
     public function test_una_foto_recien_subida_nace_sin_aprobar_y_no_sale_en_la_ficha(): void
@@ -175,9 +168,9 @@ class MisFotosTest extends TestCase
 
         $this->assertCount(1, $asociado->fresh()->fotosAprobadas());
 
-        // La ficha pinta la conversion `thumb`, no el original: si se
-        // afirmara sobre `getUrl()` la prueba pasaria por casualidad el dia
-        // que alguien pusiera el original en la galeria.
+        // La ficha pinta la conversión `thumb`, no el original: si se
+        // afirmara sobre `getUrl()` la prueba pasaría por casualidad el día
+        // que alguien pusiera el original en la galería.
         $this->get(route('directorio.show', $asociado))
             ->assertSuccessful()
             ->assertSee($foto->fresh()->getUrl('thumb'), escape: false);
@@ -188,17 +181,18 @@ class MisFotosTest extends TestCase
      *
      * Un JPEG legítimo llamado «payload.html» pasa la validación de tipo --su
      * MIME es image/jpeg-- y quedaría servido como HTML desde el disco
-     * público. Es el hallazgo del v4, aquí por una puerta nueva: el portal del
-     * asociado, que no pasa por `SubidaSegura` porque eso es de Filament.
+     * público. Es el riesgo que `SubidaSegura` cubre en el panel, aquí por otra
+     * puerta: el portal del asociado, que no pasa por `SubidaSegura` porque
+     * eso es de Filament.
      */
     public function test_la_extension_sale_del_mime_y_no_del_nombre(): void
     {
         $asociado = Asociado::factory()->publicado()->create();
 
-        // El ataque de verdad, no una imitacion: contenido JPEG legitimo con
+        // El ataque de verdad, no una imitación: contenido JPEG legítimo con
         // un nombre de cliente que miente. `fake()->image('payload.html')` no
-        // sirve --deduce el MIME de la extension y lo tumbaria la validacion
-        // antes de llegar al codigo que se quiere probar--.
+        // sirve --deduce el MIME de la extensión y lo tumbaría la validación
+        // antes de llegar al código que se quiere probar--.
         $real = UploadedFile::fake()->image('inocente.jpg', 1200, 800);
         $enDisco = $real->getRealPath();
 
@@ -303,32 +297,23 @@ class MisFotosTest extends TestCase
     }
 
     /**
-     * Sube una foto y comprueba que de verdad entro.
-     *
-     * `assertRedirect()` a secas no basta: un fallo de validacion tambien
-     * redirige, asi que el ayudante daria por buena una subida que no ocurrio
-     * y el caso siguiente mediria otra cosa. Se comprueba el conteo.
-     */
-    /**
      * El defecto SILENCIOSO: una foto sin la propiedad escrita.
      *
-     * No es hipotetico. Es el estado en que estaban las dieciocho fotos de la
-     * demostracion antes de la migracion de relleno, y el que tendra cualquier
-     * medio que entre por una via que se olvide de sellarla. «Sin aprobar»
-     * tiene que ser el defecto incluido el defecto por omision, o el olvido
-     * publica material sin moderar.
+     * No es hipotético: es el estado de cualquier medio anterior a la
+     * migración de relleno o que entre por una vía que se olvide de sellarlo.
+     * «Sin aprobar» tiene que ser el defecto incluido el defecto por omisión,
+     * o el olvido publica material sin moderar.
      *
-     * Esta prueba existe porque las demas NO la cubrian: todas suben por el
-     * controlador, que siempre escribe la propiedad, asi que el valor por
-     * defecto no se ejercia nunca. Se descubrio mutando --poner `true` como
-     * defecto dejaba la clase en verde--.
+     * Las demás pruebas NO lo cubren: todas suben por el controlador, que
+     * siempre escribe la propiedad, así que el valor por defecto no se ejerce
+     * nunca. Sin esta, poner `true` como defecto deja la clase en verde.
      */
     public function test_una_foto_sin_la_propiedad_escrita_no_sale_al_sitio(): void
     {
         $asociado = Asociado::factory()->publicado()->create();
 
         // La referencia se retiene: el temporal de `fake()` se borra en cuanto
-        // el objeto se destruye, y `addMedia()` no lo encontraria.
+        // el objeto se destruye, y `addMedia()` no lo encontraría.
         $archivo = UploadedFile::fake()->image('antigua.jpg', 1200, 800);
 
         $asociado->addMedia($archivo->getRealPath())
@@ -350,6 +335,13 @@ class MisFotosTest extends TestCase
             ->assertDontSee($foto->getUrl('thumb'), escape: false);
     }
 
+    /**
+     * Sube una foto y comprueba que de verdad entró.
+     *
+     * `assertRedirect()` a secas no basta: un fallo de validación también
+     * redirige, así que el ayudante daría por buena una subida que no ocurrió
+     * y el caso siguiente mediría otra cosa. Se comprueba el conteo.
+     */
     private function subirComo(User $usuario, Asociado $asociado, ?UploadedFile $archivo = null): Media
     {
         $antes = $asociado->fresh()->getMedia('galeria')->count();

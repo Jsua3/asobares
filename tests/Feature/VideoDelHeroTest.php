@@ -10,14 +10,14 @@ use Tests\TestCase;
 use Throwable;
 
 /**
- * El video institucional del hero (OBS3-02, D-22).
+ * El video institucional del hero.
  *
- * Esta prueba existe por un defecto que ninguna otra podía ver: el video se
- * servía con `file_exists(public_path(...))` mientras `.gitignore` tenía
- * `/public/videos/`. En local el archivo estaba y el hero se veía; en
- * producción Cloud despliega desde git, el archivo no viajaba, la condición
- * era falsa siempre y el hero salía mudo **sin error, sin log y sin que la
- * suite se enterara**. Un fallo que solo existe del lado del despliegue.
+ * Vigila un defecto que ninguna otra prueba puede ver: el video se sirve con
+ * `file_exists(public_path(...))`, y si `.gitignore` tapa `/public/videos/`,
+ * en local el archivo está y el hero se ve, pero Cloud despliega desde git,
+ * el archivo no viaja, la condición es falsa siempre y el hero sale mudo
+ * **sin error, sin log y sin que la suite se entere**. Un fallo que solo
+ * existe del lado del despliegue.
  *
  * De ahí que la primera prueba mire el índice de git y no el disco: que el
  * archivo esté en la máquina de quien programa no demuestra nada.
@@ -96,7 +96,7 @@ class VideoDelHeroTest extends TestCase
      *
      * En producción no hay ninguna ficha publicada --nacen en borrador y no
      * hay autorizaciones--, así que la colección de fotos destacadas viene
-     * vacía y el hero se quedaba sin nada que enseñar mientras el video carga.
+     * vacía y el hero se quedaría sin nada que enseñar mientras el video carga.
      */
     public function test_la_portada_sirve_el_video_con_su_propio_poster(): void
     {

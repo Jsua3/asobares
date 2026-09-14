@@ -13,8 +13,8 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * HOME-FINAL-06: la pauta de la portada es una pieza editorial clicable,
- * no una tarjeta informativa, y no inventa destino ni reusa el hero.
+ * La pauta de la portada es una pieza editorial clicable, no una tarjeta
+ * informativa, y no inventa destino ni reusa el hero.
  *
  * Roturas: href="#"; perder rel=sponsored; pintar el bloque sin pauta;
  * devolver la URL del hero como fallback.
@@ -39,8 +39,8 @@ class PublicidadEditorialDeLaPortadaTest extends TestCase
     }
 
     /**
-     * La prueba de arriba no siembra nada: pasaba con la portada tomando
-     * cualquier pauta de Inicio (MUT-04). Cada caso va solo, para que quitar
+     * La prueba de arriba no siembra nada: pasaría con la portada tomando
+     * cualquier pauta de Inicio. Cada caso va solo, para que quitar
      * UN filtro (estado, vigencia o ubicación) también se note.
      */
     public function test_la_portada_no_pinta_pautas_sin_publicar_vencidas_futuras_ni_de_otra_ubicacion(): void
@@ -126,8 +126,8 @@ class PublicidadEditorialDeLaPortadaTest extends TestCase
 
     /**
      * La pauta tiene que decir que es publicidad, a la vista y en el nombre
-     * accesible de la sección y de la pieza (MUT-03). Antes solo se pedía
-     * `aria-label=`, que cumple hasta un atributo vacío.
+     * accesible de la sección y de la pieza. Pedir solo `aria-label=` no
+     * basta: lo cumple hasta un atributo vacío.
      */
     private function assertSeIdentificaComoPatrocinada(string $html, string $nombre): void
     {

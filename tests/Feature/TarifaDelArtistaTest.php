@@ -9,19 +9,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * La tarifa del artista no se publica (OBS3-08).
+ * La tarifa del artista no se publica.
  *
- * El directivo lo razonó desde el lado del que contrata: «de pronto no lo
- * contacto porque se sesga de una vez con el precio» (R21 14:01). Alguien
- * propuso dejarlo «a decisión del artista, si quiere ponerle precio» (R21
- * 14:31) y él lo descartó en la frase siguiente: «no, no, no, yo no le
- * pondría precio» (R21 14:37). Ratificado en la tercera grabación: «el tema
- * de los artistas, la tarifa, pues eso al parecer se elimina» (R23 09:49).
- *
- * Por eso NO hay bandera `publicar_tarifa`: se construyó lo que se decidió,
- * no lo que se propuso. El §27.8 lo cierra por escrito --«no devolver la
- * tarifa del artista a la ficha pública aunque el campo siga en el modelo»--
- * y esta prueba es lo que lo hace exigible.
+ * Es una decisión del gremio pensada desde el lado del que contrata: un
+ * precio a la vista sesga antes del primer contacto. También se descartó
+ * dejarlo a elección de cada artista, y por eso NO hay bandera
+ * `publicar_tarifa`: la tarifa no vuelve a la ficha pública aunque el campo
+ * siga en el modelo, y esta prueba es lo que lo hace exigible.
  */
 class TarifaDelArtistaTest extends TestCase
 {
@@ -114,10 +108,10 @@ class TarifaDelArtistaTest extends TestCase
     }
 
     /**
-     * Y el formulario de inscripción sigue pidiéndola, pero ya no promete que
-     * se publique. La ayuda vieja decía «déjalo vacío si prefieres decir "a
-     * convenir"», que después de OBS3-08 es falso: diga lo que diga el
-     * artista, su ficha lee la leyenda.
+     * Y el formulario de inscripción sigue pidiéndola, pero no promete que se
+     * publique. Una ayuda que dijera «déjalo vacío si prefieres decir "a
+     * convenir"» sería falsa: diga lo que diga el artista, su ficha lee la
+     * leyenda.
      */
     public function test_el_formulario_avisa_que_la_tarifa_no_se_publica(): void
     {
