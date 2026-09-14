@@ -175,11 +175,11 @@ class RegistroDePagos
     /**
      * ¿Lo que la pasarela dice haber cobrado es lo que se cobró?
      *
-     * Antes, una notificación sin monto se daba por buena con un aviso en el
-     * log. El problema es lo que pasa si el nombre real del campo no es
-     * ninguno de los que adivina `PasarelaBold`: entonces NINGÚN pago se
-     * concilia nunca y el control queda inerte sin que nadie se entere, que es
-     * justo el modo de fallar que no se puede permitir en la parte del dinero.
+     * Una notificación sin monto no se da por buena. Si el nombre real del
+     * campo no fuera ninguno de los que adivina `PasarelaBold`, aceptarla con
+     * un aviso en el log haría que NINGÚN pago se comparara nunca contra lo
+     * cobrado: el control quedaría inerte sin que nadie se entere, que es justo
+     * el modo de fallar que no se puede permitir en la parte del dinero.
      *
      * Fallando cerrado, la transacción se queda pendiente y el desajuste se
      * ve en la primera prueba contra el sandbox, que es cuando toca

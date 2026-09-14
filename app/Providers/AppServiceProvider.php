@@ -51,17 +51,14 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Peticiones por minuto de cada ruta limitada, por nombre de limitador.
      *
-     * Antes cada ruta llevaba `throttle:N,1`, y ese limitador sin nombre firma
-     * el contador solo con el usuario —o con la IP del anónimo—, nunca con la
-     * ruta: todas compartían un único contador y cada una lo comparaba con su
-     * propio máximo. Seis postulaciones gestionadas dejaban «Pagar» (máximo 5)
-     * en 429, y siete consultas a la guía (máximo 30) hacían lo mismo con el
-     * formulario de afiliación (máximo 6). Los comentarios de `routes/web.php`
-     * razonan cada máximo como si fuera de su ruta; con un limitador por ruta,
-     * por fin lo es (PERM-02).
+     * Un limitador con nombre por ruta: `throttle:N,1` sin nombre firma el
+     * contador solo con el usuario —o con la IP del anónimo—, nunca con la
+     * ruta, así que todas las rutas compartirían un único contador y cada una
+     * lo compararía con su propio máximo. Seis postulaciones gestionadas
+     * dejarían «Pagar» (máximo 5) en 429.
      *
-     * Los números son los mismos que había, y el porqué de cada uno sigue
-     * junto a su ruta. `LimitesDePeticionesTest` fija los dos lados.
+     * El porqué de cada máximo vive junto a su ruta en `routes/web.php`.
+     * `LimitesDePeticionesTest` fija los dos lados.
      *
      * @var array<string, int>
      */
@@ -136,16 +133,12 @@ class AppServiceProvider extends ServiceProvider
      * la página de error de Laravel con las llaves de Bold dentro, o que
      * escribe cada PQR con los datos del ciudadano en storage/logs.
      *
-     * La coraza se ató a `production` mientras el hosting no existía. El
-     * despliegue de Laravel Cloud usa `APP_ENV=staging` (§20.5 del prompt
-     * maestro), y con la condición anterior ese entorno —el único que de
-     * verdad está en internet— era justo el que no se endurecía: sin https
-     * forzado, sin cookie `Secure`, y libre de arrancar con `APP_DEBUG=true`.
-     *
-     * Por eso la condición ahora es al revés: se salta en desarrollo y en la
-     * suite, y se aplica en todo lo demás. Un entorno remoto que se llame
-     * `dev`, `demo` o `qa` también queda cubierto, que es lo que se quiere:
-     * el criterio no es cómo se llama el entorno, es si está expuesto.
+     * Se salta solo en `local` y `testing` y se aplica en todo lo demás, no
+     * solo en `production`: el despliegue de Laravel Cloud usa
+     * `APP_ENV=staging`, y un entorno remoto que se llame `dev`, `demo` o `qa`
+     * también tiene que salir con https forzado, cookie `Secure` y sin
+     * `APP_DEBUG=true`. El criterio no es cómo se llama el entorno, es si está
+     * expuesto.
      */
     private function asegurarConfiguracionDeEntornoExpuesto(): void
     {

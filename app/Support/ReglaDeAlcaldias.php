@@ -8,27 +8,16 @@ use App\Models\Municipio;
 use Illuminate\Support\Collection;
 
 /**
- * «A todos o nada» (OBS3-05).
- *
- * En la revisión del 28 de agosto se propuso darle un espacio a las alcaldías
- * junto a los demás aliados institucionales, y el directivo lo paró en seco:
- *
- *   --«tenemos un espacio para las alcaldías» (R21 03:35)
- *   --«es para no abrir susceptibilidades... no le toca nombrarlos a todos,
- *      porque uno no se nombre» (R21 03:41-03:44)
- *   --«a todos o nada» (R21 03:47)
+ * «A todos o nada»: o salen entre los aliados las alcaldías de todos los
+ * municipios, o no sale ninguna.
  *
  * No es una preferencia estética: es política. Nombrar la alcaldía de un
  * municipio y no la del vecino le cuesta al gremio una relación que necesita
  * para lo que de verdad hace, que es sentarse con las instituciones.
  *
- * El §27.5 lo fija como regla de contenido y el acta pide «documentarla para
- * que nadie la rompa después». Documentarla no basta: quien la rompa lo hará
- * sin leerla, cargando una alcaldía un martes por la tarde. Por eso la regla
- * se aplica al pintar --si falta una, no sale ninguna-- y así el juego parcial
- * es literalmente irrepresentable en el sitio.
- *
- * Deja de ser una promesa y pasa a ser una propiedad.
+ * Documentar la regla no basta: quien la rompa lo hará sin leerla, cargando
+ * una alcaldía un martes por la tarde. Por eso se aplica al pintar --si falta
+ * una, no sale ninguna-- y el juego parcial es irrepresentable en el sitio.
  */
 class ReglaDeAlcaldias
 {

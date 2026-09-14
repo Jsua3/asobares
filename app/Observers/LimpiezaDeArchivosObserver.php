@@ -14,10 +14,10 @@ use Illuminate\Support\Facades\Storage;
 /**
  * Borra del disco los archivos que dejan de estar referenciados.
  *
- * Antes no se borraba nada: cambiar la foto de un asociado o eliminar su
- * ficha dejaba el archivo accesible por /storage para siempre. Con fotos que
- * el propietario pidió quitar, eso es un problema de datos personales además
- * de un disco que solo crece.
+ * Sin esto, cambiar la foto de un asociado o eliminar su ficha deja el
+ * archivo accesible por /storage para siempre. Con fotos que el propietario
+ * pidió quitar, eso es un problema de datos personales además de un disco que
+ * solo crece.
  */
 class LimpiezaDeArchivosObserver
 {

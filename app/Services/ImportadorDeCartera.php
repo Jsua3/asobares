@@ -170,8 +170,8 @@ class ImportadorDeCartera
      * millón doscientos cincuenta mil pesos y «1250.75» son mil doscientos
      * cincuenta con setenta y cinco.
      *
-     * Antes se borraban TODOS los puntos, de modo que un archivo exportado en
-     * formato inglés multiplicaba cada saldo por cien.
+     * Borrar TODOS los puntos haría que un archivo exportado en formato inglés
+     * multiplicara cada saldo por cien.
      *
      * Devuelve null cuando no hay número, incluida la celda vacía: dejar la
      * deuda de alguien en cero tiene que ser una decisión escrita, no el

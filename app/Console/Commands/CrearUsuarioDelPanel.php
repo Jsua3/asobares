@@ -14,11 +14,10 @@ use function Laravel\Prompts\password as preguntarClave;
 /**
  * Da de alta a alguien en el panel sin pasar por el sembrador del demo.
  *
- * Hasta ahora la única forma de tener una cuenta era `UsuarioSeeder`, que
- * **se niega a correr en producción** y con razón: crea tres cuentas con la
- * contraseña `Asobares2026*`, publicada en el README de un repositorio
- * **público**. Eso dejaba el sitio desplegado sin ninguna manera legítima de
- * entrar a `/admin`. Esto es esa manera.
+ * `UsuarioSeeder` **se niega a correr en producción**, y con razón: crea tres
+ * cuentas con la contraseña `Asobares2026*`, publicada en el README de un
+ * repositorio **público**. Sin este comando el sitio desplegado no tendría
+ * ninguna manera legítima de entrar a `/admin`.
  *
  * Tres decisiones que no son de estilo:
  *
@@ -31,10 +30,10 @@ use function Laravel\Prompts\password as preguntarClave;
  * - **No se activa el segundo factor por correo.** El panel exige segundo
  *   factor (`AdminPanelProvider`, `isRequired: true`) y quien no lo tenga cae
  *   en la pantalla de alta obligatoria, donde puede registrar su app de
- *   autenticación. Encender el de correo aquí dejaría la cuenta encerrada:
- *   las direcciones del demo son `.test` —un dominio reservado que por
- *   definición no recibe correo (RFC 6761)— y la instalación todavía no tiene
- *   proveedor SMTP contratado (§29.1).
+ *   autenticación. Encender el de correo aquí dejaría la cuenta encerrada si
+ *   el código no llega: las direcciones del demo son `.test` —un dominio
+ *   reservado que por definición no recibe correo (RFC 6761)— y sin proveedor
+ *   SMTP configurado no sale ninguno.
  */
 class CrearUsuarioDelPanel extends Command
 {
@@ -90,8 +89,8 @@ class CrearUsuarioDelPanel extends Command
         // ⚠️ Estos dos se asignan sueltos y no en el `updateOrCreate` de
         // arriba: `User` declara `#[Fillable(['name', 'email', 'password',
         // 'asociado_id'])]`, así que la asignación masiva descarta cualquier
-        // otro campo **en silencio**. Puesto dentro del array, la cuenta salía
-        // sin verificar y sin que nada lo avisara.
+        // otro campo **en silencio**. Puesto dentro del array, la cuenta
+        // saldría sin verificar y sin que nada lo avisara.
         $usuario->email_verified_at ??= now();
 
         // Explícito, no por omisión: si la cuenta ya existía con el factor de
@@ -138,10 +137,8 @@ class CrearUsuarioDelPanel extends Command
 
         // ⚠️ No basta con mirar `isInteractive()`. En el ejecutor remoto de
         // Laravel Cloud da `true` aunque no haya terminal de verdad, así que
-        // la pregunta devuelve cadena vacía y el comando seguía adelante hasta
-        // morir en la validación con un mensaje que no explicaba nada. Lo que
-        // decide es si al final hay contraseña, no si el proceso se cree
-        // interactivo.
+        // la pregunta devuelve cadena vacía. Lo que decide es si al final hay
+        // contraseña, no si el proceso se cree interactivo.
         $this->error('No se recibió ninguna contraseña.');
         $this->line('  En una terminal, el comando la pregunta. Sin terminal --y el ejecutor de');
         $this->line('  Laravel Cloud no la tiene, aunque diga que sí-- pásala en la variable de');
@@ -165,13 +162,12 @@ class CrearUsuarioDelPanel extends Command
             ]);
         }
 
-        // Los mensajes van escritos aquí, uno por regla, por dos razones que
-        // se descubrieron corriendo esto en producción:
+        // Los mensajes van escritos aquí, uno por regla, por dos razones:
         //
-        // 1. «La contraseña» estaba de TERCER argumento de `validator()`, que
-        //    es `$messages` y no `$attributes`. Resultado: cualquier fallo se
-        //    imprimía como el literal «La contraseña». El comando devolvió eso
-        //    y exit 1, y parecía una clave débil cuando llegaba vacía.
+        // 1. El TERCER argumento de `validator()` es `$messages`, no
+        //    `$attributes`: un nombre de campo puesto ahí se imprime tal cual
+        //    como mensaje de cualquier fallo, y una clave vacía parecería una
+        //    clave débil.
         // 2. La aplicación corre con `locale` y `fallback_locale` en `es` y no
         //    hay carpeta `lang/`; el framework solo trae `en`. Así que sin
         //    mensaje propio esto imprime `validation.min.string`, que tampoco
