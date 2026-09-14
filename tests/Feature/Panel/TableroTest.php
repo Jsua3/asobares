@@ -163,8 +163,8 @@ class TableroTest extends TestCase
     }
 
     /**
-     * El widget anterior traía todos los modelos a memoria para agruparlos con
-     * `groupBy` de Collection. Se mide el comportamiento —cuántas consultas
+     * Agrupar con `groupBy` de Collection obligaría a traer todos los modelos
+     * a memoria. Se mide el comportamiento —cuántas consultas
      * salen— y no cómo está escrito el archivo: una aserción sobre el texto
      * fuente se rompe con cualquier `->get()` legítimo en otro método.
      *
@@ -484,10 +484,10 @@ class TableroTest extends TestCase
                 'xl' => 'full',
             ],
             /*
-             * La banda del flujo del sitio, rehecha el 9 de septiembre de 2026
-             * con el Acta 08 (A-03): tres números a lo ancho, debajo la curva de
-             * treinta días también a lo ancho --dos series no caben legibles en
-             * cuatro columnas-- y al pie las dos listas ordenadas, 3 + 2 = 6.
+             * La banda del flujo del sitio: tres números a lo ancho, debajo la
+             * curva de treinta días también a lo ancho --dos series no caben
+             * legibles en cuatro columnas-- y al pie las dos listas ordenadas,
+             * 3 + 3 = 6.
              *
              * Las dos van juntas a propósito: una dice por dónde ENTRA la gente y
              * la otra qué MIRA una vez dentro, y leerlas al lado es la mitad de
@@ -520,7 +520,7 @@ class TableroTest extends TestCase
      * Un `columnSpan` sin desglosar no se aplica en todos los anchos: Filament
      * lo guarda como `['lg' => …]`, y la regla base de la rejilla solo lee
      * `--col-span-default`. Con el tablero a una columna daba igual; con la
-     * rejilla de 2 en `md` y 6 en `xl` (7 sep) el widget cae a una sola pista
+     * rejilla de 2 en `md` y 6 en `xl` el widget cae a una sola pista
      * y queda a un sexto de fila con el resto vacío.
      * Rotura: devolver `'full'` a secas a cualquiera de los tres.
      */

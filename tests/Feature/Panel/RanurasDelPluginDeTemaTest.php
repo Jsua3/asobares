@@ -22,7 +22,7 @@ use Tests\TestCase;
  * «this.options.ticks.setContext is not a function» y queda congelada con
  * los colores del tema anterior.
  *
- * Se descubrió el 14 ago 2026 mirando la consola del navegador, no leyendo:
+ * El defecto solo se ve en la consola del navegador, no leyendo el código:
  * las pruebas que exigen la clave (`assertArrayHasKey`) pasan igual con `[]`
  * que con el objeto que Chart.js espera, porque en PHP no hay diferencia
  * entre los dos vacíos. Por eso esta guardia mira el JSON serializado, que
