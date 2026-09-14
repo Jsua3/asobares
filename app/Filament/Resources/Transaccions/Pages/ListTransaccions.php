@@ -7,12 +7,11 @@ use Filament\Resources\Pages\ListRecords;
 
 /**
  * El recurso de transacciones es de SOLO LECTURA por diseño: una transacción
- * la escribe la pasarela y nadie más. `TransaccionResource::getPages()` solo
- * declara `index`, así que el `CreateAction` que vivía aquí era huérfano —
- * y peor que huérfano: Filament lo habría resuelto abriendo el formulario en
- * un modal, dejando que el personal fabricara a mano un cobro que nunca
- * ocurrió. Es la misma frontera que ya guarda `FlujoDePagoTest` del lado de
- * las inscripciones (G9: nadie confirma un pago a mano).
+ * la escribe la pasarela y nadie más. Sin página de creación, un
+ * `CreateAction` aquí no quedaría inerte: Filament abriría el formulario en
+ * un modal y el personal podría fabricar a mano un cobro que nunca ocurrió.
+ * Es la misma frontera que guarda `FlujoDePagoTest` del lado de las
+ * inscripciones: nadie confirma un pago a mano.
  */
 class ListTransaccions extends ListRecords
 {

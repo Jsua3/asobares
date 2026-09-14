@@ -42,12 +42,12 @@ class PorDondeEntranAlSitio extends ChartWidget
     private const int CUANTAS = 8;
 
     /**
-     * La advertencia que acompaña a toda cifra de este módulo.
+     * La advertencia que acompaña a la cifra de esta gráfica.
      *
-     * Es un método y no una constante para que las dos piezas del flujo la
-     * compartan y `FlujoDeEntradasAlSitioTest` pueda exigirla en las dos: una
-     * cifra de tráfico sin esta frase se lee como visitantes únicos, que es
-     * justo lo que no es.
+     * `EntradasAlSitio` declara la suya con la misma primera frase, y
+     * `FlujoDeEntradasAlSitioTest` exige que las dos digan «personas
+     * distintas»: una cifra de tráfico sin esa aclaración se lee como
+     * visitantes únicos, que es justo lo que no es.
      */
     public function obtenerAdvertencia(): string
     {

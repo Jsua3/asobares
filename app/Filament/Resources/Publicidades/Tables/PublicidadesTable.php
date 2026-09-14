@@ -100,8 +100,8 @@ class PublicidadesTable
 
     /**
      * Sobre una pauta publicada, volver a pendiente de pago la saca del sitio:
-     * es despublicar, asi que exige el mismo permiso que retirar_publicacion.
-     * authorize() la oculta y ademas la rechaza si se invoca a la fuerza.
+     * es despublicar, así que exige el mismo permiso que retirar_publicacion.
+     * authorize() la oculta y además la rechaza si se invoca a la fuerza.
      */
     private static function marcarPendientePago(): Action
     {

@@ -75,13 +75,12 @@ class Proveedor extends Model
     }
 
     /**
-     * Cada cuánto hay que volver a llamar a un proveedor (OBS3-12).
+     * Cada cuánto hay que volver a llamar a un proveedor.
      *
      * SEIS meses, la mitad que la guía normativa, y la razón es que envejecen
      * distinto. Un trámite de apertura cambia cuando cambia un acuerdo
      * municipal --ritmo anual--; un proveedor cambia de número, de dueño o de
-     * oficio cuando le va mal un semestre. La queja del gremio fue literal:
-     * «ya no existe, ya no contestan» (R22 04:19).
+     * oficio cuando le va mal un semestre, y deja de contestar.
      *
      * Vive aquí, con su razón al lado, y no en un ajuste que nadie mira: es
      * criterio del gremio, no una norma.
@@ -111,7 +110,7 @@ class Proveedor extends Model
         // `subMonthsNoOverflow`, o el borde estricto de arriba deja de serlo:
         // la resta corriente desborda los días 29, 30 y 31 y adelanta el
         // corte hasta dos días, marcando como caducada una ficha que todavía
-        // está dentro del plazo. Es el defecto del §28, y aquí se paga igual.
+        // está dentro del plazo.
         return $this->verificado_el->copy()->startOfDay()->lt(
             now()->subMonthsNoOverflow(self::MESES_HASTA_REVISION)->startOfDay()
         );

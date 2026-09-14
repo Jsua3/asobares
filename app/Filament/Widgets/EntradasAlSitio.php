@@ -32,10 +32,8 @@ class EntradasAlSitio extends StatsOverviewWidget
 
     /**
      * Desglosado por ancho y no `'full'` a secas: Filament solo aplica el valor
-     * escalar desde `lg`, así que en el teléfono el widget caía a una sola pista.
-     * Es el defecto que ya se pagó con el widget de pendientes el 7 de septiembre
-     * y que `Panel\TableroTest` vigila desde entonces —lo atrapó aquí en cuanto
-     * se registró este widget—.
+     * escalar desde `lg`, así que en el teléfono el widget caería a una sola
+     * pista. `Panel\TableroTest` lo vigila en todos los widgets del tablero.
      */
     protected int|string|array $columnSpan = [
         'default' => 'full',
@@ -43,7 +41,12 @@ class EntradasAlSitio extends StatsOverviewWidget
         'xl' => 'full',
     ];
 
-    /** La misma advertencia que la gráfica de por dónde entran. */
+    /**
+     * La advertencia de este widget. Empieza con la misma frase que la de
+     * `PorDondeEntranAlSitio`, pero cada uno declara la suya, y
+     * `FlujoDeEntradasAlSitioTest` exige que las dos digan «personas
+     * distintas».
+     */
     public function obtenerAdvertencia(): string
     {
         return 'Llegadas al sitio, no personas distintas: quien vuelve mañana cuenta otra vez.';

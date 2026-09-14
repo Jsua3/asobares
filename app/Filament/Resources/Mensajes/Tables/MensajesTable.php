@@ -57,10 +57,9 @@ class MensajesTable
                 /*
                  * El plazo legal de la PQR, donde se trabaja (Acta 08, A-04).
                  *
-                 * Antes del 9 de septiembre de 2026 el sistema sabía radicar una
-                 * PQR y no sabía que tenía término: la secretaría abría la
-                 * bandeja y no había forma de distinguir la del martes de la de
-                 * hace tres semanas sin abrirlas una por una.
+                 * Una PQR radicada tiene término: sin esta columna la
+                 * secretaría no distinguiría la del martes de la de hace tres
+                 * semanas sin abrirlas una por una.
                  *
                  * La palabra «Vencida» va escrita y no solo en rojo: RNF-12
                  * exige que lo urgente se marque con algo más que color.

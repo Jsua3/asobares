@@ -30,8 +30,8 @@ class RequisitoAperturasTable
                 TextColumn::make('enlace_externo')
                     ->label('Enlace externo')
                     ->searchable(),
-                // OBS3-10. La columna de arriba enseña la URL; esta dice si
-                // sirve para lo que el gremio pidió. Sin una señal a la vista,
+                // La columna de arriba enseña la URL; esta dice si lleva al
+                // trámite y no solo a la portada. Sin una señal a la vista,
                 // los enlaces a portada se quedan años: no fallan, solo no
                 // llevan a ninguna parte útil.
                 TextColumn::make('enlace_puntual')

@@ -58,19 +58,17 @@ class RequisitoApertura extends Model
     /**
      * ¿El enlace lleva al trámite, o solo a la puerta de la entidad?
      *
-     * OBS3-10. El directivo lo pidió así: «que sea puntual... o sea que no me
-     * abra la página de la cámara solamente» (R23 05:39-05:44), «tiene que ir
-     * directamente el enlace» (R23 05:50), «hay que poner la completa» (R23
-     * 05:59). Su razón no era estética: «muchas veces llegar a ese registro es
-     * difícil» (R23 06:05) y «hay personas que no son tan amigables con la
-     * tecnología» (R23 06:27). Un enlace a la portada de una alcaldía deja al
-     * usuario donde estaba, con el trámite a cuatro clics de distancia.
+     * El gremio pide el enlace directo al trámite, y la razón no es estética:
+     * llegar a ese registro desde la portada es difícil, y no todo el que
+     * consulta la guía se maneja bien con la tecnología. Un enlace a la
+     * portada de una alcaldía deja al usuario donde estaba, con el trámite a
+     * cuatro clics de distancia.
      *
      * Puntual = tiene camino, consulta o ancla. `https://camaraarmenia.org.co`
      * y `https://camaraarmenia.org.co/` no lo son; cualquier cosa por debajo
      * sí. Es una heurística y no una garantía --una ruta puede seguir siendo
-     * una portada de sección-- pero separa exactamente el caso que se señaló
-     * en la mesa, que es el de los siete enlaces sembrados a dominio pelado.
+     * una portada de sección-- pero separa el caso que importa: el enlace a
+     * un dominio pelado.
      */
     public function enlaceEsPuntual(): bool
     {
@@ -143,8 +141,8 @@ class RequisitoApertura extends Model
      * panel y el observer usan `publicado()` y ahí un decreto vencido sí tiene
      * que seguir viéndose: alguien tiene que poder renovarlo.
      *
-     * El cierre que agrupa el `orWhere` es cinturón y tirantes, no la guarda
-     * que este proyecto creyó al principio: Eloquent ya aísla las condiciones
+     * El cierre que agrupa el `orWhere` es cinturón y tirantes, no la única
+     * guarda: Eloquent ya aísla las condiciones
      * de un scope local en su propio grupo —`Builder::callScope()` cuenta los
      * `where` antes y después y llama a `addNewWheresWithinGroup()`—, así que
      * `publicado()->vigente()` sale agrupado con o sin él.

@@ -40,8 +40,8 @@ class Aliado extends Model
     }
 
     /**
-     * Solo lo llevan las alcaldias: es lo que las ata a su municipio y lo que
-     * permite aplicar la regla de OBS3-05 sin adivinar por el nombre.
+     * Solo lo llevan las alcaldías: es lo que las ata a su municipio y lo que
+     * permite aplicar la regla de las alcaldías sin adivinar por el nombre.
      *
      * @return BelongsTo<Municipio, $this>
      */
@@ -52,7 +52,7 @@ class Aliado extends Model
 
     /**
      * Institucional: respalda al gremio. Comercial: le vende a sus afiliados.
-     * La portada los pinta en dos bandas distintas (OBS3-04).
+     * La portada los pinta en dos bandas distintas.
      */
     public function esInstitucional(): bool
     {

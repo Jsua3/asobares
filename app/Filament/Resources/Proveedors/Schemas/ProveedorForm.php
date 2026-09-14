@@ -69,10 +69,10 @@ class ProveedorForm
                             ->maxLength(255),
                     ]),
 
-                // OBS3-12. Seccion aparte de «Visibilidad» a proposito: que un
-                // proveedor haya pagado por aparecer no dice que su telefono
-                // siga sonando. Son dos preguntas distintas y confundirlas es
-                // lo que produjo la queja del 28 de agosto.
+                // Sección aparte de «Visibilidad» a propósito: que un
+                // proveedor haya pagado por aparecer no dice que su teléfono
+                // siga sonando. Son dos preguntas distintas, y confundirlas
+                // deja en el sitio contactos que ya no responden.
                 Section::make('Verificación del contacto')
                     ->description('Cada cuánto se confirma que el proveedor sigue existiendo y respondiendo. Se muestra en su ficha pública.')
                     ->columns(2)

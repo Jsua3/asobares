@@ -150,11 +150,10 @@ class AjustesDelSitio extends Page implements HasSchemas
             ->label($etiqueta)
             ->maxLength(500);
 
-        // Todos los ajustes se trataban como texto libre, pero algunos acaban
-        // dentro de un `href` del sitio público. `{{ }}` escapa las comillas
-        // —no se puede salir del atributo— pero no filtra el esquema, así que
-        // un `javascript:` guardado aquí se ejecutaba al pulsar el enlace en
-        // cada página.
+        // Algunos ajustes acaban dentro de un `href` del sitio público. `{{ }}`
+        // escapa las comillas —no se puede salir del atributo— pero no filtra
+        // el esquema, así que sin esta regla un `javascript:` guardado aquí se
+        // ejecutaría al pulsar el enlace en cada página.
         //
         // La regla se aplica sólo cuando el campo trae algo: dejar un ajuste
         // en blanco es legítimo, y si el formato se exigiera también sobre el
@@ -184,10 +183,10 @@ class AjustesDelSitio extends Page implements HasSchemas
         $estado = $this->form->getState();
         $ajustes = Setting::query()->whereIn('clave', array_keys($estado))->get()->keyBy('clave');
 
-        // Solo se escribe lo que cambió. Antes se actualizaban todas las
-        // claves en cada guardado, y una actualización masiva sella
-        // `updated_at` aunque el valor sea el mismo: la fecha de «El gremio
-        // en cifras» habría sido la del último guardado de cualquier cosa.
+        // Solo se escribe lo que cambió. Actualizar todas las claves en cada
+        // guardado sellaría `updated_at` aunque el valor fuera el mismo, y la
+        // fecha de «El gremio en cifras» sería la del último guardado de
+        // cualquier cosa.
         foreach ($estado as $clave => $valor) {
             $ajuste = $ajustes->get($clave);
 

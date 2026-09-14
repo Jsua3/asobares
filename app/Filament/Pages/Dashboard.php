@@ -11,9 +11,9 @@ use Filament\Pages\Dashboard as TableroDeFabrica;
  * Reemplaza al de fábrica para poder ordenar las bandas del diseño: primero lo
  * que hay que hacer (`PendientesDeAprobacion`), después las cuatro cifras del
  * oficio (`ResumenDelGremio`), y al final los widgets operativos reales. Las
- * bandas las ordena `getSort()` de cada widget. La rejilla (`xl` = 6) solo
- * reparte recaudo (4) y municipios (2) en escritorio; no cambia datos ni
- * permisos.
+ * bandas las ordena `getSort()` de cada widget. La rejilla (`xl` = 6) reparte
+ * en escritorio recaudo y municipios (4 + 2) y las dos listas del flujo del
+ * sitio (3 + 3); no cambia datos ni permisos.
  */
 class Dashboard extends TableroDeFabrica
 {

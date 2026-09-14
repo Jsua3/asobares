@@ -71,8 +71,8 @@ class AccionesDeAprobacion
     /**
      * Un correo del panel no puede tumbar la acción que lo dispara: cuando
      * el transporte falla, el estado ya cambió y la secretaría necesita
-     * terminar y enterarse, no ver el error de Livewire (D-24, bitácora
-     * §33.4). El fallo se reporta al registro. Devuelve si el correo salió.
+     * terminar y enterarse, no ver el error de Livewire. El fallo se reporta
+     * al registro. Devuelve si el correo salió.
      */
     private static function enviar(Closure $envio): bool
     {

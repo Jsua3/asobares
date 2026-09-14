@@ -23,9 +23,9 @@ use Illuminate\Support\Str;
 /**
  * Banda 2 del tablero: cuatro cifras, no seis, y distintas según el oficio.
  *
- * Antes eran seis tarjetas fijas que mezclaban contenido, plata, bandeja y
- * bolsa: la dirección y la secretaría abrían la misma pantalla con la misma
- * jerarquía y ninguna veía su trabajo. El discriminador es `ver_transaccion`,
+ * Seis tarjetas fijas mezclarían contenido, plata, bandeja y bolsa: la
+ * dirección y la secretaría abrirían la misma pantalla con la misma
+ * jerarquía y ninguna vería su trabajo. El discriminador es `ver_transaccion`,
  * que es justo el permiso que `RolYPermisoSeeder` le niega a la secretaría.
  *
  * Toda tarjeta lleva `url()`: un KPI que no es enlace es un número muerto.

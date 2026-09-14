@@ -88,9 +88,9 @@ class Observatorio extends Page
     }
 
     /**
-     * Las seis gráficas del observatorio: las tres que sí tienen datos que
-     * sostienen lo que dibujan (OBS T5), y las tres flacas con su estado
-     * vacío honesto (OBS T6). El mecanismo es `getFooterWidgets()` y no
+     * Las seis gráficas del observatorio: las que tienen datos que sostienen
+     * lo que dibujan y las flacas con su estado vacío honesto. El mecanismo
+     * es `getFooterWidgets()` y no
      * `<x-filament-widgets::widgets>`: ese componente está `@deprecated` en
      * `vendor/filament/`, y quien de verdad rinde estos widgets es el
      * envoltorio `<x-filament-panels::page>` (invoca `{{ $this->footerWidgets }}`

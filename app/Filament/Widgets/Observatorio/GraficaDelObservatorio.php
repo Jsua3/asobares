@@ -12,28 +12,25 @@ use Illuminate\Support\Facades\Auth;
  * Base de las seis gráficas del observatorio.
  *
  * El principio del módulo es «ninguna gráfica dibuja si su muestra no la
- * sostiene», y hasta ahora esa regla vivía copiada a mano
- * (`isEmpty()`/`getEmptyState()`, con tres docblocks idénticos palabra por
- * palabra) en las tres gráficas que un día quedaron bajo el umbral.
- * `ComposicionDelSector` no las tenía: se clasificó como «sólida» ese día y
- * nadie volvió a mirarla cuando su muestra bajó de treinta, así que dibujaba
- * sin ningún aviso mientras la tarjeta KPI y el informe impreso marcaban ese
- * mismo dato como «muestra pequeña».
+ * sostiene». La regla (`isEmpty()`/`getEmptyState()`) vive aquí y no copiada
+ * en cada gráfica para que ninguna pueda olvidarla: una gráfica copiada a
+ * mano dibujaría sin aviso cuando su muestra bajara del umbral, mientras la
+ * tarjeta KPI y el informe impreso marcan ese mismo dato como «muestra
+ * pequeña».
  *
- * Con la regla aquí, las seis gráficas la heredan sin poder olvidarla: una
- * gráfica nueva del observatorio extiende esta clase o no pertenece al
- * observatorio. También sube lo demás que estaba copiado seis veces:
- * `columnSpan`, `canView()` y el acceso memoizado a `MetricasDelObservatorio`.
+ * Una gráfica nueva del observatorio extiende esta clase o no pertenece al
+ * observatorio. Aquí vive también lo común a las seis: `columnSpan`,
+ * `canView()` y el acceso memoizado a `MetricasDelObservatorio`.
  */
 abstract class GraficaDelObservatorio extends ChartWidget
 {
     /**
      * `AdminPanelProvider::panel()` descubre widgets recursivamente en
      * `app/Filament/Widgets` (`discoverWidgets()` recorre subdirectorios), así
-     * que sin esto las seis gráficas del observatorio se colaban en el
-     * tablero: sus `$sort` (1–6) se intercalaban con los del tablero (0–4) y
-     * rompían las tres bandas que el tablero documenta como su razón de
-     * existir, además de doblar su coste de consultas en cada carga.
+     * que sin esto las seis gráficas del observatorio entrarían en el
+     * tablero: sus `$sort` se intercalarían con los de los widgets del
+     * tablero y romperían las bandas que el tablero documenta como su razón
+     * de existir, además de doblar su coste de consultas en cada carga.
      *
      * `$isDiscovered = false` es el mecanismo nativo de Filament para esto
      * (`Widget::isDiscovered()`, consultado por `discoverComponents()` antes
@@ -57,9 +54,8 @@ abstract class GraficaDelObservatorio extends ChartWidget
      * manual de marca está pensada sobre Ambient White, y sobre Pub Black
      * tres de estos siete —Wine, Pub Grey y Pub Black mismo— no llegan a 3:1
      * contra la superficie. Vive aquí, en la base, por lo mismo que la regla
-     * del umbral: `PresenciaPorMunicipio` y `DemandaLaboralPorArea` ya
-     * cablearon la misma paleta a mano cada una por su lado, y la segunda
-     * arrastró el error de la primera.
+     * del umbral: una paleta cableada a mano en cada gráfica copia también
+     * sus errores de una a otra.
      */
     protected const array RESERVA_DE_SERIE = [
         1 => '#ee4137', // Pub Red
@@ -80,8 +76,7 @@ abstract class GraficaDelObservatorio extends ChartWidget
      * Completa «El observatorio ya mide …» en el estado vacío de esta
      * gráfica. Estático y sin efectos secundarios a propósito:
      * `InformeDelObservatorio::series()` lo lee sin instanciar el widget, y
-     * de paso es la única fuente de esa frase — antes vivía repetida aquí y
-     * en el informe.
+     * así esta es la única fuente de esa frase para la gráfica y el informe.
      */
     abstract public static function que(): string;
 

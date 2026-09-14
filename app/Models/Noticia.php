@@ -52,8 +52,8 @@ class Noticia extends Model
      * El cuerpo de la noticia listo para imprimirse sin escapar.
      *
      * El panel lo edita en un Textarea de texto plano, pero la ficha lo pinta
-     * como HTML, así que dos párrafos separados por una línea en blanco salían
-     * como un solo bloque (SEG-04). Si el contenido no trae etiquetas, cada
+     * como HTML, así que sin conversión dos párrafos separados por una línea
+     * en blanco saldrían como un solo bloque. Si el contenido no trae etiquetas, cada
      * bloque separado por líneas en blanco pasa a ser un `<p>` y los saltos
      * simples se conservan como `<br>`. Si trae HTML (lo sembrado, o lo que
      * llegue de un editor enriquecido) se deja como estaba. En los dos casos
@@ -81,8 +81,8 @@ class Noticia extends Model
      * Una etiqueta HTML de verdad, de apertura o de cierre, de las que escriben
      * un editor o el sembrador. Un «<3», un «a < b», un correo entre ángulos o
      * un marcador como «<de 8 a 12>» o «<nombre del contacto>» no cuentan: son
-     * texto. Tomarlos por etiqueta hacía que el saneado se comiera todo lo que
-     * venía detrás. El enlace solo cuenta con `href`, para que «<a lo sumo
+     * texto. Tomarlos por etiqueta haría que el saneado se comiera todo lo que
+     * viene detrás. El enlace solo cuenta con `href`, para que «<a lo sumo
      * cinco>» siga siendo texto.
      */
     private static function traeEtiquetasHtml(string $contenido): bool
