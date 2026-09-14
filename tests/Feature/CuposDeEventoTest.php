@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
- * G4. El cupo se comprobaba con un conteo y la inscripción se insertaba
- * después, en dos pasos sueltos: dos peticiones simultáneas leían el mismo
- * conteo y las dos insertaban.
+ * El cupo se comprueba con un conteo y la inscripción se inserta después: si
+ * fueran dos pasos sueltos, dos peticiones simultáneas leerían el mismo conteo
+ * y las dos insertarían.
  *
  * Una carrera de verdad no se reproduce en PHPUnit —las pruebas corren en un
  * solo proceso y sobre SQLite, donde `lockForUpdate` no compila a nada—, así
