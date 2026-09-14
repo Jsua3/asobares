@@ -181,8 +181,9 @@ class BarraLateralTest extends TestCase
      * El límite de la barra no lo hace la luz: un filo luminiscente no llega a
      * los 3:1 que pide un borde de región (el rojo claro contra la página clara
      * da 2,60:1 y el oscuro contra la oscura 1,93:1). La barra tampoco se separa
-     * con un canto: se une al contenido con su fondo y su sombra, y lo único que
-     * dibuja su `::after` es el resplandor de la esquina.
+     * con un canto: no tiene fondo ni sombra propios, el campo de puntos pasa
+     * por debajo de ella y del contenido, y lo único que dibuja su `::after` es
+     * el resplandor de la esquina.
      * Rotura: devolver `border-inline-end` a la barra; quitar el resplandor de
      * la esquina.
      */
@@ -191,8 +192,8 @@ class BarraLateralTest extends TestCase
         $tema = $this->tema();
         $elemento = $this->regla($tema, '.fi-sidebar');
 
-        // Lo que separa no es un canto, sino el fondo propio de la barra (el
-        // campo de puntos) más la sombra y el degradado que la unen al contenido.
+        // Lo que separa no es un canto: la barra no tiene fondo ni sombra
+        // propios y el campo de puntos es continuo por debajo.
         $this->assertStringNotContainsString('border-inline-end', $elemento, 'La barra no puede separarse con un canto: se une con la sombra de su pseudoelemento.');
 
         // Lo único que dibuja `::after` es el resplandor de la esquina: la barra
