@@ -1,8 +1,8 @@
 /**
- * El campo de puntos del fondo de TODA la interfaz (D-L24, ampliado en D-L26).
+ * El campo de puntos del fondo de TODA la interfaz.
  *
- * Sua lo pidió el 7 sep: fondo de puntos que se apartan del cursor, primero en
- * la barra y después en el panel entero. Se dibuja en un `<canvas>` y no con
+ * Un fondo de puntos que se apartan del cursor, en la barra y en el panel
+ * entero. Se dibuja en un `<canvas>` y no con
  * nodos, porque con 18 px de paso una pantalla de 1.920 por 1.080 son más de
  * seis mil puntos.
  *

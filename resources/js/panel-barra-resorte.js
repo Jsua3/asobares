@@ -1,8 +1,8 @@
 /**
- * El resorte de los iconos del riel (D-L30).
+ * El resorte de los iconos del riel.
  *
- * Sua lo pidió el 8 sep: «que al scrollear los botones tengan su animación
- * tipo resorte, que sean responsivas al movimiento del usuario». Lo que se
+ * Al desplazar la lista, los botones llegan con un resorte que sigue el
+ * movimiento de quien la usa. Lo que se
  * mueve responde al GESTO y no a un reloj: cada icono se retrasa respecto al
  * dedo y llega con muelle, y tanto más cuanto más rápido se desplaza la lista.
  * Eso es manipulación directa; una transición CSS no puede hacerlo, porque no
@@ -21,10 +21,10 @@
  *    riel no existe.
  */
 /*
- * ARRASTRE calibrado el 8 sep midiendo con gestos reales, no a ojo. Con 0,55 un
- * desplazamiento de 24 px por fotograma —un pase normal del pulgar— ya saturaba
- * el tope y todos los iconos se quedaban en 14: la respuesta al gesto se
- * perdía justo donde importa. Con 0,35 el rango útil cubre de 5 a 40 px por
+ * ARRASTRE calibrado midiendo con gestos reales, no a ojo. Con 0,55 un
+ * desplazamiento de 24 px por fotograma —un pase normal del pulgar— satura
+ * el tope y todos los iconos se quedan en 14: la respuesta al gesto se
+ * pierde justo donde importa. Con 0,35 el rango útil cubre de 5 a 40 px por
  * fotograma, que es donde vive un dedo.
  */
 const ARRASTRE = 0.35;
@@ -43,10 +43,10 @@ let previo = 0;
 let corriendo = false;
 
 /*
- * Lo que se mueve son los MÓDULOS, no lo que hay dentro. Se movían las filas y
- * Sua lo vio enseguida: el indicador rojo del apartado activo se quedaba
- * quieto mientras su fila se desplazaba, porque el indicador lo pinta el
- * módulo y la fila iba por su cuenta. Un módulo es un grupo o, para los
+ * Lo que se mueve son los MÓDULOS, no lo que hay dentro. Si se movieran las
+ * filas, el indicador rojo del apartado activo se quedaría quieto mientras su
+ * fila se desplaza, porque el indicador lo pinta el módulo y la fila iría por
+ * su cuenta. Un módulo es un grupo o, para los
  * destinos sin grupo como «Tablero», el ítem suelto que Filament pinta
  * directamente en la lista.
  */

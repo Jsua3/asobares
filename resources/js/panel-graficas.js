@@ -1,8 +1,8 @@
 /*
  * Las gráficas del panel siguen el tema.
  *
- * Lo que no seguía el tema eran los ticks, la rejilla y la leyenda, que
- * Chart.js pinta en un gris fijo con poco contraste sobre el fondo oscuro.
+ * Chart.js pinta los ticks, la rejilla y la leyenda en un gris fijo con poco
+ * contraste sobre el fondo oscuro: el plugin los repinta con los tokens.
  *
  * El relleno de una gráfica de una sola serie se queda en Pub Red: como
  * relleno funciona en los dos temas (la restricción AA del token `acento` es
@@ -72,8 +72,8 @@ window.filamentChartJsPlugins.push(plugin)
 /*
  * Chromium no reinicia una transición cuando lo que cambia es la custom
  * property que hay detrás del valor: la propiedad se queda congelada en el
- * color del tema anterior. Es el mismo bug que ya se cerró en el sitio
- * público (`publico.blade.php`), y el panel lo hereda en cualquier clase con
+ * color del tema anterior. Es el mismo bug que evita el sitio público
+ * (`publico.blade.php`), y el panel lo hereda en cualquier clase con
  * `transition-colors` que dependa de un token (por ejemplo, el enlace
  * «Revisar» de `<x-panel.cola>`, que usa `text-tinta`).
  *
@@ -120,9 +120,9 @@ new MutationObserver(() => {
      * en el que Chart.js NO vuelve a fusionar las opciones compartidas de
      * los elementos, así que los rellenos que beforeUpdate acaba de escribir
      * en el dataset no llegan a las barras y cada serie se queda con la
-     * paleta del tema anterior — Seguridad, que en claro es casi negro,
-     * quedaba invisible al pasar a oscuro. Se vio midiendo los píxeles del
-     * canvas el 14 ago 2026, no leyendo. Tampoco anima: el componente de
+     * paleta del tema anterior — una serie casi negra en claro queda
+     * invisible al pasar a oscuro. Solo se nota midiendo los píxeles del
+     * canvas, no leyendo el código. Tampoco anima: el componente de
      * Filament fija animation.duration en 0 para todas las gráficas.
      */
     graficas.forEach((grafica) => grafica.update())
