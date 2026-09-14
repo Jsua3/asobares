@@ -27,10 +27,10 @@
  * El reloj por defecto de Tailwind, dicho con los tokens del proyecto.
  *
  * `transition-colors` sin `duration-*` no cae en los tokens: cae en el default
- * nativo, 150 ms con cubic-bezier(0.4, 0, 0.2, 1). Eran 21 de las 22 del sitio
- * público corriendo por fuera del sistema mientras los portadores de aquí abajo
- * —`.pulsable`, `.tarjeta-hover`, `.enlace-accion`— ya fundían color a 140 ms
- * con `ease`. Declarar el default alinea las 21 sin tocar ni una vista.
+ * nativo, 150 ms con cubic-bezier(0.4, 0, 0.2, 1), por fuera del sistema con el
+ * que los portadores de aquí abajo —`.pulsable`, `.tarjeta-hover`,
+ * `.enlace-accion`— funden color a 140 ms con `ease`. Declarar el default
+ * alinea cualquier `transition-colors` suelta sin tocar ni una vista.
  *
  * No pisa a quien sí escribe su reloj: `transition-colors` emite
  * `transition-duration: var(--tw-duration, var(--default-transition-duration))`
@@ -59,11 +59,10 @@
  * (el texto pequeño necesita aire, el titular necesita apretarse); el leading
  * hace el camino contrario, de 1 a 1.65.
  *
- * Ojo al declararlo, porque es la mitad del arreglo que falta: `leading-*`
- * escribe `--tw-leading` y `tracking-*` escribe `--tw-tracking`, y las dos
- * variables van de reserva en el `var()` que emite cada utilidad de tamaño.
- * Mientras una de esas utilidades siga suelta en una vista, la escala NO
- * gobierna ese elemento. Las 74 que quedan se retiran en su propia etapa.
+ * Ojo al declararlo, porque no basta: `leading-*` escribe `--tw-leading` y
+ * `tracking-*` escribe `--tw-tracking`, y las dos variables van de reserva en
+ * el `var()` que emite cada utilidad de tamaño. Mientras una de esas
+ * utilidades siga suelta en una vista, la escala NO gobierna ese elemento.
  */
 @theme {
     /* Rótulo en versalitas, por debajo de la rampa. Existe para absorber los
@@ -134,7 +133,7 @@
 
 @layer base {
     /* El scroll suave lo dispara el enlace «Saltar al contenido», que es
-       navegación de teclado. Incondicional era una barrera. */
+       navegación de teclado. Incondicional sería una barrera. */
     html {
         scroll-behavior: auto;
     }
@@ -1207,9 +1206,9 @@
     }
 
     /*
-     * Hero con imagen o video de fondo (OBS3-02). La ranura `medio` del
-     * componente pinta aquí detrás, y el texto queda por encima con un velo
-     * en medio que garantiza el contraste.
+     * Hero con imagen o video de fondo. La ranura `medio` del componente
+     * pinta aquí detrás, y el texto queda por encima con un velo en medio que
+     * garantiza el contraste.
      *
      * El apilado se aísla con `isolation` para que el z-index del contenido no
      * compita con nada de fuera: la portada tiene secciones vecinas con
