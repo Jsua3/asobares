@@ -12,8 +12,8 @@
     {{--
         Enlace de solo icono: el nombre accesible va en `aria-label`, y no
         promete tiempos de respuesta. El WhatsApp del gremio lo contesta una
-        persona (OBS3-14), y el aviso que lo explica vive junto a los botones
-        de /contacto y /afiliate, donde hay sitio para leerlo.
+        persona, y el aviso que lo explica vive junto a los botones de
+        /contacto y /afiliate, donde hay sitio para leerlo.
     --}}
     <a href="{{ $enlaceFlotante }}"
        target="_blank"
