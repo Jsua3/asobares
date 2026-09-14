@@ -44,7 +44,7 @@ class EventosTable
                     ->label('Precio')
                     ->formatStateUsing(fn (mixed $state): string => (float) $state === 0.0
                         ? 'Gratuito'
-                        : '$'.number_format((float) $state, 0, ',', '.'))
+                        : pesos($state))
                     ->sortable(),
                 TextColumn::make('cupos')
                     ->label('Cupos')

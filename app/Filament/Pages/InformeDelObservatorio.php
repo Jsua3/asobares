@@ -88,7 +88,7 @@ class InformeDelObservatorio extends Page
             ],
             [
                 'etiqueta' => 'Recaudo (18 meses)',
-                'valor' => '$'.number_format((float) array_sum($salud->series['Recaudo (COP)'] ?? []), 0, ',', '.'),
+                'valor' => pesos(array_sum($salud->series['Recaudo (COP)'] ?? [])),
                 'serie' => $salud,
             ],
             [
@@ -214,7 +214,7 @@ class InformeDelObservatorio extends Page
     public function formatearCelda(string $clave, int|float $valor): string
     {
         return match (true) {
-            str_contains($clave, 'COP') => '$'.number_format((float) $valor, 0, ',', '.'),
+            str_contains($clave, 'COP') => pesos($valor),
             str_contains($clave, '%') => number_format((float) $valor, 1, ',', '.').' %',
             default => number_format((float) $valor, 0, ',', '.'),
         };

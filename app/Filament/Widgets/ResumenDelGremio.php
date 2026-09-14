@@ -110,7 +110,7 @@ class ResumenDelGremio extends StatsOverviewWidget
         $conPresencia = Municipio::whereHas('asociados', fn (Builder $asociados): Builder => $asociados->publicado())->count();
 
         return [
-            Stat::make('Recaudado este mes', $this->pesos($recaudado))
+            Stat::make('Recaudado este mes', pesos($recaudado))
                 ->description($this->variacion($recaudado, $recaudadoAntes, $transaccionesRecaudado, $transaccionesAntes))
                 ->descriptionIcon($recaudado >= $recaudadoAntes
                     ? 'heroicon-o-arrow-trending-up'
@@ -119,7 +119,7 @@ class ResumenDelGremio extends StatsOverviewWidget
                 ->url(route('filament.admin.resources.transacciones.index')),
 
             Stat::make('Cartera en mora', $enMora)
-                ->description($this->pesos($saldo).' por recaudar')
+                ->description(pesos($saldo).' por recaudar')
                 ->descriptionIcon('heroicon-o-exclamation-triangle')
                 ->color($enMora > 0 ? 'danger' : 'success')
                 ->url(route('filament.admin.resources.cartera.index')),
@@ -220,11 +220,6 @@ class ResumenDelGremio extends StatsOverviewWidget
 
         return $signo.number_format(abs($porcentaje), 1, ',', '.')
             ." % vs. mismo tramo del mes anterior (n = {$transaccionesAhora} vs. n = {$transaccionesAntes})";
-    }
-
-    private function pesos(float $monto): string
-    {
-        return '$'.number_format($monto, 0, ',', '.');
     }
 
     public static function canView(): bool
