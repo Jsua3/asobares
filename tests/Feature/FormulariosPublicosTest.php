@@ -24,6 +24,7 @@ use App\Models\Vacante;
 use App\Support\Formulario;
 use Database\Seeders\RolYPermisoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -228,8 +229,14 @@ class FormulariosPublicosTest extends TestCase
 
     // --- PQR y radicado ---
 
+    /**
+     * El radicado lleva el año. El reloj se fija en el último segundo del año
+     * y el año esperado se escribe tal cual: si la prueba lo calculara con su
+     * propio `now()`, no vería un radicado sellado con el año siguiente.
+     */
     public function test_una_pqr_genera_radicado_consecutivo_y_envia_acuse(): void
     {
+        $this->travelTo(Carbon::parse('2026-12-31 23:59:59'));
         Mail::fake();
         $this->correoInstitucional('oficina@asobares.test');
 
@@ -244,10 +251,9 @@ class FormulariosPublicosTest extends TestCase
         }
 
         $radicados = Mensaje::whereNotNull('radicado')->orderBy('id')->pluck('radicado')->all();
-        $anio = now()->year;
 
         $this->assertSame(
-            ["PQR-{$anio}-0001", "PQR-{$anio}-0002", "PQR-{$anio}-0003"],
+            ['PQR-2026-0001', 'PQR-2026-0002', 'PQR-2026-0003'],
             $radicados,
             'Los radicados deben ser consecutivos y sin saltos.'
         );
