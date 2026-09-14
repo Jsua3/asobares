@@ -111,9 +111,9 @@ class AsociadoForm
                         // la extensión la elegiría quien sube, y un JPEG
                         // llamado «payload.html» quedaría servido como HTML
                         // desde /storage.
-                        SpatieMediaLibraryFileUpload::make('galeria')
+                        SpatieMediaLibraryFileUpload::make(Asociado::COLECCION_GALERIA)
                             ->label('Galería')
-                            ->collection('galeria')
+                            ->collection(Asociado::COLECCION_GALERIA)
                             // Lo que carga el gremio nace aprobado --es el
                             // gremio quien aprueba--. Lo que sube el
                             // propietario desde /mi-cuenta nace SIN aprobar, que

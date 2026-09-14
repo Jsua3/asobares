@@ -60,7 +60,7 @@ class AsociadoSeeder extends Seeder
 
             // Galería solo para los destacados: mantiene la semilla ágil.
             // SEED_GALERIA=false la omite (la suite de pruebas la apaga).
-            if (config('app.seed_galeria') && ($datos['destacado'] ?? false) && $asociado->getMedia('galeria')->isEmpty()) {
+            if (config('app.seed_galeria') && ($datos['destacado'] ?? false) && $asociado->getMedia(Asociado::COLECCION_GALERIA)->isEmpty()) {
                 foreach (range(1, 3) as $numero) {
                     $ruta = $imagenes->generar("galeria-{$datos['nombre']}-{$numero}", 'galeria', 1200, 900);
                     $asociado->addMedia(storage_path("app/public/{$ruta}"))
@@ -72,7 +72,7 @@ class AsociadoSeeder extends Seeder
                         // pendiente a propósito, para que la demo pueda enseñar
                         // la cola de moderación sin inventar datos.
                         ->withCustomProperties([Asociado::FOTO_APROBADA => $numero < 3])
-                        ->toMediaCollection('galeria');
+                        ->toMediaCollection(Asociado::COLECCION_GALERIA);
                 }
             }
         }

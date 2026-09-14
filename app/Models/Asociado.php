@@ -140,9 +140,17 @@ class Asociado extends Model implements HasMedia
     /** Motivo escrito cuando la secretaría devuelve una foto. */
     public const string FOTO_MOTIVO = 'motivo_rechazo';
 
+    /**
+     * La colección de medialibrary con las fotos del establecimiento. Una sola
+     * fuente para el nombre: si la moderación o el tope de fotos lo escribieran
+     * a mano y alguien lo renombrara en un solo sitio, dejarían de ver las fotos
+     * sin ningún error.
+     */
+    public const string COLECCION_GALERIA = 'galeria';
+
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('galeria')
+        $this->addMediaCollection(self::COLECCION_GALERIA)
             ->useDisk(config('almacenamiento.publico'))
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
     }
@@ -159,7 +167,7 @@ class Asociado extends Model implements HasMedia
      */
     public function fotosAprobadas(): Collection
     {
-        return $this->getMedia('galeria')
+        return $this->getMedia(self::COLECCION_GALERIA)
             ->filter(fn (Media $media): bool => (bool) $media->getCustomProperty(self::FOTO_APROBADA, false))
             ->values();
     }
@@ -171,7 +179,7 @@ class Asociado extends Model implements HasMedia
      */
     public function fotosPendientes(): Collection
     {
-        return $this->getMedia('galeria')
+        return $this->getMedia(self::COLECCION_GALERIA)
             ->filter(fn (Media $media): bool => ! (bool) $media->getCustomProperty(self::FOTO_APROBADA, false))
             ->values();
     }
