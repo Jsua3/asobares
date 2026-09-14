@@ -1,6 +1,6 @@
 @php
     // El panel escribe texto plano y lo sembrado trae HTML: el modelo convierte
-    // el texto en párrafos cuando hace falta y sanea el resultado (SEG-04).
+    // el texto en párrafos cuando hace falta y sanea el resultado.
     $contenidoSeguro = $noticia->contenidoSaneado();
 @endphp
 

@@ -260,10 +260,10 @@ class DepuracionDeBolsasTest extends TestCase
     }
 
     /**
-     * El hueco que la v6 dejó anotado: una vacante de tiempo completo sin
-     * fecha límite que nadie cierra nunca conservaba sus postulaciones para
-     * siempre, porque el reloj de la retención solo arrancaba al cerrar o
-     * vencer. La antigüedad absoluta corre aunque la vacante siga abierta.
+     * Una vacante de tiempo completo sin fecha límite que nadie cierra nunca
+     * conservaría sus postulaciones para siempre si el reloj de la retención
+     * solo arrancara al cerrar o vencer. La antigüedad absoluta corre aunque la
+     * vacante siga abierta.
      */
     public function test_una_postulacion_antigua_se_borra_aunque_su_vacante_siga_abierta(): void
     {

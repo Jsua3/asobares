@@ -440,9 +440,9 @@
         background: transparent;
     }
 
-    /* El velo. Va detrás de todo el contenido de la barra y por eso el
-       pseudoelemento no recibe puntero. En escritorio es solo velo; el
-       desenfoque se le añade en la media del cajón. */
+    /* Las dos capas de la barra, sin puntero: `::after` pinta el resplandor
+       de la esquina y `::before` no pinta nada (queda por debajo del
+       contenido). */
     .fi-sidebar::before,
     .fi-sidebar::after {
         content: '';
@@ -895,8 +895,8 @@
     }
 
     /*
-     * El aviso de que hay más lista. La lista se corta casi siempre (con todos
-     * los apartados, 1.312 px de contenido en 1.019 de hueco). Es una máscara de
+     * El aviso de que hay más lista. La lista se corta casi siempre (medido:
+     * 1.312 px de contenido en 1.019 de hueco). Es una máscara de
      * desvanecido en el canto que oculta lista, gobernada por `data-barra-borde`,
      * y es el único sitio de esta barra donde el resorte no mueve nada que el
      * usuario esté a punto de pulsar.

@@ -122,7 +122,7 @@ class RegistroDePagos
      * nada del cobro: los dos se ignoran en silencio. Lo que no puede pasar
      * en silencio es lo contrario de lo resuelto, como una anulación
      * (VOID_APPROVED) sobre un cobro aprobado o una aprobación sobre uno
-     * rechazado (SEG-02).
+     * rechazado.
      */
     private function contradiceLoResuelto(Transaccion $transaccion, ResultadoDePago $resultado): bool
     {

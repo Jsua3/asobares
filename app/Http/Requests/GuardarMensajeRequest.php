@@ -18,7 +18,7 @@ class GuardarMensajeRequest extends FormRequest
 
     /**
      * Mismo ancla que usa el controlador al guardar: un error de validación
-     * vuelve al formulario y no al tope de la página (RUT-03).
+     * vuelve al formulario y no al tope de la página.
      */
     protected function getRedirectUrl(): string
     {

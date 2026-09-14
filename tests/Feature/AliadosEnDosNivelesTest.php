@@ -24,7 +24,7 @@ class AliadosEnDosNivelesTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** Los que nombró el directivo, en el orden en que los nombró. */
+    /** Los que nombró el gremio, en ese orden. */
     private const array INSTITUCIONALES = [
         'Asobares Colombia',
         'Cámara de Comercio de Armenia y del Quindío',
@@ -48,7 +48,7 @@ class AliadosEnDosNivelesTest extends TestCase
             ->assertSeeInOrder([$institucional->nombre, $comercial->nombre], escape: false);
     }
 
-    /** Los cuatro que nombró el directivo están, y están arriba. */
+    /** Los cuatro que nombró el gremio están, y están arriba. */
     public function test_los_cuatro_institucionales_del_acta_estan_sembrados(): void
     {
         $this->seed(DatabaseSeeder::class);

@@ -18,8 +18,8 @@ class GuardarSolicitudAfiliacionRequest extends FormRequest
 
     /**
      * El formulario empieza varias pantallas por debajo del hero: sin el ancla,
-     * un error de validación devolvía a la persona al tope sin nada a la vista
-     * (RUT-03). Mismo remedio que los formularios de empleo.
+     * un error de validación devolvería a la persona al tope sin nada a la
+     * vista. Mismo remedio que los formularios de empleo.
      */
     protected function getRedirectUrl(): string
     {

@@ -295,10 +295,10 @@ class AccionesDelPanelTest extends TestCase
 
     /**
      * Las transacciones no ofrecen crear a mano. El recurso solo declara la
-     * página `index`, así que un `CreateAction` no llevaría a ninguna parte;
-     * Filament lo resolvería abriendo el formulario en un modal y el personal
-     * podría fabricar a mano un cobro que la pasarela nunca hizo. Es la misma
-     * frontera que `FlujoDePagoTest` guarda del lado de las inscripciones.
+     * página `index`: sin página de creación, un `CreateAction` aquí abriría un
+     * modal de creación y dejaría registrar a mano un cobro que la pasarela
+     * nunca produjo. Es la misma frontera que `FlujoDePagoTest` guarda del
+     * lado de las inscripciones.
      */
     public function test_las_transacciones_son_de_solo_lectura_y_no_ofrecen_crear_a_mano(): void
     {

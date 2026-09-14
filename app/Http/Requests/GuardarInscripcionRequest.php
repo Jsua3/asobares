@@ -16,8 +16,8 @@ class GuardarInscripcionRequest extends FormRequest
 
     /**
      * La inscripción queda por debajo de la descripción del evento: sin el
-     * ancla, un error de validación devolvía a la persona al tope de la ficha
-     * sin ningún error a la vista (RUT-03).
+     * ancla, un error de validación devolvería a la persona al tope de la ficha
+     * sin ningún error a la vista.
      */
     protected function getRedirectUrl(): string
     {

@@ -13,7 +13,7 @@
  * Manda el scroll INTERNO de `.fi-sidebar-nav`, no el del documento. En
  * escritorio la barra es `lg:sticky` y no se mueve con la página, así que
  * compactar por el documento sería efecto sin causa; y la lista desborda casi
- * siempre (con todos los apartados, 1.312 px de contenido en 1.019 de hueco).
+ * siempre (medido: 1.312 px de contenido en 1.019 de hueco).
  *
  * El movimiento reducido se consulta en vivo con `matchMedia` y se escucha su
  * `change`. NO se copia `menosMovimiento()` de la barra pública: esa lee la
