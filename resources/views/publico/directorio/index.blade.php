@@ -18,14 +18,6 @@
         ])->values()->all()
         : [];
 
-    $coleccionHero = $asociados instanceof \Illuminate\Pagination\AbstractPaginator
-        ? $asociados->getCollection()
-        : collect($asociados);
-
-    $fotoHeroDirectorio = $coleccionHero
-        ->first(fn ($asociado) => filled($asociado->foto_portada))
-        ?->foto_portada;
-
     $totalEstablecimientos = $vista === 'mapa'
         ? $asociados->count()
         : $asociados->total();
@@ -40,17 +32,13 @@
 
     <div class="directorio-editorial">
         <section class="directorio-editorial-hero" aria-labelledby="directorio-editorial-titulo">
-            <div class="directorio-editorial-hero__medio" aria-hidden="true">
-                @if ($fotoHeroDirectorio)
-                    <img src="{{ Storage::disk('public')->url($fotoHeroDirectorio) }}"
-                         alt=""
-                         width="1600"
-                         height="900"
-                         fetchpriority="high">
-                @else
-                    <x-publico.hueco-foto ancho="1600" alto="900" />
-                @endif
-            </div>
+            <div class="directorio-editorial-hero__plano" aria-hidden="true"></div>
+            {{--
+                Ranura derecha para una fotografía editorial posterior.
+                No hay foto aprobada para este uso: no se reutilizan las de
+                Home ni se pinta un hueco geométrico.
+            --}}
+            <div class="directorio-editorial-hero__foto" aria-hidden="true"></div>
             <div class="directorio-editorial-hero__velo" aria-hidden="true"></div>
             <div class="directorio-editorial-hero__cuerpo">
                 <p class="directorio-editorial-hero__eyebrow">
@@ -62,14 +50,14 @@
                     {{ ajuste('directorio_hero_entradilla', 'Bares, gastrobares, cafés y experiencias que forman parte del gremio en el Quindío.') }}
                 </p>
                 <div class="directorio-editorial-hero__cta">
-                    <x-publico.boton href="#resultados" variante="contorno-claro">
+                    <x-publico.boton href="#resultados">
                         {{ ajuste('directorio_cta', 'Explorar establecimientos') }}&nbsp;<x-publico.flecha />
                     </x-publico.boton>
                 </div>
             </div>
         </section>
 
-        <div class="directorio-editorial-cifras" aria-label="Cobertura del directorio">
+        <div class="directorio-editorial-cifras revelar" data-revelar aria-label="Cobertura del directorio">
             <p class="directorio-editorial-cifras__dato">
                 <strong>{{ $totalEstablecimientos }}</strong>
                 <span>{{ Str::plural('establecimiento', $totalEstablecimientos) }}</span>
