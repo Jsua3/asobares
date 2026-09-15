@@ -31,14 +31,16 @@
                    :descripcion="ajuste('seo_directorio_descripcion', 'Bares, gastrobares, cafés y discotecas afiliados al gremio en Armenia, Salento, Filandia y todo el Quindío.')">
 
     <div class="directorio-editorial">
-        <section class="directorio-editorial-hero" aria-labelledby="directorio-editorial-titulo">
+        <section class="directorio-editorial-hero directorio-editorial-hero--con-foto" aria-labelledby="directorio-editorial-titulo">
             <div class="directorio-editorial-hero__plano" aria-hidden="true"></div>
-            {{--
-                Ranura derecha para una fotografía editorial posterior.
-                No hay foto aprobada para este uso: no se reutilizan las de
-                Home ni se pinta un hueco geométrico.
-            --}}
-            <div class="directorio-editorial-hero__foto" aria-hidden="true"></div>
+            <div class="directorio-editorial-hero__foto" aria-hidden="true">
+                <img src="{{ asset('img/directorio/hero-directorio.png') }}"
+                     alt=""
+                     width="1672"
+                     height="941"
+                     fetchpriority="high"
+                     decoding="async">
+            </div>
             <div class="directorio-editorial-hero__velo" aria-hidden="true"></div>
             <div class="directorio-editorial-hero__cuerpo">
                 <p class="directorio-editorial-hero__eyebrow">
@@ -59,15 +61,15 @@
 
         <div class="directorio-editorial-cifras revelar" data-revelar aria-label="Cobertura del directorio">
             <p class="directorio-editorial-cifras__dato">
-                <strong>{{ $totalEstablecimientos }}</strong>
+                <strong data-cifra-final="{{ $totalEstablecimientos }}">{{ $totalEstablecimientos }}</strong>
                 <span>{{ Str::plural('establecimiento', $totalEstablecimientos) }}</span>
             </p>
             <p class="directorio-editorial-cifras__dato">
-                <strong>{{ $municipios->count() }}</strong>
+                <strong data-cifra-final="{{ $municipios->count() }}">{{ $municipios->count() }}</strong>
                 <span>{{ Str::plural('municipio', $municipios->count()) }}</span>
             </p>
             <p class="directorio-editorial-cifras__dato">
-                <strong>{{ $categorias->count() }}</strong>
+                <strong data-cifra-final="{{ $categorias->count() }}">{{ $categorias->count() }}</strong>
                 <span>{{ Str::plural('categoría', $categorias->count()) }}</span>
             </p>
         </div>

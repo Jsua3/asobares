@@ -149,29 +149,40 @@ class DirectorioEditorialHibridoTest extends TestCase
         $this->assertStringContainsString('rgb(11 9 10 / 0.9)', $css);
         $this->assertStringContainsString('rgb(255 248 241 / 0.86)', $css);
         $this->assertStringContainsString('rgb(255 248 241 / 0.9)', $css);
+        $this->assertStringContainsString('padding: 0.65rem 0.4rem 0.7rem', $css);
+        $this->assertStringContainsString('clamp(1.25rem, 2.6vw, 1.75rem)', $css);
         $this->assertStringContainsString('resources/css/directorio-editorial.css', $vite);
         $this->assertStringContainsString("@vite(['resources/css/directorio-editorial.css'])", $vista);
         $this->assertStringNotContainsString('home-editorial.css', $vista);
     }
 
     /**
-     * El hero deja una ranura a la derecha y no rellena con hueco geométrico
-     * ni con la portada del primer asociado. Rotura: volver a pintar
-     * `<x-publico.hueco-foto>` o a leer `foto_portada` en el listado.
+     * El hero pinta la fotografía editorial versionada. Rotura: vaciar
+     * `.directorio-editorial-hero__foto`; volver al hueco geométrico; ocultar
+     * la foto en móvil con `display: none`.
      */
-    public function test_el_hero_reserva_la_fotografia_sin_placeholder_artificial(): void
+    public function test_el_hero_pinta_la_fotografia_editorial_del_directorio(): void
     {
         $vista = File::get(resource_path('views/publico/directorio/index.blade.php'));
+        $css = File::get(resource_path('css/directorio-editorial.css'));
         $hero = $this->fragmentoDelHero($this->get(route('directorio.index'))->assertOk()->getContent());
 
-        $this->assertStringContainsString('directorio-editorial-hero__foto', $vista);
-        $this->assertStringContainsString('directorio-editorial-hero__foto', $hero);
+        $this->assertFileExists(public_path('img/directorio/hero-directorio.png'));
+        $this->assertStringContainsString("asset('img/directorio/hero-directorio.png')", $vista);
+        $this->assertStringContainsString('img/directorio/hero-directorio.png', $hero);
         $this->assertStringNotContainsString('hueco-foto', $vista);
         $this->assertStringNotContainsString('foto_portada', $vista);
         $this->assertStringNotContainsString('<x-publico.hueco-foto', $vista);
+        $this->assertStringNotContainsString('img/home/establecimiento', $vista);
+        $this->assertDoesNotMatchRegularExpression(
+            '/\.directorio-editorial-hero__foto\s*\{[^}]*display:\s*none/s',
+            $css,
+            'La fotografía del Directorio no puede desaparecer en un ancho.'
+        );
         $this->assertStringContainsString("ajuste('directorio_hero_titulo'", $vista);
         $this->assertStringContainsString("ajuste('directorio_hero_entradilla'", $vista);
         $this->assertStringContainsString("ajuste('directorio_cta'", $vista);
+        $this->assertStringContainsString('data-cifra-final', $vista);
     }
 
     /**
@@ -187,6 +198,8 @@ class DirectorioEditorialHibridoTest extends TestCase
         $this->assertStringContainsString('$publicidad->url_destino', $componente);
         $this->assertStringContainsString('noopener noreferrer sponsored', $componente);
         $this->assertStringContainsString('directorio-pauta__rotulo', $componente);
+        $this->assertStringContainsString('directorio-pauta__escena', $componente);
+        $this->assertStringContainsString('directorio-pauta__velo', $componente);
 
         $conDestino = $this->sembrarPautaDeDirectorio([
             'nombre_comercial' => 'Marca Con Destino',
@@ -287,7 +300,7 @@ class DirectorioEditorialHibridoTest extends TestCase
     private function fragmentoDelHero(string $html): string
     {
         $this->assertTrue(
-            (bool) preg_match('/<section class="directorio-editorial-hero"[^>]*>(.*?)<\/section>/s', $html, $coincidencias),
+            (bool) preg_match('/<section[^>]*class="[^"]*directorio-editorial-hero[^"]*"[^>]*>(.*?)<\/section>/s', $html, $coincidencias),
             'El Directorio no pintó el hero editorial.'
         );
 

@@ -603,6 +603,62 @@ Alpine.data('videoHero', () => ({
     },
 }));
 
+/*
+ * Identidad de Abre tu negocio. El master dura 6 s, campo oscuro de
+ * punta a punta (sin cola vacía). La pausa visible venía de un
+ * setTimeout deliberado tras ended; el bucle nativo reinicia al instante.
+ * Con movimiento reducido no cicla: se queda en el último fotograma.
+ */
+Alpine.data('guiaIdentidad', () => ({
+    init() {
+        const video = this.$refs.identidad;
+
+        if (! video) {
+            return;
+        }
+
+        video.muted = true;
+
+        const irAlFinal = () => {
+            video.loop = false;
+
+            if (Number.isFinite(video.duration) && video.duration > 0) {
+                video.currentTime = Math.max(0, video.duration - 0.04);
+            }
+        };
+
+        if (reduceMovimiento()) {
+            video.preload = 'auto';
+
+            if (video.readyState >= 1) {
+                irAlFinal();
+            } else {
+                video.addEventListener('loadedmetadata', irAlFinal, { once: true });
+                video.load();
+            }
+
+            return;
+        }
+
+        video.loop = true;
+        video.preload = 'auto';
+        const intentarReproducir = () => {
+            const intento = video.play();
+
+            if (intento && typeof intento.catch === 'function') {
+                intento.catch(() => {});
+            }
+        };
+
+        if (video.readyState >= 2) {
+            intentarReproducir();
+        } else {
+            video.addEventListener('canplay', intentarReproducir, { once: true });
+            video.load();
+        }
+    },
+}));
+
 Alpine.data('cintaEditorial', () => ({
     pausada: false,
 
