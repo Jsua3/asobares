@@ -21,26 +21,28 @@
     @else
         <div class="directorio-pauta__pieza" role="group" aria-label="{{ $nombreAccesible }}">
     @endif
-        <div class="directorio-pauta__cuerpo">
-            <p class="directorio-pauta__rotulo">{{ $rotulo }}</p>
-            <h2 class="directorio-pauta__titulo">{{ $nombre }}</h2>
-            <p class="directorio-pauta__pie">{{ $pie }}</p>
-            @if ($href)
-                <span class="directorio-pauta__cta" aria-hidden="true">
-                    Conocer más&nbsp;<x-publico.flecha />
-                </span>
-            @endif
+        <div class="directorio-pauta__escena">
+            <img
+                src="{{ $imagen }}"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                width="640"
+                height="360"
+                class="imagen-viva directorio-pauta__img object-cover"
+            >
+            <div class="directorio-pauta__velo" aria-hidden="true"></div>
+            <div class="directorio-pauta__cuerpo">
+                <p class="directorio-pauta__rotulo">{{ $rotulo }}</p>
+                <h2 class="directorio-pauta__titulo">{{ $nombre }}</h2>
+                <p class="directorio-pauta__pie">{{ $pie }}</p>
+                @if ($href)
+                    <span class="directorio-pauta__cta" aria-hidden="true">
+                        Conocer más&nbsp;<x-publico.flecha />
+                    </span>
+                @endif
+            </div>
         </div>
-
-        <img
-            src="{{ $imagen }}"
-            alt=""
-            loading="lazy"
-            decoding="async"
-            width="640"
-            height="360"
-            class="imagen-viva directorio-pauta__img h-full min-h-44 w-full object-cover"
-        >
     @if ($href)
         </a>
     @else

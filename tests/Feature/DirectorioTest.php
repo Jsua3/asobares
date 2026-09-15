@@ -103,9 +103,9 @@ class DirectorioTest extends TestCase
 
         $respuesta->assertSuccessful();
         $respuesta->assertSee($visible->nombre);
-        $this->assertMatchesRegularExpression('/<strong>\s*1\s*<\/strong>\s*<span>establecimiento<\/span>/u', $respuesta->getContent());
-        $this->assertMatchesRegularExpression('/<strong>\s*1\s*<\/strong>\s*<span>municipio<\/span>/u', $respuesta->getContent());
-        $this->assertMatchesRegularExpression('/<strong>\s*1\s*<\/strong>\s*<span>categoría<\/span>/u', $respuesta->getContent());
+        $this->assertMatchesRegularExpression('/<strong[^>]*data-cifra-final="1"[^>]*>\s*1\s*<\/strong>\s*<span>establecimiento<\/span>/u', $respuesta->getContent());
+        $this->assertMatchesRegularExpression('/<strong[^>]*data-cifra-final="1"[^>]*>\s*1\s*<\/strong>\s*<span>municipio<\/span>/u', $respuesta->getContent());
+        $this->assertMatchesRegularExpression('/<strong[^>]*data-cifra-final="1"[^>]*>\s*1\s*<\/strong>\s*<span>categoría<\/span>/u', $respuesta->getContent());
         $respuesta->assertSee('Municipio Visible');
         $respuesta->assertSee('Categoría Visible');
         $respuesta->assertDontSee('Establecimiento Oculto');
@@ -129,15 +129,17 @@ class DirectorioTest extends TestCase
         Municipio::factory()->create(['nombre' => 'Municipio Administrativo', 'slug' => 'municipio-administrativo']);
         Categoria::factory()->create(['nombre' => 'Categoría Administrativa', 'slug' => 'categoria-administrativa']);
 
-        $this->get(route('directorio.index'))
+        $html = $this->get(route('directorio.index'))
             ->assertSuccessful()
             ->assertSee('Todavía no hay establecimientos publicados')
-            ->assertSee('<strong>0</strong>', escape: false)
             ->assertSee('establecimientos')
             ->assertSee('municipios')
             ->assertSee('categorías')
             ->assertDontSee('Municipio Administrativo')
-            ->assertDontSee('Categoría Administrativa');
+            ->assertDontSee('Categoría Administrativa')
+            ->getContent();
+
+        $this->assertMatchesRegularExpression('/<strong[^>]*data-cifra-final="0"[^>]*>\s*0\s*<\/strong>/u', $html);
     }
 
     public function test_el_directorio_usa_tarjetas_uniformes_y_conserva_distincion_de_destacado(): void
