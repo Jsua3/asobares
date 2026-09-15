@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Asociado;
+use App\Models\Setting;
+use Database\Seeders\SettingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Vite;
@@ -85,6 +87,49 @@ class DirectorioEditorialHibridoTest extends TestCase
             ->assertSee('Directorio de establecimientos');
     }
 
+    /**
+     * H1, entradilla y CTA salen de ajustes. Rotura: volver a cablear los
+     * tres textos en la vista; cambiar href="#resultados".
+     */
+    public function test_el_hero_obedece_frase_entradilla_y_cta_editables(): void
+    {
+        $this->seed(SettingSeeder::class);
+
+        $this->editarAjuste('directorio_hero_titulo', 'FRASE HERO DIRECTORIO EDITADA');
+        $this->editarAjuste('directorio_hero_entradilla', 'ENTRADILLA HERO DIRECTORIO EDITADA');
+        $this->editarAjuste('directorio_cta', 'CTA HERO DIRECTORIO EDITADO');
+
+        $html = $this->get(route('directorio.index'))->assertOk()->getContent();
+        $hero = $this->fragmentoDelHero($html);
+
+        $this->assertStringContainsString('FRASE HERO DIRECTORIO EDITADA', $hero);
+        $this->assertStringContainsString('ENTRADILLA HERO DIRECTORIO EDITADA', $hero);
+        $this->assertStringContainsString('CTA HERO DIRECTORIO EDITADO', $hero);
+        $this->assertStringContainsString('href="#resultados"', $hero);
+        $this->assertStringNotContainsString('Encuentra dónde vive la noche.', $hero);
+        $this->assertStringNotContainsString('Explorar establecimientos', $hero);
+    }
+
+    /**
+     * Sin fila en `settings` la vista pinta el respaldo. Rotura: quitar el
+     * segundo argumento de ajuste() y dejar el hero vacío.
+     */
+    public function test_el_hero_cae_a_los_textos_de_respaldo_si_faltan_ajustes(): void
+    {
+        $html = $this->get(route('directorio.index'))->assertOk()->getContent();
+        $hero = $this->fragmentoDelHero($html);
+        $vista = File::get(resource_path('views/publico/directorio/index.blade.php'));
+
+        $this->assertStringContainsString("ajuste('directorio_hero_titulo', 'Encuentra dónde vive la noche.')", $vista);
+        $this->assertStringContainsString("ajuste('directorio_hero_entradilla', 'Bares, gastrobares, cafés y experiencias que forman parte del gremio en el Quindío.')", $vista);
+        $this->assertStringContainsString("ajuste('directorio_cta', 'Explorar establecimientos')", $vista);
+        $this->assertStringContainsString('href="#resultados"', $vista);
+        $this->assertStringContainsString('Encuentra dónde vive la noche.', $hero);
+        $this->assertStringContainsString('Bares, gastrobares, cafés y experiencias que forman parte del gremio en el Quindío.', $hero);
+        $this->assertStringContainsString('Explorar establecimientos', $hero);
+        $this->assertStringContainsString('href="#resultados"', $hero);
+    }
+
     public function test_el_css_y_vite_declaran_la_hoja_del_directorio(): void
     {
         $this->assertFileExists(resource_path('css/directorio-editorial.css'));
@@ -156,6 +201,24 @@ class DirectorioEditorialHibridoTest extends TestCase
             $componente->getAttribute('x-data'),
             'abrirDrawer() no abre la hoja'
         );
+    }
+
+    private function editarAjuste(string $clave, string $valor): void
+    {
+        $ajuste = Setting::query()->where('clave', $clave)->first();
+
+        $this->assertNotNull($ajuste, "El ajuste «{$clave}» no está sembrado.");
+        $ajuste->update(['valor' => $valor]);
+    }
+
+    private function fragmentoDelHero(string $html): string
+    {
+        $this->assertTrue(
+            (bool) preg_match('/<section class="directorio-editorial-hero"[^>]*>(.*?)<\/section>/s', $html, $coincidencias),
+            'El Directorio no pintó el hero editorial.'
+        );
+
+        return $coincidencias[1];
     }
 
     /** El documento servido, listo para consultar por XPath. */

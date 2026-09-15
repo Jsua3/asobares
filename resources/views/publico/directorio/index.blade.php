@@ -57,13 +57,13 @@
                     {{ ajuste('directorio_titulo', 'Directorio de establecimientos') }}
                     · La noche del Quindío
                 </p>
-                <h1 id="directorio-editorial-titulo">Encuentra dónde vive la noche.</h1>
+                <h1 id="directorio-editorial-titulo">{{ ajuste('directorio_hero_titulo', 'Encuentra dónde vive la noche.') }}</h1>
                 <p class="directorio-editorial-hero__sub">
-                    Bares, gastrobares, cafés y experiencias que forman parte del gremio en el Quindío.
+                    {{ ajuste('directorio_hero_entradilla', 'Bares, gastrobares, cafés y experiencias que forman parte del gremio en el Quindío.') }}
                 </p>
                 <div class="directorio-editorial-hero__cta">
                     <x-publico.boton href="#resultados" variante="contorno-claro">
-                        Explorar establecimientos&nbsp;<x-publico.flecha />
+                        {{ ajuste('directorio_cta', 'Explorar establecimientos') }}&nbsp;<x-publico.flecha />
                     </x-publico.boton>
                 </div>
             </div>

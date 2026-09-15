@@ -1674,9 +1674,14 @@ html:not(.dark) .home-editorial-publicidad__pieza {
 .home-editorial-publicidad__cta {
     display: inline-flex;
     align-items: center;
+    padding: 0.4rem 0.7rem;
+    border-radius: 9999px;
+    background: rgb(8 8 8 / 0.78);
+    box-shadow: 0 0 22px 14px rgb(8 8 8 / 0.42);
     font-size: 0.875rem;
     font-weight: 500;
     color: #ee4137;
+    text-shadow: 0 1px 8px rgb(0 0 0 / 0.55);
     transition: transform 280ms ease;
 }
 
@@ -1706,6 +1711,11 @@ html:not(.dark) .home-editorial-publicidad__pieza {
 .home-editorial-publicidad a.home-editorial-publicidad__pieza:focus-visible {
     outline: 2px solid var(--home-accent);
     outline-offset: 3px;
+}
+
+.home-editorial-publicidad a.home-editorial-publicidad__pieza:focus-visible .home-editorial-publicidad__cta {
+    outline: 2px solid var(--home-accent);
+    outline-offset: 2px;
 }
 
 /* —— Aliados — franja institucional de marcas, no listado —— */
@@ -2085,6 +2095,11 @@ html:not(.dark) .home-editorial-cta__velo {
 }
 
 @media (prefers-reduced-transparency: reduce) {
+    .home-editorial-publicidad__cta {
+        background: #080808;
+        box-shadow: none;
+    }
+
     .home-editorial-movimiento__atmosfera {
         opacity: 0.35;
     }
