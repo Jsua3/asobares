@@ -53,8 +53,9 @@ class SettingSeeder extends Seeder
         'portada_videos_proxima_rotulo',
         'portada_videos_proxima_texto',
 
-        // La cabecera editorial del directorio no pinta entradilla bajo el
-        // título.
+        // Texto previo al hero editorial del directorio. El hero lee
+        // `directorio_hero_entradilla`; reutilizar esta clave pintaría el
+        // párrafo viejo en bases que no se resembraron.
         'directorio_intro',
     ];
 
@@ -277,6 +278,9 @@ class SettingSeeder extends Seeder
 
             // --- Directorio ---
             $this->texto('directorio_titulo', 'Directorio de establecimientos', 'directorio', 'Título del directorio'),
+            $this->texto('directorio_hero_titulo', 'Encuentra dónde vive la noche.', 'directorio', 'Directorio · frase principal del hero'),
+            $this->largo('directorio_hero_entradilla', 'Bares, gastrobares, cafés y experiencias que forman parte del gremio en el Quindío.', 'directorio', 'Directorio · entradilla del hero'),
+            $this->texto('directorio_cta', 'Explorar establecimientos', 'directorio', 'Directorio · botón del hero'),
 
             // --- Guía normativa ---
             // Dos rótulos porque el enlace no siempre cumple lo mismo.

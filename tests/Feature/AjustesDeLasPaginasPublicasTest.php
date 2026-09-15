@@ -13,6 +13,9 @@ class AjustesDeLasPaginasPublicasTest extends TestCase
 
     private const array PAGINAS = [
         ['directorio.index', 'directorio_titulo'],
+        ['directorio.index', 'directorio_hero_titulo'],
+        ['directorio.index', 'directorio_hero_entradilla'],
+        ['directorio.index', 'directorio_cta'],
         ['contacto', 'contacto_titulo_pagina'],
         ['afiliate', 'afiliate_beneficios_titulo'],
         ['guia.index', 'guia_cta_titulo'],

@@ -188,6 +188,19 @@ class PublicidadEditorialDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('scale(1.012)', $bloque);
         $this->assertStringContainsString('scale(1.03)', $bloque);
         $this->assertStringContainsString('@media (prefers-reduced-motion: reduce)', $css);
+        $this->assertMatchesRegularExpression(
+            '/\.home-editorial-publicidad__cta\s*\{[^}]*background:[^}]*box-shadow:/s',
+            $bloque,
+            'El CTA de publicidad perdió el velo local que lo hace legible sobre foto variable.'
+        );
+        $this->assertStringContainsString(
+            '.home-editorial-publicidad a.home-editorial-publicidad__pieza:focus-visible',
+            $bloque
+        );
+        $this->assertStringContainsString(
+            '.home-editorial-publicidad__cta',
+            substr($css, (int) strpos($css, '@media (prefers-reduced-transparency: reduce)'))
+        );
     }
 
     /**
