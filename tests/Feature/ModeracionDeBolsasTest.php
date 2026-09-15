@@ -27,6 +27,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -53,6 +54,54 @@ class ModeracionDeBolsasTest extends TestCase
         foreach ([User::ROL_SUPER_ADMIN, User::ROL_SUBADMIN] as $rol) {
             $this->actingAs($this->crearUsuario($rol))->get('/admin/postulaciones')->assertSuccessful();
         }
+    }
+
+    public function test_ver_postulaciones_se_muestra_solo_si_el_recurso_autoriza_el_acceso(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $vacante = Vacante::factory()->publicado()->create();
+        Postulacion::factory()->for($vacante)->create([
+            'nombre' => 'Candidata visible',
+        ]);
+
+        Livewire::test(ListVacantes::class)
+            ->assertActionVisible(TestAction::make('postulaciones')->table($vacante));
+
+        $this->get('/admin/postulaciones')
+            ->assertSuccessful()
+            ->assertSee('Candidata visible');
+    }
+
+    public function test_ver_postulaciones_se_oculta_si_el_recurso_responde_forbidden(): void
+    {
+        Role::findByName(User::ROL_SUBADMIN)->revokePermissionTo('ver_postulacion');
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $vacante = Vacante::factory()->publicado()->create();
+        Postulacion::factory()->for($vacante)->create([
+            'nombre' => 'Candidata protegida',
+            'correo' => 'candidata.protegida@example.test',
+            'telefono' => '3000000000',
+        ]);
+
+        Livewire::test(ListVacantes::class)
+            ->assertActionHidden(TestAction::make('postulaciones')->table($vacante));
+
+        $this->get('/admin/postulaciones')
+            ->assertForbidden()
+            ->assertDontSee('Candidata protegida')
+            ->assertDontSee('candidata.protegida@example.test')
+            ->assertDontSee('3000000000');
+    }
+
+    public function test_un_asociado_no_tiene_acceso_administrativo_a_postulaciones(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_ASOCIADO));
+
+        $this->get('/admin/postulaciones')->assertForbidden();
     }
 
     public function test_nadie_crea_una_postulacion_desde_el_panel(): void
