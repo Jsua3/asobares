@@ -24,8 +24,9 @@ class GuiaController
         // Sólo se ofrecen municipios que ya tienen la guía levantada Y vigente:
         // uno cuyos trámites hayan caducado todos saldría en el selector con la
         // guía vacía.
-        $municipiosConGuia = Municipio::whereHas('requisitos', fn (Builder $requisitos): Builder => $requisitos->publicado()->vigente())
-            ->orderBy('nombre')
+        $municipiosConGuia = Municipio::activos()
+            ->whereHas('requisitos', fn (Builder $requisitos): Builder => $requisitos->publicado()->vigente())
+            ->ordenados()
             ->get();
 
         $seleccionado = filled($request->string('municipio')->toString())

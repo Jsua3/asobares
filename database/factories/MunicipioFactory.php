@@ -20,6 +20,8 @@ class MunicipioFactory extends Factory
         return [
             'nombre' => $nombre,
             'slug' => Str::slug($nombre).'-'.Str::random(4),
+            'activo' => true,
+            'orden' => 0,
         ];
     }
 }

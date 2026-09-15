@@ -54,6 +54,8 @@ class EtiquetasDeColumnasTest extends TestCase
 
             'municipios · nombre' => [ListMunicipios::class, 'nombre', 'Nombre'],
             'municipios · slug' => [ListMunicipios::class, 'slug', 'Slug (URL)'],
+            'municipios · orden' => [ListMunicipios::class, 'orden', 'Orden'],
+            'municipios · activo' => [ListMunicipios::class, 'activo', 'Activo'],
             'municipios · created_at' => [ListMunicipios::class, 'created_at', 'Creado'],
             'municipios · updated_at' => [ListMunicipios::class, 'updated_at', 'Actualizado'],
 

@@ -288,6 +288,123 @@ class VigenciaDeLaGuiaTest extends TestCase
         $respuesta->assertDontSee(route('guia.index', ['municipio' => $apagado->slug]), escape: false);
     }
 
+    public function test_un_municipio_inactivo_no_sale_en_la_guia_aunque_tenga_requisitos_publicados(): void
+    {
+        $activo = Municipio::factory()->create(['nombre' => 'Armenia', 'slug' => 'armenia', 'activo' => true]);
+        $inactivo = Municipio::factory()->create(['nombre' => 'Pijao', 'slug' => 'pijao', 'activo' => false]);
+
+        $this->requisitoPublicado($activo, ['entidad' => 'Entidad visible Armenia']);
+        $this->requisitoPublicado($inactivo, ['entidad' => 'Entidad oculta Pijao']);
+
+        $respuesta = $this->get(route('guia.index'))->assertSuccessful();
+
+        $respuesta->assertSee('Armenia');
+        $respuesta->assertSee('Entidad visible Armenia');
+        $respuesta->assertDontSee('Pijao');
+        $respuesta->assertDontSee('Entidad oculta Pijao');
+
+        $this->get(route('guia.index', ['municipio' => $inactivo->slug]))
+            ->assertSuccessful()
+            ->assertSee('Todavía no hay guía publicada')
+            ->assertSee('name="robots" content="noindex, follow"', escape: false)
+            ->assertDontSee('Entidad oculta Pijao');
+    }
+
+    public function test_los_municipios_de_la_guia_respetan_el_orden_administrable(): void
+    {
+        $segundo = Municipio::factory()->create(['nombre' => 'Calarcá', 'slug' => 'calarca', 'orden' => 20]);
+        $primero = Municipio::factory()->create(['nombre' => 'Buenavista', 'slug' => 'buenavista', 'orden' => 10]);
+
+        $this->requisitoPublicado($segundo, ['entidad' => 'Entidad Calarcá']);
+        $this->requisitoPublicado($primero, ['entidad' => 'Entidad Buenavista']);
+
+        $this->get(route('guia.index'))
+            ->assertSuccessful()
+            ->assertSeeInOrder(['Buenavista', 'Calarcá'])
+            ->assertSee('Entidad Buenavista')
+            ->assertDontSee('Entidad Calarcá');
+    }
+
+    public function test_un_municipio_nuevo_y_sus_datos_llegan_a_la_guia_sin_tocar_blade(): void
+    {
+        $municipio = Municipio::factory()->create([
+            'nombre' => 'Córdoba',
+            'slug' => 'cordoba',
+            'activo' => true,
+        ]);
+
+        $primero = $this->requisitoPublicado($municipio, [
+            'entidad' => 'Alcaldía de Córdoba',
+            'descripcion' => 'Trámite administrado desde base de datos.',
+            'checklist' => ['Documento administrable uno'],
+            'costo_aproximado' => 123456,
+            'orden' => 1,
+        ]);
+
+        $segundo = $this->requisitoPublicado($municipio, [
+            'entidad' => 'Bomberos de Córdoba',
+            'checklist' => ['Documento administrable dos'],
+            'costo_aproximado' => 50000,
+            'orden' => 2,
+        ]);
+
+        $this->get(route('guia.index', ['municipio' => $municipio->slug]))
+            ->assertSuccessful()
+            ->assertSee('Córdoba')
+            ->assertSeeInOrder([$primero->entidad, $segundo->entidad])
+            ->assertSee('Trámite administrado desde base de datos.')
+            ->assertSee('Documento administrable uno')
+            ->assertSee('Documento administrable dos')
+            ->assertSee('$123.456');
+
+        $primero->update(['costo_aproximado' => 234567]);
+
+        $this->get(route('guia.index', ['municipio' => $municipio->slug]))
+            ->assertSuccessful()
+            ->assertSee('$234.567')
+            ->assertDontSee('$123.456');
+    }
+
+    public function test_la_guia_no_mezcla_requisitos_entre_municipios(): void
+    {
+        $armenia = Municipio::factory()->create(['nombre' => 'Armenia', 'slug' => 'armenia']);
+        $filandia = Municipio::factory()->create(['nombre' => 'Filandia', 'slug' => 'filandia']);
+
+        $this->requisitoPublicado($armenia, [
+            'entidad' => 'Entidad exclusiva Armenia',
+            'checklist' => ['Documento solo Armenia'],
+        ]);
+
+        $this->requisitoPublicado($filandia, [
+            'entidad' => 'Entidad exclusiva Filandia',
+            'checklist' => ['Documento solo Filandia'],
+        ]);
+
+        $this->get(route('guia.index', ['municipio' => $filandia->slug]))
+            ->assertSuccessful()
+            ->assertSee('Entidad exclusiva Filandia')
+            ->assertSee('Documento solo Filandia')
+            ->assertDontSee('Entidad exclusiva Armenia')
+            ->assertDontSee('Documento solo Armenia');
+    }
+
+    public function test_los_requisitos_desactivados_no_aparecen_publicamente(): void
+    {
+        $municipio = Municipio::factory()->create(['nombre' => 'Armenia', 'slug' => 'armenia']);
+
+        $this->requisitoPublicado($municipio, ['entidad' => 'Entidad publicada']);
+        RequisitoApertura::factory()->create([
+            'municipio_id' => $municipio->id,
+            'entidad' => 'Entidad en borrador',
+            'estado' => EstadoPublicacion::Borrador,
+        ]);
+
+        $this->get(route('guia.index', ['municipio' => $municipio->slug]))
+            ->assertSuccessful()
+            ->assertSee('Entidad publicada')
+            ->assertDontSee('Entidad en borrador');
+    }
+
     /**
      * La URL `?municipio=X` de un municipio apagado no desaparece —sigue
      * respondiendo 200 con «Todavía no hay guía publicada»— pero deja de ser
