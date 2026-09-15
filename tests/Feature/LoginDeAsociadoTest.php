@@ -65,6 +65,41 @@ class LoginDeAsociadoTest extends TestCase
             ->assertDontSee('<footer', escape: false);
     }
 
+    /**
+     * Sin navbar hace falta un retorno al sitio. Rotura: quitar el enlace
+     * «Volver al sitio» o apuntarlo a otra ruta que no sea la portada.
+     */
+    public function test_el_acceso_ofrece_volver_al_sitio_y_el_logo_lleva_al_inicio(): void
+    {
+        $html = $this->get(route('mi-cuenta.entrar'))->assertSuccessful()->getContent();
+        $xpath = $this->xpathDe($html);
+        $inicio = route('inicio');
+
+        $volver = $xpath->query('//a[contains(normalize-space(.), "Volver al sitio")]');
+        $this->assertSame(1, $volver->length, 'no hay un enlace visible para volver al sitio');
+        $this->assertSame($inicio, $volver->item(0)->getAttribute('href'));
+
+        $marca = $xpath->query('//a[@aria-label="Ir al inicio, ASOBARES Capítulo Quindío"]');
+        $this->assertSame(1, $marca->length, 'el logo no tiene nombre accesible de retorno al inicio');
+        $this->assertSame($inicio, $marca->item(0)->getAttribute('href'));
+
+        $this->assertSame(1, $xpath->query('//form[@method="POST"][@action="'.route('mi-cuenta.entrar.post').'"]')->length);
+        $this->assertSame(1, $xpath->query('//input[@name="email"]')->length);
+        $this->assertSame(1, $xpath->query('//input[@name="password"]')->length);
+        $this->assertStringContainsString('acceso-asociado', $html);
+    }
+
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
+    }
+
     public function test_un_asociado_con_sus_datos_correctos_entra(): void
     {
         $socio = $this->crearUsuario(User::ROL_ASOCIADO);

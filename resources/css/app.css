@@ -1702,6 +1702,96 @@
  * navegador funde el viejo con el nuevo y, siendo el mismo objeto, ese fundido
  * solo lo hace parpadear a mitad del recorrido.
  */
+@layer components {
+    /*
+     * Acceso de afiliados (/mi-cuenta/entrar): pantalla concentrada, sin
+     * navbar. El plano de página y el de la ficha tienen que distinguirse
+     * en claro; en oscuro se conserva el carácter actual.
+     */
+    .acceso-asociado {
+        position: relative;
+        min-height: 100svh;
+        padding:
+            max(1rem, env(safe-area-inset-top, 0px))
+            1rem
+            calc(5.5rem + env(safe-area-inset-bottom, 0px));
+        background:
+            radial-gradient(ellipse 70% 50% at 50% -8%, rgb(183 31 24 / 0.08), transparent 58%),
+            linear-gradient(180deg, #f7f1e8 0%, #efe6d8 100%);
+    }
+
+    .dark .acceso-asociado {
+        background-image:
+            radial-gradient(
+                60% 55% at 50% 0%,
+                rgb(238 65 55 / var(--asb-resplandor)) 0%,
+                transparent 70%
+            );
+        background-color: var(--asb-fondo);
+    }
+
+    .acceso-asociado__volver {
+        display: inline-flex;
+        align-items: center;
+        min-height: 2.75rem;
+        margin: 0 0 0.5rem;
+        padding-inline: 0.15rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--asb-suave);
+    }
+
+    .acceso-asociado__volver:hover {
+        color: var(--asb-tinta);
+    }
+
+    .acceso-asociado__marco {
+        width: 100%;
+        max-width: 28rem;
+        margin-inline: auto;
+        padding-top: 1.25rem;
+        padding-bottom: 2rem;
+    }
+
+    @media (min-width: 768px) {
+        .acceso-asociado {
+            display: flex;
+            flex-direction: column;
+            padding-inline: 1.5rem;
+            padding-bottom: calc(3rem + env(safe-area-inset-bottom, 0px));
+        }
+
+        .acceso-asociado__marco {
+            padding-top: 2rem;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .acceso-asociado {
+            padding-inline: 2rem;
+        }
+    }
+
+    .acceso-asociado__marca {
+        display: inline-block;
+        border-radius: 0.5rem;
+    }
+
+    .acceso-asociado__tarjeta {
+        background-color: var(--asb-superficie);
+        border: 1px solid var(--asb-linea);
+        border-radius: var(--asb-radio-tarjeta);
+        box-shadow: var(--asb-sombra-tarjeta);
+    }
+
+    html:not(.dark) .acceso-asociado__tarjeta {
+        background-color: #fffcf8;
+        box-shadow:
+            0 10px 28px rgb(23 17 15 / 0.06),
+            inset 0 1px 0 rgb(255 255 255 / 0.7);
+    }
+}
+
 ::view-transition-group(pestana-activa) {
     animation-duration: var(--duracion-rebote);
     animation-timing-function: var(--ease-rebote-suave);

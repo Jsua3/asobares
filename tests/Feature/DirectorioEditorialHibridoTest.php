@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Enums\EstadoPublicidad;
+use App\Enums\UbicacionPublicidad;
 use App\Models\Asociado;
+use App\Models\Publicidad;
 use App\Models\Setting;
 use Database\Seeders\SettingSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -139,6 +142,8 @@ class DirectorioEditorialHibridoTest extends TestCase
         $vista = File::get(resource_path('views/publico/directorio/index.blade.php'));
 
         $this->assertStringContainsString('.directorio-editorial-hero', $css);
+        $this->assertStringContainsString('.directorio-editorial-hero__foto', $css);
+        $this->assertStringContainsString('.directorio-editorial-cifras__dato', $css);
         $this->assertStringContainsString('@media (prefers-reduced-motion: reduce)', $css);
         $this->assertStringContainsString('@media (prefers-reduced-transparency: reduce)', $css);
         $this->assertStringContainsString('rgb(11 9 10 / 0.9)', $css);
@@ -147,6 +152,61 @@ class DirectorioEditorialHibridoTest extends TestCase
         $this->assertStringContainsString('resources/css/directorio-editorial.css', $vite);
         $this->assertStringContainsString("@vite(['resources/css/directorio-editorial.css'])", $vista);
         $this->assertStringNotContainsString('home-editorial.css', $vista);
+    }
+
+    /**
+     * El hero deja una ranura a la derecha y no rellena con hueco geométrico
+     * ni con la portada del primer asociado. Rotura: volver a pintar
+     * `<x-publico.hueco-foto>` o a leer `foto_portada` en el listado.
+     */
+    public function test_el_hero_reserva_la_fotografia_sin_placeholder_artificial(): void
+    {
+        $vista = File::get(resource_path('views/publico/directorio/index.blade.php'));
+        $hero = $this->fragmentoDelHero($this->get(route('directorio.index'))->assertOk()->getContent());
+
+        $this->assertStringContainsString('directorio-editorial-hero__foto', $vista);
+        $this->assertStringContainsString('directorio-editorial-hero__foto', $hero);
+        $this->assertStringNotContainsString('hueco-foto', $vista);
+        $this->assertStringNotContainsString('foto_portada', $vista);
+        $this->assertStringNotContainsString('<x-publico.hueco-foto', $vista);
+        $this->assertStringContainsString("ajuste('directorio_hero_titulo'", $vista);
+        $this->assertStringContainsString("ajuste('directorio_hero_entradilla'", $vista);
+        $this->assertStringContainsString("ajuste('directorio_cta'", $vista);
+    }
+
+    /**
+     * La pauta del Directorio se nombra como patrocinio y solo envuelve el
+     * bloque en un enlace si hay destino. Rotura: quitar el rótulo; enlazar
+     * siempre; dejar de leer `url_destino`.
+     */
+    public function test_la_publicidad_del_directorio_se_identifica_y_solo_enlaza_con_destino(): void
+    {
+        $componente = File::get(resource_path('views/components/publico/publicidad.blade.php'));
+
+        $this->assertStringContainsString("ajuste('publicidad_rotulo'", $componente);
+        $this->assertStringContainsString('$publicidad->url_destino', $componente);
+        $this->assertStringContainsString('noopener noreferrer sponsored', $componente);
+        $this->assertStringContainsString('directorio-pauta__rotulo', $componente);
+
+        $conDestino = $this->sembrarPautaDeDirectorio([
+            'nombre_comercial' => 'Marca Con Destino',
+            'url_destino' => 'https://example.com/pauta-directorio',
+        ]);
+
+        $htmlConDestino = $this->get(route('directorio.index'))->assertOk()->getContent();
+        $this->assertStringContainsString('aria-label="Contenido patrocinado"', $htmlConDestino);
+        $this->assertStringContainsString('Marca Con Destino', $htmlConDestino);
+        $this->assertStringContainsString('https://example.com/pauta-directorio', $htmlConDestino);
+        $this->assertStringContainsString('Conocer más', $htmlConDestino);
+
+        Publicidad::withoutEvents(fn () => $conDestino->update(['url_destino' => null]));
+
+        $htmlSinDestino = $this->get(route('directorio.index'))->assertOk()->getContent();
+        $this->assertStringContainsString('aria-label="Contenido patrocinado"', $htmlSinDestino);
+        $this->assertStringContainsString('Marca Con Destino', $htmlSinDestino);
+        $this->assertStringNotContainsString('https://example.com/pauta-directorio', $htmlSinDestino);
+        $this->assertStringNotContainsString('Conocer más', $htmlSinDestino);
+        $this->assertStringContainsString('role="group"', $htmlSinDestino);
     }
 
     public function test_las_pestanas_y_el_mapa_siguen_en_pie(): void
@@ -201,6 +261,19 @@ class DirectorioEditorialHibridoTest extends TestCase
             $componente->getAttribute('x-data'),
             'abrirDrawer() no abre la hoja'
         );
+    }
+
+    /**
+     * @param  array<string, mixed>  $atributos
+     */
+    private function sembrarPautaDeDirectorio(array $atributos): Publicidad
+    {
+        return Publicidad::withoutEvents(fn (): Publicidad => Publicidad::factory()->create(array_merge([
+            'ubicacion' => UbicacionPublicidad::Directorio,
+            'estado' => EstadoPublicidad::Publicada,
+            'fecha_inicio' => now()->subDay(),
+            'fecha_fin' => now()->addWeek(),
+        ], $atributos)));
     }
 
     private function editarAjuste(string $clave, string $valor): void
