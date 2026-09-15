@@ -3,6 +3,8 @@
 namespace Tests\Feature\Panel;
 
 use App\Enums\EstadoPublicacion;
+use App\Filament\Resources\Municipios\Pages\CreateMunicipio;
+use App\Filament\Resources\Municipios\Pages\EditMunicipio;
 use App\Filament\Resources\RequisitoAperturas\Pages\EditRequisitoApertura;
 use App\Filament\Resources\RequisitoAperturas\Pages\ListRequisitoAperturas;
 use App\Models\Municipio;
@@ -86,6 +88,39 @@ class VigenciaEnElPanelTest extends TestCase
         $this->get(route('filament.admin.resources.requisitos.index'))
             ->assertSuccessful()
             ->assertSee('Circasia');
+    }
+
+    public function test_la_direccion_administra_actividad_y_orden_del_municipio(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(CreateMunicipio::class)
+            ->fillForm([
+                'nombre' => 'Córdoba',
+                'slug' => 'cordoba',
+                'activo' => false,
+                'orden' => 40,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $municipio = Municipio::where('slug', 'cordoba')->firstOrFail();
+
+        $this->assertFalse($municipio->activo);
+        $this->assertSame(40, $municipio->orden);
+
+        Livewire::test(EditMunicipio::class, ['record' => $municipio->getRouteKey()])
+            ->fillForm([
+                'activo' => true,
+                'orden' => 5,
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $municipio->refresh();
+
+        $this->assertTrue($municipio->activo);
+        $this->assertSame(5, $municipio->orden);
     }
 
     public function test_el_filtro_lista_lo_rancio_y_lo_que_nadie_verifico(): void
