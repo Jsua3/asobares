@@ -6,6 +6,7 @@ use App\Enums\CargoDelSector;
 use App\Enums\EstadoPublicacion;
 use App\Filament\Resources\Postulaciones\PostulacionResource;
 use App\Filament\Support\AccionesDeAprobacion;
+use App\Models\Postulacion;
 use App\Models\Vacante;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -100,9 +101,7 @@ class VacantesTable
             ->label('Ver postulaciones')
             ->icon('heroicon-o-user-group')
             ->color('gray')
-            ->visible(fn (): bool => auth()->user()?->can('ver_postulacion') === true
-                || auth()->user()?->esSuperAdmin() === true
-                || auth()->user()?->esSubadmin() === true)
+            ->visible(fn (): bool => auth()->user()?->can('viewAny', Postulacion::class) === true)
             ->url(fn (Vacante $registro): string => PostulacionResource::getUrl('index', [
                 'tableFilters' => ['vacante' => ['value' => $registro->getKey()]],
             ]));
