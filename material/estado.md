@@ -191,10 +191,10 @@ No se «arregla de paso»:
 - **Ninguna prueba ve una imagen generada por IA.** La procedencia se comprueba leyendo los bytes del **original** —el WebP ya perdió el manifiesto— y eso no está automatizado. Si entra otra tanda, se mira a mano.
 - **`hamcrest` subió a 3.0.0** con el salto. No lo usa ninguna prueba nuestra directamente; entra por Mockery.
 - **Del panel en el teléfono:** el tacto del resorte solo lo cierra un aparato de verdad; se ajusta con `ARRASTRE` y `AMORTIGUACION`.
-- **De la barra pública B:** la transición de `gap` cuesta un reflow por fotograma durante 620 ms; `$rol`/`$prefijoRol` son dos `match` que recalculan lo mismo.
-- **Preexistente:** `consultaSistema.addEventListener('change', aplicarTema)` pasa el evento como `preferenciaForzada` (funciona por accidente de la comparación); tabular hacia el header `sticky` estando desplazado devuelve la página al tope (Chromium).
+- **De la barra pública B:** `$rol`/`$prefijoRol` en `menu-usuario.blade.php` son dos `match` que recalculan lo mismo. ~~La transición de `gap` cuesta un reflow por fotograma.~~ **Ya no existe**: no queda ni una `transition` sobre `gap` en todo el CSS, comprobado hoy.
+- **Preexistente:** tabular hacia el header `sticky` estando desplazado devuelve la página al tope (Chromium). ~~`consultaSistema.addEventListener('change', aplicarTema)` pasa el evento como `preferenciaForzada`.~~ **Cerrado el 15 sep, y no «funcionaba por accidente»**: seguía al sistema en TODOS los modos, así que a quien hubiera forzado claro lo pasaba a oscuro en cuanto cambiara su sistema. Medido en el navegador y arreglado envolviendo la llamada, con guardia sobre el cableado.
 - **El correo de ficha de bolsa publicada enlaza a `/proveedores`**, que ya no nombra al proveedor. Se arregla cuando haya SMTP.
-- `@alpinejs/collapse` importado sin consumidor. El consecutivo de PQR bajo concurrencia falla cerrado. No existe `lang/` (D-32).
+- El consecutivo de PQR bajo concurrencia falla cerrado. No existe `lang/` (D-32). ~~`@alpinejs/collapse` importado sin consumidor.~~ **Sí lo tiene**: `x-collapse` gobierna el cajón de filtros del Directorio desde `30f2333`.
 - Cuatro `index.lock.huerfano*` y `.git/huerfanos-cowork-2026-09-01/` en `.git/`: **los borra Sua a mano**.
 - **El worktree `.claude/worktrees/visual03` y su servidor en el 8124 siguen levantados**, y `.claude/launch.json` en la raíz tiene una entrada de más sin commitear. Se retiran al cerrar la revisión.
 
