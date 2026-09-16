@@ -237,6 +237,12 @@ class ObservatorioTest extends TestCase
      * Si la vista de la página lo vuelve a invocar a mano, cada widget monta
      * dos instancias Livewire: el doble de consultas, y un directivo vería
      * cada gráfica repetida.
+     *
+     * Se cuenta el atributo `wire:name`, que Livewire escribe **una vez por
+     * instancia montada** y con el nombre de clase completo. El alias con
+     * puntos —`app.filament.widgets.observatorio.…`— no sirve para contar:
+     * no aparece en el marcado. Por eso la lista son clases y no cadenas: si
+     * alguien renombra un widget, la guardia lo sigue.
      */
     public function test_cada_widget_del_observatorio_se_monta_una_sola_vez(): void
     {
@@ -245,17 +251,19 @@ class ObservatorioTest extends TestCase
         $html = $this->get(Observatorio::getUrl())->getContent();
 
         foreach ([
-            'app.filament.widgets.observatorio.presencia-por-municipio',
-            'app.filament.widgets.observatorio.composicion-del-sector',
-            'app.filament.widgets.observatorio.salud-financiera',
-            'app.filament.widgets.observatorio.cobertura-de-proveedores',
-            'app.filament.widgets.observatorio.demanda-laboral-por-area',
-            'app.filament.widgets.observatorio.oferta-contra-demanda',
-        ] as $nombreLivewire) {
+            PresenciaPorMunicipio::class,
+            ComposicionDelSector::class,
+            SaludFinanciera::class,
+            CoberturaDeProveedores::class,
+            DemandaLaboralPorArea::class,
+            OfertaContraDemanda::class,
+        ] as $widget) {
+            $marca = 'wire:name="'.$widget.'"';
+
             $this->assertSame(
                 1,
-                substr_count($html, $nombreLivewire),
-                "{$nombreLivewire} aparece ".substr_count($html, $nombreLivewire).' veces en el HTML: se está montando más de una instancia.'
+                substr_count($html, $marca),
+                "{$widget} aparece ".substr_count($html, $marca).' veces en el HTML: se está montando más de una instancia.'
             );
         }
     }
