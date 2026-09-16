@@ -2581,3 +2581,67 @@ El 11, Sua recorrió en su teléfono los seis puntos de la lista: barra móvil, 
 Eso cierra **la deuda más vieja del bloque visual**: el arrastre de la hoja y el botón vidriado llevaban desde el 9 de septiembre medidos solo por geometría y con puntero sintético, y el expediente lo decía en tres sitios distintos. Los números que estaban en duda se quedan como están —la deceleración de la hoja en 0,99, no la 0,998 del scroll, y el vidriado en 90 ms de ida y 280 de vuelta—. La S7 del cronograma, «pruebas en dispositivos reales», queda cumplida dentro de su semana.
 
 Lo que **no** cubre esa pasada, y no se cuenta como hecho: **iOS y Safari**, y el riel del panel en el teléfono, que no entraba en la lista.
+
+---
+
+## §55 — La capa visual de Ingrid, la guía de los doce municipios y el salto a Filament 5 (15 de septiembre de 2026)
+
+Sesión larga y con tres frentes que acabaron siendo uno. Empezó abriendo en local la rama de Ingrid para poder mirarla, siguió encontrando que otra sesión estaba escribiendo en la misma carpeta en ese mismo momento, y terminó con `main` conteniendo todo: la capa visual, la guía de los doce municipios y un salto de dos versiones mayores.
+
+### 55.1 El material del 15 de septiembre, y lo que desencadenó
+
+El gremio entregó `material/sep15material/`: el Excel de la **guía normativa de los 12 municipios** y **fotos de siete establecimientos reales** (Break, Donde Alejo, El Ruedo, Garden, Icónico, Indianápolis, San Basilio). Medido en disco: **27 archivos, 17,4 MB** — el commit que la ignoró dice 53 archivos y 35 MB, y esa cifra no cuadra con lo que hay. La carpeta quedó ignorada, comprobado con `git check-ignore` sobre la carpeta, una foto y el Excel.
+
+De ahí salió la guía: **de 8 fichas a 151**, doce municipios, contadas ejecutando. El criterio es lo que la salva y conviene no perderlo: el marco general nacional va fechado y con su ley citada; los bloques por municipio salen **sin `verificado_el`**, así que la guía le pinta al lector «Sin verificar contra la fuente oficial»; **ningún costo**, porque el archivo los rotula «a confirmar»; y de veinticinco enlaces entran **dos**, los únicos que abren el trámite y no la portada de la alcaldía.
+
+**El defecto que la suite no podía ver.** `verificado_con` es `varchar(255)`, y la procedencia más larga medía **254**. SQLite ignora la longitud declarada y PostgreSQL la aplica: la suite entera pasaba verde y el sembrador habría abortado a mitad del despliegue con «value too long for type character varying(255)», dejando la tabla a medias. Se acortó la fuente y hoy la más larga mide **191 de 255**. La guardia que lo mide a mano —`EnCuantoCabeLaProcedenciaTest`— es la única forma de verlo mientras las pruebas corran sobre SQLite.
+
+### 55.2 La base local mentía, y el sembrador lo avisaba
+
+Al levantar el sitio para revisar, Salento enseñaba **19 entidades y «$608.000»**. No era del cambio: `RequisitoAperturaSeeder` usa `updateOrCreate` y **no borra nada**, así que las fichas viejas con costos inventados seguían en la base de desarrollo desde agosto, mezcladas con las nuevas y duplicando tres trámites. La base tenía **170 fichas donde el código siembra 151**. Se limpió con `migrate:fresh --seed` y quedó en 151 exactas, cero costos.
+
+Producción estaba limpia —solo Armenia, ocho entidades, «Costo por confirmar»—, así que el riesgo era solo de lectura: **revisar sobre una base sucia habría hecho creer que el cambio publicaba cifras inventadas**. La regla §4.7 del prompt maestro dice justo esto, y aquí se pagó.
+
+### 55.3 La fusión: 421 archivos, dos conflictos, los dos de comentario
+
+`cierre/visual03-directorio-login` sale de `2c366fc` —lo que servía producción—, así que entró con **421 archivos, +14.247 / −6.674** y sin ver nada de lo posterior. Los únicos dos conflictos cayeron en los archivos que la guía había reescrito ese mismo día, y ninguno era de código: uno se resolvió tomando la redacción de Ingrid, que además **corregía el nombre del documento citado** (`guia-normativa-armenia-fuente-oficial.md`, sin tilde, que es como está en disco); el otro tomando la nuestra, porque la suya afirmaba que una prueba se pondría roja «el día que lleguen las URL buenas» y ese día era ese.
+
+### 55.4 Los tres fallos de la fusión, que eran tres cosas distintas
+
+- **Un defecto real, suyo.** La pantalla de acceso nueva escribía la flecha izquierda como carácter. El subconjunto de Poppins trae 217 glifos por peso y **ninguna flecha** —U+2190 ni siquiera entra en el `unicode-range` que el `@font-face` promete—, así que el navegador cae a la fuente del sistema. Medido sobre la página servida: 12,1 px pintados con la familia de respaldo. Para eso existe `<x-publico.flecha>`, y `MovimientoTest` ya lo vigilaba.
+- **Un falso positivo, nuestro.** `HeroEditorialDeLaPortadaTest` decía «El hero perdió la `<img>` fija» y la `<img>` estaba: servida, cargada y colgando del contenedor del video, comprobado en el navegador. Comparaba el **texto del marcado** contra `<div class="hero-video-fondo">` seguido inmediatamente de `<img`, y ese contenedor lleva ahora el `x-data` del mecanismo de video. Pasa a medirse sobre el árbol con XPath, como ya hacían otras cinco clases.
+- **Uno estructural.** Tres de sus commits llevaban la firma de Cursor como trailer.
+
+### 55.5 La firma de Cursor: reescribir, pero solo tres
+
+La guardia tolera a propósito la firma **anterior al corte** `6c22d87`, y ahí hay diecisiete commits que la llevan. Reescribirlos todos habría cambiado ciento cincuenta hashes sin motivo. Se reescribió el rango `6c22d87..HEAD` con un filtro anclado a la **forma de trailer** y no a la dirección suelta, porque `df0de23`, el commit que **creó** la guardia, nombra esa dirección dentro de su texto para explicarse: un filtro ingenuo le habría mutilado el mensaje. Comprobado después: el árbol es idéntico al del respaldo (`git diff` vacío), `df0de23` conserva su hash, y los tres firmados salieron.
+
+**El coste, que hay que decirle a Ingrid:** `origin/cierre/visual03-directorio-login` sigue teniendo los commits firmados. Si ella sigue trabajando ahí y alguien vuelve a fusionar, la firma regresa y la historia se duplica. Su rama tiene que ponerse sobre lo que quede en `main`.
+
+### 55.6 Filament 4 a 5, y con él Livewire 3 a 4
+
+Decisión del dueño del proyecto, tomada con las dos caras delante, y **revierte una decisión escrita**: el §13 del encargo dice, con fecha del 3 de agosto, que Filament 5 se descartó por demasiado nuevo para la entrega del 22 de septiembre. Queda anotada como tal.
+
+Se midió **antes** una referencia sobre 4.12.8 con la fusión y los tres arreglos dentro: **1.615 casos, 1.615 pasan, 0 fallos, 8.460 aserciones, 967 s**. Sin esa referencia, cualquier cosa que se rompiera después habría sido indistinguible de un arreglo mal hecho.
+
+El salto movió once paquetes de Filament a **v5.8.2**, `livewire/livewire` a **v4.4.5**, `laravel/framework` a **13.32.0** y `hamcrest-php` a **v3.0.0**. La herramienta oficial —`filament/upgrade` v5.8.2, que corre Rector con la configuración de Filament— recorrió `app`, `tests`, `database` y `config` y **no cambió ni un archivo**.
+
+**Un solo fallo en 1.615 casos, y era de la guardia.** `ObservatorioTest` contaba el alias con puntos para comprobar que ningún widget se monta dos veces. Livewire 4 identifica los componentes por su **nombre de clase completo**: ese alias aparece **cero** veces en el marcado, así que la guardia gritaba «se está montando más de una instancia» cuando lo que le pasaba es que no encontraba ninguna. **Es el modo de fallo más caro que hay: una guardia que avisa por lo contrario de lo que mira.** Pasa a contar `wire:name`, que Livewire escribe una vez por instancia, y la lista pasa de cadenas a `::class`.
+
+Suite final sobre Filament 5: **1.615 casos, 1.615 pasan, 0 fallos, 8.460 aserciones, 693 s**. Mismas aserciones que la referencia y **un 28 % más rápida**.
+
+### 55.7 Las tres mutaciones, y la prueba de control que separa arreglar de aflojar
+
+Las tres se comprobaron **verificando dentro del archivo que la mutación había entrado** antes de correr, que es lo que distingue un arnés honesto de uno que miente:
+
+- Devolver el carácter de flecha a la vista de Mi Cuenta: `MovimientoTest` roja con el mismo mensaje.
+- Apagar la `<img>` del hero: la aserción nueva roja (0 no es idéntico a 1).
+- Invocar los widgets del pie una segunda vez en la vista del observatorio —el defecto exacto que esa guardia existe para cazar—: el conteo da 2 y se pone roja.
+
+Y una **prueba de control** en el hero, que es la que dice si el arreglo sirve: metiendo un atributo **delante** de `class`, la aserción nueva sigue verde donde la vieja —y también una versión meramente aflojada— se habría roto.
+
+### 55.8 Lo que no arregla ningún merge
+
+Quedó decidido desplegar **con las imágenes generadas por IA dentro**. Son cuatro superficies públicas —el hero del Directorio, el de «Abre tu negocio», los tres establecimientos del banco visual de la portada y el respaldo de publicidad— y sus originales traen manifiesto C2PA de «OpenAI Media Service API» con `digitalSourceType` de medio generado por algoritmo entrenado. Los WebP derivados ya no lo traen: la conversión lo borra. La decisión se toma con eso delante y con las fotos reales de siete establecimientos ya en la casa, a la espera de autorización de imagen (D-03).
+
+Y queda dicho que **el `deployCommand` sigue siendo `php artisan migrate --force` y nada más**: la guía no aparece en producción por desplegar. `RolYPermisoSeeder` **no cambia** en esta fusión, así que no se repite el P0 del 10 de septiembre.
