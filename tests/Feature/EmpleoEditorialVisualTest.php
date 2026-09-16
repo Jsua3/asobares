@@ -35,8 +35,10 @@ class EmpleoEditorialVisualTest extends TestCase
         $this->assertStringContainsString('data-empleo-hero-slot="img/empleo/hero-empleo.webp"', $html);
         $this->assertStringContainsString('empleo-editorial-cartelera', $html);
         $this->assertStringContainsString($vacante->cargo, $html);
-        $this->assertStringContainsString($vacante->asociado->nombre, $html);
-        $this->assertStringContainsString($vacante->asociado->municipio->nombre, $html);
+        // Escapados como los escapa Blade: la fábrica inventa nombres como
+        // «L' Báez», y el apóstrofo sale en el HTML como &#039;.
+        $this->assertStringContainsString(e($vacante->asociado->nombre), $html);
+        $this->assertStringContainsString(e($vacante->asociado->municipio->nombre), $html);
         $this->assertStringContainsString('Ver y postularme', $html);
         $this->assertStringContainsString('Abierta', $html);
         $this->assertStringNotContainsString('geometria', $html);
