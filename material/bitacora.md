@@ -2724,3 +2724,69 @@ Se comprobó una por una, no se razonó:
 ### 56.5 Lo que se deja dicho y no se toca
 
 El correo de ficha de bolsa publicada enlaza a `/proveedores`. Medido: esa página **no nombra a ningún proveedor** —solo pinta categorías— y no existe `proveedores.show`. Así que el correo promete «Ya apareces en el directorio: X» y lleva a una página donde X no sale. El arreglo cambia texto de cara al usuario y no hay destino correcto que inventar: es decisión de contenido.
+
+## §57 — Todo a `main`: el trabajo de Ingrid, el lenguaje único y lo que la revisión encontró (16 de septiembre de 2026)
+
+Sua pidió unificar lo de Ingrid y lo nuestro, que todo funcionara y quedara al día en `main`. Ingrid había escrito el 15 sep «no hacer merge a `main` automáticamente»; esta vez lo pidió el dueño del proyecto con esa frase delante, y así queda dicho. Hubo tres ramas que juntar y una revisión de `a6ebcca` cuyos hallazgos verificados estaban sin arreglar.
+
+### 57.1 Primero lo que estaba roto en producción
+
+`/empleo` no admitía perfiles: el desplegable obligatorio «Área del establecimiento» salía con **una sola opción**, la deshabilitada, porque la vista usaba las áreas con vacante abierta y producción no tiene ninguna. El arreglo es de Ingrid y venía dentro de `a6ebcca`; se adelantó solo (`a57f044`), con la suite entera en verde (**1.617 / 1.617**). Push a las 22:06 UTC, despliegue terminado a las 22:08. **Comprobado sobre la URL pública**: el select trae las siete áreas.
+
+### 57.2 La integración, sin la firma de Cursor
+
+Rama `integracion/lenguaje-unico` desde `main`. `a6ebcca` entró **por `cherry-pick`** y no por fusión: su padre `e703485` ya no es ancestro de `main` —se reescribió el 15 sep para quitar la firma—, así que una fusión lo arrastraba entero y daba seis conflictos de tipo «añadido en los dos lados». Con `cherry-pick` chocaron **dos archivos**, los de `/empleo`, y los dos porque el mismo arreglo ya estaba en `main`. Autoría y fecha de Ingrid conservadas (`d3aefd9`), mensaje sin `Co-authored-by: Cursor`. Encima, la unificación visual (`5cc1f87`, antes `0fba4ae`), limpia.
+
+**Línea de base sobre esa rama: 1.717 casos, 1.714 pasan, 3 fallan.** Las tres eran las de `ArtistasYProveedoresEditorialTest` que buscaban la cadena `resources/css/…` en el HTML y solo pasaban con `npm run dev`.
+
+### 57.3 Eventos de aliados: la compuerta que faltaba, y el cobro
+
+Verificado por lectura de código y convertido en pruebas antes de arreglarlo:
+
+- Un aliado **en borrador o apagado** —que es como nace uno desde el panel— publicaba nombre y web en el riel, el calendario, la ficha, el JSON-LD y el sitemap.
+- Una **alcaldía suelta** salía como organizadora aunque la portada la oculta por «a todos o nada».
+- Borrado el aliado, la llave foránea deja `aliado_id` en null y la ficha caía a «**ASOBARES** Capítulo Quindío».
+- **El cobro no miraba el origen**: un evento de aliado con precio se cobraba por la cuenta de Bold del gremio, y los datos de inscripción quedaban a cargo del gremio.
+
+Ahora hay **una** compuerta, `Evento::scopeVisibleAlPublico()`, por la que pasan las seis salidas públicas. `ReglaDeAlcaldias` gana la misma definición de alcaldía escrita como consulta, junto a la de memoria. Un evento de aliado **no admite inscripción en línea**: el guardado la apaga y `admiteInscripciones()` la niega aunque una fila vieja la traiga encendida; la ficha dice quién gestiona la inscripción, y con enlace externo el botón ya no dice «Registrarme en la Nacional». La portada, que titula «Próximos eventos del gremio», solo pinta los del gremio. `fecha_fin` anterior a `fecha_inicio` se rechaza también en el modelo.
+
+**La fila sembrada tapaba el texto.** `eventos_intro` decía en producción «Solo eventos del gremio…» y el calendario lo repetía quemado. Una migración la corrige **solo si sigue diciendo lo sembrado**, por el modelo para que se limpie la caché de ajustes; la prueba lo exige con la caché puesta, y con `DB::table` se pone roja.
+
+14 pruebas nuevas; **17 mutaciones, las 17 rojas**.
+
+⚠️ **Lo que no es código:** publicar eventos de aliados contradice «solo eventos del gremio» del encargo, del manual y del anexo entregado a la universidad. Queda en el §13 como decisión de Sua del 16 sep, pendiente de acta (D-47), y el cobro a nombre de un aliado queda cerrado hasta que D-10 lo resuelva.
+
+### 57.4 La barra: ni banda opaca ni huecos
+
+El arreglo de Ingrid para que el texto no se leyera entre las tres píldoras era un `::after` de ancho completo **100 % opaco**. Medido en Chromium con Playwright a 1440 px en los dos temas: terminaba en una **raya recta** que cruzaba la página y partía las fichas de `/eventos`; bajo ese fondo el `backdrop-filter` no componía nada, y las píldoras de vidrio se quedaban planas. Subir el velo de la píldora a 84/78 no arreglaba el hueco (0,14/255 de diferencia sobre la píldora) y contradecía la Parte I.
+
+**Decisión de esta sesión, a confirmar por Sua:** el velo de fila pasa a translúcido (80 % / 76 %) con el desenfoque del cromo y **una máscara que lo desvanece** durante 1,5 rem por debajo de la barra. Lo que pasa entre las píldoras sale desenfocado, no hay banda ni corte, y las píldoras vuelven a tener profundidad. El velo de la píldora vuelve a 72/62. La guardia de Ingrid buscaba tres cadenas y seguía verde con el defecto entero de vuelta; la nueva mide la regla, el token de los dos temas, la máscara y el apilamiento. **7 mutaciones rojas.**
+
+### 57.5 «Ninguna línea recta»: lo que se veía, medido
+
+Un auditor en Playwright recorrió trece páginas en claro y oscuro, a 1440 y a 390 px, listando cajas con fondo o borde propio y alguna esquina a cero que ningún ancestro redondeado recorte. Lo que quedó después de descartar las piezas interiores (columnas de una tarjeta recortada, celdas de una tabla redondeada, degradados de borde):
+
+- **`/abre-tu-negocio`, rota hoy también en producción**: la escena del hero era un rectángulo con radio solo a la derecha, cortado en seco arriba, abajo y contra el texto; en claro, un bloque negro de lado a lado sobre el crema; en producción además tapaba el final del título («sin» se leía «sir»). La caja del video del logotipo se veía como un cuadrado porque su máscara elíptica usaba `farthest-corner` y dejaba el centro de cada lado al 75 %. Ahora la escena se funde por los cuatro lados con una máscara, en claro sin negro y con una sombra redonda propia para el neón, y la elipse usa `closest-side`. La guardia que eximía esas capas «por ser decorado» exige ahora lo que las vuelve invisibles.
+- `/contacto`, el bloque «Escríbenos» (832×828, esquinas a cero); `/directorio`, la franja de cifras, que además iba a sangre por debajo de 80rem; la fecha sobre la foto de cada evento en la portada.
+- `/eventos`: la fila de la ficha fija en 11.5rem empujaba «Ver evento» debajo del recorte.
+- Las páginas del gremio abrían con el tope del módulo móvil y su primera línea quedaba a 18 px de la barra.
+- En el teléfono: el correo de `/contacto` se partía por la última letra del dominio y «ESTABLECIMIENTOS» no cabía en su tercio (una línea ahora a 320, 360 y 390, medido).
+
+### 57.6 Pruebas que mentían
+
+- **«Conserva filtros» del boletín** afirmaba ver «Observatorio económico», que es uno de los botones y está con filtro o sin él. Seguía verde sin el filtro. Ahora mira qué piezas quedan y qué botón se marca.
+- **El hero «administrable» de `/eventos`** solo afirmaba el texto por defecto, que en producción nunca sale. Ahora escribe la fila y exige que mande. La foto del hero, sin guardia, la tiene sobre el árbol.
+- **Un fallo intermitente de Ingrid**: la prueba de la capa de empleo buscaba el nombre del asociado crudo, y la fábrica inventó «L' Báez», que Blade pinta con `&#039;`. Roja en la suite y verde sola. Control con ese nombre forzado: la versión anterior roja, la nueva verde.
+
+### 57.7 Las imágenes
+
+Siete PNG de cabecera de 1672×941 servidos: **13,1 MB**. En WebP a calidad 82 y mismas dimensiones, **0,86 MB**. La foto de la guía entraba **dos veces byte a byte** y solo se servía una. Con la aprobación de Natalia a las imágenes generadas (§13, 16 sep), el manifiesto C2PA deja de ser un problema y lo que queda es el peso.
+
+### 57.8 La medición antes de subir
+
+Suite entera sobre la rama terminada, con los activos compilados y sin `npm run dev`: **1.738 casos · 1.738 pasan · 0 fallos · 12.319 aserciones · 616 s**. Frente a lo desplegado antes de empezar (1.617 casos, 8.541 aserciones) son 121 casos más: los de Ingrid, los de la unificación y los de esta sesión. Cada guardia nueva o reescrita se vio roja rompiendo lo que vigila: 17 en eventos, 7 en la barra, 5 en la guía, 7 en las superficies, 3 en los textos del teléfono, 3 en el hero de eventos y 2 en el boletín.
+
+### 57.9 Lo que se deja dicho
+
+- **La rama remota de Ingrid no se tocó.** `origin/cierre/visual03-directorio-login` sigue en `a6ebcca`; su contenido está en `main` con otro hash. Rehacerla exigiría un push forzado sobre su rama, y eso lo decide ella: tiene que empezar lo siguiente desde `main`.
+- Los tokens de radio compartidos que pidieron los agentes de la unificación no se crearon: los valores ya son la escala de cada hoja, con guardia, y un cambio de nomenclatura en todas las hojas a seis días de la entrega no compra nada que se vea.

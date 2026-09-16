@@ -106,7 +106,11 @@ Es la tarea más frecuente: el gremio crece mes a mes.
 
 Las inscripciones llegan a **Bandejas → Inscripciones**, con el estado de pago de cada una.
 
-> **Solo eventos del gremio.** Es una regla editorial acordada con la directiva: ExpoBar, congresos, capacitaciones propias. Los eventos de bares individuales no se publican, y lo nacional se enlaza al registro de la Nacional.
+> **Eventos del gremio y de aliados.** Los eventos de bares individuales no se publican, y lo nacional se enlaza al registro de la Nacional. Desde el 16 de septiembre de 2026 también se pueden publicar eventos **de un aliado**: en el formulario, **Origen → Aliado** y se elige quién organiza. Tres cosas que el sistema hace solo:
+>
+> - El evento **solo sale en el sitio mientras ese aliado esté publicado y activo**. Si el aliado se apaga, se borra o es una alcaldía cuando no están todas, su evento desaparece del sitio sin que nadie lo toque.
+> - Un evento de aliado **no recibe inscripciones ni cobros por la página**: el gremio no cobra ni guarda datos a nombre de otro. Si el aliado tiene su propio registro, póngalo en **Enlace externo** y el botón lleva allá. El precio es solo informativo.
+> - La portada solo muestra los eventos del gremio; los de aliados salen en **Eventos** con el nombre de quien organiza.
 
 ---
 
