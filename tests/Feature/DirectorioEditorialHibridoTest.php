@@ -244,6 +244,20 @@ class DirectorioEditorialHibridoTest extends TestCase
      * del botón; renombrar abrirDrawer() en el x-data; que abrirDrawer() no
      * ponga drawerAbierto a true; quitar x-show="drawerAbierto" de la hoja.
      */
+    /**
+     * «ESTABLECIMIENTOS» es el rótulo más largo de las tres cifras. Medido en
+     * Chromium a 320, 360 y 390 px: con tracking y el relleno de escritorio no
+     * cabía en su tercio y se partía por la última letra. Bajo 640px va sin
+     * tracking, y bajo 360px un punto más pequeño.
+     */
+    public function test_los_rotulos_de_las_cifras_caben_en_un_telefono(): void
+    {
+        $css = File::get(resource_path('css/directorio-editorial.css'));
+
+        $this->assertMatchesRegularExpression('/@media \(max-width: 639px\) \{.*?\.directorio-editorial-cifras__dato span \{\s*font-size: 0\.6rem;\s*letter-spacing: 0;/s', $css);
+        $this->assertMatchesRegularExpression('/@media \(max-width: 359px\) \{\s*\.directorio-editorial-cifras__dato span \{\s*font-size: 0\.55rem;/', $css);
+    }
+
     public function test_los_filtros_se_alcanzan_en_escritorio_y_en_movil(): void
     {
         Asociado::factory()->publicado()->create();

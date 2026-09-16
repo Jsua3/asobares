@@ -37,7 +37,9 @@
                 <div class="gremio-editorial-canal gremio-editorial-canal--largo">
                     <span class="gremio-editorial-canal__n" aria-hidden="true">02</span>
                     <p class="gremio-editorial-canal__rotulo">Correo</p>
-                    <a href="mailto:{{ ajuste('contacto_correo') }}" class="enlace-accion">{{ ajuste('contacto_correo') }}</a>
+                    {{-- El corte, si hace falta, va después de la arroba: partir el dominio
+                         por la última letra («asobares.or / g») no se lee como un correo. --}}
+                    <a href="mailto:{{ ajuste('contacto_correo') }}" class="enlace-accion">{{ Str::before(ajuste('contacto_correo'), '@') }}@<wbr>{{ Str::after(ajuste('contacto_correo'), '@') }}</a>
                 </div>
                 <div class="gremio-editorial-canal gremio-editorial-canal--largo">
                     <span class="gremio-editorial-canal__n" aria-hidden="true">03</span>

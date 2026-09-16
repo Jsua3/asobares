@@ -136,6 +136,10 @@ class GremioEditorialVisualTest extends TestCase
         $this->assertStringContainsString('name="acepta_datos"', $html);
         $this->assertStringContainsString('gremio-editorial-mapa', $html);
         $this->assertStringContainsString('gremio-editorial-canal__n', $html);
+        // En un teléfono el correo no cabe en una línea: el corte va tras la
+        // arroba y no por la última letra del dominio.
+        $this->assertStringContainsString('>'.str_replace('@', '@<wbr>', ajuste('contacto_correo')).'</a>', $html);
+        $this->assertStringNotContainsString('overflow-wrap: anywhere', File::get(resource_path('css/gremio-editorial.css')));
         $this->assertStringContainsString('padding-right: 4.5rem', File::get(resource_path('css/gremio-editorial.css')));
     }
 

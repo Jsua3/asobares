@@ -366,14 +366,27 @@
 }
 
 @media (max-width: 639px) {
+    /* Tres cifras en un teléfono de 360-390 px: el rótulo más largo
+       («ESTABLECIMIENTOS») no cabía en su tercio y se partía por la última
+       letra. Menos relleno lateral y sin tracking, cabe entero. */
+    .directorio-editorial-cifras {
+        padding-inline: 0.25rem;
+    }
+
     .directorio-editorial-cifras__dato {
-        padding-inline: 0.35rem;
+        padding-inline: 0.2rem;
     }
 
     .directorio-editorial-cifras__dato span {
-        font-size: 0.625rem;
-        letter-spacing: 0.04em;
+        font-size: 0.6rem;
+        letter-spacing: 0;
         line-height: 1.25;
+    }
+}
+
+@media (max-width: 359px) {
+    .directorio-editorial-cifras__dato span {
+        font-size: 0.55rem;
     }
 }
 

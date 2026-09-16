@@ -1034,7 +1034,7 @@
 .gremio-editorial-canal--largo p:not(.gremio-editorial-canal__rotulo):not(.gremio-editorial-canal__aviso) {
     font-size: clamp(1.02rem, 0.92rem + 0.4vw, 1.2rem);
     font-weight: 500;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
 .gremio-editorial-canal__aviso {
