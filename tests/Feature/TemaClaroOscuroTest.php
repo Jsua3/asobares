@@ -66,6 +66,40 @@ class TemaClaroOscuroTest extends TestCase
     }
 
     /**
+     * Seguir al sistema en modo «sistema» no puede pisar una preferencia
+     * forzada.
+     *
+     * `addEventListener` le pasa a su función el `MediaQueryListEvent`. Si se
+     * le entrega `aplicarTema` pelada, ese evento entra como
+     * `preferenciaForzada`; al no ser nulo, la función **se salta la lectura
+     * de localStorage** y resuelve contra el sistema. Consecuencia medida en
+     * el navegador, con `theme` en `light` y el sistema en oscuro: el evento
+     * ponía la página en oscuro, contra la elección explícita del usuario.
+     *
+     * Por eso se exige la forma envuelta, que llama sin argumentos y vuelve a
+     * leer la preferencia guardada. Se afirma sobre el **código fuente** de la
+     * vista y no sobre el HTML servido: lo que se vigila es el cableado, y una
+     * llamada envuelta no se distingue de una pelada mirando la página.
+     */
+    public function test_seguir_al_sistema_no_pisa_una_preferencia_forzada(): void
+    {
+        $layout = File::get(resource_path('views/components/layouts/publico.blade.php'));
+
+        $this->assertMatchesRegularExpression(
+            '/consultaSistema\.addEventListener\(\s*\'change\',\s*\(\)\s*=>\s*aplicarTema\(\)\s*\)/',
+            $layout,
+            'El oyente de `prefers-color-scheme` dejó de llamar a `aplicarTema()` sin argumentos.'
+        );
+
+        $this->assertDoesNotMatchRegularExpression(
+            '/addEventListener\(\s*\'change\',\s*aplicarTema\s*\)/',
+            $layout,
+            'Le pasa `aplicarTema` pelada al oyente: el evento entra como preferencia forzada '
+            .'y quien haya elegido claro se queda en oscuro cuando cambie su sistema.'
+        );
+    }
+
+    /**
      * Chromium congela toda propiedad con `transition` cuyo valor venga de una
      * custom property cuando esa property cambia. Sin la mordaza, cambiar de
      * tema en vivo dejaría los enlaces de la navbar y los bordes de las

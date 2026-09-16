@@ -205,8 +205,20 @@
                 document.documentElement.classList.add('sin-desplazamiento');
             }
 
-            // En modo «sistema», seguir al sistema operativo sin recargar.
-            consultaSistema.addEventListener('change', aplicarTema);
+            /*
+             * En modo «sistema», seguir al sistema operativo sin recargar.
+             *
+             * El oyente va envuelto, y no es cosmético: `addEventListener` le
+             * pasa a su función el `MediaQueryListEvent`, que aquí caería en
+             * `preferenciaForzada`. Como no es nulo, `aplicarTema` se salta la
+             * lectura de localStorage y resuelve contra el sistema, así que
+             * quien hubiera FORZADO claro se quedaba en oscuro en cuanto su
+             * sistema cambiara —y al revés—. Medido en el navegador: con
+             * `theme` en `light` y el sistema en oscuro, el evento ponía la
+             * página en oscuro. Llamarla sin argumentos es lo que la hace leer
+             * la preferencia guardada y respetarla.
+             */
+            consultaSistema.addEventListener('change', () => aplicarTema());
 
             // Si cambian el tema en otra pestaña —típico: el panel abierto al
             // lado del sitio— esta se entera y se pone al día sola.
