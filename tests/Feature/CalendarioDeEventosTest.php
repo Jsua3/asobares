@@ -37,22 +37,56 @@ class CalendarioDeEventosTest extends TestCase
 
     private const MES = '/eventos/calendario/2026/09';
 
-    /** La rejilla de escritorio, recortada del resto del documento. */
+    /**
+     * La rejilla de escritorio, recortada del resto del documento.
+     *
+     * Se recorta por el árbol y se exige que la tabla sea ÚNICA: quienes la
+     * llaman cuentan apariciones dentro del fragmento --casillas de un evento,
+     * el día de hoy-- y un recorte por texto se queda con la primera `<table>`
+     * del documento. El día que el layout o el pie sirvan otra tabla antes, ese
+     * recorte devuelve la tabla equivocada EN SILENCIO y los tres casos gritan
+     * «el evento perdió dos casillas» con la rejilla intacta.
+     */
     private function rejilla(string $html): string
     {
-        $this->assertMatchesRegularExpression('/<table[^>]*>.*?<\/table>/s', $html, 'El calendario no pintó ninguna tabla.');
-        preg_match('/<table[^>]*>.*?<\/table>/s', $html, $coincidencias);
+        $tablas = $this->xpathDe($html)->query('//table');
 
-        return $coincidencias[0];
+        $this->assertSame(1, $tablas->length, 'El calendario tiene que pintar exactamente una tabla; pintó '.$tablas->length.'.');
+
+        $tabla = $tablas->item(0);
+
+        return $tabla->ownerDocument->saveHTML($tabla);
     }
 
-    /** La agenda vertical de móvil, recortada del resto del documento. */
+    /**
+     * La agenda vertical de móvil, recortada del resto del documento.
+     *
+     * `sm:hidden` se conserva a propósito --el corte responsive es justo lo que
+     * la prueba vigila--, pero como token exacto de `class` y sobre el nodo
+     * único: por texto casaba como subcadena de la sopa de atributos, así que
+     * un `data-x="sm:hidden"` o un `lg:sm:hidden` la daban por buena.
+     */
     private function agenda(string $html): string
     {
-        $this->assertMatchesRegularExpression('/<ol[^>]*sm:hidden[^>]*>.*?<\/ol>/s', $html, 'El calendario no pintó ninguna agenda móvil.');
-        preg_match('/<ol[^>]*sm:hidden[^>]*>.*?<\/ol>/s', $html, $coincidencias);
+        $listas = $this->xpathDe($html)->query('//ol[contains(concat(" ", normalize-space(@class), " "), " sm:hidden ")]');
 
-        return $coincidencias[0];
+        $this->assertSame(1, $listas->length, 'El calendario no pintó ninguna agenda móvil (o pintó más de una).');
+
+        $agenda = $listas->item(0);
+
+        return $agenda->ownerDocument->saveHTML($agenda);
+    }
+
+    /** El documento servido, listo para consultar por XPath. */
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
     }
 
     /**
@@ -238,28 +272,42 @@ class CalendarioDeEventosTest extends TestCase
     public function test_la_navegacion_entre_meses_funciona_sin_javascript(): void
     {
         $html = $this->get(self::MES)->assertSuccessful()->getContent();
+        $xpath = $this->xpathDe($html);
+
+        /*
+         * `@click` se mide sobre el texto servido y no sobre el nodo porque
+         * libxml DESCARTA los atributos que empiezan por `@`: preguntándole al
+         * árbol, la guardia pasaría en verde justo ante el atajo que persigue.
+         * Es una afirmación sobre la página entera, y como tal se enuncia; el
+         * sitio escribe `x-on:` en sus veintiún componentes de Alpine y no usa
+         * la forma corta en ninguno.
+         */
+        $this->assertStringNotContainsString(
+            '@click',
+            $html,
+            'La página del calendario escribe el atajo `@click` de Alpine, que desde el árbol es invisible: mientras esté, un enlace de mes colgado de JavaScript se cuela por debajo de la comprobación de atributos.'
+        );
 
         foreach (['prev' => [2026, '08'], 'next' => [2026, '10']] as $relacion => $destino) {
-            $this->assertMatchesRegularExpression(
-                '/<a[^>]*rel="'.$relacion.'"[^>]*>/',
-                $html,
-                "Falta el enlace rel=\"{$relacion}\"."
-            );
+            $enlaces = $xpath->query('//a[@rel="'.$relacion.'"]');
 
-            preg_match('/<a[^>]*rel="'.$relacion.'"[^>]*>/', $html, $etiqueta);
+            $this->assertSame(1, $enlaces->length, "Falta el enlace rel=\"{$relacion}\".");
 
-            $this->assertStringContainsString(
+            $enlace = $enlaces->item(0);
+
+            $this->assertSame(
                 route('eventos.calendario', $destino),
-                $etiqueta[0],
+                $enlace->getAttribute('href'),
                 "El enlace rel=\"{$relacion}\" no apunta al mes que toca."
             );
 
-            foreach (['x-on:', '@click', 'wire:', 'onclick'] as $prohibido) {
-                $this->assertStringNotContainsString(
-                    $prohibido,
-                    $etiqueta[0],
-                    "El enlace rel=\"{$relacion}\" cuelga de JavaScript: sin él el mes no tiene URL propia."
-                );
+            foreach ($enlace->attributes as $atributo) {
+                foreach (['x-on:', 'wire:', 'onclick'] as $prohibido) {
+                    $this->assertFalse(
+                        str_starts_with($atributo->nodeName, $prohibido),
+                        "El enlace rel=\"{$relacion}\" cuelga de JavaScript: sin él el mes no tiene URL propia."
+                    );
+                }
             }
         }
     }
@@ -349,11 +397,20 @@ class CalendarioDeEventosTest extends TestCase
 
         $html = $this->get(self::MES)->assertSuccessful()->getContent();
 
-        $this->assertMatchesRegularExpression(
-            '/<div class="[^"]*\bhidden\b[^"]*\bsm:block\b[^"]*"[^>]*>\s*<table/',
-            $html,
-            'La rejilla tiene que estar oculta por debajo de sm.'
+        /*
+         * Lo único que importa aquí es que la `<table>` cuelgue de un
+         * contenedor que se oculta por debajo de `sm`. Medido sobre el árbol no
+         * dice nada del orden de los atributos ni de la vecindad textual: un
+         * `x-data` delante de `class` o un comentario entre el `<div>` y la
+         * tabla cambian el texto servido sin tocar el corte responsive.
+         */
+        $rejillaOculta = $this->xpathDe($html)->query(
+            '//div[contains(concat(" ", normalize-space(@class), " "), " hidden ")]'
+            .'[contains(concat(" ", normalize-space(@class), " "), " sm:block ")]'
+            .'/table'
         );
+
+        $this->assertSame(1, $rejillaOculta->length, 'La rejilla tiene que estar oculta por debajo de sm.');
 
         $this->assertStringContainsString($evento->titulo, $this->rejilla($html));
 
@@ -388,19 +445,40 @@ class CalendarioDeEventosTest extends TestCase
          * naciera fuera de ese prefijo, la barra se apagaría en esta página y
          * nadie lo notaría.
          */
-        $cabecera = $this->recortarCabecera($enElCalendario->getContent());
-        $this->assertMatchesRegularExpression(
-            '/<a[^>]*href="[^"]*\/eventos"[^>]*aria-current="page"[^>]*text-acento/s',
-            $cabecera,
-            'El item «Eventos» de la barra tiene que seguir encendido dentro del calendario.'
-        );
-    }
+        /*
+         * TODAS las anclas a «Eventos» de la cabecera, y no la primera que
+         * case: el item se declara una vez y se pinta dos --bandeja de
+         * escritorio y pestaña del módulo inferior--, las dos encendidas por el
+         * mismo `$actual`. Exigirlas todas es el invariante real; quedarse con
+         * una deja la otra sin vigilancia.
+         *
+         * Medido sobre el árbol, además, no depende del ORDEN en que Blade
+         * escriba `href`, el `aria-current` condicional y el `@class`: hoy casa
+         * de milagro porque salen en ese orden, e intercambiar dos líneas de la
+         * plantilla --cambio que no altera el HTML útil-- apagaba la guardia con
+         * el item encendido. El `//header//` sustituye al recorte por texto de
+         * la cabecera, que devolvía cadena vacía si el layout dejaba de tener
+         * `<header>` y entonces decía «el item se apagó» faltando la barra
+         * entera: avisar por lo contrario de lo que mira.
+         */
+        $destino = route('eventos.index');
+        $enlaces = $this->xpathDe($enElCalendario->getContent())->query('//header//a[@href="'.$destino.'"]');
 
-    private function recortarCabecera(string $html): string
-    {
-        preg_match('/<header.*?<\/header>/s', $html, $coincidencias);
+        $this->assertGreaterThan(0, $enlaces->length, 'La barra no ofrece el item «Eventos».');
 
-        return $coincidencias[0] ?? '';
+        foreach ($enlaces as $enlace) {
+            $this->assertSame(
+                'page',
+                $enlace->getAttribute('aria-current'),
+                'El item «Eventos» de la barra tiene que seguir encendido dentro del calendario.'
+            );
+
+            $this->assertStringContainsString(
+                ' text-acento ',
+                ' '.$enlace->getAttribute('class').' ',
+                'El item «Eventos» de la barra tiene que seguir encendido dentro del calendario.'
+            );
+        }
     }
 
     // --- La regla de «próximo» y «pasado» ---

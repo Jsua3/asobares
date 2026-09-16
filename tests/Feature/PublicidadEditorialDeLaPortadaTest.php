@@ -128,25 +128,52 @@ class PublicidadEditorialDeLaPortadaTest extends TestCase
      * La pauta tiene que decir que es publicidad, a la vista y en el nombre
      * accesible de la sección y de la pieza. Pedir solo `aria-label=` no
      * basta: lo cumple hasta un atributo vacío.
+     *
+     * Todo se mide sobre el árbol servido. Recortar por `<section class="…"`
+     * exige que `class` sea el primer atributo, y un lookahead de aria-label
+     * es posicional: exige además que el rótulo venga detrás. Reordenar los
+     * atributos, o que entre un `x-data` delante, pone la guardia roja con el
+     * nombre accesible intacto, y aflojar el patrón no lo arregla porque el
+     * lookahead sigue mirando solo hacia delante.
      */
     private function assertSeIdentificaComoPatrocinada(string $html, string $nombre): void
     {
         $rotulo = 'Contenido patrocinado';
-        $seccion = $this->seccionDePublicidad($html);
+        $xpath = $this->xpathDe($html);
+        $seccion = $this->nodoDePublicidad($xpath);
 
-        $this->assertMatchesRegularExpression(
-            '/<section class="home-editorial-publicidad[^"]*"(?=[^>]*\saria-label="'.preg_quote($rotulo, '/').'")[^>]*>/',
-            $html,
+        $this->assertSame(
+            $rotulo,
+            $seccion->getAttribute('aria-label'),
             'La sección de publicidad perdió su rótulo accesible.'
         );
-        $this->assertStringContainsString(
-            '<p class="home-editorial-publicidad__rotulo">'.e($rotulo).'</p>',
-            $seccion,
+
+        $rotulos = $xpath->query(
+            './/*[contains(concat(" ", normalize-space(@class), " "), " home-editorial-publicidad__rotulo ")]',
+            $seccion
+        );
+
+        $this->assertSame(1, $rotulos->length, 'La pieza de publicidad perdió el rótulo visible.');
+        $this->assertSame(
+            $rotulo,
+            trim($rotulos->item(0)->textContent),
             'La pieza de publicidad perdió el rótulo visible.'
         );
-        $this->assertMatchesRegularExpression(
-            '/class="home-editorial-publicidad__pieza[^"]*"(?:[^>]*)\saria-label="'.preg_quote(e($rotulo.': '.$nombre), '/').'"/',
-            $seccion,
+
+        // Exactamente una pieza: la franja no puede montarse dos veces, y una
+        // guardia que solo busca la cadena se quedaría con la primera y callaría.
+        $piezas = $xpath->query(
+            './/*[contains(concat(" ", normalize-space(@class), " "), " home-editorial-publicidad__pieza ")]',
+            $seccion
+        );
+
+        $this->assertSame(1, $piezas->length, 'La portada no pintó exactamente una pieza de publicidad.');
+
+        // El valor llega desescapado, que es lo que oye un lector de pantalla:
+        // así un cambio de escapado de Blade no la pone roja por nada.
+        $this->assertSame(
+            $rotulo.': '.$nombre,
+            $piezas->item(0)->getAttribute('aria-label'),
             'El nombre accesible de la pieza tiene que empezar por el rótulo de patrocinio.'
         );
     }
@@ -224,16 +251,6 @@ class PublicidadEditorialDeLaPortadaTest extends TestCase
         return $pauta->fresh();
     }
 
-    private function seccionDePublicidad(string $html): string
-    {
-        $this->assertTrue(
-            (bool) preg_match('/<section class="home-editorial-publicidad[^"]*"[^>]*>(.*?)<\/section>/s', $html, $seccion),
-            'La portada no pintó la franja editorial de publicidad.'
-        );
-
-        return $seccion[1];
-    }
-
     private function bloqueDePublicidad(string $css): string
     {
         $inicio = strpos($css, '/* —— Publicidad');
@@ -243,5 +260,47 @@ class PublicidadEditorialDeLaPortadaTest extends TestCase
         $this->assertNotFalse($fin);
 
         return substr($css, $inicio, $fin - $inicio);
+    }
+
+    /** El documento servido, listo para consultar por XPath. */
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
+    }
+
+    /**
+     * La franja de publicidad como nodo del árbol servido, y una sola vez.
+     *
+     * Se busca por token de clase: el recorte por `<section class="…"` exige
+     * que `class` sea el primer atributo y corta en el primer `</section>`,
+     * así que un atributo delante o una sección anidada dejan mudas las
+     * aserciones que cuelgan de aquí sin que falte nada.
+     */
+    private function nodoDePublicidad(\DOMXPath $xpath): \DOMElement
+    {
+        $secciones = $xpath->query('//section[contains(concat(" ", normalize-space(@class), " "), " home-editorial-publicidad ")]');
+
+        $this->assertSame(1, $secciones->length, 'La portada no pintó la franja editorial de publicidad.');
+
+        return $secciones->item(0);
+    }
+
+    /** El interior de la franja, serializado desde el árbol ya localizado. */
+    private function seccionDePublicidad(string $html): string
+    {
+        $seccion = $this->nodoDePublicidad($this->xpathDe($html));
+        $interior = '';
+
+        foreach ($seccion->childNodes as $hijo) {
+            $interior .= $seccion->ownerDocument->saveHTML($hijo);
+        }
+
+        return $interior;
     }
 }

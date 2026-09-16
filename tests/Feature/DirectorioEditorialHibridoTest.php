@@ -297,14 +297,37 @@ class DirectorioEditorialHibridoTest extends TestCase
         $ajuste->update(['valor' => $valor]);
     }
 
+    /**
+     * El interior del hero editorial, recortado por el árbol y no por el texto
+     * del marcado.
+     *
+     * Recortar por texto ata el fragmento a tres cosas que no son el hero: que
+     * `class` sea alcanzable desde el principio de la etiqueta --un atributo
+     * anterior cuyo valor lleve un `>`, como los `x-data` de esta misma vista,
+     * deja la expresión sin casar--, y que el primer `</section>` que aparezca
+     * sea el del cierre --una `<section>` anidada recorta el fragmento EN
+     * SILENCIO y pone en verde, por vacío, a los `assertStringNotContains`--.
+     *
+     * El token de clase se compara entero: quedarse solo con el modificador
+     * `--con-foto` es perder la capa editorial de la hoja, y por subcadena eso
+     * pasaba por bueno.
+     */
     private function fragmentoDelHero(string $html): string
     {
-        $this->assertTrue(
-            (bool) preg_match('/<section[^>]*class="[^"]*directorio-editorial-hero[^"]*"[^>]*>(.*?)<\/section>/s', $html, $coincidencias),
-            'El Directorio no pintó el hero editorial.'
+        $heroes = $this->xpathDe($html)->query(
+            '//*[contains(concat(" ", normalize-space(@class), " "), " directorio-editorial-hero ")]'
         );
 
-        return $coincidencias[1];
+        $this->assertSame(1, $heroes->length, 'El Directorio no pintó el hero editorial.');
+
+        $hero = $heroes->item(0);
+        $interior = '';
+
+        foreach ($hero->childNodes as $hijo) {
+            $interior .= $hero->ownerDocument->saveHTML($hijo);
+        }
+
+        return $interior;
     }
 
     /** El documento servido, listo para consultar por XPath. */

@@ -97,16 +97,26 @@ class BandaDeEstablecimientosDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('home-editorial-banda__pista', $seccion);
         $this->assertStringContainsString('Ver establecimientos anteriores', $seccion);
         $this->assertStringContainsString('Ver establecimientos siguientes', $seccion);
-        $this->assertMatchesRegularExpression(
-            '/<button\b(?=[^>]*home-editorial-banda__control--prev)(?=[^>]*\saria-label="Ver establecimientos anteriores")[^>]*>/',
-            $seccion,
+
+        // Control y nombre accesible en el mismo nodo, no dos cadenas dentro
+        // del mismo tramo de texto: el `[^>]*` de un lookahead se para en el
+        // primer `>`, así que basta un atributo de Alpine con una comparación
+        // —`x-show="quedan > 1"`— para que la guardia denuncie un botón sin
+        // nombre teniéndolo. Y se exige exactamente uno: un control montado
+        // dos veces también es un defecto.
+        $xpathDeLaSeccion = $this->xpathDe($seccion);
+
+        $this->assertSame(
+            1,
+            $xpathDeLaSeccion->query('//button[contains(concat(" ", normalize-space(@class), " "), " home-editorial-banda__control--prev ")][@aria-label="Ver establecimientos anteriores"]')->length,
             'El control anterior de la banda solo lleva un icono: su nombre accesible es el aria-label.'
         );
-        $this->assertMatchesRegularExpression(
-            '/<button\b(?=[^>]*home-editorial-banda__control--next)(?=[^>]*\saria-label="Ver establecimientos siguientes")[^>]*>/',
-            $seccion,
+        $this->assertSame(
+            1,
+            $xpathDeLaSeccion->query('//button[contains(concat(" ", normalize-space(@class), " "), " home-editorial-banda__control--next ")][@aria-label="Ver establecimientos siguientes"]')->length,
             'El control siguiente de la banda solo lleva un icono: su nombre accesible es el aria-label.'
         );
+
         $this->assertStringNotContainsString('href="#"', $seccion);
         $this->assertStringContainsString('La noche del Quindío', $seccion);
         $this->assertStringContainsString('Lugares que dan vida a nuestra ciudad.', $seccion);
@@ -202,9 +212,18 @@ class BandaDeEstablecimientosDeLaPortadaTest extends TestCase
             $this->bloqueDeAlpine($js, 'bandaEstablecimientos'),
             'La banda tiene que desplazarse sin animación si pidieron menos movimiento.'
         );
-        $this->assertDoesNotMatchRegularExpression(
-            '/Alpine\.data\(\'bandaEstablecimientos\'[\s\S]*setInterval/',
-            $js
+        // Acotado por el mismo motivo que la de arriba, y falla de las dos
+        // maneras cuando no lo está: `[\s\S]*` desde el nombre del componente
+        // hasta el final del archivo se pone roja por cualquier `setInterval`
+        // posterior aunque sea de otro componente, y pasa en vacío si alguien
+        // renombra la banda, porque entonces el patrón no casa con nada y
+        // «no coincide» es justo lo que la aserción pide. `bloqueDeAlpine`
+        // afirma que el bloque existe antes de devolverlo, así que ahí no hay
+        // aprobado por ausencia.
+        $this->assertStringNotContainsString(
+            'setInterval',
+            $this->bloqueDeAlpine($js, 'bandaEstablecimientos'),
+            'La banda volvió a rotar sola: un `setInterval` dentro de su componente es autoplay, y la portada no lo tiene.'
         );
     }
 
@@ -270,26 +289,60 @@ class BandaDeEstablecimientosDeLaPortadaTest extends TestCase
         return false;
     }
 
-    private function seccionDeDescubre(string $html): string
+    /** El documento servido, listo para consultar por XPath. */
+    private function xpathDe(string $html): \DOMXPath
     {
-        $this->assertTrue(
-            (bool) preg_match('/<section class="home-editorial-descubre[^"]*"[^>]*>(.*?)<\/section>/s', $html, $seccion),
-            'La portada no pintó la franja de establecimientos.'
-        );
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
 
-        return $seccion[1];
+        return new \DOMXPath($dom);
     }
 
     /**
+     * La franja de establecimientos, serializada desde el árbol servido.
+     *
+     * Es la raíz del archivo —de aquí cuelgan casi todas las aserciones— y
+     * por eso no se recorta por texto: `<section class="home-editorial-descubre`
+     * exige que `class` sea el primer atributo, y `(.*?)</section>` corta en el
+     * primer cierre, así que un `x-data` delante o una sección anidada dejan
+     * mudas quince aserciones sin que falte nada de la franja.
+     */
+    private function seccionDeDescubre(string $html): string
+    {
+        $secciones = $this->xpathDe($html)->query('//section[contains(concat(" ", normalize-space(@class), " "), " home-editorial-descubre ")]');
+
+        $this->assertSame(1, $secciones->length, 'La portada no pintó la franja de establecimientos.');
+
+        $nodo = $secciones->item(0);
+
+        return $nodo->ownerDocument->saveHTML($nodo);
+    }
+
+    /**
+     * Los nombres de la banda, en orden de documento.
+     *
+     * Se pide el encabezado de cada tarjeta y no cualquier `<h3>` del tramo:
+     * un h3 que no sea título de establecimiento mete un nombre de más, y
+     * bajar el título a `<h4>` por jerarquía deja la lista vacía. Las dos
+     * roturas avisan por el motivo equivocado.
+     *
      * @return list<string>
      */
     private function nombresDeLaBanda(string $seccion): array
     {
-        preg_match_all('/<h3[^>]*>(.*?)<\/h3>/s', $seccion, $titulos);
+        $titulos = $this->xpathDe($seccion)->query(
+            '//article[contains(concat(" ", normalize-space(@class), " "), " home-editorial-establecimiento ")]//h3'
+        );
 
-        return array_values(array_map(
-            fn (string $titulo): string => trim(html_entity_decode(strip_tags($titulo), ENT_QUOTES, 'UTF-8')),
-            $titulos[1]
-        ));
+        $nombres = [];
+
+        foreach ($titulos as $titulo) {
+            $nombres[] = trim(preg_replace('/\s+/u', ' ', $titulo->textContent) ?? '');
+        }
+
+        return $nombres;
     }
 }

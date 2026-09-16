@@ -33,7 +33,9 @@ class EventosEditorialesDeLaPortadaTest extends TestCase
         $this->assertGreaterThanOrEqual(2, $proximos->count());
 
         $html = $this->get('/')->assertOk()->getContent();
-        $seccion = $this->seccionDeEventos($html);
+        $xpath = $this->xpathDe($html);
+        $franja = $this->franjaDeEventos($xpath);
+        $seccion = $this->interiorDe($franja);
 
         $this->assertStringContainsString('Próximos eventos del gremio', $seccion);
         $this->assertStringContainsString('Eventos que mueven la noche del Quindío.', $seccion);
@@ -53,28 +55,43 @@ class EventosEditorialesDeLaPortadaTest extends TestCase
         $this->assertStringNotContainsString('Bolsa de empleo', $seccion);
         $this->assertStringNotContainsString(ajuste('iniciativas_titulo'), $seccion);
 
-        $this->assertSame($proximos->count(), preg_match_all('/class="[^"]*home-editorial-evento(?:\s|")/', $seccion));
+        // Se cuentan elementos que llevan de verdad la clase, no apariciones
+        // del texto `class="…home-editorial-evento` en el marcado: una ligadura
+        // de Alpine que nombre la clase no puede doblar la cuenta.
+        $this->assertSame(
+            $proximos->count(),
+            $xpath->query('.//*['.$this->conClase('home-editorial-evento').']', $franja)->length,
+            'La franja tiene que pintar una tarjeta por cada evento próximo.'
+        );
+
         $this->assertStringContainsString('aria-label="Ver el evento anterior"', $seccion);
         $this->assertStringContainsString('aria-label="Ver el evento siguiente"', $seccion);
         $this->assertStringContainsString('aria-label="Pausar carrusel de eventos"', $seccion);
         $this->assertStringContainsString('aria-pressed="false"', $seccion);
         $this->assertStringContainsString('x-on:click="alternarPausaManual()"', $seccion);
 
-        // Los puntos solo pintan un número con aria-hidden: sin aria-label
-        // son botones sin nombre. `\s` y no `\b` delante del atributo: `\b`
-        // también casa tras `:` y aceptaría un `:aria-label` sin nombre servido.
+        // Los puntos solo pintan un número con aria-hidden: sin aria-label son
+        // botones sin nombre. `@aria-label` lee el atributo servido, así que
+        // una ligadura `:aria-label` de Alpine no cuela como nombre accesible.
         $this->assertSame(
             $proximos->count(),
-            preg_match_all('/<button\b(?=[^>]*home-editorial-eventos__punto)(?=[^>]*\saria-label="Ir al evento )[^>]*>/', $seccion),
+            $xpath->query('.//button['.$this->conClase('home-editorial-eventos__punto').'][starts-with(@aria-label, "Ir al evento ")]', $franja)->length,
             'Cada evento tiene que tener un punto con nombre accesible.'
         );
 
-        foreach ($proximos->values() as $indice => $evento) {
-            $rotulo = 'Ir al evento '.($indice + 1).' de '.$proximos->count().': '.$evento->titulo;
+        // El árbol devuelve el valor del atributo ya decodificado: el rótulo se
+        // compara crudo, y un título con «&» o con comillas no necesita escape
+        // ni rompe la consulta.
+        $rotulosServidos = array_map(
+            static fn (\DOMElement $punto): string => $punto->getAttribute('aria-label'),
+            iterator_to_array($xpath->query('.//button['.$this->conClase('home-editorial-eventos__punto').']', $franja))
+        );
 
-            $this->assertMatchesRegularExpression(
-                '/<button\b(?=[^>]*home-editorial-eventos__punto)(?=[^>]*\saria-label="'.preg_quote(e($rotulo), '/').'")[^>]*>/',
-                $seccion
+        foreach ($proximos->values() as $indice => $evento) {
+            $this->assertContains(
+                'Ir al evento '.($indice + 1).' de '.$proximos->count().': '.$evento->titulo,
+                $rotulosServidos,
+                'El punto '.($indice + 1).' no lleva el rótulo accesible de «'.$evento->titulo.'».'
             );
         }
     }
@@ -92,13 +109,19 @@ class EventosEditorialesDeLaPortadaTest extends TestCase
         ]);
 
         $html = $this->get('/')->assertOk()->getContent();
-        $seccion = $this->seccionDeEventos($html);
+        $xpath = $this->xpathDe($html);
+        $franja = $this->franjaDeEventos($xpath);
+        $seccion = $this->interiorDe($franja);
 
         $this->assertStringContainsString('Foro único de la portada', $seccion);
         $this->assertStringContainsString('href="'.route('eventos.show', $unico).'"', $seccion);
         $this->assertStringContainsString('home-editorial-evento__fallback', $seccion);
         $this->assertStringNotContainsString('videos/asobares-institucional.jpg', $seccion);
-        $this->assertSame(1, preg_match_all('/class="[^"]*home-editorial-evento(?:\s|")/', $seccion));
+        $this->assertSame(
+            1,
+            $xpath->query('.//*['.$this->conClase('home-editorial-evento').']', $franja)->length,
+            'Con un solo evento próximo la franja pinta una sola tarjeta.'
+        );
         $this->assertStringNotContainsString('aria-label="Ver el evento anterior"', $seccion);
         $this->assertStringNotContainsString('href="#"', $seccion);
     }
@@ -157,14 +180,57 @@ class EventosEditorialesDeLaPortadaTest extends TestCase
         $this->assertStringContainsString('alternarPausaManual()', $js);
     }
 
-    private function seccionDeEventos(string $html): string
+    /**
+     * El <section> de la franja editorial de eventos dentro del documento
+     * servido. Se localiza por token de clase sobre el árbol: el orden de los
+     * atributos de la etiqueta no es la regresión que se vigila, y un atributo
+     * nuevo delante de `class` no puede fingir que la franja falta.
+     */
+    private function franjaDeEventos(\DOMXPath $xpath): \DOMElement
     {
-        $this->assertTrue(
-            (bool) preg_match('/<section class="home-editorial-eventos[^"]*"[^>]*>(.*?)<\/section>/s', $html, $seccion),
-            'La portada no pintó la franja editorial de eventos.'
-        );
+        $franja = $xpath->query('//section['.$this->conClase('home-editorial-eventos').']');
 
-        return $seccion[1];
+        $this->assertSame(1, $franja->length, 'La portada no pintó la franja editorial de eventos.');
+
+        return $franja->item(0);
+    }
+
+    /**
+     * El marcado interior de un nodo, tal como se sirvió. Acota a la franja las
+     * aserciones de texto y de valor de atributo —el hero sirve el póster
+     * institucional en esta misma respuesta— y el recorte lo hace el árbol: una
+     * <section> anidada no puede dejar el interior en el encabezado y convertir
+     * un «no contiene» en verde vacío.
+     */
+    private function interiorDe(\DOMElement $nodo): string
+    {
+        $interior = '';
+
+        foreach ($nodo->childNodes as $hijo) {
+            $interior .= $nodo->ownerDocument->saveHTML($hijo);
+        }
+
+        return $interior;
+    }
+
+    /**
+     * Predicado XPath de clase exacta: exige el token entero, para que
+     * `home-editorial-evento__fallback` no cuente como tarjeta.
+     */
+    private function conClase(string $clase): string
+    {
+        return 'contains(concat(" ", normalize-space(@class), " "), " '.$clase.' ")';
+    }
+
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
     }
 
     private function bloqueDeEventos(string $css): string

@@ -257,20 +257,29 @@ class NavbarTresEstadosTest extends TestCase
         $this->assertStringContainsString('data-pais="co"', $popover);
         $this->assertStringContainsString('data-pais="us"', $popover);
 
-        // La fila de English va desde su `lang="en"` hasta el cierre del botón;
-        // `aria-disabled` contiene `disabled` como subcadena, así que el
-        // atributo propio se exige con un espacio delante y un cierre detrás.
-        // Rotura: quitar `disabled` (y solo `disabled`) de esa fila.
-        [$antesDeIngles, $filaIngles] = explode('lang="en"', $popover, 2);
-        $filaIngles = strstr($filaIngles, '</button>', true);
-        $etiquetaDeApertura = strstr($filaIngles, '>', true);
+        // Las dos filas se identifican por su `lang` sobre el ÁRBOL, no por
+        // rebanadas del texto: en el árbol `disabled` y `aria-disabled` son dos
+        // atributos distintos —no uno subcadena del otro—, el orden en que se
+        // escriban da igual, y un atributo nuevo en la fila no mueve nada. Esto
+        // último no es hipotético: el componente anuncia que la fila de un
+        // idioma elegible llevará `x-on:click`, y un `>` dentro del valor de un
+        // atributo parte cualquier recorte por texto de la etiqueta de apertura.
+        // Rotura: quitar `disabled` (y solo `disabled`) de la fila de English.
+        $xpath = $this->xpathDe($html);
+        $filaIngles = '//div[@id="popover-idioma"]//button[@lang="en"]';
 
-        $this->assertMatchesRegularExpression('/\sdisabled(\s|$)/', $etiquetaDeApertura, 'la fila de English lleva el atributo `disabled` propio');
-        $this->assertStringContainsString('aria-disabled="true"', $etiquetaDeApertura);
-        $this->assertStringContainsString('>English<', $filaIngles);
+        $this->assertSame(1, $xpath->query($filaIngles)->length, 'el popover ofrece la fila de English');
+        $this->assertSame(1, $xpath->query($filaIngles.'[@disabled]')->length, 'la fila de English lleva el atributo `disabled` propio');
+        $this->assertSame(1, $xpath->query($filaIngles.'[@aria-disabled="true"]')->length, 'y lo anuncia también a la capa de accesibilidad');
+        $this->assertSame(1, $xpath->query($filaIngles.'/span[normalize-space()="English"]')->length, 'el rótulo cuelga de esa misma fila');
 
-        // Y la de Español no está deshabilitada.
-        $this->assertStringNotContainsString('disabled', strstr($antesDeIngles, 'lang="es"'));
+        // Y la de Español no está deshabilitada, ni de la forma propia ni de la
+        // ARIA. Se exige primero que la fila exista: un cero contado sobre una
+        // fila ausente no vigila nada y pasaría en verde por el motivo contrario.
+        $filaEspanol = '//div[@id="popover-idioma"]//button[@lang="es"]';
+
+        $this->assertSame(1, $xpath->query($filaEspanol)->length, 'el popover ofrece la fila de Español');
+        $this->assertSame(0, $xpath->query($filaEspanol.'[@disabled or @aria-disabled]')->length, 'la fila de Español no está deshabilitada');
 
         $this->assertStringContainsString('aria-pressed="true"', $popover);
         $this->assertStringContainsString('transicion-desplegable', $html);
@@ -800,6 +809,22 @@ class NavbarTresEstadosTest extends TestCase
         $bandeja = $this->regla($movil, '.bandeja');
         $this->assertStringNotContainsString('backdrop-filter', $bandeja, 'la bandeja no es raíz de fondo');
         $this->assertStringContainsString('height: var(--asb-alto-modulo-superior);', $bandeja);
+    }
+
+    /**
+     * El árbol del marcado servido. Lo que se afirma sobre elementos y
+     * atributos se pregunta aquí y no al texto del HTML, que cambia de forma
+     * —orden de atributos, atributos nuevos, espaciado— sin cambiar de fondo.
+     */
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
     }
 
     /** El cuerpo de la primera regla cuyo selector empieza así. */

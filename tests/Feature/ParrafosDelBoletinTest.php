@@ -34,11 +34,23 @@ class ParrafosDelBoletinTest extends TestCase
             'contenido' => "Primer párrafo del editor.{$salto}{$salto}Segundo párrafo del editor.",
         ]);
 
-        $cuerpo = $this->cuerpoDeLaFicha($noticia);
+        [$xpath, $bloque] = $this->bloqueDelCuerpo($noticia);
 
-        $this->assertSame(2, substr_count($cuerpo, '<p>'), "Cuerpo pintado: {$cuerpo}");
-        $this->assertStringContainsString('<p>Primer párrafo del editor.</p>', $cuerpo);
-        $this->assertStringContainsString('<p>Segundo párrafo del editor.</p>', $cuerpo);
+        // Lo que se vigila es que la línea en blanco parta el texto en dos
+        // párrafos y que cada frase se quede en el suyo. Se cuenta sobre el
+        // árbol: cuántos `<p>` cuelgan del bloque no cambia porque la etiqueta
+        // gane un atributo, y contar la cadena `<p>` sí se iría a cero.
+        $this->assertSame(2, $xpath->query('.//p', $bloque)->length, $this->pintado($bloque));
+        $this->assertSame(
+            'Primer párrafo del editor.',
+            $xpath->evaluate('normalize-space((.//p)[1])', $bloque),
+            $this->pintado($bloque),
+        );
+        $this->assertSame(
+            'Segundo párrafo del editor.',
+            $xpath->evaluate('normalize-space((.//p)[2])', $bloque),
+            $this->pintado($bloque),
+        );
     }
 
     public function test_un_salto_simple_se_conserva_y_el_texto_plano_se_escapa(): void
@@ -47,14 +59,27 @@ class ParrafosDelBoletinTest extends TestCase
             'contenido' => "Inscripciones: <inscripciones@gremio.test>\r\nCupos & horarios en la sede.",
         ]);
 
-        $cuerpo = $this->cuerpoDeLaFicha($noticia);
+        [$xpath, $bloque] = $this->bloqueDelCuerpo($noticia);
 
-        $this->assertSame(1, substr_count($cuerpo, '<p>'), "Cuerpo pintado: {$cuerpo}");
-        // El saneado codifica la arroba como `&#64;`; los ángulos tienen que
-        // llegar escapados, no convertidos en una etiqueta que se descarta.
-        $this->assertMatchesRegularExpression(
-            '/Inscripciones: &lt;inscripciones(?:@|&#64;)gremio\.test&gt;<br\s*\/?>Cupos &amp; horarios/',
-            $cuerpo,
+        // El salto simple no abre párrafo: se conserva como un `<br>` dentro
+        // del mismo. Se mide por el árbol porque cómo escribe el saneado esa
+        // etiqueta —y si deja o no un espacio a los lados— es cosa suya.
+        $this->assertSame(1, $xpath->query('.//p', $bloque)->length, $this->pintado($bloque));
+        $this->assertSame(1, $xpath->query('.//p/br', $bloque)->length, $this->pintado($bloque));
+
+        // El árbol devuelve el texto ya descodificado, así que la afirmación no
+        // depende de con qué entidad se escriba la arroba ni el ampersand. Si
+        // los ángulos llegaran sin escapar, el marcador sería una etiqueta y el
+        // saneado se habría comido todo lo que viene detrás.
+        $this->assertSame(
+            'Inscripciones: <inscripciones@gremio.test>',
+            $xpath->evaluate('normalize-space((.//p/br)[1]/preceding-sibling::text()[1])', $bloque),
+            $this->pintado($bloque),
+        );
+        $this->assertSame(
+            'Cupos & horarios en la sede.',
+            $xpath->evaluate('normalize-space((.//p/br)[1]/following-sibling::text()[1])', $bloque),
+            $this->pintado($bloque),
         );
     }
 
@@ -65,7 +90,7 @@ class ParrafosDelBoletinTest extends TestCase
 
         $noticia = Noticia::factory()->visible()->create(['contenido' => $contenido]);
 
-        $cuerpo = $this->cuerpoDeLaFicha($noticia);
+        $cuerpo = $this->cuerpoServidoDeLaFicha($noticia);
 
         $saneadoComoAntes = (new HtmlSanitizer(
             (new HtmlSanitizerConfig)
@@ -74,9 +99,16 @@ class ParrafosDelBoletinTest extends TestCase
                 ->forceHttpsUrls()
         ))->sanitize($contenido);
 
+        // Esta prueba compara bytes a propósito: afirma que el contenido que ya
+        // trae etiquetas sale del saneado sin que la conversión a párrafos lo
+        // toque. El esperado lo calcula la misma librería, así que el árbol no
+        // añadiría nada y sí escondería una diferencia de serialización.
         $this->assertSame(trim($saneadoComoAntes), $cuerpo);
         $this->assertSame(2, substr_count($cuerpo, '<p>'));
         $this->assertStringNotContainsString('&lt;p&gt;', $cuerpo);
+        // Las dos negativas se miden sobre los bytes servidos: lo que se vigila
+        // es que el navegador no reciba el script ni el esquema, y un árbol ya
+        // parseado los habría normalizado.
         $this->assertStringNotContainsString('<script', $cuerpo);
         $this->assertStringNotContainsString('javascript:', $cuerpo);
     }
@@ -91,11 +123,22 @@ class ParrafosDelBoletinTest extends TestCase
             'contenido' => "Horario <de 8 a 12> en la sede.\n\nEscribe a <nombre del contacto> o <a lo sumo cinco> personas.",
         ]);
 
-        $cuerpo = $this->cuerpoDeLaFicha($noticia);
+        [$xpath, $bloque] = $this->bloqueDelCuerpo($noticia);
 
-        $this->assertSame(2, substr_count($cuerpo, '<p>'), "Cuerpo pintado: {$cuerpo}");
-        $this->assertStringContainsString('<p>Horario &lt;de 8 a 12&gt; en la sede.</p>', $cuerpo);
-        $this->assertStringContainsString('Escribe a &lt;nombre del contacto&gt; o &lt;a lo sumo cinco&gt; personas.', $cuerpo);
+        // El texto de cada párrafo se pide al árbol: así la afirmación es que
+        // los ángulos llegaron como texto —el nodo los devuelve descodificados—
+        // y no que estén escritos con una entidad concreta.
+        $this->assertSame(2, $xpath->query('.//p', $bloque)->length, $this->pintado($bloque));
+        $this->assertSame(
+            'Horario <de 8 a 12> en la sede.',
+            $xpath->evaluate('normalize-space((.//p)[1])', $bloque),
+            $this->pintado($bloque),
+        );
+        $this->assertSame(
+            'Escribe a <nombre del contacto> o <a lo sumo cinco> personas.',
+            $xpath->evaluate('normalize-space((.//p)[2])', $bloque),
+            $this->pintado($bloque),
+        );
     }
 
     /** Un byte UTF-8 roto no puede dejar la noticia vacía. */
@@ -105,12 +148,44 @@ class ParrafosDelBoletinTest extends TestCase
 
         $cuerpo = $noticia->contenidoSaneado();
 
-        $this->assertSame(2, substr_count($cuerpo, '<p>'), "Cuerpo pintado: {$cuerpo}");
+        // Los dos párrafos se cuentan sobre el árbol por lo mismo que en la
+        // ficha: el número de `<p>` es estructura, no texto.
+        $this->assertSame(2, $this->xpathDe($cuerpo)->query('//p')->length, "Cuerpo pintado: {$cuerpo}");
         $this->assertStringContainsString('Segundo párrafo.', $cuerpo);
     }
 
-    /** Lo que la ficha pinta dentro del bloque `prose-asobares`. */
-    private function cuerpoDeLaFicha(Noticia $noticia): string
+    /**
+     * El bloque `prose-asobares` de la ficha, con el consultor del árbol.
+     *
+     * Se localiza por XPath y no buscando la clase dentro del HTML servido:
+     * lo que las pruebas vigilan es qué cuelga de ese bloque, y eso no cambia
+     * porque el `<div>` gane un atributo nuevo delante de `class`.
+     *
+     * @return array{\DOMXPath, \DOMElement}
+     */
+    private function bloqueDelCuerpo(Noticia $noticia): array
+    {
+        $html = $this->get(route('boletin.show', $noticia))->assertSuccessful()->getContent();
+
+        $xpath = $this->xpathDe($html);
+        $bloque = $xpath
+            ->query('//div[contains(concat(" ", normalize-space(@class), " "), " prose-asobares ")]')
+            ->item(0);
+
+        $this->assertInstanceOf(
+            \DOMElement::class,
+            $bloque,
+            'La ficha tiene que pintar el cuerpo de la noticia dentro del bloque `prose-asobares`.',
+        );
+
+        return [$xpath, $bloque];
+    }
+
+    /**
+     * Los bytes que la ficha pinta dentro del bloque `prose-asobares`, para la
+     * única prueba que compara la serialización tal cual.
+     */
+    private function cuerpoServidoDeLaFicha(Noticia $noticia): string
     {
         $html = $this->get(route('boletin.show', $noticia))->assertSuccessful()->getContent();
 
@@ -121,5 +196,29 @@ class ParrafosDelBoletinTest extends TestCase
         $cierre = strpos($html, '</div>', $apertura);
 
         return trim(substr($html, $apertura, $cierre - $apertura));
+    }
+
+    /** El cuerpo tal y como quedó pintado, para el mensaje de fallo. */
+    private function pintado(\DOMElement $bloque): string
+    {
+        $documento = $bloque->ownerDocument;
+        $html = '';
+
+        foreach ($bloque->childNodes as $hijo) {
+            $html .= $documento->saveHTML($hijo);
+        }
+
+        return 'Cuerpo pintado: '.trim($html);
+    }
+
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
     }
 }

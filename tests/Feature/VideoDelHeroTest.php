@@ -129,9 +129,35 @@ class VideoDelHeroTest extends TestCase
         $this->assertStringContainsString('aria-label="Reproducir video institucional"', $html);
         $this->assertStringContainsString('aria-pressed="false"', $html);
         $this->assertStringContainsString('x-on:click="alternar()"', $html);
-        $this->assertDoesNotMatchRegularExpression(
-            '/<video\b[^>]*\bautoplay\b/i',
-            $html,
+        // Se mide sobre el árbol y no sobre el texto del marcado. Un barrido
+        // de texto grita sin que falte nada --`data-autoplay="false"` o una
+        // clase que contenga la palabra caen dentro de la ventana-- y calla
+        // cuando no hay nada que mirar: una aserción negativa pasa sola si el
+        // <video> deja de servirse, que es la avería peor porque el hero se
+        // queda mudo sin que la guardia se entere. De ahí que primero se exija
+        // el elemento colgando de su contenedor y solo después se miren sus
+        // atributos, incluido el enlace de Alpine que los escribe.
+        $video = $this->xpathDe($html)->query('//div[contains(@class, "hero-video-fondo")]//video');
+
+        $this->assertSame(
+            1,
+            $video->length,
+            'El hero no sirvió su <video> institucional: sin elemento, la guardia del `autoplay` no vigila nada.'
+        );
+
+        $arranqueAutomatico = [];
+
+        foreach ($video->item(0)->attributes as $atributo) {
+            $nombre = strtolower($atributo->nodeName);
+
+            if ($nombre === 'autoplay' || str_ends_with($nombre, ':autoplay')) {
+                $arranqueAutomatico[] = $nombre;
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $arranqueAutomatico,
             'El <video> del hero salió con `autoplay`: se reproduce aunque hayan pedido menos movimiento.'
         );
 
@@ -147,5 +173,16 @@ class VideoDelHeroTest extends TestCase
             $js,
             '`videoHero` tiene que consultar `reduceMovimiento()` antes de reproducir.'
         );
+    }
+
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
     }
 }

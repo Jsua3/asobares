@@ -59,16 +59,45 @@ class BeneficiosPorAlcanceTest extends TestCase
      * página: «ASOBARES Quindío» es el membrete del sitio y los municipios
      * salen en el formulario de afiliación, así que un `assertSee` a secas
      * pasaría aunque el sello dijera cualquier otra cosa.
+     *
+     * Se busca el sello en el árbol del documento y se lee su texto completo.
+     * Lo que se vigila es «hay un sello y anuncia este territorio», que no
+     * depende de cómo esté escrito el marcado: un atributo nuevo en la etiqueta
+     * o un `<span>` envolviendo el rótulo lo dejan diciendo lo mismo.
      */
     private function assertElSelloDice(string $esperado): void
     {
-        $contenido = $this->get(route('afiliate'))->assertOk()->getContent();
+        $xpath = $this->xpathDe($this->get(route('afiliate'))->assertOk()->getContent());
 
-        $this->assertMatchesRegularExpression(
-            '/'.self::SELLO.'[^>]*>\s*'.preg_quote($esperado, '/').'\s*</u',
-            $contenido,
-            "El sello de alcance no dice «{$esperado}»."
-        );
+        $dichos = [];
+
+        foreach ($xpath->query('//*['.$this->conLaClase(self::SELLO).']') as $sello) {
+            $dichos[] = trim((string) preg_replace('/\s+/u', ' ', $sello->textContent));
+        }
+
+        $this->assertContains($esperado, $dichos, "El sello de alcance no dice «{$esperado}».");
+    }
+
+    /** El documento servido, listo para consultar por XPath. */
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
+    }
+
+    /**
+     * Predicado XPath: el elemento lleva la clase entera, no una subcadena.
+     * Rodear de espacios es lo que impide que `text-apagado-suave` pase por
+     * `text-apagado`, o que una marca ajena que empiece igual pase por el sello.
+     */
+    private function conLaClase(string $clase): string
+    {
+        return 'contains(concat(" ", normalize-space(@class), " "), " '.$clase.' ")';
     }
 
     /**
@@ -80,16 +109,25 @@ class BeneficiosPorAlcanceTest extends TestCase
      * donde vive el token, en `resources/css/tokens.css`, y lo mide
      * `ContrasteDelTextoTenueTest`. Cambiar el color aquí escondería en un
      * componente una decisión que cruza todas las páginas.
+     *
+     * Se cuentan los sellos del árbol y se exige que TODOS lleven el token, no
+     * que alguno lo lleve. Contarlos por separado es lo que evita el aviso al
+     * revés: si la página no pintara ningún sello, la prueba dice que no hay
+     * sello en vez de acusar al token de haberse perdido.
      */
     public function test_el_sello_conserva_el_token_de_color_que_se_midio(): void
     {
         $beneficio = Beneficio::factory()->create(['alcance' => Alcance::Departamental]);
 
-        $contenido = $this->get(route('afiliate'))->assertOk()->getContent();
+        $xpath = $this->xpathDe($this->get(route('afiliate'))->assertOk()->getContent());
+        $sellos = '//*['.$this->conLaClase(self::SELLO).']';
 
-        $this->assertMatchesRegularExpression(
-            '/class="[^"]*'.self::SELLO.'[^"]*text-apagado[^"]*"/u',
-            $contenido,
+        $pintados = $xpath->query($sellos)->length;
+        $this->assertGreaterThan(0, $pintados, 'La página no pintó ningún sello de alcance.');
+
+        $this->assertSame(
+            $pintados,
+            $xpath->query($sellos.'['.$this->conLaClase('text-apagado').']')->length,
             'El sello de alcance perdió `text-apagado`, el token cuyo contraste mide ContrasteDelTextoTenueTest. '
             .'Si se cambia el color hay que volver a medirlo, no suponerlo.'
         );

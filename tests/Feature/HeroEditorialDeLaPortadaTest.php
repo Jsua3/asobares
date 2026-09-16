@@ -69,9 +69,19 @@ class HeroEditorialDeLaPortadaTest extends TestCase
 
         $html = $this->get('/')->assertOk()->getContent();
 
-        $this->assertMatchesRegularExpression(
-            '/<h1\b[^>]*>.*home-editorial-hero-titulo.*La noche construye territorio/s',
-            $html
+        // El revelado editorial es que el texto del titular cuelgue del
+        // elemento que declara la clase, y ese del <h1>. Se mide sobre el
+        // árbol: una ventana `[^>]*` sobre el texto del marcado se corta en el
+        // primer `>` que aparezca dentro del valor de un atributo del <h1>, y
+        // una coincidencia por proximidad se pone verde aunque la clase y el
+        // titular queden sueltos en cualquier punto posterior de la página.
+        $this->assertSame(
+            1,
+            $this->xpathDe($html)->query(
+                '//h1//*[contains(concat(" ", normalize-space(@class), " "), " home-editorial-hero-titulo ")]'
+                .'[contains(., "La noche construye territorio")]'
+            )->length,
+            'El titular de portada ya no envuelve su texto en el elemento que declara el revelado editorial.'
         );
     }
 

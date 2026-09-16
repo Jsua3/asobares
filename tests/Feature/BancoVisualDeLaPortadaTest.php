@@ -168,13 +168,21 @@ class BancoVisualDeLaPortadaTest extends TestCase
 
         $html = $this->get('/')->assertOk()->getContent();
 
-        $this->assertTrue(
-            (bool) preg_match('/<section class="home-editorial-eventos[^"]*"[^>]*>(.*?)<\/section>/s', $html, $seccion),
-            'La portada no pintó la franja editorial de eventos.'
-        );
+        $xpath = $this->xpathDe($html);
+        $franja = $xpath->query('//section[contains(concat(" ", normalize-space(@class), " "), " home-editorial-eventos ")]');
 
-        $this->assertStringContainsString('home-editorial-evento__fallback', $seccion[1]);
-        $this->assertStringNotContainsString('videos/asobares-institucional.jpg', $seccion[1]);
+        $this->assertSame(1, $franja->length, 'La portada no pintó la franja editorial de eventos.');
+
+        // El acotado a la franja es imprescindible: el hero sirve el póster
+        // institucional en esta misma respuesta, así que el «no contiene» solo
+        // significa algo dentro de la sección. El recorte lo hace el árbol, y
+        // no un `(.*?)` que se para en el primer </section>: así una sección
+        // anidada no deja el interior en el encabezado y el «no contiene»
+        // pasando en vacío.
+        $seccion = $this->interiorDe($franja->item(0));
+
+        $this->assertStringContainsString('home-editorial-evento__fallback', $seccion);
+        $this->assertStringNotContainsString('videos/asobares-institucional.jpg', $seccion);
     }
 
     public function test_la_publicidad_sin_archivo_no_reusa_el_hero(): void
@@ -231,5 +239,28 @@ class BancoVisualDeLaPortadaTest extends TestCase
         $this->assertMatchesRegularExpression('/\.home-editorial \.home-editorial-hero-secundario\s*\{[^}]*rgb\(255 255 255 \/ 0\.68\)/s', $css);
         $this->assertMatchesRegularExpression('/\.home-editorial \.home-editorial-video-nota\s*\{[^}]*rgb\(255 255 255 \/ 0\.72\)/s', $css);
         $this->assertMatchesRegularExpression('/\.home-editorial-cta \.home-editorial-eyebrow\s*\{[^}]*rgb\(255 255 255 \/ 0\.78\)/s', $css);
+    }
+
+    /** El marcado interior de un nodo, tal como se sirvió. */
+    private function interiorDe(\DOMElement $nodo): string
+    {
+        $interior = '';
+
+        foreach ($nodo->childNodes as $hijo) {
+            $interior .= $nodo->ownerDocument->saveHTML($hijo);
+        }
+
+        return $interior;
+    }
+
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
     }
 }

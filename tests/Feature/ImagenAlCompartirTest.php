@@ -97,17 +97,57 @@ class ImagenAlCompartirTest extends TestCase
     public function test_las_paginas_sin_imagen_propia_se_comparten_con_la_tarjeta(): void
     {
         foreach (['/', '/quienes-somos', '/abre-tu-negocio', '/directorio', '/contacto'] as $ruta) {
-            $html = $this->get($ruta)->assertOk()->getContent();
+            $xpath = $this->xpathDe($this->get($ruta)->assertOk()->getContent());
 
             $this->assertMatchesRegularExpression(
-                '/<meta property="og:image" content="https?:\/\/[^"]*'.preg_quote(self::TARJETA, '/').'"/',
-                $html,
+                '/^https?:\/\/.*'.preg_quote(self::TARJETA, '/').'$/',
+                $this->contenidoDeMeta($xpath, '//meta[@property="og:image"]', $ruta),
                 "«{$ruta}» se comparte sin imagen, o con una ruta relativa que Open Graph no acepta."
             );
 
-            $this->assertStringContainsString('<meta property="og:image:width" content="1200">', $html);
-            $this->assertStringContainsString('name="twitter:card" content="summary_large_image"', $html);
+            $this->assertSame(
+                '1200',
+                $this->contenidoDeMeta($xpath, '//meta[@property="og:image:width"]', $ruta),
+                "«{$ruta}» no declara el ancho de la tarjeta: el desplegador recorta contra una medida que no existe."
+            );
+
+            $this->assertSame(
+                'summary_large_image',
+                $this->contenidoDeMeta($xpath, '//meta[@name="twitter:card"]', $ruta),
+                "«{$ruta}» se comparte en Twitter sin tarjeta grande."
+            );
         }
+    }
+
+    /**
+     * El `content` de la única etiqueta `<meta>` que casa con la consulta.
+     *
+     * Se pregunta al árbol y no al texto del `<head>`: lo que se vigila es que
+     * la página DECLARE la etiqueta con el valor que toca, y eso no depende de
+     * con qué atributo empiece la etiqueta, de en qué orden los escriba Blade
+     * ni de si el formateador la parte en varias líneas. Exigir exactamente una
+     * coincidencia sube el listón: dos `og:image` son tan defecto como ninguna,
+     * porque el desplegador se queda con la que quiere.
+     */
+    private function contenidoDeMeta(\DOMXPath $xpath, string $consulta, string $ruta): string
+    {
+        $etiquetas = $xpath->query($consulta);
+
+        $this->assertSame(1, $etiquetas->length, "«{$ruta}» no declara exactamente una etiqueta «{$consulta}».");
+
+        return $etiquetas->item(0)->getAttribute('content');
+    }
+
+    /** El documento servido, listo para consultar por XPath. */
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
     }
 
     /**

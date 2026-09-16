@@ -6,6 +6,7 @@ use App\Models\Asociado;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use DOMDocument;
+use DOMNode;
 use DOMXPath;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
@@ -206,11 +207,30 @@ class NavbarMovilTest extends TestCase
         $this->assertStringNotContainsString('leading-', $vista, 'la escala tipográfica gobierna el chip');
         $this->assertStringContainsString("\$rangoCorto = \$rol === 'Establecimiento afiliado' ? 'Afiliado' : \$rol;", $vista);
 
-        $html = $this->actingAs($this->usuarioCon([User::ROL_SUBADMIN]))->get('/contacto')->assertOk()->getContent();
-        $this->assertSame(1, preg_match('/<button[^>]*aria-controls="menu-cuenta"[^>]*>(.*?)<\/button>/s', $html, $chip), 'existe el disparador de cuenta');
-        $this->assertMatchesRegularExpression('/<span class="sr-only">Sec\. Lola Pantoja, Secretaría del gremio: configuración y sesión<\/span>/', $chip[1]);
-        $this->assertMatchesRegularExpression('/<span class="block truncate text-2xs text-tenue lg:hidden">\s*Secretaría del gremio\s*<\/span>/', $chip[1]);
-        $this->assertStringContainsString('>Sec.<', $chip[1]);
+        $xpath = $this->arbol($this->actingAs($this->usuarioCon([User::ROL_SUBADMIN]))->get('/contacto')->assertOk()->getContent());
+
+        // Lo que se vigila del chip es de quién cuelga cada rótulo y qué dice,
+        // así que se mide sobre el árbol: el orden en que el framework escriba
+        // los atributos y cuántas utilidades acompañen a las que importan no
+        // son parte del contrato, y sobre el texto del HTML sí lo serían.
+        $disparador = $xpath->query('//button[@aria-controls="menu-cuenta"]');
+        $this->assertSame(1, $disparador->length, 'existe el disparador de cuenta');
+
+        $this->assertSame(
+            'Sec. Lola Pantoja, Secretaría del gremio: configuración y sesión',
+            $this->texto($xpath->query('.//span[contains(concat(" ", normalize-space(@class), " "), " sr-only ")]', $disparador->item(0))->item(0)),
+            'el nombre accesible empieza por el texto visible (WCAG 2.5.3)'
+        );
+
+        $rango = $xpath->query('.//span[contains(concat(" ", normalize-space(@class), " "), " text-tenue ") and contains(concat(" ", normalize-space(@class), " "), " lg:hidden ")]', $disparador->item(0))->item(0);
+        $this->assertNotNull($rango, 'el renglón de rango es de móvil y va en `text-tenue`: 11 px en `text-apagado` sobre el vidrio no llegan a 4,5:1');
+        $this->assertSame('Secretaría del gremio', $this->texto($rango), 'el renglón de rango cambió de contenido');
+
+        // El rango corto es un elemento propio y no parte del nombre: se apaga
+        // de color sin apagar a la persona.
+        $prefijo = $xpath->query('.//span[contains(concat(" ", normalize-space(@class), " "), " text-apagado ")]', $disparador->item(0))->item(0);
+        $this->assertNotNull($prefijo, 'el chip dejó de pintar el rango corto delante del nombre');
+        $this->assertSame('Sec.', $this->texto($prefijo), 'en la barra cabe el rango corto y no el largo');
     }
 
     /**
@@ -265,14 +285,15 @@ class NavbarMovilTest extends TestCase
         $this->assertStringContainsString(route('mi-cuenta.entrar'), $pestana);
         $this->assertStringNotContainsString('aria-current', $pestana, 'ninguna sección activa: ni el botón ni las filas lo llevan');
         $this->assertStringNotContainsString('origin-top-left', $pestana);
-        // El icono: contorno en reposo, y del vendor, no un path a mano. Desde
-        // el 9 sep 2026 va dentro de `.pestana__icono`, que es de quien cuelga
-        // la gota de la pestaña activa; la gota es opcional aquí porque en esta
-        // comprobación no hay ninguna sección activa.
-        $this->assertMatchesRegularExpression(
-            '/<button[^>]*aria-controls="menu-bolsas-movil"[^>]*>\s*<span class="pestana__icono">\s*(?:<span class="pestana__gota"[^>]*><\/span>\s*)?<svg[^>]*class="h-6 w-6 shrink-0"/s',
-            $pestana
-        );
+        // El icono cuelga de `.pestana__icono`, que es de quien cuelga la gota
+        // de la pestaña activa, y en reposo va de contorno. Es anidamiento, así
+        // que se afirma sobre el árbol: escrito como texto, un atributo nuevo
+        // en cualquiera de los tres elementos —o el orden con que el paquete de
+        // iconos emita los suyos— pondría roja la guardia con el icono intacto.
+        $icono = $this->arbol($pestana)->query('//button[@aria-controls="menu-bolsas-movil"]/span[contains(concat(" ", normalize-space(@class), " "), " pestana__icono ")]/*[local-name()="svg"]');
+        $this->assertSame(1, $icono->length, 'el icono de la pestaña se descolgó de `.pestana__icono`');
+        $this->assertStringContainsString('h-6 w-6 shrink-0', $icono->item(0)->getAttribute('class'));
+        $this->assertSame('none', $icono->item(0)->getAttribute('fill'), 'sin sección activa el icono va de contorno');
         foreach (['role="menu"', 'aria-haspopup', 'x-collapse', 'line-clamp', 'leading-'] as $prohibido) {
             $this->assertStringNotContainsString($prohibido, $pestana);
         }
@@ -440,7 +461,13 @@ class NavbarMovilTest extends TestCase
         $this->assertStringNotContainsString('menu-cuenta', $html);
         $this->assertStringNotContainsString('Cerrar sesión', $html);
         $this->assertStringNotContainsString('modulo-cuenta hidden', File::get(resource_path('views/components/publico/navbar.blade.php')));
-        $this->assertMatchesRegularExpression('/<footer.*href="'.preg_quote(route('mi-cuenta.entrar'), '/').'"[^>]*>\s*Entrar a mi cuenta/s', $html, 'el pie enlaza la entrada en todos los anchos y sin JavaScript');
+        // La contención se afirma sobre el árbol: escrito como texto, `<footer.*href`
+        // solo pide que antes del enlace se haya abierto un <footer> en algún punto
+        // del documento, que es más flojo de lo que la guardia dice vigilar, y a la
+        // vez exige que el rótulo vaya pegado al tag de apertura, que es más duro.
+        $entrada = $this->arbol($html)->query('//footer//a[@href="'.route('mi-cuenta.entrar').'"]');
+        $this->assertSame(1, $entrada->length, 'el pie enlaza la entrada en todos los anchos y sin JavaScript');
+        $this->assertSame('Entrar a mi cuenta', $this->texto($entrada->item(0)));
 
         $conSesion = $this->actingAs($this->usuarioCon([User::ROL_SUBADMIN]))->get('/contacto')->assertOk()->getContent();
         $this->assertStringNotContainsString('Entrar como afiliado', $conSesion);
@@ -921,6 +948,16 @@ class NavbarMovilTest extends TestCase
         libxml_use_internal_errors($anteriores);
 
         return new DOMXPath($documento);
+    }
+
+    /**
+     * El texto de un nodo con los espacios colapsados: la sangría del marcado
+     * no dice nada, y un nodo ausente devuelve cadena vacía para que el fallo
+     * lo cuente la aserción y no un error de tipos.
+     */
+    private function texto(?DOMNode $nodo): string
+    {
+        return $nodo === null ? '' : trim(preg_replace('/\s+/u', ' ', $nodo->textContent));
     }
 
     /** El cuerpo de la PRIMERA regla cuyo selector empieza así. */

@@ -103,9 +103,11 @@ class DirectorioTest extends TestCase
 
         $respuesta->assertSuccessful();
         $respuesta->assertSee($visible->nombre);
-        $this->assertMatchesRegularExpression('/<strong[^>]*data-cifra-final="1"[^>]*>\s*1\s*<\/strong>\s*<span>establecimiento<\/span>/u', $respuesta->getContent());
-        $this->assertMatchesRegularExpression('/<strong[^>]*data-cifra-final="1"[^>]*>\s*1\s*<\/strong>\s*<span>municipio<\/span>/u', $respuesta->getContent());
-        $this->assertMatchesRegularExpression('/<strong[^>]*data-cifra-final="1"[^>]*>\s*1\s*<\/strong>\s*<span>categoría<\/span>/u', $respuesta->getContent());
+        $cobertura = $this->cifrasDeCobertura($respuesta->getContent());
+
+        $this->assertSame(['1', '1'], $this->cifraDe($cobertura, 'establecimiento'), 'la cifra de establecimientos no sale solo de asociados publicados');
+        $this->assertSame(['1', '1'], $this->cifraDe($cobertura, 'municipio'), 'la cifra de municipios no sale solo de asociados publicados');
+        $this->assertSame(['1', '1'], $this->cifraDe($cobertura, 'categoría'), 'la cifra de categorías no sale solo de asociados publicados');
         $respuesta->assertSee('Municipio Visible');
         $respuesta->assertSee('Categoría Visible');
         $respuesta->assertDontSee('Establecimiento Oculto');
@@ -139,7 +141,97 @@ class DirectorioTest extends TestCase
             ->assertDontSee('Categoría Administrativa')
             ->getContent();
 
-        $this->assertMatchesRegularExpression('/<strong[^>]*data-cifra-final="0"[^>]*>\s*0\s*<\/strong>/u', $html);
+        /*
+         * Las TRES cifras, no una cualquiera. La guardia vigila que sin
+         * establecimientos publicados el Directorio no anuncie cobertura que no
+         * tiene, y con «existe alguna cifra en cero» le bastaba con que una de
+         * las tres lo estuviera: pasaba en verde con los municipios en uno.
+         */
+        foreach ($this->cifrasDeCobertura($html) as $rotulo => [$anunciada, $pintada]) {
+            $this->assertSame('0', $anunciada, "sin establecimientos publicados la cifra de «{$rotulo}» no es cero");
+            $this->assertSame('0', $pintada, "sin establecimientos publicados el Directorio pinta «{$rotulo}» distinto de cero");
+        }
+    }
+
+    /**
+     * El dato de cobertura cuyo rótulo habla de `$deQue`.
+     *
+     * Se busca por la raíz y no por la palabra exacta porque el rótulo se
+     * pluraliza con su propia cifra --«1 municipio», «0 municipios»--: buscando
+     * la palabra exacta, una cifra equivocada haría fallar la guardia por no
+     * encontrar la clave, y no por la cifra, que es lo que mira.
+     *
+     * @param  array<string, array{0: string, 1: string}>  $cobertura
+     * @return array{0: string, 1: string}
+     */
+    private function cifraDe(array $cobertura, string $deQue): array
+    {
+        $coincidencias = array_filter(
+            $cobertura,
+            static fn (string $rotulo): bool => str_starts_with($rotulo, $deQue),
+            ARRAY_FILTER_USE_KEY
+        );
+
+        $this->assertCount(
+            1,
+            $coincidencias,
+            "el Directorio no pinta una sola cifra de «{$deQue}»; pinta ".json_encode(array_keys($cobertura), JSON_UNESCAPED_UNICODE)
+        );
+
+        return reset($coincidencias);
+    }
+
+    /**
+     * Cada dato de cobertura del Directorio, indexado por su rótulo visible:
+     * `[rótulo => [valor de data-cifra-final, dígito pintado]]`.
+     *
+     * Se lee del árbol y no del texto del marcado porque lo que la prueba
+     * vigila es la CIFRA, no cómo se escribe la etiqueta que la envuelve: un
+     * atributo nuevo en el rótulo, un envoltorio para animar el contador o un
+     * cambio de `<strong>`/`<span>` no tocan lo que el Directorio afirma. El
+     * rótulo se arma con el texto del dato que no cuelga de la cifra, así que
+     * tampoco depende de que los dos sean hermanos inmediatos.
+     *
+     * @return array<string, array{0: string, 1: string}>
+     */
+    private function cifrasDeCobertura(string $html): array
+    {
+        $xpath = $this->xpathDe($html);
+        $cobertura = [];
+
+        foreach ($xpath->query('//*[contains(concat(" ", normalize-space(@class), " "), " directorio-editorial-cifras__dato ")]') as $dato) {
+            $cifra = $xpath->query('.//*[@data-cifra-final]', $dato)->item(0);
+
+            $this->assertNotNull($cifra, 'un dato de cobertura no pinta su cifra');
+
+            $rotulo = '';
+
+            foreach ($xpath->query('.//text()[not(ancestor::*[@data-cifra-final])]', $dato) as $texto) {
+                $rotulo .= $texto->nodeValue;
+            }
+
+            $rotulo = trim(preg_replace('/\s+/u', ' ', $rotulo));
+
+            $this->assertNotSame('', $rotulo, 'una cifra de cobertura no dice qué cuenta');
+
+            $cobertura[$rotulo] = [$cifra->getAttribute('data-cifra-final'), trim($cifra->textContent)];
+        }
+
+        $this->assertNotEmpty($cobertura, 'el Directorio no pinta el bloque de cobertura');
+
+        return $cobertura;
+    }
+
+    /** El documento servido, listo para consultar por XPath. */
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
     }
 
     public function test_el_directorio_usa_tarjetas_uniformes_y_conserva_distincion_de_destacado(): void

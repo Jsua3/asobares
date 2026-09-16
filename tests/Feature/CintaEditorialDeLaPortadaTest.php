@@ -76,11 +76,13 @@ class CintaEditorialDeLaPortadaTest extends TestCase
     {
         $this->assertFileExists(public_path('img/monograma-asobares.png'));
 
-        $html = $this->get('/')->assertOk()->getContent();
-        $cinta = $this->fragmentoDeLaCinta($html);
+        $xpath = $this->xpathDe($this->get('/')->assertOk()->getContent());
+        $cinta = $this->nodoDeLaCinta($xpath);
 
-        $this->assertStringContainsString('img/monograma-asobares.png', $cinta);
-        $this->assertStringContainsString('href="'.route('inicio').'"', $cinta);
+        // El marcado se serializa desde el nodo ya localizado: las aserciones de
+        // destino y de texto visible siguen leyéndose sobre cadena, pero el
+        // recorte ya no depende de qué atributo va primero.
+        $marcado = $cinta->ownerDocument->saveHTML($cinta);
 
         // El enlace a inicio solo contiene el isotipo, así que su nombre
         // accesible es el alt; y un <aside> sin etiqueta no se distingue de
@@ -88,69 +90,100 @@ class CintaEditorialDeLaPortadaTest extends TestCase
         $nombreDelSitio = (string) ajuste('sitio_nombre');
 
         $this->assertNotSame('', trim($nombreDelSitio), 'Sin nombre del sitio la cinta se queda sin nombre accesible.');
-        $this->assertMatchesRegularExpression(
-            '/^<aside\b(?=[^>]*class="home-editorial-cinta")(?=[^>]*aria-label="'.preg_quote(e($nombreDelSitio), '/').'")[^>]*>/',
-            $cinta,
+        $this->assertSame(
+            $nombreDelSitio,
+            $cinta->getAttribute('aria-label'),
             'La cinta perdió su aria-label.'
         );
-        $this->assertStringContainsString('x-data="cintaEditorial"', $cinta);
-        $this->assertStringContainsString('x-bind:class="pausada && \'home-editorial-cinta--pausada\'"', $cinta);
-        $this->assertStringContainsString('aria-label="Pausar cinta editorial"', $cinta);
-        $this->assertStringContainsString('aria-pressed="false"', $cinta);
-        $this->assertStringContainsString('x-on:click="alternar()"', $cinta);
-        $this->assertMatchesRegularExpression(
-            '/<a href="'.preg_quote(route('inicio'), '/').'" class="home-editorial-cinta__marca[^"]*">\s*<img\b(?=[^>]*img\/monograma-asobares\.png)(?=[^>]*\salt="'.preg_quote(e($nombreDelSitio), '/').'")[^>]*>/',
-            $cinta,
+
+        // El cableado se lee del atributo del nodo, no de una cadena buscada en
+        // el fragmento: así consta de qué elemento cuelga, y el valor llega sin
+        // escapar, que es como lo recibe Alpine.
+        $this->assertSame('cintaEditorial', $cinta->getAttribute('x-data'), 'La cinta perdió su componente de Alpine.');
+        $this->assertSame(
+            "pausada && 'home-editorial-cinta--pausada'",
+            $cinta->getAttribute('x-bind:class'),
+            'La cinta ya no refleja el estado de pausa en su clase.'
+        );
+
+        $botones = $xpath->query('.//button[contains(concat(" ", normalize-space(@class), " "), " control-movimiento--cinta ")]', $cinta);
+
+        $this->assertSame(1, $botones->length, 'La cinta se quedó sin botón de pausa.');
+        $this->assertSame('Pausar cinta editorial', $botones->item(0)->getAttribute('aria-label'));
+        $this->assertSame('false', $botones->item(0)->getAttribute('aria-pressed'));
+        $this->assertSame('alternar()', $botones->item(0)->getAttribute('x-on:click'), 'El botón de pausa dejó de estar cableado.');
+
+        // El isotipo cuelga del enlace a inicio: se afirma el anidamiento y no
+        // que `<img` sea el texto pegado al `>` del enlace, que un <span>
+        // envolvente o un comentario rompen sin que falte nada.
+        $marcas = $xpath->query('.//a[contains(concat(" ", normalize-space(@class), " "), " home-editorial-cinta__marca ")]', $cinta);
+
+        $this->assertSame(1, $marcas->length, 'La cinta perdió el enlace del isotipo.');
+        $this->assertSame(route('inicio'), $marcas->item(0)->getAttribute('href'), 'El isotipo de la cinta ya no vuelve al inicio.');
+
+        $isotipos = $xpath->query('.//img[contains(@src, "img/monograma-asobares.png")]', $marcas->item(0));
+
+        $this->assertSame(1, $isotipos->length, 'El enlace del isotipo ya no cuelga del monograma oficial.');
+        $this->assertSame(
+            $nombreDelSitio,
+            $isotipos->item(0)->getAttribute('alt'),
             'El enlace del isotipo se quedó sin nombre accesible: el alt no puede ir vacío.'
         );
 
-        $this->assertStringContainsString('href="'.route('directorio.index').'"', $cinta);
-        $this->assertStringContainsString('href="'.route('guia.index').'"', $cinta);
-        $this->assertStringContainsString('href="'.route('eventos.index').'"', $cinta);
-        $this->assertStringContainsString('href="'.route('empleo.index').'"', $cinta);
-        $this->assertStringContainsString('href="'.route('boletin.index').'"', $cinta);
-        $this->assertStringContainsString('href="'.route('aliados.index').'"', $cinta);
-        $this->assertStringContainsString('href="'.route('afiliate').'"', $cinta);
-        $this->assertStringContainsString('href="'.route('quienes-somos').'#iniciativas"', $cinta);
+        $this->assertStringContainsString('href="'.route('directorio.index').'"', $marcado);
+        $this->assertStringContainsString('href="'.route('guia.index').'"', $marcado);
+        $this->assertStringContainsString('href="'.route('eventos.index').'"', $marcado);
+        $this->assertStringContainsString('href="'.route('empleo.index').'"', $marcado);
+        $this->assertStringContainsString('href="'.route('boletin.index').'"', $marcado);
+        $this->assertStringContainsString('href="'.route('aliados.index').'"', $marcado);
+        $this->assertStringContainsString('href="'.route('afiliate').'"', $marcado);
+        $this->assertStringContainsString('href="'.route('quienes-somos').'#iniciativas"', $marcado);
 
-        $this->assertStringContainsString('Directorio', $cinta);
-        $this->assertStringContainsString('Abre tu negocio', $cinta);
-        $this->assertStringContainsString('Eventos', $cinta);
-        $this->assertStringContainsString('Empleo', $cinta);
-        $this->assertStringContainsString('Boletín', $cinta);
-        $this->assertStringContainsString('Aliados', $cinta);
-        $this->assertStringContainsString('Iniciativas', $cinta);
-        $this->assertStringContainsString('Afíliate', $cinta);
+        $this->assertStringContainsString('Directorio', $marcado);
+        $this->assertStringContainsString('Abre tu negocio', $marcado);
+        $this->assertStringContainsString('Eventos', $marcado);
+        $this->assertStringContainsString('Empleo', $marcado);
+        $this->assertStringContainsString('Boletín', $marcado);
+        $this->assertStringContainsString('Aliados', $marcado);
+        $this->assertStringContainsString('Iniciativas', $marcado);
+        $this->assertStringContainsString('Afíliate', $marcado);
 
-        $this->assertStringNotContainsString('href="#"', $cinta);
-        $this->assertStringNotContainsString('Eventos y capacitaciones', $cinta);
-        $this->assertStringNotContainsString('Bolsa de empleo', $cinta);
-        $this->assertStringNotContainsString('Boletín del gremio', $cinta);
-        $this->assertStringNotContainsString('Aliados del capítulo', $cinta);
-        $this->assertStringNotContainsString('Las iniciativas más importantes', $cinta);
+        $this->assertStringNotContainsString('href="#"', $marcado);
+        $this->assertStringNotContainsString('Eventos y capacitaciones', $marcado);
+        $this->assertStringNotContainsString('Bolsa de empleo', $marcado);
+        $this->assertStringNotContainsString('Boletín del gremio', $marcado);
+        $this->assertStringNotContainsString('Aliados del capítulo', $marcado);
+        $this->assertStringNotContainsString('Las iniciativas más importantes', $marcado);
     }
 
     public function test_todos_los_items_visibles_de_la_cinta_son_enlaces(): void
     {
-        $html = $this->get('/')->assertOk()->getContent();
-        $cinta = $this->fragmentoDeLaCinta($html);
+        $xpath = $this->xpathDe($this->get('/')->assertOk()->getContent());
+        $cinta = $this->nodoDeLaCinta($xpath);
 
-        $this->assertTrue(
-            (bool) preg_match(
-                '/<ul class="home-editorial-cinta__lista">(.*?)<\/ul>/s',
-                $cinta,
-                $visible
-            )
+        // La lista visible se distingue de la copia decorativa por no llevar
+        // `aria-hidden`, no por el literal `<ul class="…">`: ahí un `x-ref` o
+        // una clase de más dejan el recorte vacío y el aviso llega por lo
+        // contrario de lo que mira —«la cinta no tiene ítems»— con los ocho
+        // servidos.
+        $visibles = $xpath->query(
+            './/ul[contains(concat(" ", normalize-space(@class), " "), " home-editorial-cinta__lista ")][not(@aria-hidden)]/li',
+            $cinta
         );
 
-        preg_match_all('/<li class="home-editorial-cinta__item">(.*?)<\/li>/s', $visible[1], $items);
+        $this->assertGreaterThan(0, $visibles->length, 'La cinta no pintó ningún ítem visible.');
 
-        $this->assertNotSame([], $items[1]);
+        foreach ($visibles as $item) {
+            $enlaces = $xpath->query('.//a[contains(concat(" ", normalize-space(@class), " "), " home-editorial-cinta__enlace ")]', $item);
 
-        foreach ($items[1] as $item) {
+            $this->assertSame(1, $enlaces->length, 'Un ítem visible de la cinta no es un enlace.');
+
+            // El destino sí se mide con una expresión, pero ya sobre el valor
+            // del atributo y no sobre el texto de la etiqueta: reordenar las
+            // clases o intercalar un atributo no cambia adónde lleva.
             $this->assertMatchesRegularExpression(
-                '/<a href="https?:\/\/[^"]+" class="home-editorial-cinta__enlace/',
-                $item,
+                '/^https?:\/\/\S+$/',
+                $enlaces->item(0)->getAttribute('href'),
                 'Un ítem visible de la cinta no tiene destino real.'
             );
         }
@@ -158,28 +191,30 @@ class CintaEditorialDeLaPortadaTest extends TestCase
 
     public function test_la_copia_del_loop_no_se_lee_ni_se_tabula(): void
     {
-        $html = $this->get('/')->assertOk()->getContent();
-        $cinta = $this->fragmentoDeLaCinta($html);
+        $xpath = $this->xpathDe($this->get('/')->assertOk()->getContent());
+        $cinta = $this->nodoDeLaCinta($xpath);
 
-        $this->assertSame(
-            1,
-            preg_match_all('/<ul class="home-editorial-cinta__lista" aria-hidden="true">/', $cinta)
+        // Se cuentan nodos ocultos al lector, no apariciones de una cadena que
+        // fija el orden de los atributos: ahí un atributo de más baja la cuenta
+        // a cero y la guardia denuncia que falta la copia habiendo exactamente
+        // una.
+        $copias = $xpath->query(
+            './/ul[contains(concat(" ", normalize-space(@class), " "), " home-editorial-cinta__lista ")][@aria-hidden="true"]',
+            $cinta
         );
 
-        $this->assertTrue(
-            (bool) preg_match(
-                '/<ul class="home-editorial-cinta__lista" aria-hidden="true">(.*?)<\/ul>/s',
-                $cinta,
-                $copia
-            )
-        );
+        $this->assertSame(1, $copias->length, 'La cinta tiene que llevar exactamente una copia decorativa del recorrido.');
 
-        preg_match_all('/<a\b[^>]*>/', $copia[1], $enlaces);
+        $enlaces = $xpath->query('.//a', $copias->item(0));
 
-        $this->assertNotSame([], $enlaces[0], 'La copia visual tiene que seguir siendo clicable.');
+        $this->assertGreaterThan(0, $enlaces->length, 'La copia visual tiene que seguir siendo clicable.');
 
-        foreach ($enlaces[0] as $enlace) {
-            $this->assertStringContainsString('tabindex="-1"', $enlace);
+        foreach ($enlaces as $enlace) {
+            $this->assertSame(
+                '-1',
+                $enlace->getAttribute('tabindex'),
+                'La copia decorativa no puede entrar en el orden de tabulación.'
+            );
         }
     }
 
@@ -244,13 +279,33 @@ class CintaEditorialDeLaPortadaTest extends TestCase
         return substr($css, $inicio, $fin - $inicio);
     }
 
-    private function fragmentoDeLaCinta(string $html): string
+    /** El documento servido, listo para consultar por XPath. */
+    private function xpathDe(string $html): \DOMXPath
     {
-        $this->assertTrue(
-            (bool) preg_match('/<aside class="home-editorial-cinta"[^>]*>.*?<\/aside>/s', $html, $coincidencias),
-            'La portada no pintó la cinta editorial.'
-        );
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
 
-        return $coincidencias[0];
+        return new \DOMXPath($dom);
+    }
+
+    /**
+     * La cinta como nodo del árbol servido, y una sola vez.
+     *
+     * El nombre de etiqueta sí forma parte del contrato —la cinta es un
+     * landmark complementario—, pero el recorte por `<aside class="…"` exige
+     * además que `class` sea el primer atributo y que su valor sea exacto, así
+     * que un `x-data` delante o una variante de clase dejan sin cinta a las
+     * tres pruebas que cuelgan de aquí con la cinta servida y entera.
+     */
+    private function nodoDeLaCinta(\DOMXPath $xpath): \DOMElement
+    {
+        $cintas = $xpath->query('//aside[contains(concat(" ", normalize-space(@class), " "), " home-editorial-cinta ")]');
+
+        $this->assertSame(1, $cintas->length, 'La portada no pintó la cinta editorial.');
+
+        return $cintas->item(0);
     }
 }

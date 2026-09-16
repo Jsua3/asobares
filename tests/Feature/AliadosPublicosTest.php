@@ -45,9 +45,11 @@ class AliadosPublicosTest extends TestCase
 
         /*
          * assertSeeInOrder tolera duplicados, así que un aliado pintado en los
-         * dos niveles seguiría en orden. Cada nivel se afirma dentro de su
-         * propia <section>. Roturas: quitar el filtro de tipo de cualquiera de
-         * los dos niveles en PaginaController::aliados.
+         * dos niveles seguiría en orden. Cada nivel se afirma sobre el texto de
+         * su propia región, recortada del árbol: una región anidada dentro del
+         * nivel no muerde el trozo que se mira, y la etiqueta que la pinte da
+         * igual mientras siga rotulada. Roturas: quitar el filtro de tipo de
+         * cualquiera de los dos niveles en PaginaController::aliados.
          */
         $institucionales = $this->seccion($html, 'aliados-institucionales');
         $comerciales = $this->seccion($html, 'aliados-comerciales');
@@ -91,17 +93,24 @@ class AliadosPublicosTest extends TestCase
 
         /*
          * El pie ya lleva target="_blank" y rel="noopener", así que buscarlos
-         * en toda la página no protege la tarjeta. Se exigen en la etiqueta <a>
-         * del aliado. Roturas: cambiar rel="noopener" por rel="external" en la
-         * tarjeta; quitarle target="_blank".
+         * en toda la página no protege la tarjeta. Se exigen sobre el nodo <a>
+         * del aliado, tomado del árbol: lo que se vigila es que la tarjeta
+         * enlace al sitio y aísle el opener, no en qué orden se serializan sus
+         * atributos. Roturas: cambiar rel="noopener" por rel="external" en la
+         * tarjeta; quitarle target="_blank"; dejar de enlazar con un <a>.
          */
-        $this->assertSame(
-            1,
-            preg_match('/<a href="https:\/\/example\.com\/aliado"[^>]*>/', $respuesta->getContent(), $etiqueta),
-            'la tarjeta no enlaza al sitio del aliado'
+        $enlaces = $this->xpathDe($respuesta->getContent())
+            ->query('//a[@href="https://example.com/aliado"]');
+
+        $this->assertSame(1, $enlaces->length, 'la tarjeta no enlaza al sitio del aliado');
+
+        $etiqueta = $enlaces->item(0);
+        $this->assertSame('_blank', $etiqueta->getAttribute('target'), 'el enlace de la tarjeta abre en otra pestaña');
+        $this->assertContains(
+            'noopener',
+            preg_split('/\s+/', trim($etiqueta->getAttribute('rel'))),
+            'el enlace de la tarjeta lleva noopener en su propia etiqueta'
         );
-        $this->assertStringContainsString('target="_blank"', $etiqueta[0], 'el enlace de la tarjeta abre en otra pestaña');
-        $this->assertMatchesRegularExpression('/\srel="[^"]*\bnoopener\b[^"]*"/', $etiqueta[0], 'el enlace de la tarjeta lleva noopener en su propia etiqueta');
     }
 
     public function test_un_aliado_sin_logo_no_rompe_la_pagina(): void
@@ -189,15 +198,24 @@ class AliadosPublicosTest extends TestCase
             ->assertSee(route('aliados.index'), escape: false);
     }
 
-    /** El contenido de la <section> que etiqueta el encabezado con ese id. */
+    /** El texto de la región que etiqueta el encabezado con ese id. */
     private function seccion(string $html, string $encabezado): string
     {
-        $this->assertSame(
-            1,
-            preg_match('/<section\b[^>]*aria-labelledby="'.preg_quote($encabezado, '/').'"[^>]*>(.*?)<\/section>/s', $html, $trozos),
-            "la página no tiene la sección {$encabezado}"
-        );
+        $regiones = $this->xpathDe($html)->query('//*[@aria-labelledby="'.$encabezado.'"]');
 
-        return $trozos[1];
+        $this->assertSame(1, $regiones->length, "la página no tiene la sección {$encabezado}");
+
+        return $regiones->item(0)->textContent;
+    }
+
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
     }
 }
