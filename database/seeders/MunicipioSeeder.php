@@ -8,8 +8,24 @@ use Illuminate\Database\Seeder;
 class MunicipioSeeder extends Seeder
 {
     /**
-     * Los 8 municipios donde hoy hay afiliados, con su centro aproximado
-     * para ubicar los pines del mapa.
+     * Los 12 municipios del Quindío, con su centro aproximado para ubicar los
+     * pines del mapa.
+     *
+     * Los 8 primeros son donde hay afiliados. Los 4 últimos —Buenavista,
+     * Córdoba, Génova y Pijao— entraron el 15 de septiembre de 2026 con la guía
+     * normativa: el archivo del gremio cubre los doce municipios y sin ellos no
+     * hay a qué colgar sus trámites. No tienen afiliados, así que sus
+     * coordenadas no las lee nadie hoy; van por completitud y porque
+     * `AsociadoSeeder` espera esta forma para todas las filas.
+     *
+     * ⚠️ El filtro de municipios del **directorio** lista todos tengan o no
+     * fichas, así que estos cuatro lo alargan de 8 a 12 entradas vacías. Está
+     * anotado como deuda en `estado.md` §4 y se arregla en el directorio, no
+     * aquí: la guía sí filtra bien (ver `GuiaController::index`).
+     *
+     * Coordenadas de los cuatro nuevos: Wikipedia en español, consultada el 15
+     * de septiembre de 2026 vía su API de `coordinates`. Las 8 anteriores se
+     * dejan como estaban.
      *
      * @var array<string, array{slug: string, lat: float, lng: float}>
      */
@@ -22,6 +38,10 @@ class MunicipioSeeder extends Seeder
         'Montenegro' => ['slug' => 'montenegro', 'lat' => 4.5661, 'lng' => -75.7494],
         'Quimbaya' => ['slug' => 'quimbaya', 'lat' => 4.6231, 'lng' => -75.7639],
         'La Tebaida' => ['slug' => 'la-tebaida', 'lat' => 4.4517, 'lng' => -75.7864],
+        'Buenavista' => ['slug' => 'buenavista', 'lat' => 4.3597, 'lng' => -75.7392],
+        'Córdoba' => ['slug' => 'cordoba', 'lat' => 4.3911, 'lng' => -75.6878],
+        'Génova' => ['slug' => 'genova', 'lat' => 4.2067, 'lng' => -75.7906],
+        'Pijao' => ['slug' => 'pijao', 'lat' => 4.3328, 'lng' => -75.7056],
     ];
 
     public function run(): void

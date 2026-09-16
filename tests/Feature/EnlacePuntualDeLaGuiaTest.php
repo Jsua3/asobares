@@ -101,26 +101,63 @@ class EnlacePuntualDeLaGuiaTest extends TestCase
     }
 
     /**
-     * Deja constancia medida de la deuda que este cambio NO cierra, para que
-     * quien lea la suite sepa que el pendiente es contenido y no código. Si
-     * un día alguien siembra las URL buenas, esta prueba se pone roja y hay
-     * que venir a celebrarlo y borrarla.
+     * Medía la deuda de OBS3-10 exigiendo **cero** enlaces puntuales sembrados,
+     * y el 15 de septiembre de 2026 se puso roja: el archivo del gremio para los
+     * doce municipios trajo los dos primeros que sí abren el trámite (Calarcá).
+     * Era el día que la propia prueba anunciaba —«hay que venir a celebrarlo»—,
+     * así que la deuda se sigue midiendo, pero donde de verdad queda.
+     *
+     * Y queda en **Armenia**: sus siete enlaces salen del documento de la
+     * Alcaldía, que no trae las URL de trámite, y esa es la decisión D-04 que
+     * sigue esperando a que el gremio las consiga. El día que lleguen, esta
+     * prueba se pone roja otra vez y se borra de una vez por todas.
      */
-    public function test_los_enlaces_sembrados_siguen_siendo_de_portada(): void
+    public function test_a_armenia_todavia_le_faltan_las_urls_de_tramite(): void
     {
         $this->seed(DatabaseSeeder::class);
 
-        $conEnlace = RequisitoApertura::query()->whereNotNull('enlace_externo')->get();
+        $armenia = Municipio::where('slug', 'armenia')->firstOrFail();
 
-        $this->assertNotEmpty($conEnlace, 'El sembrador debería traer trámites con enlace.');
+        $conEnlace = RequisitoApertura::query()
+            ->where('municipio_id', $armenia->id)
+            ->whereNotNull('enlace_externo')
+            ->get();
 
-        $puntuales = $conEnlace->filter->enlaceEsPuntual();
+        $this->assertNotEmpty($conEnlace, 'La guía de Armenia debería traer trámites con enlace.');
 
-        $this->assertCount(
-            0,
+        $puntuales = $conEnlace->filter->enlaceEsPuntual()->pluck('enlace_externo')->all();
+
+        $this->assertSame(
+            [],
             $puntuales,
-            'Ya hay enlaces puntuales sembrados: OBS3-10 dejó de estar bloqueado por el insumo del gremio. '
-            .'Actualiza esta prueba y el §27.2.'
+            'Armenia ya tiene enlaces al trámite: D-04 dejó de estar bloqueada. '
+            .'Celebra, borra esta prueba y anótalo en el §27.2. Enlaces: '.implode(', ', $puntuales)
+        );
+    }
+
+    /**
+     * La otra mitad de la misma regla, que antes no se podía escribir porque no
+     * había un solo enlace bueno: lo que SÍ se siembra, abre el trámite. Es lo
+     * que separa a este cambio de haber volcado el archivo del gremio entero.
+     */
+    public function test_fuera_de_armenia_no_se_siembra_ningun_enlace_a_portada(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        $armenia = Municipio::where('slug', 'armenia')->firstOrFail();
+
+        $mentirosos = RequisitoApertura::query()
+            ->where('municipio_id', '!=', $armenia->id)
+            ->whereNotNull('enlace_externo')
+            ->get()
+            ->reject->enlaceEsPuntual()
+            ->pluck('enlace_externo')
+            ->all();
+
+        $this->assertSame(
+            [],
+            $mentirosos,
+            'Se sembraron enlaces a portada fuera de Armenia: '.implode(', ', $mentirosos)
         );
     }
 
