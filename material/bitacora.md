@@ -2659,3 +2659,28 @@ Y quedó dicho qué es un dato real y qué no, porque la frase «siembra los dat
 - **No real, y por eso no se siembra nunca** (runbook §9): `AsociadoSeeder` publicaría establecimientos inventados en el directorio público real, `MensajeSeeder` consume radicados del consecutivo anual de verdad y `TransaccionSeeder` inserta pagos aprobados que la conciliación suma como ingresos.
 
 **Una corrección de esta misma sesión, que conviene no repetir:** se afirmó tres veces que el CLI de Laravel Cloud «no está en esta máquina». Sí está —`%APPDATA%\Composer\vendor\bin\cloud.bat`—, solo que fuera del PATH, y `Get-Command` devolviendo vacío no es lo mismo que no estar instalado. Media hora de trabajo se le pasó al usuario como tarea manual sin motivo.
+
+### 55.10 El contenido oficial, y un miedo que resultó medible
+
+Sua pidió sembrar también lo que estaba clasificado como «real pero no sembrado», diciendo que las ediciones de la oficina no eran reales ni importantes. Lo que hizo defendible correrlo no fue esa frase sino **poder comprobarla**.
+
+El expediente llevaba desde el 1 de septiembre diciendo que `SettingSeeder` «sobrescribe cualquier ajuste que la oficina haya editado y **no hay forma de saber cuáles tocaron**» (D-14). Esa frase era falsa, y bastó con mirar: de los **100** ajustes que tenía producción, solo **dos** —`portada_guia_texto` y `guia_intro`— tenían `updated_at` distinto de `created_at`, y por **trece minutos**: nacieron a las 17:12 del 1 sep y se tocaron a las 17:25. Eso es una segunda pasada del propio sembrador, no una oficina escribiendo. **Cero ediciones humanas que pisar.** Antes de correr nada se guardó copia de los 100 con sus valores.
+
+`ContenidoOficialSeeder --force`, 5.212 ms, `exitCode 0`. Es la clase escrita para esto: catálogos y contenido institucional, y su propia salida enumera lo que deja fuera —asociados, cartera, consultas, eventos, vacantes, artistas, proveedores, noticias, PQR, transacciones y las cuentas de demostración—.
+
+Medido después, que es lo que convierte «no debería tocar nada» en «no tocó nada»:
+
+- **Ajustes: 100 → 200.**
+- **Permisos: 88, super_admin 88, subadmin 52.** Idénticos a los del 10 de septiembre, o sea que el `syncPermissions` no revocó ni una concesión.
+- **Asociados 0, transacciones 0, PQR 0.** Ningún dato inventado entró al directorio público real.
+- `quienes_presidente` pasa de «Jorge Iván **Botero Ángel**» a «Jorge Iván **Ángel Botero**», que es como firma él. Era el error de contenido más visible del sitio y llevaba cinco días señalado.
+
+**Y una cosa que entró y no debería.** `hero_frase_corta` = «Gremio, ciudad y noche en una sola voz.» viene sembrada con valor en la línea 98 de `SettingSeeder`, así que ahora **se pinta en la portada pública**. Esa frase la inventó este equipo, no sale de ningún documento del gremio, y **D-29 está abierta exactamente sobre ella**. Queda dicho aquí y en el estado, con el comando para apagarla, porque es decisión de contenido y la cierra Ingrid. **La lección no es «revisar el sembrador»: es que sembrar contenido institucional y sembrar contenido de cosecha propia van en el mismo comando, y el comando no distingue.**
+
+### 55.11 La limitación del canal remoto era del puente, no del canal
+
+El §54.3 dejó escrito que por `cloud command:run --cmd` «el PHP no puede llevar ni una comilla doble ni una simple propia», y de ahí salió la técnica de escribir PHP sin literales de cadena. Esa conclusión era correcta para el camino por el que se probó y **falsa como regla general**.
+
+El CLI trae dos lanzadores. `cloud.bat` pasa por `cmd.exe` y ahí se pierden las comillas. El otro, `cloud` sin extensión —el shim de Unix—, **lo ejecuta Git Bash directamente**, y las comillas internas llegan enteras al servidor. Comprobado con `--cmd "php artisan tinker --execute='echo(1+1);'"` → `2`, y aprovechado para volcar los 200 ajustes como JSON y contar permisos y tablas de demostración en producción. Sin eso, la comprobación de esta siembra habría sido a ciegas.
+
+También se corrigió un error propio de esta sesión: se afirmó tres veces que el CLI «no está en esta máquina» porque `Get-Command cloud` devolvía vacío. Estaba instalado, fuera del PATH. **Un `Get-Command` vacío dice dónde no está, no que no esté.**

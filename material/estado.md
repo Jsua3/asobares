@@ -10,11 +10,19 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 >
 > **Comprobado contra la URL pública, municipio por municipio, no contra la base:** Armenia **8** entidades y una sin verificar; los otros once, **13** cada uno y **4** sin verificar —Planeación, Bomberos, Salud y Rentas, los bloques locales que el archivo del gremio trae en «Pendiente»—. **Total servido: 151 fichas**, que es exactamente lo que afirma `GuiaDeLosDoceMunicipiosTest`. **Ni un costo en pesos** en ninguna página.
 >
-> **Lo que NO se sembró, y por qué.** `SettingSeeder` —o `ContenidoOficialSeeder`, que lo arrastra—: producción tiene **109 claves** y la rama siembra **200**, así que faltan 91, entre ellas los textos que Ingrid volvió administrables en Directorio y Guía, y también el nombre del presidente con los apellidos en su orden. El coste es que `updateOrCreate` **pisa cualquier ajuste que la oficina haya editado** desde el 3 de septiembre y no hay forma de saber cuáles tocaron (D-14). Ingrid pidió expresamente no correrlo el 11 sep. Sigue siendo una decisión aplazada, no un olvido.
+> **Y el contenido oficial también, a las 22:25.** `ContenidoOficialSeeder --force` (5.212 ms, `exitCode 0`), que es la clase hecha para la base real: catálogos y contenido institucional, sin nada de demostración. **Los ajustes pasan de 100 a 200.**
+>
+> **El miedo que bloqueaba esto resultó medible, y era infundado.** El expediente decía «no hay forma de saber qué ajustes tocó la oficina» (D-14). Sí la hay: de los **100** ajustes que había, solo **dos** tenían `updated_at` distinto de `created_at` —`portada_guia_texto` y `guia_intro`, los dos el 1 sep a las 17:25, **trece minutos** después de nacer a las 17:12—, o sea una segunda pasada del propio sembrador y no la oficina escribiendo. Copia de los 100 con sus valores, tomada antes, en el scratchpad de la sesión.
+>
+> **Lo que arregló:** `quienes_presidente` pasa de «Jorge Iván **Botero Ángel**» a «Jorge Iván **Ángel Botero**», que es como firma él en el documento del gremio. Era el error de contenido más visible del sitio.
+>
+> **Lo que no tocó, comprobado después:** permisos **88**, super_admin **88**, subadmin **52** —idénticos, el `syncPermissions` no revocó nada— y asociados, transacciones y PQR en **0**. Ningún dato de demostración entró.
+>
+> ⚠️ **Lo que sí metió y no debería estar:** `hero_frase_corta` = «Gremio, ciudad y noche en una sola voz.», que **ahora se pinta en la portada pública**. Esa frase la inventó este equipo, no sale de ningún documento del gremio, y **D-29 está abierta justo sobre ella**. Se apaga en un comando —`Setting::where(clave, hero_frase_corta)->update(valor => null)`— y la vista vuelve a no pintarla. Decisión de contenido: la cierra Ingrid, no la sesión.
 >
 > **Lo que no se siembra nunca** (runbook §9): `AsociadoSeeder` publicaría establecimientos inventados en el directorio público real, `MensajeSeeder` consume radicados del consecutivo anual de verdad y `TransaccionSeeder` inserta pagos en estado aprobado que la conciliación suma como ingresos.
 >
-> ⚠️ **Dos cosas del canal, medidas hoy:** el CLI **sí está instalado**, en `%APPDATA%\Composer\vendor\bin\cloud.bat`, solo que fuera del PATH. Y el `--cmd` **no admite comillas dobles ni simples dentro del PHP**: el CLI llega al servidor por `cmd.exe` y la tokenización se parte. El PHP que se mande por ahí va sin literales de cadena.
+> ✅ **Dos cosas del canal, medidas hoy, y las dos corrigen al expediente.** El CLI **sí está instalado**, en `%APPDATA%\Composer\vendor\bin\`, solo que fuera del PATH: `Get-Command` vacío no es lo mismo que no estar. Y la limitación que el §54.3 daba por insalvable —«el PHP que se mande por `--cmd` no puede llevar ni una comilla»— **es solo del puente de Windows**: invocando el lanzador sin extensión (`…\vendor\bin\cloud`, el shim de Unix) **desde Git Bash**, las comillas internas sobreviven enteras. Comprobado con `--execute='echo(1+1);'` → `2`, y usado para volcar los 200 ajustes y contar permisos en producción. Por `cloud.bat` desde PowerShell sigue rompiéndose: el que pasa por `cmd.exe` es el que se come las comillas.
 
 ---
 
@@ -86,7 +94,7 @@ De catorce, **doce cerrados y dos vivos** (10 y 11); ninguno se cierra escribien
 | Qué | Estado | Qué falta, y de quién depende |
 |---|---|---|
 | **Guía normativa** | ✅ **De 1 municipio a 12, y ya en producción: 151 fichas servidas**, contadas municipio por municipio sobre la URL pública el 15 sep a las 22:18. Cero costos publicados | Que la dirección **confirme por escrito** que esta es la versión vigente; el archivo trae las doce filas en «Pendiente» y por eso las fichas locales salen sin fecha, y la guía lo dice en la cara del lector (D-21). Y las **7 URL de trámite de Armenia** (D-04) |
-| **Los ajustes sembrados** | ⚠️ Producción tiene **109**; la rama siembra **200**. Faltan **91**, entre ellos los textos administrables nuevos de Directorio y Guía | Correr `SettingSeeder` **con visto bueno aparte, porque pisa ediciones de la oficina** (D-14). Ingrid pidió no correrlo el 11 sep |
+| **Los ajustes sembrados** | ✅ **Producción pasó de 100 a 200 el 15 sep a las 22:25**, con `ContenidoOficialSeeder`. Entran los textos administrables de Directorio y Guía y el presidente con sus apellidos en orden | ⚠️ Entró también `hero_frase_corta`, que es de cosecha propia y hoy se pinta en la portada: **D-29** |
 | **Franja «El gremio en cifras»** (D-25, Acta 05) | ✅ Código en producción, vacía de fábrica | **Firmar el Acta 05**; fijar las cuatro cifras; teclearlas |
 | Portada | ✅ Todo texto editable | Las 19 fotos autorizadas sin colocar |
 | Aliados | ⚠️ 23 del catálogo **nacional**, ninguno del Quindío | Los 18 departamentales de las láminas 15–16 necesitan **dos** cosas: los nombres escritos y **qué le da cada uno al afiliado** (`detalle_convenio`), que la presentación no trae (D-18) |
@@ -214,8 +222,8 @@ Medidas el **15 de septiembre de 2026 sobre `2d86359`**, que es lo desplegado. *
 | Rutas GET propias | **96** | `php artisan route:list --method=GET --except-vendor --json` |
 | **Suite completa** | **1.615 casos · 1.615 pasan · 0 fallos · 8.460 aserciones · 693 s** (Filament 5.8.2) | `php artisan test --compact` |
 | Referencia previa, Filament 4.12.8 | 1.615 casos · 1.615 pasan · 0 fallos · **8.460 aserciones** · 967 s | `php artisan test --compact` |
-| Ajustes que siembra `SettingSeeder` | **200** en la rama · **109** en producción | reflexión sobre `SettingSeeder::ajustes()` |
-| Permisos que siembra `RolYPermisoSeeder` | **88**, y **no cambia** en esta fusión: no se repite el P0 del 10 sep | `git diff main HEAD -- database/seeders/RolYPermisoSeeder.php` |
+| Ajustes | **200** en la rama y **200 en producción** (eran 100 antes de sembrar). De los 100 previos, **2** tenían `updated_at` distinto de `created_at`, y por trece minutos: no eran ediciones de la oficina | `Setting::all()` por `cloud command:run` |
+| Permisos | **88** · super_admin **88** · subadmin **52**. Medidos **después** de que `ContenidoOficialSeeder` corriera su `syncPermissions`: idénticos, no revocó nada | `Permission::count()` y `Role::...->permissions()->count()` en producción |
 | Fichas de la guía | **151 servidas en producción**: Armenia 8 (1 sin verificar) y once municipios de 13 (4 sin verificar cada uno). 12 municipios, **0 costos**, procedencia más larga 191 de 255 | `curl` a las doce URL, sumando lo servido |
 | Material del gremio del 15 sep | **27 archivos · 17,4 MB** | `Get-ChildItem -Recurse -File` |
 | Despliegue de hoy | push 21:48 · sirviendo 21:50 · **60 s** · 178 commits · 437 archivos · 1 migración | `git ls-remote` + `curl` al activo nuevo |
