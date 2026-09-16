@@ -387,6 +387,36 @@ class BolsaDeEmpleoTest extends TestCase
             ->assertSee('Todas las áreas');
     }
 
+    /**
+     * Sin vacantes abiertas, la persona tiene que poder dejar su perfil.
+     *
+     * El desplegable «Área del establecimiento» del perfil no es un filtro del
+     * muro: es el catálogo completo de áreas del sector, y el campo es
+     * obligatorio. Armado con las áreas que tienen vacante, el día que no hay
+     * ninguna queda solo el marcador deshabilitado y el formulario no se puede
+     * enviar: ni el navegador lo deja ni la validación lo aceptaría.
+     *
+     * Se afirma sobre las opciones de ese select y no con `assertSee` del
+     * rótulo de un área, porque un rótulo como «Barra» puede estar en la
+     * página por otro motivo.
+     */
+    public function test_sin_vacantes_el_perfil_ofrece_todas_las_areas(): void
+    {
+        $html = $this->get(route('empleo.index'))->assertOk()->getContent();
+
+        $ofrecidas = [];
+
+        foreach ($this->xpathDe($html)->query('//select[@name="categoria_cargo"]/option[@value != ""]') as $opcion) {
+            $ofrecidas[] = $opcion->getAttribute('value');
+        }
+
+        $this->assertEqualsCanonicalizing(
+            array_map(fn (CargoDelSector $cargo): string => $cargo->value, CargoDelSector::cases()),
+            $ofrecidas,
+            'Sin vacantes, el perfil no ofrece todas las áreas del sector y el formulario no se puede enviar.'
+        );
+    }
+
     public function test_el_error_del_perfil_devuelve_al_formulario(): void
     {
         $this->from(route('empleo.index'))
@@ -428,5 +458,16 @@ class BolsaDeEmpleoTest extends TestCase
         $this->get(route('empleo.show', $vacante))
             ->assertDontSee('candidato.privado@ejemplo.test')
             ->assertDontSee('Candidato Privado');
+    }
+
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
     }
 }

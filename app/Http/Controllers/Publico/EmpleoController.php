@@ -51,6 +51,9 @@ class EmpleoController
             'vacantes' => $consulta->latest()->paginate(10)->withQueryString(),
             'municipios' => $this->municipiosConVacante($datos['municipio'] ?? null),
             'categorias' => $this->areasConVacante($datos['categoria'] ?? null),
+            // El perfil no filtra el muro: ofrece el catálogo entero, o sin
+            // vacantes abiertas su desplegable obligatorio se queda vacío.
+            'categoriasPerfil' => CargoDelSector::cases(),
             'filtros' => $datos,
         ]);
     }
