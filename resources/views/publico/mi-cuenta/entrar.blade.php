@@ -4,7 +4,7 @@
 
     <div class="acceso-asociado">
         <a href="{{ route('inicio') }}" class="acceso-asociado__volver">
-            <span aria-hidden="true">← </span>Volver al sitio
+            <x-publico.flecha direccion="izquierda" />&nbsp;Volver al sitio
         </a>
 
         <div class="acceso-asociado__marco">

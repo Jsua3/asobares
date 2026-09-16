@@ -33,10 +33,19 @@ class HeroEditorialDeLaPortadaTest extends TestCase
 
         // La ruta también vive en el atributo poster del <video>, que es una
         // capa invisible hasta que carga y no arranca con movimiento reducido.
-        // La foto fija tiene que ser la <img>.
-        $this->assertMatchesRegularExpression(
-            '/<div class="hero-video-fondo">\s*<img src="[^"]*videos\/asobares-institucional\.jpg"/',
-            $html,
+        // La foto fija tiene que ser la <img>, y tiene que colgar del mismo
+        // contenedor que el video.
+        //
+        // Se mide sobre el árbol y no sobre el texto del marcado: ese
+        // contenedor lleva el `x-data` del mecanismo de video, y una expresión
+        // anclada a `<div class="hero-video-fondo">` se rompe en cuanto ahí
+        // entra o sale un atributo, sin que la foto falte. Es el modo de fallo
+        // que fabrica guardias inútiles, y este proyecto ya retiró dos.
+        $xpath = $this->xpathDe($html);
+
+        $this->assertSame(
+            1,
+            $xpath->query('//div[contains(@class, "hero-video-fondo")]/img[contains(@src, "videos/asobares-institucional.jpg")]')->length,
             'El hero perdió la <img> fija: con movimiento reducido o sin video se quedaría sin foto.'
         );
         $this->assertStringContainsString('La noche construye territorio', $html);
@@ -76,5 +85,16 @@ class HeroEditorialDeLaPortadaTest extends TestCase
             '/@media \(prefers-reduced-motion: reduce\).*?\.home-editorial-hero-titulo\s*\{[^}]*animation:\s*none/s',
             $css
         );
+    }
+
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
     }
 }
