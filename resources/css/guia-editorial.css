@@ -468,26 +468,59 @@ html:not(.dark) .guia-editorial-escena__velo {
     gap: 0.5rem;
 }
 
+/*
+ * El selector es una fila de celdas de 44 px, no de etiquetas: lleva el radio
+ * de celda de la casa, el mismo del enlace a la entidad, y no el de píldora.
+ */
 .guia-editorial-municipio {
     display: inline-flex;
     min-height: 2.75rem;
     align-items: center;
     border: 1px solid var(--guia-linea);
-    border-radius: 0.85rem;
+    border-radius: 0.75rem;
     background: var(--guia-superficie);
     padding-inline: 1rem;
     font-size: 0.875rem;
     color: var(--guia-suave);
     box-shadow: 0 1px 0 rgb(255 255 255 / 0.4);
+    /*
+     * Transición completa, `transform` incluido, aunque `.pulsable` ya traiga
+     * una: esta hoja no va en capa y gana a `@layer components`, así que
+     * cualquier `transition` escrita aquí sustituye entera a la del portador.
+     * Con las cuatro propiedades en la misma regla el chip tiene un solo reloj.
+     */
+    transition:
+        transform var(--duracion-instante) var(--ease-out),
+        color var(--duracion-boton) var(--ease-color),
+        background-color var(--duracion-boton) var(--ease-color),
+        border-color var(--duracion-boton) var(--ease-color);
 }
 
 .dark .guia-editorial-municipio {
     box-shadow: none;
 }
 
-.guia-editorial-municipio:hover {
-    border-color: rgb(183 31 24 / 0.38);
-    color: var(--guia-tinta);
+/*
+ * Solo con puntero fino: en táctil el hover se queda pegado tras el toque. El
+ * borde sale del acento de la guía, así que en oscuro sigue al rojo del tema
+ * igual que el chip seleccionado.
+ */
+@media (hover: hover) and (pointer: fine) {
+    .guia-editorial-municipio:hover {
+        border-color: color-mix(in oklab, var(--guia-acento) 38%, transparent);
+        color: var(--guia-tinta);
+    }
+}
+
+/*
+ * Acuse al pulsar, sin puerta: en táctil es el único que existe. Baja al
+ * instante y sube en `--duracion-instante`. El encogimiento sale del token
+ * porque es geometría: bajo movimiento reducido `tokens.css` lo deja en 1 y el
+ * fundido del borde sigue intacto.
+ */
+.guia-editorial-municipio:active {
+    transform: scale(var(--asb-encogimiento-tarjeta));
+    transition-duration: 0ms;
 }
 
 .guia-editorial-municipio:focus-visible {
@@ -550,6 +583,7 @@ html:not(.dark) .guia-editorial-escena__velo {
     border-radius: 1rem;
     background: var(--guia-superficie);
     box-shadow: var(--guia-sombra);
+    transition: border-color var(--duracion-boton) var(--ease-color);
 }
 
 .guia-editorial-requisito[open] {
@@ -563,6 +597,53 @@ html:not(.dark) .guia-editorial-escena__velo {
     align-items: flex-start;
     gap: 1rem;
     padding: 1.15rem 1.25rem;
+    /*
+     * La cabecera es una fila: acusa tiñéndose, no encogiendo, porque encogerla
+     * arrastraría la flecha que gira al abrir y se leerían dos movimientos
+     * sobre el mismo gesto. Declara su transición por lo mismo que el chip:
+     * esta hoja gana a `.fila-pulsable`.
+     */
+    transition:
+        color var(--duracion-boton) var(--ease-color),
+        background-color var(--duracion-boton) var(--ease-color);
+}
+
+/* El tinte sale de la paleta de la guía, no del gris neutro del sitio. */
+@media (hover: hover) and (pointer: fine) {
+    .guia-editorial-requisito__cabecera:hover {
+        background-color: var(--guia-alta);
+    }
+}
+
+/*
+ * Va después del hover a propósito: las dos reglas escriben el fondo, y al
+ * pulsar con el ratón encima tiene que ganar el tinte pulsado.
+ */
+.guia-editorial-requisito__cabecera:active {
+    background-color: var(--asb-fila-pulsada);
+    transition-duration: 0ms;
+}
+
+/*
+ * El anillo va hacia dentro. La tarjeta recorta con `overflow: hidden`, y el
+ * foco global del sitio, 3 px por fuera, queda cortado: medido en Chromium,
+ * con la tarjeta cerrada no enseña nada y abierta solo una raya bajo la
+ * cabecera. El radio es el de la tarjeta menos su borde, para que el anillo
+ * siga la esquina.
+ */
+.guia-editorial-requisito__cabecera:focus-visible {
+    outline: 2px solid var(--guia-acento);
+    outline-offset: -2px;
+    border-radius: calc(1rem - 1px);
+}
+
+/*
+ * `group-open:rotate-180` compila a la propiedad independiente `rotate`, no a
+ * `transform`: una transición que nombrara `transform` dejaría saltar la
+ * flecha.
+ */
+.guia-editorial-requisito__flecha {
+    transition: rotate var(--duracion-boton) var(--ease-out);
 }
 
 .guia-editorial-requisito__indice {
@@ -591,6 +672,35 @@ html:not(.dark) .guia-editorial-escena__velo {
     }
 }
 
+/*
+ * Enlace a la entidad. Su caja --borde y radio de celda-- la dibujan las
+ * utilidades de la vista; aquí vive lo que responde. El hover no va en una
+ * utilidad `hover:` porque en Tailwind 4 esa variante solo pregunta
+ * `(hover: hover)` y deja fuera `(pointer: fine)`.
+ */
+.guia-editorial-enlace {
+    transition:
+        transform var(--duracion-instante) var(--ease-out),
+        color var(--duracion-boton) var(--ease-color),
+        border-color var(--duracion-boton) var(--ease-color);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .guia-editorial-enlace:hover {
+        border-color: color-mix(in oklab, var(--guia-acento) 38%, transparent);
+    }
+}
+
+.guia-editorial-enlace:active {
+    transform: scale(var(--asb-encogimiento-tarjeta));
+    transition-duration: 0ms;
+}
+
+.guia-editorial-enlace:focus-visible {
+    outline: 2px solid var(--guia-acento);
+    outline-offset: 3px;
+}
+
 .guia-editorial-vacio {
     margin-top: 2.5rem;
     border: 1px dashed var(--guia-linea);
@@ -607,8 +717,19 @@ html:not(.dark) .guia-editorial-cta {
     box-shadow: var(--guia-sombra);
 }
 
+/*
+ * Movimiento reducido: se apaga lo que se mueve y nada más. La flecha sigue
+ * diciendo abierto o cerrado, pero cambia sin girar, y los dos encogimientos
+ * los anula su token en `tokens.css`. Los fundidos de color, borde y fondo no
+ * se tocan: no son movimiento, y sin ellos el hover y el acuse se quedan sin
+ * señal.
+ */
 @media (prefers-reduced-motion: reduce) {
     .guia-editorial-logo-vivo video {
         animation: none;
+    }
+
+    .guia-editorial-requisito__flecha {
+        transition: none;
     }
 }

@@ -127,9 +127,10 @@
 
                                     @foreach ($porDia[$dia->toDateString()] ?? [] as $evento)
                                         {{--
-                                            El acuse es de COLOR y no de fondo a propósito: `.enlace-accion`
-                                            sólo transiciona `color`, así que un `hover:bg-*` aquí saltaría
-                                            de golpe al lado de un texto que sí funde, y nada fallaría.
+                                            Sin `hover:` en la lista: el radio, el color y los tres estados de
+                                            la pastilla los dicta `eventos-editorial.css`, que va sin capa y
+                                            gana a toda utilidad de aquí. Un `hover:text-*` en esta etiqueta
+                                            no se ve nunca, porque el `color` de la hoja lo pisa.
 
                                             La pastilla mide unos 27 px de alto, por debajo de los 44: es
                                             deliberado y está acotado. Esta rejilla sólo existe de `sm:`
@@ -137,7 +138,7 @@
                                             de este mismo evento vive en la agenda de abajo, con `min-h-11`.
                                         --}}
                                         <a href="{{ route('eventos.show', $evento) }}"
-                                           class="enlace-accion mt-1 block truncate rounded-md bg-marca-500/15 px-1.5 py-1 text-xs font-medium text-acento-fuerte hover:text-fuerte"
+                                           class="enlace-accion mt-1 block truncate rounded-md bg-marca-500/15 px-1.5 py-1 text-xs font-medium text-acento-fuerte"
                                            title="{{ $evento->titulo }}">{{ $evento->titulo }}</a>
                                     @endforeach
                                 </td>
@@ -151,6 +152,13 @@
         {{--
             MÓVIL: la misma información como agenda vertical. Cero JavaScript,
             cero scroll horizontal y cada enlace con su objetivo de 44 px.
+
+            Sin `hover:` en ninguna lista de aquí abajo: Tailwind 4 compila esa
+            variante detrás de `(hover: hover)` y no de la puerta de puntero
+            fino, así que en un híbrido el color se queda puesto tras el toque.
+            Los hovers, el recuadro del evento y su acuse los dicta
+            `eventos-editorial.css`; la atenuación al pulsar sigue siendo de
+            `.enlace-accion`.
         --}}
         <ol class="eventos-editorial-agenda revelar mt-5 space-y-3 sm:hidden" data-revelar style="view-transition-name: calendario-agenda">
             @forelse ($agenda as $fecha => $eventosDelDia)
@@ -163,11 +171,11 @@
                         @endif
                     </p>
 
-                    <ul class="mt-2 divide-y divide-linea">
+                    <ul class="mt-2 space-y-2">
                         @foreach ($eventosDelDia as $evento)
-                            <li class="py-1">
+                            <li>
                                 <a href="{{ route('eventos.show', $evento) }}"
-                                   class="enlace-accion flex min-h-11 flex-col justify-center text-sm font-medium text-tinta hover:text-acento">
+                                   class="eventos-editorial-agenda__evento enlace-accion flex min-h-11 flex-col justify-center text-sm font-medium text-tinta">
                                     {{ $evento->titulo }}
                                     <span class="text-xs font-normal text-tenue">
                                         {{ $evento->fecha_inicio->translatedFormat('g:i a') }} · {{ $evento->tipo->getLabel() }}@if ($evento->lugar) · {{ $evento->lugar }}@endif
@@ -181,7 +189,7 @@
                 <li class="tarjeta p-8 text-center">
                     <p class="font-display text-base font-semibold">No hay eventos del gremio en {{ $tituloMes }}</p>
                     <a href="{{ route('eventos.index', ['cuando' => 'proximos']) }}"
-                       class="enlace-accion relative mt-3 inline-flex min-h-11 items-center text-sm font-medium text-acento hover:text-fuerte">
+                       class="eventos-editorial-proximos enlace-accion relative mt-3 inline-flex min-h-11 items-center text-sm font-medium text-acento">
                         Ver los próximos eventos&nbsp;<x-publico.flecha />
                     </a>
                 </li>
@@ -195,7 +203,7 @@
             <p class="mt-4 hidden text-sm text-tenue sm:block">
                 No hay eventos del gremio en {{ $tituloMes }}.
                 <a href="{{ route('eventos.index', ['cuando' => 'proximos']) }}"
-                   class="enlace-accion font-medium text-acento hover:text-fuerte">Ver los próximos eventos&nbsp;<x-publico.flecha /></a>
+                   class="eventos-editorial-proximos enlace-accion font-medium text-acento">Ver los próximos eventos&nbsp;<x-publico.flecha /></a>
             </p>
         @endif
     </div>

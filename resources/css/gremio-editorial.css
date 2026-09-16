@@ -1,6 +1,25 @@
 /*
  * El Gremio — capa editorial de /quienes-somos, /boletin y /contacto.
  * No mezclar con Directorio, Eventos, Empleo, Artistas ni Proveedores.
+ *
+ * La composición es editorial —bandas, folios, filetes, jerarquía
+ * tipográfica— y lo pulsable habla como el resto del sitio:
+ *
+ *   - Redondea con la escala de la casa: celdas y tarjetas 0.75rem, piezas
+ *     grandes 1rem, pastillas 999px. Las bandas a sangre y los filetes de un
+ *     píxel no tienen esquinas y se quedan rectos.
+ *   - Responde a las tres manos. Al puntero, con el papel elevado y el filo en
+ *     acento, siempre tras la puerta de puntero fino: en táctil un hover se
+ *     queda pegado después del toque. Al dedo, con un tinte y un encogimiento
+ *     que salen de los tokens de la casa, y `tokens.css` anula el encogimiento
+ *     con movimiento reducido. Al teclado, con el anillo de 2 px en el acento
+ *     de la hoja.
+ *   - Esta hoja no va en ninguna capa, así que gana a los portadores de
+ *     `app.css` —`.revelar`, `.enlace-accion`, `.pulsable`— sin que cuente la
+ *     especificidad. Donde un elemento lleva uno de ellos, o aquí no se declara
+ *     `transition`, o se declara repitiendo entera la del portador.
+ *
+ * Lo vigila `MovimientoEditorialDelGremioTest`.
  */
 
 .gremio-editorial {
@@ -473,6 +492,11 @@
     border-bottom: 1px solid var(--grem-linea);
 }
 
+/*
+ * Los filtros ya son pastillas con `.pulsable`, que los encoge al pulsar y
+ * funde color, fondo y borde. Aquí no se declara `transition`: pisaría la del
+ * portador entera, y ni el encogimiento volvería ni el color fundiría.
+ */
 .gremio-editorial-indice a {
     color: var(--grem-suave);
     text-decoration: none;
@@ -481,6 +505,27 @@
 .gremio-editorial-indice a[aria-current='page'] {
     color: var(--grem-acento);
     box-shadow: inset 0 -2px 0 var(--grem-acento);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .gremio-editorial-indice a:hover {
+        border-color: color-mix(in oklab, var(--grem-acento) 38%, transparent);
+        background-color: var(--grem-elevada);
+    }
+
+    .gremio-editorial-indice a:not([aria-current='page']):hover {
+        color: var(--grem-tinta);
+    }
+}
+
+/* El dedo no tiene hover: en táctil el tinte es lo que se ve al pulsar. */
+.gremio-editorial-indice a:active {
+    background-color: var(--asb-fila-pulsada);
+}
+
+.gremio-editorial-indice a:focus-visible {
+    outline: 2px solid var(--grem-acento);
+    outline-offset: 3px;
 }
 
 .gremio-editorial-vacio {
@@ -492,15 +537,40 @@
     color: var(--grem-suave);
 }
 
+/*
+ * La pieza principal es un enlace entero sobre papel elevado: redondea como
+ * pieza grande y responde como tarjeta.
+ *
+ * El margen negativo con su relleno aparta el papel del texto sin mover el
+ * texto de la columna; sin relleno lateral, las letras tocarían las esquinas.
+ *
+ * El filete al pie es el canto del papel: una sombra interior de un píxel, que
+ * sigue la curva de las esquinas como el propio papel y comparte ese píxel con
+ * el filo del hover en vez de sumarle otro. No va suelto debajo: a mitad del
+ * aire que lo separa del tablero queda tan cerca del filete de la primera fila
+ * del índice que los dos se leen como una raya doble.
+ *
+ * La transición repite la de `.revelar`, que la pieza también lleva: sin
+ * `opacity` y `translate` aquí, la pieza aparece de golpe en vez de revelarse.
+ */
 .gremio-editorial-lead {
     display: grid;
     gap: 1.4rem;
     margin-top: 2rem;
-    padding: 1rem 0 1.2rem;
+    margin-inline: -0.75rem;
+    padding: 1rem 0.75rem 1.2rem;
+    border-radius: 1rem;
     background: var(--grem-elevada);
-    border-bottom: 1px solid var(--grem-linea);
+    box-shadow:
+        inset 0 -1px 0 var(--grem-linea),
+        inset 0 0 0 1px transparent;
     text-decoration: none;
     color: inherit;
+    transition:
+        box-shadow var(--duracion-boton) var(--ease-color),
+        transform var(--duracion-instante) var(--ease-out),
+        opacity var(--duracion-panel) var(--ease-out),
+        translate var(--duracion-panel) var(--ease-out);
 }
 
 @media (min-width: 768px) {
@@ -516,6 +586,34 @@
     }
 }
 
+@media (hover: hover) and (pointer: fine) {
+    .gremio-editorial-lead:hover {
+        box-shadow:
+            inset 0 -1px 0 var(--grem-linea),
+            inset 0 0 0 1px color-mix(in oklab, var(--grem-acento) 38%, transparent);
+    }
+
+    .gremio-editorial-lead:hover h2 {
+        text-decoration-color: currentColor;
+    }
+}
+
+.gremio-editorial-lead:active {
+    transform: scale(var(--asb-encogimiento-tarjeta));
+    transition-duration: 0ms;
+}
+
+.gremio-editorial-lead:focus-visible {
+    outline: 2px solid var(--grem-acento);
+    outline-offset: 3px;
+}
+
+/*
+ * Los subrayados de los títulos pulsables están siempre puestos, en
+ * transparente, y el hover solo les da color: así funden con el papel en vez de
+ * aparecer de golpe. Son color y no movimiento, y por eso siguen ahí con
+ * movimiento reducido.
+ */
 .gremio-editorial-lead h2 {
     margin: 0.45rem 0 0;
     font-family: var(--font-display);
@@ -525,12 +623,11 @@
     letter-spacing: -0.025em;
     color: var(--grem-tinta);
     text-wrap: balance;
-}
-
-.gremio-editorial-lead:hover h2 {
-    text-decoration: underline;
+    text-decoration-line: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 0.18em;
+    text-decoration-color: transparent;
+    transition: text-decoration-color var(--duracion-boton) var(--ease-color);
 }
 
 .gremio-editorial-lead p {
@@ -540,6 +637,11 @@
     color: var(--grem-suave);
 }
 
+/*
+ * Las fotos de las piezas redondean como celda, y la de la lectura, que ocupa
+ * la columna entera, como pieza grande. Ninguna va dentro de un contenedor que
+ * las recorte, así que el radio es suyo.
+ */
 .gremio-editorial-lead img,
 .gremio-editorial-secundaria img,
 .gremio-editorial-lectura img {
@@ -548,7 +650,11 @@
     height: auto;
     aspect-ratio: 16 / 10;
     object-fit: cover;
-    border-radius: 0;
+    border-radius: 0.75rem;
+}
+
+.gremio-editorial-lectura img {
+    border-radius: 1rem;
 }
 
 .gremio-editorial-tablero {
@@ -564,11 +670,25 @@
     }
 }
 
+/*
+ * La pieza secundaria y las filas del índice no tienen papel en reposo:
+ * aparece bajo el puntero. El margen negativo con su relleno les da aire sin
+ * mover ni el texto ni la foto; en las filas, el aire no llega a los filetes
+ * del `<li>`, que se quedan quietos al pulsar.
+ */
 .gremio-editorial-secundaria {
     display: grid;
     gap: 1rem;
+    margin: -0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    box-shadow: inset 0 0 0 1px transparent;
     text-decoration: none;
     color: inherit;
+    transition:
+        background-color var(--duracion-boton) var(--ease-color),
+        box-shadow var(--duracion-boton) var(--ease-color),
+        transform var(--duracion-instante) var(--ease-out);
 }
 
 .gremio-editorial-secundaria h2 {
@@ -580,10 +700,12 @@
     color: var(--grem-tinta);
 }
 
-.gremio-editorial-secundaria:hover h2,
-.gremio-editorial-indice-piezas a:hover .gremio-editorial-indice-piezas__titulo {
-    text-decoration: underline;
+.gremio-editorial-secundaria h2,
+.gremio-editorial-indice-piezas__titulo {
+    text-decoration-line: underline;
     text-underline-offset: 0.16em;
+    text-decoration-color: transparent;
+    transition: text-decoration-color var(--duracion-boton) var(--ease-color);
 }
 
 .gremio-editorial-secundaria p {
@@ -595,8 +717,42 @@
 
 .gremio-editorial-indice-piezas a {
     display: block;
+    margin: -0.55rem -0.75rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.75rem;
+    box-shadow: inset 0 0 0 1px transparent;
     text-decoration: none;
     color: inherit;
+    transition:
+        background-color var(--duracion-boton) var(--ease-color),
+        box-shadow var(--duracion-boton) var(--ease-color),
+        transform var(--duracion-instante) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .gremio-editorial-secundaria:hover,
+    .gremio-editorial-indice-piezas a:hover {
+        background-color: var(--grem-elevada);
+        box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--grem-acento) 38%, transparent);
+    }
+
+    .gremio-editorial-secundaria:hover h2,
+    .gremio-editorial-indice-piezas a:hover .gremio-editorial-indice-piezas__titulo {
+        text-decoration-color: currentColor;
+    }
+}
+
+.gremio-editorial-secundaria:active,
+.gremio-editorial-indice-piezas a:active {
+    background-color: var(--asb-fila-pulsada);
+    transform: scale(var(--asb-encogimiento-tarjeta));
+    transition-duration: 0ms;
+}
+
+.gremio-editorial-secundaria:focus-visible,
+.gremio-editorial-indice-piezas a:focus-visible {
+    outline: 2px solid var(--grem-acento);
+    outline-offset: 3px;
 }
 
 .gremio-editorial-indice-piezas__titulo {
@@ -614,13 +770,50 @@
 
 /* —— Lectura —— */
 
+/*
+ * «Volver» es una pastilla sin papel en reposo. Lleva `.enlace-accion`, así
+ * que su transición repite la del portador —color y opacidad— además de las
+ * suyas. Su flecha apunta atrás: al pasar el puntero retrocede, en vez de
+ * avanzar como la de «Ver detalle».
+ */
 .gremio-editorial-retorno {
     display: inline-flex;
     min-height: 2.75rem;
     align-items: center;
-    margin-bottom: 1.15rem;
+    margin: 0 -0.85rem 1.15rem;
+    padding-inline: 0.85rem;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px transparent;
     font-size: 0.9rem;
     text-decoration: none;
+    transition:
+        color var(--duracion-boton) var(--ease-color),
+        background-color var(--duracion-boton) var(--ease-color),
+        box-shadow var(--duracion-boton) var(--ease-color),
+        opacity var(--duracion-instante) var(--ease-out),
+        transform var(--duracion-instante) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .gremio-editorial-retorno:hover {
+        background-color: var(--grem-elevada);
+        box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--grem-acento) 38%, transparent);
+    }
+
+    .gremio-editorial-retorno:hover svg {
+        translate: calc(var(--asb-avance-flecha) * -1) 0;
+    }
+}
+
+.gremio-editorial-retorno:active {
+    background-color: var(--asb-fila-pulsada);
+    transform: scale(var(--asb-encogimiento-control));
+    transition-duration: 0ms;
+}
+
+.gremio-editorial-retorno:focus-visible {
+    outline: 2px solid var(--grem-acento);
+    outline-offset: 3px;
 }
 
 .gremio-editorial-kicker {
@@ -664,14 +857,54 @@
     color: var(--grem-tenue);
 }
 
+/*
+ * Los motivos son pastillas sin papel en reposo, con su raya de filete debajo.
+ * La raya es `text-decoration` y no una sombra interior: la sombra seguiría la
+ * curva de la pastilla y dejaría de ser una raya bajo el texto. Bajo el puntero
+ * la raya se funde y cede el sitio a la pastilla, porque juntas dibujan dos
+ * líneas pegadas al pie.
+ *
+ * El margen negativo compensa el relleno para que la línea no se mueva, y el
+ * relleno vertical no llega a cubrir el hueco entre filas: dos pastillas
+ * vecinas no se roban el toque.
+ */
 .gremio-editorial-motivos a {
+    display: inline-block;
+    margin: -0.15rem -0.55rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px transparent;
     color: inherit;
-    text-decoration: none;
-    box-shadow: inset 0 -1px 0 var(--grem-linea);
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.35em;
+    text-decoration-color: var(--grem-linea);
+    transition:
+        color var(--duracion-boton) var(--ease-color),
+        background-color var(--duracion-boton) var(--ease-color),
+        box-shadow var(--duracion-boton) var(--ease-color),
+        text-decoration-color var(--duracion-boton) var(--ease-color),
+        transform var(--duracion-instante) var(--ease-out);
 }
 
-.gremio-editorial-motivos a:hover {
-    color: var(--grem-acento);
+@media (hover: hover) and (pointer: fine) {
+    .gremio-editorial-motivos a:hover {
+        color: var(--grem-acento);
+        background-color: var(--grem-elevada);
+        box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--grem-acento) 38%, transparent);
+        text-decoration-color: transparent;
+    }
+}
+
+.gremio-editorial-motivos a:active {
+    background-color: var(--asb-fila-pulsada);
+    transform: scale(var(--asb-encogimiento-control));
+    transition-duration: 0ms;
+}
+
+.gremio-editorial-motivos a:focus-visible {
+    outline: 2px solid var(--grem-acento);
+    outline-offset: 3px;
 }
 
 .gremio-editorial-canales {
@@ -681,12 +914,80 @@
     border-top: 1px solid var(--grem-linea);
 }
 
+/*
+ * Cada canal con enlace es una celda pulsable entera, no solo su texto.
+ *
+ * Los filetes siguen siendo bordes de la celda, que no tienen esquinas, y la
+ * superficie redondeada es su `::before`: por debajo del texto y apartada de
+ * los filetes. Lo que recibe el toque es el `::after` del enlace, con la misma
+ * caja que la superficie, así que lo que se enciende es exactamente lo que
+ * responde. Por eso el papel se enciende con `:has(a:hover)` y no con el
+ * `:hover` de la celda: la franja entre la superficie y el filete no lleva a
+ * ninguna parte.
+ *
+ * Al pulsar encoge la superficie y no la celda: los filetes no se mueven y el
+ * texto no sale de la rejilla de píxeles. Y la oficina, que no tiene enlace, no
+ * tiene superficie: `:has(a)` la deja fuera.
+ */
 .gremio-editorial-canal {
+    --grem-canal-superficie: 0.3rem -0.75rem;
+    position: relative;
+    isolation: isolate;
     display: grid;
     grid-template-columns: auto 1fr;
     column-gap: 0.85rem;
     padding: 1.35rem 0;
     border-bottom: 1px solid var(--grem-linea);
+}
+
+.gremio-editorial-canal:has(a)::before,
+.gremio-editorial-canal a::after {
+    content: '';
+    position: absolute;
+    inset: var(--grem-canal-superficie);
+    border-radius: 0.75rem;
+}
+
+.gremio-editorial-canal:has(a)::before {
+    z-index: -1;
+    box-shadow: inset 0 0 0 1px transparent;
+    pointer-events: none;
+    transition:
+        background-color var(--duracion-boton) var(--ease-color),
+        box-shadow var(--duracion-boton) var(--ease-color),
+        transform var(--duracion-instante) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .gremio-editorial-canal:has(a:hover)::before {
+        background-color: var(--grem-elevada);
+        box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--grem-acento) 38%, transparent);
+    }
+
+    .gremio-editorial-canal a:hover {
+        color: var(--grem-acento);
+    }
+}
+
+.gremio-editorial-canal:has(a:focus-visible)::before {
+    background-color: var(--grem-elevada);
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--grem-acento) 38%, transparent);
+}
+
+.gremio-editorial-canal:has(a:active)::before {
+    background-color: var(--asb-fila-pulsada);
+    transform: scale(var(--asb-encogimiento-tarjeta));
+    transition-duration: 0ms;
+}
+
+/*
+ * El anillo va en el acento de la hoja y no en el rojo de marca del sitio: con
+ * la celda encendida cae sobre el papel elevado, y ahí el rojo de marca del
+ * tema claro no llega a 3:1.
+ */
+.gremio-editorial-canal a:focus-visible {
+    outline: 2px solid var(--grem-acento);
+    outline-offset: 3px;
 }
 
 .gremio-editorial-canal__n {
@@ -741,11 +1042,13 @@
     }
 
     .gremio-editorial-canal:nth-child(odd) {
+        --grem-canal-superficie: 0.3rem 0.75rem 0.3rem -0.75rem;
         padding-right: 1.75rem;
         border-right: 1px solid var(--grem-linea);
     }
 
     .gremio-editorial-canal:nth-child(even) {
+        --grem-canal-superficie: 0.3rem -0.75rem 0.3rem 0.75rem;
         padding-left: 1.75rem;
     }
 }
@@ -786,11 +1089,23 @@
     background-color: var(--grem-campo);
     border-color: var(--grem-linea-fuerte);
     color: var(--grem-tinta);
+    transition: border-color var(--duracion-boton) var(--ease-color);
 }
 
 .gremio-editorial-formulario input:not([type='checkbox']):not([type='hidden']):focus,
 .gremio-editorial-formulario select:focus,
 .gremio-editorial-formulario textarea:focus {
+    border-color: var(--grem-acento);
+}
+
+/*
+ * El borde rojo del campo con error lo pone `campo.blade.php` con una utilidad
+ * en capa, y el borde de reposo de arriba, que no va en capa, lo pisa. Se
+ * devuelve aquí con más especificidad que ese reposo.
+ */
+.gremio-editorial-formulario input:not([type='checkbox']):not([type='hidden'])[aria-invalid='true'],
+.gremio-editorial-formulario select[aria-invalid='true'],
+.gremio-editorial-formulario textarea[aria-invalid='true'] {
     border-color: var(--grem-acento);
 }
 
@@ -815,13 +1130,14 @@
     }
 }
 
+/*
+ * Movimiento reducido: se apaga lo que se mueve y nada más. Los encogimientos
+ * y la flecha de «Volver» salen de tokens que `tokens.css` anula; aquí queda la
+ * entrada del folio. El color, el papel y el subrayado se quedan: no son
+ * movimiento, y sin ellos el puntero se queda sin respuesta.
+ */
 @media (prefers-reduced-motion: reduce) {
     .gremio-editorial-folio {
         animation: none;
-    }
-
-    .gremio-editorial-lead:hover h2,
-    .gremio-editorial-secundaria:hover h2 {
-        text-decoration: none;
     }
 }

@@ -69,12 +69,15 @@
         @else
             <div class="revelar mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-revelar>
                 @foreach ($artistas as $artista)
+                    {{-- La tarjeta la dibuja el enlace y no el <article>: lo que se
+                         pulsa es lo que responde, con su transición, su acuse y
+                         su anillo de foco propios. --}}
                     <article @class([
-                        'artistas-editorial-card group flex flex-col',
-                        'sm:col-span-2 sm:flex-row lg:col-span-2' => $loop->first,
+                        'flex flex-col',
+                        'sm:col-span-2 lg:col-span-2' => $loop->first,
                     ])>
                         <a href="{{ route('artistas.show', $artista) }}" @class([
-                            'flex flex-1 flex-col',
+                            'artistas-editorial-card group flex flex-1 flex-col',
                             'sm:flex-row' => $loop->first,
                         ])>
                             @if ($artista->foto)

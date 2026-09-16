@@ -155,7 +155,7 @@
                                 </span>
                             </span>
 
-                            <svg class="mt-1 h-5 w-5 shrink-0 text-apagado transition-transform group-open:rotate-180"
+                            <svg class="guia-editorial-requisito__flecha mt-1 h-5 w-5 shrink-0 text-apagado group-open:rotate-180"
                                  fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
                             </svg>
@@ -203,7 +203,7 @@
                                          recibe su URL exacta, la etiqueta cambia sola, sin tocar
                                          la vista. --}}
                                     <a href="{{ $requisito->enlace_externo }}" target="_blank" rel="noopener"
-                                       class="pulsable inline-flex min-h-11 items-center rounded-xl border border-linea px-4 py-2.5 text-sm text-tinta hover:border-marca-500/50">
+                                       class="guia-editorial-enlace pulsable inline-flex min-h-11 items-center rounded-xl border border-linea px-4 py-2.5 text-sm text-tinta">
                                         {{ $requisito->enlaceEsPuntual()
                                             ? ajuste('guia_enlace_puntual')
                                             : ajuste('guia_enlace_portada') }}&nbsp;<x-publico.flecha direccion="externa" />

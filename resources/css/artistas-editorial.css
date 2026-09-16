@@ -13,6 +13,8 @@
     --art-tenue: #7a665e;
     --art-acento: #b8241d;
     --art-acento-suave: rgb(184 36 29 / 0.13);
+    /* Borde de lo que responde al puntero o al dedo: tarjetas y desplegables. */
+    --art-linea-viva: rgb(184 36 29 / 0.32);
     --art-sombra: 0 18px 42px rgb(34 22 18 / 0.08);
     --art-tope: calc(var(--asb-alto-modulo-superior, 3.5rem) + env(safe-area-inset-top, 0px) + 1rem);
     background:
@@ -306,15 +308,47 @@
     background: rgb(25 19 19 / 0.78);
 }
 
+/*
+ * La tarjeta del listado es el propio enlace, de arriba abajo, y responde como
+ * una sola pieza: el dedo puede caer en la foto, en el nombre o en la tarifa y
+ * lo que se hunde es la tarjeta entera.
+ *
+ * `transform` corre al reloj del acuse y no al del hover: al soltar, la
+ * tarjeta vuelve en 100 ms, y el levante del ratón comparte ese reloj.
+ */
 .artistas-editorial-card {
     overflow: hidden;
     border-radius: 1.45rem;
-    transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+    transition:
+        border-color var(--duracion-boton) var(--ease-color),
+        transform var(--duracion-instante) var(--ease-out);
 }
 
-.artistas-editorial-card:hover {
-    border-color: rgb(184 36 29 / 0.32);
-    transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+    .artistas-editorial-card:hover {
+        border-color: var(--art-linea-viva);
+        transform: translateY(var(--asb-levante));
+    }
+}
+
+/*
+ * Pulsar hunde la tarjeta y tiñe su borde a la vez. El tinte no es adorno: con
+ * movimiento reducido el encogimiento vale 1, y el borde es el único acuse que
+ * le queda al dedo.
+ */
+.artistas-editorial-card:active {
+    border-color: var(--art-linea-viva);
+    transform: scale(var(--asb-encogimiento-tarjeta));
+    transition-duration: 0ms;
+}
+
+/*
+ * El anillo va fuera del borde: `overflow: hidden` recorta lo que la tarjeta
+ * contiene, no el contorno de la propia tarjeta.
+ */
+.artistas-editorial-card:focus-visible {
+    outline: 2px solid var(--art-acento);
+    outline-offset: 3px;
 }
 
 .artistas-editorial-card__foto,
@@ -323,18 +357,39 @@
     background: var(--art-surface-alta);
 }
 
+/*
+ * El acercamiento va en `scale` y no en `transform`: la foto de la ficha se
+ * inclina con el puntero por `transform` (`.imagen-inclinable`), y una regla
+ * sin capa se lo pisaría entero. Son dos propiedades y se componen.
+ */
 .artistas-editorial-card__foto img,
 .artistas-editorial-ficha__foto img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 320ms ease, filter 320ms ease;
+    transition:
+        scale var(--duracion-boton) var(--ease-out),
+        filter var(--duracion-boton) var(--ease-color);
 }
 
-.artistas-editorial-card:hover .artistas-editorial-card__foto img,
-.artistas-editorial-ficha:hover .artistas-editorial-ficha__foto img {
-    transform: scale(1.035);
-    filter: saturate(1.08);
+/*
+ * Por lo mismo, la foto de la ficha repite la transición de la inclinación:
+ * dos atajos `transition` no se suman, y el de esta hoja gana al de la capa de
+ * componentes.
+ */
+.artistas-editorial-ficha__foto img {
+    transition:
+        transform var(--duracion-entrada) var(--ease-out),
+        scale var(--duracion-boton) var(--ease-out),
+        filter var(--duracion-boton) var(--ease-color);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .artistas-editorial-card:hover .artistas-editorial-card__foto img,
+    .artistas-editorial-ficha:hover .artistas-editorial-ficha__foto img {
+        scale: var(--asb-zoom-imagen);
+        filter: saturate(1.08);
+    }
 }
 
 .artistas-editorial-chip {
@@ -369,14 +424,81 @@
     padding: 1.5rem;
 }
 
+/*
+ * Las fichas de «Otros …» traen el acuse de la casa en el marcado
+ * (`.tarjeta-hover`, `.tarjeta-pulsable`): esta hoja no les declara
+ * `transition` ni `transform`, que sin capa le ganarían al portador. Sí dibuja
+ * su superficie, y por eso sus esquinas y el borde de sus estados viven aquí:
+ * el `border` sin capa de arriba ganaría a cualquier borde de la capa de
+ * componentes.
+ */
+.artistas-editorial-similar {
+    border-radius: 1.25rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .artistas-editorial-similar:hover {
+        border-color: var(--art-linea-viva);
+    }
+}
+
+.artistas-editorial-similar:active {
+    border-color: var(--art-linea-viva);
+}
+
+.artistas-editorial-similar:focus-visible {
+    outline: 2px solid var(--art-acento);
+    outline-offset: 3px;
+}
+
+/*
+ * Los desplegables de filtro vienen de <x-publico.campo>, que no declara
+ * movimiento propio. El hover no toca el borde de un campo con foco ni el de
+ * uno errado: esta regla sin capa le ganaría a `focus:border-marca-500` y al
+ * borde rojo del error.
+ */
+.artistas-editorial select {
+    transition:
+        border-color var(--duracion-boton) var(--ease-color),
+        transform var(--duracion-instante) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .artistas-editorial select:hover:not(:focus, [aria-invalid='true']) {
+        border-color: var(--art-linea-viva);
+    }
+}
+
+.artistas-editorial select:active {
+    transform: scale(var(--asb-encogimiento-tarjeta));
+    transition-duration: 0ms;
+}
+
+.artistas-editorial select:focus-visible {
+    outline: 2px solid var(--art-acento);
+    outline-offset: 3px;
+}
+
+/*
+ * Movimiento reducido: se va lo que se mueve y nada más. Los fundidos de borde
+ * y de saturación se quedan, porque no son movimiento y sin ellos el hover deja
+ * de avisar. Los tokens de levante, encogimiento y acercamiento ya se anulan en
+ * `tokens.css`; estas reglas sostienen lo mismo aunque un token cambie.
+ */
 @media (prefers-reduced-motion: reduce) {
-    .artistas-editorial-card,
-    .artistas-editorial-card__foto img,
-    .artistas-editorial-ficha__foto img {
-        transition: none;
+    .artistas-editorial-card:active,
+    .artistas-editorial select:active {
+        transform: none;
     }
 
-    .artistas-editorial-card:hover {
-        transform: none;
+    @media (hover: hover) and (pointer: fine) {
+        .artistas-editorial-card:hover {
+            transform: none;
+        }
+
+        .artistas-editorial-card:hover .artistas-editorial-card__foto img,
+        .artistas-editorial-ficha:hover .artistas-editorial-ficha__foto img {
+            scale: none;
+        }
     }
 }

@@ -18,7 +18,17 @@
     --evt-tinta: #1c120e;
     --evt-suave: #5c4a42;
     --evt-tenue: #7a665c;
-    --evt-acento: #b71f18;
+    /*
+     * El acento que lleva TEXTO es el de la casa, que ya cambia con el tema.
+     * Pub Red puro en oscuro deja los rótulos pequeños por debajo de 4,5:1 en
+     * una ficha realizada --3,41:1 el chip del tipo sobre su tinte, 4,05:1
+     * «Ver evento»--; `--asb-acento` da 4,59:1 y 5,45:1 en esos mismos dos
+     * sitios. En claro los dos son #b71f18.
+     *
+     * Un relleno con rótulo claro encima NO usa este token: usa
+     * `--asb-accion-fuerte`. Lo vigila `EventosLenguajeUnicoTest`.
+     */
+    --evt-acento: var(--asb-acento);
     --evt-acento-suave: rgb(183 31 24 / 0.12);
     --evt-noche: #1a1412;
     --evt-sombra: 0 14px 32px rgb(55 32 24 / 0.08);
@@ -41,7 +51,6 @@
     --evt-tinta: #f6eee6;
     --evt-suave: #d2c4b8;
     --evt-tenue: #b3a498;
-    --evt-acento: #ee4137;
     --evt-acento-suave: rgb(238 65 55 / 0.16);
     --evt-noche: #0e0b0a;
     --evt-sombra: 0 18px 40px rgb(0 0 0 / 0.38);
@@ -335,18 +344,67 @@
     }
 }
 
+/*
+ * Segmentos del conmutador. Esta hoja va sin capa y gana a las utilidades de
+ * la vista y a `.pulsable` sin mirar la especificidad, así que cada estado se
+ * dicta aquí entero: repartido con la vista, la mitad que se quede allí muere
+ * sin ningún error.
+ *
+ * Radio de celda y no de píldora: el segmento es concéntrico con el marco,
+ * 1rem menos 0.3rem de relleno. Una píldora dentro de ese marco deja en sus
+ * esquinas un hueco más ancho que en los lados.
+ *
+ * Encoge como un control de 44 px y no como una tarjeta: es lo que mide de
+ * alto, y a su lado los mandos del riel acusan igual.
+ */
+.eventos-editorial-conmutador a {
+    border-radius: 0.75rem;
+    transition:
+        transform var(--duracion-instante) var(--ease-out),
+        color var(--duracion-boton) var(--ease-color);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .eventos-editorial-conmutador a:not([aria-current="true"]):hover {
+        color: var(--asb-fuerte);
+    }
+}
+
+.eventos-editorial-conmutador a:active {
+    transform: scale(var(--asb-encogimiento-control));
+    transition-duration: 0ms;
+}
+
+/* 2 px de separación y no 3: el anillo cabe en los 0.3rem de relleno del
+   marco sin montarse en su borde. */
+.eventos-editorial-conmutador a:focus-visible {
+    outline: 2px solid var(--color-marca-500);
+    outline-offset: 2px;
+}
+
+/*
+ * El segmento activo lleva rótulo blanco, así que se rellena con el rojo que
+ * puede llevarlo y no con el acento editorial: blanco sobre Pub Red da
+ * 3,86:1 y sobre `--asb-accion-fuerte` 6,52:1, en los dos temas. Es el mismo
+ * rojo que la columna de fecha de las fichas de debajo.
+ */
 .eventos-editorial-conmutador a[aria-current="true"] {
-    background: var(--evt-acento);
+    background-color: var(--asb-accion-fuerte);
 }
 
 /* —— Riel horizontal de eventos reales —— */
 
+/*
+ * Contexto de bloque propio para que el margen negativo de la pista no se
+ * funda con el de arriba, y sin recorte horizontal para no cortarle el
+ * sangrado: con las dos cosas el riel mide y se coloca igual que sin él.
+ */
 .eventos-editorial-riel {
     position: relative;
+    display: flow-root;
     margin-top: 1.15rem;
     max-width: 100%;
     min-width: 0;
-    overflow-x: clip;
 }
 
 .eventos-editorial-agenda__tope {
@@ -383,12 +441,33 @@
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
-    scroll-padding-inline: 0;
+    /*
+     * Sangrado para el anillo de foco. La pista recorta lo que sale de su
+     * caja y cada ficha encajada toca su borde de arriba y el de la
+     * izquierda: sin sitio, el anillo de la ficha enfocada pierde esos dos
+     * lados. El relleno le hace sitio y el margen negativo devuelve la pista
+     * a su lugar, así que ninguna ficha se mueve. `avanzar()` suma este
+     * `scroll-padding` a su origen; sin eso, con el encaje apagado por
+     * movimiento reducido, cada ficha quedaría 0.35rem corrida.
+     */
+    scroll-padding-inline: 0.35rem 0;
+    margin-top: -0.35rem;
+    margin-left: -0.35rem;
+    padding-top: 0.35rem;
+    padding-left: 0.35rem;
     padding-right: 0.25rem;
     padding-bottom: 0.35rem;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    touch-action: pan-x;
+    /*
+     * El riel se queda el gesto horizontal y deja pasar los otros dos. Con
+     * `pan-x` a secas, un deslizamiento vertical que empieza sobre una ficha
+     * no mueve la página y el pellizco no amplía, y en el teléfono la ficha
+     * cubre casi todo el ancho y buena parte del alto: es justo donde cae el
+     * dedo. El sentido del gesto lo decide el navegador al empezar, así que
+     * soltar `pan-y` no hace que el riel se desplace en diagonal.
+     */
+    touch-action: pan-x pan-y pinch-zoom;
 }
 
 @media (max-width: 63.999rem) {
@@ -476,11 +555,32 @@
     border-radius: 999px;
     background: var(--evt-surface);
     color: var(--evt-tinta);
+    transition:
+        transform var(--duracion-instante) var(--ease-out),
+        color var(--duracion-boton) var(--ease-color),
+        border-color var(--duracion-boton) var(--ease-color);
 }
 
-.eventos-editorial-riel__mando:hover {
-    border-color: var(--evt-acento);
-    color: var(--evt-acento);
+/*
+ * Los mandos aparecen desde 768 px, y a ese ancho también hay tabletas: sin
+ * la puerta de puntero fino el borde rojo se queda puesto tras el toque.
+ */
+@media (hover: hover) and (pointer: fine) {
+    .eventos-editorial-riel__mando:hover {
+        border-color: var(--evt-acento);
+        color: var(--evt-acento);
+    }
+}
+
+/* Caja de 44 px: el encogimiento de control, el mismo que el zoom del mapa. */
+.eventos-editorial-riel__mando:active {
+    transform: scale(var(--asb-encogimiento-control));
+    transition-duration: 0ms;
+}
+
+.eventos-editorial-riel__mando:focus-visible {
+    outline: 2px solid var(--color-marca-500);
+    outline-offset: 3px;
 }
 
 /* —— Tarjeta de evento —— */
@@ -496,6 +596,10 @@
     box-shadow: var(--evt-sombra);
     color: inherit;
     text-decoration: none;
+    transition:
+        border-color var(--duracion-boton) var(--ease-color),
+        box-shadow var(--duracion-boton) var(--ease-color),
+        transform var(--duracion-instante) var(--ease-out);
 }
 
 @media (min-width: 768px) {
@@ -520,7 +624,12 @@
     justify-content: center;
     gap: 0.15rem;
     padding: 1rem 0.65rem;
-    background: var(--evt-acento);
+    /*
+     * Relleno con rótulo claro: el rojo de acción fuerte y no el acento, que
+     * en oscuro es un rojo para texto. Con Pub Red el mes cae a 3,66:1 y la
+     * hora, translúcida, a 3,30:1; así dan 6,18:1 y 5,44:1 en los dos temas.
+     */
+    background: var(--asb-accion-fuerte);
     color: #fff8ef;
     text-align: center;
 }
@@ -605,6 +714,12 @@
     height: 100%;
     max-width: none;
     object-fit: cover;
+}
+
+/* Solo la foto: el monograma del hueco va un nivel más adentro y no se amplía. */
+.eventos-editorial-ficha__foto > img {
+    scale: 1;
+    transition: scale var(--duracion-boton) var(--ease-out);
 }
 
 .eventos-editorial-ficha .hueco-foto,
@@ -715,6 +830,48 @@
     color: var(--evt-acento);
 }
 
+.eventos-editorial-ficha__cta svg {
+    translate: 0 0;
+    transition: translate var(--duracion-boton) var(--ease-out);
+}
+
+/*
+ * Acuse de la ficha: la receta de la tarjeta de la casa --`.tarjeta-hover`
+ * más `.tarjeta-pulsable`-- con la paleta editorial. El `:active` es lo único
+ * que responde en táctil, donde más se lee la agenda.
+ *
+ * La foto y la flecha salen de tokens que el movimiento reducido anula; el
+ * borde y la sombra son fundidos y se quedan.
+ */
+@media (hover: hover) and (pointer: fine) {
+    .eventos-editorial-ficha__enlace:hover {
+        border-color: var(--evt-acento);
+        box-shadow:
+            var(--evt-sombra),
+            0 14px 34px var(--evt-acento-suave);
+    }
+
+    .eventos-editorial-ficha__enlace:hover .eventos-editorial-ficha__foto > img {
+        scale: var(--asb-zoom-imagen);
+    }
+
+    .eventos-editorial-ficha__enlace:hover .eventos-editorial-ficha__cta svg {
+        translate: var(--asb-avance-flecha) 0;
+    }
+}
+
+.eventos-editorial-ficha__enlace:active {
+    transform: scale(var(--asb-encogimiento-tarjeta));
+    transition-duration: 0ms;
+}
+
+/* 2 px de separación: el anillo entero, 4 px, cabe en el 0.25rem que la pista
+   deja a la derecha de una ficha única. */
+.eventos-editorial-ficha__enlace:focus-visible {
+    outline: 2px solid var(--color-marca-500);
+    outline-offset: 2px;
+}
+
 .eventos-editorial-vacio {
     margin-top: 1.75rem;
     padding: 2.5rem 1.5rem;
@@ -783,28 +940,108 @@
     }
 }
 
+/*
+ * La píldora de un evento en la rejilla. Radio de celda, 0.75rem: vive dentro
+ * de una celda y, cuando el título envuelve en tableta, crece como una celda.
+ *
+ * El rótulo va en `--asb-acento-fuerte` y no en el acento editorial: un día
+ * colgante tiñe la píldora sobre `--evt-bg-alta`, y ahí el acento se queda en
+ * 4,23:1 en claro; el fuerte da 5,44:1, y en oscuro 7,70:1.
+ *
+ * Los estados viven aquí y no en la vista: esta hoja va sin capa, así que su
+ * `color` pisa cualquier `hover:text-*` de la plantilla y lo deja muerto.
+ */
 .eventos-editorial-calendario a {
     display: block;
     margin-top: 0.35rem;
     overflow: hidden;
     padding: 0.28rem 0.4rem;
-    border-radius: 0.45rem;
+    border-radius: 0.75rem;
     background: var(--evt-acento-suave);
-    color: var(--evt-acento);
+    color: var(--asb-acento-fuerte);
     font-size: 0.72rem;
     font-weight: 600;
     text-overflow: ellipsis;
+    transition:
+        transform var(--duracion-instante) var(--ease-out),
+        color var(--duracion-boton) var(--ease-color),
+        opacity var(--duracion-instante) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .eventos-editorial-calendario a:hover {
+        color: var(--evt-tinta);
+    }
+}
+
+/* Encoge como tarjeta, no como control: en una rejilla densa un 6 % se lee
+   como un salto. La atenuación de `.enlace-accion` acompaña al gesto. */
+.eventos-editorial-calendario a:active {
+    transform: scale(var(--asb-encogimiento-tarjeta));
+    transition-duration: 0ms;
+}
+
+/* 2 px de separación y no 3: el anillo entero, 4 px, cabe en el relleno más
+   estrecho de la celda --0.3rem en tableta-- sin montarse en el filete de la
+   celda vecina. Hacia dentro quedaría sobre el tinte, por debajo de 3:1. */
+.eventos-editorial-calendario a:focus-visible {
+    outline: 2px solid var(--color-marca-500);
+    outline-offset: 2px;
 }
 
 .eventos-editorial-agenda {
     margin-top: 1.25rem;
 }
 
-.eventos-editorial-agenda li {
+/*
+ * El recuadro de cada día. Solo el de primer nivel: el evento de dentro ya no
+ * es un recuadro dentro del recuadro, es el enlace mismo el que se dibuja.
+ */
+.eventos-editorial-agenda > li {
     padding: 1rem 1.1rem;
     border: 1px solid var(--evt-linea);
     border-radius: 1.15rem;
     background: var(--evt-surface);
+}
+
+/*
+ * Un evento de la agenda de móvil. La caja entera es el enlace: con el borde en
+ * el `<li>` y el enlace dentro, el relleno de alrededor parecía pulsable y no
+ * respondía, y esta lista solo existe en el teléfono.
+ *
+ * Radio de celda, 0.75rem, porque vive dentro del recuadro del día. Acusa como
+ * la ficha del riel --borde al acento con puntero fino, encogimiento de tarjeta
+ * al pulsar-- y conserva la atenuación de `.enlace-accion`, así que su
+ * transición nombra también la opacidad: esta hoja va sin capa y la lista de
+ * aquí sustituye entera a la del portador.
+ */
+.eventos-editorial-agenda__evento {
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--evt-linea);
+    border-radius: 0.75rem;
+    background: var(--evt-surface);
+    transition:
+        transform var(--duracion-instante) var(--ease-out),
+        border-color var(--duracion-boton) var(--ease-color),
+        opacity var(--duracion-instante) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .eventos-editorial-agenda__evento:hover {
+        border-color: var(--evt-acento);
+    }
+}
+
+.eventos-editorial-agenda__evento:active {
+    transform: scale(var(--asb-encogimiento-tarjeta));
+    transition-duration: 0ms;
+}
+
+/* 2 px de separación: el anillo entero, 4 px, cabe en los 0.5rem que separan
+   un evento del siguiente y en el relleno del recuadro del día. */
+.eventos-editorial-agenda__evento:focus-visible {
+    outline: 2px solid var(--color-marca-500);
+    outline-offset: 2px;
 }
 
 .eventos-editorial-mes {
@@ -824,6 +1061,37 @@
     display: inline-flex;
     min-height: 2.75rem;
     align-items: center;
+}
+
+/*
+ * Enlaces de texto: «Todos los eventos» en la ficha y «Ver los próximos
+ * eventos» en el mes vacío. No son superficies y no encogen: el fundido de
+ * color y la atenuación al pulsar los pone `.enlace-accion` desde el marcado, y
+ * por eso aquí no se declara ni `transition` ni `opacity`, que pisarían al
+ * portador entero. Esta hoja solo pone el hover detrás de la puerta de puntero
+ * fino, donde la utilidad `hover:` de Tailwind no llega.
+ *
+ * La flecha de «Todos los eventos» apunta hacia atrás, así que retrocede: el
+ * portador la empuja hacia delante, que en una vuelta la mete en el texto.
+ */
+@media (hover: hover) and (pointer: fine) {
+    .eventos-editorial-retorno:hover {
+        color: var(--evt-acento);
+    }
+
+    .eventos-editorial-retorno:hover svg {
+        translate: calc(var(--asb-avance-flecha) * -1) 0;
+    }
+
+    .eventos-editorial-proximos:hover {
+        color: var(--asb-fuerte);
+    }
+}
+
+.eventos-editorial-retorno:focus-visible,
+.eventos-editorial-proximos:focus-visible {
+    outline: 2px solid var(--color-marca-500);
+    outline-offset: 3px;
 }
 
 .eventos-editorial-cuando {

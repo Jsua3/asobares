@@ -12,6 +12,8 @@
     --prov-tenue: #7a6d64;
     --prov-acento: #b8241d;
     --prov-acento-suave: rgb(184 36 29 / 0.12);
+    /* Borde de lo que responde al puntero: las categorías. */
+    --prov-linea-viva: rgb(184 36 29 / 0.28);
     --prov-sombra: 0 16px 36px rgb(29 22 19 / 0.07);
     --prov-tope: calc(var(--asb-alto-modulo-superior, 3.5rem) + env(safe-area-inset-top, 0px) + 1rem);
     background:
@@ -311,6 +313,12 @@
     color: var(--prov-acento);
 }
 
+/*
+ * Las categorías no enlazan a ninguna parte —los contactos son de los
+ * afiliados—, así que no llevan acuse de pulsación ni foco: solo el hover, y
+ * solo con puntero fino, porque en táctil el levante se queda pegado tras el
+ * toque.
+ */
 .proveedores-editorial-categoria {
     display: flex;
     min-height: 7.5rem;
@@ -318,12 +326,16 @@
     gap: 1rem;
     border-radius: 1.35rem;
     padding: 1.25rem;
-    transition: border-color 180ms ease, transform 180ms ease;
+    transition:
+        border-color var(--duracion-boton) var(--ease-color),
+        transform var(--duracion-boton) var(--ease-out);
 }
 
-.proveedores-editorial-categoria:hover {
-    border-color: rgb(184 36 29 / 0.28);
-    transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+    .proveedores-editorial-categoria:hover {
+        border-color: var(--prov-linea-viva);
+        transform: translateY(var(--asb-levante));
+    }
 }
 
 .proveedores-editorial-categoria__icono {
@@ -344,12 +356,14 @@
     text-align: center;
 }
 
+/*
+ * Movimiento reducido: se va el levante y se queda el fundido del borde, que
+ * no es movimiento y es lo que avisa del hover.
+ */
 @media (prefers-reduced-motion: reduce) {
-    .proveedores-editorial-categoria {
-        transition: none;
-    }
-
-    .proveedores-editorial-categoria:hover {
-        transform: none;
+    @media (hover: hover) and (pointer: fine) {
+        .proveedores-editorial-categoria:hover {
+            transform: none;
+        }
     }
 }

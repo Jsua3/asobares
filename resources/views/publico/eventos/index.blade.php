@@ -18,7 +18,7 @@
                          return;
                      }
                      const fichas = Array.from(pista.querySelectorAll('.eventos-editorial-ficha'));
-                     const origen = pista.getBoundingClientRect().left;
+                     const origen = pista.getBoundingClientRect().left + (parseFloat(getComputedStyle(pista).scrollPaddingLeft) || 0);
                      let indice = 0;
                      let menor = Infinity;
                      fichas.forEach((ficha, posicion) => {

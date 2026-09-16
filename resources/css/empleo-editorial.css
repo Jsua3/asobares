@@ -20,6 +20,8 @@
     --emp-tenue: #7a665c;
     --emp-acento: #b71f18;
     --emp-acento-suave: rgb(183 31 24 / 0.12);
+    /* Borde de lo que responde al puntero: la oferta y los desplegables. */
+    --emp-linea-viva: rgb(183 31 24 / 0.35);
     --emp-noche: #1a1412;
     --emp-sombra: 0 14px 32px rgb(55 32 24 / 0.08);
     --emp-tope: calc(var(--asb-alto-modulo-superior, 3.5rem) + env(safe-area-inset-top, 0px) + 1.25rem);
@@ -320,6 +322,17 @@
     margin-top: 1.5rem;
 }
 
+/*
+ * Los dos CTA llevan `.pulsable` en el marcado y el acuse al pulsar es suyo.
+ * Esta hoja no les declara `transition`: sin capa le ganaría a la de
+ * `.pulsable`, incluido el `transition-duration: 0ms` de su `:active`, y el
+ * botón bajaría con retardo. El color funde al reloj que `.pulsable` ya le da.
+ *
+ * El relleno es el rojo de acción y no el acento del módulo: en oscuro el
+ * acento es Pub Red, y con el rótulo crema da 3,66:1, por debajo del 4,5:1 del
+ * texto normal. `--asb-accion` no cambia con el tema; medido con el crema,
+ * 4,58:1 en reposo y 6,18:1 con `--asb-accion-fuerte` en hover.
+ */
 .empleo-editorial-hero__cta {
     display: inline-flex;
     min-height: 2.75rem;
@@ -327,16 +340,11 @@
     justify-content: center;
     padding: 0.45rem 1.15rem;
     border-radius: 0.85rem;
-    background: var(--emp-acento);
+    background: var(--asb-accion);
     color: #fff8ef;
     font-size: 0.9rem;
     font-weight: 600;
     text-decoration: none;
-    transition: transform 180ms ease, background-color 180ms ease;
-}
-
-.empleo-editorial-hero__cta:hover {
-    background: #9a1a14;
 }
 
 .empleo-editorial-hero__cta--contorno {
@@ -345,14 +353,22 @@
     color: var(--emp-tinta);
 }
 
-.empleo-editorial-hero__cta--contorno:hover {
-    border-color: var(--emp-acento);
-    color: var(--emp-acento);
-    background: transparent;
-}
-
 .dark .empleo-editorial-hero__cta--contorno {
     color: #f6f1eb;
+}
+
+/* Detrás del tema oscuro a propósito: con la misma especificidad, el color del
+   hover solo gana en los dos temas si viene después. */
+@media (hover: hover) and (pointer: fine) {
+    .empleo-editorial-hero__cta:hover {
+        background: var(--asb-accion-fuerte);
+    }
+
+    .empleo-editorial-hero__cta--contorno:hover {
+        border-color: var(--emp-acento);
+        color: var(--emp-acento);
+        background: transparent;
+    }
 }
 
 /* —— Cuerpo —— */
@@ -441,9 +457,48 @@
     text-decoration: none;
 }
 
-.empleo-editorial-filtros__limpiar:hover {
-    color: var(--emp-tinta);
-    border-color: var(--emp-acento);
+@media (hover: hover) and (pointer: fine) {
+    .empleo-editorial-filtros__limpiar:hover {
+        color: var(--emp-tinta);
+        border-color: var(--emp-acento);
+    }
+}
+
+/*
+ * Los campos —los dos desplegables del filtro y los de los formularios de
+ * perfil y postulación— vienen de <x-publico.campo>, que no declara movimiento
+ * propio. El hover no toca el borde de un campo con foco ni el de uno errado:
+ * esta regla sin capa le ganaría a `focus:border-marca-500` y al borde rojo
+ * del error.
+ */
+.empleo-editorial select {
+    transition:
+        border-color var(--duracion-boton) var(--ease-color),
+        transform var(--duracion-instante) var(--ease-out);
+}
+
+/*
+ * Los campos de texto tiñen el borde y no encogen: pulsar en ellos es poner el
+ * cursor o arrastrar una selección, y una caja que se achica bajo el puntero
+ * mueve el texto que se está seleccionando. La casilla de datos es de
+ * <x-publico.habeas-data> y la dibuja el navegador.
+ */
+.empleo-editorial textarea,
+.empleo-editorial input:not([type='checkbox'], [type='radio']) {
+    transition: border-color var(--duracion-boton) var(--ease-color);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .empleo-editorial select:hover:not(:focus, [aria-invalid='true']),
+    .empleo-editorial textarea:hover:not(:focus, [aria-invalid='true']),
+    .empleo-editorial input:hover:not([type='checkbox'], [type='radio'], :focus, [aria-invalid='true']) {
+        border-color: var(--emp-linea-viva);
+    }
+}
+
+.empleo-editorial select:active {
+    transform: scale(var(--asb-encogimiento-tarjeta));
+    transition-duration: 0ms;
 }
 
 .empleo-editorial-vacio {
@@ -482,6 +537,12 @@
     margin: 0;
 }
 
+/*
+ * La oferta no es un enlace: dentro viven tres —el cargo, el establecimiento y
+ * el CTA— y cada uno trae su acuse. Un `:active` aquí hundiría la oferta entera
+ * junto con el botón pulsado, porque `:active` casa con los ancestros. Le queda
+ * el hover, con puntero fino.
+ */
 .empleo-editorial-oferta__enlace {
     display: grid;
     gap: 0.85rem 1.25rem;
@@ -492,13 +553,10 @@
     background: var(--emp-surface);
     box-shadow: var(--emp-sombra);
     color: inherit;
-    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
-}
-
-.empleo-editorial-oferta:hover .empleo-editorial-oferta__enlace {
-    border-color: rgb(183 31 24 / 0.35);
-    box-shadow: 0 18px 36px rgb(55 32 24 / 0.12);
-    transform: translateY(-2px);
+    transition:
+        border-color var(--duracion-boton) var(--ease-color),
+        box-shadow var(--duracion-boton) var(--ease-out),
+        transform var(--duracion-boton) var(--ease-out);
 }
 
 @media (min-width: 768px) {
@@ -509,8 +567,16 @@
     }
 }
 
-.dark .empleo-editorial-oferta:hover .empleo-editorial-oferta__enlace {
-    box-shadow: 0 18px 40px rgb(0 0 0 / 0.4);
+@media (hover: hover) and (pointer: fine) {
+    .empleo-editorial-oferta:hover .empleo-editorial-oferta__enlace {
+        border-color: var(--emp-linea-viva);
+        box-shadow: 0 18px 36px rgb(55 32 24 / 0.12);
+        transform: translateY(var(--asb-levante));
+    }
+
+    .dark .empleo-editorial-oferta:hover .empleo-editorial-oferta__enlace {
+        box-shadow: 0 18px 40px rgb(0 0 0 / 0.4);
+    }
 }
 
 .empleo-editorial-oferta__meta {
@@ -576,8 +642,10 @@
     text-decoration: none;
 }
 
-.empleo-editorial-oferta__empresa a:hover {
-    text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+    .empleo-editorial-oferta__empresa a:hover {
+        text-decoration: underline;
+    }
 }
 
 .empleo-editorial-oferta__datos {
@@ -603,10 +671,14 @@
     text-decoration: none;
 }
 
-.empleo-editorial-oferta__cargo a:hover {
-    color: var(--emp-acento);
+@media (hover: hover) and (pointer: fine) {
+    .empleo-editorial-oferta__cargo a:hover {
+        color: var(--emp-acento);
+    }
 }
 
+/* Mismo rojo y mismo motivo que los CTA del hero: el acento de oscuro no
+   sostiene el rótulo crema. `.pulsable`, en el marcado, pone el acuse. */
 .empleo-editorial-oferta__cta {
     display: inline-flex;
     min-height: 2.75rem;
@@ -614,12 +686,18 @@
     justify-content: center;
     padding: 0.4rem 1rem;
     border-radius: 0.85rem;
-    background: var(--emp-acento);
+    background: var(--asb-accion);
     color: #fff8ef;
     font-size: 0.85rem;
     font-weight: 600;
     white-space: nowrap;
     text-decoration: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .empleo-editorial-oferta__cta:hover {
+        background: var(--asb-accion-fuerte);
+    }
 }
 
 @media (max-width: 767.98px) {
@@ -671,8 +749,10 @@
     text-decoration: none;
 }
 
-.empleo-editorial-retorno:hover {
-    color: var(--emp-tinta);
+@media (hover: hover) and (pointer: fine) {
+    .empleo-editorial-retorno:hover {
+        color: var(--emp-tinta);
+    }
 }
 
 .empleo-editorial-ficha {
@@ -772,6 +852,33 @@
     white-space: nowrap;
 }
 
+/* El mismo aviso que el enlace al establecimiento: subrayado, que no se mueve. */
+@media (hover: hover) and (pointer: fine) {
+    .empleo-editorial-whatsapp a:hover {
+        text-decoration: underline;
+    }
+}
+
+/*
+ * Foco con el acento del módulo, como el resto de hojas editoriales. Medido
+ * contra el fondo y la superficie de la bolsa en los dos temas, el peor caso
+ * —oscuro sobre la superficie— da 4,51:1, por encima del 3:1 de un indicador
+ * de foco.
+ */
+.empleo-editorial-hero__cta:focus-visible,
+.empleo-editorial-oferta__cta:focus-visible,
+.empleo-editorial-filtros__limpiar:focus-visible,
+.empleo-editorial-retorno:focus-visible,
+.empleo-editorial-oferta__cargo a:focus-visible,
+.empleo-editorial-oferta__empresa a:focus-visible,
+.empleo-editorial-whatsapp a:focus-visible,
+.empleo-editorial select:focus-visible,
+.empleo-editorial textarea:focus-visible,
+.empleo-editorial input:not([type='checkbox'], [type='radio']):focus-visible {
+    outline: 2px solid var(--emp-acento);
+    outline-offset: 3px;
+}
+
 /* El FAB global no se mueve: Empleo cede hueco local a controles. */
 @media (max-width: 64rem) {
     .empleo-editorial-oferta__cta {
@@ -789,13 +896,20 @@
     }
 }
 
+/*
+ * Movimiento reducido: se va lo que se mueve y nada más. Los fundidos de
+ * color, borde y sombra se quedan, igual que el subrayado de los enlaces,
+ * porque no son movimiento y sin ellos el hover deja de avisar. El
+ * encogimiento de los CTA es de `.pulsable` y lo decide la casa.
+ */
 @media (prefers-reduced-motion: reduce) {
-    .empleo-editorial-hero__cta,
-    .empleo-editorial-oferta__enlace {
-        transition: none;
+    .empleo-editorial select:active {
+        transform: none;
     }
 
-    .empleo-editorial-oferta:hover .empleo-editorial-oferta__enlace {
-        transform: none;
+    @media (hover: hover) and (pointer: fine) {
+        .empleo-editorial-oferta:hover .empleo-editorial-oferta__enlace {
+            transform: none;
+        }
     }
 }

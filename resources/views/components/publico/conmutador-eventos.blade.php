@@ -59,12 +59,19 @@
             Sin `view-transition-name: filtro-activo`: ese nombre lo comparte
             el boletín y provocaba morphs entre pastillas de páginas distintas.
             aria-current y las URLs reales se conservan.
+
+            El radio, el relleno del activo y los tres estados --hover tras la
+            puerta de puntero fino, acuse y foco-- los dicta
+            `eventos-editorial.css`. Esa hoja va sin capa y gana a cualquier
+            utilidad de esta lista, así que un `hover:` aquí sería letra
+            muerta. `rounded-lg` y `bg-accion` se quedan como respaldo si el
+            componente se pinta sin la hoja.
         --}}
         <a href="{{ $segmento['url'] }}"
            @class([
                'pulsable inline-flex min-h-11 items-center rounded-lg px-5 text-sm',
                'bg-accion font-medium text-white' => $activo === $clave,
-               'text-tenue hover:text-fuerte' => $activo !== $clave,
+               'text-tenue' => $activo !== $clave,
            ])
            @if ($activo === $clave) aria-current="true" @endif>
             {{ $segmento['texto'] }}

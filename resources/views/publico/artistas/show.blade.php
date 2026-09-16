@@ -95,7 +95,7 @@
                 <ul class="mt-6 grid gap-4 sm:grid-cols-3">
                     @foreach ($similares as $similar)
                         <li>
-                            <a href="{{ route('artistas.show', $similar) }}" class="artistas-editorial-similar tarjeta-hover tarjeta-pulsable block rounded-[1.25rem] p-5">
+                            <a href="{{ route('artistas.show', $similar) }}" class="artistas-editorial-similar tarjeta-hover tarjeta-pulsable block p-5">
                                 <span class="block font-display text-sm font-semibold">{{ $similar->nombre }}</span>
                                 <span class="mt-1 block text-xs text-acento">{{ $similar->genero_musical }}</span>
                             </a>
