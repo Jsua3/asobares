@@ -56,6 +56,13 @@ base-de-datos-cap*.xls*
 # nunca se versiona; entra por importador, sembradores o medios optimizados.
 /material/materialnoviembre/
 
+# Material del gremio recibido el 15 sep 2026 (carpeta "sep15material"): 35 MB, 53 archivos.
+# Fotos y un video de siete establecimientos afiliados -interiores, fachadas y personas
+# identificables-, dos logotipos de terceros y el Excel de trabajo de la guia normativa.
+# Llego SIN ignorar y `git status` ya la listaba, igual que materialnoviembre el 9 sep.
+# Mismo trato: nunca se versiona; entra por importador, sembradores o medios optimizados.
+/material/sep15material/
+
 # `public/videos/` SÍ se versiona. El original del gremio son 58 MB y esos no
 # entran en git: lo que se versiona es el bucle de 10 s recortado y comprimido
 # (1,5 MB) más su póster. Cloud despliega desde git, así que un archivo
