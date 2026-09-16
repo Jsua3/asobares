@@ -10,15 +10,16 @@ The Laravel Boost guidelines are specifically curated by Laravel maintainers for
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
 - php - 8.5
-- filament/filament (FILAMENT) - v4
+- filament/filament (FILAMENT) - v5
 - laravel/framework (LARAVEL) - v13
 - laravel/prompts (PROMPTS) - v0
-- livewire/livewire (LIVEWIRE) - v3
+- livewire/livewire (LIVEWIRE) - v4
 - laravel/boost (BOOST) - v2
 - laravel/mcp (MCP) - v0
 - laravel/pail (PAIL) - v1
 - laravel/pint (PINT) - v1
 - phpunit/phpunit (PHPUNIT) - v12
+- rector/rector (RECTOR) - v2
 - alpinejs (ALPINEJS) - v3
 - tailwindcss (TAILWINDCSS) - v4
 
