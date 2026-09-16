@@ -40,6 +40,15 @@
     overflow-x: clip;
 }
 
+/* En escritorio la barra son píldoras de 4.375rem con su propio aire: con
+   el tope del módulo móvil (3.5rem) la primera línea quedaba a 18 px del
+   borde de la barra, pegada. Mismo respiro que la guía. */
+@media (min-width: 64rem) {
+    .gremio-editorial {
+        --grem-tope: calc(4.375rem + env(safe-area-inset-top, 0px) + 2.75rem);
+    }
+}
+
 .dark .gremio-editorial {
     --grem-bg: #14110f;
     --grem-elevada: #1b1714;
@@ -1053,10 +1062,14 @@
     }
 }
 
+/* Una pieza con fondo propio: se redondea como las demás superficies. Con
+   solo un filete arriba y esquinas a cero era la única caja recta de la
+   página, a sangre sobre la columna. */
 .gremio-editorial-formulario {
     margin-top: 2.75rem;
     padding: 2.25rem 0 0;
-    border-top: 1px solid var(--grem-linea);
+    border: 1px solid var(--grem-linea);
+    border-radius: 1rem;
     background: var(--grem-elevada);
 }
 

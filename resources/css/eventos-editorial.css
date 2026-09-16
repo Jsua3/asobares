@@ -602,10 +602,12 @@
         transform var(--duracion-instante) var(--ease-out);
 }
 
+/* La fila crece con el cuerpo: fija a 11.5rem, un lugar de dos líneas
+   empujaba «Ver evento» por debajo del recorte de la tarjeta. */
 @media (min-width: 768px) {
     .eventos-editorial-ficha__enlace {
         grid-template-columns: 7.5rem minmax(0, 0.92fr) minmax(0, 1.15fr);
-        grid-template-rows: 11.5rem;
+        grid-template-rows: minmax(11.5rem, auto);
     }
 }
 
@@ -676,7 +678,7 @@
 
 @media (min-width: 768px) {
     .eventos-editorial-ficha__foto {
-        height: 11.5rem;
+        height: auto;
         min-height: 11.5rem;
         grid-column: 3;
         grid-row: 1;
