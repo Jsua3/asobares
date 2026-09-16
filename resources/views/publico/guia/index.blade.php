@@ -45,15 +45,17 @@
                 <div class="guia-editorial-escena__velo"></div>
                 @if (file_exists(public_path('media/abre-tu-negocio/animacion-logo.mp4')))
                     <div class="guia-editorial-logo-vivo" x-data="guiaIdentidad">
-                        <video x-ref="identidad"
-                               muted
-                               playsinline
-                               loop
-                               preload="auto"
-                               width="1080"
-                               height="1080">
-                            <source src="{{ asset('media/abre-tu-negocio/animacion-logo.mp4') }}" type="video/mp4">
-                        </video>
+                        <span class="guia-editorial-logo-vivo__marco">
+                            <video x-ref="identidad"
+                                   muted
+                                   playsinline
+                                   loop
+                                   preload="auto"
+                                   width="1080"
+                                   height="1080">
+                                <source src="{{ asset('media/abre-tu-negocio/animacion-logo.mp4') }}" type="video/mp4">
+                            </video>
+                        </span>
                     </div>
                 @endif
             </div>

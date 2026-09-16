@@ -82,6 +82,13 @@ class SuperficiesPulsablesDeLaGuiaTest extends TestCase
      * exención se comprueba en el árbol: la escena es decorado mientras esté
      * oculta a los lectores de pantalla y no tenga nada que pulsar.
      *
+     * Y se comprueba en la pantalla: esas capas rectas solo no se ven porque
+     * la escena se funde con la página por los cuatro lados con una máscara,
+     * y el video del logotipo con una elipse que llega a transparente en sus
+     * cuatro lados (`closest-side`). Con un radio solo a la derecha, la foto
+     * se cortaba en seco arriba, abajo y contra el texto, y la caja del video
+     * se veía como un cuadrado.
+     *
      * El enlace a la entidad toma su caja de las utilidades de la vista, así
      * que su radio se mira en el elemento servido: `rounded-xl` es la celda de
      * 0.75rem de Tailwind 4, y ninguna otra utilidad de radio la pisa.
@@ -125,6 +132,24 @@ class SuperficiesPulsablesDeLaGuiaTest extends TestCase
         }
 
         $this->assertSame([], $rectas, "Esquinas rectas fuera del decorado del hero:\n".implode("\n", $rectas));
+
+        $mascara = $this->declaracionesBase($reglas, '.guia-editorial-escena')['mask-image'] ?? '';
+        $this->assertMatchesRegularExpression(
+            '/^linear-gradient\(90deg, transparent [^,]+, #000 [^,]+, #000 [^,]+, transparent 100%\), linear-gradient\(180deg, transparent 0%, #000 [^,]+, #000 [^,]+, transparent 100%\)$/',
+            $mascara,
+            'La escena del hero no se funde con la página por los cuatro lados: sus capas rectas se ven.'
+        );
+
+        foreach ($this->reglasDe($reglas, '.guia-editorial-escena') as $regla) {
+            $declaraciones = $this->declaraciones($regla['cuerpo']);
+
+            $this->assertArrayNotHasKey('border-radius', $declaraciones, 'La escena vuelve a recortarse con un radio en vez de fundirse.');
+            $this->assertNotSame('none', $declaraciones['mask-image'] ?? null, 'Algún ancho le quita la máscara a la escena.');
+        }
+
+        $mascaraDelLogo = $this->declaracionesBase($reglas, '.guia-editorial-logo-vivo video')['mask-image'] ?? '';
+        $this->assertStringStartsWith('radial-gradient(closest-side,', $mascaraDelLogo, 'La elipse del logotipo no toca los lados de su caja: el video se ve como un cuadrado.');
+        $this->assertStringEndsWith('transparent 100%)', $mascaraDelLogo);
 
         $xpath = $this->guiaServida();
         $escena = $xpath->query('//*['.$this->conClase('guia-editorial-escena').']');

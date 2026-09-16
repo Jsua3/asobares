@@ -69,12 +69,31 @@ html:not(.dark) .guia-editorial .hero-con-medio {
 
 .guia-editorial-escena {
     --guia-video-negro: #0f1112;
+    --guia-escena-inicio: 0%;
+    --guia-escena-entrada: 10%;
+    --guia-escena-salida: 90%;
+    --guia-escena-arriba: 16%;
     position: relative;
     overflow: hidden;
     min-height: 16rem;
     height: 100%;
     align-self: stretch;
-    border-radius: 0;
+    /*
+     * Sin cantos: la escena se funde con la página por los cuatro lados,
+     * como las cabeceras de eventos, empleo, artistas y proveedores. Con un
+     * radio solo a la derecha, la foto se cortaba en seco por arriba, por
+     * abajo y contra la columna del texto, y el logotipo vivo dejaba ver su
+     * caja. Las capas de dentro pueden ir rectas porque nunca llegan a verse
+     * sus bordes: esta máscara los borra.
+     */
+    -webkit-mask-image:
+        linear-gradient(90deg, transparent var(--guia-escena-inicio), #000 var(--guia-escena-entrada), #000 var(--guia-escena-salida), transparent 100%),
+        linear-gradient(180deg, transparent 0%, #000 var(--guia-escena-arriba), #000 84%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+        linear-gradient(90deg, transparent var(--guia-escena-inicio), #000 var(--guia-escena-entrada), #000 var(--guia-escena-salida), transparent 100%),
+        linear-gradient(180deg, transparent 0%, #000 var(--guia-escena-arriba), #000 84%, transparent 100%);
+    mask-composite: intersect;
 }
 
 .guia-editorial-escena__campo,
@@ -116,23 +135,25 @@ img.guia-editorial-escena__foto {
     z-index: 1;
 }
 
+/* En claro no hay negro de video: la foto se funde con el crema como las
+   demás cabeceras, y el logotipo lleva su propia sombra redonda
+   (`.guia-editorial-logo-vivo::before`). Un bloque oscuro a la derecha se
+   leía como una mancha. */
 html:not(.dark) .guia-editorial-escena__velo {
     background:
         linear-gradient(
             90deg,
-            #f7f1e8 0%,
-            #f7f1e8 8%,
-            rgb(247 241 232 / 0.5) 16%,
-            rgb(247 241 232 / 0.14) 24%,
-            transparent 34%
+            transparent 0%,
+            transparent 58%,
+            rgb(247 241 232 / 0.55) 86%,
+            rgb(247 241 232 / 0.9) 100%
         ),
         linear-gradient(
-            90deg,
-            transparent 0%,
-            transparent 78%,
-            rgb(47 28 20 / 0.22) 86%,
-            rgb(15 17 18 / 0.55) 92%,
-            var(--guia-video-negro) 100%
+            180deg,
+            rgb(247 241 232 / 0.35) 0%,
+            transparent 30%,
+            transparent 70%,
+            rgb(247 241 232 / 0.45) 100%
         );
 }
 
@@ -167,6 +188,25 @@ html:not(.dark) .guia-editorial-escena__velo {
     pointer-events: none;
 }
 
+/* El neón del logotipo se pinta con `screen`: necesita oscuro detrás. En
+   claro ese oscuro es una sombra redonda que se desvanece alrededor del
+   video, no una caja. */
+.guia-editorial-logo-vivo__marco {
+    position: relative;
+    display: block;
+    flex: 0 0 auto;
+}
+
+html:not(.dark) .guia-editorial-logo-vivo__marco::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: -35%;
+    border-radius: 999px;
+    background: radial-gradient(closest-side, rgb(15 17 18 / 0.92) 0%, rgb(15 17 18 / 0.74) 44%, rgb(15 17 18 / 0.3) 74%, transparent 100%);
+    pointer-events: none;
+}
+
 .guia-editorial-logo-vivo video {
     display: block;
     flex: 0 0 auto;
@@ -182,8 +222,12 @@ html:not(.dark) .guia-editorial-escena__velo {
     outline: none;
     box-shadow: none;
     border-radius: 0;
-    -webkit-mask-image: radial-gradient(ellipse at 62% 50%, #000 55%, rgb(0 0 0 / 0.75) 78%, transparent 100%);
-    mask-image: radial-gradient(ellipse at 62% 50%, #000 55%, rgb(0 0 0 / 0.75) 78%, transparent 100%);
+    /* `closest-side`: la elipse toca los cuatro lados de la caja del video y
+       llega a transparente justo ahí. Con el tamaño por defecto
+       (`farthest-corner`) el centro de cada lado quedaba al 75 % y la caja
+       se veía como un cuadrado claro sobre la foto. */
+    -webkit-mask-image: radial-gradient(closest-side, #000 58%, rgb(0 0 0 / 0.7) 80%, transparent 100%);
+    mask-image: radial-gradient(closest-side, #000 58%, rgb(0 0 0 / 0.7) 80%, transparent 100%);
 }
 
 .guia-editorial-logo-vivo video::-webkit-media-controls {
@@ -245,7 +289,9 @@ html:not(.dark) .guia-editorial-escena__velo {
         min-height: 0;
         height: auto;
         margin-right: 0;
-        border-radius: 0 1.75rem 1.75rem 0;
+        --guia-escena-inicio: 44%;
+        --guia-escena-entrada: 62%;
+        --guia-escena-salida: 88%;
     }
 
     img.guia-editorial-escena__foto {
@@ -255,7 +301,7 @@ html:not(.dark) .guia-editorial-escena__velo {
 
     .guia-editorial-logo-vivo {
         min-height: 100%;
-        padding-right: clamp(0.75rem, 1.6vw, 1.5rem);
+        padding-right: clamp(4rem, 9vw, 9rem);
     }
 }
 
@@ -318,7 +364,8 @@ html:not(.dark) .guia-editorial-escena__velo {
     }
 
     .guia-editorial-escena {
-        border-radius: 0 1.25rem 1.25rem 0;
+        --guia-escena-entrada: 34%;
+        --guia-escena-salida: 90%;
     }
 
     html:not(.dark) .guia-editorial-escena__velo {
@@ -329,14 +376,6 @@ html:not(.dark) .guia-editorial-escena__velo {
                 rgb(247 241 232 / 0.5) 10%,
                 rgb(247 241 232 / 0.14) 18%,
                 transparent 26%
-            ),
-            linear-gradient(
-                90deg,
-                transparent 0%,
-                transparent 50%,
-                rgb(47 28 20 / 0.2) 62%,
-                var(--guia-video-negro) 72%,
-                var(--guia-video-negro) 100%
             );
     }
 
@@ -394,7 +433,9 @@ html:not(.dark) .guia-editorial-escena__velo {
     }
 
     .guia-editorial-escena {
-        border-radius: 0 0 1.15rem 1.15rem;
+        --guia-escena-entrada: 6%;
+        --guia-escena-salida: 94%;
+        --guia-escena-arriba: 34%;
     }
 
     img.guia-editorial-escena__foto {
@@ -410,13 +451,6 @@ html:not(.dark) .guia-editorial-escena__velo {
                 #f7f1e8 0%,
                 rgb(247 241 232 / 0.4) 12%,
                 transparent 28%
-            ),
-            linear-gradient(
-                to top left,
-                var(--guia-video-negro) 0%,
-                var(--guia-video-negro) 42%,
-                rgb(47 28 20 / 0.28) 58%,
-                transparent 76%
             );
     }
 

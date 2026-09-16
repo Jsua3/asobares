@@ -57,7 +57,7 @@ class GuiaEditorialHibridoTest extends TestCase
         $this->assertStringContainsString('object-position: 18% 50%', $css);
         $this->assertStringContainsString('img.guia-editorial-escena__foto', $css);
         $this->assertStringContainsString('max-width: none', $css);
-        $this->assertStringContainsString('transparent 34%', $css);
+        $this->assertStringContainsString('mask-composite: intersect', $css);
         $this->assertStringContainsString('--guia-hero-tope', $css);
         $this->assertStringContainsString('media/abre-tu-negocio/hero-abre-tu-negocio.webp', File::get(resource_path('views/publico/guia/index.blade.php')));
         $this->assertFileExists(public_path('media/abre-tu-negocio/hero-abre-tu-negocio.webp'));
