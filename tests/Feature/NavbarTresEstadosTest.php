@@ -529,22 +529,56 @@ class NavbarTresEstadosTest extends TestCase
     }
 
     /**
-     * En scroll las tres píldoras dejan huecos y el manifiesto se leía a
-     * través. El velo de fila cubre la banda del header; las píldoras no
-     * cambian de geometría.
+     * En scroll las tres píldoras dejan huecos, y el texto que pasa por debajo
+     * se leía entre ellas. El velo de fila lo desenfoca sin tocar la geometría.
      *
-     * Rotura: borrar los ::after de data-estado scroll/atencion.
+     * La guardia anterior buscaba tres cadenas y seguía verde con el defecto
+     * entero de vuelta (`--asb-cromo-fila: transparent`) y con la banda
+     * tapando logo, enlaces y cuenta (sin el `z-index` de `.bandeja`). Esta
+     * mide lo que el velo HACE:
+     *
+     * - existe en los dos estados y pinta el token de fila con desenfoque;
+     * - se desvanece por máscara hacia `transparent`: sin ella vuelve la
+     *   franja de lado a lado con un corte recto cruzando la página;
+     * - el token es translúcido en los dos temas (un fondo sólido no deja
+     *   nada que desenfocar a las píldoras) y sólido bajo transparencia
+     *   reducida;
+     * - queda por DEBAJO de `.bandeja` en el apilamiento.
+     *
+     * Roturas: token a `transparent`, token opaco, sin máscara, sin
+     * `z-index` en `.bandeja`, sin los `::after`.
      */
     public function test_el_velo_de_fila_cubre_los_huecos_en_scroll(): void
     {
         $css = File::get(resource_path('css/app.css'));
-        $escritorio = strstr($css, '@media (min-width: 64rem) {');
-        $this->assertNotFalse($escritorio);
-        $bloque = substr($escritorio, 0, strpos($escritorio, '@media', 10));
+        $escritorio = $this->bloqueCss($css, '@media (min-width: 64rem) {');
 
-        $this->assertStringContainsString('.cromo[data-estado="scroll"]::after', $bloque);
-        $this->assertStringContainsString('.cromo[data-estado="atencion"]::after', $bloque);
-        $this->assertStringContainsString('background-color: var(--asb-cromo-fila);', $bloque);
+        $selector = ".cromo[data-estado=\"scroll\"]::after,\n        .cromo[data-estado=\"atencion\"]::after";
+        $velo = $this->regla($escritorio, $selector);
+
+        $this->assertStringContainsString("content: '';", $velo, 'el velo de fila no se pinta');
+        $this->assertStringContainsString('background-color: var(--asb-cromo-fila);', $velo);
+        $this->assertStringContainsString('backdrop-filter: var(--asb-cromo-desenfoque);', $velo);
+        $this->assertMatchesRegularExpression('/(?<!-webkit-)mask-image: linear-gradient\(to bottom, #000 [^;]+, transparent\);/', $velo, 'sin máscara el velo es una banda con corte recto');
+
+        $this->assertSame(1, preg_match('/z-index: (\d+);/', $velo, $zVelo), 'el velo de fila no declara su z-index');
+        $this->assertSame(1, preg_match('/z-index: (\d+);/', $this->regla($escritorio, '.bandeja'), $zBandeja), '.bandeja de escritorio no declara z-index: el velo la tapa');
+        $this->assertGreaterThan((int) $zVelo[1], (int) $zBandeja[1], 'el velo de fila queda por encima de logo, enlaces y cuenta');
+
+        $tokens = File::get(resource_path('css/tokens.css'));
+        $patron = '/--asb-cromo-fila: color-mix\(in oklab, var\(--asb-fondo\) (\d+)%, transparent\);/';
+
+        foreach (['claro' => ':root {', 'oscuro' => '.dark {'] as $tema => $marca) {
+            $this->assertSame(1, preg_match($patron, $this->bloqueCss($tokens, $marca), $alfa), "el velo de fila {$tema} no es un color-mix translúcido del fondo");
+            $this->assertGreaterThanOrEqual(70, (int) $alfa[1], "el velo de fila {$tema} deja pasar demasiado");
+            $this->assertLessThan(100, (int) $alfa[1], "el velo de fila {$tema} es opaco: el desenfoque no compone nada");
+        }
+
+        $this->assertStringContainsString(
+            '--asb-cromo-fila: var(--asb-fondo);',
+            $this->bloqueCss($tokens, '@media (prefers-reduced-transparency: reduce) {'),
+            'bajo transparencia reducida el velo de fila tiene que ser sólido'
+        );
     }
 
     /**
@@ -854,5 +888,23 @@ class NavbarTresEstadosTest extends TestCase
         $fin = strpos($css, '}', $inicio);
 
         return substr($css, $inicio, $fin - $inicio);
+    }
+
+    /** El bloque completo que abre `$marca`, contando llaves. */
+    private function bloqueCss(string $css, string $marca): string
+    {
+        $inicio = strpos($css, $marca);
+        $this->assertNotFalse($inicio, "no existe el bloque {$marca}");
+        $nivel = 0;
+
+        for ($i = strpos($css, '{', $inicio), $largo = strlen($css); $i < $largo; $i++) {
+            if ($css[$i] === '{') {
+                $nivel++;
+            } elseif ($css[$i] === '}' && --$nivel === 0) {
+                return substr($css, $inicio, $i - $inicio + 1);
+            }
+        }
+
+        $this->fail("el bloque {$marca} no cierra");
     }
 }

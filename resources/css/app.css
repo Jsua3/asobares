@@ -651,9 +651,19 @@
         }
 
         /*
-         * En scroll/atención las tres píldoras dejan huecos: el manifiesto
-         * se leía a través de la fila. Este velo cubre la banda del header
-         * sin cambiar geometría, enlaces ni módulos.
+         * En scroll y atención las tres píldoras dejan huecos, y el texto que
+         * pasaba por debajo se leía entre ellas. Este velo lo desenfoca sin
+         * cambiar geometría, enlaces ni módulos.
+         *
+         * No es una banda: se DESVANECE hacia abajo con una máscara. Con
+         * fondo opaco y corte seco volvía a ser la franja de lado a lado con
+         * una raya recta cruzando la página, que es lo que las píldoras
+         * flotantes vinieron a quitar. Y es translúcido para que el
+         * desenfoque componga algo: debajo de un fondo sólido se pagaba en
+         * cada fotograma de scroll sin pintar nada.
+         *
+         * Va por debajo de `.bandeja` (z-index 1): sin eso tapa el logo, los
+         * enlaces y la cuenta.
          */
         .cromo[data-estado="scroll"]::after,
         .cromo[data-estado="atencion"]::after {
@@ -661,11 +671,13 @@
             pointer-events: none;
             position: absolute;
             inset: 0 0 auto;
-            height: calc(100% + 0.75rem);
+            height: calc(100% + 1.5rem);
             z-index: 0;
             background-color: var(--asb-cromo-fila);
             -webkit-backdrop-filter: var(--asb-cromo-desenfoque);
             backdrop-filter: var(--asb-cromo-desenfoque);
+            -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5rem), transparent);
+            mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5rem), transparent);
         }
 
         .bandeja {
