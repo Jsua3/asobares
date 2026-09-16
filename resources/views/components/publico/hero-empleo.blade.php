@@ -10,13 +10,13 @@
     fotografía panorámica fundida, no una tarjeta a la derecha).
 
     Fotografía propia, nunca la de Directorio, Eventos, Guía ni Home:
-    public/img/empleo/hero-empleo.png
+    public/img/empleo/hero-empleo.webp
 
     Sin archivo: plano crema/noche. No geometría, no foto falsa.
 --}}
 @php
-    $fotoHeroEmpleo = is_file(public_path('img/empleo/hero-empleo.png'))
-        ? 'img/empleo/hero-empleo.png'
+    $fotoHeroEmpleo = is_file(public_path('img/empleo/hero-empleo.webp'))
+        ? 'img/empleo/hero-empleo.webp'
         : null;
 @endphp
 
@@ -25,7 +25,7 @@
         'empleo-editorial-hero--con-foto' => (bool) $fotoHeroEmpleo,
     ])
     aria-labelledby="empleo-editorial-titulo"
-    data-empleo-hero-slot="img/empleo/hero-empleo.png">
+    data-empleo-hero-slot="img/empleo/hero-empleo.webp">
     <div class="empleo-editorial-hero__plano" aria-hidden="true"></div>
     @if ($fotoHeroEmpleo)
         <div class="empleo-editorial-hero__foto" aria-hidden="true">

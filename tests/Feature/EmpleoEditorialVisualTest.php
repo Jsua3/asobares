@@ -32,7 +32,7 @@ class EmpleoEditorialVisualTest extends TestCase
             'Empleo no enlaza su hoja editorial'
         );
         $this->assertStringContainsString('empleo-editorial-hero', $html);
-        $this->assertStringContainsString('data-empleo-hero-slot="img/empleo/hero-empleo.png"', $html);
+        $this->assertStringContainsString('data-empleo-hero-slot="img/empleo/hero-empleo.webp"', $html);
         $this->assertStringContainsString('empleo-editorial-cartelera', $html);
         $this->assertStringContainsString($vacante->cargo, $html);
         $this->assertStringContainsString($vacante->asociado->nombre, $html);
@@ -89,14 +89,14 @@ class EmpleoEditorialVisualTest extends TestCase
     public function test_el_css_y_vite_declaran_la_hoja_de_empleo(): void
     {
         $this->assertFileExists(resource_path('css/empleo-editorial.css'));
-        $this->assertFileExists(public_path('img/empleo/hero-empleo.png'));
+        $this->assertFileExists(public_path('img/empleo/hero-empleo.webp'));
 
         $css = File::get(resource_path('css/empleo-editorial.css'));
         $vite = File::get(base_path('vite.config.js'));
 
         $this->assertStringContainsString('.empleo-editorial-hero', $css);
         $this->assertStringContainsString('.empleo-editorial-hero__foto', $css);
-        $this->assertStringContainsString('public/img/empleo/hero-empleo.png', $css);
+        $this->assertStringContainsString('public/img/empleo/hero-empleo.webp', $css);
         $this->assertStringNotContainsString('geometria', $css);
         $this->assertStringContainsString('@media (prefers-reduced-motion: reduce)', $css);
         $this->assertStringContainsString('margin-inline-end: 4.5rem', $css);

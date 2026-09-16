@@ -167,9 +167,9 @@ class DirectorioEditorialHibridoTest extends TestCase
         $css = File::get(resource_path('css/directorio-editorial.css'));
         $hero = $this->fragmentoDelHero($this->get(route('directorio.index'))->assertOk()->getContent());
 
-        $this->assertFileExists(public_path('img/directorio/hero-directorio.png'));
-        $this->assertStringContainsString("asset('img/directorio/hero-directorio.png')", $vista);
-        $this->assertStringContainsString('img/directorio/hero-directorio.png', $hero);
+        $this->assertFileExists(public_path('img/directorio/hero-directorio.webp'));
+        $this->assertStringContainsString("asset('img/directorio/hero-directorio.webp')", $vista);
+        $this->assertStringContainsString('img/directorio/hero-directorio.webp', $hero);
         $this->assertStringNotContainsString('hueco-foto', $vista);
         $this->assertStringNotContainsString('foto_portada', $vista);
         $this->assertStringNotContainsString('<x-publico.hueco-foto', $vista);

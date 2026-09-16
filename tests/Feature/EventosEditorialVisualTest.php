@@ -44,7 +44,7 @@ class EventosEditorialVisualTest extends TestCase
         $this->assertStringContainsString('Organiza', $html);
         $this->assertStringContainsString('ASOBARES Capítulo Quindío', $html);
         $this->assertStringContainsString('eventos-editorial-ficha', $html);
-        $this->assertStringContainsString('data-eventos-hero-slot="img/eventos/hero-eventos.png"', $html);
+        $this->assertStringContainsString('data-eventos-hero-slot="img/eventos/hero-eventos.webp"', $html);
         $this->assertStringContainsString($evento->titulo, $html);
         $this->assertStringContainsString('Centro de Convenciones', $html);
         $this->assertStringContainsString('Ver evento', $html);

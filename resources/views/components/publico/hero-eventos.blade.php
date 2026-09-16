@@ -8,13 +8,13 @@
     fotografía panorámica fundida, no una tarjeta a la derecha).
 
     Fotografía propia, nunca la de Directorio, Guía ni Home:
-    public/img/eventos/hero-eventos.png
+    public/img/eventos/hero-eventos.webp
 
     Sin archivo: plano crema/noche. No geometría, no foto falsa.
 --}}
 @php
-    $fotoHeroEventos = is_file(public_path('img/eventos/hero-eventos.png'))
-        ? 'img/eventos/hero-eventos.png'
+    $fotoHeroEventos = is_file(public_path('img/eventos/hero-eventos.webp'))
+        ? 'img/eventos/hero-eventos.webp'
         : null;
 @endphp
 
@@ -23,7 +23,7 @@
         'eventos-editorial-hero--con-foto' => (bool) $fotoHeroEventos,
     ])
     aria-labelledby="eventos-editorial-titulo"
-    data-eventos-hero-slot="img/eventos/hero-eventos.png">
+    data-eventos-hero-slot="img/eventos/hero-eventos.webp">
     <div class="eventos-editorial-hero__plano" aria-hidden="true"></div>
     @if ($fotoHeroEventos)
         <div class="eventos-editorial-hero__foto" aria-hidden="true">

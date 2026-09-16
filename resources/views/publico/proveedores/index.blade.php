@@ -9,7 +9,7 @@
         <section class="proveedores-editorial-hero" aria-labelledby="proveedores-titulo">
             <div class="proveedores-editorial-hero__plano"></div>
             <div class="proveedores-editorial-hero__foto" aria-hidden="true">
-                <img src="{{ asset('img/proveedores/hero-proveedores.png') }}" alt="" width="1800" height="900" decoding="async">
+                <img src="{{ asset('img/proveedores/hero-proveedores.webp') }}" alt="" width="1672" height="941" decoding="async">
             </div>
             <div class="proveedores-editorial-hero__velo"></div>
             <div class="proveedores-editorial-hero__cuerpo">

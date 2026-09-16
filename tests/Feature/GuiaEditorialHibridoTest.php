@@ -59,8 +59,8 @@ class GuiaEditorialHibridoTest extends TestCase
         $this->assertStringContainsString('max-width: none', $css);
         $this->assertStringContainsString('transparent 34%', $css);
         $this->assertStringContainsString('--guia-hero-tope', $css);
-        $this->assertStringContainsString('media/abre-tu-negocio/hero-abre-tu-negocio.png', File::get(resource_path('views/publico/guia/index.blade.php')));
-        $this->assertFileExists(public_path('media/abre-tu-negocio/hero-abre-tu-negocio.png'));
+        $this->assertStringContainsString('media/abre-tu-negocio/hero-abre-tu-negocio.webp', File::get(resource_path('views/publico/guia/index.blade.php')));
+        $this->assertFileExists(public_path('media/abre-tu-negocio/hero-abre-tu-negocio.webp'));
         $this->assertStringContainsString('mix-blend-mode: screen', $css);
         $this->assertStringContainsString('@media (prefers-reduced-motion: reduce)', $css);
         $this->assertStringContainsString('view-transition-name: none', $css);

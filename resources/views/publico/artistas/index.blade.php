@@ -9,7 +9,7 @@
         <section class="artistas-editorial-hero" aria-labelledby="artistas-titulo">
             <div class="artistas-editorial-hero__plano"></div>
             <div class="artistas-editorial-hero__foto" aria-hidden="true">
-                <img src="{{ asset('img/artistas/hero-artistas.png') }}" alt="" width="1800" height="900" decoding="async">
+                <img src="{{ asset('img/artistas/hero-artistas.webp') }}" alt="" width="1672" height="941" decoding="async">
             </div>
             <div class="artistas-editorial-hero__velo"></div>
             <div class="artistas-editorial-hero__cuerpo">

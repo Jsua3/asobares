@@ -15,11 +15,10 @@
         @endpush
     @endif
 
-    {{-- Fotografía definitiva: `public/media/abre-tu-negocio/hero-abre-tu-negocio.png`. --}}
+    {{-- Fotografía definitiva: `public/media/abre-tu-negocio/hero-abre-tu-negocio.webp`. --}}
     @php
         $fotoGuiaEscena = collect([
-            'media/abre-tu-negocio/hero-abre-tu-negocio.png',
-            'img/guia/hero-abre-tu-negocio.png',
+            'media/abre-tu-negocio/hero-abre-tu-negocio.webp',
             'img/guia/hero-abre-tu-negocio.webp',
             'img/guia/hero-abre-tu-negocio.jpg',
         ])->first(fn (string $ruta): bool => is_file(public_path($ruta)));

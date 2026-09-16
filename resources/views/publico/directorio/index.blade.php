@@ -34,7 +34,7 @@
         <section class="directorio-editorial-hero directorio-editorial-hero--con-foto" aria-labelledby="directorio-editorial-titulo">
             <div class="directorio-editorial-hero__plano" aria-hidden="true"></div>
             <div class="directorio-editorial-hero__foto" aria-hidden="true">
-                <img src="{{ asset('img/directorio/hero-directorio.png') }}"
+                <img src="{{ asset('img/directorio/hero-directorio.webp') }}"
                      alt=""
                      width="1672"
                      height="941"

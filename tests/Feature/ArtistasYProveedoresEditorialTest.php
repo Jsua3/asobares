@@ -7,6 +7,7 @@ use App\Models\Artista;
 use App\Models\Proveedor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Vite;
 use Tests\TestCase;
 
 class ArtistasYProveedoresEditorialTest extends TestCase
@@ -25,8 +26,8 @@ class ArtistasYProveedoresEditorialTest extends TestCase
         $respuesta = $this->get(route('artistas.index'))->assertOk();
 
         $respuesta
-            ->assertSee('resources/css/artistas-editorial.css', escape: false)
-            ->assertSee('img/artistas/hero-artistas.png', escape: false)
+            ->assertSee('href="'.Vite::asset('resources/css/artistas-editorial.css').'"', escape: false)
+            ->assertSee('img/artistas/hero-artistas.webp', escape: false)
             ->assertSee('artistas-editorial-card', escape: false)
             ->assertSee('Trío Editorial')
             ->assertDontSee('3001112233')
@@ -44,7 +45,7 @@ class ArtistasYProveedoresEditorialTest extends TestCase
 
         $this->get(route('artistas.show', $artista))
             ->assertOk()
-            ->assertSee('resources/css/artistas-editorial.css', escape: false)
+            ->assertSee('href="'.Vite::asset('resources/css/artistas-editorial.css').'"', escape: false)
             ->assertSee('artistas-editorial-ficha', escape: false)
             ->assertSee('Solista Reservado')
             ->assertDontSee('3004445566')
@@ -63,8 +64,8 @@ class ArtistasYProveedoresEditorialTest extends TestCase
 
         $this->get(route('proveedores.index'))
             ->assertOk()
-            ->assertSee('resources/css/proveedores-editorial.css', escape: false)
-            ->assertSee('img/proveedores/hero-proveedores.png', escape: false)
+            ->assertSee('href="'.Vite::asset('resources/css/proveedores-editorial.css').'"', escape: false)
+            ->assertSee('img/proveedores/hero-proveedores.webp', escape: false)
             ->assertSee('proveedores-editorial-categoria', escape: false)
             ->assertSee('Hielo')
             ->assertSee('1')
@@ -95,7 +96,7 @@ class ArtistasYProveedoresEditorialTest extends TestCase
 
         $this->assertStringContainsString('resources/css/artistas-editorial.css', $vite);
         $this->assertStringContainsString('resources/css/proveedores-editorial.css', $vite);
-        $this->assertFileExists(public_path('img/artistas/hero-artistas.png'));
-        $this->assertFileExists(public_path('img/proveedores/hero-proveedores.png'));
+        $this->assertFileExists(public_path('img/artistas/hero-artistas.webp'));
+        $this->assertFileExists(public_path('img/proveedores/hero-proveedores.webp'));
     }
 }

@@ -63,9 +63,9 @@
     /*
      * Ruta relativa al CSS, no url("/img/..."): con `public/hot`, Vite
      * reescribe el path absoluto al origen HMR y responde 404. El
-     * archivo vive en public/img/panel/cabecera-dashboard.png.
+     * archivo vive en public/img/panel/cabecera-dashboard.webp.
      */
-    --asb-admin-dashboard-image: url("../../../../public/img/panel/cabecera-dashboard.png");
+    --asb-admin-dashboard-image: url("../../../../public/img/panel/cabecera-dashboard.webp");
     --asb-admin-topbar-alto: 3.75rem;
     /*
      * El desenfoque del cromo superior, en token y no literal: escrito a mano,
