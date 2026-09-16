@@ -4,22 +4,17 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 
 ---
 
-## ⚠️ LO PRIMERO DE MAÑANA — LA GUÍA ESTÁ DESPLEGADA PERO NO SEMBRADA
+## ✅ LA GUÍA DE LOS DOCE MUNICIPIOS ESTÁ SEMBRADA EN PRODUCCIÓN (15 sep, 22:17)
 
-> El código de la guía de los doce municipios **está en producción desde hoy**. Los datos **no**. El `deployCommand` del entorno es `php artisan migrate --force` y nada más: empujar no siembra. Comprobado a las 21:50 sobre la URL pública: la guía sigue ofreciendo **un municipio y ocho entidades**.
+> El producto insignia pasó de **un municipio a doce** en la URL pública. `MunicipioSeeder` (164 ms) y `RequisitoAperturaSeeder` (3.710 ms), los dos con `exitCode 0`, por `cloud command:run`.
 >
-> Dos comandos, en este orden, porque el segundo necesita los cuatro municipios que crea el primero:
+> **Comprobado contra la URL pública, municipio por municipio, no contra la base:** Armenia **8** entidades y una sin verificar; los otros once, **13** cada uno y **4** sin verificar —Planeación, Bomberos, Salud y Rentas, los bloques locales que el archivo del gremio trae en «Pendiente»—. **Total servido: 151 fichas**, que es exactamente lo que afirma `GuiaDeLosDoceMunicipiosTest`. **Ni un costo en pesos** en ninguna página.
 >
-> ```
-> cloud command:run <entorno> --cmd='php artisan db:seed --class=MunicipioSeeder --force' -n
-> cloud command:run <entorno> --cmd='php artisan db:seed --class=RequisitoAperturaSeeder --force' -n
-> ```
+> **Lo que NO se sembró, y por qué.** `SettingSeeder` —o `ContenidoOficialSeeder`, que lo arrastra—: producción tiene **109 claves** y la rama siembra **200**, así que faltan 91, entre ellas los textos que Ingrid volvió administrables en Directorio y Guía, y también el nombre del presidente con los apellidos en su orden. El coste es que `updateOrCreate` **pisa cualquier ajuste que la oficina haya editado** desde el 3 de septiembre y no hay forma de saber cuáles tocaron (D-14). Ingrid pidió expresamente no correrlo el 11 sep. Sigue siendo una decisión aplazada, no un olvido.
 >
-> Los dos usan `updateOrCreate` y **no borran nada**: añaden 4 municipios y 143 fichas, y actualizan las 8 de Armenia. Después, la guía tiene que dar **12 municipios y 151 fichas**, todas con «Costo por confirmar», y las cuatro locales de cada municipio diciendo «Sin verificar contra la fuente oficial».
+> **Lo que no se siembra nunca** (runbook §9): `AsociadoSeeder` publicaría establecimientos inventados en el directorio público real, `MensajeSeeder` consume radicados del consecutivo anual de verdad y `TransaccionSeeder` inserta pagos en estado aprobado que la conciliación suma como ingresos.
 >
-> ⚠️ **El `--cmd` no admite comillas dobles**: el CLI llega al servidor por `cmd.exe` y la tokenización se parte («Too many arguments»). Van con simples, y el PHP de dentro no puede llevar literales de cadena propios.
->
-> **Lo que NO se siembra, y por qué:** `SettingSeeder` —o `ContenidoOficialSeeder`, que lo arrastra—. Producción tiene **109 claves** y la rama siembra **200**: faltan 91, entre ellas todos los textos que Ingrid volvió administrables en Directorio y Guía. El coste es que `updateOrCreate` **pisa cualquier ajuste que la oficina haya editado** desde el 3 de septiembre y no hay forma de saber cuáles tocaron (D-14). Ingrid pidió expresamente no correrlo el 11 sep. Se decide con eso delante, no después.
+> ⚠️ **Dos cosas del canal, medidas hoy:** el CLI **sí está instalado**, en `%APPDATA%\Composer\vendor\bin\cloud.bat`, solo que fuera del PATH. Y el `--cmd` **no admite comillas dobles ni simples dentro del PHP**: el CLI llega al servidor por `cmd.exe` y la tokenización se parte. El PHP que se mande por ahí va sin literales de cadena.
 
 ---
 
@@ -90,7 +85,7 @@ De catorce, **doce cerrados y dos vivos** (10 y 11); ninguno se cierra escribien
 
 | Qué | Estado | Qué falta, y de quién depende |
 |---|---|---|
-| **Guía normativa** | ✅ **De 1 municipio a 12 en el código; 151 fichas.** ⚠️ **En producción sigue en 1 y 8 fichas** hasta que se siembre (bloque de arriba) | Que la dirección **confirme por escrito** que esta es la versión vigente antes de publicarla como definitiva; el archivo trae las doce filas en «Pendiente» y por eso las fichas locales salen sin fecha (D-21) |
+| **Guía normativa** | ✅ **De 1 municipio a 12, y ya en producción: 151 fichas servidas**, contadas municipio por municipio sobre la URL pública el 15 sep a las 22:18. Cero costos publicados | Que la dirección **confirme por escrito** que esta es la versión vigente; el archivo trae las doce filas en «Pendiente» y por eso las fichas locales salen sin fecha, y la guía lo dice en la cara del lector (D-21). Y las **7 URL de trámite de Armenia** (D-04) |
 | **Los ajustes sembrados** | ⚠️ Producción tiene **109**; la rama siembra **200**. Faltan **91**, entre ellos los textos administrables nuevos de Directorio y Guía | Correr `SettingSeeder` **con visto bueno aparte, porque pisa ediciones de la oficina** (D-14). Ingrid pidió no correrlo el 11 sep |
 | **Franja «El gremio en cifras»** (D-25, Acta 05) | ✅ Código en producción, vacía de fábrica | **Firmar el Acta 05**; fijar las cuatro cifras; teclearlas |
 | Portada | ✅ Todo texto editable | Las 19 fotos autorizadas sin colocar |
@@ -221,13 +216,13 @@ Medidas el **15 de septiembre de 2026 sobre `2d86359`**, que es lo desplegado. *
 | Referencia previa, Filament 4.12.8 | 1.615 casos · 1.615 pasan · 0 fallos · **8.460 aserciones** · 967 s | `php artisan test --compact` |
 | Ajustes que siembra `SettingSeeder` | **200** en la rama · **109** en producción | reflexión sobre `SettingSeeder::ajustes()` |
 | Permisos que siembra `RolYPermisoSeeder` | **88**, y **no cambia** en esta fusión: no se repite el P0 del 10 sep | `git diff main HEAD -- database/seeders/RolYPermisoSeeder.php` |
-| Fichas de la guía | **151** en la rama (12 municipios, 0 costos, procedencia más larga 191 de 255) · **8** en producción hasta sembrar | `php artisan tinker` + `curl` sobre la URL pública |
+| Fichas de la guía | **151 servidas en producción**: Armenia 8 (1 sin verificar) y once municipios de 13 (4 sin verificar cada uno). 12 municipios, **0 costos**, procedencia más larga 191 de 255 | `curl` a las doce URL, sumando lo servido |
 | Material del gremio del 15 sep | **27 archivos · 17,4 MB** | `Get-ChildItem -Recurse -File` |
 | Despliegue de hoy | push 21:48 · sirviendo 21:50 · **60 s** · 178 commits · 437 archivos · 1 migración | `git ls-remote` + `curl` al activo nuevo |
 
 ## 6. Lo siguiente, en orden
 
-1. **Sembrar la guía en producción** — el bloque del principio. Sin eso el trabajo insignia de hoy está desplegado y no se ve.
+1. ✅ **Sembrada la guía en producción** (15 sep, 22:17). Lo que queda de ella no es código: la confirmación por escrito de la dirección (D-21) y las 7 URL de Armenia (D-04).
 2. **Decirle a Ingrid que su rama quedó huérfana** (D-48) antes de que escriba una línea más sobre ella. Y de paso, lo que quedó pendiente de decirle desde el 10 sep: que se desplegó lo que ella estaba revisando, que dos de los cinco hallazgos que le describí no eran lo que le conté, y que la validación de la consolidación citaba 425 pruebas cuando la suite pasa de 1.600.
 3. **Mirar el panel con ojos, bajo Filament 5**, Sua e Ingrid. Es lo único que ninguna prueba cubre y acaba de cambiar de versión mayor. Entrar con la app de autenticación; el correo no sale hasta que haya SMTP.
 4. **Emitir el Acta 09** (D-47), que ahora cubre la capa visual **y** el salto de versión: el §9 del encargo exige el registro por escrito y en los dos casos llegó después del código.

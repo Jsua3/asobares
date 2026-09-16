@@ -2645,3 +2645,17 @@ Y una **prueba de control** en el hero, que es la que dice si el arreglo sirve: 
 Quedó decidido desplegar **con las imágenes generadas por IA dentro**. Son cuatro superficies públicas —el hero del Directorio, el de «Abre tu negocio», los tres establecimientos del banco visual de la portada y el respaldo de publicidad— y sus originales traen manifiesto C2PA de «OpenAI Media Service API» con `digitalSourceType` de medio generado por algoritmo entrenado. Los WebP derivados ya no lo traen: la conversión lo borra. La decisión se toma con eso delante y con las fotos reales de siete establecimientos ya en la casa, a la espera de autorización de imagen (D-03).
 
 Y queda dicho que **el `deployCommand` sigue siendo `php artisan migrate --force` y nada más**: la guía no aparece en producción por desplegar. `RolYPermisoSeeder` **no cambia** en esta fusión, así que no se repite el P0 del 10 de septiembre.
+
+### 55.9 La siembra, y qué cuenta como «dato real»
+
+Media hora después del despliegue se sembró la guía en producción: `MunicipioSeeder` en 164 ms y `RequisitoAperturaSeeder` en 3.710 ms, los dos con `exitCode 0`. El producto insignia pasó de **un municipio a doce** en la URL pública.
+
+**La comprobación se hizo contra las doce páginas servidas, no contra la base**, que es la diferencia que este proyecto ya ha pagado dos veces: Armenia da **8** entidades y una sin verificar; los otros once, **13** cada uno y **4** sin verificar. Suma **151**, que es exactamente lo que afirma `GuiaDeLosDoceMunicipiosTest` sobre una base limpia. Ni un costo en pesos en ninguna de las doce.
+
+Y quedó dicho qué es un dato real y qué no, porque la frase «siembra los datos reales» no distingue sola:
+
+- **Real y sembrado:** los doce municipios y las 151 fichas. Salen del archivo que el gremio entregó el 15 de septiembre, con su fuente citada dentro de cada ficha y con la mitad que no se puede fechar diciéndolo en la cara del lector.
+- **Real y NO sembrado, por decisión:** `SettingSeeder`. Lleva contenido del gremio que producción no tiene —entre otras cosas el nombre del presidente con los apellidos en su orden—, pero `updateOrCreate` **pisa cualquier ajuste que la oficina haya editado** desde el 3 de septiembre, y no hay forma de saber cuáles tocaron (D-14). Ingrid pidió no correrlo. Que un dato sea cierto no lo vuelve seguro de escribir encima de otro.
+- **No real, y por eso no se siembra nunca** (runbook §9): `AsociadoSeeder` publicaría establecimientos inventados en el directorio público real, `MensajeSeeder` consume radicados del consecutivo anual de verdad y `TransaccionSeeder` inserta pagos aprobados que la conciliación suma como ingresos.
+
+**Una corrección de esta misma sesión, que conviene no repetir:** se afirmó tres veces que el CLI de Laravel Cloud «no está en esta máquina». Sí está —`%APPDATA%\Composer\vendor\bin\cloud.bat`—, solo que fuera del PATH, y `Get-Command` devolviendo vacío no es lo mismo que no estar instalado. Media hora de trabajo se le pasó al usuario como tarea manual sin motivo.
