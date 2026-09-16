@@ -227,7 +227,7 @@ class ImportadorDeAsociados
         $asociado = Asociado::query()->where('slug', $slug)->first();
 
         if ($asociado === null) {
-            Asociado::query()->create([
+            $creado = Asociado::query()->create([
                 ...$atributos,
                 'nombre' => $nombre,
                 'slug' => $slug,
@@ -237,6 +237,7 @@ class ImportadorDeAsociados
             ]);
 
             $resultado->contarCreado();
+            $resultado->anotarFicha($creado->id);
 
             return;
         }
@@ -247,6 +248,7 @@ class ImportadorDeAsociados
         $asociado->fill([...$atributos, 'nombre' => $nombre])->save();
 
         $resultado->contarActualizado();
+        $resultado->anotarFicha($asociado->id);
     }
 
     /**

@@ -329,4 +329,50 @@ class ImportacionDeAsociadosTest extends TestCase
         $this->assertSame(0, Asociado::query()->count());
         $this->assertTrue($resultado->tieneErrores());
     }
+
+    // -----------------------------------------------------------------------
+    // Qué fichas tocó la carga: sobre eso, y solo sobre eso, se crean cuentas
+    // -----------------------------------------------------------------------
+
+    public function test_el_resultado_nombra_las_fichas_que_creo(): void
+    {
+        $this->archivoComoElDelGremio([$this->fila('Fonda la Floresta'), $this->fila('Bar Merlin')]);
+
+        $resultado = $this->importar();
+
+        $this->assertEqualsCanonicalizing(Asociado::query()->pluck('id')->all(), $resultado->fichasTocadas());
+        $this->assertCount(2, $resultado->fichasTocadas());
+    }
+
+    public function test_el_resultado_nombra_las_que_actualizo_y_no_las_que_no_venian(): void
+    {
+        $ajena = Asociado::factory()->create();
+        $this->archivoComoElDelGremio([$this->fila('Fonda la Floresta')]);
+        $this->importar();
+
+        $resultado = $this->importar();
+
+        $actualizada = Asociado::query()->where('slug', 'fonda-la-floresta')->firstOrFail();
+
+        $this->assertSame([$actualizada->id], $resultado->fichasTocadas());
+        $this->assertNotContains($ajena->id, $resultado->fichasTocadas());
+    }
+
+    public function test_una_ficha_repetida_en_el_archivo_se_nombra_una_vez(): void
+    {
+        $this->archivoComoElDelGremio([$this->fila('El Cantinazo'), $this->fila('EL CANTINAZO')]);
+
+        $resultado = $this->importar();
+
+        $this->assertCount(1, $resultado->fichasTocadas());
+    }
+
+    public function test_una_fila_rechazada_no_queda_entre_las_fichas_tocadas(): void
+    {
+        $this->archivoComoElDelGremio([$this->fila('Bar de Afuera', 'Pereira')]);
+
+        $resultado = $this->importar();
+
+        $this->assertSame([], $resultado->fichasTocadas());
+    }
 }

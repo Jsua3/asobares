@@ -21,6 +21,14 @@ class ResultadoDeCargaDeAsociados
     /** @var list<string> */
     private array $avisos = [];
 
+    /**
+     * Ids de las fichas creadas o actualizadas en esta carga, como claves para
+     * no repetir: el archivo del gremio trae una misma ficha en dos filas.
+     *
+     * @var array<int, true>
+     */
+    private array $fichasTocadas = [];
+
     public function contarCreado(): void
     {
         $this->creados++;
@@ -44,6 +52,23 @@ class ResultadoDeCargaDeAsociados
     public function agregarAviso(string $mensaje): void
     {
         $this->avisos[] = $mensaje;
+    }
+
+    public function anotarFicha(int $id): void
+    {
+        $this->fichasTocadas[$id] = true;
+    }
+
+    /**
+     * Las fichas que esta carga creó o actualizó. La importación desde el
+     * panel crea cuentas solo para estas: una ficha que no venía en el
+     * archivo no recibe una.
+     *
+     * @return list<int>
+     */
+    public function fichasTocadas(): array
+    {
+        return array_keys($this->fichasTocadas);
     }
 
     public function creados(): int
