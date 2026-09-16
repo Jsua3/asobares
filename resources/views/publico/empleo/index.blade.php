@@ -1,178 +1,119 @@
 <x-layouts.publico :titulo="ajuste('seo_empleo_titulo', ajuste('empleo_titulo').' — ASOBARES Quindío')"
                    :descripcion="ajuste('seo_empleo_descripcion', 'Vacantes de bartender, chef, mesero y administrador en bares y gastrobares del Quindío. Publican solo los establecimientos asociados.')">
 
-    <x-publico.hero :titulo="ajuste('empleo_titulo')" :subtitulo="ajuste('empleo_intro')" compacto atmosfera>
-        {{-- Hueco de foto de cabecera: marcador hoy, `empleo_foto` cuando llegue. --}}
-        <x-slot:medio>
-            <x-publico.hueco-foto :foto="ajuste('empleo_foto', null)" />
-        </x-slot:medio>
+    @push('cabeza')
+        @vite(['resources/css/empleo-editorial.css'])
+    @endpush
 
-        <div class="mt-7 flex flex-col gap-3 sm:flex-row">
-            <x-publico.boton href="#perfil">
-                {{ ajuste('empleo_cta_perfil', 'Déjanos tu perfil') }}
-            </x-publico.boton>
-            <x-publico.boton variante="contorno" href="#vacantes">
-                {{ ajuste('empleo_cta_vacantes', 'Ver vacantes') }}
-            </x-publico.boton>
-        </div>
-    </x-publico.hero>
+    <div class="empleo-editorial">
+        <x-publico.hero-empleo
+            :titulo="ajuste('empleo_titulo')"
+            :subtitulo="ajuste('empleo_intro')"
+            :cta-perfil="ajuste('empleo_cta_perfil', 'Déjanos tu perfil')"
+            :cta-vacantes="ajuste('empleo_cta_vacantes', 'Ver vacantes')" />
 
-    <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+        <div class="empleo-editorial-cuerpo">
 
-        {{-- Muro de vacantes --}}
-        <section id="vacantes" aria-labelledby="titulo-vacantes">
-            <div class="flex flex-wrap items-end justify-between gap-4">
-                <h2 id="titulo-vacantes" class="font-display text-2xl font-bold">{{ ajuste('empleo_vacantes_titulo', 'Vacantes abiertas') }}</h2>
-                <p class="text-xs text-apagado">{{ ajuste('empleo_aviso') }}</p>
-            </div>
-
-            {{--
-                Sin nada que filtrar, la caja de filtros sobra: prometía cortar
-                algo cuando no hay nada que cortar. Es el estado real de
-                producción hoy —cero vacantes publicadas— y era lo primero que
-                veía quien entraba a la bolsa.
-
-                La condición mira las OPCIONES y no las vacantes de la página:
-                así el formulario sigue en pie cuando un filtro deja la lista
-                vacía, que es justo cuando hace falta para volver atrás.
-            --}}
-            @if ($municipios->isNotEmpty() || filled($categorias))
-            <form method="GET" action="{{ route('empleo.index') }}#vacantes" class="tarjeta mt-6 grid gap-4 p-5 sm:grid-cols-3">
-                <x-publico.campo nombre="categoria" etiqueta="Área" tipo="select"
-                                 :valor="$filtros['categoria'] ?? null"
-                                 :opciones="['' => 'Todas las áreas'] + collect($categorias)->mapWithKeys(fn ($c) => [$c->value => $c->getLabel()])->all()" />
-                <x-publico.campo nombre="municipio" etiqueta="Municipio" tipo="select"
-                                 :valor="$filtros['municipio'] ?? null"
-                                 :opciones="['' => 'Todos los municipios'] + $municipios->pluck('nombre', 'slug')->all()" />
-                <div class="flex items-end gap-2">
-                    <x-publico.boton class="flex-1">
-                        Filtrar
-                    </x-publico.boton>
-                    @if (array_filter($filtros ?? []))
-                        <a href="{{ route('empleo.index') }}"
-                           class="pulsable min-h-11 rounded-xl border border-linea px-4 py-2.5 text-sm text-tenue hover:text-fuerte">Limpiar</a>
-                    @endif
-                </div>
-            </form>
-            @endif
-
-            @if ($vacantes->isEmpty())
-                <div class="tarjeta mt-6 p-12 text-center">
-                    @if (array_filter($filtros ?? []))
-                        <p class="font-display text-lg font-semibold">No hay vacantes con ese filtro</p>
-                        <p class="mt-2 text-sm text-tenue">
-                            Prueba otro municipio o área, o deja tu perfil abajo para que te avisemos.
-                        </p>
-                    @else
-                        <p class="font-display text-lg font-semibold">Todavía no hay vacantes abiertas</p>
-                        <p class="mt-2 text-sm text-tenue">
-                            Deja tu perfil abajo y te avisamos cuando aparezca una que encaje.
-                        </p>
-                    @endif
-                </div>
-            @else
-                <ul class="mt-6 space-y-4">
-                    @foreach ($vacantes as $vacante)
-                        <li @class([
-                            'tarjeta tarjeta-hover',
-                            'p-6' => ! $loop->first,
-                            'vidrio p-8 sm:p-9' => $loop->first,
-                        ])>
-                            <div class="flex flex-wrap items-start justify-between gap-4">
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex flex-wrap items-center gap-2 text-xs">
-                                        <span class="rounded-full bg-marca-500/15 px-2.5 py-1 font-medium text-acento-fuerte">
-                                            {{ $vacante->tipo->getLabel() }}
-                                        </span>
-                                        <span class="text-apagado">
-                                            {{ $vacante->asociado->municipio->nombre }} · publicada {{ $vacante->created_at->diffForHumans() }}
-                                        </span>
-                                    </div>
-
-                                    <h3 class="mt-3 font-display text-lg font-semibold">
-                                        <a href="{{ route('empleo.show', $vacante) }}" class="enlace-accion hover:text-acento">
-                                            {{ $vacante->cargo }}
-                                        </a>
-                                    </h3>
-
-                                    <p class="mt-1 text-sm text-tenue">
-                                        en
-                                        @if ($vacante->asociado->estaPublicado())
-                                            <a href="{{ route('directorio.show', $vacante->asociado) }}"
-                                               class="enlace-accion text-acento hover:text-acento-fuerte">{{ $vacante->asociado->nombre }}</a>
-                                        @else
-                                            {{ $vacante->asociado->nombre }}
-                                        @endif
-                                    </p>
-
-                                    @if ($vacante->descripcion)
-                                        <p class="mt-3 text-sm leading-relaxed text-suave">{{ $vacante->descripcion }}</p>
-                                    @endif
-
-                                    @if ($vacante->franja_horaria)
-                                        <p class="mt-3 text-xs text-apagado">🕒 {{ $vacante->franja_horaria }}</p>
-                                    @endif
-
-                                    @if ($vacante->fecha_limite)
-                                        <p class="mt-1 text-xs text-apagado">
-                                            📅 Se cierra el {{ $vacante->fecha_limite->translatedFormat('d \d\e F') }}
-                                        </p>
-                                    @endif
-                                </div>
-
-                                <x-publico.boton :href="route('empleo.show', $vacante)" class="shrink-0">
-                                    Ver y postularme
-                                </x-publico.boton>
-                            </div>
-                        </li>
-                    @endforeach
-                </ul>
-
-                <div class="mt-10">{{ $vacantes->links() }}</div>
-            @endif
-        </section>
-
-        {{-- Formulario de aspirante --}}
-        <section id="perfil" class="tarjeta mt-16 p-7 sm:p-9" aria-labelledby="titulo-perfil">
-            <h2 id="titulo-perfil" class="font-display text-2xl font-bold">{{ ajuste('empleo_perfil_titulo', 'Déjanos tu perfil') }}</h2>
-            <p class="mt-2 text-sm text-tenue">
-                {{ ajuste('empleo_perfil_texto', 'Cuando un establecimiento asociado busque tu cargo, te contactamos. No necesitas cuenta.') }}
-            </p>
-
-            @if (session('exito'))
-                <x-publico.alerta class="mt-6">{{ session('exito') }}</x-publico.alerta>
-            @endif
-
-            <form method="POST" action="{{ route('empleo.aspirante') }}" class="mt-7 space-y-5">
-                @csrf
-
-                <div class="grid gap-5 sm:grid-cols-2">
-                    <x-publico.campo nombre="nombre" etiqueta="Nombre completo" requerido />
-                    <x-publico.campo nombre="correo" etiqueta="Correo electrónico" tipo="email" requerido />
-                    <x-publico.campo nombre="telefono" etiqueta="Teléfono o WhatsApp" tipo="tel" />
-                    <x-publico.campo nombre="cargo_interes" etiqueta="Cargo que buscas" requerido
-                                     placeholder="Bartender, mesero, chef, administrador…" />
-                    <x-publico.campo nombre="categoria_cargo" etiqueta="Área del establecimiento" tipo="select" requerido
-                                     :opciones="collect($categoriasPerfil)->mapWithKeys(fn ($c) => [$c->value => $c->getLabel()])->all()" />
+            <section id="vacantes" aria-labelledby="titulo-vacantes">
+                <div class="empleo-editorial-seccion__cabeza">
+                    <h2 id="titulo-vacantes">{{ ajuste('empleo_vacantes_titulo', 'Vacantes abiertas') }}</h2>
+                    <p class="empleo-editorial-seccion__aviso">{{ ajuste('empleo_aviso') }}</p>
                 </div>
 
-                <x-publico.campo nombre="experiencia" etiqueta="Tu experiencia" tipo="textarea" filas="3"
-                                 :placeholder="ajuste('empleo_perfil_experiencia_placeholder', 'Cuéntanos en pocas líneas dónde has trabajado y qué sabes hacer.')"
-                                 :ayuda="ajuste('empleo_perfil_experiencia_ayuda', 'Con dos o tres frases es suficiente.')" />
+                {{--
+                    Sin nada que filtrar, la caja de filtros sobra: prometía cortar
+                    algo cuando no hay nada que cortar. Es el estado real de
+                    producción hoy —cero vacantes publicadas— y era lo primero que
+                    veía quien entraba a la bolsa.
 
-                {{-- Ley 1581: el perfil no lo ve solo la secretaría, lo ve cualquier
-                     establecimiento afiliado. Eso se dice aquí, junto a la casilla, y
-                     no solo en la política. --}}
-                <p class="text-xs leading-relaxed text-apagado">
-                    {{ ajuste('empleo_perfil_privacidad', 'Tu perfil quedará visible para los establecimientos afiliados a ASOBARES Capítulo Quindío, que podrán contactarte directamente para ofrecerte trabajo.') }}
+                    La condición mira las OPCIONES y no las vacantes de la página:
+                    así el formulario sigue en pie cuando un filtro deja la lista
+                    vacía, que es justo cuando hace falta para volver atrás.
+                --}}
+                @if ($municipios->isNotEmpty() || filled($categorias))
+                    <form method="GET"
+                          action="{{ route('empleo.index') }}#vacantes"
+                          class="empleo-editorial-filtros">
+                        <x-publico.campo nombre="categoria" etiqueta="Área" tipo="select"
+                                         :valor="$filtros['categoria'] ?? null"
+                                         :opciones="['' => 'Todas las áreas'] + collect($categorias)->mapWithKeys(fn ($c) => [$c->value => $c->getLabel()])->all()" />
+                        <x-publico.campo nombre="municipio" etiqueta="Municipio" tipo="select"
+                                         :valor="$filtros['municipio'] ?? null"
+                                         :opciones="['' => 'Todos los municipios'] + $municipios->pluck('nombre', 'slug')->all()" />
+                        <div class="empleo-editorial-filtros__acciones">
+                            <x-publico.boton class="flex-1">
+                                Filtrar
+                            </x-publico.boton>
+                            @if (array_filter($filtros ?? []))
+                                <a href="{{ route('empleo.index') }}"
+                                   class="empleo-editorial-filtros__limpiar pulsable">Limpiar</a>
+                            @endif
+                        </div>
+                    </form>
+                @endif
+
+                @if ($vacantes->isEmpty())
+                    <div class="empleo-editorial-vacio">
+                        @if (array_filter($filtros ?? []))
+                            <p>No hay vacantes con ese filtro</p>
+                            <p>Prueba otro municipio o área, o deja tu perfil abajo para que te avisemos.</p>
+                        @else
+                            <p>Todavía no hay vacantes abiertas</p>
+                            <p>Deja tu perfil abajo y te avisamos cuando aparezca una que encaje.</p>
+                        @endif
+                    </div>
+                @else
+                    <ul class="empleo-editorial-cartelera">
+                        @foreach ($vacantes as $vacante)
+                            <x-publico.vacante-ficha :vacante="$vacante" />
+                        @endforeach
+                    </ul>
+
+                    <div class="empleo-editorial-pagina">{{ $vacantes->links() }}</div>
+                @endif
+            </section>
+
+            <section id="perfil" class="empleo-editorial-bloque" aria-labelledby="titulo-perfil">
+                <h2 id="titulo-perfil">{{ ajuste('empleo_perfil_titulo', 'Déjanos tu perfil') }}</h2>
+                <p>
+                    {{ ajuste('empleo_perfil_texto', 'Cuando un establecimiento asociado busque tu cargo, te contactamos. No necesitas cuenta.') }}
                 </p>
 
-                <x-publico.habeas-data />
+                @if (session('exito'))
+                    <x-publico.alerta class="mt-6">{{ session('exito') }}</x-publico.alerta>
+                @endif
 
-                <x-publico.boton class="w-full sm:w-auto">
-                    Registrar mi perfil
-                </x-publico.boton>
-            </form>
-        </section>
+                <form method="POST" action="{{ route('empleo.aspirante') }}" class="mt-7 space-y-5">
+                    @csrf
+
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <x-publico.campo nombre="nombre" etiqueta="Nombre completo" requerido />
+                        <x-publico.campo nombre="correo" etiqueta="Correo electrónico" tipo="email" requerido />
+                        <x-publico.campo nombre="telefono" etiqueta="Teléfono o WhatsApp" tipo="tel" />
+                        <x-publico.campo nombre="cargo_interes" etiqueta="Cargo que buscas" requerido
+                                         placeholder="Bartender, mesero, chef, administrador…" />
+                        <x-publico.campo nombre="categoria_cargo" etiqueta="Área del establecimiento" tipo="select" requerido
+                                         :opciones="collect($categoriasPerfil)->mapWithKeys(fn ($c) => [$c->value => $c->getLabel()])->all()" />
+                    </div>
+
+                    <x-publico.campo nombre="experiencia" etiqueta="Tu experiencia" tipo="textarea" filas="3"
+                                     :placeholder="ajuste('empleo_perfil_experiencia_placeholder', 'Cuéntanos en pocas líneas dónde has trabajado y qué sabes hacer.')"
+                                     :ayuda="ajuste('empleo_perfil_experiencia_ayuda', 'Con dos o tres frases es suficiente.')" />
+
+                    {{-- Ley 1581: el perfil no lo ve solo la secretaría, lo ve cualquier
+                         establecimiento afiliado. Eso se dice aquí, junto a la casilla, y
+                         no solo en la política. --}}
+                    <p class="text-xs leading-relaxed text-apagado">
+                        {{ ajuste('empleo_perfil_privacidad', 'Tu perfil quedará visible para los establecimientos afiliados a ASOBARES Capítulo Quindío, que podrán contactarte directamente para ofrecerte trabajo.') }}
+                    </p>
+
+                    <x-publico.habeas-data />
+
+                    <x-publico.boton class="w-full sm:w-auto">
+                        Registrar mi perfil
+                    </x-publico.boton>
+                </form>
+            </section>
+        </div>
     </div>
 </x-layouts.publico>

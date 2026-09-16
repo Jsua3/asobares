@@ -1,0 +1,850 @@
+/*
+ * EVT-06 — Eventos editorial.
+ * Solo lo cargan /eventos, /eventos/calendario y la ficha.
+ * El tema sigue siendo html.dark. No mezclar con Guía ni Directorio.
+ *
+ * Fotografía de hero (propia, no inventada):
+ *   public/img/eventos/hero-eventos.webp
+ * Criterio: hero panorámico de /directorio (plano + foto + velo + texto).
+ * Sin archivo: plano neutro, sin geometría ni foto falsa.
+ */
+
+.eventos-editorial {
+    --evt-bg: #f3ece2;
+    --evt-bg-alta: #ebe3d6;
+    --evt-surface: #fff8ef;
+    --evt-surface-alta: #f7eee3;
+    --evt-linea: rgb(55 32 24 / 0.12);
+    --evt-tinta: #1c120e;
+    --evt-suave: #5c4a42;
+    --evt-tenue: #7a665c;
+    --evt-acento: #b71f18;
+    --evt-acento-suave: rgb(183 31 24 / 0.12);
+    --evt-noche: #1a1412;
+    --evt-sombra: 0 14px 32px rgb(55 32 24 / 0.08);
+    --evt-tope: calc(var(--asb-alto-modulo-superior, 3.5rem) + env(safe-area-inset-top, 0px) + 1.25rem);
+    --evt-fab: calc(var(--asb-alto-modulo-inferior, 4.25rem) + env(safe-area-inset-bottom, 0px) + 4.75rem);
+    background:
+        radial-gradient(ellipse 70% 48% at 92% 8%, rgb(183 31 24 / 0.09), transparent 56%),
+        radial-gradient(ellipse 50% 40% at 8% 30%, rgb(212 160 80 / 0.12), transparent 52%),
+        linear-gradient(180deg, #f7f0e6 0%, #efe6d8 38%, #f3ece2 100%);
+    color: var(--evt-tinta);
+    overflow-x: clip;
+}
+
+.dark .eventos-editorial {
+    --evt-bg: #141010;
+    --evt-bg-alta: #1c1614;
+    --evt-surface: #1f1916;
+    --evt-surface-alta: #2a221e;
+    --evt-linea: rgb(245 232 220 / 0.12);
+    --evt-tinta: #f6eee6;
+    --evt-suave: #d2c4b8;
+    --evt-tenue: #b3a498;
+    --evt-acento: #ee4137;
+    --evt-acento-suave: rgb(238 65 55 / 0.16);
+    --evt-noche: #0e0b0a;
+    --evt-sombra: 0 18px 40px rgb(0 0 0 / 0.38);
+    background:
+        radial-gradient(ellipse 62% 46% at 88% 6%, rgb(238 65 55 / 0.14), transparent 58%),
+        radial-gradient(ellipse 46% 36% at 10% 28%, rgb(212 160 80 / 0.08), transparent 50%),
+        linear-gradient(180deg, #181210 0%, #12100f 46%, #161210 100%);
+}
+
+/* —— Hero: mismo criterio que Directorio (texto + foto panorámica fundida) —— */
+
+.eventos-editorial-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    min-height: 24rem;
+    color: var(--evt-tinta);
+    border-bottom: 1px solid var(--evt-linea);
+}
+
+@media (min-width: 768px) {
+    .eventos-editorial-hero {
+        min-height: 28rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .eventos-editorial-hero {
+        min-height: 32rem;
+    }
+}
+
+.eventos-editorial-hero__plano {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, #f7f1e8 0%, #efe6d8 100%);
+}
+
+.dark .eventos-editorial-hero__plano {
+    background: #0b090a;
+}
+
+.eventos-editorial-hero__foto {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    inset: 0;
+}
+
+.eventos-editorial-hero__foto img {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    object-position: 72% 42%;
+    -webkit-mask-image:
+        linear-gradient(180deg, transparent 0%, #000 18%, #000 78%, transparent 100%),
+        linear-gradient(90deg, transparent 0%, rgb(0 0 0 / 0.35) 38%, #000 72%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+        linear-gradient(180deg, transparent 0%, #000 18%, #000 78%, transparent 100%),
+        linear-gradient(90deg, transparent 0%, rgb(0 0 0 / 0.35) 38%, #000 72%);
+    mask-composite: intersect;
+}
+
+@media (min-width: 768px) {
+    .eventos-editorial-hero__foto {
+        inset: 0 0 0 28%;
+    }
+
+    .eventos-editorial-hero__foto img {
+        object-position: 48% 40%;
+        -webkit-mask-image:
+            linear-gradient(90deg, transparent 0%, #000 26%, #000 88%, transparent 100%),
+            linear-gradient(180deg, rgb(0 0 0 / 0.55) 0%, #000 22%, #000 86%, transparent 100%);
+        mask-image:
+            linear-gradient(90deg, transparent 0%, #000 26%, #000 88%, transparent 100%),
+            linear-gradient(180deg, rgb(0 0 0 / 0.55) 0%, #000 22%, #000 86%, transparent 100%);
+    }
+}
+
+@media (min-width: 1024px) {
+    .eventos-editorial-hero__foto {
+        inset: 0 0 0 34%;
+    }
+
+    .eventos-editorial-hero__foto img {
+        object-position: 42% 38%;
+    }
+}
+
+.eventos-editorial-hero__velo {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            180deg,
+            rgb(247 241 232 / 0.78) 0%,
+            rgb(247 241 232 / 0.42) 36%,
+            rgb(247 241 232 / 0.88) 100%
+        ),
+        linear-gradient(
+            105deg,
+            rgb(247 241 232 / 0.96) 0%,
+            rgb(247 241 232 / 0.72) 34%,
+            rgb(247 241 232 / 0.18) 62%,
+            transparent 100%
+        );
+}
+
+.dark .eventos-editorial-hero__velo {
+    background:
+        linear-gradient(
+            105deg,
+            rgb(11 9 10 / 0.9) 0%,
+            rgb(11 9 10 / 0.58) 38%,
+            rgb(11 9 10 / 0.18) 68%,
+            rgb(11 9 10 / 0.04) 100%
+        ),
+        linear-gradient(
+            180deg,
+            rgb(11 9 10 / 0.28) 0%,
+            transparent 42%,
+            rgb(11 9 10 / 0.5) 100%
+        );
+}
+
+@media (min-width: 768px) {
+    .eventos-editorial-hero__velo {
+        background:
+            linear-gradient(
+                105deg,
+                rgb(247 241 232 / 0.96) 0%,
+                rgb(247 241 232 / 0.78) 32%,
+                rgb(247 241 232 / 0.22) 58%,
+                transparent 82%
+            ),
+            linear-gradient(
+                180deg,
+                rgb(247 241 232 / 0.28) 0%,
+                transparent 40%,
+                rgb(247 241 232 / 0.55) 100%
+            );
+    }
+
+    .dark .eventos-editorial-hero__velo {
+        background:
+            linear-gradient(
+                105deg,
+                rgb(11 9 10 / 0.9) 0%,
+                rgb(11 9 10 / 0.58) 38%,
+                rgb(11 9 10 / 0.18) 68%,
+                rgb(11 9 10 / 0.04) 100%
+            ),
+            linear-gradient(
+                180deg,
+                rgb(11 9 10 / 0.28) 0%,
+                transparent 42%,
+                rgb(11 9 10 / 0.5) 100%
+            );
+    }
+}
+
+.eventos-editorial-hero__cuerpo {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    max-width: 80rem;
+    min-height: inherit;
+    margin-inline: auto;
+    padding: calc(var(--evt-tope) + 2.25rem) 1rem 2.25rem;
+}
+
+@media (min-width: 640px) {
+    .eventos-editorial-hero__cuerpo {
+        padding-inline: 1.5rem;
+        padding-bottom: 2.75rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .eventos-editorial-hero__cuerpo {
+        padding-inline: 2rem;
+        padding-bottom: 3.25rem;
+        max-width: 42rem;
+        margin-inline: auto 0;
+        margin-left: max(2rem, calc((100% - 80rem) / 2 + 2rem));
+    }
+}
+
+.eventos-editorial-hero__cuerpo h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+    color: var(--evt-tinta);
+    text-wrap: balance;
+}
+
+.dark .eventos-editorial-hero__cuerpo h1 {
+    color: #f6f1eb;
+    text-shadow: 0 2px 28px rgb(11 9 10 / 0.5);
+}
+
+@media (min-width: 640px) {
+    .eventos-editorial-hero__cuerpo h1 {
+        font-size: 2.75rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .eventos-editorial-hero__cuerpo h1 {
+        font-size: 3.25rem;
+    }
+}
+
+.eventos-editorial-hero__sub {
+    margin: 1rem 0 0;
+    max-width: 34rem;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--evt-suave);
+    text-wrap: pretty;
+}
+
+.dark .eventos-editorial-hero__sub {
+    color: rgb(255 248 241 / 0.9);
+    text-shadow: 0 1px 18px rgb(0 0 0 / 0.4);
+}
+
+/* —— Cuerpo, conmutador, offsets de navbar y FAB locales —— */
+
+.eventos-editorial-cuerpo {
+    padding-top: 1.75rem;
+    padding-bottom: calc(2.5rem + var(--evt-fab) * 0);
+}
+
+.eventos-editorial > article.eventos-editorial-cuerpo {
+    padding-top: calc(var(--evt-tope) + 0.85rem);
+}
+
+@media (max-width: 63.999rem) {
+    .eventos-editorial-cuerpo {
+        padding-bottom: calc(2.75rem + 4.25rem);
+    }
+}
+
+.eventos-editorial-conmutador,
+.eventos-editorial-riel,
+.eventos-editorial-ficha,
+.eventos-editorial-calendario,
+.eventos-editorial-retorno,
+.eventos-editorial-cuando,
+.eventos-editorial-hero,
+.eventos-editorial h1,
+.eventos-editorial h2 {
+    scroll-margin-top: var(--evt-tope);
+}
+
+@media (max-width: 63.999rem) {
+    .eventos-editorial-conmutador,
+    .eventos-editorial-ficha,
+    .eventos-editorial-cuando,
+    .eventos-editorial-agenda li {
+        scroll-margin-bottom: var(--evt-fab);
+    }
+}
+
+.eventos-editorial-conmutador {
+    display: inline-flex;
+    max-width: 100%;
+    flex-wrap: wrap;
+    padding: 0.3rem;
+    border: 1px solid var(--evt-linea);
+    border-radius: 1rem;
+    background: var(--evt-surface);
+    box-shadow: var(--evt-sombra);
+}
+
+@media (max-width: 63.999rem) {
+    .eventos-editorial-conmutador {
+        max-width: calc(100% - 4.5rem);
+    }
+}
+
+.eventos-editorial-conmutador a[aria-current="true"] {
+    background: var(--evt-acento);
+}
+
+/* —— Riel horizontal de eventos reales —— */
+
+.eventos-editorial-riel {
+    position: relative;
+    margin-top: 1.15rem;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: clip;
+}
+
+.eventos-editorial-agenda__tope {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+}
+
+.eventos-editorial-riel--hay-mas::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    width: 3.25rem;
+    height: 100%;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--evt-bg));
+}
+
+@media (max-width: 767.98px) {
+    .eventos-editorial-riel--hay-mas::after {
+        height: 100%;
+        width: 2.5rem;
+    }
+}
+
+.eventos-editorial-riel__pista {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scroll-padding-inline: 0;
+    padding-right: 0.25rem;
+    padding-bottom: 0.35rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+}
+
+@media (max-width: 63.999rem) {
+    .eventos-editorial-riel__pista {
+        padding-bottom: 1.25rem;
+    }
+}
+
+.eventos-editorial-riel__pista::-webkit-scrollbar {
+    display: none;
+}
+
+.eventos-editorial-ficha {
+    flex: 0 0 calc(100% - 3.25rem);
+    min-width: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+}
+
+@media (min-width: 768px) {
+    .eventos-editorial-ficha {
+        flex-basis: 84%;
+    }
+}
+
+@media (min-width: 1024px) {
+    .eventos-editorial-ficha {
+        flex-basis: 81%;
+    }
+}
+
+@media (min-width: 1280px) {
+    .eventos-editorial-ficha {
+        flex-basis: 79%;
+    }
+}
+
+.eventos-editorial-ficha:only-child {
+    flex-basis: 100%;
+}
+
+.eventos-editorial-riel--hay-mas .eventos-editorial-riel__pista::after {
+    content: "";
+    flex: 0 0 3.25rem;
+}
+
+@media (min-width: 768px) {
+    .eventos-editorial-riel--hay-mas .eventos-editorial-riel__pista::after {
+        flex-basis: 16%;
+    }
+}
+
+@media (min-width: 1024px) {
+    .eventos-editorial-riel--hay-mas .eventos-editorial-riel__pista::after {
+        flex-basis: 19%;
+    }
+}
+
+@media (min-width: 1280px) {
+    .eventos-editorial-riel--hay-mas .eventos-editorial-riel__pista::after {
+        flex-basis: 21%;
+    }
+}
+
+.eventos-editorial-riel__mandos {
+    display: none;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    margin-inline-start: auto;
+}
+
+@media (min-width: 768px) {
+    .eventos-editorial-riel__mandos {
+        display: flex;
+    }
+}
+
+.eventos-editorial-riel__mando {
+    display: inline-flex;
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--evt-linea);
+    border-radius: 999px;
+    background: var(--evt-surface);
+    color: var(--evt-tinta);
+}
+
+.eventos-editorial-riel__mando:hover {
+    border-color: var(--evt-acento);
+    color: var(--evt-acento);
+}
+
+/* —— Tarjeta de evento —— */
+
+.eventos-editorial-ficha__enlace {
+    display: grid;
+    grid-template-columns: 6.25rem minmax(0, 1fr);
+    min-height: 100%;
+    overflow: hidden;
+    border: 1px solid var(--evt-linea);
+    border-radius: 1.35rem;
+    background: var(--evt-surface);
+    box-shadow: var(--evt-sombra);
+    color: inherit;
+    text-decoration: none;
+}
+
+@media (min-width: 768px) {
+    .eventos-editorial-ficha__enlace {
+        grid-template-columns: 7.5rem minmax(0, 0.92fr) minmax(0, 1.15fr);
+        grid-template-rows: 11.5rem;
+    }
+}
+
+.eventos-editorial-ficha--realizado .eventos-editorial-ficha__enlace {
+    background: var(--evt-surface-alta);
+}
+
+.eventos-editorial-ficha--realizado .eventos-editorial-ficha__foto {
+    filter: none;
+}
+
+.eventos-editorial-ficha__fecha {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    padding: 1rem 0.65rem;
+    background: var(--evt-acento);
+    color: #fff8ef;
+    text-align: center;
+}
+
+.eventos-editorial-ficha--realizado .eventos-editorial-ficha__fecha {
+    background: #6b3a34;
+}
+
+.dark .eventos-editorial-ficha--realizado .eventos-editorial-ficha__fecha {
+    background: #4a2a26;
+}
+
+.eventos-editorial-ficha__dia {
+    font-family: var(--font-display, Poppins, sans-serif);
+    font-size: 2.15rem;
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+}
+
+.eventos-editorial-ficha__mes {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.eventos-editorial-ficha__hora {
+    margin-top: 0.35rem;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgb(255 248 241 / 0.92);
+}
+
+.eventos-editorial-ficha__foto {
+    position: relative;
+    height: 8.5rem;
+    min-height: 8.5rem;
+    overflow: hidden;
+    background: var(--evt-bg-alta);
+}
+
+@media (min-width: 768px) {
+    .eventos-editorial-ficha__foto {
+        height: 11.5rem;
+        min-height: 11.5rem;
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    .eventos-editorial-ficha__cuerpo {
+        grid-column: 2;
+        grid-row: 1;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .eventos-editorial-ficha__enlace {
+        grid-template-columns: 5.5rem minmax(0, 1fr);
+        grid-template-rows: auto auto;
+    }
+
+    .eventos-editorial-ficha__fecha {
+        grid-row: 1 / span 2;
+    }
+
+    .eventos-editorial-ficha__foto {
+        grid-column: 2;
+        height: 8.5rem;
+        min-height: 8.5rem;
+    }
+
+    .eventos-editorial-ficha__cuerpo {
+        grid-column: 2;
+    }
+}
+
+.eventos-editorial-ficha__foto img {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+}
+
+.eventos-editorial-ficha .hueco-foto,
+.eventos-editorial .hueco-foto {
+    min-height: 8.5rem;
+    background-color: #efe4d4;
+    background-image: repeating-linear-gradient(
+        135deg,
+        rgb(183 31 24 / 0.08) 0 2px,
+        transparent 2px 16px
+    );
+}
+
+.dark .eventos-editorial-ficha .hueco-foto,
+.dark .eventos-editorial .hueco-foto {
+    background-color: #2a221e;
+    background-image: repeating-linear-gradient(
+        135deg,
+        rgb(238 65 55 / 0.1) 0 2px,
+        transparent 2px 16px
+    );
+}
+
+.eventos-editorial-ficha__cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.32rem;
+    padding: 0.85rem 1.05rem 0.9rem;
+}
+
+.eventos-editorial-ficha__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.eventos-editorial-ficha__tipo,
+.eventos-editorial-ficha__precio,
+.eventos-editorial-ficha__origen,
+.eventos-editorial-ficha__realizado {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.65rem;
+    padding: 0.15rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.eventos-editorial-ficha__tipo {
+    background: var(--evt-acento-suave);
+    color: var(--evt-acento);
+}
+
+.eventos-editorial-ficha__precio {
+    border: 1px solid var(--evt-linea);
+    color: var(--evt-suave);
+}
+
+.eventos-editorial-ficha__origen {
+    border: 1px solid var(--evt-acento);
+    color: var(--evt-acento);
+}
+
+.eventos-editorial-ficha__realizado {
+    background: var(--evt-acento-suave);
+    color: var(--evt-acento);
+}
+
+.eventos-editorial-ficha__titulo {
+    font-family: var(--font-display, Poppins, sans-serif);
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-wrap: balance;
+}
+
+.eventos-editorial-ficha__lugar {
+    font-size: 0.85rem;
+    line-height: 1.3;
+    color: var(--evt-suave);
+}
+
+.eventos-editorial-ficha__organiza {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.25;
+    color: var(--evt-tinta);
+}
+
+.eventos-editorial-ficha__organiza span {
+    display: block;
+    margin-bottom: 0.08rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--evt-tenue);
+}
+
+.eventos-editorial-ficha__cta {
+    margin-top: 0.4rem;
+    padding-top: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--evt-acento);
+}
+
+.eventos-editorial-vacio {
+    margin-top: 1.75rem;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    border: 1px solid var(--evt-linea);
+    border-radius: 1.35rem;
+    background: var(--evt-surface);
+}
+
+/* —— Calendario: misma lógica, superficie editorial —— */
+
+.eventos-editorial-calendario {
+    margin-top: 1.25rem;
+    overflow: hidden;
+    border: 1px solid var(--evt-linea);
+    border-radius: 1.35rem;
+    background: var(--evt-surface);
+    box-shadow: var(--evt-sombra);
+}
+
+.eventos-editorial-calendario table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.eventos-editorial-calendario th {
+    padding: 0.65rem 0.4rem;
+    border-bottom: 1px solid var(--evt-linea);
+    background: var(--evt-surface-alta);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--evt-tenue);
+}
+
+.eventos-editorial-calendario td {
+    height: auto;
+    min-height: 6.5rem;
+    padding: 0.55rem 0.45rem 0.7rem;
+    vertical-align: top;
+    border-bottom: 1px solid var(--evt-linea);
+    border-right: 1px solid var(--evt-linea);
+    background: var(--evt-surface);
+}
+
+.eventos-editorial-calendario td:last-child {
+    border-right: 0;
+}
+
+.eventos-editorial-calendario td[data-fuera="true"] {
+    background: var(--evt-bg-alta);
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+    .eventos-editorial-calendario td {
+        min-height: 5.35rem;
+        padding: 0.4rem 0.3rem 0.5rem;
+    }
+
+    .eventos-editorial-calendario a {
+        font-size: 0.68rem;
+        line-height: 1.2;
+        white-space: normal;
+    }
+}
+
+.eventos-editorial-calendario a {
+    display: block;
+    margin-top: 0.35rem;
+    overflow: hidden;
+    padding: 0.28rem 0.4rem;
+    border-radius: 0.45rem;
+    background: var(--evt-acento-suave);
+    color: var(--evt-acento);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+}
+
+.eventos-editorial-agenda {
+    margin-top: 1.25rem;
+}
+
+.eventos-editorial-agenda li {
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--evt-linea);
+    border-radius: 1.15rem;
+    background: var(--evt-surface);
+}
+
+.eventos-editorial-mes {
+    scroll-margin-top: var(--evt-tope);
+}
+
+@media (max-width: 63.999rem) {
+    .eventos-editorial-mes {
+        padding-right: 4.75rem;
+        padding-bottom: 0.35rem;
+    }
+}
+
+/* —— Ficha de detalle —— */
+
+.eventos-editorial-retorno {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+}
+
+.eventos-editorial-cuando {
+    padding: 1.35rem 1.35rem 1.5rem;
+    border: 1px solid var(--evt-linea);
+    border-radius: 1.35rem;
+    background: var(--evt-surface);
+    box-shadow: var(--evt-sombra);
+}
+
+.eventos-editorial-cuando__dia {
+    font-family: var(--font-display, Poppins, sans-serif);
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 0.9;
+    color: var(--evt-acento);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .eventos-editorial-riel__pista {
+        scroll-behavior: auto;
+        scroll-snap-type: none;
+    }
+}

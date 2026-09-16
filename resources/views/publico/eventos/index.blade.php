@@ -1,77 +1,93 @@
 <x-layouts.publico :titulo="ajuste('seo_eventos_titulo', 'Eventos y capacitaciones — ASOBARES Quindío')"
                    :descripcion="ajuste('seo_eventos_descripcion', 'ExpoBar, foros, congresos y capacitaciones del gremio de la vida nocturna del Quindío.')">
 
-    <x-publico.hero :titulo="ajuste('eventos_titulo', 'Eventos y capacitaciones')" compacto atmosfera
-                    :subtitulo="ajuste('eventos_intro', 'Solo eventos del gremio: ferias, foros y formación para los establecimientos del Quindío.')" />
+    @push('cabeza')
+        @vite(['resources/css/eventos-editorial.css'])
+    @endpush
 
-    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="eventos-editorial">
+        <x-publico.hero-eventos
+            :titulo="ajuste('eventos_titulo', 'Eventos y capacitaciones')"
+            :subtitulo="ajuste('eventos_intro', 'Eventos, capacitaciones y experiencias del gremio y sus aliados para el sector gastronómico y de entretenimiento del Quindío.')" />
 
-        <x-publico.conmutador-eventos :activo="$cuando"
-                                      :total-proximos="$totalProximos"
-                                      :total-pasados="$totalPasados" />
+        <div class="eventos-editorial-cuerpo mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+             x-data="{
+                 avanzar(sentido) {
+                     const pista = this.$refs.pista;
+                     if (! pista) {
+                         return;
+                     }
+                     const fichas = Array.from(pista.querySelectorAll('.eventos-editorial-ficha'));
+                     const origen = pista.getBoundingClientRect().left;
+                     let indice = 0;
+                     let menor = Infinity;
+                     fichas.forEach((ficha, posicion) => {
+                         const delta = Math.abs(ficha.getBoundingClientRect().left - origen);
+                         if (delta < menor) {
+                             menor = delta;
+                             indice = posicion;
+                         }
+                     });
+                     const destino = fichas[indice + sentido];
+                     if (! destino) {
+                         return;
+                     }
+                     const izquierda = destino.getBoundingClientRect().left - origen + pista.scrollLeft;
+                     const suave = ! window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                     pista.scrollTo({ left: izquierda, behavior: suave ? 'smooth' : 'auto' });
+                 }
+             }">
 
-        @if ($eventos->isEmpty())
-            <div class="tarjeta mt-8 p-12 text-center">
-                <p class="font-display text-lg font-semibold">
-                    {{ $cuando === 'proximos' ? ajuste('eventos_vacios_proximos', 'No hay eventos programados por ahora') : ajuste('eventos_vacios_pasados', 'Todavía no hay eventos pasados') }}
-                </p>
-                <p class="mt-2 text-sm text-tenue">{{ ajuste('eventos_vacios_texto', 'Publicamos aquí la agenda del gremio.') }}</p>
-            </div>
-        @else
-            <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach ($eventos as $evento)
-                    <article @class([
-                        'tarjeta tarjeta-hover tarjeta-pulsable group flex flex-col overflow-hidden',
-                        'sm:col-span-2 sm:flex-row' => $loop->first,
-                    ])>
-                        <a href="{{ route('eventos.show', $evento) }}" @class([
-                            'flex flex-1 flex-col',
-                            'sm:flex-row' => $loop->first,
-                        ])>
-                            @if ($evento->imagen)
-                                <img src="{{ Storage::disk('public')->url($evento->imagen) }}" alt=""
-                                     loading="lazy" decoding="async" width="400" height="225"
-                                     style="view-transition-name: portada-evento-{{ $evento->id }}"
-                                     @class([
-                                         'imagen-viva w-full object-cover',
-                                         'aspect-video' => ! $loop->first,
-                                         'aspect-[16/10] sm:aspect-auto sm:w-[42%] sm:shrink-0' => $loop->first,
-                                     ])>
-                            @endif
+            <div class="eventos-editorial-agenda__tope">
+                <x-publico.conmutador-eventos :activo="$cuando"
+                                              :total-proximos="$totalProximos"
+                                              :total-pasados="$totalPasados" />
 
-                            <div class="flex flex-1 flex-col p-5">
-                                <div class="flex flex-wrap items-center gap-2 text-xs">
-                                    <span class="rounded-full bg-marca-500/15 px-2.5 py-1 font-medium text-acento-fuerte">
-                                        {{ $evento->tipo->getLabel() }}
-                                    </span>
-                                    @if ($evento->esGratuito())
-                                        <span class="rounded-full border border-linea px-2.5 py-1 text-tenue">Gratuito</span>
-                                    @else
-                                        <span class="rounded-full border border-linea px-2.5 py-1 text-tenue">{{ pesos($evento->precio) }}</span>
-                                    @endif
-                                </div>
-
-                                <h2 class="mt-3 font-display text-base font-semibold leading-snug">{{ $evento->titulo }}</h2>
-
-                                <p class="mt-2 text-xs text-apagado">
-                                    {{ $evento->fecha_inicio->translatedFormat('l d \d\e F, Y') }}
-                                    @if ($evento->lugar)
-                                        <span class="block">{{ $evento->lugar }}</span>
-                                    @endif
-                                </p>
-
-                                <p class="mt-3 line-clamp-3 flex-1 text-sm leading-relaxed text-tenue">
-                                    {{ Str::limit(strip_tags($evento->descripcion), 130) }}
-                                </p>
-
-                                <span class="mt-4 text-sm font-medium text-acento">Ver detalle&nbsp;<x-publico.flecha /></span>
-                            </div>
-                        </a>
-                    </article>
-                @endforeach
+                @if ($eventos->isNotEmpty() && $eventos->count() > 1)
+                    <div class="eventos-editorial-riel__mandos">
+                        <button type="button"
+                                class="eventos-editorial-riel__mando pulsable"
+                                aria-controls="eventos-riel"
+                                aria-label="Evento anterior"
+                                x-on:click="avanzar(-1)">
+                            <x-publico.flecha direccion="izquierda" />
+                        </button>
+                        <button type="button"
+                                class="eventos-editorial-riel__mando pulsable"
+                                aria-controls="eventos-riel"
+                                aria-label="Evento siguiente"
+                                x-on:click="avanzar(1)">
+                            <x-publico.flecha />
+                        </button>
+                    </div>
+                @endif
             </div>
 
-            <div class="mt-10">{{ $eventos->links() }}</div>
-        @endif
+            @if ($eventos->isEmpty())
+                <div class="eventos-editorial-vacio">
+                    <p class="font-display text-lg font-semibold">
+                        {{ $cuando === 'proximos' ? ajuste('eventos_vacios_proximos', 'No hay eventos programados por ahora') : ajuste('eventos_vacios_pasados', 'Todavía no hay eventos pasados') }}
+                    </p>
+                    <p class="mt-2 text-sm text-tenue">{{ ajuste('eventos_vacios_texto', 'Publicamos aquí la agenda del gremio.') }}</p>
+                </div>
+            @else
+                <section @class([
+                             'eventos-editorial-riel',
+                             'eventos-editorial-riel--hay-mas' => $eventos->count() > 1,
+                         ])
+                         aria-label="Agenda de eventos">
+                    <div id="eventos-riel"
+                         class="eventos-editorial-riel__pista"
+                         x-ref="pista"
+                         tabindex="0">
+                        @foreach ($eventos as $evento)
+                            <x-publico.evento-ficha :evento="$evento" :realizado="$cuando === 'pasados'" />
+                        @endforeach
+                    </div>
+                </section>
+
+                <div class="mt-10">{{ $eventos->links() }}</div>
+            @endif
+        </div>
     </div>
 </x-layouts.publico>

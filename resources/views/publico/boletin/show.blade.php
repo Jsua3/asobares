@@ -25,62 +25,61 @@
         <x-publico.json-ld :datos="$jsonLd" />
     @endpush
 
-    <article class="revelar mx-auto max-w-3xl px-4 py-10 sm:px-6" data-revelar>
-        <a href="{{ route('boletin.index') }}" class="enlace-accion relative inline-block text-sm text-apagado after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento"><x-publico.flecha direccion="izquierda" />&nbsp;Volver al boletín</a>
+    @push('cabeza')
+        @vite(['resources/css/gremio-editorial.css'])
+    @endpush
 
-        <div class="mt-5 flex items-center gap-2 text-xs">
-            <span class="rounded-full bg-marca-500/15 px-3 py-1 font-medium text-acento-fuerte">
-                {{ $noticia->categoria->getLabel() }}
-            </span>
-            <time datetime="{{ $noticia->publicado_at->toDateString() }}" class="text-apagado">
-                {{ $noticia->publicado_at->translatedFormat('d \d\e F \d\e Y') }}
-            </time>
-        </div>
+    <div class="gremio-editorial gremio-editorial--revista">
+        <article class="gremio-editorial-lectura revelar" data-revelar>
+            <a href="{{ route('boletin.index') }}" class="gremio-editorial-retorno enlace-accion"><x-publico.flecha direccion="izquierda" />&nbsp;Volver al boletín</a>
 
-        <h1 class="mt-4 font-display text-3xl font-bold leading-tight tracking-tight text-balance sm:text-4xl">
-            {{ $noticia->titulo }}
-        </h1>
+            <x-publico.folio-gremio numero="02" />
 
-        @if ($noticia->extracto)
-            <p class="mt-5 text-lg leading-relaxed text-suave text-pretty">{{ $noticia->extracto }}</p>
-        @endif
+            <p class="gremio-editorial-kicker">
+                <span>{{ $noticia->categoria->getLabel() }}</span>
+                <time datetime="{{ $noticia->publicado_at->toDateString() }}">
+                    {{ $noticia->publicado_at->translatedFormat('d \d\e F \d\e Y') }}
+                </time>
+            </p>
 
-        @if ($noticia->imagen)
-            <div class="tarjeta-escena group mt-8 overflow-hidden rounded-[1.75rem] border border-linea bg-superficie-alta"
-                 x-data="escena"
-                 x-on:pointermove="seguir($event)"
-                 x-on:pointerleave="salir()"
-                 x-bind:style="`--puntero-x: ${px}; --puntero-y: ${py}`">
-                <img src="{{ Storage::disk('public')->url($noticia->imagen) }}" alt=""
-                     width="1200" height="675" decoding="async"
-                     class="imagen-viva imagen-inclinable aspect-video w-full object-cover">
+            <h1>{{ $noticia->titulo }}</h1>
+
+            @if ($noticia->extracto)
+                <p class="gremio-editorial-entradilla">{{ $noticia->extracto }}</p>
+            @endif
+
+            @if ($noticia->imagen)
+                <figure>
+                    <img src="{{ Storage::disk('public')->url($noticia->imagen) }}" alt=""
+                         width="1200" height="675" decoding="async">
+                </figure>
+            @endif
+
+            <div class="gremio-editorial-prosa prose-asobares
+                        [&_a]:text-acento [&_a]:underline [&_a]:underline-offset-2
+                        [&_p]:text-pretty [&_strong]:font-semibold [&_strong]:text-fuerte">
+                {!! $contenidoSeguro !!}
             </div>
-        @endif
 
-        <div class="prose-asobares mt-8 space-y-5 text-base leading-relaxed text-suave
-                    [&_a]:text-acento [&_a]:underline [&_a]:underline-offset-2
-                    [&_p]:text-pretty [&_strong]:font-semibold [&_strong]:text-fuerte">
-            {!! $contenidoSeguro !!}
-        </div>
-
-        @if ($relacionadas->isNotEmpty())
-            <section class="mt-16 border-t border-linea pt-10" aria-labelledby="relacionadas">
-                <h2 id="relacionadas" class="font-display text-lg font-semibold">Más del boletín</h2>
-                <ul class="mt-5 space-y-3">
-                    @foreach ($relacionadas as $relacionada)
-                        <li>
-                            <a href="{{ route('boletin.show', $relacionada) }}"
-                               class="vidrio tarjeta-hover tarjeta-pulsable block rounded-[1.25rem] p-5">
-                                <span class="text-xs text-apagado">
-                                    {{ $relacionada->categoria->getLabel() }} ·
-                                    {{ $relacionada->publicado_at->translatedFormat('d M Y') }}
-                                </span>
-                                <span class="mt-1.5 block font-display text-sm font-semibold">{{ $relacionada->titulo }}</span>
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
-            </section>
-        @endif
-    </article>
+            @if ($relacionadas->isNotEmpty())
+                <section class="gremio-editorial-seccion" aria-labelledby="relacionadas">
+                    <h2 id="relacionadas">Más del boletín</h2>
+                    <ol class="gremio-editorial-indice-piezas">
+                        @foreach ($relacionadas as $relacionada)
+                            <li>
+                                <a href="{{ route('boletin.show', $relacionada) }}">
+                                    <span class="gremio-editorial-kicker">
+                                        {{ $relacionada->categoria->getLabel() }}
+                                        ·
+                                        {{ $relacionada->publicado_at->translatedFormat('d M Y') }}
+                                    </span>
+                                    <span class="gremio-editorial-indice-piezas__titulo">{{ $relacionada->titulo }}</span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ol>
+                </section>
+            @endif
+        </article>
+    </div>
 </x-layouts.publico>

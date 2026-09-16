@@ -1,14 +1,25 @@
 <x-layouts.publico :titulo="ajuste('seo_proveedores_titulo', ajuste('proveedores_titulo').' — ASOBARES Quindío')"
                    :descripcion="ajuste('seo_proveedores_descripcion', 'Bolsa de proveedores verificados para bares y gastrobares del Quindío: un beneficio para los establecimientos afiliados a ASOBARES.')">
 
-    {{-- Hueco de foto de cabecera: marcador hoy, `proveedores_foto` cuando llegue. --}}
-    <x-publico.hero :titulo="ajuste('proveedores_titulo')" :subtitulo="ajuste('proveedores_intro')" compacto atmosfera>
-        <x-slot:medio>
-            <x-publico.hueco-foto :foto="ajuste('proveedores_foto', null)" />
-        </x-slot:medio>
-    </x-publico.hero>
+    @push('cabeza')
+        @vite(['resources/css/proveedores-editorial.css'])
+    @endpush
 
-    <div class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="proveedores-editorial">
+        <section class="proveedores-editorial-hero" aria-labelledby="proveedores-titulo">
+            <div class="proveedores-editorial-hero__plano"></div>
+            <div class="proveedores-editorial-hero__foto" aria-hidden="true">
+                <img src="{{ asset('img/proveedores/hero-proveedores.png') }}" alt="" width="1800" height="900" decoding="async">
+            </div>
+            <div class="proveedores-editorial-hero__velo"></div>
+            <div class="proveedores-editorial-hero__cuerpo">
+                <span class="proveedores-editorial-eyebrow">Red de soluciones B2B</span>
+                <h1 id="proveedores-titulo">{{ ajuste('proveedores_titulo') }}</h1>
+                <p>{{ ajuste('proveedores_intro') }}</p>
+            </div>
+        </section>
+
+    <div class="proveedores-editorial-cuerpo">
 
         @php
             $usuario = auth()->user();
@@ -21,18 +32,24 @@
              entera mandaría a un login seco a quien llega desde un buscador y
              sacaría del índice una sección que hoy trae visitas—, así que
              cualquier dato que se agregue aquí hay que mirarlo dos veces. --}}
-        <section class="revelar tarjeta p-8 sm:p-10" data-revelar>
-            <h2 class="font-display text-xl font-bold">{{ ajuste('proveedores_beneficio_titulo', 'Un beneficio de estar afiliado') }}</h2>
-            <p class="mt-3 max-w-2xl text-sm leading-relaxed text-tenue">
-                {{ ajuste('proveedores_beneficio_texto', 'La secretaría verifica cada proveedor y anota la fecha de la última revisión, para que nadie llame a un número que ya no responde. El listado con nombres, WhatsApp y correos es para los establecimientos afiliados: aquí solo se ve de qué está hecho.') }}
-            </p>
+        <section class="proveedores-editorial-panel revelar" data-revelar>
+            <div class="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
+                <div>
+                    <h2 class="font-display text-xl font-bold">{{ ajuste('proveedores_beneficio_titulo', 'Un beneficio de estar afiliado') }}</h2>
+                    <p class="mt-3 max-w-2xl text-sm leading-relaxed text-tenue">
+                        {{ ajuste('proveedores_beneficio_texto', 'La secretaría verifica cada proveedor y anota la fecha de la última revisión, para que nadie llame a un número que ya no responde. El listado con nombres, WhatsApp y correos es para los establecimientos afiliados: aquí solo se ve de qué está hecho.') }}
+                    </p>
+                </div>
 
-            @if ($total > 0)
-                <p class="mt-6 font-display text-4xl font-bold tracking-tight">{{ $total }}</p>
-                <p class="text-sm text-apagado">
-                    {{ $total === 1 ? 'proveedor verificado y al día' : 'proveedores verificados y al día' }}
-                </p>
-            @endif
+                @if ($total > 0)
+                    <div class="proveedores-editorial-total">
+                        <p class="font-display text-4xl font-bold tracking-tight">{{ $total }}</p>
+                        <p class="mt-1 text-center text-xs font-medium text-current">
+                            {{ $total === 1 ? 'proveedor al día' : 'proveedores al día' }}
+                        </p>
+                    </div>
+                @endif
+            </div>
         </section>
 
         {{-- Categorías: qué hay, cuánto hay, y nada más. --}}
@@ -41,17 +58,22 @@
 
             <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($categorias as $categoria)
-                    <div class="tarjeta flex items-center gap-3 p-5">
-                        <x-dynamic-component :component="$categoria->icono()" class="h-5 w-5 shrink-0 text-acento" />
-                        <span class="flex-1 text-sm font-medium">{{ $categoria->getLabel() }}</span>
-                        <span class="text-sm text-apagado">{{ $conteos[$categoria->value] ?? 0 }}</span>
+                    <div class="proveedores-editorial-categoria">
+                        <span class="proveedores-editorial-categoria__icono">
+                            <x-dynamic-component :component="$categoria->icono()" class="h-5 w-5" />
+                        </span>
+                        <span class="min-w-0 flex-1">
+                            <span class="block text-sm font-semibold">{{ $categoria->getLabel() }}</span>
+                            <span class="mt-1 block text-xs text-tenue">Disponibilidad verificada para afiliados</span>
+                        </span>
+                        <span class="font-display text-xl font-bold text-acento">{{ $conteos[$categoria->value] ?? 0 }}</span>
                     </div>
                 @endforeach
             </div>
         </section>
 
         {{-- Dos salidas, y cuál se ve primero depende de quién mira. --}}
-        <section class="revelar tarjeta-escena vidrio mt-16 rounded-[1.75rem] p-8 text-center" data-revelar>
+        <section class="proveedores-editorial-cta revelar mt-16" data-revelar>
             @if ($esAfiliado)
                 <h2 class="font-display text-xl font-semibold">{{ ajuste('proveedores_afiliado_titulo', 'Ya estás afiliado') }}</h2>
                 <p class="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-tenue">
@@ -72,12 +94,13 @@
             @endif
         </section>
 
-        <section class="revelar mt-8 text-center" data-revelar>
+        <section class="proveedores-editorial-inscripcion revelar mt-8" data-revelar>
             <p class="text-sm text-tenue">
                 {{ ajuste('proveedores_inscripcion_texto', '¿Le vendes al sector nocturno del Quindío?') }}
                 <a href="{{ route('proveedores.inscripcion') }}"
                    class="enlace-accion text-acento underline underline-offset-2 hover:text-acento-fuerte">{{ ajuste('proveedores_inscripcion_cta', 'Inscríbete en la bolsa') }}</a>.
             </p>
         </section>
+    </div>
     </div>
 </x-layouts.publico>

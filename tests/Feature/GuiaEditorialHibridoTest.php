@@ -54,11 +54,14 @@ class GuiaEditorialHibridoTest extends TestCase
         $this->assertStringContainsString('mix-blend-mode: normal', $css);
         $this->assertStringContainsString('#0f1112', $css);
         $this->assertStringContainsString('4.375rem + 1.75rem', $css);
-        $this->assertStringContainsString('object-position: 32% 50%', $css);
+        $this->assertStringContainsString('object-position: 18% 50%', $css);
+        $this->assertStringContainsString('img.guia-editorial-escena__foto', $css);
+        $this->assertStringContainsString('max-width: none', $css);
+        $this->assertStringContainsString('transparent 34%', $css);
         $this->assertStringContainsString('--guia-hero-tope', $css);
         $this->assertStringContainsString('media/abre-tu-negocio/hero-abre-tu-negocio.png', File::get(resource_path('views/publico/guia/index.blade.php')));
         $this->assertFileExists(public_path('media/abre-tu-negocio/hero-abre-tu-negocio.png'));
-        $this->assertStringNotContainsString('mix-blend-mode: screen', $css);
+        $this->assertStringContainsString('mix-blend-mode: screen', $css);
         $this->assertStringContainsString('@media (prefers-reduced-motion: reduce)', $css);
         $this->assertStringContainsString('view-transition-name: none', $css);
         $this->assertStringContainsString(".guia-editorial-municipio[aria-current='true']", $css);

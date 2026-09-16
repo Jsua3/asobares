@@ -230,7 +230,8 @@
      * el hexadecimal deja dos valores que divergen en cuanto alguien retoque
      * la paleta, que es justo lo que este archivo existe para impedir.
      */
-    --asb-cromo-velo: color-mix(in oklab, var(--asb-fondo) 72%, transparent);
+    --asb-cromo-velo: color-mix(in oklab, var(--asb-fondo) 84%, transparent);
+    --asb-cromo-fila: var(--asb-fondo);
     --asb-cromo-desenfoque: blur(20px) saturate(180%);
     /* Solo se pinta con la pagina desplazada: separar de lo que no solapa
        nada es una raya gratis cruzando la pantalla. */
@@ -429,7 +430,8 @@
         inset 0 1px 0 rgb(255 255 255 / 0.055),
         0 12px 28px rgb(0 0 0 / 0.45);
 
-    --asb-cromo-velo: color-mix(in oklab, var(--asb-fondo) 62%, transparent);
+    --asb-cromo-velo: color-mix(in oklab, var(--asb-fondo) 78%, transparent);
+    --asb-cromo-fila: var(--asb-fondo);
     --asb-cromo-apoyo:
         0 1px 0 rgb(255 255 255 / 0.1),
         0 8px 28px rgb(0 0 0 / 0.55);
@@ -490,6 +492,7 @@
            desenfoque. Lo que se pierde es la profundidad, no la jerarquia:
            la sombra de apoyo sigue separando el cromo del contenido. */
         --asb-cromo-velo: var(--asb-fondo);
+        --asb-cromo-fila: var(--asb-fondo);
         --asb-cromo-desenfoque: none;
         --asb-vidrio-velo: var(--asb-superficie);
         --asb-vidrio-desenfoque: none;
@@ -516,6 +519,7 @@
         /* Quien pide más contraste no lee 11 px a través de una foto: el
            material se vuelve sólido, como bajo transparencia reducida. */
         --asb-cromo-velo: var(--asb-fondo);
+        --asb-cromo-fila: var(--asb-fondo);
         --asb-cromo-desenfoque: none;
         --asb-hoja-velo: var(--asb-superficie);
     }
@@ -527,6 +531,7 @@
         --asb-apagado: #d0cccd;
         --asb-hoja-borde: rgb(255 255 255 / 0.38);
         --asb-cromo-velo: var(--asb-fondo);
+        --asb-cromo-fila: var(--asb-fondo);
         --asb-cromo-desenfoque: none;
         --asb-hoja-velo: var(--asb-superficie);
     }

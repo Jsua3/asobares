@@ -1,0 +1,801 @@
+/*
+ * EMP-07 — Empleo editorial.
+ * Solo lo cargan /empleo y /empleo/{vacante}.
+ * El tema sigue siendo html.dark. No mezclar con Guía, Directorio ni Eventos.
+ *
+ * Fotografía de hero (propia, no inventada):
+ *   public/img/empleo/hero-empleo.png
+ * Criterio: hero panorámico de /directorio (plano + foto + velo + texto).
+ * Sin archivo: plano neutro, sin geometría ni foto falsa.
+ */
+
+.empleo-editorial {
+    --emp-bg: #f3ece2;
+    --emp-bg-alta: #ebe3d6;
+    --emp-surface: #fff8ef;
+    --emp-surface-alta: #f7eee3;
+    --emp-linea: rgb(55 32 24 / 0.12);
+    --emp-tinta: #1c120e;
+    --emp-suave: #5c4a42;
+    --emp-tenue: #7a665c;
+    --emp-acento: #b71f18;
+    --emp-acento-suave: rgb(183 31 24 / 0.12);
+    --emp-noche: #1a1412;
+    --emp-sombra: 0 14px 32px rgb(55 32 24 / 0.08);
+    --emp-tope: calc(var(--asb-alto-modulo-superior, 3.5rem) + env(safe-area-inset-top, 0px) + 1.25rem);
+    --emp-fab: calc(var(--asb-alto-modulo-inferior, 4.25rem) + env(safe-area-inset-bottom, 0px) + 4.75rem);
+    background:
+        radial-gradient(ellipse 70% 48% at 92% 8%, rgb(183 31 24 / 0.09), transparent 56%),
+        radial-gradient(ellipse 50% 40% at 8% 30%, rgb(212 160 80 / 0.12), transparent 52%),
+        linear-gradient(180deg, #f7f0e6 0%, #efe6d8 38%, #f3ece2 100%);
+    color: var(--emp-tinta);
+    overflow-x: clip;
+}
+
+.dark .empleo-editorial {
+    --emp-bg: #141010;
+    --emp-bg-alta: #1c1614;
+    --emp-surface: #1f1916;
+    --emp-surface-alta: #2a221e;
+    --emp-linea: rgb(245 232 220 / 0.12);
+    --emp-tinta: #f6eee6;
+    --emp-suave: #d2c4b8;
+    --emp-tenue: #b3a498;
+    --emp-acento: #ee4137;
+    --emp-acento-suave: rgb(238 65 55 / 0.16);
+    --emp-noche: #0e0b0a;
+    --emp-sombra: 0 18px 40px rgb(0 0 0 / 0.38);
+    background:
+        radial-gradient(ellipse 62% 46% at 88% 6%, rgb(238 65 55 / 0.14), transparent 58%),
+        radial-gradient(ellipse 46% 36% at 10% 28%, rgb(212 160 80 / 0.08), transparent 50%),
+        linear-gradient(180deg, #181210 0%, #12100f 46%, #161210 100%);
+}
+
+.empleo-editorial-cuerpo,
+.empleo-editorial-ficha,
+.empleo-editorial-hero,
+.empleo-editorial h1,
+.empleo-editorial h2,
+#vacantes,
+#perfil,
+#postularme {
+    scroll-margin-top: var(--emp-tope);
+}
+
+@media (max-width: 64rem) {
+    .empleo-editorial-cuerpo,
+    .empleo-editorial-ficha {
+        padding-bottom: calc(2.75rem + 4.25rem);
+    }
+
+    #vacantes,
+    #perfil,
+    #postularme,
+    .empleo-editorial-ficha {
+        scroll-margin-bottom: var(--emp-fab);
+    }
+}
+
+/* —— Hero —— */
+
+.empleo-editorial-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    min-height: 24rem;
+    color: var(--emp-tinta);
+    border-bottom: 1px solid var(--emp-linea);
+}
+
+@media (min-width: 768px) {
+    .empleo-editorial-hero {
+        min-height: 28rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .empleo-editorial-hero {
+        min-height: 32rem;
+    }
+}
+
+.empleo-editorial-hero__plano {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, #f7f1e8 0%, #efe6d8 100%);
+}
+
+.dark .empleo-editorial-hero__plano {
+    background: #0b090a;
+}
+
+.empleo-editorial-hero__foto {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    inset: 0;
+}
+
+.empleo-editorial-hero__foto img {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    object-position: 78% 42%;
+    -webkit-mask-image:
+        linear-gradient(90deg, transparent 0%, rgb(0 0 0 / 0.2) 22%, #000 58%, #000 92%, transparent 100%),
+        linear-gradient(180deg, rgb(0 0 0 / 0.45) 0%, #000 18%, #000 82%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+        linear-gradient(90deg, transparent 0%, rgb(0 0 0 / 0.2) 22%, #000 58%, #000 92%, transparent 100%),
+        linear-gradient(180deg, rgb(0 0 0 / 0.45) 0%, #000 18%, #000 82%, transparent 100%);
+    mask-composite: intersect;
+}
+
+@media (max-width: 767.98px) {
+    .empleo-editorial-hero__foto {
+        inset: 0 0 0 34%;
+    }
+}
+
+@media (min-width: 768px) {
+    .empleo-editorial-hero__foto {
+        inset: 0 0 0 36%;
+    }
+
+    .empleo-editorial-hero__foto img {
+        object-position: 62% 42%;
+        -webkit-mask-image:
+            linear-gradient(90deg, transparent 0%, #000 26%, #000 88%, transparent 100%),
+            linear-gradient(180deg, rgb(0 0 0 / 0.55) 0%, #000 22%, #000 86%, transparent 100%);
+        mask-image:
+            linear-gradient(90deg, transparent 0%, #000 26%, #000 88%, transparent 100%),
+            linear-gradient(180deg, rgb(0 0 0 / 0.55) 0%, #000 22%, #000 86%, transparent 100%);
+    }
+}
+
+@media (min-width: 1024px) {
+    .empleo-editorial-hero__foto {
+        inset: 0 0 0 34%;
+    }
+
+    .empleo-editorial-hero__foto img {
+        object-position: 62% 40%;
+    }
+}
+
+.empleo-editorial-hero__velo {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            105deg,
+            rgb(247 241 232 / 0.98) 0%,
+            rgb(247 241 232 / 0.96) 54%,
+            rgb(247 241 232 / 0.42) 70%,
+            rgb(247 241 232 / 0.08) 86%,
+            transparent 100%
+        ),
+        linear-gradient(
+            180deg,
+            rgb(247 241 232 / 0.18) 0%,
+            transparent 40%,
+            rgb(247 241 232 / 0.28) 100%
+        );
+}
+
+.dark .empleo-editorial-hero__velo {
+    background:
+        linear-gradient(
+            105deg,
+            rgb(11 9 10 / 0.96) 0%,
+            rgb(11 9 10 / 0.82) 52%,
+            rgb(11 9 10 / 0.28) 70%,
+            rgb(11 9 10 / 0.06) 88%,
+            rgb(11 9 10 / 0.04) 100%
+        ),
+        linear-gradient(
+            180deg,
+            rgb(11 9 10 / 0.22) 0%,
+            transparent 42%,
+            rgb(11 9 10 / 0.36) 100%
+        );
+}
+
+@media (min-width: 1024px) {
+    .empleo-editorial-hero__velo {
+        background:
+            linear-gradient(
+                105deg,
+                rgb(247 241 232 / 0.97) 0%,
+                rgb(247 241 232 / 0.82) 36%,
+                rgb(247 241 232 / 0.18) 58%,
+                transparent 78%
+            ),
+            linear-gradient(
+                180deg,
+                rgb(247 241 232 / 0.28) 0%,
+                transparent 40%,
+                rgb(247 241 232 / 0.55) 100%
+            );
+    }
+
+    .dark .empleo-editorial-hero__velo {
+        background:
+            linear-gradient(
+                105deg,
+                rgb(11 9 10 / 0.9) 0%,
+                rgb(11 9 10 / 0.52) 38%,
+                rgb(11 9 10 / 0.12) 68%,
+                rgb(11 9 10 / 0.04) 100%
+            ),
+            linear-gradient(
+                180deg,
+                rgb(11 9 10 / 0.22) 0%,
+                transparent 42%,
+                rgb(11 9 10 / 0.42) 100%
+            );
+    }
+}
+
+.empleo-editorial-hero__cuerpo {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    max-width: 80rem;
+    min-height: inherit;
+    margin-inline: auto;
+    padding: calc(var(--emp-tope) + 2.25rem) 1rem 2.25rem;
+}
+
+@media (min-width: 640px) {
+    .empleo-editorial-hero__cuerpo {
+        padding-inline: 1.5rem;
+        padding-bottom: 2.75rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .empleo-editorial-hero__cuerpo {
+        padding-inline: 2rem;
+        padding-bottom: 3.25rem;
+        max-width: 42rem;
+        margin-inline: auto 0;
+        margin-left: max(2rem, calc((100% - 80rem) / 2 + 2rem));
+    }
+}
+
+.empleo-editorial-hero__cuerpo h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+    color: var(--emp-tinta);
+    text-wrap: balance;
+}
+
+.dark .empleo-editorial-hero__cuerpo h1 {
+    color: #f6f1eb;
+    text-shadow: 0 2px 28px rgb(11 9 10 / 0.5);
+}
+
+@media (min-width: 640px) {
+    .empleo-editorial-hero__cuerpo h1 {
+        font-size: 2.75rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .empleo-editorial-hero__cuerpo h1 {
+        font-size: 3.25rem;
+    }
+}
+
+.empleo-editorial-hero__sub {
+    margin: 1rem 0 0;
+    max-width: 34rem;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--emp-suave);
+    text-wrap: pretty;
+}
+
+.dark .empleo-editorial-hero__sub {
+    color: rgb(255 248 241 / 0.9);
+    text-shadow: 0 1px 18px rgb(0 0 0 / 0.4);
+}
+
+.empleo-editorial-hero__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.empleo-editorial-hero__cta {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 1.15rem;
+    border-radius: 0.85rem;
+    background: var(--emp-acento);
+    color: #fff8ef;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 180ms ease, background-color 180ms ease;
+}
+
+.empleo-editorial-hero__cta:hover {
+    background: #9a1a14;
+}
+
+.empleo-editorial-hero__cta--contorno {
+    background: transparent;
+    border: 1px solid var(--emp-linea);
+    color: var(--emp-tinta);
+}
+
+.empleo-editorial-hero__cta--contorno:hover {
+    border-color: var(--emp-acento);
+    color: var(--emp-acento);
+    background: transparent;
+}
+
+.dark .empleo-editorial-hero__cta--contorno {
+    color: #f6f1eb;
+}
+
+/* —— Cuerpo —— */
+
+.empleo-editorial-cuerpo {
+    margin-inline: auto;
+    max-width: 72rem;
+    padding: 2.25rem 1rem 3.5rem;
+}
+
+@media (min-width: 640px) {
+    .empleo-editorial-cuerpo {
+        padding-inline: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .empleo-editorial-cuerpo {
+        padding-inline: 2rem;
+    }
+}
+
+.empleo-editorial-seccion__cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 0.75rem 1.25rem;
+}
+
+.empleo-editorial-seccion__cabeza h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.65rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+.empleo-editorial-seccion__aviso {
+    margin: 0;
+    max-width: 28rem;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    font-weight: 500;
+    color: var(--emp-tinta);
+}
+
+.dark .empleo-editorial-seccion__aviso {
+    color: #efe4d8;
+}
+
+.empleo-editorial-filtros {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.35rem;
+    padding: 1.15rem 1.2rem;
+    border: 1px solid var(--emp-linea);
+    border-radius: 1.25rem;
+    background: var(--emp-surface);
+    box-shadow: var(--emp-sombra);
+}
+
+@media (min-width: 640px) {
+    .empleo-editorial-filtros {
+        grid-template-columns: 1fr 1fr auto;
+        align-items: end;
+    }
+}
+
+.empleo-editorial-filtros__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: end;
+}
+
+.empleo-editorial-filtros__limpiar {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    padding: 0 1rem;
+    border: 1px solid var(--emp-linea);
+    border-radius: 0.85rem;
+    color: var(--emp-tenue);
+    font-size: 0.875rem;
+    text-decoration: none;
+}
+
+.empleo-editorial-filtros__limpiar:hover {
+    color: var(--emp-tinta);
+    border-color: var(--emp-acento);
+}
+
+.empleo-editorial-vacio {
+    margin-top: 1.35rem;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    border: 1px solid var(--emp-linea);
+    border-radius: 1.35rem;
+    background: var(--emp-surface);
+}
+
+.empleo-editorial-vacio p:first-child {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.empleo-editorial-vacio p:last-child {
+    margin: 0.55rem 0 0;
+    font-size: 0.9rem;
+    color: var(--emp-tenue);
+}
+
+/* —— Cartelera de vacantes —— */
+
+.empleo-editorial-cartelera {
+    display: grid;
+    gap: 1rem;
+    margin: 1.35rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.empleo-editorial-oferta {
+    margin: 0;
+}
+
+.empleo-editorial-oferta__enlace {
+    display: grid;
+    gap: 0.85rem 1.25rem;
+    min-height: 100%;
+    padding: 1.15rem 1.2rem 1.2rem;
+    border: 1px solid var(--emp-linea);
+    border-radius: 1.25rem;
+    background: var(--emp-surface);
+    box-shadow: var(--emp-sombra);
+    color: inherit;
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.empleo-editorial-oferta:hover .empleo-editorial-oferta__enlace {
+    border-color: rgb(183 31 24 / 0.35);
+    box-shadow: 0 18px 36px rgb(55 32 24 / 0.12);
+    transform: translateY(-2px);
+}
+
+@media (min-width: 768px) {
+    .empleo-editorial-oferta__enlace {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        padding: 1.25rem 1.4rem;
+    }
+}
+
+.dark .empleo-editorial-oferta:hover .empleo-editorial-oferta__enlace {
+    box-shadow: 0 18px 40px rgb(0 0 0 / 0.4);
+}
+
+.empleo-editorial-oferta__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.empleo-editorial-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.65rem;
+    padding: 0.15rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.empleo-editorial-chip--tipo {
+    background: var(--emp-acento-suave);
+    color: var(--emp-acento);
+}
+
+.empleo-editorial-chip--area {
+    border: 1px solid rgb(55 32 24 / 0.42);
+    background: #efe4d4;
+    color: #1c120e;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.dark .empleo-editorial-chip--area {
+    border-color: rgb(245 232 220 / 0.48);
+    background: #3a2f28;
+    color: #f6eee6;
+}
+
+.empleo-editorial-chip--estado {
+    border: 1px solid var(--emp-acento);
+    color: var(--emp-acento);
+}
+
+.empleo-editorial-oferta__cargo {
+    margin: 0.55rem 0 0;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-wrap: balance;
+}
+
+.empleo-editorial-oferta__empresa {
+    margin: 0.35rem 0 0;
+    font-size: 0.9rem;
+    color: var(--emp-suave);
+}
+
+.empleo-editorial-oferta__empresa a {
+    color: var(--emp-acento);
+    text-decoration: none;
+}
+
+.empleo-editorial-oferta__empresa a:hover {
+    text-decoration: underline;
+}
+
+.empleo-editorial-oferta__datos {
+    margin: 0.55rem 0 0;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--emp-tenue);
+}
+
+.empleo-editorial-oferta__extracto {
+    display: -webkit-box;
+    margin: 0.55rem 0 0;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: var(--emp-suave);
+}
+
+.empleo-editorial-oferta__cargo a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.empleo-editorial-oferta__cargo a:hover {
+    color: var(--emp-acento);
+}
+
+.empleo-editorial-oferta__cta {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem 1rem;
+    border-radius: 0.85rem;
+    background: var(--emp-acento);
+    color: #fff8ef;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+@media (max-width: 767.98px) {
+    .empleo-editorial-oferta__cta {
+        justify-self: start;
+    }
+}
+
+.empleo-editorial-pagina {
+    margin-top: 2rem;
+}
+
+/* —— Formulario de perfil / postulación —— */
+
+.empleo-editorial-bloque {
+    margin-top: 3rem;
+    padding: 1.6rem 1.35rem 1.75rem;
+    border: 1px solid var(--emp-linea);
+    border-radius: 1.35rem;
+    background: var(--emp-surface);
+    box-shadow: var(--emp-sombra);
+}
+
+@media (min-width: 640px) {
+    .empleo-editorial-bloque {
+        padding: 2rem 1.85rem 2.1rem;
+    }
+}
+
+.empleo-editorial-bloque h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.empleo-editorial-bloque > p {
+    margin: 0.55rem 0 0;
+    font-size: 0.9rem;
+    color: var(--emp-tenue);
+}
+
+.empleo-editorial-retorno {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--emp-acento);
+    text-decoration: none;
+}
+
+.empleo-editorial-retorno:hover {
+    color: var(--emp-tinta);
+}
+
+.empleo-editorial-ficha {
+    margin-inline: auto;
+    max-width: 46rem;
+    padding: var(--emp-tope) 1rem 3.5rem;
+}
+
+@media (min-width: 640px) {
+    .empleo-editorial-ficha {
+        padding-inline: 1.5rem;
+    }
+}
+
+@media (max-width: 64rem) {
+    .empleo-editorial-ficha {
+        padding-bottom: calc(2.75rem + 4.25rem);
+    }
+}
+
+.empleo-editorial-ficha__cargo {
+    margin: 0.85rem 0 0;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+}
+
+.empleo-editorial-ficha__descripcion {
+    margin-top: 1.5rem;
+    padding: 1.25rem 1.3rem;
+    border: 1px solid var(--emp-linea);
+    border-radius: 1.25rem;
+    background: var(--emp-surface);
+}
+
+.empleo-editorial-ficha__descripcion p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--emp-suave);
+}
+
+.empleo-editorial-condiciones {
+    display: grid;
+    gap: 0.85rem;
+    margin: 1.25rem 0 0;
+}
+
+@media (min-width: 640px) {
+    .empleo-editorial-condiciones {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.empleo-editorial-condiciones div {
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--emp-linea);
+    border-radius: 1.15rem;
+    background: var(--emp-surface);
+}
+
+.empleo-editorial-condiciones dt {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--emp-acento);
+}
+
+.empleo-editorial-condiciones dd {
+    margin: 0.4rem 0 0;
+    font-size: 0.9rem;
+}
+
+.empleo-editorial-similares {
+    margin-top: 2.75rem;
+}
+
+.empleo-editorial-similares h2 {
+    margin: 0 0 1rem;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.empleo-editorial-whatsapp {
+    margin: 1.25rem 0 0;
+    font-size: 0.78rem;
+    color: var(--emp-tenue);
+}
+
+.empleo-editorial-whatsapp a {
+    color: var(--emp-acento);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+/* El FAB global no se mueve: Empleo cede hueco local a controles. */
+@media (max-width: 64rem) {
+    .empleo-editorial-oferta__cta {
+        margin-inline-end: 4.5rem;
+    }
+}
+
+@media (max-width: 48rem) {
+    .empleo-editorial-filtros {
+        padding-right: 4.5rem;
+    }
+
+    .empleo-editorial-bloque {
+        padding-right: 4.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .empleo-editorial-hero__cta,
+    .empleo-editorial-oferta__enlace {
+        transition: none;
+    }
+
+    .empleo-editorial-oferta:hover .empleo-editorial-oferta__enlace {
+        transform: none;
+    }
+}

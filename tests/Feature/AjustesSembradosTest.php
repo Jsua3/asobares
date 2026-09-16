@@ -34,9 +34,6 @@ class AjustesSembradosTest extends TestCase
      */
     private const array LEIDAS_SIN_SEMBRAR = [
         'guia_foto' => 'Hueco de foto de cabecera (HuecoDeFotoTest): se lee con respaldo null y pinta el marcador de marca mientras el gremio no entregue material autorizado. Una fila vacía le daría a la oficina un campo de texto para una ruta de imagen, sin subida ni validación.',
-        'empleo_foto' => 'Hueco de foto de cabecera, por lo mismo que guia_foto.',
-        'artistas_foto' => 'Hueco de foto de cabecera, por lo mismo que guia_foto.',
-        'proveedores_foto' => 'Hueco de foto de cabecera, por lo mismo que guia_foto.',
     ];
 
     public function test_toda_clave_que_lee_una_vista_esta_sembrada(): void

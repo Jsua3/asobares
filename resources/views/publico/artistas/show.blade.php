@@ -2,13 +2,18 @@
                    :descripcion="Str::limit($artista->descripcion, 155)"
                    :ogImagen="$artista->foto ? Storage::disk('public')->url($artista->foto) : null">
 
-    <article class="revelar mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8" data-revelar>
+    @push('cabeza')
+        @vite(['resources/css/artistas-editorial.css'])
+    @endpush
+
+    <div class="artistas-editorial">
+    <article class="artistas-editorial-cuerpo revelar max-w-5xl" data-revelar>
         <a href="{{ route('artistas.index') }}" class="enlace-accion relative inline-block text-sm text-apagado after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento"><x-publico.flecha direccion="izquierda" />&nbsp;Todos los artistas</a>
 
-        <div class="mt-6 grid gap-10 lg:grid-cols-3">
+        <div class="artistas-editorial-ficha mt-6 grid gap-10 p-5 sm:p-7 lg:grid-cols-3">
             <div class="lg:col-span-2">
                 <div class="flex flex-wrap items-center gap-2 text-xs">
-                    <span class="rounded-full bg-marca-500/15 px-3 py-1 font-medium text-acento-fuerte">
+                    <span class="artistas-editorial-chip">
                         {{ $artista->tipo->getLabel() }}
                     </span>
                     @if ($artista->municipio)
@@ -26,7 +31,7 @@
                 {{-- Video: se embebe solo el ID extraído, nunca la URL cruda --}}
                 @if ($id = $artista->youtubeId())
                     <h2 class="mt-10 font-display text-lg font-semibold">Escúchalo</h2>
-                    <div class="mt-4 aspect-video overflow-hidden rounded-[1.5rem] border border-linea">
+                    <div class="artistas-editorial-video mt-4 aspect-video overflow-hidden rounded-[1.5rem]">
                         <iframe class="h-full w-full"
                                 src="https://www.youtube-nocookie.com/embed/{{ $id }}"
                                 title="Video de {{ $artista->nombre }}"
@@ -40,7 +45,7 @@
 
             <aside class="space-y-5 lg:sticky lg:top-24 lg:self-start">
                 @if ($artista->foto)
-                    <div class="tarjeta-escena group overflow-hidden rounded-[1.75rem] border border-linea bg-superficie-alta"
+                    <div class="artistas-editorial-ficha__foto group"
                          x-data="escena"
                          x-on:pointermove="seguir($event)"
                          x-on:pointerleave="salir()"
@@ -48,11 +53,11 @@
                         <img src="{{ Storage::disk('public')->url($artista->foto) }}" alt="{{ $artista->nombre }}"
                              width="500" height="500" decoding="async"
                              style="view-transition-name: portada-artista-{{ $artista->id }}"
-                             class="imagen-viva imagen-inclinable aspect-square w-full object-cover">
+                             class="imagen-inclinable aspect-square w-full">
                     </div>
                 @endif
 
-                <div class="vidrio rounded-[1.5rem] p-6">
+                <div class="artistas-editorial-contacto">
                     {{-- La tarifa no se publica: ver el comentario de `index.blade.php`. --}}
                     <p class="text-xs uppercase tracking-wide text-apagado">Tarifa</p>
                     <p class="mt-1 font-display text-2xl font-bold text-acento">
@@ -90,7 +95,7 @@
                 <ul class="mt-6 grid gap-4 sm:grid-cols-3">
                     @foreach ($similares as $similar)
                         <li>
-                            <a href="{{ route('artistas.show', $similar) }}" class="vidrio tarjeta-hover tarjeta-pulsable block rounded-[1.25rem] p-5">
+                            <a href="{{ route('artistas.show', $similar) }}" class="artistas-editorial-similar tarjeta-hover tarjeta-pulsable block rounded-[1.25rem] p-5">
                                 <span class="block font-display text-sm font-semibold">{{ $similar->nombre }}</span>
                                 <span class="mt-1 block text-xs text-acento">{{ $similar->genero_musical }}</span>
                             </a>
@@ -100,4 +105,5 @@
             </section>
         @endif
     </article>
+    </div>
 </x-layouts.publico>

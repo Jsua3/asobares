@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Eventos\Schemas;
 
 use App\Enums\EstadoPublicacion;
+use App\Enums\OrigenEvento;
 use App\Enums\TipoEvento;
 use App\Filament\Forms\Components\SubidaSegura;
 use Filament\Forms\Components\DateTimePicker;
@@ -21,7 +22,7 @@ class EventoForm
         return $schema
             ->components([
                 Section::make('El evento')
-                    ->description('Solo eventos del gremio: ExpoBar, congresos, capacitaciones.')
+                    ->description('Eventos propios del gremio o publicados por un aliado.')
                     ->columns(2)
                     ->schema([
                         TextInput::make('titulo')
@@ -46,6 +47,26 @@ class EventoForm
                             ->default(TipoEvento::Evento)
                             ->required()
                             ->native(false),
+                        Select::make('origen')
+                            ->label('Origen')
+                            ->options(OrigenEvento::class)
+                            ->default(OrigenEvento::Asobares)
+                            ->required()
+                            ->native(false)
+                            ->live()
+                            ->afterStateUpdated(function (mixed $state, callable $set): void {
+                                if ($state === OrigenEvento::Asobares->value || $state === OrigenEvento::Asobares) {
+                                    $set('aliado_id', null);
+                                }
+                            }),
+                        Select::make('aliado_id')
+                            ->label('Aliado organizador')
+                            ->relationship('aliado', 'nombre')
+                            ->searchable()
+                            ->preload()
+                            ->required(fn (callable $get): bool => static::esEventoDeAliado($get('origen')))
+                            ->visible(fn (callable $get): bool => static::esEventoDeAliado($get('origen')))
+                            ->helperText('Solo para eventos organizados por un aliado.'),
                         TextInput::make('lugar')
                             ->label('Lugar')
                             ->maxLength(255)
@@ -57,6 +78,7 @@ class EventoForm
                         DateTimePicker::make('fecha_fin')
                             ->label('Termina')
                             ->native(false)
+                            ->afterOrEqual('fecha_inicio')
                             ->helperText('Déjalo vacío si es de un solo momento.'),
                         Textarea::make('descripcion')
                             ->label('Descripción')
@@ -75,7 +97,7 @@ class EventoForm
                             ->label('Enlace externo')
                             ->url()
                             ->maxLength(255)
-                            ->helperText('Para eventos de la Nacional cuya inscripción es afuera.'),
+                            ->helperText('Para eventos cuya inscripción se gestiona por fuera del sitio.'),
                         TextInput::make('cupos')
                             ->label('Cupos')
                             ->numeric()
@@ -112,5 +134,11 @@ class EventoForm
                                 : 'Al guardar, quedará pendiente de aprobación de la dirección.'),
                     ]),
             ]);
+    }
+
+    private static function esEventoDeAliado(mixed $origen): bool
+    {
+        return $origen === OrigenEvento::Aliado
+            || $origen === OrigenEvento::Aliado->value;
     }
 }

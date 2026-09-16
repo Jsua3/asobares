@@ -650,7 +650,26 @@
             content: none;
         }
 
+        /*
+         * En scroll/atención las tres píldoras dejan huecos: el manifiesto
+         * se leía a través de la fila. Este velo cubre la banda del header
+         * sin cambiar geometría, enlaces ni módulos.
+         */
+        .cromo[data-estado="scroll"]::after,
+        .cromo[data-estado="atencion"]::after {
+            content: '';
+            pointer-events: none;
+            position: absolute;
+            inset: 0 0 auto;
+            height: calc(100% + 0.75rem);
+            z-index: 0;
+            background-color: var(--asb-cromo-fila);
+            -webkit-backdrop-filter: var(--asb-cromo-desenfoque);
+            backdrop-filter: var(--asb-cromo-desenfoque);
+        }
+
         .bandeja {
+            z-index: 1;
             width: min(calc(100% - 2rem), 80rem);
             gap: 0;
             border: 1px solid transparent;

@@ -1,0 +1,827 @@
+/*
+ * El Gremio — capa editorial de /quienes-somos, /boletin y /contacto.
+ * No mezclar con Directorio, Eventos, Empleo, Artistas ni Proveedores.
+ */
+
+.gremio-editorial {
+    --grem-bg: #f3ece2;
+    --grem-elevada: #e8dfd0;
+    --grem-profunda: #241814;
+    --grem-tinta: #1c120e;
+    --grem-suave: #4a3b34;
+    --grem-tenue: #6e5c54;
+    --grem-linea: rgb(55 32 24 / 0.16);
+    --grem-linea-fuerte: rgb(55 32 24 / 0.28);
+    --grem-acento: #b71f18;
+    --grem-campo: #faf6ef;
+    --grem-tope: calc(var(--asb-alto-modulo-superior, 3.5rem) + env(safe-area-inset-top, 0px) + 1.5rem);
+    --grem-fab: calc(var(--asb-alto-modulo-inferior, 4.25rem) + env(safe-area-inset-bottom, 0px) + 4.75rem);
+    background: var(--grem-bg);
+    color: var(--grem-tinta);
+    overflow-x: clip;
+}
+
+.dark .gremio-editorial {
+    --grem-bg: #14110f;
+    --grem-elevada: #1b1714;
+    --grem-profunda: #1a0e0c;
+    --grem-tinta: #f4ebe3;
+    --grem-suave: #cfc0b4;
+    --grem-tenue: #a8988c;
+    --grem-linea: rgb(245 232 220 / 0.14);
+    --grem-linea-fuerte: rgb(245 232 220 / 0.28);
+    --grem-acento: #ee4137;
+    --grem-campo: #221c19;
+}
+
+.gremio-editorial a {
+    color: var(--grem-acento);
+}
+
+.gremio-editorial-cuerpo,
+.gremio-editorial-lectura,
+.gremio-editorial-banda__interior {
+    margin-inline: auto;
+    max-width: 46rem;
+    padding-inline: 1.25rem;
+}
+
+.gremio-editorial-cuerpo,
+.gremio-editorial-lectura {
+    padding-top: var(--grem-tope);
+    padding-bottom: 4.5rem;
+}
+
+.gremio-editorial--revista .gremio-editorial-cuerpo {
+    max-width: 68rem;
+}
+
+.gremio-editorial--conversacion .gremio-editorial-cuerpo {
+    max-width: 52rem;
+}
+
+.gremio-editorial--manifiesto > .gremio-editorial-cuerpo {
+    max-width: none;
+    padding: 0;
+}
+
+@media (min-width: 640px) {
+    .gremio-editorial-cuerpo,
+    .gremio-editorial-lectura,
+    .gremio-editorial-banda__interior {
+        padding-inline: 1.75rem;
+    }
+}
+
+@media (max-width: 64rem) {
+    .gremio-editorial-cuerpo,
+    .gremio-editorial-lectura {
+        padding-bottom: calc(4.5rem + 4.25rem);
+        scroll-margin-bottom: var(--grem-fab);
+    }
+}
+
+/* —— Bandas —— */
+
+.gremio-editorial-banda {
+    padding-block: 2.6rem;
+    background: var(--grem-bg);
+}
+
+.gremio-editorial-banda--apertura {
+    padding-top: var(--grem-tope);
+    padding-bottom: 2.4rem;
+}
+
+.gremio-editorial-banda--elevada {
+    background: var(--grem-elevada);
+}
+
+.gremio-editorial-banda--profunda {
+    background: var(--grem-profunda);
+    color: #f4ebe3;
+    --grem-tinta: #f4ebe3;
+    --grem-suave: #d4c4b8;
+    --grem-tenue: #b6a498;
+    --grem-linea: rgb(244 235 227 / 0.16);
+    --grem-acento: #ee4137;
+}
+
+.gremio-editorial-banda + .gremio-editorial-banda {
+    border-top: 1px solid var(--grem-linea);
+}
+
+.gremio-editorial-banda--profunda + .gremio-editorial-banda,
+.gremio-editorial-banda + .gremio-editorial-banda--profunda {
+    border-top-color: transparent;
+}
+
+/* —— Folio —— */
+
+.gremio-editorial-folio {
+    display: grid;
+    gap: 0.3rem;
+    margin: 0;
+    color: var(--grem-acento);
+    animation: gremio-folio-entra 640ms ease both;
+}
+
+.gremio-editorial-folio__marca,
+.gremio-editorial-folio__serie,
+.gremio-editorial-folio__kicker {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.gremio-editorial-folio__serie {
+    color: var(--grem-tinta);
+    letter-spacing: 0.2em;
+}
+
+.gremio-editorial-folio__kicker {
+    margin-top: 0.45rem;
+    color: var(--grem-tenue);
+}
+
+@keyframes gremio-folio-entra {
+    from {
+        opacity: 0;
+        transform: translateY(0.35rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* —— Tipografía —— */
+
+.gremio-editorial-apertura {
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--grem-linea);
+}
+
+.gremio-editorial-banda--apertura .gremio-editorial-apertura {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.gremio-editorial-apertura__lema {
+    margin: 1.35rem 0 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--grem-acento);
+}
+
+.gremio-editorial-apertura h1 {
+    margin: 0.7rem 0 0;
+    max-width: 16ch;
+    font-family: var(--font-display);
+    font-size: clamp(2.05rem, 1.1rem + 2.6vw, 4rem);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+}
+
+.gremio-editorial--manifiesto .gremio-editorial-apertura h1 {
+    max-width: 22ch;
+    font-size: clamp(1.85rem, 1.15rem + 2.35vw, 3.375rem);
+}
+
+.gremio-editorial-lectura h1 {
+    margin: 0.7rem 0 0;
+    max-width: 22ch;
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 1rem + 2.1vw, 3rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.028em;
+    text-wrap: balance;
+}
+
+.gremio-editorial-apertura__cuerpo,
+.gremio-editorial-entradilla {
+    margin: 1.15rem 0 0;
+    max-width: 38rem;
+    font-size: clamp(1.05rem, 0.95rem + 0.35vw, 1.1875rem);
+    line-height: 1.65;
+    color: var(--grem-suave);
+    text-wrap: pretty;
+}
+
+.gremio-editorial-seccion {
+    padding: 0;
+}
+
+.gremio-editorial-seccion__cabeza {
+    display: grid;
+    gap: 0.45rem;
+    margin-bottom: 0.85rem;
+}
+
+.gremio-editorial-seccion__n {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: var(--grem-acento);
+}
+
+.gremio-editorial-seccion h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 1.05rem + 0.7vw, 2rem);
+    font-weight: 600;
+    letter-spacing: -0.018em;
+    text-wrap: balance;
+}
+
+.gremio-editorial-seccion__prosa {
+    margin: 0.85rem 0 0;
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: var(--grem-suave);
+    text-wrap: pretty;
+}
+
+.gremio-editorial-pie {
+    margin: 0.75rem 0 0;
+    font-size: 0.88rem;
+    color: var(--grem-tenue);
+}
+
+.gremio-editorial-cita {
+    margin: 1.5rem 0 0;
+    padding: 0.15rem 0 0.15rem 1.15rem;
+    border: 0;
+    border-left: 2px solid var(--grem-acento);
+}
+
+.gremio-editorial-cita p {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 1rem + 0.55vw, 1.45rem);
+    font-weight: 500;
+    font-style: italic;
+    line-height: 1.35;
+    text-wrap: balance;
+}
+
+.gremio-editorial-vision__nota {
+    margin: 0.75rem 0 0;
+    font-size: 1.02rem;
+    font-weight: 500;
+    color: var(--grem-acento);
+}
+
+.gremio-editorial-vision__detalle {
+    margin: 1.15rem 0 0;
+    display: grid;
+    gap: 0.7rem;
+}
+
+.gremio-editorial-vision__detalle p {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--grem-suave);
+}
+
+@media (min-width: 900px) {
+    .gremio-editorial-vision__detalle {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem 2rem;
+    }
+}
+
+/* —— Listas editoriales —— */
+
+.gremio-editorial-abiertas,
+.gremio-editorial-secuencia,
+.gremio-editorial-listado,
+.gremio-editorial-beneficios,
+.gremio-editorial-indice-piezas {
+    list-style: none;
+    margin: 1.5rem 0 0;
+    padding: 0;
+}
+
+.gremio-editorial-abiertas > li,
+.gremio-editorial-secuencia > li,
+.gremio-editorial-listado > li,
+.gremio-editorial-beneficios > li,
+.gremio-editorial-indice-piezas > li {
+    padding: 1.2rem 0;
+    border-top: 1px solid var(--grem-linea);
+}
+
+.gremio-editorial-abiertas > li:last-child,
+.gremio-editorial-secuencia > li:last-child,
+.gremio-editorial-listado > li:last-child,
+.gremio-editorial-beneficios > li:last-child,
+.gremio-editorial-indice-piezas > li:last-child {
+    border-bottom: 1px solid var(--grem-linea);
+}
+
+.gremio-editorial-abiertas__n {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: var(--grem-acento);
+}
+
+.gremio-editorial-abiertas h3,
+.gremio-editorial-secuencia h3,
+.gremio-editorial-listado h3,
+.gremio-editorial-beneficios h3 {
+    margin: 0.35rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 1.05rem + 0.4vw, 1.5rem);
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.gremio-editorial-abiertas p,
+.gremio-editorial-secuencia p,
+.gremio-editorial-listado p,
+.gremio-editorial-beneficios p {
+    margin: 0.5rem 0 0;
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: var(--grem-suave);
+}
+
+@media (min-width: 900px) {
+    .gremio-editorial-abiertas,
+    .gremio-editorial-beneficios {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 2.5rem;
+    }
+
+    .gremio-editorial-abiertas > li,
+    .gremio-editorial-beneficios > li {
+        border-top: 0;
+        border-bottom: 1px solid var(--grem-linea);
+    }
+}
+
+.gremio-editorial-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--grem-tenue);
+}
+
+.gremio-editorial-meta strong {
+    font-weight: 600;
+    color: var(--grem-acento);
+}
+
+.gremio-editorial-programas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.1rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.92rem;
+    color: var(--grem-tinta);
+}
+
+.gremio-editorial-firma {
+    margin-top: 1.5rem;
+}
+
+.gremio-editorial-firma__cargo {
+    margin: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--grem-tenue);
+}
+
+.gremio-editorial-firma__nombre {
+    margin: 0.3rem 0 1.2rem;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.gremio-editorial-cierre h2 {
+    font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.15rem);
+    font-weight: 600;
+}
+
+.gremio-editorial-cierre .gremio-editorial-apertura__lema {
+    margin-top: 1.1rem;
+}
+
+.gremio-editorial-cifras {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 3rem;
+    margin: 1.5rem 0 0;
+}
+
+.gremio-editorial-cifras div {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.gremio-editorial-cifras dt {
+    margin-top: 0.35rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--grem-tenue);
+}
+
+.gremio-editorial-cifras dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--grem-acento);
+}
+
+.gremio-editorial-nacional__accion {
+    margin-top: 1.5rem;
+}
+
+/* —— Revista —— */
+
+.gremio-editorial-indice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.35rem;
+    margin: 1.75rem 0 0;
+    padding: 0.35rem 0 1.1rem;
+    border-bottom: 1px solid var(--grem-linea);
+}
+
+.gremio-editorial-indice a {
+    color: var(--grem-suave);
+    text-decoration: none;
+}
+
+.gremio-editorial-indice a[aria-current='page'] {
+    color: var(--grem-acento);
+    box-shadow: inset 0 -2px 0 var(--grem-acento);
+}
+
+.gremio-editorial-vacio {
+    margin-top: 2.5rem;
+}
+
+.gremio-editorial-vacio p {
+    margin: 0.5rem 0 0;
+    color: var(--grem-suave);
+}
+
+.gremio-editorial-lead {
+    display: grid;
+    gap: 1.4rem;
+    margin-top: 2rem;
+    padding: 1rem 0 1.2rem;
+    background: var(--grem-elevada);
+    border-bottom: 1px solid var(--grem-linea);
+    text-decoration: none;
+    color: inherit;
+}
+
+@media (min-width: 768px) {
+    .gremio-editorial-lead {
+        margin-inline: -1.5rem;
+        padding-inline: 1.5rem;
+    }
+
+    .gremio-editorial-lead--con-foto {
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr);
+        align-items: end;
+        gap: 2rem;
+    }
+}
+
+.gremio-editorial-lead h2 {
+    margin: 0.45rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.05rem + 1.35vw, 3rem);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    color: var(--grem-tinta);
+    text-wrap: balance;
+}
+
+.gremio-editorial-lead:hover h2 {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+}
+
+.gremio-editorial-lead p {
+    margin: 0.75rem 0 0;
+    font-size: 1.05rem;
+    line-height: 1.55;
+    color: var(--grem-suave);
+}
+
+.gremio-editorial-lead img,
+.gremio-editorial-secundaria img,
+.gremio-editorial-lectura img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border-radius: 0;
+}
+
+.gremio-editorial-tablero {
+    display: grid;
+    gap: 2.25rem;
+    margin-top: 2.25rem;
+}
+
+@media (min-width: 900px) {
+    .gremio-editorial-tablero {
+        grid-template-columns: minmax(0, 1.1fr) minmax(16rem, 0.75fr);
+        gap: 3rem;
+    }
+}
+
+.gremio-editorial-secundaria {
+    display: grid;
+    gap: 1rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+.gremio-editorial-secundaria h2 {
+    margin: 0.4rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.2rem, 1.05rem + 0.55vw, 1.5rem);
+    font-weight: 600;
+    line-height: 1.22;
+    color: var(--grem-tinta);
+}
+
+.gremio-editorial-secundaria:hover h2,
+.gremio-editorial-indice-piezas a:hover .gremio-editorial-indice-piezas__titulo {
+    text-decoration: underline;
+    text-underline-offset: 0.16em;
+}
+
+.gremio-editorial-secundaria p {
+    margin: 0.5rem 0 0;
+    font-size: 0.98rem;
+    line-height: 1.5;
+    color: var(--grem-suave);
+}
+
+.gremio-editorial-indice-piezas a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.gremio-editorial-indice-piezas__titulo {
+    display: block;
+    margin-top: 0.3rem;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--grem-tinta);
+}
+
+.gremio-editorial-pagina {
+    margin-top: 2.5rem;
+}
+
+/* —— Lectura —— */
+
+.gremio-editorial-retorno {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    margin-bottom: 1.15rem;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+.gremio-editorial-kicker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 1rem;
+    margin: 1rem 0 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--grem-tenue);
+}
+
+.gremio-editorial-prosa {
+    margin-top: 1.75rem;
+}
+
+.gremio-editorial-prosa :where(p) {
+    margin: 0 0 1.15rem;
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: var(--grem-suave);
+}
+
+.gremio-editorial-lectura figure {
+    margin: 1.75rem 0;
+}
+
+/* —— Conversación —— */
+
+.gremio-editorial-motivos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.25rem;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--grem-tenue);
+}
+
+.gremio-editorial-motivos a {
+    color: inherit;
+    text-decoration: none;
+    box-shadow: inset 0 -1px 0 var(--grem-linea);
+}
+
+.gremio-editorial-motivos a:hover {
+    color: var(--grem-acento);
+}
+
+.gremio-editorial-canales {
+    display: grid;
+    gap: 0;
+    margin-top: 2.25rem;
+    border-top: 1px solid var(--grem-linea);
+}
+
+.gremio-editorial-canal {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 0.85rem;
+    padding: 1.35rem 0;
+    border-bottom: 1px solid var(--grem-linea);
+}
+
+.gremio-editorial-canal__n {
+    grid-row: 1 / span 4;
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    color: var(--grem-acento);
+}
+
+.gremio-editorial-canal__rotulo {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--grem-tenue);
+}
+
+.gremio-editorial-canal a,
+.gremio-editorial-canal p:not(.gremio-editorial-canal__rotulo):not(.gremio-editorial-canal__aviso) {
+    margin: 0.2rem 0 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 1rem + 0.7vw, 1.45rem);
+    font-weight: 600;
+    line-height: 1.3;
+    text-decoration: none;
+    color: var(--grem-tinta);
+}
+
+.gremio-editorial-canal--principal a {
+    color: var(--grem-acento);
+}
+
+.gremio-editorial-canal--largo a,
+.gremio-editorial-canal--largo p:not(.gremio-editorial-canal__rotulo):not(.gremio-editorial-canal__aviso) {
+    font-size: clamp(1.02rem, 0.92rem + 0.4vw, 1.2rem);
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.gremio-editorial-canal__aviso {
+    margin: 0.35rem 0 0;
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 400;
+    color: var(--grem-tenue);
+}
+
+@media (min-width: 900px) {
+    .gremio-editorial-canales {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .gremio-editorial-canal:nth-child(odd) {
+        padding-right: 1.75rem;
+        border-right: 1px solid var(--grem-linea);
+    }
+
+    .gremio-editorial-canal:nth-child(even) {
+        padding-left: 1.75rem;
+    }
+}
+
+.gremio-editorial-formulario {
+    margin-top: 2.75rem;
+    padding: 2.25rem 0 0;
+    border-top: 1px solid var(--grem-linea);
+    background: var(--grem-elevada);
+}
+
+.gremio-editorial--conversacion .gremio-editorial-formulario {
+    margin-inline: -1.25rem;
+    padding: 2.25rem 1.25rem 2rem;
+}
+
+@media (min-width: 640px) {
+    .gremio-editorial--conversacion .gremio-editorial-formulario {
+        margin-inline: -1.75rem;
+        padding-inline: 1.75rem;
+    }
+}
+
+.gremio-editorial-formulario h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 1.1rem + 0.7vw, 2rem);
+    font-weight: 600;
+}
+
+.gremio-editorial-formulario form {
+    margin-top: 1.5rem;
+}
+
+.gremio-editorial-formulario input:not([type='checkbox']):not([type='hidden']),
+.gremio-editorial-formulario select,
+.gremio-editorial-formulario textarea {
+    background-color: var(--grem-campo);
+    border-color: var(--grem-linea-fuerte);
+    color: var(--grem-tinta);
+}
+
+.gremio-editorial-formulario input:not([type='checkbox']):not([type='hidden']):focus,
+.gremio-editorial-formulario select:focus,
+.gremio-editorial-formulario textarea:focus {
+    border-color: var(--grem-acento);
+}
+
+.gremio-editorial-mapa {
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--grem-linea);
+}
+
+.gremio-editorial-mapa h2 {
+    margin: 0 0 1rem;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+@media (max-width: 48rem) {
+    .gremio-editorial-cuerpo,
+    .gremio-editorial-lectura,
+    .gremio-editorial-banda__interior {
+        padding-right: 4.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gremio-editorial-folio {
+        animation: none;
+    }
+
+    .gremio-editorial-lead:hover h2,
+    .gremio-editorial-secundaria:hover h2 {
+        text-decoration: none;
+    }
+}

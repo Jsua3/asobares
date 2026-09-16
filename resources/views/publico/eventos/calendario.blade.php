@@ -21,6 +21,10 @@
 <x-layouts.publico :titulo="'Calendario de eventos · '.$tituloMes.' — ASOBARES Quindío'"
                    :descripcion="'Agenda del gremio de la vida nocturna del Quindío en '.$tituloMes.': ferias, foros y capacitaciones.'">
 
+    @push('cabeza')
+        @vite(['resources/css/eventos-editorial.css'])
+    @endpush
+
     @if ($fueraDeRango)
         {{-- Los meses anterior y siguiente son enlaces sin tope: sin esto un
              rastreador pasea por años enteros de calendarios vacíos y los
@@ -30,10 +34,12 @@
         @endpush
     @endif
 
-    <x-publico.hero titulo="Eventos y capacitaciones" compacto atmosfera
-                    subtitulo="Solo eventos del gremio: ferias, foros y formación para los establecimientos del Quindío." />
+    <div class="eventos-editorial">
+    <x-publico.hero-eventos
+        titulo="Eventos y capacitaciones"
+        subtitulo="Solo eventos del gremio: ferias, foros y formación para los establecimientos del Quindío." />
 
-    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="eventos-editorial-cuerpo mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
         <div class="revelar" data-revelar>
             <x-publico.conmutador-eventos activo="calendario" :mes="$mes"
@@ -53,7 +59,7 @@
             objetivo de 44 px. En móvil los nombres de mes se esconden y quedan
             las dos flechas, así que el título cabe entre ellas a 375 px.
         --}}
-        <nav aria-label="Cambiar de mes" class="revelar mt-8 flex items-center justify-between gap-3" data-revelar>
+        <nav aria-label="Cambiar de mes" class="eventos-editorial-mes revelar mt-8 flex items-center justify-between gap-3" data-revelar>
             <x-publico.boton variante="contorno" rel="prev"
                              :href="route('eventos.calendario', [$anterior->year, $anterior->format('m')])">
                 <x-publico.flecha direccion="izquierda" />
@@ -85,7 +91,7 @@
             lee ni el objetivo llega a 44. Móvil recibe la agenda de más abajo,
             que es la misma información en la forma que cabe.
         --}}
-        <div class="revelar vidrio mt-5 hidden overflow-hidden rounded-[1.5rem] sm:block"
+        <div class="eventos-editorial-calendario revelar mt-5 hidden overflow-hidden rounded-[1.5rem] sm:block"
              data-revelar
              style="view-transition-name: calendario-rejilla">
             <table class="w-full table-fixed border-collapse">
@@ -110,6 +116,7 @@
                                         'bg-superficie' => $dia->month === $mes->month,
                                         'bg-superficie-alta' => $dia->month !== $mes->month,
                                     ])
+                                    @if ($dia->month !== $mes->month) data-fuera="true" @endif
                                     @if ($dia->isToday()) aria-current="date" @endif>
                                     <span @class([
                                         'inline-flex h-6 w-6 items-center justify-center rounded-full text-xs',
@@ -145,7 +152,7 @@
             MÓVIL: la misma información como agenda vertical. Cero JavaScript,
             cero scroll horizontal y cada enlace con su objetivo de 44 px.
         --}}
-        <ol class="revelar mt-5 space-y-3 sm:hidden" data-revelar style="view-transition-name: calendario-agenda">
+        <ol class="eventos-editorial-agenda revelar mt-5 space-y-3 sm:hidden" data-revelar style="view-transition-name: calendario-agenda">
             @forelse ($agenda as $fecha => $eventosDelDia)
                 @php ($dia = \Illuminate\Support\Carbon::parse($fecha))
                 <li class="vidrio rounded-[1.25rem] p-4" @if ($dia->isToday()) aria-current="date" @endif>
@@ -191,5 +198,6 @@
                    class="enlace-accion font-medium text-acento hover:text-fuerte">Ver los próximos eventos&nbsp;<x-publico.flecha /></a>
             </p>
         @endif
+    </div>
     </div>
 </x-layouts.publico>

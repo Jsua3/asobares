@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EstadoPublicacion;
+use App\Enums\OrigenEvento;
 use App\Enums\TipoEvento;
 use App\Models\Concerns\EsPublicable;
 use Carbon\CarbonInterface;
@@ -10,17 +11,20 @@ use Database\Factories\EventoFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Validation\ValidationException;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
 /**
- * Solo eventos del gremio (ExpoBar, Congreso Nacional, capacitaciones propias).
- * Nunca eventos de bares individuales.
+ * Eventos del gremio y de aliados institucionales o comerciales.
  */
 class Evento extends Model
 {
     use EsPublicable, LogsActivity;
+
+    public const ORGANIZADOR_ASOBARES = 'ASOBARES Capítulo Quindío';
 
     /** @use HasFactory<EventoFactory> */
     use HasFactory;
@@ -34,11 +38,35 @@ class Evento extends Model
         return [
             'estado' => EstadoPublicacion::class,
             'tipo' => TipoEvento::class,
+            'origen' => OrigenEvento::class,
             'fecha_inicio' => 'datetime',
             'fecha_fin' => 'datetime',
             'precio' => 'decimal:2',
             'permite_inscripcion' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (Evento $evento): void {
+            $evento->origen ??= OrigenEvento::Asobares;
+
+            $origen = $evento->origen instanceof OrigenEvento
+                ? $evento->origen
+                : OrigenEvento::from((string) $evento->origen);
+
+            if ($origen === OrigenEvento::Asobares) {
+                $evento->aliado_id = null;
+
+                return;
+            }
+
+            if (blank($evento->aliado_id)) {
+                throw ValidationException::withMessages([
+                    'aliado_id' => 'Selecciona el aliado que organiza este evento.',
+                ]);
+            }
+        });
     }
 
     public function getRouteKeyName(): string
@@ -50,6 +78,14 @@ class Evento extends Model
     public function inscripciones(): HasMany
     {
         return $this->hasMany(Inscripcion::class);
+    }
+
+    /**
+     * @return BelongsTo<Aliado, $this>
+     */
+    public function aliado(): BelongsTo
+    {
+        return $this->belongsTo(Aliado::class);
     }
 
     /**
@@ -118,6 +154,52 @@ class Evento extends Model
         return filled($this->enlace_externo);
     }
 
+    public function esDeAliado(): bool
+    {
+        return $this->origenPublico() === OrigenEvento::Aliado;
+    }
+
+    /**
+     * Los eventos anteriores a la columna `origen` pueden llegar en null.
+     * En lectura se interpretan como ASOBARES; no como aliado.
+     */
+    public function origenPublico(): OrigenEvento
+    {
+        return $this->origen ?? OrigenEvento::Asobares;
+    }
+
+    public function organizadorVisible(): string
+    {
+        if ($this->esDeAliado() && $this->aliado !== null) {
+            return $this->aliado->nombre;
+        }
+
+        return self::ORGANIZADOR_ASOBARES;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function organizadorJsonLd(): array
+    {
+        $organizador = [
+            '@type' => 'Organization',
+            'name' => $this->organizadorVisible(),
+        ];
+
+        if ($this->esDeAliado()) {
+            if (filled($this->aliado?->url)) {
+                $organizador['url'] = $this->aliado->url;
+            }
+
+            return $organizador;
+        }
+
+        $organizador['url'] = route('inicio');
+
+        return $organizador;
+    }
+
     public function cuposDisponibles(): ?int
     {
         if ($this->cupos === null) {
@@ -149,7 +231,7 @@ class Evento extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['titulo', 'estado', 'fecha_inicio', 'precio'])
+            ->logOnly(['titulo', 'estado', 'fecha_inicio', 'precio', 'origen', 'aliado_id'])
             ->logOnlyDirty()
             ->useLogName('evento')
             ->setDescriptionForEvent(fn (string $evento): string => "Evento {$this->titulo}: {$evento}");
