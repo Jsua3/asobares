@@ -18,10 +18,11 @@ class MunicipioSeeder extends Seeder
      * coordenadas no las lee nadie hoy; van por completitud y porque
      * `AsociadoSeeder` espera esta forma para todas las filas.
      *
-     * ⚠️ El filtro de municipios del **directorio** lista todos tengan o no
-     * fichas, así que estos cuatro lo alargan de 8 a 12 entradas vacías. Está
-     * anotado como deuda en `estado.md` §4 y se arregla en el directorio, no
-     * aquí: la guía sí filtra bien (ver `GuiaController::index`).
+     * Añadir municipios no ensucia ningún filtro: tanto el directorio
+     * (`DirectorioController::index`) como la guía (`GuiaController::index`)
+     * solo ofrecen los que tienen algo publicado, con `whereHas`. Un municipio
+     * sin establecimientos ni fichas existe en la base y no aparece en ningún
+     * desplegable.
      *
      * Coordenadas de los cuatro nuevos: Wikipedia en español, consultada el 15
      * de septiembre de 2026 vía su API de `coordinates`. Las 8 anteriores se
