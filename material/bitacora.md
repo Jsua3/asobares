@@ -2684,3 +2684,43 @@ El §54.3 dejó escrito que por `cloud command:run --cmd` «el PHP no puede llev
 El CLI trae dos lanzadores. `cloud.bat` pasa por `cmd.exe` y ahí se pierden las comillas. El otro, `cloud` sin extensión —el shim de Unix—, **lo ejecuta Git Bash directamente**, y las comillas internas llegan enteras al servidor. Comprobado con `--cmd "php artisan tinker --execute='echo(1+1);'"` → `2`, y aprovechado para volcar los 200 ajustes como JSON y contar permisos y tablas de demostración en producción. Sin eso, la comprobación de esta siembra habría sido a ciegas.
 
 También se corrigió un error propio de esta sesión: se afirmó tres veces que el CLI «no está en esta máquina» porque `Get-Command cloud` devolvía vacío. Estaba instalado, fuera del PATH. **Un `Get-Command` vacío dice dónde no está, no que no esté.**
+
+---
+
+## §56 — Las guardias dejan de leer el marcado, y tres notas de deuda que ya no eran ciertas (15 de septiembre de 2026, noche)
+
+Del salto a Filament 5 salió una lección con nombre: **una guardia anclada al texto del HTML servido sobrevive a la regresión que vigila y muere por un cambio cosmético**. Esta sesión fue a por todas las demás.
+
+### 56.1 El tamaño real, contado y no estimado
+
+El estado decía «quedan más guardias de ese tipo». Contadas: **17 archivos de prueba** hacían `assertMatchesRegularExpression` sobre HTML servido. Analizadas una por una por diecisiete agentes en paralelo —solo lectura, sin tocar nada—: **92 aserciones vistas, 47 frágiles**. Las demás tienen por sujeto un `.css`, un `.js` o el código fuente de un Blade leído con `File::get`, y ahí el regex es la herramienta correcta y se queda.
+
+La conversión la hicieron nueve agentes, agrupados por **componentes conexas del grafo «prueba → fuentes que mutaría»**, para que dos no rompieran el mismo Blade a la vez. Cada uno tenía prohibido tocar nada fuera de su grupo y tenía que devolver, por cada aserción convertida, la mutación vista roja **y** una prueba de control. Resultado: **65 convertidas, 64 dejadas como estaban a propósito, cero controles fallidos, cero mutaciones que se quedaran verdes**. Ninguna fuente quedó tocada al final.
+
+### 56.2 Lo que apareció por el camino, que vale más que la conversión
+
+- **Un falso verde en el Directorio.** La guardia exigía `data-cifra-final="0"` **en alguna** de las tres cifras de cobertura. Con los municipios en uno pasaba en verde. Ahora afirma las tres, y cada una por partida doble: la cifra anunciada y la pintada.
+- **Dos guardias sobre `app.js` que avisaban por lo contrario de lo que miraban.** La de la banda, `assertDoesNotMatchRegularExpression('/Alpine.data(\'bandaEstablecimientos\'[\s\S]*setInterval/', $js)` sobre el archivo entero y **sin mensaje de fallo**: se pone roja por cualquier `setInterval` posterior aunque sea de otro componente —y ya hay uno en la línea 724—, y pasa en vacío si alguien renombra el componente, porque entonces el patrón no casa con nada y «no coincide» es justo lo que la aserción pide. La de las cifras, `/data-cifra-final[\s\S]*reduceMovimiento\(\)/`, se conformaba con que **alguien** en el archivo mirara `prefers-reduced-motion`. Las dos acotadas a su bloque, con el ayudante que además afirma que el bloque existe antes de devolverlo.
+- **Un agente se apartó del análisis previo a propósito, y otro lo corrigió con mediciones.** El de la portada no convirtió valores de atributo ni texto visible: habría sido convertir por convertir. El del calendario midió que el reemplazo propuesto indexaba por un rótulo que `Str::plural` cambia bajo mutación, así que la guardia se habría puesto **roja por no encontrar la clave y no por la cifra** —roja por el motivo equivocado, que es el defecto que veníamos a matar—.
+
+### 56.3 El tema no «funcionaba por accidente»: estaba mal y se veía
+
+La nota de deuda decía que `consultaSistema.addEventListener('change', aplicarTema)` funcionaba por accidente de la comparación. No.
+
+`addEventListener` le entrega a su función el `MediaQueryListEvent`, que cae en el parámetro `preferenciaForzada`. Como no es nulo, `aplicarTema` **se salta la lectura de localStorage** y resuelve contra el sistema. Para quien está en modo «sistema» acierta; para quien **forzó** un tema, no: con `theme` en `light` y el sistema cambiando a oscuro, el evento pone la página en oscuro contra la elección explícita del usuario. El comentario decía «en modo sistema, seguir al sistema operativo»; seguía al sistema en todos los modos.
+
+**Y la trampa del entorno casi lo tapa.** El primer intento de reproducirlo dijo «no hay defecto»: emulando `prefers-color-scheme: dark` la página seguía en claro. Una sonda lo desmontó —`elEventoLlego: 0`—: la emulación del panel **cambia `matches` pero no dispara el evento `change`**, así que la medición no medía nada. La reproducción buena fue invocar lo que hace el oyente.
+
+### 56.4 Cinco notas de deuda que ya no eran ciertas
+
+Se comprobó una por una, no se razonó:
+
+- **El filtro de municipios del Directorio.** Lo arregló Ingrid en «fix(cierre): alinea conteos del directorio con asociados publicados», que entró hoy con la fusión: `DirectorioController::index` filtra municipios y categorías con `whereHas(…->publicado())`, y `DirectorioTest` lo vigila. **Por qué la nota decía lo contrario, que es lo útil:** la escribió una sesión que medía sobre `guia/doce-municipios`, rama que sale de `main` y no tenía el trabajo de Ingrid dentro. Una deuda medida sobre una rama que no es la que se va a desplegar envejece mal el mismo día.
+- **La transición de `gap`** de la barra: no queda ni una `transition` sobre `gap` en todo el CSS.
+- **`@alpinejs/collapse` «importado sin consumidor»:** `x-collapse` gobierna el cajón de filtros del Directorio desde `30f2333`.
+- **El `consultaSistema`**, cerrado arriba.
+- Y la propia entrada del estado que afirmaba que, tras la siembra, el filtro del Directorio ofrecería doce opciones con cuatro vacías **en producción**: medido sobre la URL pública, el Directorio sirve sus tres cifras en **0** y el selector solo trae «Todos los municipios», porque no hay ni un establecimiento publicado. Escribir una deuda como si se viera donde no se ve es la misma falta que citar una cifra sin medirla.
+
+### 56.5 Lo que se deja dicho y no se toca
+
+El correo de ficha de bolsa publicada enlaza a `/proveedores`. Medido: esa página **no nombra a ningún proveedor** —solo pinta categorías— y no existe `proveedores.show`. Así que el correo promete «Ya apareces en el directorio: X» y lleva a una página donde X no sale. El arreglo cambia texto de cara al usuario y no hay destino correcto que inventar: es decisión de contenido.

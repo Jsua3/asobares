@@ -187,7 +187,7 @@ Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen�
 No se «arregla de paso»:
 
 - ~~El filtro de municipios del Directorio lista todos, tengan o no fichas.~~ **Ya no existe: lo arregló Ingrid** en `fix(cierre): alinea conteos del directorio con asociados publicados`, que entró hoy con la fusión. `DirectorioController::index` filtra municipios y categorías con `whereHas(…->publicado())`, igual que la guía, y `DirectorioTest` lo vigila con tres municipios —sin fichas, en borrador y publicado— exigiendo que la cabecera cuente **uno**. La nota que decía lo contrario la escribió una sesión que trabajaba sobre la rama anterior; queda corregida también en el docblock de `MunicipioSeeder`.
-- **La guardia del hero medía el marcado con una expresión regular** y se rompió en cuanto el contenedor ganó un atributo. Ya está sobre XPath, y el resto está **contado, no estimado**: **17 archivos de prueba** hacen `assertMatchesRegularExpression` sobre HTML servido (`getContent()`), y cada uno es candidato al mismo fallo —romperse por un atributo, o peor, invertirse por un cambio de nomenclatura del framework—. Seis clases ya usan el ayudante `xpathDe()`; el camino está hecho.
+- ~~Las guardias que leen el marcado con expresiones regulares.~~ **Cerrado la noche del 15 sep** (bitácora §56): de **92 aserciones** examinadas en los 17 archivos, **47 eran frágiles** y se convirtieron **65** a medición sobre el árbol —algunas se partieron en varias más precisas—, con mutación roja y prueba de control por cada una. **64 se dejaron a propósito**: su sujeto es un `.css`, un `.js` o el fuente de un Blade leído con `File::get`, y ahí el regex es la herramienta correcta. Quedan **11 archivos** que aún mezclan regex y HTML en la misma clase, y **17 clases** usan ya `xpathDe()`. ⚠️ Lo que **no** cubre esto: las guardias sobre `.js` acotadas con `[\s\S]*` sobre el archivo entero —se arreglaron las dos conocidas, la de la banda y la de las cifras, pero el patrón puede repetirse.
 - **Ninguna prueba ve una imagen generada por IA.** La procedencia se comprueba leyendo los bytes del **original** —el WebP ya perdió el manifiesto— y eso no está automatizado. Si entra otra tanda, se mira a mano.
 - **`hamcrest` subió a 3.0.0** con el salto. No lo usa ninguna prueba nuestra directamente; entra por Mockery.
 - **Del panel en el teléfono:** el tacto del resorte solo lo cierra un aparato de verdad; se ajusta con `ARRASTRE` y `AMORTIGUACION`.
@@ -210,7 +210,7 @@ Medidas el **15 de septiembre de 2026 sobre `2d86359`**, que es lo desplegado. *
 | Sembradores | **21** | `ls database/seeders/*.php` |
 | Fábricas | **19** | `ls database/factories/*.php` |
 | Archivos de prueba | **134** | `find tests -name '*Test.php'` |
-| Métodos de prueba | **1.251** | `grep -rhE '^\s*public function test_' tests` |
+| Métodos de prueba | **1.252** | `grep -rhE '^\s*public function test_' tests` |
 | Vistas Blade | **102** | `find resources/views -name '*.blade.php'` |
 | Componentes públicos | **24** | `ls resources/views/components/publico/*.blade.php` |
 | Panel | **21** recursos · **6** páginas · **22** policies · **16** widgets | `ls app/Filament/…`, `ls app/Policies/*.php` |
@@ -220,7 +220,7 @@ Medidas el **15 de septiembre de 2026 sobre `2d86359`**, que es lo desplegado. *
 | Middleware propio | **3** | `ls app/Http/Middleware/*.php` |
 | Archivos de configuración | **18** | `ls config/*.php` |
 | Rutas GET propias | **96** | `php artisan route:list --method=GET --except-vendor --json` |
-| **Suite completa** | **1.615 casos · 1.615 pasan · 0 fallos · 8.460 aserciones · 693 s** (Filament 5.8.2) | `php artisan test --compact` |
+| **Suite completa** | **1.616 casos · 1.616 pasan · 0 fallos · 8.539 aserciones · 580 s** (Filament 5.8.2, tras convertir las guardias). Son **79 aserciones más** que antes de la conversión sobre el mismo código: el listón sube, no se cambian unas guardias por otras más cómodas | `php artisan test --compact` |
 | Referencia previa, Filament 4.12.8 | 1.615 casos · 1.615 pasan · 0 fallos · **8.460 aserciones** · 967 s | `php artisan test --compact` |
 | Ajustes | **200** en la rama y **200 en producción** (eran 100 antes de sembrar). De los 100 previos, **2** tenían `updated_at` distinto de `created_at`, y por trece minutos: no eran ediciones de la oficina | `Setting::all()` por `cloud command:run` |
 | Permisos | **88** · super_admin **88** · subadmin **52**. Medidos **después** de que `ContenidoOficialSeeder` corriera su `syncPermissions`: idénticos, no revocó nada | `Permission::count()` y `Role::...->permissions()->count()` en producción |
