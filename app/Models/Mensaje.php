@@ -42,6 +42,11 @@ class Mensaje extends Model
         return $this->tipo === TipoMensaje::Pqr;
     }
 
+    public function getAsuntoAttribute(): string
+    {
+        return $this->tipo->getLabel();
+    }
+
     /**
      * Cuándo vence el plazo legal de esta PQR, o `null` si no corre ninguno.
      *

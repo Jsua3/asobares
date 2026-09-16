@@ -51,6 +51,7 @@ class EmpleoController
             'vacantes' => $consulta->latest()->paginate(10)->withQueryString(),
             'municipios' => $this->municipiosConVacante($datos['municipio'] ?? null),
             'categorias' => $this->areasConVacante($datos['categoria'] ?? null),
+            'categoriasPerfil' => CargoDelSector::cases(),
             'filtros' => $datos,
         ]);
     }

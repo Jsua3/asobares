@@ -44,7 +44,7 @@
     Envolviendo, a 320 px cae a un segundo renglón dentro del mismo marco y a
     partir de ahí sigue en una sola línea.
 --}}
-<div class="inline-flex max-w-full flex-wrap rounded-xl border border-linea p-1" role="group" aria-label="Cambiar la vista de eventos">
+<div class="eventos-editorial-conmutador inline-flex max-w-full flex-wrap rounded-xl border border-linea p-1" role="group" aria-label="Cambiar la vista de eventos">
     @foreach ($segmentos as $clave => $segmento)
         {{--
             `.pulsable` y ni una utilidad de movimiento al lado: en Tailwind 4
@@ -55,6 +55,10 @@
 
             `min-h-11` es geometría medida: con `py-2` el segmento daba 37,7 px
             de alto, por debajo del objetivo táctil de 44.
+
+            Sin `view-transition-name: filtro-activo`: ese nombre lo comparte
+            el boletín y provocaba morphs entre pastillas de páginas distintas.
+            aria-current y las URLs reales se conservan.
         --}}
         <a href="{{ $segmento['url'] }}"
            @class([
@@ -62,12 +66,7 @@
                'bg-accion font-medium text-white' => $activo === $clave,
                'text-tenue hover:text-fuerte' => $activo !== $clave,
            ])
-           {{-- El nombre de transición viaja con la pastilla roja, así que al
-                navegar entre las tres vistas se desliza de un segmento al
-                siguiente en vez de parpadear. Es el mismo nombre que ya usan
-                los chips del boletín, de proveedores y de la guía: sólo hay un
-                elemento activo por documento, así que no se pisa con nadie. --}}
-           @if ($activo === $clave) aria-current="true" style="view-transition-name: filtro-activo" @endif>
+           @if ($activo === $clave) aria-current="true" @endif>
             {{ $segmento['texto'] }}
         </a>
     @endforeach

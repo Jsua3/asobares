@@ -76,17 +76,13 @@ class HuecoDeFotoTest extends TestCase
     }
 
     /**
-     * Las cinco secciones que ya tienen el hueco abierto, y por la ruta que lo
-     * hace utilizable: un ajuste. Sin él, meter una foto obligaría a editar la
-     * plantilla, que es justo lo que este trabajo viene a evitar.
+     * Las secciones que todavía usan el hueco de foto de hero conectado a un ajuste.
+     * Empleo, Artistas y Proveedores ya tienen fotografía editorial propia.
      */
     public function test_las_secciones_tienen_el_hueco_abierto_y_conectado_a_un_ajuste(): void
     {
         $secciones = [
             'guia/index' => 'guia_foto',
-            'empleo/index' => 'empleo_foto',
-            'artistas/index' => 'artistas_foto',
-            'proveedores/index' => 'proveedores_foto',
         ];
 
         foreach ($secciones as $vista => $ajuste) {
@@ -112,7 +108,7 @@ class HuecoDeFotoTest extends TestCase
      */
     public function test_el_hueco_del_hero_va_dentro_de_la_ranura_que_lleva_velo(): void
     {
-        foreach (['guia/index', 'empleo/index', 'artistas/index', 'proveedores/index'] as $vista) {
+        foreach (['guia/index'] as $vista) {
             $html = File::get(resource_path("views/publico/{$vista}.blade.php"));
 
             $this->assertMatchesRegularExpression(

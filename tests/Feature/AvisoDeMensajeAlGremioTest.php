@@ -90,6 +90,13 @@ class AvisoDeMensajeAlGremioTest extends TestCase
         );
     }
 
+    public function test_el_asunto_visible_del_aviso_sale_del_tipo_de_mensaje(): void
+    {
+        $mensaje = Mensaje::factory()->create(['tipo' => TipoMensaje::Aliado]);
+
+        $this->assertSame('Quiero ser aliado', $mensaje->asunto);
+    }
+
     /** @return array<string, array{TipoMensaje}> */
     public static function tiposDelFormularioDeContacto(): array
     {

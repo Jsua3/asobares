@@ -520,6 +520,25 @@ class NavbarTresEstadosTest extends TestCase
     }
 
     /**
+     * En scroll las tres píldoras dejan huecos y el manifiesto se leía a
+     * través. El velo de fila cubre la banda del header; las píldoras no
+     * cambian de geometría.
+     *
+     * Rotura: borrar los ::after de data-estado scroll/atencion.
+     */
+    public function test_el_velo_de_fila_cubre_los_huecos_en_scroll(): void
+    {
+        $css = File::get(resource_path('css/app.css'));
+        $escritorio = strstr($css, '@media (min-width: 64rem) {');
+        $this->assertNotFalse($escritorio);
+        $bloque = substr($escritorio, 0, strpos($escritorio, '@media', 10));
+
+        $this->assertStringContainsString('.cromo[data-estado="scroll"]::after', $bloque);
+        $this->assertStringContainsString('.cromo[data-estado="atencion"]::after', $bloque);
+        $this->assertStringContainsString('background-color: var(--asb-cromo-fila);', $bloque);
+    }
+
+    /**
      * La franja estrecha de escritorio: de 64rem a 82.5rem la barra no cabe.
      *
      * Medido sobre el sitio servido el 10 sep, y era peor de lo que decía D-33.

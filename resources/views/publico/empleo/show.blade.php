@@ -1,6 +1,10 @@
 <x-layouts.publico :titulo="$vacante->cargo.' en '.$vacante->asociado->nombre.' — ASOBARES Quindío'"
                    :descripcion="Str::limit($vacante->descripcion ?? 'Vacante publicada por un establecimiento asociado a ASOBARES Capítulo Quindío.', 155)">
 
+    @push('cabeza')
+        @vite(['resources/css/empleo-editorial.css'])
+    @endpush
+
     @php
         $jsonLd = [
             '@context' => 'https://schema.org',
@@ -30,115 +34,112 @@
         <x-publico.json-ld :datos="$jsonLd" />
     @endpush
 
-    <div class="revelar mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8" data-revelar>
+    <div class="empleo-editorial">
+        <div class="empleo-editorial-ficha">
 
-        <a href="{{ route('empleo.index') }}" class="enlace-accion relative inline-block text-sm text-acento after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento-fuerte"><x-publico.flecha direccion="izquierda" />&nbsp;Todas las vacantes</a>
+            <a href="{{ route('empleo.index') }}" class="empleo-editorial-retorno enlace-accion"><x-publico.flecha direccion="izquierda" />&nbsp;Todas las vacantes</a>
 
-        <header class="mt-4">
-            <div class="flex flex-wrap items-center gap-2 text-xs">
-                <span class="rounded-full bg-marca-500/15 px-2.5 py-1 font-medium text-acento-fuerte">
-                    {{ $vacante->tipo->getLabel() }}
-                </span>
-                <span class="rounded-full border border-linea px-2.5 py-1 text-tenue">
-                    {{ $vacante->categoria_cargo->getLabel() }}
-                </span>
-                <span class="text-apagado">
-                    {{ $vacante->asociado->municipio->nombre }} · publicada {{ $vacante->created_at->diffForHumans() }}
-                </span>
-            </div>
-
-            <h1 class="mt-4 font-display text-3xl font-bold tracking-tight">{{ $vacante->cargo }}</h1>
-
-            <p class="mt-2 text-sm text-tenue">
-                en
-                @if ($vacante->asociado->estaPublicado())
-                    <a href="{{ route('directorio.show', $vacante->asociado) }}"
-                       class="enlace-accion text-acento hover:text-acento-fuerte">{{ $vacante->asociado->nombre }}</a>
-                @else
-                    {{ $vacante->asociado->nombre }}
-                @endif
-            </p>
-        </header>
-
-        @if ($vacante->descripcion)
-            <div class="vidrio mt-8 rounded-[1.5rem] p-6">
-                <p class="text-sm leading-relaxed text-suave">{{ $vacante->descripcion }}</p>
-            </div>
-        @endif
-
-        <dl class="mt-6 grid gap-4 sm:grid-cols-2">
-            @if ($vacante->franja_horaria)
-                <div class="tarjeta-escena vidrio rounded-[1.25rem] p-5">
-                    <dt class="text-[.65rem] font-semibold uppercase tracking-wider text-acento">Horario</dt>
-                    <dd class="mt-1.5 text-sm">{{ $vacante->franja_horaria }}</dd>
-                </div>
-            @endif
-            @if ($vacante->fecha_limite)
-                <div class="tarjeta-escena vidrio rounded-[1.25rem] p-5">
-                    <dt class="text-[.65rem] font-semibold uppercase tracking-wider text-acento">Se cierra el</dt>
-                    <dd class="mt-1.5 text-sm">{{ $vacante->fecha_limite->translatedFormat('d \d\e F \d\e Y') }}</dd>
-                </div>
-            @endif
-        </dl>
-
-        {{-- Formulario de postulación --}}
-        <section id="postularme" class="tarjeta mt-10 p-7 sm:p-9" aria-labelledby="titulo-postularme">
-            <h2 id="titulo-postularme" class="font-display text-2xl font-bold">Postularme a esta vacante</h2>
-            <p class="mt-2 text-sm text-tenue">
-                Tus datos le llegan directamente al establecimiento. No necesitas cuenta.
-            </p>
-
-            @if (session('exito'))
-                <x-publico.alerta class="mt-6">{{ session('exito') }}</x-publico.alerta>
-            @endif
-
-            <form method="POST" action="{{ route('empleo.postular', $vacante) }}" class="mt-7 space-y-5">
-                @csrf
-
-                <div class="grid gap-5 sm:grid-cols-2">
-                    <x-publico.campo nombre="nombre" etiqueta="Nombre completo" requerido />
-                    <x-publico.campo nombre="correo" etiqueta="Correo electrónico" tipo="email" requerido />
-                    <x-publico.campo nombre="telefono" etiqueta="Teléfono o WhatsApp" tipo="tel" />
+            <header class="mt-2">
+                <div class="empleo-editorial-oferta__meta">
+                    <span class="empleo-editorial-chip empleo-editorial-chip--tipo">{{ $vacante->tipo->getLabel() }}</span>
+                    <span class="empleo-editorial-chip empleo-editorial-chip--area">{{ $vacante->categoria_cargo->getLabel() }}</span>
+                    <span class="empleo-editorial-chip empleo-editorial-chip--estado">Abierta</span>
                 </div>
 
-                <x-publico.campo nombre="experiencia" etiqueta="Por qué encajas en el puesto" tipo="textarea" filas="4"
-                                 placeholder="Cuéntale al establecimiento dónde has trabajado y qué sabes hacer."
-                                 ayuda="Con dos o tres frases es suficiente." />
+                <h1 class="empleo-editorial-ficha__cargo">{{ $vacante->cargo }}</h1>
 
-                <x-publico.habeas-data />
-
-                <x-publico.boton class="w-full sm:w-auto">
-                    Enviar mi postulación
-                </x-publico.boton>
-            </form>
-
-            @if ($enlace = enlaceWhatsapp($vacante->whatsapp_contacto, "Hola, vi la vacante de {$vacante->cargo} en la bolsa de empleo de ASOBARES Quindío."))
-                <p class="mt-6 text-xs text-apagado">
-                    ¿Prefieres escribir?
-                    {{-- `whitespace-nowrap`: el espacio duro no frena el salto delante del SVG, y
-                         sin él la flecha queda huérfana a 368-376 px. --}}
-                    <a href="{{ $enlace }}" target="_blank" rel="noopener nofollow"
-                       class="enlace-accion whitespace-nowrap text-acento hover:text-acento-fuerte">Contactar por WhatsApp&nbsp;<x-publico.flecha direccion="externa" /></a>
+                <p class="empleo-editorial-oferta__empresa">
+                    @if ($vacante->asociado->estaPublicado())
+                        <a href="{{ route('directorio.show', $vacante->asociado) }}" class="enlace-accion">{{ $vacante->asociado->nombre }}</a>
+                    @else
+                        {{ $vacante->asociado->nombre }}
+                    @endif
                 </p>
-            @endif
-        </section>
 
-        @if ($similares->isNotEmpty())
-            <section class="mt-14" aria-labelledby="similares">
-                <h2 id="similares" class="font-display text-xl font-bold">Otras vacantes del área</h2>
-                <ul class="mt-5 space-y-3">
-                    @foreach ($similares as $similar)
-                        <li class="tarjeta tarjeta-hover tarjeta-pulsable p-5">
-                            <a href="{{ route('empleo.show', $similar) }}" class="block">
-                                <p class="font-display text-base font-semibold">{{ $similar->cargo }}</p>
-                                <p class="mt-1 text-xs text-apagado">
-                                    {{ $similar->asociado->nombre }} · {{ $similar->asociado->municipio->nombre }}
-                                </p>
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
+                <p class="empleo-editorial-oferta__datos">
+                    {{ $vacante->asociado->municipio->nombre }}
+                    · publicada {{ $vacante->created_at->diffForHumans() }}
+                </p>
+            </header>
+
+            @if ($vacante->descripcion)
+                <div class="empleo-editorial-ficha__descripcion">
+                    <p>{{ $vacante->descripcion }}</p>
+                </div>
+            @endif
+
+            <dl class="empleo-editorial-condiciones">
+                <div>
+                    <dt>Contrato</dt>
+                    <dd>{{ $vacante->tipo->getLabel() }}</dd>
+                </div>
+                <div>
+                    <dt>Área</dt>
+                    <dd>{{ $vacante->categoria_cargo->getLabel() }}</dd>
+                </div>
+                @if ($vacante->franja_horaria)
+                    <div>
+                        <dt>Horario</dt>
+                        <dd>{{ $vacante->franja_horaria }}</dd>
+                    </div>
+                @endif
+                @if ($vacante->fecha_limite)
+                    <div>
+                        <dt>Se cierra el</dt>
+                        <dd>{{ $vacante->fecha_limite->translatedFormat('d \d\e F \d\e Y') }}</dd>
+                    </div>
+                @endif
+            </dl>
+
+            <section id="postularme" class="empleo-editorial-bloque" aria-labelledby="titulo-postularme">
+                <h2 id="titulo-postularme">Postularme a esta vacante</h2>
+                <p>
+                    Tus datos le llegan directamente al establecimiento. No necesitas cuenta.
+                </p>
+
+                @if (session('exito'))
+                    <x-publico.alerta class="mt-6">{{ session('exito') }}</x-publico.alerta>
+                @endif
+
+                <form method="POST" action="{{ route('empleo.postular', $vacante) }}" class="mt-7 space-y-5">
+                    @csrf
+
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <x-publico.campo nombre="nombre" etiqueta="Nombre completo" requerido />
+                        <x-publico.campo nombre="correo" etiqueta="Correo electrónico" tipo="email" requerido />
+                        <x-publico.campo nombre="telefono" etiqueta="Teléfono o WhatsApp" tipo="tel" />
+                    </div>
+
+                    <x-publico.campo nombre="experiencia" etiqueta="Por qué encajas en el puesto" tipo="textarea" filas="4"
+                                     placeholder="Cuéntale al establecimiento dónde has trabajado y qué sabes hacer."
+                                     ayuda="Con dos o tres frases es suficiente." />
+
+                    <x-publico.habeas-data />
+
+                    <x-publico.boton class="w-full sm:w-auto">
+                        Enviar mi postulación
+                    </x-publico.boton>
+                </form>
+
+                @if ($enlace = enlaceWhatsapp($vacante->whatsapp_contacto, "Hola, vi la vacante de {$vacante->cargo} en la bolsa de empleo de ASOBARES Quindío."))
+                    <p class="empleo-editorial-whatsapp">
+                        ¿Prefieres escribir?
+                        <a href="{{ $enlace }}" target="_blank" rel="noopener nofollow"
+                           class="enlace-accion">Contactar por WhatsApp&nbsp;<x-publico.flecha direccion="externa" /></a>
+                    </p>
+                @endif
             </section>
-        @endif
+
+            @if ($similares->isNotEmpty())
+                <section class="empleo-editorial-similares" aria-labelledby="similares">
+                    <h2 id="similares">Otras vacantes del área</h2>
+                    <ul class="empleo-editorial-cartelera">
+                        @foreach ($similares as $similar)
+                            <x-publico.vacante-ficha :vacante="$similar" compacta />
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
+        </div>
     </div>
 </x-layouts.publico>

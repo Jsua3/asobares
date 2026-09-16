@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Eventos\Tables;
 
 use App\Enums\EstadoPublicacion;
+use App\Enums\OrigenEvento;
 use App\Enums\TipoEvento;
 use App\Filament\Support\AccionesDeAprobacion;
 use App\Models\Evento;
@@ -36,6 +37,14 @@ class EventosTable
                     ->label('Tipo')
                     ->badge()
                     ->sortable(),
+                TextColumn::make('origen')
+                    ->label('Origen')
+                    ->badge()
+                    ->sortable(),
+                TextColumn::make('aliado.nombre')
+                    ->label('Aliado')
+                    ->placeholder('ASOBARES')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('fecha_inicio')
                     ->label('Fecha')
                     ->dateTime('d/m/Y h:i a')
@@ -68,6 +77,9 @@ class EventosTable
                 SelectFilter::make('tipo')
                     ->label('Tipo')
                     ->options(TipoEvento::class),
+                SelectFilter::make('origen')
+                    ->label('Origen')
+                    ->options(OrigenEvento::class),
             ])
             ->recordActions([
                 ...AccionesDeAprobacion::paraFila(),

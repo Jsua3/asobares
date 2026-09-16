@@ -376,6 +376,21 @@ class BolsaDeEmpleoTest extends TestCase
             ->assertDontSee('Todas las áreas');
     }
 
+    /**
+     * Aunque no haya vacantes abiertas, la persona debe poder dejar su perfil.
+     * Ese selector no es un filtro del muro: es el catálogo completo de áreas
+     * laborales del sector.
+     */
+    public function test_sin_vacantes_el_perfil_sigue_ofreciendo_todas_las_areas(): void
+    {
+        $this->get(route('empleo.index'))
+            ->assertOk()
+            ->assertSee('Barra')
+            ->assertSee('Cocina')
+            ->assertSee('Servicio y meseros')
+            ->assertSee('Administración');
+    }
+
     /** Con vacantes, el filtro está donde siempre. */
     public function test_con_vacantes_la_caja_de_filtros_sigue_estando(): void
     {

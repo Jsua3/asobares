@@ -24,7 +24,7 @@ class EventoController
         $datos = $request->validate(['cuando' => ['nullable', 'in:proximos,pasados']]);
         $cuando = $datos['cuando'] ?? 'proximos';
 
-        $consulta = Evento::publicado();
+        $consulta = Evento::publicado()->with('aliado');
         $cuando === 'pasados' ? $consulta->pasado() : $consulta->proximo();
 
         return view('publico.eventos.index', [
@@ -149,7 +149,7 @@ class EventoController
         abort_unless($evento->estaPublicado(), 404);
 
         return view('publico.eventos.show', [
-            'evento' => $evento->loadCount('inscripciones'),
+            'evento' => $evento->loadCount('inscripciones')->loadMissing('aliado'),
         ]);
     }
 

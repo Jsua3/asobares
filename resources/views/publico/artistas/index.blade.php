@@ -1,14 +1,25 @@
 <x-layouts.publico :titulo="ajuste('seo_artistas_titulo', ajuste('artistas_titulo').' — ASOBARES Quindío')"
                    :descripcion="ajuste('seo_artistas_descripcion', 'DJs, bandas y solistas del Quindío: género musical, contacto directo y video para escucharlos.')">
 
-    {{-- Hueco de foto de cabecera: marcador hoy, `artistas_foto` cuando llegue. --}}
-    <x-publico.hero :titulo="ajuste('artistas_titulo')" :subtitulo="ajuste('artistas_intro')" compacto atmosfera>
-        <x-slot:medio>
-            <x-publico.hueco-foto :foto="ajuste('artistas_foto', null)" />
-        </x-slot:medio>
-    </x-publico.hero>
+    @push('cabeza')
+        @vite(['resources/css/artistas-editorial.css'])
+    @endpush
 
-    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="artistas-editorial">
+        <section class="artistas-editorial-hero" aria-labelledby="artistas-titulo">
+            <div class="artistas-editorial-hero__plano"></div>
+            <div class="artistas-editorial-hero__foto" aria-hidden="true">
+                <img src="{{ asset('img/artistas/hero-artistas.png') }}" alt="" width="1800" height="900" decoding="async">
+            </div>
+            <div class="artistas-editorial-hero__velo"></div>
+            <div class="artistas-editorial-hero__cuerpo">
+                <span class="artistas-editorial-eyebrow">Talento para establecimientos</span>
+                <h1 id="artistas-titulo">{{ ajuste('artistas_titulo') }}</h1>
+                <p>{{ ajuste('artistas_intro') }}</p>
+            </div>
+        </section>
+
+    <div class="artistas-editorial-cuerpo">
 
         {{-- Filtros. Sin fichas publicadas no hay nada que filtrar y la caja
              sobra: prometía cortar algo cuando no hay nada que cortar. La
@@ -16,7 +27,7 @@
              el formulario siga en pie cuando un filtro deja la lista vacía, que
              es cuando hace falta para volver atrás. --}}
         @if (filled($tipos) || $generos->isNotEmpty())
-        <form method="GET" action="{{ route('artistas.index') }}" class="revelar tarjeta grid gap-4 p-5 sm:grid-cols-3" data-revelar>
+        <form method="GET" action="{{ route('artistas.index') }}" class="artistas-editorial-filtros revelar grid gap-4 rounded-[1.5rem] p-5 sm:grid-cols-3" data-revelar>
             {{-- Los tipos los arma el controlador con los que de verdad tienen
                  ficha publicada, igual que los géneros del desplegable de al
                  lado: recorrer el enum entero desde aquí ofrecería tipos que no
@@ -40,7 +51,7 @@
         @endif
 
         @if ($artistas->isEmpty())
-            <div class="revelar tarjeta mt-8 p-12 text-center" data-revelar>
+            <div class="artistas-editorial-vacio artistas-editorial-panel revelar mt-8" data-revelar>
                 {{-- Los dos casos son distintos y decían lo mismo. Sin ninguna
                      ficha publicada —el estado de producción hoy— el aviso
                      hablaba de «ese filtro» sin que hubiera filtro, y mandaba a
@@ -59,7 +70,7 @@
             <div class="revelar mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-revelar>
                 @foreach ($artistas as $artista)
                     <article @class([
-                        'tarjeta tarjeta-hover tarjeta-pulsable group flex flex-col overflow-hidden',
+                        'artistas-editorial-card group flex flex-col',
                         'sm:col-span-2 sm:flex-row lg:col-span-2' => $loop->first,
                     ])>
                         <a href="{{ route('artistas.show', $artista) }}" @class([
@@ -67,14 +78,23 @@
                             'sm:flex-row' => $loop->first,
                         ])>
                             @if ($artista->foto)
-                                <img src="{{ Storage::disk('public')->url($artista->foto) }}" alt=""
-                                     loading="lazy" decoding="async" width="400" height="400"
-                                     style="view-transition-name: portada-artista-{{ $artista->id }}"
-                                     @class([
-                                         'imagen-viva w-full object-cover',
-                                         'aspect-square' => ! $loop->first,
-                                         'aspect-[4/3] sm:aspect-auto sm:w-[42%] sm:shrink-0' => $loop->first,
-                                     ])>
+                                <div @class([
+                                    'artistas-editorial-card__foto',
+                                    'aspect-square' => ! $loop->first,
+                                    'aspect-[4/3] sm:aspect-auto sm:w-[42%] sm:shrink-0' => $loop->first,
+                                ])>
+                                    <img src="{{ Storage::disk('public')->url($artista->foto) }}" alt=""
+                                         loading="lazy" decoding="async" width="400" height="400"
+                                         style="view-transition-name: portada-artista-{{ $artista->id }}">
+                                </div>
+                            @else
+                                <div @class([
+                                    'artistas-editorial-card__foto',
+                                    'aspect-square' => ! $loop->first,
+                                    'aspect-[4/3] sm:aspect-auto sm:w-[42%] sm:shrink-0' => $loop->first,
+                                ])>
+                                    <x-publico.hueco-foto />
+                                </div>
                             @endif
 
                             <div @class([
@@ -82,7 +102,7 @@
                                 'sm:p-7' => $loop->first,
                             ])>
                                 <div class="flex flex-wrap items-center gap-2 text-xs">
-                                    <span class="rounded-full bg-marca-500/15 px-2.5 py-1 font-medium text-acento-fuerte">
+                                    <span class="artistas-editorial-chip">
                                         {{ $artista->tipo->getLabel() }}
                                     </span>
                                     @if ($artista->tieneVideo())
@@ -119,7 +139,7 @@
             <div class="mt-10">{{ $artistas->links() }}</div>
         @endif
 
-        <section class="revelar tarjeta-escena vidrio mt-16 rounded-[1.75rem] p-8 text-center" data-revelar>
+        <section class="artistas-editorial-cta revelar mt-16 rounded-[1.75rem] p-8 text-center" data-revelar>
             <h2 class="font-display text-xl font-bold">{{ ajuste('artistas_bloque_titulo', '¿Eres DJ, banda o solista?') }}</h2>
             <p class="mx-auto mt-2 max-w-xl text-sm text-tenue">
                 {{ ajuste('artistas_bloque_texto', 'Inscríbete gratis en la bolsa de artistas del gremio y aparece cuando un establecimiento busque música para su noche.') }}
@@ -128,5 +148,6 @@
                 {{ ajuste('artistas_bloque_cta', 'Inscribirme en la bolsa') }}
             </x-publico.boton>
         </section>
+    </div>
     </div>
 </x-layouts.publico>

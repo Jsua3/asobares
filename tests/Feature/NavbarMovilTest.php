@@ -137,11 +137,10 @@ class NavbarMovilTest extends TestCase
     }
 
     /**
-     * El 88 / 85 % es del móvil. La base de `:root` sigue en 72 y `.dark` en
-     * 62 para la píldora de escritorio de la Parte I, y solo el bloque bajo
-     * 64rem reasigna el velo: la revisión del 6 sep encontró la base subida
-     * al 88 sin decisión ni guardia, y el escritorio claro había cambiado de
-     * material sin que ninguna prueba lo viera.
+     * El 88 / 85 % es del móvil. La píldora de escritorio va al 84 / 78 (15 sep
+     * 2026: el velo 72 / 62 dejaba leer el manifiesto y el boletín a través
+     * de los módulos compactos). Sigue por debajo del móvil; solo el bloque
+     * bajo 64rem reasigna al 88 / 85.
      */
     public function test_el_velo_de_escritorio_no_hereda_el_del_movil(): void
     {
@@ -149,8 +148,8 @@ class NavbarMovilTest extends TestCase
         $patron = '/--asb-cromo-velo: color-mix\(in oklab, var\(--asb-fondo\) (\d+)%, transparent\);/';
 
         foreach ([
-            'base' => [$this->bloque($tokens, ':root {'), 72],
-            'oscuro' => [$this->bloque($tokens, '.dark {'), 62],
+            'base' => [$this->bloque($tokens, ':root {'), 84],
+            'oscuro' => [$this->bloque($tokens, '.dark {'), 78],
         ] as $paleta => [$bloque, $esperado]) {
             $this->assertSame(1, preg_match($patron, $bloque, $porcentaje), "la paleta {$paleta} de escritorio no declara --asb-cromo-velo");
             $this->assertSame($esperado, (int) $porcentaje[1], "el velo de escritorio {$paleta} cambió sin decisión: el 88 / 85 vive solo bajo 64rem");

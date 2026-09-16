@@ -13,7 +13,7 @@
             'endDate' => $evento->fecha_fin?->toIso8601String(),
             'eventStatus' => 'https://schema.org/EventScheduled',
             'location' => $evento->lugar ? ['@type' => 'Place', 'name' => $evento->lugar] : null,
-            'organizer' => ['@type' => 'Organization', 'name' => ajuste('sitio_nombre'), 'url' => route('inicio')],
+            'organizer' => $evento->organizadorJsonLd(),
             'offers' => [
                 '@type' => 'Offer',
                 'price' => (string) $evento->precio,
@@ -27,11 +27,17 @@
         <x-publico.json-ld :datos="$jsonLd" />
     @endpush
 
-    <article class="revelar mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8" data-revelar>
-        <a href="{{ route('eventos.index') }}" class="enlace-accion relative inline-block text-sm text-apagado after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento"><x-publico.flecha direccion="izquierda" />&nbsp;Todos los eventos</a>
+    @push('cabeza')
+        @vite(['resources/css/eventos-editorial.css'])
+    @endpush
+
+    <div class="eventos-editorial">
+    <article class="eventos-editorial-cuerpo revelar mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8" data-revelar>
+        <a href="{{ route('eventos.index') }}" class="eventos-editorial-retorno enlace-accion relative inline-block text-sm text-apagado after:absolute after:inset-x-0 after:-inset-y-3 after:content-[''] hover:text-acento"><x-publico.flecha direccion="izquierda" />&nbsp;Todos los eventos</a>
 
         <div class="mt-5 flex flex-wrap items-center gap-2 text-xs">
             <span class="rounded-full bg-marca-500/15 px-3 py-1 font-medium text-acento-fuerte">{{ $evento->tipo->getLabel() }}</span>
+            <span class="rounded-full border border-linea px-3 py-1 text-tenue">{{ $evento->origenPublico()->getLabel() }}</span>
             <span class="rounded-full border border-linea px-3 py-1 text-tenue">
                 {{ $evento->esGratuito() ? 'Entrada libre' : pesos($evento->precio) }}
             </span>
@@ -53,6 +59,11 @@
                      style="view-transition-name: portada-evento-{{ $evento->id }}"
                      class="imagen-viva imagen-inclinable aspect-video w-full object-cover">
             </div>
+        @else
+            <div class="mt-7 overflow-hidden rounded-[1.75rem]"
+                 style="view-transition-name: portada-evento-{{ $evento->id }}">
+                <x-publico.hueco-foto class="aspect-video" />
+            </div>
         @endif
 
         <div class="mt-10 grid gap-10 lg:grid-cols-3">
@@ -65,11 +76,14 @@
             </div>
 
             <aside class="space-y-5">
-                <div class="vidrio rounded-[1.5rem] p-6">
+                <div class="eventos-editorial-cuando">
                     <dl class="space-y-3.5 text-sm">
                         <div>
                             <dt class="text-xs uppercase tracking-wide text-apagado">Cuándo</dt>
-                            <dd class="mt-0.5 text-tinta">
+                            <dd class="mt-1 text-tinta">
+                                <span class="eventos-editorial-cuando__dia">{{ $evento->fecha_inicio->format('d') }}</span>
+                                <span class="ml-2 text-sm font-semibold uppercase tracking-wide">{{ $evento->fecha_inicio->translatedFormat('M') }}</span>
+                                <br>
                                 {{ $evento->fecha_inicio->translatedFormat('l d \d\e F, Y') }}<br>
                                 <span class="text-tenue">{{ $evento->fecha_inicio->format('g:i a') }}</span>
                                 @if ($evento->fecha_fin)
@@ -83,6 +97,10 @@
                                 <dd class="mt-0.5 text-tinta">{{ $evento->lugar }}</dd>
                             </div>
                         @endif
+                        <div>
+                            <dt class="text-xs uppercase tracking-wide text-apagado">Organiza</dt>
+                            <dd class="mt-0.5 text-tinta">{{ $evento->organizadorVisible() }}</dd>
+                        </div>
                         @if ($evento->cupos)
                             <div>
                                 <dt class="text-xs uppercase tracking-wide text-apagado">Cupos</dt>
@@ -152,4 +170,5 @@
             </section>
         @endif
     </article>
+    </div>
 </x-layouts.publico>

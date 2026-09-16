@@ -25,246 +25,224 @@
 <x-layouts.publico titulo="Quiénes somos — ASOBARES Capítulo Quindío"
                    descripcion="El gremio que representa, fortalece y dinamiza el sector nocturno, gastronómico y de entretenimiento del Quindío.">
 
-    <x-publico.hero :titulo="ajuste('manifiesto_apertura')" :subtitulo="ajuste('quienes_mision')" atmosfera>
-        <x-slot:encima>
-            <p class="antetitulo mb-4 text-acento">{{ ajuste('sitio_eslogan') }}</p>
-        </x-slot:encima>
-    </x-publico.hero>
+    @push('cabeza')
+        @vite(['resources/css/gremio-editorial.css'])
+    @endpush
 
-    <div class="mx-auto max-w-4xl space-y-16 px-4 py-16 sm:px-6 lg:px-8">
+    <div class="gremio-editorial gremio-editorial--manifiesto">
+        <div class="gremio-editorial-cuerpo">
 
-        <section class="revelar" data-revelar aria-labelledby="historia">
-            <h2 id="historia" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_historia') }}</h2>
-            <p class="mt-4 text-base leading-relaxed text-suave text-pretty">{{ ajuste('quienes_historia') }}</p>
-        </section>
+            <header class="gremio-editorial-banda gremio-editorial-banda--apertura revelar" data-revelar>
+                <div class="gremio-editorial-banda__interior gremio-editorial-apertura">
+                    <x-publico.folio-gremio numero="01" />
+                    <p class="gremio-editorial-apertura__lema">{{ ajuste('sitio_eslogan') }}</p>
+                    <h1>{{ ajuste('manifiesto_apertura') }}</h1>
+                    <p class="gremio-editorial-apertura__cuerpo">{{ ajuste('quienes_mision') }}</p>
+                </div>
+            </header>
 
-        <section class="revelar" data-revelar aria-labelledby="hacemos">
-            <h2 id="hacemos" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_que_hacemos') }}</h2>
-            <p class="mt-4 text-base leading-relaxed text-suave text-pretty">{{ ajuste('quienes_que_hacemos') }}</p>
-
-            <blockquote class="vidrio trama-puntos mt-7 rounded-[1.5rem] p-7">
-                <p class="font-display text-lg font-bold leading-snug text-balance sm:text-xl">
-                    «{{ ajuste('quienes_vision') }}»
-                </p>
-            </blockquote>
-        </section>
-
-        {{-- Visión a 10 años --}}
-        <section class="revelar" data-revelar aria-labelledby="vision">
-            <p class="antetitulo text-acento">{{ ajuste('quienes_rotulo_vision') }}</p>
-            <h2 id="vision" class="mt-3 font-display text-2xl font-bold leading-tight text-balance sm:text-3xl">
-                {{ ajuste('vision_titulo') }}
-            </h2>
-            <p class="mt-3 font-display text-sm font-medium text-acento">{{ ajuste('vision_nota') }}</p>
-
-            <div class="mt-6 space-y-3 border-l-2 border-marca-500 pl-5">
-                @foreach (array_filter(explode("\n", (string) ajuste('vision_detalle'))) as $detalle)
-                    <p class="text-base leading-relaxed text-suave text-pretty">{{ trim($detalle) }}</p>
-                @endforeach
-            </div>
-        </section>
-
-        {{-- Lo que frena al sector --}}
-        @if ($barreras->isNotEmpty())
-            <section class="revelar" data-revelar aria-labelledby="barreras">
-                <h2 id="barreras" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_barreras') }}</h2>
-                <p class="mt-2 text-sm text-tenue">
-                    {{ ajuste('quienes_barreras_pie') }}
-                </p>
-
-                <div class="mt-6 grid gap-5 sm:grid-cols-2">
-                    @foreach ($barreras as $indice => $barrera)
-                        <article class="vidrio rounded-[1.5rem] p-6">
-                            <span class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-marca-500 font-display text-sm font-bold">
-                                {{ str_pad((string) ($indice + 1), 2, '0', STR_PAD_LEFT) }}
-                            </span>
-                            <h3 class="mt-4 font-display text-lg font-bold leading-snug">{{ $barrera['titular'] }}</h3>
-                            <p class="mt-3 text-sm leading-relaxed text-tenue text-pretty">{{ $barrera['explicacion'] }}</p>
-                        </article>
-                    @endforeach
+            <section class="gremio-editorial-banda gremio-editorial-banda--elevada revelar" data-revelar aria-labelledby="historia">
+                <div class="gremio-editorial-banda__interior gremio-editorial-seccion">
+                    <div class="gremio-editorial-seccion__cabeza">
+                        <span class="gremio-editorial-seccion__n" aria-hidden="true">01</span>
+                        <h2 id="historia">{{ ajuste('quienes_titulo_historia') }}</h2>
+                    </div>
+                    <p class="gremio-editorial-seccion__prosa">{{ ajuste('quienes_historia') }}</p>
                 </div>
             </section>
-        @endif
 
-        {{-- Portafolio de iniciativas --}}
-        @if ($iniciativas->isNotEmpty())
-            <section class="revelar" data-revelar aria-labelledby="iniciativas">
-                <h2 id="iniciativas" class="font-display text-2xl font-bold">{{ ajuste('iniciativas_titulo') }}</h2>
-                <p class="mt-2 text-sm text-tenue">{{ ajuste('iniciativas_intro') }}</p>
+            <section class="gremio-editorial-banda revelar" data-revelar aria-labelledby="hacemos">
+                <div class="gremio-editorial-banda__interior gremio-editorial-seccion">
+                    <div class="gremio-editorial-seccion__cabeza">
+                        <span class="gremio-editorial-seccion__n" aria-hidden="true">02</span>
+                        <h2 id="hacemos">{{ ajuste('quienes_titulo_que_hacemos') }}</h2>
+                    </div>
+                    <p class="gremio-editorial-seccion__prosa">{{ ajuste('quienes_que_hacemos') }}</p>
+                    <blockquote class="gremio-editorial-cita">
+                        <p>«{{ ajuste('quienes_vision') }}»</p>
+                    </blockquote>
+                </div>
+            </section>
 
-                <ol class="mt-7 space-y-4">
-                    @foreach ($iniciativas as $iniciativa)
-                        <li @class([
-                            'tarjeta tarjeta-hover p-6',
-                            'vidrio p-7' => $loop->first,
-                        ])>
-                            <div class="flex flex-wrap items-start justify-between gap-4">
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex flex-wrap items-center gap-2">
-                                        <span @class([
-                                            'rounded-full px-3 py-1 text-[.65rem] font-semibold uppercase tracking-wider',
-                                            'bg-emerald-500/15 text-exito' => $iniciativa->estado_iniciativa === \App\Enums\EstadoIniciativa::EnEjecucion,
-                                            'bg-amber-500/15 text-aviso' => $iniciativa->estado_iniciativa === \App\Enums\EstadoIniciativa::Escalando,
-                                            'border border-linea-fuerte text-tenue' => $iniciativa->estado_iniciativa === \App\Enums\EstadoIniciativa::Formulacion,
-                                        ])>{{ $iniciativa->estado_iniciativa->getLabel() }}</span>
+            <section class="gremio-editorial-banda gremio-editorial-banda--elevada revelar" data-revelar aria-labelledby="vision">
+                <div class="gremio-editorial-banda__interior gremio-editorial-seccion">
+                    <p class="gremio-editorial-apertura__lema">{{ ajuste('quienes_rotulo_vision') }}</p>
+                    <h2 id="vision">{{ ajuste('vision_titulo') }}</h2>
+                    <p class="gremio-editorial-vision__nota">{{ ajuste('vision_nota') }}</p>
+                    <div class="gremio-editorial-vision__detalle">
+                        @foreach (array_filter(explode("\n", (string) ajuste('vision_detalle'))) as $detalle)
+                            <p>{{ trim($detalle) }}</p>
+                        @endforeach
+                    </div>
+                </div>
+            </section>
 
+            @if ($barreras->isNotEmpty())
+                <section class="gremio-editorial-banda gremio-editorial-banda--profunda revelar" data-revelar aria-labelledby="barreras">
+                    <div class="gremio-editorial-banda__interior gremio-editorial-seccion">
+                        <div class="gremio-editorial-seccion__cabeza">
+                            <span class="gremio-editorial-seccion__n" aria-hidden="true">03</span>
+                            <h2 id="barreras">{{ ajuste('quienes_titulo_barreras') }}</h2>
+                        </div>
+                        <p class="gremio-editorial-pie">{{ ajuste('quienes_barreras_pie') }}</p>
+                        <ol class="gremio-editorial-abiertas">
+                            @foreach ($barreras as $indice => $barrera)
+                                <li>
+                                    <span class="gremio-editorial-abiertas__n">{{ str_pad((string) ($indice + 1), 2, '0', STR_PAD_LEFT) }}</span>
+                                    <h3>{{ $barrera['titular'] }}</h3>
+                                    <p>{{ $barrera['explicacion'] }}</p>
+                                </li>
+                            @endforeach
+                        </ol>
+                    </div>
+                </section>
+            @endif
+
+            @if ($iniciativas->isNotEmpty())
+                <section class="gremio-editorial-banda revelar" data-revelar aria-labelledby="iniciativas">
+                    <div class="gremio-editorial-banda__interior gremio-editorial-seccion">
+                        <h2 id="iniciativas">{{ ajuste('iniciativas_titulo') }}</h2>
+                        <p class="gremio-editorial-pie">{{ ajuste('iniciativas_intro') }}</p>
+                        <ol class="gremio-editorial-listado">
+                            @foreach ($iniciativas as $iniciativa)
+                                <li>
+                                    <p class="gremio-editorial-meta">
+                                        <strong>{{ $iniciativa->estado_iniciativa->getLabel() }}</strong>
                                         @if ($iniciativa->linea)
-                                            <span class="text-xs text-apagado">{{ $iniciativa->linea }}</span>
+                                            <span>{{ $iniciativa->linea }}</span>
                                         @endif
                                         @if ($iniciativa->lugar)
-                                            <span class="text-xs text-apagado">· {{ $iniciativa->lugar }}</span>
+                                            <span>{{ $iniciativa->lugar }}</span>
                                         @endif
-                                    </div>
-
-                                    <h3 class="mt-3 font-display text-lg font-bold">{{ $iniciativa->nombre }}</h3>
-                                    <p class="mt-1.5 text-sm font-medium text-acento">{{ $iniciativa->resumen }}</p>
-
+                                    </p>
+                                    <h3>{{ $iniciativa->nombre }}</h3>
+                                    <p>{{ $iniciativa->resumen }}</p>
                                     @if ($iniciativa->descripcion)
-                                        <p class="mt-3 text-sm leading-relaxed text-tenue text-pretty">
-                                            {{ $iniciativa->descripcion }}
-                                        </p>
+                                        <p>{{ $iniciativa->descripcion }}</p>
                                     @endif
-                                </div>
-                            </div>
-                        </li>
-                    @endforeach
-                </ol>
+                                </li>
+                            @endforeach
+                        </ol>
+                        <p class="gremio-editorial-pie">{{ ajuste('quienes_iniciativas_pie') }}</p>
+                    </div>
+                </section>
+            @endif
 
-                <p class="mt-5 text-xs text-apagado">
-                    {{ ajuste('quienes_iniciativas_pie') }}
-                </p>
-            </section>
-        @endif
-
-        {{-- Las tres líneas del plan de acción --}}
-        <section class="revelar" data-revelar aria-labelledby="lineas">
-            <h2 id="lineas" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_lineas') }}</h2>
-            <p class="mt-2 text-sm text-tenue">
-                {{ ajuste('quienes_lineas_intro') }}
-            </p>
-
-            <div class="mt-7 space-y-5">
-                @foreach ($lineas as $indice => $linea)
-                    <article class="tarjeta-escena vidrio rounded-[1.5rem] p-7">
-                        <div class="flex items-start gap-4">
-                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-marca-500/15 font-display text-sm font-bold text-acento">
-                                {{ str_pad((string) ($indice + 1), 2, '0', STR_PAD_LEFT) }}
-                            </span>
-                            <div class="min-w-0">
-                                <h3 class="font-display text-xl font-bold">{{ $linea['nombre'] }}</h3>
-                                <p class="mt-2.5 text-sm leading-relaxed text-tenue text-pretty">
-                                    {{ $linea['descripcion'] }}
-                                </p>
-
+            <section class="gremio-editorial-banda gremio-editorial-banda--profunda revelar" data-revelar aria-labelledby="lineas">
+                <div class="gremio-editorial-banda__interior gremio-editorial-seccion">
+                    <div class="gremio-editorial-seccion__cabeza">
+                        <span class="gremio-editorial-seccion__n" aria-hidden="true">04</span>
+                        <h2 id="lineas">{{ ajuste('quienes_titulo_lineas') }}</h2>
+                    </div>
+                    <p class="gremio-editorial-pie">{{ ajuste('quienes_lineas_intro') }}</p>
+                    <ol class="gremio-editorial-secuencia">
+                        @foreach ($lineas as $indice => $linea)
+                            <li>
+                                <span class="gremio-editorial-abiertas__n">{{ str_pad((string) ($indice + 1), 2, '0', STR_PAD_LEFT) }}</span>
+                                <h3>{{ $linea['nombre'] }}</h3>
+                                <p>{{ $linea['descripcion'] }}</p>
                                 @if ($linea['programas'])
-                                    <p class="antetitulo mt-5 text-apagado">{{ ajuste('quienes_rotulo_programas') }}</p>
-                                    <ul class="mt-3 flex flex-wrap gap-2">
+                                    <p class="gremio-editorial-apertura__lema">{{ ajuste('quienes_rotulo_programas') }}</p>
+                                    <ul class="gremio-editorial-programas">
                                         @foreach ($linea['programas'] as $programa)
-                                            <li class="rounded-lg border border-linea px-3 py-1.5 text-xs text-tinta">
-                                                {{ $programa }}
-                                            </li>
+                                            <li>{{ $programa }}</li>
                                         @endforeach
                                     </ul>
                                 @endif
-                            </div>
-                        </div>
-                    </article>
-                @endforeach
-            </div>
-        </section>
-
-        <section class="revelar" data-revelar aria-labelledby="armenia">
-            <h2 id="armenia" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_armenia') }}</h2>
-            <p class="mt-4 text-base leading-relaxed text-suave text-pretty">
-                {{ ajuste('quienes_estrategia_armenia') }}
-            </p>
-        </section>
-
-        <section class="revelar" data-revelar aria-labelledby="direccion">
-            <h2 id="direccion" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_direccion') }}</h2>
-            <div class="mt-6 grid gap-5 sm:grid-cols-2">
-                <div class="vidrio rounded-[1.5rem] p-6">
-                    <p class="antetitulo text-apagado">{{ ajuste('quienes_cargo_presidente') }}</p>
-                    <p class="mt-2 font-display text-lg font-bold">{{ ajuste('quienes_presidente') }}</p>
+                            </li>
+                        @endforeach
+                    </ol>
                 </div>
-                <div class="vidrio rounded-[1.5rem] p-6">
-                    <p class="antetitulo text-apagado">{{ ajuste('quienes_cargo_directora') }}</p>
-                    <p class="mt-2 font-display text-lg font-bold">{{ ajuste('quienes_directora') }}</p>
-                </div>
-            </div>
-            <p class="mt-4 text-sm text-apagado">Capítulo fundado el {{ ajuste('quienes_fundacion') }} en Armenia.</p>
-        </section>
+            </section>
 
-        <section class="revelar" data-revelar aria-labelledby="beneficios">
-            <h2 id="beneficios" class="font-display text-2xl font-bold">{{ ajuste('quienes_titulo_beneficios') }}</h2>
-            <div class="mt-6 grid gap-4 sm:grid-cols-2">
-                @foreach ($beneficios as $beneficio)
-                    <div class="tarjeta tarjeta-hover p-5">
-                        <h3 class="font-display text-base font-bold">{{ $beneficio->titulo }}</h3>
-                        <x-publico.sello-de-alcance :beneficio="$beneficio" />
-                        <p class="mt-2 text-sm leading-relaxed text-tenue">{{ $beneficio->descripcion }}</p>
+            <section class="gremio-editorial-banda gremio-editorial-banda--elevada revelar" data-revelar aria-labelledby="armenia">
+                <div class="gremio-editorial-banda__interior gremio-editorial-seccion">
+                    <h2 id="armenia">{{ ajuste('quienes_titulo_armenia') }}</h2>
+                    <p class="gremio-editorial-seccion__prosa">{{ ajuste('quienes_estrategia_armenia') }}</p>
+                </div>
+            </section>
+
+            <section class="gremio-editorial-banda revelar" data-revelar aria-labelledby="direccion">
+                <div class="gremio-editorial-banda__interior gremio-editorial-seccion">
+                    <h2 id="direccion">{{ ajuste('quienes_titulo_direccion') }}</h2>
+                    <div class="gremio-editorial-firma">
+                        <p class="gremio-editorial-firma__cargo">{{ ajuste('quienes_cargo_presidente') }}</p>
+                        <p class="gremio-editorial-firma__nombre">{{ ajuste('quienes_presidente') }}</p>
+                        <p class="gremio-editorial-firma__cargo">{{ ajuste('quienes_cargo_directora') }}</p>
+                        <p class="gremio-editorial-firma__nombre">{{ ajuste('quienes_directora') }}</p>
                     </div>
-                @endforeach
-            </div>
-        </section>
+                    <p class="gremio-editorial-pie">Capítulo fundado el {{ ajuste('quienes_fundacion') }} en Armenia.</p>
+                </div>
+            </section>
 
-        {{-- Cierre del manifiesto --}}
-        <section class="revelar vidrio trama-puntos rounded-[1.75rem] p-9 text-center sm:p-12"
-                 data-revelar
-                 aria-labelledby="cierre">
-            <h2 id="cierre" class="font-display text-2xl font-bold leading-tight text-balance sm:text-3xl">
-                {{ ajuste('manifiesto_cierre_titulo') }}
-            </h2>
-            <p class="antetitulo mt-6 text-acento">{{ ajuste('manifiesto_cierre_firma') }}</p>
-        </section>
+            <section class="gremio-editorial-banda gremio-editorial-banda--elevada revelar" data-revelar aria-labelledby="beneficios">
+                <div class="gremio-editorial-banda__interior gremio-editorial-seccion">
+                    <div class="gremio-editorial-seccion__cabeza">
+                        <span class="gremio-editorial-seccion__n" aria-hidden="true">05</span>
+                        <h2 id="beneficios">{{ ajuste('quienes_titulo_beneficios') }}</h2>
+                    </div>
+                    <ul class="gremio-editorial-beneficios">
+                        @foreach ($beneficios as $beneficio)
+                            <li>
+                                <h3>{{ $beneficio->titulo }}</h3>
+                                <x-publico.sello-de-alcance :beneficio="$beneficio" />
+                                <p>{{ $beneficio->descripcion }}</p>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </section>
 
-        <section class="revelar tarjeta p-8 text-center" data-revelar>
-            <h2 class="font-display text-xl font-bold">{{ ajuste('quienes_titulo_nacional') }}</h2>
+            <section class="gremio-editorial-banda gremio-editorial-cierre revelar" data-revelar aria-labelledby="cierre">
+                <div class="gremio-editorial-banda__interior gremio-editorial-seccion">
+                    <h2 id="cierre">{{ ajuste('manifiesto_cierre_titulo') }}</h2>
+                    <p class="gremio-editorial-apertura__lema">{{ ajuste('manifiesto_cierre_firma') }}</p>
+                </div>
+            </section>
 
-            {{-- El tamaño de ese respaldo, de la lámina 3 de la presentación
-                 institucional. Los rótulos dicen «en el país» a propósito: son
-                 cifras de la Nacional, y sin esa palabra se leen como el tamaño
-                 del capítulo, que es otra cosa y todavía no tiene documento que
-                 la sostenga. Como en la franja de la portada, la cifra que la
-                 oficina deje en blanco no se pinta, y si borra las dos
-                 desaparece el bloque. --}}
-            @php
-                $respaldoNacional = array_values(array_filter([
-                    ['cifra' => trim((string) ajuste('nacional_capitulos')), 'rotulo' => ajuste('nacional_capitulos_rotulo')],
-                    ['cifra' => trim((string) ajuste('nacional_afiliados')), 'rotulo' => ajuste('nacional_afiliados_rotulo')],
-                ], fn (array $dato): bool => $dato['cifra'] !== ''));
-            @endphp
+            <section class="gremio-editorial-banda gremio-editorial-banda--elevada revelar" data-revelar aria-labelledby="nacional">
+                <div class="gremio-editorial-banda__interior gremio-editorial-seccion">
+                <h2 id="nacional">{{ ajuste('quienes_titulo_nacional') }}</h2>
 
-            @if ($respaldoNacional !== [])
-                {{-- A 375 px las dos cifras se apilan, y así se queda. Medido:
-                     dentro de la tarjeta solo hay 279 px de ancho útil
-                     (`p-8` a cada lado), y los dos pares miden 165 y 160 --lo
-                     ancho es el rótulo, no el número--. Caben hombro con hombro
-                     solo si se acota el rótulo a ~123 px, y entonces se parte en
-                     dos líneas y el bloque pasa de 121 a 154 px de alto: peor por
-                     los dos lados. Apilados, cada cifra se lee de un vistazo. --}}
-                <dl class="mt-6 flex flex-wrap items-start justify-center gap-x-12 gap-y-5">
-                    @foreach ($respaldoNacional as $dato)
-                        {{-- En orden inverso para que el número quede arriba sin
-                             romper el par <dt>/<dd>, que va al revés en el DOM. --}}
-                        <div class="flex flex-col-reverse">
-                            <dt class="antetitulo mt-1 text-tenue">{{ $dato['rotulo'] }}</dt>
-                            <dd class="font-display text-3xl font-bold leading-none text-acento">{{ $dato['cifra'] }}</dd>
-                        </div>
-                    @endforeach
-                </dl>
-            @endif
+                {{-- El tamaño de ese respaldo, de la lámina 3 de la presentación
+                     institucional. Los rótulos dicen «en el país» a propósito: son
+                     cifras de la Nacional, y sin esa palabra se leen como el tamaño
+                     del capítulo, que es otra cosa y todavía no tiene documento que
+                     la sostenga. Como en la franja de la portada, la cifra que la
+                     oficina deje en blanco no se pinta, y si borra las dos
+                     desaparece el bloque. --}}
+                @php
+                    $respaldoNacional = array_values(array_filter([
+                        ['cifra' => trim((string) ajuste('nacional_capitulos')), 'rotulo' => ajuste('nacional_capitulos_rotulo')],
+                        ['cifra' => trim((string) ajuste('nacional_afiliados')), 'rotulo' => ajuste('nacional_afiliados_rotulo')],
+                    ], fn (array $dato): bool => $dato['cifra'] !== ''));
+                @endphp
 
-            <p class="mx-auto mt-6 max-w-xl text-sm leading-relaxed text-tenue">
-                Aterrizamos en el Quindío los programas nacionales del gremio:
-                {{ collect(array_filter(explode("\n", (string) ajuste('quienes_programas_nacionales'))))->map(fn ($p) => trim($p))->join(', ', ' y ') }}.
-                Lo que no es local se gestiona directamente con la Nacional.
-            </p>
-            @if ($enlaceNacional = enlaceSeguro(ajuste('url_nacional')))
-                <x-publico.boton variante="contorno" :href="$enlaceNacional" target="_blank" rel="noopener" class="mt-6">
-                    Ir a Asobares Nacional&nbsp;<x-publico.flecha direccion="externa" />
-                </x-publico.boton>
-            @endif
-        </section>
+                @if ($respaldoNacional !== [])
+                    <dl class="gremio-editorial-cifras">
+                        @foreach ($respaldoNacional as $dato)
+                            <div>
+                                <dt>{{ $dato['rotulo'] }}</dt>
+                                <dd>{{ $dato['cifra'] }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                @endif
+
+                <p class="gremio-editorial-seccion__prosa">
+                    Aterrizamos en el Quindío los programas nacionales del gremio:
+                    {{ collect(array_filter(explode("\n", (string) ajuste('quienes_programas_nacionales'))))->map(fn ($p) => trim($p))->join(', ', ' y ') }}.
+                    Lo que no es local se gestiona directamente con la Nacional.
+                </p>
+                @if ($enlaceNacional = enlaceSeguro(ajuste('url_nacional')))
+                    <div class="gremio-editorial-nacional__accion">
+                        <x-publico.boton variante="contorno" :href="$enlaceNacional" target="_blank" rel="noopener">
+                            Ir a Asobares Nacional&nbsp;<x-publico.flecha direccion="externa" />
+                        </x-publico.boton>
+                    </div>
+                @endif
+                </div>
+            </section>
+        </div>
     </div>
 </x-layouts.publico>

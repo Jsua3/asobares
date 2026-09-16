@@ -38,6 +38,11 @@ html:not(.dark) .guia-editorial .hero-con-medio {
     background: #0c0a0b;
 }
 
+.guia-editorial .hero-con-medio > :not(.hero-medio) {
+    position: static;
+    z-index: auto;
+}
+
 .guia-editorial .hero-editorial {
     --guia-hero-tope: calc(var(--asb-alto-modulo-superior, 3.5rem) + env(safe-area-inset-top, 0px) + 1.75rem);
     --guia-hero-base: 2.25rem;
@@ -53,7 +58,7 @@ html:not(.dark) .guia-editorial .hero-con-medio {
 @media (min-width: 64rem) {
     .guia-editorial .hero-editorial {
         --guia-hero-tope: calc(4.375rem + 1.75rem);
-        --guia-hero-base: 2.5rem;
+        --guia-hero-base: 1.5rem;
     }
 }
 
@@ -69,21 +74,30 @@ html:not(.dark) .guia-editorial .hero-con-medio {
     min-height: 16rem;
     height: 100%;
     align-self: stretch;
+    border-radius: 0;
 }
 
 .guia-editorial-escena__campo,
-.guia-editorial-escena__foto,
 .guia-editorial-escena__placeholder,
 .guia-editorial-escena__velo {
     position: absolute;
     inset: 0;
+    overflow: hidden;
+    border-radius: 0;
 }
 
-.guia-editorial-escena__foto {
-    width: 100%;
+img.guia-editorial-escena__foto {
+    position: absolute;
+    top: 0;
+    right: auto;
+    bottom: 0;
+    left: -10%;
+    width: 128%;
+    max-width: none;
     height: 100%;
+    border-radius: 0;
     object-fit: cover;
-    object-position: 32% 50%;
+    object-position: 18% 50%;
 }
 
 /* PLACEHOLDER GEOMETRÍA 04D — no es fotografía del gremio. */
@@ -107,19 +121,17 @@ html:not(.dark) .guia-editorial-escena__velo {
         linear-gradient(
             90deg,
             #f7f1e8 0%,
-            rgb(247 241 232 / 0.82) 10%,
-            rgb(247 241 232 / 0.48) 22%,
-            rgb(247 241 232 / 0.18) 36%,
-            rgb(247 241 232 / 0.05) 48%,
-            transparent 62%
+            #f7f1e8 8%,
+            rgb(247 241 232 / 0.5) 16%,
+            rgb(247 241 232 / 0.14) 24%,
+            transparent 34%
         ),
         linear-gradient(
             90deg,
             transparent 0%,
-            transparent 38%,
-            rgb(15 17 18 / 0.22) 52%,
-            rgb(15 17 18 / 0.55) 60%,
-            var(--guia-video-negro) 66%,
+            transparent 78%,
+            rgb(47 28 20 / 0.22) 86%,
+            rgb(15 17 18 / 0.55) 92%,
             var(--guia-video-negro) 100%
         );
 }
@@ -129,17 +141,16 @@ html:not(.dark) .guia-editorial-escena__velo {
         linear-gradient(
             90deg,
             #0c0a0b 0%,
-            rgb(12 10 11 / 0.55) 12%,
-            rgb(12 10 11 / 0.18) 28%,
-            transparent 44%
+            rgb(12 10 11 / 0.72) 12%,
+            rgb(12 10 11 / 0.22) 24%,
+            transparent 36%
         ),
         linear-gradient(
             90deg,
             transparent 0%,
-            transparent 38%,
-            rgb(15 17 18 / 0.28) 54%,
-            rgb(15 17 18 / 0.62) 62%,
-            var(--guia-video-negro) 66%,
+            transparent 78%,
+            rgb(47 28 20 / 0.26) 86%,
+            rgb(15 17 18 / 0.6) 92%,
             var(--guia-video-negro) 100%
         );
 }
@@ -166,7 +177,13 @@ html:not(.dark) .guia-editorial-escena__velo {
     object-fit: contain;
     background: transparent;
     mix-blend-mode: normal;
+    mix-blend-mode: screen;
+    border: 0;
+    outline: none;
+    box-shadow: none;
     border-radius: 0;
+    -webkit-mask-image: radial-gradient(ellipse at 62% 50%, #000 55%, rgb(0 0 0 / 0.75) 78%, transparent 100%);
+    mask-image: radial-gradient(ellipse at 62% 50%, #000 55%, rgb(0 0 0 / 0.75) 78%, transparent 100%);
 }
 
 .guia-editorial-logo-vivo video::-webkit-media-controls {
@@ -186,6 +203,33 @@ html:not(.dark) .guia-editorial-escena__velo {
         grid-column: auto;
     }
 
+    .guia-editorial .hero-editorial .grid > :first-child {
+        position: relative;
+        z-index: 2;
+    }
+
+    html:not(.dark) .guia-editorial .hero-editorial .grid > :first-child {
+        background:
+            linear-gradient(
+                90deg,
+                #f7f1e8 0%,
+                #f7f1e8 88%,
+                rgb(247 241 232 / 0.4) 96%,
+                transparent 100%
+            );
+    }
+
+    .dark .guia-editorial .hero-editorial .grid > :first-child {
+        background:
+            linear-gradient(
+                90deg,
+                #0c0a0b 0%,
+                #0c0a0b 88%,
+                rgb(12 10 11 / 0.4) 96%,
+                transparent 100%
+            );
+    }
+
     .guia-editorial .hero-editorial .grid > :last-child {
         position: static;
         min-height: 0;
@@ -196,16 +240,22 @@ html:not(.dark) .guia-editorial-escena__velo {
         top: var(--guia-hero-tope);
         right: 0;
         bottom: var(--guia-hero-base);
-        left: 45%;
+        left: 0;
         width: auto;
         min-height: 0;
         height: auto;
         margin-right: 0;
+        border-radius: 0 1.75rem 1.75rem 0;
+    }
+
+    img.guia-editorial-escena__foto {
+        left: 0;
+        width: 100%;
     }
 
     .guia-editorial-logo-vivo {
         min-height: 100%;
-        padding-right: 1.25rem;
+        padding-right: clamp(0.75rem, 1.6vw, 1.5rem);
     }
 }
 
@@ -239,8 +289,8 @@ html:not(.dark) .guia-editorial-escena__velo {
             linear-gradient(
                 90deg,
                 #f7f1e8 0%,
-                #f7f1e8 62%,
-                rgb(247 241 232 / 0.55) 88%,
+                #f7f1e8 58%,
+                rgb(247 241 232 / 0.4) 82%,
                 transparent 100%
             );
     }
@@ -251,7 +301,7 @@ html:not(.dark) .guia-editorial-escena__velo {
                 90deg,
                 #0c0a0b 0%,
                 #0c0a0b 58%,
-                rgb(12 10 11 / 0.55) 86%,
+                rgb(12 10 11 / 0.4) 82%,
                 transparent 100%
             );
     }
@@ -261,10 +311,14 @@ html:not(.dark) .guia-editorial-escena__velo {
         top: var(--guia-hero-tope);
         right: 0;
         bottom: var(--guia-hero-base);
-        left: 40%;
+        left: 12%;
         z-index: 0;
         width: auto;
         pointer-events: none;
+    }
+
+    .guia-editorial-escena {
+        border-radius: 0 1.25rem 1.25rem 0;
     }
 
     html:not(.dark) .guia-editorial-escena__velo {
@@ -272,16 +326,16 @@ html:not(.dark) .guia-editorial-escena__velo {
             linear-gradient(
                 90deg,
                 #f7f1e8 0%,
-                rgb(247 241 232 / 0.5) 14%,
-                rgb(247 241 232 / 0.12) 32%,
-                transparent 48%
+                rgb(247 241 232 / 0.5) 10%,
+                rgb(247 241 232 / 0.14) 18%,
+                transparent 26%
             ),
             linear-gradient(
                 90deg,
                 transparent 0%,
-                transparent 48%,
-                rgb(15 17 18 / 0.35) 72%,
-                var(--guia-video-negro) 88%,
+                transparent 50%,
+                rgb(47 28 20 / 0.2) 62%,
+                var(--guia-video-negro) 72%,
                 var(--guia-video-negro) 100%
             );
     }
@@ -291,15 +345,15 @@ html:not(.dark) .guia-editorial-escena__velo {
             linear-gradient(
                 90deg,
                 #0c0a0b 0%,
-                rgb(12 10 11 / 0.35) 18%,
-                transparent 40%
+                rgb(12 10 11 / 0.4) 12%,
+                transparent 24%
             ),
             linear-gradient(
                 90deg,
                 transparent 0%,
                 transparent 50%,
-                rgb(15 17 18 / 0.4) 74%,
-                var(--guia-video-negro) 90%,
+                rgb(47 28 20 / 0.22) 62%,
+                var(--guia-video-negro) 72%,
                 var(--guia-video-negro) 100%
             );
     }
@@ -339,21 +393,53 @@ html:not(.dark) .guia-editorial-escena__velo {
         background: transparent;
     }
 
+    .guia-editorial-escena {
+        border-radius: 0 0 1.15rem 1.15rem;
+    }
+
+    img.guia-editorial-escena__foto {
+        left: -10%;
+        width: 128%;
+        max-width: none;
+    }
+
     html:not(.dark) .guia-editorial-escena__velo {
         background:
             linear-gradient(
                 180deg,
                 #f7f1e8 0%,
-                rgb(247 241 232 / 0.55) 18%,
-                transparent 42%
+                rgb(247 241 232 / 0.4) 12%,
+                transparent 28%
             ),
             linear-gradient(
                 to top left,
                 var(--guia-video-negro) 0%,
-                var(--guia-video-negro) 28%,
-                rgb(15 17 18 / 0.45) 52%,
-                transparent 74%
+                var(--guia-video-negro) 42%,
+                rgb(47 28 20 / 0.28) 58%,
+                transparent 76%
             );
+    }
+
+    .dark .guia-editorial-escena__velo {
+        background:
+            linear-gradient(
+                180deg,
+                #0c0a0b 0%,
+                rgb(12 10 11 / 0.35) 10%,
+                transparent 26%
+            ),
+            linear-gradient(
+                to top left,
+                var(--guia-video-negro) 0%,
+                var(--guia-video-negro) 42%,
+                rgb(47 28 20 / 0.3) 58%,
+                transparent 76%
+            );
+    }
+
+    .guia-editorial-logo-vivo {
+        align-items: flex-end;
+        padding: 0 0.5rem 0.5rem 0;
     }
 
     .guia-editorial-logo-vivo video {
