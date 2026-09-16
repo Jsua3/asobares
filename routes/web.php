@@ -41,7 +41,7 @@ Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/robots.txt', function (): Response {
     $lineas = [
         'User-agent: *',
-        // Mientras no haya dominio propio, el sitio no se deja indexar (D-08):
+        // Mientras no haya dominio propio, el sitio no se deja indexar:
         // lo que se indexe hoy queda apuntando al host temporal de Cloud.
         // `config/sitio.php` explica por qué el valor por defecto es cerrado.
         config('sitio.indexable') ? 'Allow: /' : 'Disallow: /',
@@ -60,6 +60,7 @@ Route::get('/robots.txt', function (): Response {
 })->name('robots');
 
 Route::get('/quienes-somos', [PaginaController::class, 'quienesSomos'])->name('quienes-somos');
+Route::get('/aliados', [PaginaController::class, 'aliados'])->name('aliados.index');
 Route::get('/politica-de-datos', [PaginaController::class, 'politicaDeDatos'])->name('politica-de-datos');
 
 // Directorio de establecimientos.
@@ -69,31 +70,32 @@ Route::get('/directorio/{asociado:slug}', [DirectorioController::class, 'show'])
 // Guía normativa: el producto insignia.
 // Es lectura, no un formulario, y cada visita con ?municipio= inserta una fila
 // para el observatorio: sin límite, un bucle sobre los 12 municipios del
-// Quindío envenena esa cifra. 6,1 —el límite de los formularios de escritura—
-// cortaría a la mitad a alguien comparando municipios de verdad; 30,1 iguala
-// el límite que ya usan las otras rutas de lectura del sitio (retorno y
-// estado de pago) y sigue muy lejos de permitir un bucle serio.
+// Quindío envenena esa cifra. Seis por minuto —el límite de los formularios de
+// escritura— cortaría a la mitad a alguien comparando municipios de verdad;
+// treinta iguala el límite que ya usan las otras rutas de lectura del sitio
+// (retorno y estado de pago) y sigue muy lejos de permitir un bucle serio.
+// Cada máximo vive en AppServiceProvider::LIMITES_POR_MINUTO, uno por ruta.
 Route::get('/abre-tu-negocio', [GuiaController::class, 'index'])
-    ->middleware('throttle:30,1')
+    ->middleware('throttle:guia')
     ->name('guia.index');
 // Descargar un formato también escribe en consultas_guia (ver el
 // controlador), pero es una acción más deliberada y menos repetitiva que
 // elegir municipio: nadie baja 30 formatos por minuto de verdad, y cada guía
-// solo trae dos o tres. 10,1 iguala el límite que ya usan las otras
-// escrituras ocasionales del sitio (resolver el pago simulado) y sobra para
-// bajar todos los formatos de una guía real sin rebotar a nadie.
+// solo trae dos o tres. Diez por minuto, lo mismo que la otra escritura
+// ocasional del sitio (resolver el pago simulado), sobra para bajar todos los
+// formatos de una guía real sin rebotar a nadie.
 Route::get('/abre-tu-negocio/formato/{requisito}', [GuiaController::class, 'descargarFormato'])
-    ->middleware('throttle:10,1')
+    ->middleware('throttle:guia-formato')
     ->name('guia.formato');
 
 // Bolsa de empleo.
 Route::get('/empleo', [EmpleoController::class, 'index'])->name('empleo.index');
 Route::post('/empleo/perfil', [EmpleoController::class, 'registrarAspirante'])
-    ->middleware('throttle:6,1')
+    ->middleware('throttle:empleo-perfil')
     ->name('empleo.aspirante');
 Route::get('/empleo/{vacante}', [EmpleoController::class, 'show'])->name('empleo.show');
 Route::post('/empleo/{vacante}/postular', [EmpleoController::class, 'postular'])
-    ->middleware('throttle:6,1')
+    ->middleware('throttle:empleo-postular')
     ->name('empleo.postular');
 
 // Artistas y proveedores.
@@ -101,14 +103,14 @@ Route::get('/artistas', [ArtistaController::class, 'index'])->name('artistas.ind
 // Antes que la ruta con slug: si no, «inscripcion» se leería como un artista.
 Route::get('/artistas/inscripcion', [ArtistaController::class, 'inscripcion'])->name('artistas.inscripcion');
 Route::post('/artistas/inscripcion', [ArtistaController::class, 'guardarInscripcion'])
-    ->middleware('throttle:6,1')
+    ->middleware('throttle:artistas-inscripcion')
     ->name('artistas.inscripcion.store');
 Route::get('/artistas/{artista:slug}', [ArtistaController::class, 'show'])->name('artistas.show');
 
 Route::get('/proveedores', [ProveedorController::class, 'index'])->name('proveedores.index');
 Route::get('/proveedores/inscripcion', [ProveedorController::class, 'inscripcion'])->name('proveedores.inscripcion');
 Route::post('/proveedores/inscripcion', [ProveedorController::class, 'guardarInscripcion'])
-    ->middleware('throttle:6,1')
+    ->middleware('throttle:proveedores-inscripcion')
     ->name('proveedores.inscripcion.store');
 
 // Eventos del gremio.
@@ -129,7 +131,7 @@ Route::get('/eventos/calendario/{anio}/{mes}', [EventoController::class, 'calend
     ->name('eventos.calendario');
 Route::get('/eventos/{evento:slug}', [EventoController::class, 'show'])->name('eventos.show');
 Route::post('/eventos/{evento:slug}/inscripcion', [EventoController::class, 'inscribir'])
-    ->middleware('throttle:6,1')
+    ->middleware('throttle:eventos-inscripcion')
     ->name('eventos.inscribir');
 
 // Boletín.
@@ -138,9 +140,9 @@ Route::get('/boletin/{noticia:slug}', [NoticiaController::class, 'show'])->name(
 
 // Afiliación y contacto.
 Route::get('/afiliate', [AfiliacionController::class, 'index'])->name('afiliate');
-Route::post('/afiliate', [AfiliacionController::class, 'store'])->middleware('throttle:6,1')->name('afiliate.store');
+Route::post('/afiliate', [AfiliacionController::class, 'store'])->middleware('throttle:afiliate')->name('afiliate.store');
 Route::get('/contacto', [ContactoController::class, 'index'])->name('contacto');
-Route::post('/contacto', [ContactoController::class, 'store'])->middleware('throttle:6,1')->name('contacto.store');
+Route::post('/contacto', [ContactoController::class, 'store'])->middleware('throttle:contacto')->name('contacto.store');
 
 /*
 |--------------------------------------------------------------------------
@@ -150,13 +152,13 @@ Route::post('/contacto', [ContactoController::class, 'store'])->middleware('thro
 
 Route::get('/mi-cuenta/entrar', [SesionAsociadoController::class, 'mostrarFormulario'])->name('mi-cuenta.entrar');
 Route::post('/mi-cuenta/entrar', [SesionAsociadoController::class, 'entrar'])
-    ->middleware('throttle:5,1')
+    ->middleware('throttle:mi-cuenta-entrar')
     ->name('mi-cuenta.entrar.post');
 Route::get('/mi-cuenta/contrasena/{token}', [ContrasenaAsociadoController::class, 'editar'])
     ->middleware('guest')
     ->name('mi-cuenta.password.reset');
 Route::post('/mi-cuenta/contrasena', [ContrasenaAsociadoController::class, 'actualizar'])
-    ->middleware(['guest', 'throttle:5,1'])
+    ->middleware(['guest', 'throttle:mi-cuenta-contrasena'])
     ->name('mi-cuenta.password.update');
 Route::post('/mi-cuenta/salir', [SesionAsociadoController::class, 'salir'])->name('mi-cuenta.salir');
 
@@ -165,34 +167,28 @@ Route::middleware(['auth', 'rol.asociado'])->group(function (): void {
 
     // Cada llamada crea una transacción y, con Bold, un enlace de pago real.
     Route::post('/mi-cuenta/pagar', [MiCuentaController::class, 'pagarMensualidad'])
-        ->middleware('throttle:5,1')
+        ->middleware('throttle:mi-cuenta-pagar')
         ->name('mi-cuenta.pagar');
 
-    // Fotos del establecimiento: las sube el duenio, las aprueba el gremio
-    // (OBS3-13). El limite de subida es bajo a proposito: son doce fotos como
-    // maximo por ficha y cada una pasa por revision humana.
+    // Fotos del establecimiento: las sube el dueño y las aprueba el gremio.
     Route::get('/mi-cuenta/fotos', [MisFotosController::class, 'index'])->name('mi-cuenta.fotos.index');
     Route::post('/mi-cuenta/fotos', [MisFotosController::class, 'store'])
-        // Por encima del maximo por establecimiento a proposito: con un
-        // limite menor, un afiliado que suba sus doce fotos de una sentada
-        // --que es lo natural el dia que estrena la funcion-- se choca contra
-        // un 429 a mitad de camino. Lo destapo la prueba del maximo.
-        ->middleware('throttle:30,1')
+        // Treinta por minuto, por encima del tope de doce fotos por ficha a
+        // propósito: con un límite menor, un afiliado que suba sus doce fotos
+        // de una sentada chocaría contra un 429 a mitad de camino.
+        ->middleware('throttle:mi-cuenta-fotos-subir')
         ->name('mi-cuenta.fotos.store');
     Route::delete('/mi-cuenta/fotos/{media}', [MisFotosController::class, 'destroy'])
-        ->middleware('throttle:20,1')
+        ->middleware('throttle:mi-cuenta-fotos-borrar')
         ->name('mi-cuenta.fotos.destroy');
 
-    // Beneficios que dejaron de ser publicos. El directorio de proveedores
-    // vivia en /proveedores y el banco de talento no tenia pantalla: los datos
-    // de contacto de unos y otros son la contraprestacion de la cuota, asi que
-    // se entregan detras de la sesion. La cara publica de /proveedores sigue
-    // existiendo, pero sin un solo contacto.
+    // Beneficios detrás de la sesión: los datos de contacto de proveedores,
+    // artistas y aspirantes son la contraprestación de la cuota. La cara
+    // pública de /proveedores existe, pero sin un solo contacto.
     //
-    // Los artistas se sumaron el 8 sep por el mismo criterio, con una salvedad:
-    // su ficha publica NO se vacia. El escaparate --nombre, foto, genero,
-    // video-- es lo que el artista busca al inscribirse; lo que se muda aqui es
-    // solo el contacto.
+    // Los artistas, con una salvedad: su ficha pública NO se vacía. El
+    // escaparate --nombre, foto, género, video-- es lo que el artista busca al
+    // inscribirse; lo que se muda aquí es solo el contacto.
     Route::get('/mi-cuenta/proveedores', [MisProveedoresController::class, 'index'])->name('mi-cuenta.proveedores.index');
     Route::get('/mi-cuenta/artistas', [MisArtistasController::class, 'index'])->name('mi-cuenta.artistas.index');
     Route::get('/mi-cuenta/aspirantes', [MisAspirantesController::class, 'index'])->name('mi-cuenta.aspirantes.index');
@@ -201,17 +197,17 @@ Route::middleware(['auth', 'rol.asociado'])->group(function (): void {
     Route::get('/mi-cuenta/vacantes', [MisVacantesController::class, 'index'])->name('mi-cuenta.vacantes.index');
     Route::get('/mi-cuenta/vacantes/crear', [MisVacantesController::class, 'crear'])->name('mi-cuenta.vacantes.crear');
     Route::post('/mi-cuenta/vacantes', [MisVacantesController::class, 'store'])
-        ->middleware('throttle:20,1')
+        ->middleware('throttle:mi-cuenta-vacantes-crear')
         ->name('mi-cuenta.vacantes.store');
     Route::get('/mi-cuenta/vacantes/{vacante}/editar', [MisVacantesController::class, 'editar'])->name('mi-cuenta.vacantes.editar');
     Route::put('/mi-cuenta/vacantes/{vacante}', [MisVacantesController::class, 'update'])
-        ->middleware('throttle:20,1')
+        ->middleware('throttle:mi-cuenta-vacantes-editar')
         ->name('mi-cuenta.vacantes.update');
     Route::post('/mi-cuenta/vacantes/{vacante}/cerrar', [MisVacantesController::class, 'cerrar'])->name('mi-cuenta.vacantes.cerrar');
     Route::post('/mi-cuenta/vacantes/{vacante}/reabrir', [MisVacantesController::class, 'reabrir'])->name('mi-cuenta.vacantes.reabrir');
     Route::get('/mi-cuenta/vacantes/{vacante}', [MisVacantesController::class, 'show'])->name('mi-cuenta.vacantes.show');
     Route::patch('/mi-cuenta/postulaciones/{postulacion}', [MisVacantesController::class, 'gestionarPostulacion'])
-        ->middleware('throttle:60,1')
+        ->middleware('throttle:mi-cuenta-postulaciones')
         ->name('mi-cuenta.postulaciones.gestionar');
 });
 
@@ -227,7 +223,7 @@ Route::middleware(['auth', 'rol.asociado'])->group(function (): void {
 if (app()->environment('local', 'testing')) {
     Route::get('/pago-simulado/{transaccion:referencia}', [PagoController::class, 'simulado'])->name('pago.simulado');
     Route::post('/pago-simulado/{transaccion:referencia}', [PagoController::class, 'resolverSimulado'])
-        ->middleware('throttle:10,1')
+        ->middleware('throttle:pago-simulado')
         ->name('pago.simulado.resolver');
 }
 
@@ -235,16 +231,16 @@ if (app()->environment('local', 'testing')) {
 // sus propios parámetros a la URL de retorno, y eso rompería una firma: aquí
 // se ignoran y se manda a la página firmada.
 Route::get('/pago/{transaccion:referencia}/retorno', [PagoController::class, 'retorno'])
-    ->middleware('throttle:30,1')
+    ->middleware('throttle:pago-retorno')
     ->name('pago.retorno');
 
 // Muestra el detalle de un cobro, así que va firmada y caduca.
 Route::get('/pago/{transaccion:referencia}/estado', [PagoController::class, 'estado'])
-    ->middleware(['signed', 'throttle:30,1'])
+    ->middleware(['signed', 'throttle:pago-estado'])
     ->name('pago.estado');
 
 // La firma del webhook reemplaza al token CSRF: la petición viene de Bold.
 Route::post('/webhooks/bold', WebhookBoldController::class)
     ->withoutMiddleware([PreventRequestForgery::class])
-    ->middleware('throttle:120,1')
+    ->middleware('throttle:webhook-bold')
     ->name('webhooks.bold');

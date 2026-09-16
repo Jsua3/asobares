@@ -10,12 +10,12 @@ use Illuminate\Database\Seeder;
  * `DatabaseSeeder` es la demostración y se niega a correr en producción, con
  * razón: publica establecimientos inventados en el directorio, inserta PQR
  * ficticias que consumen el consecutivo anual de verdad y mete pagos en
- * estado aprobado que el widget de recaudo suma como ingresos. Pero negarse
- * dejaba un hueco: no había forma de poner en producción los catálogos y el
- * contenido institucional, que sí son ciertos y sí hacen falta, salvo
- * encadenar ocho `db:seed --class=…` a mano y acordarse del orden.
+ * estado aprobado que el widget de recaudo suma como ingresos. Esta clase pone
+ * en producción lo que sí es cierto y sí hace falta —los catálogos y el
+ * contenido institucional— sin encadenar ocho `db:seed --class=…` a mano ni
+ * acordarse del orden.
  *
- * Esto es esa forma. Los ocho que entran, y por qué cada uno:
+ * Los ocho que entran, y por qué cada uno:
  *
  * - `MunicipioSeeder` y `CategoriaSeeder` — el esqueleto. Los referencian
  *   asociados, artistas, proveedores, requisitos y consultas; sin ellos no se
@@ -24,14 +24,14 @@ use Illuminate\Database\Seeder;
  *   institucional, todo con documento detrás (el catálogo «Beneficios
  *   afiliados» y el TED gremial).
  * - `SettingSeeder` — el contenido editable del sitio. Sin él la portada sale
- *   en blanco, que es literalmente lo que pasaba: cada `ajuste()` devolvía
- *   vacío y el título de la página era «—».
+ *   en blanco: cada `ajuste()` devuelve vacío y el título de la página queda
+ *   en «—».
  * - `RequisitoAperturaSeeder` — la guía normativa de Armenia, del documento
  *   oficial de la Alcaldía.
  * - `RolYPermisoSeeder` — los roles del panel. Sin él, `asobares:crear-usuario`
  *   no tiene qué asignar.
  *
- * Los doce que **no** entran, y son los que harían daño: `AsociadoSeeder`,
+ * Los once que **no** entran, y son los que harían daño: `AsociadoSeeder`,
  * `CarteraSeeder`, `ConsultaGuiaSeeder`, `EventoSeeder`, `VacanteSeeder`,
  * `ArtistaSeeder`, `ProveedorSeeder`, `NoticiaSeeder`, `MensajeSeeder`,
  * `TransaccionSeeder` y `UsuarioSeeder`.

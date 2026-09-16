@@ -59,7 +59,7 @@
                         <x-publico.boton :href="$whatsapp" target="_blank" rel="noopener" class="mt-3">
                             {{ ajuste('afiliate_whatsapp_cta', 'Escribirnos por WhatsApp') }}
                         </x-publico.boton>
-                {{-- OBS3-14: el aviso honesto. Al otro lado hay una persona,
+                {{-- El aviso honesto: al otro lado hay una persona,
                      no un bot; prometer inmediatez con un «ya» es lo que hace
                      que el silencio de una noche se lea como abandono. --}}
                 <p class="mt-2 text-2xs text-apagado">{{ ajuste('contacto_whatsapp_aviso') }}</p>

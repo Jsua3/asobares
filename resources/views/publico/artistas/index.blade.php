@@ -18,9 +18,9 @@
         @if (filled($tipos) || $generos->isNotEmpty())
         <form method="GET" action="{{ route('artistas.index') }}" class="revelar tarjeta grid gap-4 p-5 sm:grid-cols-3" data-revelar>
             {{-- Los tipos los arma el controlador con los que de verdad tienen
-                 ficha publicada. Antes se recorría el enum entero desde aquí, y
-                 el desplegable de al lado —que sí se deriva— dejaba el defecto a
-                 la vista dentro del mismo formulario. --}}
+                 ficha publicada, igual que los géneros del desplegable de al
+                 lado: recorrer el enum entero desde aquí ofrecería tipos que no
+                 devuelven ningún resultado. --}}
             <x-publico.campo nombre="tipo" etiqueta="Tipo" tipo="select" :valor="$filtros['tipo'] ?? null"
                              :opciones="['' => 'Todos'] + collect($tipos)->mapWithKeys(fn ($t) => [$t->value => $t->getLabel()])->all()" />
 
@@ -99,10 +99,10 @@
 
                                 <div class="mt-4 flex items-end justify-between gap-3">
                                     <div>
-                                        {{-- OBS3-08: la tarifa NO sale. «De pronto no lo contacto
-                                             porque se sesga de una vez con el precio» (R21 14:01);
-                                             «yo no le pondría precio» (R21 14:37). El campo sigue en
-                                             el modelo y en el panel, pero no se pinta nunca. --}}
+                                        {{-- La tarifa NO sale: el gremio decidió no publicarla,
+                                             porque un precio a la vista sesga la decisión de
+                                             contactar al artista. El campo sigue en el modelo y en
+                                             el panel, pero no se pinta nunca. --}}
                                         <p class="text-[.65rem] uppercase tracking-wide text-apagado">Tarifa</p>
                                         <p class="font-display text-base font-semibold">
                                             {{ ajuste('artistas_tarifa_leyenda') }}

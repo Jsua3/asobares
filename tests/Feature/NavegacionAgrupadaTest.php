@@ -11,22 +11,23 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
- * La barra llevaba OCHO enlaces de primer nivel y no cabían. «Abre tu negocio»
- * y «Quiénes somos» partían cada uno en dos líneas a 1280, 1440 y 1600 px, y
- * eso dejaba la cabecera en 83,38 px: no era un defecto de estilo, era una
- * navegación que no entraba en su sitio. Medido en Chromium después de
- * reagrupar: 61,69 px, cinco controles, UNA línea, en los dos temas y en los
- * tres anchos, con los cinco en 45,7 px de alto.
+ * OCHO enlaces de primer nivel no caben en la barra de escritorio: «Abre tu
+ * negocio» y «Quiénes somos» parten cada uno en dos líneas a 1280, 1440 y
+ * 1600 px. No es un defecto de estilo, es una navegación que no entra en su
+ * sitio. Medido en Chromium sobre la barra de una sola fila, sin los tres
+ * estados: con ocho enlaces la cabecera mide 83,38 px; agrupados en cinco
+ * controles, 61,69 px, UNA línea, en los dos temas y en los tres anchos, con
+ * los cinco en 45,7 px de alto.
  *
  * ESTA CLASE NO MIDE ESA GEOMETRÍA —eso se mide con el navegador, como en
  * `ObjetivoTactilTest`—. Lo que vigila es el reparto que la produce y las tres
  * cosas que el reparto podía perder por el camino sin que nada fallara:
  *
- *   - que ningún destino se quede fuera al plegar dos grupos (y que «Contacto»,
- *     que hasta hoy solo se alcanzaba desde el móvil y el pie, gane el suyo);
+ *   - que ningún destino se quede fuera al plegar dos grupos (y que «Contacto»
+ *     tenga el suyo en escritorio);
  *   - que el desplegable se anuncie y se pueda abrir sin ratón;
  *   - que un grupo plegado siga diciendo que la sección actual es suya, que es
- *     la única señal de ubicación que tenía la barra.
+ *     la única señal de ubicación que tiene la barra.
  *
  * El reparto tampoco es de gusto: «Bolsas» es como se llama ese mismo grupo en
  * el menú del panel que ya usa el personal del gremio (§1 del manual de
@@ -153,7 +154,7 @@ class NavegacionAgrupadaTest extends TestCase
     }
 
     /**
-     * Plegar no puede perder destinos. Los ocho de la barra vieja más
+     * Plegar no puede perder destinos. Los ocho de primer nivel más
      * «Contacto» tienen que seguir alcanzándose desde la cabecera.
      */
     public function test_ningun_destino_se_pierde_al_plegar(): void
@@ -176,9 +177,8 @@ class NavegacionAgrupadaTest extends TestCase
     }
 
     /**
-     * «Contacto» solo existía en el menú móvil y en el pie: en escritorio no se
-     * alcanzaba desde ningún sitio. Al entrar en «El gremio» gana el suyo, y
-     * este es el único sitio que lo afirma.
+     * «Contacto» vive dentro de «El gremio»: sin esa fila, en escritorio solo
+     * se alcanzaría desde el pie. Este es el único sitio que lo afirma.
      */
     public function test_contacto_gana_un_sitio_en_escritorio(): void
     {
@@ -193,8 +193,7 @@ class NavegacionAgrupadaTest extends TestCase
 
     /**
      * Escritorio y móvil salen del MISMO arreglo. Si cada uno declarara el
-     * suyo, divergirían — que es exactamente lo que ya había pasado con
-     * «Contacto», presente en uno y ausente del otro.
+     * suyo, divergirían: un destino presente en uno y ausente del otro.
      */
     public function test_la_navegacion_se_declara_una_sola_vez(): void
     {
@@ -250,9 +249,8 @@ class NavegacionAgrupadaTest extends TestCase
     }
 
     /**
-     * Las cuatro salidas del desplegable. Las tres primeras son las del menú de
-     * usuario, de donde sale entera esta solución; la cuarta es nueva y es la
-     * que el teclado necesita: sin ella, tabular de un grupo al siguiente deja
+     * Las cuatro salidas del desplegable: las tres del menú de usuario y la
+     * que el teclado necesita. Sin ella, tabular de un grupo al siguiente deja
      * el primero abierto, y con el ratón eso no pasa nunca porque
      * `click.outside` lo tapa.
      */
@@ -270,8 +268,8 @@ class NavegacionAgrupadaTest extends TestCase
             $this->assertStringContainsString($codigo, $vista, "El desplegable perdió la salida por {$porque}.");
         }
 
-        // El cuerpo de las salidas vive en el componente compartido de app.js
-        // desde el 5 sep; lo que devuelve el foco al disparador se vigila ahí.
+        // El cuerpo de las salidas vive en el componente compartido de app.js;
+        // lo que devuelve el foco al disparador se vigila ahí.
         $this->assertStringContainsString(
             '$refs.disparador.focus()',
             File::get(resource_path('js/app.js')),

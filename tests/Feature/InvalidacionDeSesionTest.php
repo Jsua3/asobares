@@ -18,16 +18,13 @@ use Tests\TestCase;
  * panel —el único camino que hoy existe para cambiarla, en `UserForm`—, la
  * sesión que alguien tuviera abierta con la clave vieja deja de valer.
  *
- * Sin estas dos pruebas el middleware era un cambio de sesión sin cobertura.
- *
  * SOBRE `forgetGuards()`, que no es un truco para que pase: en una prueba HTTP
  * el contenedor NO se reconstruye entre `$this->get()` y `$this->get()`, así
  * que `SessionGuard` conserva en memoria el modelo que resolvió en la primera
  * petición —con el hash viejo— y `AuthenticateSession` compara ese hash contra
  * sí mismo. En producción cada petición levanta un proceso nuevo y el guard
  * relee al usuario de la base. `forgetGuards()` es lo que reproduce eso; sin
- * él, la prueba pasaría en verde con el middleware quitado, que es exactamente
- * el falso verde que este proyecto se ha propuesto no volver a escribir.
+ * él, la prueba pasaría en verde con el middleware quitado: un falso verde.
  */
 class InvalidacionDeSesionTest extends TestCase
 {

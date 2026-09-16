@@ -509,14 +509,14 @@ Alpine.data('desplegable', () => ({
  */
 Alpine.data('videoHero', () => ({
     listo: false,
+    reproduciendo: false,
 
     init() {
+        this.video().muted = true;
+
         if (reduceMovimiento()) {
             return;
         }
-
-        // Las políticas de reproducción automática solo perdonan el video mudo.
-        this.$el.muted = true;
 
         /*
          * Pedir la descarga es cambiar `preload`; NO se llama a `load()`.
@@ -526,30 +526,314 @@ Alpine.data('videoHero', () => ({
          * póster **con el archivo entero ya descargado** (`readyState` 4,
          * `paused` true). Sin `load()`, `play()` resuelve.
          */
-        this.$el.preload = 'auto';
+        this.video().preload = 'auto';
 
         this.arrancar();
 
         // Si todavía no había datos, el primer intento se rechaza; se reintenta
         // en cuanto el navegador dice que puede. `arrancar()` se protege sola.
-        this.$el.addEventListener('canplay', () => this.arrancar());
+        this.video().addEventListener('canplay', () => this.arrancar());
+        this.video().addEventListener('pause', () => { this.reproduciendo = false; });
+        this.video().addEventListener('play', () => { this.reproduciendo = true; });
+    },
+
+    video() {
+        return this.$refs.video;
     },
 
     arrancar() {
-        if (this.listo) {
+        if (this.listo || ! this.video()) {
             return;
         }
 
-        const intento = this.$el.play();
+        const intento = this.video().play();
 
         // Navegadores viejos no devuelven promesa: se mira el estado y ya.
         if (! intento) {
-            this.listo = ! this.$el.paused;
+            this.reproduciendo = ! this.video().paused;
+            this.listo = this.reproduciendo;
 
             return;
         }
 
-        intento.then(() => { this.listo = true; }).catch(() => { this.listo = false; });
+        intento
+            .then(() => {
+                this.listo = true;
+                this.reproduciendo = true;
+            })
+            .catch(() => {
+                this.listo = false;
+                this.reproduciendo = false;
+            });
+    },
+
+    alternar() {
+        const video = this.video();
+
+        if (! video) {
+            return;
+        }
+
+        if (! video.paused) {
+            video.pause();
+
+            return;
+        }
+
+        video.muted = true;
+        video.preload = 'auto';
+
+        const intento = video.play();
+
+        if (! intento) {
+            this.listo = ! video.paused;
+            this.reproduciendo = ! video.paused;
+
+            return;
+        }
+
+        intento
+            .then(() => {
+                this.listo = true;
+                this.reproduciendo = true;
+            })
+            .catch(() => {
+                this.reproduciendo = false;
+            });
+    },
+}));
+
+/*
+ * Identidad de Abre tu negocio. El master dura 6 s, campo oscuro de
+ * punta a punta (sin cola vacía). La pausa visible venía de un
+ * setTimeout deliberado tras ended; el bucle nativo reinicia al instante.
+ * Con movimiento reducido no cicla: se queda en el último fotograma.
+ */
+Alpine.data('guiaIdentidad', () => ({
+    init() {
+        const video = this.$refs.identidad;
+
+        if (! video) {
+            return;
+        }
+
+        video.muted = true;
+
+        const irAlFinal = () => {
+            video.loop = false;
+
+            if (Number.isFinite(video.duration) && video.duration > 0) {
+                video.currentTime = Math.max(0, video.duration - 0.04);
+            }
+        };
+
+        if (reduceMovimiento()) {
+            video.preload = 'auto';
+
+            if (video.readyState >= 1) {
+                irAlFinal();
+            } else {
+                video.addEventListener('loadedmetadata', irAlFinal, { once: true });
+                video.load();
+            }
+
+            return;
+        }
+
+        video.loop = true;
+        video.preload = 'auto';
+        const intentarReproducir = () => {
+            const intento = video.play();
+
+            if (intento && typeof intento.catch === 'function') {
+                intento.catch(() => {});
+            }
+        };
+
+        if (video.readyState >= 2) {
+            intentarReproducir();
+        } else {
+            video.addEventListener('canplay', intentarReproducir, { once: true });
+            video.load();
+        }
+    },
+}));
+
+Alpine.data('cintaEditorial', () => ({
+    pausada: false,
+
+    init() {
+        this.pausada = reduceMovimiento();
+    },
+
+    alternar() {
+        this.pausada = ! this.pausada;
+    },
+}));
+
+Alpine.data('carruselEventos', (total = 1) => ({
+    indice: 0,
+    total,
+    pausadoPorUsuario: false,
+    pausadoTemporalmente: false,
+    temporizador: null,
+    alCambiarVisibilidad: null,
+
+    init() {
+        this.alCambiarVisibilidad = () => {
+            if (document.hidden) {
+                this.detenerAuto();
+
+                return;
+            }
+
+            this.intentarAuto();
+        };
+
+        this.pausadoPorUsuario = reduceMovimiento();
+        this.sincronizar();
+        this.$refs.pista?.addEventListener('scroll', () => this.sincronizar(), { passive: true });
+        document.addEventListener('visibilitychange', this.alCambiarVisibilidad);
+        this.intentarAuto();
+    },
+
+    destroy() {
+        this.detenerAuto();
+
+        if (this.alCambiarVisibilidad) {
+            document.removeEventListener('visibilitychange', this.alCambiarVisibilidad);
+        }
+    },
+
+    puedeAutoplay() {
+        return this.total > 1
+            && ! reduceMovimiento()
+            && window.matchMedia('(min-width: 768px)').matches
+            && ! this.pausadoPorUsuario
+            && ! this.pausadoTemporalmente
+            && ! document.hidden;
+    },
+
+    intentarAuto() {
+        this.detenerAuto();
+
+        if (! this.puedeAutoplay()) {
+            return;
+        }
+
+        this.temporizador = window.setInterval(() => this.desplazar(this.indice + 1), 7000);
+    },
+
+    detenerAuto() {
+        if (this.temporizador) {
+            window.clearInterval(this.temporizador);
+            this.temporizador = null;
+        }
+    },
+
+    pausarTemporal() {
+        this.pausadoTemporalmente = true;
+        this.detenerAuto();
+    },
+
+    reanudarTemporal() {
+        this.pausadoTemporalmente = false;
+        this.intentarAuto();
+    },
+
+    alternarPausaManual() {
+        this.pausadoPorUsuario = ! this.pausadoPorUsuario;
+
+        if (this.pausadoPorUsuario) {
+            this.detenerAuto();
+
+            return;
+        }
+
+        this.intentarAuto();
+    },
+
+    pausar() {
+        this.pausadoPorUsuario = true;
+        this.detenerAuto();
+    },
+
+    reanudar() {
+        this.pausadoPorUsuario = false;
+        this.intentarAuto();
+    },
+
+    desplazar(destino) {
+        const pista = this.$refs.pista;
+        const tarjetas = pista ? [...pista.querySelectorAll('.home-editorial-evento')] : [];
+        const tarjeta = tarjetas[((destino % this.total) + this.total) % this.total];
+
+        if (! pista || ! tarjeta) {
+            return;
+        }
+
+        pista.scrollTo({
+            left: tarjeta.offsetLeft,
+            behavior: reduceMovimiento() ? 'auto' : 'smooth',
+        });
+    },
+
+    ir(destino) {
+        this.pausar();
+        this.desplazar(destino);
+    },
+
+    siguiente() {
+        this.ir(this.indice + 1);
+    },
+
+    anterior() {
+        this.ir(this.indice - 1);
+    },
+
+    sincronizar() {
+        const pista = this.$refs.pista;
+
+        if (! pista) {
+            return;
+        }
+
+        const tarjetas = [...pista.querySelectorAll('.home-editorial-evento')];
+        let cercano = 0;
+        let distancia = Number.POSITIVE_INFINITY;
+
+        tarjetas.forEach((tarjeta, indice) => {
+            const delta = Math.abs(tarjeta.offsetLeft - pista.scrollLeft);
+
+            if (delta < distancia) {
+                distancia = delta;
+                cercano = indice;
+            }
+        });
+
+        this.indice = cercano;
+    },
+}));
+
+Alpine.data('bandaEstablecimientos', () => ({
+    avanzar(direccion) {
+        const pista = this.$refs.pista;
+
+        if (! pista) {
+            return;
+        }
+
+        const tarjeta = pista.querySelector('.home-editorial-establecimiento');
+        const estilo = tarjeta ? window.getComputedStyle(pista) : null;
+        const hueco = estilo ? Number.parseFloat(estilo.columnGap || estilo.gap) || 16 : 16;
+        const paso = tarjeta
+            ? tarjeta.getBoundingClientRect().width + hueco
+            : pista.clientWidth * 0.8;
+
+        pista.scrollBy({
+            left: direccion * paso,
+            behavior: reduceMovimiento() ? 'auto' : 'smooth',
+        });
     },
 }));
 
@@ -581,10 +865,104 @@ const prepararRevelado = () => {
     nodos.forEach((nodo) => observador.observe(nodo));
 };
 
+const leerCifraColombiana = (molde) => {
+    const cuerpo = String(molde).trim().replace(/^\$/, '').replace(/\s*%$/, '').trim();
+
+    return Number(cuerpo.replace(/\./g, '').replace(',', '.'));
+};
+
+const formatearCifraAlMolde = (valor, molde) => {
+    const original = String(molde).trim();
+    const conPesos = original.startsWith('$');
+    const conPorcentaje = original.includes('%');
+    const espacioAntesDePorcentaje = original.includes(' %');
+    const cuerpo = original.replace(/^\$/, '').replace(/\s*%$/, '').trim();
+    const decimales = cuerpo.includes(',') ? cuerpo.split(',')[1].length : 0;
+    const [entero, decimal = ''] = valor.toFixed(decimales).split('.');
+    const enteroConPuntos = entero.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+    let texto = (conPesos ? '$' : '') + enteroConPuntos;
+
+    if (decimales > 0) {
+        texto += `,${decimal}`;
+    }
+
+    if (conPorcentaje) {
+        texto += espacioAntesDePorcentaje ? ' %' : '%';
+    }
+
+    return texto;
+};
+
+const animarCifra = (nodo) => {
+    const final = nodo.getAttribute('data-cifra-final') ?? '';
+    const destino = leerCifraColombiana(final);
+
+    if (! Number.isFinite(destino) || final === '') {
+        nodo.textContent = final;
+
+        return;
+    }
+
+    const duracion = 1100;
+    const inicio = performance.now();
+
+    const cuadro = (ahora) => {
+        const t = Math.min((ahora - inicio) / duracion, 1);
+        const ease = 1 - ((1 - t) ** 3);
+
+        if (t === 1) {
+            nodo.textContent = final;
+
+            return;
+        }
+
+        nodo.textContent = formatearCifraAlMolde(destino * ease, final);
+        requestAnimationFrame(cuadro);
+    };
+
+    requestAnimationFrame(cuadro);
+};
+
+const prepararCifras = () => {
+    const nodos = document.querySelectorAll('[data-cifra-final]');
+
+    if (nodos.length === 0) {
+        return;
+    }
+
+    const aplicarFinal = (nodo) => {
+        nodo.textContent = nodo.getAttribute('data-cifra-final') ?? nodo.textContent;
+    };
+
+    if (reduceMovimiento()) {
+        nodos.forEach(aplicarFinal);
+
+        return;
+    }
+
+    const observador = new IntersectionObserver((entradas) => {
+        for (const entrada of entradas) {
+            if (! entrada.isIntersecting) {
+                continue;
+            }
+
+            animarCifra(entrada.target);
+            observador.unobserve(entrada.target);
+        }
+    }, { threshold: 0.35, rootMargin: '0px 0px -8% 0px' });
+
+    nodos.forEach((nodo) => observador.observe(nodo));
+};
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', prepararRevelado);
+    document.addEventListener('DOMContentLoaded', () => {
+        prepararRevelado();
+        prepararCifras();
+    });
 } else {
     prepararRevelado();
+    prepararCifras();
 }
 
 // Otra pestaña cambió el tema: el script del <head> ya repintó, aquí solo

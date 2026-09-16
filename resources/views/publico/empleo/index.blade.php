@@ -160,9 +160,9 @@
                                  :placeholder="ajuste('empleo_perfil_experiencia_placeholder', 'Cuéntanos en pocas líneas dónde has trabajado y qué sabes hacer.')"
                                  :ayuda="ajuste('empleo_perfil_experiencia_ayuda', 'Con dos o tres frases es suficiente.')" />
 
-                {{-- Ley 1581: el perfil deja de ser solo para la secretaria y pasa a
-                     verlo cualquier establecimiento afiliado. Eso se dice aqui, junto a
-                     la casilla, y no solo en la politica. --}}
+                {{-- Ley 1581: el perfil no lo ve solo la secretaría, lo ve cualquier
+                     establecimiento afiliado. Eso se dice aquí, junto a la casilla, y
+                     no solo en la política. --}}
                 <p class="text-xs leading-relaxed text-apagado">
                     {{ ajuste('empleo_perfil_privacidad', 'Tu perfil quedará visible para los establecimientos afiliados a ASOBARES Capítulo Quindío, que podrán contactarte directamente para ofrecerte trabajo.') }}
                 </p>

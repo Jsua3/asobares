@@ -214,10 +214,10 @@ class SemillaConFormaTest extends TestCase
     }
 
     /**
-     * Un establecimiento no paga mensualidades antes de afiliarse. Es la
-     * prueba que habría atrapado el caso real: `la-cava-del-yipao` afiliado
-     * el 2026-07-30 con pagos desde 2025-05-18, catorce meses antes de
-     * existir como afiliado.
+     * Un establecimiento no paga mensualidades antes de afiliarse: la semilla
+     * no puede dejar un pago aprobado anterior a la fecha de afiliación de su
+     * asociado, que el tablero sumaría como recaudo de alguien que aún no era
+     * afiliado.
      */
     public function test_ningun_asociado_tiene_pagos_aprobados_antes_de_su_afiliacion(): void
     {
@@ -262,11 +262,11 @@ class SemillaConFormaTest extends TestCase
     }
 
     /**
-     * Antes la semilla dejaba un único pendiente en todo el sistema, con
-     * `updated_at = now()`: la banda de pendientes del tablero se enseñaba
-     * en la demo con un solo renglón y el estado "urgente" nunca aparecía.
-     * Ahora hay pendientes repartidos entre modelos distintos (vacante,
-     * artista, proveedor, noticia) con antigüedades escalonadas.
+     * Con un único pendiente en todo el sistema y `updated_at = now()`, la
+     * banda de pendientes del tablero se enseña con un solo renglón y el
+     * estado "urgente" nunca aparece. La semilla reparte pendientes entre
+     * modelos distintos (vacante, artista, proveedor, noticia) con
+     * antigüedades escalonadas.
      */
     public function test_la_semilla_reparte_pendientes_entre_modelos_con_al_menos_uno_urgente(): void
     {

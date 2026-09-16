@@ -2,15 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Widgets\AsociadosPorMunicipio;
-use App\Filament\Widgets\EntradasAlSitio;
-use App\Filament\Widgets\PaginasMasVisitadas;
-use App\Filament\Widgets\PendientesDeAprobacion;
-use App\Filament\Widgets\PorDondeEntranAlSitio;
-use App\Filament\Widgets\RecaudoMensual;
-use App\Filament\Widgets\ResumenDelGremio;
-use App\Filament\Widgets\UltimasTransacciones;
-use App\Filament\Widgets\VisitasDelSitio;
 use App\Http\Responses\LogoutDelPanelResponse;
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse as LogoutResponseContract;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
@@ -57,10 +48,8 @@ class AdminPanelProvider extends PanelProvider
             ->profile(isSimple: false)
             ->brandName('ASOBARES Quindío')
             ->favicon(asset('img/favicon.png'))
-            // El `.svg` que había aquí no era un vector: eran 49 KB de un
-            // `<svg><image xlink:href="data:img/png;base64,…">` con el MIME
-            // mal escrito. El `.png` son los mismos píxeles, 36 KB, y es el
-            // que ya usa el sitio público.
+            // El logotipo es de mapa de bits: se sirve el mismo `.png` que usa
+            // el sitio público, no un `.svg` que solo envuelva esa imagen.
             ->brandLogo(asset('img/logo-asobares.png'))
             ->brandLogoHeight('2rem')
             ->darkMode()
@@ -77,9 +66,9 @@ class AdminPanelProvider extends PanelProvider
             ->font('Poppins', provider: LocalFontProvider::class)
             // `laravel-vite-plugin` con `fonts: [bunny('Poppins', ...)]`
             // compila un `fonts-manifest.json` con los doce @font-face, pero
-            // nada lo enlazaba: por eso Poppins nunca llegaba a resolver, con
-            // o sin este `font()`. `Vite::fonts()` (Illuminate\Foundation\Vite)
-            // lee ese manifiesto y devuelve los preload + el <style> real.
+            // nada lo enlaza por sí solo: sin este gancho Poppins no resuelve,
+            // con o sin `font()`. `Vite::fonts()` (Illuminate\Foundation\Vite)
+            // lee ese manifiesto y devuelve los preload y el <style> real.
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn (): HtmlString => Vite::fonts(),
@@ -88,32 +77,32 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::TOPBAR_END,
                 fn (): HtmlString => new HtmlString(view('filament.components.theme-switcher-topbar')->render()),
             )
-            // La cuenta, ARRIBA y junto al control de tema (D-L21, corregida
-            // por segunda vez el 7 sep). Estuvo al pie de la barra y luego como
-            // primera fila; Sua la quiere en el cromo superior, con el nombre y
-            // el rango que el círculo de iniciales de Filament no mostraba.
+            // La cuenta, en el cromo superior y junto al control de tema: un
+            // chip con el nombre y el rango, que el círculo de iniciales de
+            // Filament no muestra.
             ->renderHook(
                 PanelsRenderHook::TOPBAR_END,
                 fn (): HtmlString => new HtmlString(view('filament.components.cuenta-en-la-barra', ['donde' => 'cromo'])->render()),
             )
-            // Y la MISMA cuenta al pie de la barra, que es donde la quiso Sua en
-            // el teléfono (D-L30): anclada abajo a la izquierda y con los iconos
-            // pasando por debajo. Las dos copias existen a la vez en el marcado y
+            // Y la MISMA cuenta al pie de la barra, que es donde vive en el
+            // teléfono: anclada abajo a la izquierda y con los iconos pasando
+            // por debajo. Las dos copias existen a la vez en el marcado y
             // el CSS apaga con `display: none` la que no toca, que es lo único
             // que la saca del orden de tabulación.
             ->renderHook(
                 PanelsRenderHook::SIDEBAR_FOOTER,
                 fn (): HtmlString => new HtmlString(view('filament.components.cuenta-en-la-barra', ['donde' => 'pie'])->render()),
             )
-            // El campo de puntos del fondo de TODA la interfaz (D-L24, ampliado
-            // en D-L26). Va lo primero del cuerpo, fijo y por debajo de todo.
+            // El campo de puntos del fondo de TODA la interfaz. Va lo primero
+            // del cuerpo, fijo y por debajo de todo.
             ->renderHook(
                 PanelsRenderHook::BODY_START,
                 fn (): HtmlString => new HtmlString(view('filament.components.puntos-de-la-barra')->render()),
             )
-            // Con la cuenta abajo, el menú de usuario de Filament sobra: dos
-            // disparadores para la misma sesión se contradicen en cuanto uno
-            // cambie. Perfil, sitio y salida viven ahora en la hoja del módulo.
+            // La cuenta tiene su propio módulo, así que el menú de usuario de
+            // Filament sobra: dos disparadores para la misma sesión se
+            // contradicen en cuanto uno cambie. Perfil, sitio y salida viven en
+            // la hoja del módulo.
             ->userMenu(false)
             // Pub Red, exacto según el manual de marca de Asobares Colombia.
             ->colors([
@@ -140,13 +129,10 @@ class AdminPanelProvider extends PanelProvider
                 ],
                 isRequired: true,
             )
-            // La campana se retira (D-L22, 7 sep): lo que anunciaba lo cuenta
-            // mejor la banda «Te está esperando» del tablero, que además dice
-            // qué hay que aprobar y desde cuándo espera. Si el gremio pide
-            // avisos de verdad, es un frente propio con su decisión.
+            // Sin campana de notificaciones: lo pendiente lo cuentan la banda
+            // «Te está esperando» del tablero y los contadores del menú.
+            // `Panel\AvisosQueSeVenTest` impide escribir avisos que nadie lee.
             //
-            // ->databaseNotifications()
-            // ->databaseNotificationsPolling('30s')
             // Sin icono de grupo a propósito: Filament no admite iconos en el
             // grupo y en sus items a la vez, y el icono por recurso orienta más.
             ->navigationGroups([
@@ -158,7 +144,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
-            ->pages([])
             // `discoverWidgets()` recorre `Filament/Widgets` RECURSIVAMENTE:
             // cualquier subdirectorio (como `Observatorio/`) entra también,
             // con su propio `$sort` compitiendo por posición con el tablero.
@@ -169,20 +154,6 @@ class AdminPanelProvider extends PanelProvider
             // de widgets que se agregue aquí necesita el mismo mecanismo si
             // no debe aparecer en el tablero.
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([
-                PendientesDeAprobacion::class,
-                ResumenDelGremio::class,
-                RecaudoMensual::class,
-                AsociadosPorMunicipio::class,
-                UltimasTransacciones::class,
-                // El flujo del sitio, de arriba abajo: primero los tres números
-                // (Acta 08, A-03), luego la curva de 30 días, luego por dónde
-                // entran y qué se mira una vez dentro.
-                EntradasAlSitio::class,
-                VisitasDelSitio::class,
-                PorDondeEntranAlSitio::class,
-                PaginasMasVisitadas::class,
-            ])
             ->assets($this->assetsDelPanel())
             ->middleware([
                 EncryptCookies::class,
@@ -201,17 +172,17 @@ class AdminPanelProvider extends PanelProvider
     }
 
     /**
-     * El plugin de graficas solo se registra si Vite ya lo compilo.
+     * Los módulos JS del panel solo se registran si Vite ya los compiló.
      *
-     * `panel()` se evalua en CADA arranque de consola, asi que una excepcion
-     * aqui deja muerto a artisan entero. Y hay dos formas de llegar a ella:
-     * sin manifiesto (clon recien hecho) y con un manifiesto viejo que aun
-     * no conoce esta entrada (alguien que compilo en otra rama y vuelve a
-     * esta). `ViteManifestNotFoundException` hereda de `ViteException`, asi
-     * que un solo catch cubre las dos.
+     * `panel()` se evalúa en CADA arranque de consola, así que una excepción
+     * aquí deja muerto a artisan entero. Y hay dos formas de llegar a ella:
+     * sin manifiesto (clon recién hecho) y con un manifiesto viejo que aún
+     * no conoce alguna de estas entradas (alguien que compiló en otra rama y
+     * vuelve a esta). `ViteManifestNotFoundException` hereda de
+     * `ViteException`, así que un solo catch cubre las dos.
      *
-     * Sin esto el procedimiento de compilacion del proyecto se vuelve un
-     * punto muerto circular: `view:clear` es el primer paso y necesitaria
+     * Sin esto el procedimiento de compilación del proyecto se vuelve un
+     * punto muerto circular: `view:clear` es el primer paso y necesitaría
      * el manifiesto que solo produce el paso siguiente.
      *
      * @return array<int, Js>

@@ -9,11 +9,11 @@ use Tests\TestCase;
 /**
  * Los objetivos táctiles del sitio público, y por qué hace falta vigilarlos.
  *
- * De 155 sitios de declaración interactivos, 95 no llegaban a 44x44 px: la
- * navbar de escritorio en 37,7, el conmutador Tarjetas/Mapa en 33,7, el chip de
- * WhatsApp de la tarjeta en 33,2 y el paginador en 44 de alto pero 40 de ancho.
- * Ninguno fallaba a la vista, que es el motivo de que llevaran ahí desde el
- * primer día.
+ * Un objetivo por debajo de 44x44 px no falla a la vista, y por eso sobrevive.
+ * Medido en Chromium sin las clases que los agrandan: los enlaces de la barra
+ * de escritorio de una sola fila, 37,7 px; el conmutador Tarjetas/Mapa, 33,7;
+ * el chip de WhatsApp de la tarjeta, 33,2; y el paginador, 44 de alto pero 40
+ * de ancho.
  *
  * ESTA CLASE NO MIDE GEOMETRÍA, Y HAY QUE LEERLA SABIÉNDOLO. Un objetivo táctil
  * se mide con el navegador —`document.elementFromPoint` sobre el cuadrado de
@@ -26,7 +26,7 @@ use Tests\TestCase;
  *   - Un `after:-inset-y-*` sin `relative` cuelga del ancestro posicionado más
  *     cercano, que puede ser la página entera.
  *   - Un `after:absolute` sin `after:content-['']` no genera ninguna caja: el
- *     pseudoelemento no existe y el área pulsable sigue siendo la de antes.
+ *     pseudoelemento no existe y el área pulsable no crece.
  *   - Un margen negativo sin el relleno que lo compensa no agranda nada: solo
  *     mueve el elemento.
  *   - Un envoltorio de 44x44 que sea un `<span>` en vez de un `<label for>` no
@@ -37,8 +37,8 @@ use Tests\TestCase;
 class ObjetivoTactilTest extends TestCase
 {
     /**
-     * Los siete directorios de vistas que barre `MovimientoTest`, más el
-     * paginador publicado, que renderizan ocho vistas públicas.
+     * Los directorios de vistas del sitio público, con `views/vendor` para el
+     * paginador publicado.
      *
      * @return list<string>
      */
@@ -85,12 +85,11 @@ class ObjetivoTactilTest extends TestCase
      * el área efectiva que salió. Si alguien la recorta, esto lo dice y dice
      * cuánto se pierde.
      *
-     * Seis de estas cadenas perdieron su `transition-colors` —y las filas de
-     * los desplegables su `hover:bg-superficie-alta`— al repartirse los portadores de
-     * acuse: en `@layer utilities` esas utilidades pisan al portador de
-     * `@layer components` y con ellas moría el `transition-duration: 0ms` del
-     * `:active`. Lo que esta clase vigila es la GEOMETRÍA (`py-3`, `min-h-11`,
-     * `px-4`), que sigue entera y sigue midiendo lo mismo. Quién puede convivir
+     * Ninguna de estas cadenas lleva `transition-colors` ni, en las filas de
+     * los desplegables, `hover:bg-superficie-alta`: en `@layer utilities` esas
+     * utilidades pisan al portador de acuse de `@layer components` y con ellas
+     * muere el `transition-duration: 0ms` del `:active`. Lo que esta clase
+     * vigila es la GEOMETRÍA (`py-3`, `min-h-11`, `px-4`); quién puede convivir
      * con quién lo vigila `MovimientoTest`.
      *
      * @return array<string, array{string, string, string}>
@@ -100,7 +99,7 @@ class ObjetivoTactilTest extends TestCase
         return [
             // Cromo. Las cuatro primeras son padding negativo óptico: el
             // relleno crea el área y el margen negativo la devuelve al flujo,
-            // así que la barra mide exactamente lo mismo que antes (83,38 px).
+            // así que la barra no cambia de alto por ellas.
             'navbar, logo' => [
                 'components/publico/navbar.blade.php',
                 '-my-1.5 flex shrink-0 items-center py-1.5',
@@ -121,9 +120,9 @@ class ObjetivoTactilTest extends TestCase
                 "after:absolute after:inset-x-0 after:-inset-y-1.5 after:content-['']",
                 'es la única pastilla pintada de la barra: crece el área, no el dibujo. 33,7 de pastilla y 45,7 de área medidos el 6 sep a 1440 y a 390; con 4 px por lado daban 42',
             ],
-            // Los dos grupos que reagruparon la barra. Nacieron cumpliendo:
-            // misma geometría que los enlaces sueltos de al lado, para que el
-            // disparador mida lo mismo y la barra no cambie de alto por él.
+            // Los dos grupos de la barra: misma geometría que los enlaces
+            // sueltos de al lado, para que el disparador mida lo mismo y la
+            // barra no cambie de alto por él.
             // La fila de pie de la hoja («Entrar como afiliado»): es el único
             // acceso del anónimo a su cuenta desde la barra del teléfono y su
             // cadena es distinta de la de los enlaces normales del grupo.
@@ -152,7 +151,7 @@ class ObjetivoTactilTest extends TestCase
                 'rounded-lg px-3 py-3 text-sm text-suave',
                 'py-2 dejaba la fila en 37,7 px',
             ],
-            // Los controles nuevos de la barra de escritorio (3 sep 2026).
+            // Los controles de tema e idioma de la barra de escritorio.
             'navbar, control de tema' => [
                 'components/publico/control-tema.blade.php',
                 'flex h-11 w-11 items-center justify-center rounded-full',
@@ -173,9 +172,8 @@ class ObjetivoTactilTest extends TestCase
                 'fila-pulsable flex w-full items-center gap-2.5 rounded-lg px-3 py-3 text-left text-sm',
                 'misma cadena que las filas del popover de tema, en su propio archivo: 45,7 px medidos',
             ],
-            // El suelo de 44 px que la spec §6.2 pedía y que ningún paso del
-            // plan construyó (revisión final del 5 sep). Los `-my-1` de los
-            // hijos devolvían el módulo a 37,7 + 2 de borde.
+            // El suelo de 44 px del módulo principal: sin `min-h-11`, los
+            // `-my-1` de los hijos lo dejan en 37,7 + 2 de borde.
             'navbar, módulo principal (objetivo del toque)' => [
                 'components/publico/navbar.blade.php',
                 'modulo modulo-principal hidden min-h-11 items-center gap-1 px-2 lg:flex',
@@ -186,9 +184,9 @@ class ObjetivoTactilTest extends TestCase
                 'indicador-mas -my-1 flex min-h-11 min-w-11 items-center justify-center rounded-lg px-2 py-3',
                 'solo se ve con puntero grueso y es el toque más natural: 44x44 medidos en iPad Pro 11 landscape (antes 32x40)',
             ],
-            // La barra móvil en dos módulos (6 sep 2026, Parte II): medidos en
-            // Chromium a 390x844 y 320x568 con toques por CDP, esquinas del
-            // cuadrado de 44 incluidas (`elementFromPoint` en las cuatro).
+            // La barra móvil en dos módulos: medidos en Chromium a 390x844 y
+            // 320x568 con toques por CDP, esquinas del cuadrado de 44 incluidas
+            // (`elementFromPoint` en las cuatro).
             'navbar, pestaña directa del módulo inferior' => [
                 'components/publico/navbar.blade.php',
                 'pestana fila-pulsable flex min-h-11 flex-1 flex-col items-center justify-center rounded-xl px-0.5',
@@ -265,10 +263,9 @@ class ObjetivoTactilTest extends TestCase
                 'inline-flex min-h-11 items-center rounded-xl border px-4 text-sm',
                 'con py-2 el chip mide 39,7 px',
             ],
-            // La cadena se mudó de `publico/eventos/index.blade.php` al
-            // componente al pasar el conmutador de dos segmentos a tres
-            // (Próximos / Pasados / Calendario): ahora lo pintan dos páginas y
-            // la geometría medida tiene que vivir en un solo sitio.
+            // La cadena vive en el componente del conmutador (Próximos /
+            // Pasados / Calendario) porque lo pintan dos páginas, y la
+            // geometría medida tiene que vivir en un solo sitio.
             'conmutador Próximos/Pasados/Calendario' => [
                 'components/publico/conmutador-eventos.blade.php',
                 'pulsable inline-flex min-h-11 items-center rounded-lg px-5 text-sm',
@@ -405,12 +402,12 @@ class ObjetivoTactilTest extends TestCase
 
     /**
      * Leaflet apila sus paneles internos hasta z-index 800 y `.leaflet-container`
-     * no crea contexto de apilamiento propio: esos 800 competían en la raíz
-     * contra el `z-40` de la barra. Medido: con el mapa en pantalla, abrir el
-     * menú móvil dejaba los botones de zoom POR ENCIMA de las filas del menú y
-     * el clic se lo llevaba el mapa. Es el mismo defecto que esta etapa persigue
-     * —un control responde por otro—, solo que entre dos capas en vez de entre
-     * dos vecinos.
+     * no crea contexto de apilamiento propio: esos 800 compiten en la raíz
+     * contra el `z-40` de la barra. Medido: sin contexto propio, con el mapa en
+     * pantalla, abrir el menú móvil deja los botones de zoom POR ENCIMA de las
+     * filas del menú y el clic se lo lleva el mapa. Es el mismo defecto que
+     * persigue esta clase —un control responde por otro—, solo que entre dos
+     * capas en vez de entre dos vecinos.
      */
     public function test_el_mapa_no_se_come_los_clics_del_menu(): void
     {

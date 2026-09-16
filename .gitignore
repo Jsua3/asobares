@@ -5,6 +5,7 @@
 .env.production
 .phpactor.json
 .phpunit.result.cache
+/.claude/worktrees/
 /.codex
 /.cursor/
 /.idea
@@ -15,6 +16,7 @@
 /.zed
 /auth.json
 /node_modules
+/public/_medicion/
 /public/build
 /public/fonts-manifest.dev.json
 /public/hot
@@ -46,14 +48,15 @@ Base de datos Cap*.xls*
 base-de-datos-cap*.xls*
 /material/*.xlsx
 
-# Material del gremio recibido el 26 ago 2026: bases con datos personales, certificado de un afiliado,
-# fotos de personas identificables y un PDF de 47 MB. Nunca se versiona; entra por importador/sembradores/medios.
+# Material del gremio con datos personales: bases, certificados de afiliados,
+# fotos de personas identificables y originales pesados. Nunca se versiona;
+# entra por importador, sembradores o medios optimizados.
 /material/nuevomaterial/
 
-# Material del gremio recibido el 9 sep 2026 (carpeta "materialnoviembre"): 6,4 GB con 383 archivos.
-# Cartera con saldos por establecimiento, fotos y videos de personas identificables, RAW de sesiones
-# fotograficas, logos de terceros y presentaciones institucionales. Mismo trato que nuevomaterial:
-# nunca se versiona; entra por importador, sembradores o medios optimizados.
+# Otra entrega del mismo material (varios GB): cartera con saldos por
+# establecimiento, fotos y videos de personas identificables, RAW de sesiones
+# fotograficas, logos de terceros y presentaciones institucionales. Mismo trato
+# que nuevomaterial.
 /material/materialnoviembre/
 
 # Material del gremio recibido el 15 sep 2026 (carpeta "sep15material"): 35 MB, 53 archivos.

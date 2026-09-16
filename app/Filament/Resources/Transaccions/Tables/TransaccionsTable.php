@@ -5,7 +5,6 @@ namespace App\Filament\Resources\Transaccions\Tables;
 use App\Enums\ConceptoTransaccion;
 use App\Enums\EstadoTransaccion;
 use App\Enums\MetodoPago;
-use App\Support\FormatoMoneda;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -40,12 +39,12 @@ class TransaccionsTable
                     ->toggleable(),
                 TextColumn::make('monto')
                     ->label('Monto')
-                    ->formatStateUsing(fn (mixed $state): string => FormatoMoneda::pesos($state))
+                    ->formatStateUsing(fn (mixed $state): string => pesos($state))
                     ->sortable()
                     ->summarize(
                         Sum::make()
                             ->label('Total')
-                            ->formatStateUsing(fn (mixed $state): string => FormatoMoneda::pesos($state))
+                            ->formatStateUsing(fn (mixed $state): string => pesos($state))
                     ),
                 TextColumn::make('metodo')
                     ->label('Método')

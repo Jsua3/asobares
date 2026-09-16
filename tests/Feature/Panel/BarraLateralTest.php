@@ -8,8 +8,7 @@ use Tests\Support\MideContraste;
 use Tests\TestCase;
 
 /**
- * La barra lateral del panel: cristal, luz y resorte (Parte III de la spec,
- * aprobada por Sua el 7 sep 2026).
+ * La barra lateral del panel: cristal, luz y resorte (Parte III de la spec).
  *
  * Esta clase vigila lo que ninguna otra puede: que la barra no vuelva a tener
  * paleta privada, que su material viva en los pseudoelementos, que las señales
@@ -20,7 +19,7 @@ class BarraLateralTest extends TestCase
 {
     use MideContraste;
 
-    /** Los diecinueve tokens de la Parte III, en el orden de su tabla. */
+    /** Los tokens de la Parte III, en el orden de su tabla. */
     private const TOKENS = [
         '--asb-admin-barra-velo',
         '--asb-admin-barra-velo-cajon',
@@ -76,9 +75,8 @@ class BarraLateralTest extends TestCase
 
     /**
      * Un token declarado dos veces en el mismo bloque deja sin efecto a la
-     * media que lo reasigna, y nadie se entera: es exactamente el defecto que
-     * `--asb-vidrio-desenfoque` arrastraba en este archivo.
-     * Rotura: declarar dos veces cualquiera de los diecinueve, o borrar uno.
+     * media que lo reasigna, y nadie se entera.
+     * Rotura: declarar dos veces cualquiera de ellos, o borrar uno.
      */
     public function test_los_tokens_de_la_barra_se_declaran_una_sola_vez_en_su_raiz(): void
     {
@@ -112,9 +110,9 @@ class BarraLateralTest extends TestCase
 
     /**
      * `tokens.css` apaga `--asb-vidrio-desenfoque` bajo transparencia reducida,
-     * pero el tema lo redeclaraba después con la misma especificidad y la
-     * anulación no llegaba: el panel seguía desenfocando para quien pidió que
-     * no. Afectaba al vidrio de ModerarFotos y al widget de pendientes.
+     * pero el tema lo redeclara después con la misma especificidad y esa
+     * anulación no llega: sin su propio bloque, el panel desenfoca para quien
+     * pidió que no. Afecta al vidrio de ModerarFotos y al widget de pendientes.
      * Rotura: borrar el bloque de transparencia reducida del tema.
      */
     public function test_la_transparencia_reducida_alcanza_al_vidrio_del_panel(): void
@@ -142,7 +140,7 @@ class BarraLateralTest extends TestCase
      * que anide dentro sin página que desenfocar, así que el halo del ítem
      * activo no funcionaría. Y el desenfoque solo se consume en el cajón: en
      * escritorio la barra es `lg:sticky` y detrás no pasa contenido, así que
-     * ahí desenfocar es pagar compositor por nada (medido el 7 sep).
+     * ahí desenfocar es pagar compositor por nada.
      * Rotura: mover el `backdrop-filter` al elemento, o sacarlo de la media.
      */
     public function test_el_material_de_la_barra_vive_en_los_pseudoelementos(): void
@@ -154,16 +152,16 @@ class BarraLateralTest extends TestCase
         $this->assertStringNotContainsString('filter:', $elemento, 'Ningún filtro en el elemento, por la misma razón.');
         $this->assertMatchesRegularExpression('/background:\s*transparent;/', $elemento, 'Filament da fondo opaco propio a la barra bajo `lg`: hay que ponerlo transparente explícitamente o el cajón queda opaco bajo el velo.');
 
-        // Desde D-L26 el velo no lo pinta la barra sino cada apartado: el campo
-        // de puntos es el fondo de toda la interfaz y tiene que verse también
-        // debajo de la barra.
+        // El velo no lo pinta la barra sino cada apartado: el campo de puntos
+        // es el fondo de toda la interfaz y tiene que verse también debajo de
+        // la barra.
         $velo = $this->regla($tema, '.fi-sidebar-group::before');
         $this->assertStringContainsString('var(--asb-admin-barra-velo)', $velo, 'El velo vive en el `::before` de cada apartado.');
         $suelo = $this->regla($tema, '.fi-sidebar::before');
         $this->assertStringNotContainsString('var(--asb-admin-barra-velo)', $suelo, 'La barra no puede pintar velo propio: taparía el campo de puntos.');
 
-        // El resplandor lo pinta la PÁGINA desde el 8 sep, no la barra: en la
-        // barra nacía debajo del topbar y se leía como un corte.
+        // El resplandor lo pinta la PÁGINA, no la barra: en la barra nacería
+        // debajo del topbar y se leería como un corte.
         $pagina = $this->regla($tema, '.fi-body::before');
         $this->assertStringContainsString('var(--asb-admin-barra-resplandor)', $pagina, 'Sin fondo propio, lo que marca la zona de la barra es su resplandor.');
         $this->assertStringNotContainsString('filter: blur', $pagina, 'El resplandor va con un radial: un `filter` obligaría al compositor a rehacerlo en cada fotograma del campo.');
@@ -180,42 +178,34 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * El límite de la región lo hacen una línea y una sombra, en luminancia. El
-     * filo luminiscente va encima como segunda capa: el rojo claro contra la
-     * página clara da 2,60:1 y el oscuro contra la oscura 1,93:1, así que
-     * ninguno de los dos llega solo a los 3:1 que pide un borde de región.
-     * Rotura: quitar la línea y dejar solo el filo.
+     * El límite de la barra no lo hace la luz: un filo luminiscente no llega a
+     * los 3:1 que pide un borde de región (el rojo claro contra la página clara
+     * da 2,60:1 y el oscuro contra la oscura 1,93:1). La barra tampoco se separa
+     * con un canto: no tiene fondo ni sombra propios, el campo de puntos pasa
+     * por debajo de ella y del contenido, y lo único que dibuja su `::after` es
+     * el resplandor de la esquina.
+     * Rotura: devolver `border-inline-end` a la barra; quitar el resplandor de
+     * la esquina.
      */
     public function test_el_limite_de_la_barra_no_lo_hace_solo_la_luz(): void
     {
         $tema = $this->tema();
         $elemento = $this->regla($tema, '.fi-sidebar');
 
-        // D-L25 sustituyó la línea por la unión: lo que separa ya no es un
-        // canto, sino el fondo propio de la barra (el campo de puntos) más la
-        // sombra y el degradado que la unen al contenido.
-        $this->assertStringNotContainsString('border-inline-end', $elemento, 'La barra no puede separarse con un canto: se une con la sombra de su pseudoelemento.');
+        // Lo que separa no es un canto: la barra no tiene fondo ni sombra
+        // propios y el campo de puntos es continuo por debajo.
+        $this->assertStringNotContainsString('border-inline-end', $elemento, 'La barra no puede separarse con un canto.');
 
-        // Lo único que dibuja `::after` es el resplandor de la esquina: desde
-        // que Sua pidió continuidad, ahí no va nada que separe.
+        // Lo único que dibuja `::after` es el resplandor de la esquina: la barra
+        // es continua con el contenido y ahí no va nada que separe.
         $capa = $this->regla($tema, '.fi-sidebar::after');
         $this->assertStringContainsString('var(--asb-admin-barra-halo)', $capa, 'Se perdió el resplandor de la esquina, que es de donde nace la luz.');
     }
 
     /**
-     * Se acabó la paleta privada. La barra tenía nueve colores en hexadecimal
-     * repartidos en dos bloques, y el segundo, el de puntero fino, es el que
-     * se olvida: ahí vivían `rgb(255 255 255)`, `rgb(255 255 255 / 0.06)`,
-     * `#ff8a82` y `#ff7168`. Con colores propios la barra no sigue al tema, y
-     * el día que la paleta se mueva se queda atrás.
-     * Rotura: devolver `#ff7168` al rótulo del ítem activo.
-     */
-    /**
-     * Se acabó la paleta privada. La barra tenía nueve colores en hexadecimal
-     * repartidos en dos bloques, y el segundo, el de puntero fino, es el que
-     * se olvida: ahí vivían `rgb(255 255 255)`, `rgb(255 255 255 / 0.06)`,
-     * `#ff8a82` y `#ff7168`. Con colores propios la barra no sigue al tema, y
-     * el día que la paleta se mueva se queda atrás.
+     * Sin paleta privada: con colores propios la barra no sigue al tema, y el
+     * día que la paleta se mueva se queda atrás. El bloque que más se olvida es
+     * el de puntero fino.
      *
      * Barrido por líneas y no por bloques: el archivo anida medias dentro de
      * medias y las listas de selectores ocupan varias líneas, así que partir
@@ -281,12 +271,12 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * El foco no puede depender del puntero. El único `:focus-visible` de la
-     * barra vivía dentro de `@media (hover: hover) and (pointer: fine)`, así
-     * que en un portátil táctil o en una tableta con teclado la barra se
-     * navegaba sin ningún indicador, con el contorno nativo ya quitado por
-     * Filament. Se comprueba por posición en el archivo, que es lo que de
-     * verdad falla: la regla existía y no aplicaba.
+     * El foco no puede depender del puntero. Un `:focus-visible` dentro de
+     * `@media (hover: hover) and (pointer: fine)` deja a un portátil táctil o a
+     * una tableta con teclado navegando la barra sin ningún indicador, con el
+     * contorno nativo ya quitado por Filament. Se comprueba por posición en el
+     * archivo, que es lo que de verdad falla: la regla puede existir y no
+     * aplicar.
      * Rotura: devolver el `:focus-visible` al bloque de puntero fino.
      */
     public function test_el_foco_de_la_barra_no_depende_del_puntero(): void
@@ -314,9 +304,9 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * Las 24 filas medían 43,5 px el 7 sep en el panel de Sua, y ninguna
-     * pasaba la comprobación de las cuatro esquinas del cuadrado de 44. La
-     * altura sale de un token para que la medición y el CSS no se separen.
+     * Con 2.72rem las filas miden 43,5 px y ninguna pasa la comprobación de las
+     * cuatro esquinas del cuadrado de 44. La altura sale de un token para que
+     * la medición y el CSS no se separen.
      * Rotura: devolver la fila a 2.72rem.
      */
     public function test_la_fila_de_la_barra_llega_a_los_44_px(): void
@@ -335,11 +325,11 @@ class BarraLateralTest extends TestCase
 
         $this->assertGreaterThanOrEqual(44, $enPixeles, "La fila declara {$alto[1]}rem, que son {$enPixeles} px: por debajo del mínimo táctil.");
 
-        // 48 y no 44 es elección, no mínimo: la corrección del 7 sep subió la
-        // fila para que la barra respirara, sabiendo el coste (la lista pasa de
-        // 1.216 a 1.312 px y se corta el 22 % en vez del 16 % a 1.019 de hueco).
-        // Bajarla otra vez deshace esa decisión sin que nadie se entere.
-        $this->assertSame(48.0, $enPixeles, "La fila declara {$alto[1]}rem: la decisión del 7 sep fue 3rem, o sea 48 px.");
+        // 48 y no 44 es elección, no mínimo: la fila sube para que la barra
+        // respire, sabiendo el coste (la lista pasa de 1.216 a 1.312 px y se
+        // corta el 22 % en vez del 16 % a 1.019 de hueco). Bajarla otra vez
+        // deshace esa decisión sin que nadie se entere.
+        $this->assertSame(48.0, $enPixeles, "La fila declara {$alto[1]}rem y la decisión es 3rem, o sea 48 px.");
 
         $this->assertStringContainsString(
             'min-height: var(--asb-admin-barra-fila-alto);',
@@ -349,10 +339,9 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * La barra es UNA superficie, no cajas dentro de cajas (corrección del
-     * 7 sep). Con los módulos encajados la fila se quedaba en 210 px útiles de
-     * 244, y los cantos apilaban tres niveles: barra, módulo y fila. El ritmo
-     * lo hace el aire.
+     * La barra es UNA superficie, no cajas dentro de cajas. Con los módulos
+     * encajados la fila se queda en 210 px útiles de 244, y los cantos apilan
+     * tres niveles: barra, módulo y fila. El ritmo lo hace el aire.
      *
      * Los tokens de módulo siguen vivos, pero solo para las capas que flotan
      * sobre la página: la hoja de la cuenta y el popover del tema. Ahí el canto
@@ -389,15 +378,12 @@ class BarraLateralTest extends TestCase
 
     /**
      * La cuenta vive en el cromo superior EN ESCRITORIO, junto al control de
-     * tema. Pasó por el pie de la barra y por la primera fila de la lista el
-     * mismo día; Sua la quiso arriba, al lado de la configuración de claro y
-     * oscuro.
+     * tema de claro y oscuro.
      *
-     * Desde D-L30 hay una segunda copia al pie de la barra, que es donde la
-     * quiso **en el teléfono**. Lo que este caso sigue exigiendo es que la del
-     * cromo exista y que el menú de usuario de Filament no vuelva: dos
-     * disparadores para la misma sesión se contradicen en cuanto uno cambie.
-     * De que solo una esté viva a la vez se ocupa
+     * Hay una segunda copia al pie de la barra, para **el teléfono**. Lo que
+     * este caso exige es que la del cromo exista y que el menú de usuario de
+     * Filament no vuelva: dos disparadores para la misma sesión se contradicen
+     * en cuanto uno cambie. De que solo una esté viva a la vez se ocupa
      * `test_la_cuenta_esta_en_dos_ganchos_sin_duplicar_identificadores`.
      *
      * Rotura: quitarla del cromo; devolver el menú de usuario de Filament.
@@ -417,15 +403,12 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * Los módulos, traducidos de la barra de escritorio (recordatorio de Sua el
-     * 7 sep: «se usarán módulos así como está compuesta la navBar de escritorio
-     * pero en vertical»). El grupo es el módulo, y como allí nace APAGADO: en
-     * el estado inicial el vidrio lo pone la barra y el módulo no dibuja nada.
-     * Enciende su brillo y su canto cuando la lista se ha desplazado.
-     *
-     * Pintarlos siempre fue el error de la primera pasada: se leían como cajas
-     * dentro de cajas y por eso la barra parecía apeñuscada.
-     * Rotura: encender los pseudoelementos sin el estado, o quitarlos.
+     * Los módulos, traducidos de la barra de escritorio a vertical: el grupo es
+     * el módulo, con su cristal en los pseudoelementos. El cristal está siempre
+     * puesto; lo que añade el desplazamiento de la lista es la sombra que lo
+     * despega.
+     * Rotura: quitar los pseudoelementos; apagar el cristal en reposo; quitar
+     * la sombra del estado de desplazamiento.
      */
     public function test_los_modulos_nacen_apagados_y_encienden_con_el_estado(): void
     {
@@ -435,19 +418,21 @@ class BarraLateralTest extends TestCase
             $this->assertStringContainsString($capa, $tema, "El módulo no tiene su {$capa}.");
         }
 
-        // D-L26: el cristal es permanente, porque con el campo de puntos detrás
-        // ya hay algo que refractar y la lámina deja de leerse como caja. Lo que
-        // añade el desplazamiento es la sombra que la despega.
+        // El cristal es permanente: con el campo de puntos detrás hay algo que
+        // refractar y la lámina no se lee como caja.
         $this->assertStringContainsString('opacity: 1;', $this->regla($this->tema(), '.fi-sidebar-group::before'), 'El cristal del apartado tiene que estar puesto, no esperando al scroll.');
-        $this->assertStringContainsString('body[data-barra-estado="scroll"] .fi-sidebar-group', $tema, 'El desplazamiento ya no afirma el cristal con su sombra.');
+        $this->assertStringContainsString(
+            'var(--asb-admin-barra-modulo-sombra)',
+            $this->regla($this->tema(), 'body[data-barra-estado="scroll"] .fi-sidebar-group'),
+            'Al desplazar la lista, el cristal del apartado no gana la sombra que lo despega.'
+        );
     }
 
     /**
-     * Nada separa la barra del contenido. El límite pasó por tres formas y las
-     * tres eran la misma: una línea de un píxel, un filo rojo y una franja
-     * difusa de 40 px. Difusa o no, se leía como un corte vertical, y Sua lo
-     * rechazó las tres veces. Lo que marca la zona es el resplandor; lo que la
-     * ordena son los cristales de sus apartados.
+     * Nada separa la barra del contenido: una línea de un píxel, un filo rojo o
+     * una franja difusa de 40 px se leen igual, como un corte vertical. Lo que
+     * marca la zona es el resplandor; lo que la ordena son los cristales de sus
+     * apartados.
      * Rotura: devolver el borde, el filo o la franja.
      */
     public function test_nada_corta_la_barra_del_contenido(): void
@@ -460,13 +445,13 @@ class BarraLateralTest extends TestCase
         $this->assertStringNotContainsString('box-shadow', $barra, 'La sombra del elemento la anula Filament en escritorio, y además volvería a marcar el corte.');
         $this->assertStringNotContainsString('linear-gradient(to right', $capa, 'Vuelve la franja vertical que rompe la continuidad.');
 
-        // El resplandor de D-L28 sí lleva un lavado horizontal, y por eso hay
-        // que vigilar su DIRECCIÓN: anclado al canto izquierdo y apagándose
-        // hacia dentro no separa nada; al revés es la franja del límite otra vez.
-        // Desde el 8 sep la capa es de página, `.fi-body::before`, no de la barra.
-        // Se lee la dirección declarada en vez de buscar cadenas: con el
-        // paréntesis y el salto de línea, `linear-gradient(270deg` no aparece
-        // nunca tal cual y la guardia daba verde con el lavado invertido.
+        // El resplandor sí lleva un lavado horizontal, y por eso hay que vigilar
+        // su DIRECCIÓN: anclado al canto izquierdo y apagándose hacia dentro no
+        // separa nada; al revés es la franja del límite otra vez. La capa es de
+        // página, `.fi-body::before`, no de la barra. Se lee la dirección
+        // declarada en vez de buscar cadenas: con el paréntesis y el salto de
+        // línea, `linear-gradient(270deg` no aparece nunca tal cual y buscar la
+        // cadena daría verde con el lavado invertido.
         $suelo = preg_replace('/\s+/', ' ', $this->regla($tema, '.fi-body::before'));
 
         preg_match_all('/linear-gradient\(\s*([^,]+),/', $suelo, $lavados);
@@ -501,11 +486,11 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * El campo de puntos del fondo (D-L24). Se dibuja en un lienzo y no con
-     * nodos: con 18 px de paso, una columna de 244 por 1.000 son más de
-     * setecientos puntos. Tres condiciones de la decisión, cada una con su
-     * afirmación: colores por token (invierte con el tema), repulsión apagada
-     * bajo movimiento reducido, y lienzo sin puntero ni texto.
+     * El campo de puntos del fondo. Se dibuja en un lienzo y no con nodos: con
+     * 18 px de paso, una columna de 244 por 1.000 son más de setecientos
+     * puntos. Tres condiciones de la decisión, cada una con su afirmación:
+     * colores por token (invierte con el tema), repulsión apagada bajo
+     * movimiento reducido, y lienzo sin puntero ni texto.
      * Rotura: cablear el color, mover los puntos con movimiento reducido, o
      * dejar que el lienzo reciba el puntero.
      */
@@ -526,13 +511,12 @@ class BarraLateralTest extends TestCase
 
         $lienzo = $this->regla($tema, '.asb-barra-puntos');
         $this->assertStringContainsString('pointer-events: none;', $lienzo, 'El lienzo intercepta el puntero.');
-        // Fijo desde D-L26: el campo es de toda la interfaz, no de una zona, y
-        // no puede desplazarse con nada. En flujo empujaría el contenido, que
-        // es lo que pasó el 7 sep cuando una regla le quitó la posición.
+        // Fijo: el campo es de toda la interfaz, no de una zona, y no puede
+        // desplazarse con nada. En flujo empujaría el contenido.
         $this->assertStringContainsString('position: fixed;', $lienzo, 'El lienzo tiene que estar fuera del flujo y fijo al viewport.');
         $this->assertStringContainsString('100dvh', $lienzo, 'El lienzo tiene que cubrir el alto del viewport.');
-        // El lienzo va en z-index 0 y todo lo demás en 1: con negativo se colaba
-        // por detrás del fondo del cuerpo y no se veía.
+        // El lienzo va en z-index 0 y todo lo demás en 1: con negativo se cuela
+        // por detrás del fondo del cuerpo y no se ve.
         $this->assertStringContainsString('z-index: 0;', $lienzo, 'El lienzo tiene que quedar sobre el fondo del cuerpo.');
         $this->assertStringContainsString('z-index: 1;', $this->regla($tema, '.fi-layout'), 'El contenido tiene que ir por encima del campo.');
 
@@ -548,10 +532,9 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * Sin barra de desplazamiento visible (D-L24), la única pista de que la
-     * lista sigue es la máscara de desvanecido. Por eso las dos cosas se
-     * afirman juntas: esconder la barra sin el aviso deja al usuario sin saber
-     * que hay más.
+     * Sin barra de desplazamiento visible, la única pista de que la lista sigue
+     * es la máscara de desvanecido. Por eso las dos cosas se afirman juntas:
+     * esconder la barra sin el aviso deja al usuario sin saber que hay más.
      * Rotura: quitar la máscara, o devolver la barra de desplazamiento.
      */
     public function test_esconder_la_barra_de_scroll_obliga_al_aviso(): void
@@ -577,7 +560,7 @@ class BarraLateralTest extends TestCase
      * El aire vertical de la lista tiene que ser MAYOR que el desvanecido del
      * aviso. Si no, en reposo la primera lámina nace dentro de la máscara y la
      * última muere en ella: el módulo tiene canto, y un canto a medio pintar se
-     * lee como una caja cortada, que es justo lo que Sua vio el 8 sep.
+     * lee como una caja cortada.
      *
      * La cuenta se hace, no se afirma de memoria: se resuelve el `calc()` y se
      * compara con el token. Rotura: bajar el relleno por debajo del aviso, o
@@ -624,10 +607,10 @@ class BarraLateralTest extends TestCase
     /**
      * El aire lateral de la lista tiene que ser el MISMO a los dos lados. Con
      * 0,75 rem a la izquierda y 0,3 a la derecha, el canto derecho del módulo
-     * se quedaba a 4,8 px del borde de la barra teniendo 16 px de radio: la
-     * curva no tenía fondo contra el que leerse y Sua vio un corte donde solo
-     * había estrechez (8 sep). Lo que compensa el ancho del módulo es el ancho
-     * de la barra, no el aire de un solo canto.
+     * queda a 4,8 px del borde de la barra teniendo 16 px de radio: la curva no
+     * tiene fondo contra el que leerse y se ve un corte donde solo hay
+     * estrechez. Lo que compensa el ancho del módulo es el ancho de la barra,
+     * no el aire de un solo canto.
      *
      * Rotura: dejar los dos valores distintos, o bajar el aire por debajo de
      * 0,75 rem.
@@ -660,11 +643,11 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * El resplandor marca la zona del panel de arriba abajo (D-L28). Con solo
-     * el radial de la esquina se apagaba a poco más de media altura: en una
-     * pantalla de 1.080 px se acababa sobre los 594 y la mitad de abajo se
-     * quedaba sin marca. Se afirman las DOS capas por separado, porque cada
-     * una hace una cosa distinta.
+     * El resplandor marca la zona del panel de arriba abajo. Con solo el radial
+     * de la esquina se apaga a poco más de media altura: en una pantalla de
+     * 1.080 px se acaba sobre los 594 y la mitad de abajo se queda sin marca.
+     * Se afirman las DOS capas por separado, porque cada una hace una cosa
+     * distinta.
      * Rotura: quitar el lavado y dejar solo el radial, o al revés.
      */
     public function test_el_resplandor_cubre_todo_el_lado(): void
@@ -699,7 +682,7 @@ class BarraLateralTest extends TestCase
         $this->assertStringNotContainsString(
             'var(--asb-admin-barra-resplandor)',
             $enLaBarra,
-            'El resplandor volvió a la barra: ahí nace debajo del topbar y Sua ve el corte otra vez.'
+            'El resplandor está en la barra: ahí nace debajo del topbar y se ve como un corte.'
         );
 
         // El ancho del lavado es una longitud y no un porcentaje: la capa mide
@@ -712,7 +695,7 @@ class BarraLateralTest extends TestCase
 
         /*
          * El topbar lo lleva TAMBIÉN, en sus CUATRO estados. La capa de página
-         * ya pasa por detrás, pero el blanco al 78 % del topbar la diluía lo
+         * ya pasa por detrás, pero el blanco al 78 % del topbar la diluye lo
          * bastante como para dejar un escalón justo debajo del logotipo. Se
          * afirman los cuatro por separado: el estado afirmado redeclara
          * `background` entero, así que olvidarlo apaga el rojo al desplazar y
@@ -744,15 +727,14 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * Las cuatro señales del sistema llegan a la barra (D-L17). Se afirman las
-     * cuatro por separado, con los tokens que cada una reasigna, porque cada
-     * una responde a una necesidad distinta y borrar una no rompe a las otras.
+     * Las cuatro señales del sistema llegan a la barra. Se afirman las cuatro
+     * por separado, con los tokens que cada una reasigna, porque cada una
+     * responde a una necesidad distinta y borrar una no rompe a las otras.
      *
      * Y se afirma lo que de verdad las hace funcionar: que viven FUERA de
      * `@layer components`. Dentro de la capa la reasignación pierde contra el
-     * `:root` sin capa de este mismo archivo y la señal no llega. Es el defecto
-     * que este archivo ya pagó una vez con `--asb-vidrio-desenfoque`, y una
-     * guardia que solo mirase que el bloque existe lo habría dado por bueno.
+     * `:root` sin capa de este mismo archivo y la señal no llega, y una guardia
+     * que solo mirase que el bloque existe lo daría por bueno.
      *
      * Rotura: borrar un bloque; meter uno dentro de la capa; dejar un `blur()`
      * literal donde la media no lo alcanza.
@@ -808,10 +790,10 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * El cristal del apartado tiene que DEJAR VER el campo de puntos (D-L27).
-     * Al 88 % lo tapaba y la lámina se leía como tarjeta opaca sobre un fondo
-     * con textura. El velo del cajón es otro y se queda donde estaba: ese sí
-     * se apoya sobre contenido que hay que tapar.
+     * El cristal del apartado tiene que DEJAR VER el campo de puntos. Al 88 %
+     * lo tapa y la lámina se lee como tarjeta opaca sobre un fondo con textura.
+     * El velo del cajón es otro y va más alto: ese sí se apoya sobre contenido
+     * que hay que tapar.
      * Rotura: devolver el velo del módulo por encima del 80 %.
      */
     public function test_el_cristal_del_apartado_deja_ver_el_campo(): void
@@ -875,13 +857,8 @@ class BarraLateralTest extends TestCase
     /**
      * Ningún token del panel se queda declarado sin que nadie lo consuma. No es
      * higiene: un token huérfano sostiene guardias verdes sobre algo que no
-     * pinta nada. `--asb-admin-barra-filo` lo demostró el 8 sep: dos guardias
-     * afirmaban que estaba declarado y que la señal de más contraste lo
-     * reasignaba, y hacía dos días que no tenía consumidor, desde que Sua
-     * rechazó el filo rojo que lo pintaba.
-     *
-     * La guardia ya existía para un token concreto, `--asb-admin-barra-union`.
-     * Esta la generaliza a los cuarenta y dos.
+     * pinta nada, porque una guardia puede afirmar que está declarado y que una
+     * señal lo reasigna aunque nadie lo consuma.
      *
      * Rotura: declarar un token y no consumirlo.
      */
@@ -932,16 +909,15 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * En el teléfono la barra es un RIEL de iconos y no un cajón que se va
-     * (D-L29). Y antes que eso: el tema no puede declarar `position` en
-     * `.fi-sidebar`.
+     * En el teléfono la barra es un RIEL de iconos y no un cajón que se va. Y
+     * antes que eso: el tema no puede declarar `position` en `.fi-sidebar`.
      *
      * Filament la declara `fixed` y solo la vuelve `lg:sticky` en escritorio.
-     * Nuestro `position: relative` iba DESPUÉS en el archivo compilado —que no
-     * lleva capas, `lightningcss` las aplana— así que ganaba en todas las
-     * anchuras: en el teléfono el cajón cerrado ocupaba sus 252 px en el flujo
-     * y aplastaba el contenido, y en escritorio la barra se iba con el
-     * desplazamiento. Sua lo vio como «terrible» el 8 sep.
+     * Un `position` nuestro va DESPUÉS en el archivo compilado —que no lleva
+     * capas, `lightningcss` las aplana— así que gana en todas las anchuras: con
+     * `relative`, en el teléfono el cajón cerrado ocupa sus 252 px en el flujo
+     * y aplasta el contenido, y en escritorio la barra se va con el
+     * desplazamiento.
      *
      * Rotura: devolver `position` a la barra; quitar el ancho del riel; ocultar
      * los rótulos con `display: none`; dejar el `translate` en cero en vez de
@@ -981,12 +957,12 @@ class BarraLateralTest extends TestCase
         );
 
         /*
-         * LA BARRA NO TIENE SUELO, ni cerrada ni abierta (Sua lo pidió dos
-         * veces, el 8 sep). Los módulos flotan y entre ellos se ve lo que hay
-         * detrás. Se afirma sobre el `::before` de la barra, que es la única
-         * pieza que podría pintar esa barra blanca; el velo del cajón sigue
-         * existiendo como token porque la cuenta anclada sí tapa —por debajo
-         * de ella pasan los iconos y tienen que desaparecer— y eso lo vigila
+         * LA BARRA NO TIENE SUELO, ni cerrada ni abierta. Los módulos flotan y
+         * entre ellos se ve lo que hay detrás. Se afirma sobre el `::before` de
+         * la barra, que es la única pieza que podría pintar esa barra blanca;
+         * el velo del cajón sigue existiendo como token porque la cuenta
+         * anclada sí tapa —por debajo de ella pasan los iconos y tienen que
+         * desaparecer— y eso lo vigila
          * `test_el_perfil_flota_sobre_la_lista_y_la_lista_le_reserva_sitio`.
          */
         $desde = strpos($movil, '.fi-sidebar::before');
@@ -1003,7 +979,7 @@ class BarraLateralTest extends TestCase
         // Y el cristal de los apartados es más transparente en el teléfono.
         $this->assertNotFalse(
             strpos($movil, '--asb-admin-barra-velo:'),
-            'El cristal del apartado no se aclara en el teléfono, que es lo que Sua pidió al quitarle el suelo al riel.'
+            'El cristal del apartado no se aclara en el teléfono, donde el riel no tiene suelo.'
         );
 
         // La transición es del ANCHO y declarada a mano: `transition-all` de
@@ -1032,7 +1008,7 @@ class BarraLateralTest extends TestCase
 
     /**
      * En el teléfono, el logotipo va al CENTRO y el control de tema a la
-     * derecha (D-L30). La hamburguesa se queda donde estaba, a la izquierda.
+     * derecha. La hamburguesa se queda donde estaba, a la izquierda.
      *
      * El centrado es absoluto contra el ancho del cromo y no por reparto de
      * espacio: los dos costados miden lo mismo —44 px de botón a cada lado—
@@ -1111,10 +1087,10 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * El perfil está ANCLADO al pie de la barra y los iconos pasan por DEBAJO
-     * (D-L30). Es la diferencia entre flotar y ser el último elemento: si fuera
-     * un hermano al pie, la lista terminaría encima y no habría nada que pasara
-     * por debajo, que es justo lo que Sua pidió.
+     * El perfil está ANCLADO al pie de la barra y los iconos pasan por DEBAJO.
+     * Es la diferencia entre flotar y ser el último elemento: si fuera un
+     * hermano al pie, la lista terminaría encima y no habría nada que pasara
+     * por debajo.
      *
      * Y si flota, la lista tiene que reservar su alto o el último destino queda
      * inalcanzable, que es un incumplimiento y no un detalle.
@@ -1146,9 +1122,9 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * El resorte de los iconos del riel (D-L30): lo que se mueve responde al
-     * GESTO y no a un reloj. Una transición CSS no puede hacerlo, porque no
-     * sabe a qué velocidad va la mano; hace falta integrar.
+     * El resorte de los iconos del riel: lo que se mueve responde al GESTO y no
+     * a un reloj. Una transición CSS no puede hacerlo, porque no sabe a qué
+     * velocidad va la mano; hace falta integrar.
      *
      * Se afirman las cuatro reglas de la decisión, cada una por separado,
      * porque cada una responde a un peligro distinto:
@@ -1198,10 +1174,10 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * El cajón del teléfono es una LÁMINA de cristal, no un cuadrado blanco
-     * (Sua, 8 sep). Y los ítems sin grupo —«Tablero»— son un módulo más:
-     * Filament los pinta sueltos en la lista y por eso quedaban pegados al
-     * canto, sin cristal y sin aire.
+     * El cajón del teléfono es una LÁMINA de cristal, no un cuadrado blanco.
+     * Y los ítems sin grupo —«Tablero»— son un módulo más: Filament los pinta
+     * sueltos en la lista y, sin ese trato, quedan pegados al canto, sin
+     * cristal y sin aire.
      *
      * El velo del cajón baja al 84 %, que es el SUELO medido sobre el peor
      * fondo posible: contenido negro con el velo de cierre de Filament encima.
@@ -1224,9 +1200,9 @@ class BarraLateralTest extends TestCase
 
         /*
          * El cajón NO tiene suelo: ni velo ni desenfoque propios. Los módulos
-         * quedan libres y entre ellos se ve la página atenuada, que es lo que
-         * Sua pidió dos veces. Se lee el cuerpo de la regla, no el archivo
-         * entero, porque el mismo material sí vive en otras piezas.
+         * quedan libres y entre ellos se ve la página atenuada. Se lee el
+         * cuerpo de la regla, no el archivo entero, porque el mismo material
+         * sí vive en otras piezas.
          */
         $desde = strpos($movil, '.fi-sidebar.fi-sidebar-open::before');
 
@@ -1239,9 +1215,9 @@ class BarraLateralTest extends TestCase
 
         /*
          * Y como no hay suelo, lo que sostiene la lectura es el cristal de cada
-         * módulo, que DENTRO del cajón sube al 84 %. Medido el 8 sep: al 66 %
-         * del riel, sobre página negra con el velo de cierre de Filament en
-         * medio, el rótulo del ítem activo da 3,03:1 y no pasa.
+         * módulo, que DENTRO del cajón sube al 84 %. Medido: al 66 % del riel,
+         * sobre página negra con el velo de cierre de Filament en medio, el
+         * rótulo del ítem activo da 3,03:1 y no pasa.
          */
         $this->assertSame(
             1,
@@ -1258,9 +1234,9 @@ class BarraLateralTest extends TestCase
 
     /**
      * La hoja de la cuenta, al pie de la barra, abre HACIA ARRIBA y hacia
-     * dentro. Colgaba del chip hacia abajo y hacia la izquierda —correcto en el
-     * cromo, absurdo al pie de una barra de 64 px— y se iba fuera de la
-     * pantalla: por eso Sua no podía abrir su menú con la barra cerrada.
+     * dentro. Colgando del chip hacia abajo y hacia la izquierda —correcto en
+     * el cromo, absurdo al pie de una barra de 64 px— se va fuera de la
+     * pantalla y, con la barra cerrada, el menú no se puede abrir.
      *
      * Rotura: devolverla hacia abajo.
      */
@@ -1280,21 +1256,22 @@ class BarraLateralTest extends TestCase
     }
 
     /**
-     * La maqueta con la que se mide (tarea 10 del plan). El panel exige segundo
-     * factor, así que ninguna sesión automatizada lo abre: sin poder ver la
-     * barra se entregaron dos regresiones visuales seguidas. La maqueta es lo
-     * que permite verla, y este comando es lo que la hace reproducible.
+     * La maqueta con la que se mide. El panel exige segundo factor, así que
+     * ninguna sesión automatizada lo abre y la barra no se puede ver: la
+     * maqueta es lo que permite verla, y este comando es lo que la hace
+     * reproducible.
      *
-     * Se afirma pieza por pieza, porque cada una se ganó el sitio a base de
-     * medir mal sin ella: sin `fi-sidebar-open` Filament deja la barra fuera de
-     * pantalla; sin el botón de plegado no reprodujo el defecto del canto
-     * derecho; y con las rutas a mano se mediría una hoja vieja sin avisar.
+     * Se afirma pieza por pieza, porque sin cada una se mide mal: sin
+     * `fi-sidebar-open` Filament deja la barra fuera de pantalla; sin el botón
+     * de plegado no se reproduce el defecto del canto derecho; y con las rutas
+     * a mano se mediría una hoja vieja sin avisar.
      *
      * Rotura: quitarle al comando cualquiera de esas piezas.
      */
     public function test_el_comando_de_la_maqueta_la_deja_medible(): void
     {
         $ruta = 'public/_medicion/prueba-barra.html';
+        $carpetaExistia = File::isDirectory(dirname(base_path($ruta)));
 
         try {
             $this->artisan('maqueta:barra', ['--ruta' => $ruta])->assertSuccessful();
@@ -1324,7 +1301,7 @@ class BarraLateralTest extends TestCase
             );
 
             $this->assertNotFalse(strpos($maqueta, '[x-cloak]'), 'Falta el estilo de x-cloak.');
-            $this->assertNotFalse(strpos($maqueta, '$store'), 'Falta el almacén de mentira: sin él la consola se llena de errores que esconden a los de verdad.');
+            $this->assertNotFalse(strpos($maqueta, 'window.Alpine = window.Alpine ||'), 'Falta el almacén de mentira: sin él la consola se llena de errores que esconden a los de verdad.');
 
             // Las rutas salen del manifiesto, no escritas a mano: si no, la
             // maqueta mediría una hoja vieja sin que nadie se entere.
@@ -1343,7 +1320,7 @@ class BarraLateralTest extends TestCase
                 'La maqueta no apunta a la hoja compilada de hoy: mediría una vieja sin avisar.'
             );
         } finally {
-            File::deleteDirectory(base_path('public/_medicion'));
+            $this->borrarLaMaquetaDePrueba($ruta, $carpetaExistia);
         }
     }
 
@@ -1358,6 +1335,7 @@ class BarraLateralTest extends TestCase
     public function test_la_maqueta_no_se_genera_en_produccion(): void
     {
         $ruta = 'public/_medicion/produccion.html';
+        $carpetaExistia = File::isDirectory(dirname(base_path($ruta)));
 
         $this->app->detectEnvironment(fn () => 'production');
 
@@ -1370,16 +1348,33 @@ class BarraLateralTest extends TestCase
             );
         } finally {
             $this->app->detectEnvironment(fn () => 'testing');
-            File::deleteDirectory(base_path('public/_medicion'));
+            $this->borrarLaMaquetaDePrueba($ruta, $carpetaExistia);
         }
     }
 
     /**
-     * El contrato con Filament (tarea 9 del plan). Este tema no decora a
-     * Filament: se apoya en hechos concretos de su vendor, y cada uno de ellos
-     * cambió una decisión de diseño. Si Filament sube de versión y uno se cae,
-     * lo que se rompe no es una regla: es el motivo por el que la regla está
-     * escrita como está. Por eso el porqué va en el mensaje, uno por uno.
+     * Borra solo lo que generó la prueba: su archivo y, si la carpeta no
+     * existía antes, la carpeta vacía. `public/_medicion` es también donde el
+     * comando deja por defecto la maqueta de medición, y borrarla entera se
+     * llevaría la de quien esté midiendo.
+     */
+    private function borrarLaMaquetaDePrueba(string $ruta, bool $carpetaExistia): void
+    {
+        $carpeta = dirname(base_path($ruta));
+
+        File::delete(base_path($ruta));
+
+        if (! $carpetaExistia && File::isDirectory($carpeta) && File::isEmptyDirectory($carpeta)) {
+            File::deleteDirectory($carpeta);
+        }
+    }
+
+    /**
+     * El contrato con Filament. Este tema no decora a Filament: se apoya en
+     * hechos concretos de su vendor, y de cada uno depende una decisión de
+     * diseño. Si Filament sube de versión y uno se cae, lo que se rompe no es
+     * una regla: es el motivo por el que la regla está escrita como está. Por
+     * eso el porqué va en el mensaje, uno por uno.
      *
      * Es la única guardia de esta clase que se rompe sola, sin que nadie toque
      * nuestro código.
@@ -1437,15 +1432,15 @@ class BarraLateralTest extends TestCase
      * El contraste de la barra, recalculado leyendo los porcentajes del
      * archivo y no repitiéndolos aquí.
      *
-     * Lo que la construcción descubrió el 7 sep: el que manda NO es el rótulo
-     * de grupo. Sobre el cristal del panel sale a 11,27:1 en claro y 7,68:1 en
-     * oscuro, y ni bajando el velo al 40 % baja de 10:1, porque la superficie y
-     * el fondo del panel son casi el mismo color. El que tiene el margen justo
-     * es el RÓTULO DEL ÍTEM ACTIVO, que se lee sobre el tinte del ítem con el
-     * halo compuesto encima: ahí el halo aclara el fondo y el texto sufre.
-     * Con los valores de hoy da 6,35:1 en claro y 5,20:1 en oscuro; con el halo
-     * al 60 % cae a 4,12:1 y 4,34:1, y con el rojo de marca en vez del acento
-     * fuerte, a 2,92:1, que es lo que D-L9 rechazó.
+     * El que manda NO es el rótulo de grupo. Sobre el cristal del panel sale a
+     * 11,27:1 en claro y 7,68:1 en oscuro, y ni bajando el velo al 40 % baja de
+     * 10:1, porque la superficie y el fondo del panel son casi el mismo color.
+     * El que tiene el margen justo es el RÓTULO DEL ÍTEM ACTIVO, que se lee
+     * sobre el tinte del ítem con el halo compuesto encima: ahí el halo aclara
+     * el fondo y el texto sufre. Con los valores del tema da 6,35:1 en claro y
+     * 5,20:1 en oscuro; con el halo al 60 % cae a 4,12:1 y 4,34:1, y con el rojo
+     * de marca en vez del acento fuerte, a 2,92:1: por eso el rótulo activo no
+     * es el rojo de marca.
      *
      * Rotura: subir el halo sin recalcular, o poner `#ee4137` de rótulo activo.
      */
@@ -1494,9 +1489,9 @@ class BarraLateralTest extends TestCase
     /**
      * Debajo del cajón pasa contenido que no se conoce; debajo de la barra de
      * escritorio, un color plano. Por eso el velo del cajón nunca puede ser más
-     * bajo que el de escritorio, y en claro tiene que ser más alto: es la regla
-     * de D-L11 y es lo único del velo que de verdad se puede romper, porque el
-     * contraste aquí no lo constriñe.
+     * bajo que el de escritorio, y en claro tiene que ser más alto: es lo único
+     * del velo que de verdad se puede romper, porque el contraste aquí no lo
+     * constriñe.
      * Rotura: igualar los dos velos en claro, o bajar el del cajón.
      */
     public function test_el_velo_del_cajon_nunca_baja_del_de_escritorio(): void
@@ -1520,12 +1515,6 @@ class BarraLateralTest extends TestCase
         }
     }
 
-    /**
-     * Todo lo que declara el archivo para `$selector`, juntando las reglas
-     * donde aparece como selector completo. Junta y no elige la primera porque
-     * el archivo usa listas (`.fi-sidebar::before, .fi-sidebar::after`) y
-     * quedarse con la primera coincidencia leería el bloque equivocado.
-     */
     /**
      * El cuerpo de los bloques `@media` cuya condición contiene `$senal`, y
      * SOLO los que viven fuera de `@layer`: un bloque dentro de la capa no
@@ -1639,6 +1628,12 @@ class BarraLateralTest extends TestCase
         return $cuerpos;
     }
 
+    /**
+     * Todo lo que declara el archivo para `$selector`, juntando las reglas
+     * donde aparece como selector completo. Junta y no elige la primera porque
+     * el archivo usa listas (`.fi-sidebar::before, .fi-sidebar::after`) y
+     * quedarse con la primera coincidencia leería el bloque equivocado.
+     */
     private function regla(string $css, string $selector): string
     {
         // Sin comentarios: si no, el bloque de comentario que precede a una
@@ -1718,9 +1713,9 @@ class BarraLateralTest extends TestCase
     /**
      * El botón que abre la navegación en el teléfono llega a los 44 px.
      *
-     * Medido el 10 sep sobre el panel real a 375 px: la caja daba 36x36 y el
-     * área de impacto 36x37, contra los 44 que este proyecto aplica en toda la
-     * barra pública. No es código nuestro --lo pinta Filament-- pero es EL
+     * Medido sobre el panel real a 375 px: sin el área extra la caja da 36x36 y
+     * el área de impacto 36x37, contra los 44 que este proyecto aplica en toda
+     * la barra pública. No es código nuestro --lo pinta Filament-- pero es EL
      * control que abre la navegación entera en un teléfono: si falla, no hay
      * segunda forma de llegar a ningún sitio.
      *
@@ -1765,8 +1760,8 @@ class BarraLateralTest extends TestCase
     /**
      * El rótulo de la barra se pliega, no se recorta.
      *
-     * «Eventos y capacitaciones» salía como «Eventos y capacitacion…» con el
-     * cajón abierto, y no por falta de sitio: Filament trunca por defecto. Un
+     * Filament trunca por defecto: con el cajón abierto, «Eventos y
+     * capacitaciones» sale como «Eventos y capacitacion…» aunque haya sitio. Un
      * destino cuyo nombre se corta obliga a adivinarlo o a pasar el ratón por
      * encima, y con el dedo no hay ratón.
      *

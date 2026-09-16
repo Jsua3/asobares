@@ -10,7 +10,7 @@ use Tests\TestCase;
 /**
  * El sitio de una foto que todavía no existe.
  *
- * ASOBARES no ha entregado material fotográfico autorizado, y el §9 de
+ * ASOBARES no ha entregado material fotográfico autorizado, y el §10 de
  * `encargo.md` no deja improvisarlo: en producción solo entra contenido de
  * documento oficial del gremio. Así que los huecos se abren con la marca
  * puesta y las fotos entran cuando lleguen — guardando una ruta en un ajuste,

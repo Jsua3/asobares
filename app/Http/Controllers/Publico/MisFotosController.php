@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Publico;
 
+use App\Filament\Forms\Components\SubidaSegura;
 use App\Models\Asociado;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -13,16 +14,10 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 /**
  * El propietario sube las fotos de su establecimiento y el gremio las aprueba.
  *
- * OBS3-13. En la demostración del 28 de agosto se afirmó que el afiliado sube
- * fotos y el gremio modera (`R23 00:48`), y el directivo puso la condición:
- * «lo tienen que aprobar ellos, no sea que pongan imágenes… exóticas» (R23
- * 00:45-01:05). El §27.3 punto 5 destapó que nada de eso existía: `/mi-cuenta`
- * tenía índice y vacantes, y el flujo de aprobación era el del estado del
- * registro, no el de una carga del propietario --porque el propietario no
- * cargaba nada--.
- *
- * Así que la moderación no se pudo «activar»: hubo que construir antes la
- * carga que se iba a moderar.
+ * La aprobación es condición del gremio: nada de lo que sube un afiliado sale
+ * en su ficha sin que alguien del gremio lo haya mirado. Por eso cada foto
+ * nace sin aprobar y la modera el panel, aparte del estado editorial del
+ * registro.
  */
 class MisFotosController
 {
@@ -62,16 +57,16 @@ class MisFotosController
         /*
          * Contra la base, no contra `getMedia()`.
          *
-         * Medialibrary cachea la coleccion en la INSTANCIA del modelo: si algo
-         * ya la habia cargado antes en esta peticion, el conteo llega viejo y
-         * el tope se salta en silencio. Lo destapo la prueba del maximo, donde
-         * el usuario autenticado se reutiliza entre peticiones y el
-         * establecimiento traia la galeria cargada de la primera.
+         * Medialibrary cachea la colección en la INSTANCIA del modelo: si algo
+         * ya la había cargado antes en esta petición, el conteo llega viejo y
+         * el tope se salta en silencio. Pasa, por ejemplo, cuando una prueba
+         * reutiliza el usuario autenticado entre peticiones y el
+         * establecimiento trae la galería cargada de la primera.
          *
-         * En una peticion HTTP de verdad no deberia ocurrir, pero un tope que
+         * En una petición HTTP de verdad no debería ocurrir, pero un tope que
          * depende de que nadie haya tocado el modelo antes no es un tope.
          */
-        if ($asociado->media()->where('collection_name', 'galeria')->count() >= self::MAXIMO_POR_ESTABLECIMIENTO) {
+        if ($asociado->media()->where('collection_name', Asociado::COLECCION_GALERIA)->count() >= self::MAXIMO_POR_ESTABLECIMIENTO) {
             return back()->withErrors([
                 'foto' => 'Ya tienes '.self::MAXIMO_POR_ESTABLECIMIENTO.' fotos. Borra alguna antes de subir otra.',
             ]);
@@ -83,15 +78,9 @@ class MisFotosController
          * La extensión la decide el servidor, nunca el nombre que llega.
          * Un JPEG legítimo llamado «payload.html» pasa la validación de tipo
          * --su MIME es image/jpeg-- y quedaría servido como HTML desde el
-         * disco público. Es el mismo razonamiento de `SubidaSegura`, que aquí
-         * no se puede reutilizar porque es un componente de Filament.
+         * disco público. Sale del mismo mapa que usan las subidas del panel.
          */
-        $extension = match ($archivo->getMimeType()) {
-            'image/jpeg' => 'jpg',
-            'image/png' => 'png',
-            'image/webp' => 'webp',
-            default => 'bin',
-        };
+        $extension = SubidaSegura::extensionPara($archivo->getMimeType());
 
         $asociado->addMedia($archivo->getRealPath())
             ->usingFileName(Str::ulid().'.'.$extension)
@@ -102,7 +91,7 @@ class MisFotosController
                 Asociado::FOTO_APROBADA => false,
                 'subida_por' => $request->user()->getKey(),
             ])
-            ->toMediaCollection('galeria');
+            ->toMediaCollection(Asociado::COLECCION_GALERIA);
 
         return back()->with('exito', 'Foto enviada. El gremio la revisa antes de que salga en tu ficha.');
     }
@@ -125,7 +114,7 @@ class MisFotosController
         abort_unless(
             $media->model_type === Asociado::class
                 && (int) $media->model_id === $asociado->getKey()
-                && $media->collection_name === 'galeria',
+                && $media->collection_name === Asociado::COLECCION_GALERIA,
             404
         );
 

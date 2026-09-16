@@ -14,18 +14,18 @@ use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
- * La bolsa de proveedores dice cuándo se comprobó cada contacto (OBS3-12).
+ * La bolsa de proveedores dice cuándo se comprobó cada contacto.
  *
- * La queja de la revisión del 28 de agosto fue de datos muertos: proveedores
- * que «ya no existen, ya no contestan» (R22 04:19), y el pedido, «que sí
- * respondan, y que la información esté actualizada» (R22 04:13-04:15).
+ * Lo que el gremio no acepta son datos muertos: proveedores que «ya no
+ * existen, ya no contestan». Lo que pide es «que sí respondan, y que la
+ * información esté actualizada».
  *
  * Réplica del patrón de RF-60, que ya funciona en la guía normativa. Con una
  * diferencia deliberada: seis meses en vez de doce. Un trámite de apertura
  * cambia al ritmo de los acuerdos municipales; un proveedor cambia de número,
  * de dueño o de oficio cuando le va mal un semestre.
  *
- * `visible_hasta` NO servía para esto y por eso hubo columna nueva: modela la
+ * `visible_hasta` NO sirve para esto y por eso hay columna propia: modela la
  * monetización --hasta cuándo pagó por estar en la base--, que es una pregunta
  * comercial. Que alguien haya pagado no dice que su teléfono siga sonando.
  */
@@ -34,9 +34,9 @@ class VerificacionDeProveedoresTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * El directorio con las fichas dejo de ser publico: lo lee el afiliado
-     * desde su cuenta. De la puerta se encarga AccesoDeAsociadosTest; aqui se
-     * necesita a alguien que la cruce.
+     * El directorio con las fichas no es público: lo lee el afiliado desde su
+     * cuenta. De la puerta se encarga AccesoDeAsociadosTest; aquí se necesita
+     * a alguien que la cruce.
      */
     private function afiliado(): User
     {
@@ -77,11 +77,11 @@ class VerificacionDeProveedoresTest extends TestCase
     /**
      * El borde estricto, y en los cuatro días que desbordan.
      *
-     * Es la lección del §28 aplicada por adelantado: `subMonths()` un 31 de
-     * agosto no da el 28 de febrero, da el 3 de marzo, y con eso el corte se
-     * adelanta hasta dos días y marca como caducada una ficha que todavía
-     * está dentro del plazo. Fijar la fecha es lo único que hace que esta
-     * prueba signifique lo mismo cualquier día del mes.
+     * Es la trampa de `VentanaDeMesesTest`: `subMonths()` un 31 de agosto no
+     * da el 28 de febrero, da el 3 de marzo, y con eso el corte se adelanta
+     * hasta dos días y marca como caducada una ficha que todavía está dentro
+     * del plazo. Fijar la fecha es lo único que hace que esta prueba signifique
+     * lo mismo cualquier día del mes.
      *
      * @return list<array{string}>
      */
@@ -121,7 +121,7 @@ class VerificacionDeProveedoresTest extends TestCase
     }
 
     /**
-     * Lo que ve quien busca proveedor, que es de lo que iba la queja. Los tres
+     * Lo que ve quien busca proveedor, que es lo que importa. Los tres
      * estados se distinguen en la ficha: un contacto sin fecha no vale más que
      * uno viejo --vale menos, porque el lector no sabe cuál de los dos tiene--.
      */
@@ -139,10 +139,9 @@ class VerificacionDeProveedoresTest extends TestCase
          * `FlujoDeAprobacionObserver` degrada a «pendiente_aprobacion»
          * cualquier alta hecha por quien no puede publicar (RF-37), y el
          * afiliado no puede. Con `actingAs` antes del `create`, el estado
-         * `publicado` de la factoría se perdía en el `saving`, el directorio
-         * salía vacío y esta prueba se ponía roja acusando a la vista de algo
-         * que hacía la propia prueba. Comprobado: `estado` llegaba a la base
-         * como `pendiente_aprobacion` y `Proveedor::publicado()->count()` era 0.
+         * `publicado` de la factoría se pierde en el `saving`: `estado` llega a
+         * la base como `pendiente_aprobacion`, el directorio sale vacío y la
+         * prueba se pone roja acusando a la vista de algo que hace ella misma.
          */
         $mirarComoAfiliado = function () use ($afiliado) {
             return $this->actingAs($afiliado)->get(route('mi-cuenta.proveedores.index'))->assertOk();
@@ -188,8 +187,8 @@ class VerificacionDeProveedoresTest extends TestCase
 
     /**
      * Haber pagado no es haber respondido. Son dos preguntas distintas y
-     * confundirlas es lo que produjo la queja: `visible_hasta` estaba y no
-     * evitó nada.
+     * confundirlas es lo que deja datos muertos: `visible_hasta` puede estar
+     * vigente en una ficha cuyo teléfono ya no suena.
      */
     public function test_estar_vigente_no_es_estar_verificado(): void
     {

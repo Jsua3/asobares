@@ -10,10 +10,9 @@ use App\Panel\SerieDelObservatorio;
  * Vacantes publicadas por mes y por área, doce meses, apiladas — ver el
  * docblock de `MetricasDelObservatorio::calcularDemandaLaboralPorArea()`.
  *
- * Con la semilla de hoy las siete vacantes están todas en el mismo mes: no
- * hay ni serie que trazar, solo una barra solitaria. Apilar eso sugiere una
- * tendencia mensual que todavía no existe, así que la gráfica lo dice en vez
- * de dibujarlo.
+ * Si la serie no alcanza `SerieDelObservatorio::MUESTRA_MINIMA`, apilar las
+ * barras sugeriría una tendencia mensual que todavía no existe, así que la
+ * gráfica lo dice en vez de dibujarlo.
  */
 class DemandaLaboralPorArea extends GraficaDelObservatorio
 {

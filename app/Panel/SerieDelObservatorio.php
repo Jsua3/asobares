@@ -42,11 +42,11 @@ final readonly class SerieDelObservatorio
      * a su suma combinada en `n`.
      *
      * `n` combinado es una puerta trasera al principio del módulo: una serie
-     * robusta le presta credibilidad a otras que no la tienen. Es justo lo
-     * que le pasaba a `MetricasDelObservatorio::presenciaPorMunicipio()`: 24
-     * asociados + 6 vacantes + 732 consultas sellaban «muestra suficiente»
+     * robusta le presta credibilidad a otras que no la tienen. En
+     * `MetricasDelObservatorio::presenciaPorMunicipio()`, por ejemplo, 24
+     * asociados + 6 vacantes + 732 consultas sellarían «muestra suficiente»
      * (n = 762) con el 96 % de ese total viniendo de una sola señal —las
-     * consultas—, mientras las barras de «Asociados» descansaban sobre 24
+     * consultas—, mientras las barras de «Asociados» descansan sobre 24
      * observaciones y las de «Vacantes» sobre 6, los mismos dos números que
      * el módulo declara insuficientes en cualquier otra gráfica.
      *
@@ -97,7 +97,7 @@ final readonly class SerieDelObservatorio
      *
      * `rotuloDeMuestra()` da el `n` combinado, y en una serie que cruza
      * medidas independientes ése no es el que falla: puede ser enorme. Poner
-     * ese número al lado del umbral producía una contradicción en pantalla
+     * ese número al lado del umbral produciría una contradicción en pantalla
      * —«hoy hay n = 762 registros y hacen falta al menos 30»— justo en el
      * módulo que existe para aguantar la primera pregunta en una alcaldía.
      * Lo honesto es nombrar la señal que no llega.

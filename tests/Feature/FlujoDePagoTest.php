@@ -22,9 +22,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Testing\TestResponse;
 use InvalidArgumentException;
 use RuntimeException;
+use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
 
 /**
@@ -136,7 +139,7 @@ class FlujoDePagoTest extends TestCase
      * Sustituye la pasarela por una que se cae al pedirle el enlace de pago.
      *
      * Es exactamente lo que hará el entorno remoto: se despliega con
-     * `PAYMENT_DRIVER=bold` y sin llaves de Bold (§20.5.2), así que
+     * `PAYMENT_DRIVER=bold` y sin llaves de Bold, así que
      * `PasarelaBold::crearEnlaceDePago` lanza en cuanto alguien pulsa pagar.
      */
     private function pasarelaCaida(): void
@@ -879,5 +882,180 @@ class FlujoDePagoTest extends TestCase
         $this->assertSame(EstadoTransaccion::Aprobada, $transaccion->fresh()->estado);
         $this->assertSame(MetodoPago::Pse, $transaccion->fresh()->metodo);
         $this->assertSame(EstadoInscripcion::Confirmada, Inscripcion::firstOrFail()->estado);
+    }
+
+    // --- Notificaciones que contradicen un cobro ya resuelto ---
+
+    private function transaccionDeInscripcionPendiente(): Transaccion
+    {
+        $this->post(route('eventos.inscribir', $this->eventoPago()), [
+            'nombre' => 'Mónica Salazar',
+            'correo' => 'monica@ejemplo.test',
+            'telefono' => '3152234410',
+            'acepta_datos' => '1',
+        ]);
+
+        return Transaccion::firstOrFail();
+    }
+
+    /**
+     * Manda por HTTP una notificación de Bold firmada con la llave de pruebas,
+     * igual que `test_el_webhook_con_firma_valida_actualiza_la_transaccion_y_la_inscripcion`:
+     * pasa por la verificación de firma real, no la esquiva.
+     */
+    private function notificarDesdeBold(string $tipo, Transaccion $transaccion): TestResponse
+    {
+        config()->set('pagos.driver', 'bold');
+        config()->set('pagos.bold.secret', self::LLAVE_DE_IDENTIDAD);
+        app()->forgetInstance(PasarelaDePago::class);
+
+        $cuerpo = json_encode([
+            'id' => 'EVT_'.$tipo,
+            'type' => $tipo,
+            'data' => [
+                'metadata' => ['reference' => $transaccion->referencia],
+                'payment_method' => 'PSE',
+                'amount' => ['total' => (float) $transaccion->monto, 'currency' => 'COP'],
+            ],
+        ]);
+
+        return $this->call(
+            'POST',
+            route('webhooks.bold'),
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_X_BOLD_SIGNATURE' => hash_hmac('sha256', base64_encode($cuerpo), self::LLAVE_DE_IDENTIDAD),
+            ],
+            content: $cuerpo
+        );
+    }
+
+    /**
+     * `PasarelaBold` traduce VOID_APPROVED a Rechazada, y una anulación solo
+     * tiene sentido sobre un cobro aprobado. Si `RegistroDePagos` devolviera
+     * intacta cualquier transacción que ya no estuviera pendiente, Bold
+     * recibiría 200, no quedaría ni una línea en el log y la inscripción
+     * seguiría confirmada sin dinero detrás.
+     *
+     * Revertir los efectos es una decisión de negocio sin tomar, así que la
+     * prueba fija lo contrario de un revertido automático: el cobro y la
+     * inscripción no se tocan, pero quedan tres rastros.
+     */
+    public function test_una_anulacion_de_bold_sobre_un_cobro_aprobado_deja_rastro_sin_revertirlo(): void
+    {
+        $transaccion = $this->transaccionDeInscripcionPendiente();
+
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion)->assertOk();
+        $this->assertSame(EstadoInscripcion::Confirmada, Inscripcion::firstOrFail()->estado);
+
+        Log::spy();
+
+        $this->notificarDesdeBold('VOID_APPROVED', $transaccion)
+            ->assertOk()
+            ->assertExactJson([
+                'referencia' => $transaccion->referencia,
+                'estado' => EstadoTransaccion::Aprobada->value,
+            ]);
+
+        Log::shouldHaveReceived('error')
+            ->withArgs(fn (string $mensaje, array $contexto = []): bool => ($contexto['referencia'] ?? null) === $transaccion->referencia
+                && ($contexto['estado_registrado'] ?? null) === EstadoTransaccion::Aprobada->value
+                && ($contexto['estado_notificado'] ?? null) === EstadoTransaccion::Rechazada->value
+                && ($contexto['evento'] ?? null) === 'VOID_APPROVED')
+            ->once();
+
+        $incidencias = $transaccion->fresh()->payload['incidencias'] ?? [];
+        $this->assertCount(1, $incidencias, 'La transacción tiene que llevar la marca de la anulación.');
+        $this->assertSame('VOID_APPROVED', $incidencias[0]['evento']);
+        $this->assertSame(EstadoTransaccion::Rechazada->value, $incidencias[0]['estado_notificado']);
+
+        $entrada = Activity::query()->where('log_name', 'pagos')->sole();
+        $this->assertTrue($entrada->subject?->is($transaccion), 'La bitácora tiene que apuntar a la transacción.');
+        $this->assertStringContainsString($transaccion->referencia, $entrada->description);
+
+        $this->assertSame(EstadoTransaccion::Aprobada, $transaccion->fresh()->estado, 'No se revierte el cobro automáticamente.');
+        $this->assertSame(EstadoInscripcion::Confirmada, Inscripcion::firstOrFail()->estado, 'Ni la inscripción.');
+    }
+
+    public function test_un_rechazo_de_bold_sobre_un_cobro_pendiente_lo_rechaza_sin_confirmar_la_inscripcion(): void
+    {
+        $transaccion = $this->transaccionDeInscripcionPendiente();
+
+        Log::spy();
+
+        $this->notificarDesdeBold('SALE_REJECTED', $transaccion)
+            ->assertOk()
+            ->assertExactJson([
+                'referencia' => $transaccion->referencia,
+                'estado' => EstadoTransaccion::Rechazada->value,
+            ]);
+
+        $this->assertSame(EstadoTransaccion::Rechazada, $transaccion->fresh()->estado);
+        $this->assertSame(EstadoInscripcion::Registrada, Inscripcion::firstOrFail()->estado);
+
+        // Un rechazo de un cobro pendiente es el camino normal, no una incidencia.
+        Log::shouldNotHaveReceived('error');
+        $this->assertArrayNotHasKey('incidencias', $transaccion->fresh()->payload);
+        $this->assertSame(0, Activity::query()->where('log_name', 'pagos')->count());
+    }
+
+    /** Las pasarelas reintentan: repetir el mismo desenlace es ruido, no una incidencia. */
+    public function test_un_reintento_de_la_misma_aprobacion_no_se_anota_como_incidencia(): void
+    {
+        $transaccion = $this->transaccionDeInscripcionPendiente();
+
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion)->assertOk();
+
+        Log::spy();
+
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion)->assertOk();
+
+        Log::shouldNotHaveReceived('error');
+        $this->assertArrayNotHasKey('incidencias', $transaccion->fresh()->payload);
+        $this->assertSame(0, Activity::query()->where('log_name', 'pagos')->count());
+    }
+
+    /** Un evento que `PasarelaBold` no sabe traducir queda en Pendiente: no dice nada del cobro. */
+    public function test_un_evento_sin_desenlace_sobre_un_cobro_resuelto_no_se_anota_como_incidencia(): void
+    {
+        $transaccion = $this->transaccionDeInscripcionPendiente();
+
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion)->assertOk();
+
+        Log::spy();
+
+        $this->notificarDesdeBold('VOID_REJECTED', $transaccion)->assertOk();
+
+        Log::shouldNotHaveReceived('error');
+        $this->assertArrayNotHasKey('incidencias', $transaccion->fresh()->payload);
+        $this->assertSame(0, Activity::query()->where('log_name', 'pagos')->count());
+    }
+
+    /**
+     * El caso simétrico, con el mismo remedio: Bold aprueba un cobro que aquí
+     * ya estaba rechazado —por ejemplo, alguien reintenta en el mismo enlace—.
+     * Hay dinero cobrado y ningún efecto aplicado, y eso tampoco puede pasar
+     * en silencio.
+     */
+    public function test_una_aprobacion_de_bold_sobre_un_cobro_rechazado_deja_rastro_sin_aplicarla(): void
+    {
+        $transaccion = $this->transaccionDeInscripcionPendiente();
+
+        $this->notificarDesdeBold('SALE_REJECTED', $transaccion)->assertOk();
+
+        Log::spy();
+
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion)->assertOk();
+
+        Log::shouldHaveReceived('error')
+            ->withArgs(fn (string $mensaje, array $contexto = []): bool => ($contexto['referencia'] ?? null) === $transaccion->referencia
+                && ($contexto['estado_registrado'] ?? null) === EstadoTransaccion::Rechazada->value
+                && ($contexto['estado_notificado'] ?? null) === EstadoTransaccion::Aprobada->value)
+            ->once();
+
+        $this->assertCount(1, $transaccion->fresh()->payload['incidencias'] ?? []);
+        $this->assertSame(1, Activity::query()->where('log_name', 'pagos')->count());
+        $this->assertSame(EstadoTransaccion::Rechazada, $transaccion->fresh()->estado);
+        $this->assertSame(EstadoInscripcion::Registrada, Inscripcion::firstOrFail()->estado);
     }
 }

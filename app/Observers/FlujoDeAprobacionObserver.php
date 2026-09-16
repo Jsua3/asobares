@@ -14,6 +14,11 @@ use Illuminate\Support\Facades\Auth;
  * Da igual que alguien altere el HTML o mande la petición a mano: si el
  * usuario no tiene permiso de publicar ese recurso, el registro se guarda
  * como `pendiente_aprobacion` (RF-37).
+ *
+ * No avisa a nadie: el panel no activa `databaseNotifications()`. Quien puede
+ * aprobar se entera por la banda «Te está esperando» del tablero
+ * (`ColaDePendientes`), que pregunta a las mismas policies.
+ * `Panel\AvisosQueSeVenTest` impide escribir avisos que nadie lee.
  */
 class FlujoDeAprobacionObserver
 {
@@ -68,33 +73,4 @@ class FlujoDeAprobacionObserver
         return $original === EstadoPublicacion::Publicado
             || $original === EstadoPublicacion::Publicado->value;
     }
-
-    /*
-     * Aquí vivía `saved()`, que por cada registro enviado a revisión consultaba
-     * todos los usuarios con rol, le preguntaba a la policy por cada uno y le
-     * guardaba una notificación de base de datos.
-     *
-     * Se retiró el 9 de septiembre de 2026, y el motivo no es de estilo: **la
-     * campana del panel se había apagado dos días antes** (D-L22, 7 sep). Sus
-     * dos líneas quedaron comentadas en `AdminPanelProvider` con el argumento de
-     * que la banda «Te está esperando» del tablero cuenta mejor lo mismo, pero
-     * nadie retiró a quien escribía en ella. Resultado: consultas y filas nuevas
-     * en cada guardado de contenido, sin una sola pantalla que las leyera.
-     *
-     * Y cuatro aserciones de `FlujoDeAprobacionTest` en verde sobre ese aviso
-     * invisible, que es lo que lo mantuvo escondido: la suite decía que
-     * funcionaba y el usuario no podía verlo. Falso verde número trece de este
-     * proyecto, encontrado al construir el aviso de PQR del Acta 08 —que iba a
-     * repetir el mismo error—.
-     *
-     * Quien puede aprobar sigue enterándose, por donde D-L22 dijo que se
-     * enteraría: la **cola de pendientes** del tablero (`ColaDePendientes`), que
-     * pregunta a las mismas policies, se pinta de verdad y ya tenía sus propias
-     * pruebas. Las de `FlujoDeAprobacionTest` afirman ahora sobre ella.
-     *
-     * `Panel\AvisosQueSeVenTest` vigila que las dos mitades no se vuelvan a
-     * separar: o hay campana y hay quien escriba, o no hay ninguna de las dos.
-     * Si el gremio pide avisos de verdad —correo, campana o lo que sea—, es un
-     * frente propio con su decisión, tal como dejó dicho D-L22.
-     */
 }

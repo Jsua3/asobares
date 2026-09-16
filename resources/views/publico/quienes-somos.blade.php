@@ -224,9 +224,10 @@
             {{-- El tamaño de ese respaldo, de la lámina 3 de la presentación
                  institucional. Los rótulos dicen «en el país» a propósito: son
                  cifras de la Nacional, y sin esa palabra se leen como el tamaño
-                 del capítulo, que es otra cosa y todavía no está zanjada (D-18).
-                 Como en la franja de la portada, la cifra que la oficina deje en
-                 blanco no se pinta, y si borra las dos desaparece el bloque. --}}
+                 del capítulo, que es otra cosa y todavía no tiene documento que
+                 la sostenga. Como en la franja de la portada, la cifra que la
+                 oficina deje en blanco no se pinta, y si borra las dos
+                 desaparece el bloque. --}}
             @php
                 $respaldoNacional = array_values(array_filter([
                     ['cifra' => trim((string) ajuste('nacional_capitulos')), 'rotulo' => ajuste('nacional_capitulos_rotulo')],
@@ -235,8 +236,8 @@
             @endphp
 
             @if ($respaldoNacional !== [])
-                {{-- A 375 px las dos cifras se apilan, y así se queda. Medido el
-                     10 sep: dentro de la tarjeta solo hay 279 px de ancho útil
+                {{-- A 375 px las dos cifras se apilan, y así se queda. Medido:
+                     dentro de la tarjeta solo hay 279 px de ancho útil
                      (`p-8` a cada lado), y los dos pares miden 165 y 160 --lo
                      ancho es el rótulo, no el número--. Caben hombro con hombro
                      solo si se acota el rótulo a ~123 px, y entonces se parte en

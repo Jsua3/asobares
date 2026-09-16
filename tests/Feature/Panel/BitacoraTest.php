@@ -2,10 +2,14 @@
 
 namespace Tests\Feature\Panel;
 
+use App\Enums\ConceptoTransaccion;
+use App\Enums\EstadoTransaccion;
+use App\Enums\MetodoPago;
 use App\Filament\Pages\Bitacora;
 use App\Filament\Resources\Aspirantes\Pages\ListAspirantes;
 use App\Models\Aspirante;
 use App\Models\Noticia;
+use App\Models\Transaccion;
 use App\Models\User;
 use Database\Seeders\RolYPermisoSeeder;
 use Filament\Actions\Testing\TestAction;
@@ -21,8 +25,6 @@ use Tests\TestCase;
  * frase con «quién + verbo + tipo + etiqueta» para que se lea igual venga de
  * donde venga. Esta clase vigila que esa frase siga siendo castellano y que
  * ningún tipo de contenido nuevo acabe leyéndose como «actualizó un registro».
- *
- * No existía ninguna prueba de esta página hasta el 9 de septiembre de 2026.
  */
 class BitacoraTest extends TestCase
 {
@@ -81,6 +83,35 @@ class BitacoraTest extends TestCase
         Livewire::test(Bitacora::class)
             ->assertSee($usuario->name)
             ->assertSee('la entrada del boletín');
+    }
+
+    /**
+     * Una incidencia de pago es de lo poco que alguien tiene que entender sin
+     * abrir la transacción: la pasarela notificó una cosa sobre un cobro que ya
+     * estaba resuelto en otra. Con la frase genérica se leería «El sistema
+     * actualizó un registro», que es tanto como no avisar.
+     */
+    public function test_una_incidencia_de_pago_se_lee_con_su_propia_descripcion(): void
+    {
+        $this->actingAs($this->direccion());
+
+        $transaccion = Transaccion::create([
+            'referencia' => Transaccion::generarReferencia(),
+            'concepto' => ConceptoTransaccion::Mensualidad,
+            'monto' => 50000,
+            'moneda' => 'COP',
+            'estado' => EstadoTransaccion::Aprobada,
+            'metodo' => MetodoPago::Pse,
+        ]);
+
+        activity('pagos')
+            ->performedOn($transaccion)
+            ->event('updated')
+            ->log("La pasarela notificó «rechazada» sobre el cobro {$transaccion->referencia}, que ya estaba «aprobada». No se aplicó nada: hay que revisarlo a mano.");
+
+        Livewire::test(Bitacora::class)
+            ->assertSee('hay que revisarlo a mano')
+            ->assertDontSee('actualizó un registro');
     }
 
     /**

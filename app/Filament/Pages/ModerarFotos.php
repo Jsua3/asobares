@@ -18,11 +18,10 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use UnitEnum;
 
 /**
- * La cola de fotos que subieron los propietarios y nadie ha mirado (OBS3-13).
+ * La cola de fotos que subieron los propietarios y nadie ha mirado.
  *
- * El directivo puso la condición en el mismo momento en que se le dijo que el
- * afiliado sube fotos: «lo tienen que aprobar ellos, no sea que pongan
- * imágenes… exóticas» (R23 00:45-01:05).
+ * El gremio aprueba cada foto que sube un afiliado antes de que salga en el
+ * directorio público.
  *
  * Es una página y no una pestaña dentro de la ficha del asociado a propósito:
  * moderar es trabajo por lotes --se hace una vez al día, mirando todo lo que
@@ -147,20 +146,18 @@ class ModerarFotos extends Page implements HasTable
      * lo que no sea literalmente `true`, incluida la foto cuya propiedad nunca
      * se escribió. Sin aprobar es el defecto, incluido el defecto silencioso.
      *
-     * ⚠️ La primera versión de esto era `whereNot(whereJsonContains(…, true))`
-     * y ESTABA ROTA EN POSTGRESQL, que es donde va a correr. Medido con las dos
-     * gramáticas: emitía `not (("custom_properties"->'aprobada')::jsonb @> ?)`,
-     * y sobre una fila sin la clave el `->` da NULL, `NULL @> 'true'` da NULL,
-     * `not NULL` da NULL y el `WHERE` descarta la fila. O sea que la foto que
-     * más falta hacía moderar —la que nadie marcó— era justo la que no salía.
-     * En SQLite no se reproduce: el `exists` da false y `not false` la incluye,
-     * así que la suite pasaba en verde con el defecto dentro.
+     * ⚠️ No vale `whereNot(whereJsonContains(…, true))`: en PostgreSQL emite
+     * `not (("custom_properties"->'aprobada')::jsonb @> ?)`, y sobre una fila
+     * sin la clave el `->` da NULL, `NULL @> 'true'` da NULL, `not NULL` da
+     * NULL y el `WHERE` descarta la fila. La foto que más falta hace moderar
+     * —la que nadie marcó— sería justo la que no sale. En SQLite no se
+     * reproduce: el `exists` da false y `not false` la incluye.
      *
-     * La condición de ahora añade la rama de la clave ausente, que en
+     * Por eso la condición añade la rama de la clave ausente, que en
      * PostgreSQL compila con el `coalesce` que salva la lógica trivaluada.
      * `ColaDeFotosTest` lo afirma sobre la SQL GENERADA por cada gramática y
-     * no sobre el resultado, siguiendo el §15 del runbook: sobre SQLite una
-     * prueba de comportamiento saldría verde con el código roto.
+     * no sobre el resultado: sobre SQLite una prueba de comportamiento
+     * saldría verde con el código roto.
      *
      * @return Builder<Media>
      */
@@ -168,8 +165,8 @@ class ModerarFotos extends Page implements HasTable
     {
         return Media::query()
             ->where('model_type', Asociado::class)
-            ->where('collection_name', 'galeria')
-            ->where(fn (Builder $q) => $q
+            ->where('collection_name', Asociado::COLECCION_GALERIA)
+            ->where(fn (Builder $q): Builder => $q
                 ->whereJsonDoesntContain('custom_properties->'.Asociado::FOTO_APROBADA, true)
                 ->orWhereJsonDoesntContainKey('custom_properties->'.Asociado::FOTO_APROBADA));
     }

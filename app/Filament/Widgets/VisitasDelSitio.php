@@ -28,10 +28,9 @@ class VisitasDelSitio extends ChartWidget
     protected static ?int $sort = 5;
 
     /**
-     * A todo lo ancho desde el 9 de septiembre de 2026: con dos series --entradas
-     * y páginas servidas-- y treinta puntos, cuatro de las seis columnas dejaban
-     * las líneas demasiado juntas para leer la comparación, que es justo para lo
-     * que existe la gráfica.
+     * A todo lo ancho: con dos series --entradas y páginas servidas-- y treinta
+     * puntos, cuatro de las seis columnas dejan las líneas demasiado juntas para
+     * leer la comparación, que es justo para lo que existe la gráfica.
      */
     protected int|string|array $columnSpan = [
         'default' => 'full',
@@ -53,7 +52,7 @@ class VisitasDelSitio extends ChartWidget
             ->selectRaw('dia, sum(total) as total, sum(entradas) as entradas')
             ->groupBy('dia')
             ->get()
-            ->mapWithKeys(fn ($fila): array => [substr((string) $fila->dia, 0, 10) => [
+            ->mapWithKeys(fn (VisitaDiaria $fila): array => [substr((string) $fila->dia, 0, 10) => [
                 'total' => (int) $fila->total,
                 'entradas' => (int) $fila->entradas,
             ]]);

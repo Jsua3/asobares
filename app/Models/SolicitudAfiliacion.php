@@ -58,18 +58,6 @@ class SolicitudAfiliacion extends Model
         return $this->belongsTo(User::class);
     }
 
-    /** @return BelongsTo<User, $this> */
-    public function aprobador(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'aprobado_por');
-    }
-
-    /** @return BelongsTo<User, $this> */
-    public function rechazador(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'rechazado_por');
-    }
-
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

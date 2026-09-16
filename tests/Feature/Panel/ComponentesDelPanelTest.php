@@ -53,10 +53,9 @@ class ComponentesDelPanelTest extends TestCase
     }
 
     /**
-     * Antes esta prueba solo miraba que la cadena `prefers-reduced-motion`
-     * apareciera en el tema del panel: pasaba igual aunque se vaciara la
-     * guarda entera. Y además vigilaba el sitio equivocado — la guarda se
-     * mudó a `tokens.css`, que importan las dos superficies.
+     * La guarda vive en `tokens.css`, que importan las dos superficies. Buscar
+     * solo la cadena `prefers-reduced-motion` pasaría igual con la guarda
+     * vaciada: por eso se afirman los valores.
      */
     public function test_el_movimiento_respeta_prefers_reduced_motion(): void
     {
@@ -96,14 +95,14 @@ class ComponentesDelPanelTest extends TestCase
     }
 
     /**
-     * El conteo animado gastaba 600 ms en retrasar la lectura de las cuatro
-     * cifras que son el motivo entero del observatorio, y encima mentía: la
-     * cifra correcta se pintaba, saltaba a cero y volvía a subir. No cumplía
-     * ninguno de los cinco propósitos válidos del movimiento.
+     * La cifra se pinta de una. Un conteo animado gasta 600 ms en retrasar la
+     * lectura de las cifras que son el motivo entero del observatorio, y
+     * además miente: la cifra correcta se pinta, salta a cero y vuelve a
+     * subir. No cumple ninguno de los cinco propósitos válidos del movimiento.
      *
-     * Nota: era el único `x-intersect` del repositorio, y funcionaba solo
-     * porque este componente vive dentro de /admin, donde el Alpine de
-     * Livewire lo trae. `@alpinejs/intersect` nunca estuvo en package.json.
+     * Y `x-intersect` solo funcionaría aquí porque el componente vive dentro
+     * de /admin, donde el Alpine de Livewire lo trae: `@alpinejs/intersect` no
+     * está en package.json.
      */
     public function test_el_kpi_pinta_la_cifra_de_una_sin_contarla(): void
     {
@@ -200,8 +199,8 @@ class ComponentesDelPanelTest extends TestCase
 
     /**
      * El comentario del componente dice que lo urgente se distingue por
-     * "icono y rótulo", pero el glifo era el mismo en los dos estados:
-     * `icono` siempre caía en su valor por defecto. `x-filament::icon`
+     * "icono y rótulo", y un `icono` que cae siempre en su valor por defecto
+     * deja el mismo glifo en los dos estados. `x-filament::icon`
      * pinta SVG crudo sin el nombre del icono en ningún lado del HTML, así
      * que no se puede afirmar sobre el texto "heroicon-o-...": se renderiza
      * cada icono por separado y se compara el SVG real que produce cada uno.

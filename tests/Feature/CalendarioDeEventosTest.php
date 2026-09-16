@@ -285,10 +285,10 @@ class CalendarioDeEventosTest extends TestCase
      */
     public function test_un_mes_sin_datos_se_navega_pero_no_se_indexa(): void
     {
-        // Con el sitio ABIERTO, que es cuando esta regla significa algo. Desde
-        // el 9 sep 2026 el sitio entero nace `noindex` mientras no haya dominio
-        // propio (D-08, `config/sitio.php`), y con esa llave cerrada todas las
-        // páginas llevan la etiqueta y la distinción de aquí no se puede medir.
+        // Con el sitio ABIERTO, que es cuando esta regla significa algo. El
+        // sitio entero nace `noindex` mientras no haya dominio propio
+        // (`config/sitio.php`), y con esa llave cerrada todas las páginas
+        // llevan la etiqueta y la distinción de aquí no se puede medir.
         // Lo que se prueba es la regla POR PÁGINA: un mes con datos se indexa y
         // uno vacío no, cuando el sitio deja indexar.
         config(['sitio.indexable' => true]);
@@ -403,13 +403,13 @@ class CalendarioDeEventosTest extends TestCase
         return $coincidencias[0] ?? '';
     }
 
-    // --- La regla de «próximo» y «pasado», que el calendario destapó ---
+    // --- La regla de «próximo» y «pasado» ---
 
     /**
-     * Defecto preexistente que el calendario deja a la vista. `proximo()` y
-     * `pasado()` miraban SÓLO `fecha_inicio`, así que el Congreso Nacional
-     * —tres días— se archivaba el minuto uno de su segundo día, con dos días
-     * todavía por delante y con las inscripciones abiertas.
+     * `proximo()` y `pasado()` miran `fecha_fin` y no solo `fecha_inicio`. Si
+     * miraran SÓLO `fecha_inicio`, el Congreso Nacional —tres días— se
+     * archivaría el minuto uno de su segundo día, con dos días todavía por
+     * delante y con las inscripciones abiertas.
      */
     public function test_un_evento_en_curso_cuenta_como_proximo(): void
     {

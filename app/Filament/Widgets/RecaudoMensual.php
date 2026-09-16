@@ -11,15 +11,15 @@ use Illuminate\Support\Facades\DB;
 /**
  * Banda 3 del tablero: recaudo del año en curso, mes a mes.
  *
- * Reemplaza a «Inscripciones de los últimos 30 días», que con eventos
- * mensuales era una línea plana en cero unos 28 días de cada 30 — y una
+ * Mide dinero y no inscripciones: con eventos mensuales, una serie diaria de
+ * inscripciones sería una línea plana en cero casi todo el mes, y una
  * gráfica vacía no es neutra, enseña que el tablero no sirve.
  *
  * Horizonte deliberadamente corto y operativo («¿vamos bien este mes?»); la
  * serie larga de 18 meses vive en el Observatorio, con propósito analítico.
  *
- * La agregación va en SQL: el widget anterior traía todos los modelos a
- * memoria para contarlos con `groupBy` de Collection.
+ * La agregación va en SQL, en una sola consulta, y no trae los modelos a
+ * memoria para agruparlos con `groupBy` de Collection.
  */
 class RecaudoMensual extends ChartWidget
 {
@@ -40,8 +40,8 @@ class RecaudoMensual extends ChartWidget
 
     protected function getData(): array
     {
-        // `strftime` es de SQLite. Se aísla aquí y no en un scope para que el
-        // día que el motor cambie a PostgreSQL solo haya que tocar este mapa.
+        // Extraer el mes no se escribe igual en cada motor: el mapa cubre
+        // PostgreSQL, MySQL/MariaDB y SQLite (`strftime`, el de la suite).
         $expresion = match (DB::connection()->getDriverName()) {
             'pgsql' => "to_char(created_at, 'MM')",
             'mysql', 'mariadb' => "date_format(created_at, '%m')",

@@ -12,6 +12,7 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class MensajeResource extends Resource
 {
@@ -19,7 +20,7 @@ class MensajeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-inbox';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Bandejas';
+    protected static string|UnitEnum|null $navigationGroup = 'Bandejas';
 
     protected static ?int $navigationSort = 1;
 
@@ -42,9 +43,9 @@ class MensajeResource extends Resource
     /**
      * Cuántos mensajes esperan respuesta, en el menú (Acta 08, A-04).
      *
-     * Antes del 9 de septiembre de 2026 la única señal de que había algo en la
-     * bandeja era una tarjeta del tablero: quien entraba al panel a publicar una
-     * noticia no se enteraba de que había una PQR corriendo su plazo legal.
+     * Con la señal solo en una tarjeta del tablero, quien entra al panel a
+     * publicar una noticia no se enteraría de que hay una PQR corriendo su
+     * plazo legal.
      */
     public static function getNavigationBadge(): ?string
     {
@@ -61,13 +62,6 @@ class MensajeResource extends Resource
     public static function getNavigationBadgeColor(): ?string
     {
         return Mensaje::pqrVencidas()->isNotEmpty() ? 'danger' : 'warning';
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

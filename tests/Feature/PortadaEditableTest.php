@@ -9,24 +9,33 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * Los títulos de sección de la portada se editan desde el panel (OBS3-01).
+ * Los textos propios de la portada se editan desde el panel.
  *
- * En la revisión del 28 de agosto se le dijo al gremio que «toda la página es
- * completamente editable» (R22 02:53) mientras siete títulos estaban cableados
- * en `publico/inicio.blade.php` — justo en la pantalla que estaban mirando. El
- * `SettingSeeder` ya declaraba la regla en su cabecera: «si un texto se ve en
- * el sitio público, se edita aquí desde el panel, nunca en una vista Blade».
+ * Al gremio se le promete que toda la página es editable, y un título
+ * cableado en la vista lo desmiente justo en la pantalla que más se mira.
+ * `SettingSeeder` declara la regla en su cabecera: «si un texto se ve en el
+ * sitio público, se edita aquí desde el panel, nunca en una vista Blade».
  * Esta prueba es lo que la convierte en algo que se puede incumplir en rojo.
  */
 class PortadaEditableTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** Las doce claves que gobiernan el texto propio de la portada. */
+    /**
+     * Claves de texto propio que pinta la portada. Los subtítulos y los dos
+     * textos del cierre están aquí porque la portada editorial los lee de
+     * `ajustes`: sin sembrarlos, la vista cae en su respaldo y el panel no
+     * puede cambiarlos.
+     */
     private const array TITULOS = [
+        'portada_cifras_subtitulo',
+        'portada_destacados_subtitulo',
+        'portada_beneficios_subtitulo',
+        'portada_actualidad_subtitulo',
+        'cta_editorial_frase',
+        'cta_final_boton',
         'portada_cifras_titulo',
         'portada_guia_titulo',
-        'portada_empleo_titulo',
         'portada_destacados_titulo',
         'portada_beneficios_titulo',
         'portada_eventos_titulo',
@@ -35,16 +44,12 @@ class PortadaEditableTest extends TestCase
         'portada_aliados_comerciales',
         'portada_videos_rotulo',
         'portada_videos_titulo',
-        'portada_videos_intro',
-        'portada_videos_proxima_rotulo',
-        'portada_videos_proxima_texto',
         'hero_frase_corta',
         'hero_resumen_corto',
         'hero_video_rotulo',
         'hero_video_titulo',
         'hero_video_detalle',
         'portada_guia_texto',
-        'portada_empleo_texto',
         'portada_destacados_texto',
     ];
 
@@ -86,14 +91,24 @@ class PortadaEditableTest extends TestCase
     public function test_cada_titulo_de_la_portada_obedece_a_su_ajuste(): void
     {
         foreach (self::TITULOS as $indice => $clave) {
-            $this->editarAjuste($clave, "TITULO EDITADO DESDE EL PANEL {$indice}");
+            $this->editarAjuste($clave, $this->textoEditado($indice));
         }
 
         $respuesta = $this->get('/')->assertOk();
 
         foreach (self::TITULOS as $indice => $clave) {
-            $respuesta->assertSee("TITULO EDITADO DESDE EL PANEL {$indice}", escape: false);
+            $respuesta->assertSee($this->textoEditado($indice), escape: false);
         }
+    }
+
+    /**
+     * El índice va cerrado entre corchetes a propósito. Sin cierre, «PANEL 1»
+     * es prefijo de «PANEL 10» a «PANEL 19», y la clave del índice 1 pasaba en
+     * verde aunque su vista la cableara: la sostenía el texto de otra clave.
+     */
+    private function textoEditado(int $indice): string
+    {
+        return "TITULO EDITADO DESDE EL PANEL [{$indice}]";
     }
 
     /** La entradilla de beneficios también se edita, no solo el título. */
@@ -109,10 +124,10 @@ class PortadaEditableTest extends TestCase
     }
 
     /**
-     * OBS3-01, el señalamiento textual: «lo que gana es como si estuviéramos
-     * vendiendo una lotería» (R22 03:05). No basta con que el ajuste exista —
-     * el valor sembrado, que es el que verá el gremio en la próxima demo, no
-     * puede seguir siendo el que le sonó horrible.
+     * El título de los beneficios no puede sonar a premio: el gremio rechazó
+     * «lo que gana» porque se lee «como si estuviéramos vendiendo una
+     * lotería». No basta con que el ajuste exista: el valor sembrado es el que
+     * se ve mientras nadie lo edite.
      */
     public function test_la_portada_ya_no_titula_los_beneficios_como_lo_que_gana(): void
     {
@@ -124,9 +139,9 @@ class PortadaEditableTest extends TestCase
     /**
      * Guardia estructural, hermana de la de `TemaClaroOscuroTest`.
      *
-     * Existe porque la prueba de comportamiento solo vigila las diez claves
-     * que YA existen: un texto nuevo aniadido cableado maniana pasaria por
-     * delante de ella sin despeinarla. Esta mira la vista, no la respuesta.
+     * Existe porque la prueba de comportamiento solo vigila las claves que YA
+     * existen: un texto nuevo añadido cableado mañana pasaría por delante de
+     * ella sin despeinarla. Esta mira la vista, no la respuesta.
      *
      * La regla, aplicada a `<h2>` y `<p>`: o el cuerpo interpola algo con
      * llaves dobles, o contiene marcado anidado --un enlace, un icono, un
@@ -135,37 +150,40 @@ class PortadaEditableTest extends TestCase
      */
     public function test_ningun_texto_propio_de_la_portada_esta_cableado(): void
     {
-        $vista = resource_path('views/publico/inicio.blade.php');
-        $this->assertFileExists($vista);
+        $vistas = array_merge(
+            [resource_path('views/publico/inicio.blade.php')],
+            File::glob(resource_path('views/components/publico/home/*.blade.php')) ?: []
+        );
 
-        $contenido = File::get($vista);
         $cableados = [];
 
-        foreach (['h2', 'p'] as $etiqueta) {
-            $encontrados = preg_match_all(
-                sprintf('/<%1$s\b[^>]*>(.*?)<\/%1$s>/s', $etiqueta),
-                $contenido,
-                $coincidencias
-            );
+        foreach ($vistas as $vista) {
+            $this->assertFileExists($vista);
 
-            $this->assertGreaterThan(
-                0,
-                $encontrados,
-                "No se encontro ningun <{$etiqueta}> en la portada: el patron de la guardia quedo obsoleto."
-            );
+            $contenido = File::get($vista);
 
-            foreach ($coincidencias[1] as $cuerpo) {
-                if (str_contains($cuerpo, '{{') || str_contains($cuerpo, '<')) {
-                    continue;
-                }
+            foreach (['h2', 'p'] as $etiqueta) {
+                preg_match_all(
+                    sprintf('/<%1$s\b[^>]*>(.*?)<\/%1$s>/s', $etiqueta),
+                    $contenido,
+                    $coincidencias
+                );
 
-                $limpio = trim(preg_replace('/\s+/', ' ', $cuerpo));
+                foreach ($coincidencias[1] as $cuerpo) {
+                    if (str_contains($cuerpo, '{{') || str_contains($cuerpo, '<')) {
+                        continue;
+                    }
 
-                if ($limpio !== '') {
-                    $cableados[] = "<{$etiqueta}> {$limpio}";
+                    $limpio = trim(preg_replace('/\s+/', ' ', $cuerpo));
+
+                    if ($limpio !== '') {
+                        $cableados[] = basename($vista).": <{$etiqueta}> {$limpio}";
+                    }
                 }
             }
         }
+
+        $this->assertNotSame([], $vistas, 'La portada editorial no tiene vistas que vigilar.');
 
         $this->assertSame(
             [],

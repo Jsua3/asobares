@@ -163,8 +163,8 @@ class TableroTest extends TestCase
     }
 
     /**
-     * El widget anterior traía todos los modelos a memoria para agruparlos con
-     * `groupBy` de Collection. Se mide el comportamiento —cuántas consultas
+     * Agrupar con `groupBy` de Collection obligaría a traer todos los modelos
+     * a memoria. Se mide el comportamiento —cuántas consultas
      * salen— y no cómo está escrito el archivo: una aserción sobre el texto
      * fuente se rompe con cualquier `->get()` legítimo en otro método.
      *
@@ -173,6 +173,11 @@ class TableroTest extends TestCase
      */
     public function test_el_recaudo_mensual_agrega_en_una_sola_consulta(): void
     {
+        // La prueba y el widget leen el mes de `now()` por separado: con el
+        // reloj corriendo, una ejecución que cruce el cambio de mes los
+        // desalinea.
+        $this->freezeTime();
+
         foreach (range(1, (int) now()->format('n')) as $mes) {
             Transaccion::create([
                 'referencia' => Transaccion::generarReferencia(),
@@ -288,10 +293,10 @@ class TableroTest extends TestCase
     }
 
     /**
-     * «1 altas este mes» era el texto real que producía la base: la
-     * descripción concatenaba el conteo sin pasar por `Str::plural`, la misma
-     * convención que ya usan `directorio/index.blade.php`,
-     * `mi-cuenta/index.blade.php` y el paginador.
+     * «1 altas este mes» es lo que sale si la descripción concatena el conteo
+     * sin pasar por `Str::plural`, la misma convención que usan
+     * `directorio/index.blade.php`, `mi-cuenta/index.blade.php` y el
+     * paginador.
      */
     public function test_las_altas_del_mes_singularizan_con_una_sola_alta(): void
     {
@@ -319,7 +324,7 @@ class TableroTest extends TestCase
 
     /**
      * Mismo defecto de concordancia en la tarjeta de secretaría: «1 PQR
-     * abiertos» tenía el adjetivo en plural fijo, sin importar el conteo.
+     * abiertos» es el adjetivo en plural fijo, sin importar el conteo.
      */
     public function test_los_pqr_abiertos_singularizan_con_uno_solo(): void
     {
@@ -393,13 +398,12 @@ class TableroTest extends TestCase
      * `discoverWidgets(in: app_path('Filament/Widgets'))` recorre
      * subdirectorios: sin que las gráficas de `Observatorio/` opten por
      * quedar fuera (`GraficaDelObservatorio::$isDiscovered = false`), las
-     * seis se colaban en el tablero con sus `$sort` (1–6) intercalados entre
-     * los del tablero (0–4) — Pendientes → Presencia → Resumen → Composición
-     * → Recaudo → …, rompiendo las tres bandas que el tablero documenta como
+     * seis entrarían en el tablero con sus `$sort` intercalados entre los de
+     * los widgets propios, rompiendo las bandas que el tablero documenta como
      * su razón de existir y doblando su coste de consultas.
      *
      * Se afirma el conjunto exacto, no solo la ausencia del observatorio: un
-     * tablero al que le falte uno de los cinco widgets propios también sería
+     * tablero al que le falte uno de sus nueve widgets propios también sería
      * un defecto, y `assertEqualsCanonicalizing` lo atrapa igual que atrapa
      * una fuga del observatorio.
      */
@@ -416,8 +420,8 @@ class TableroTest extends TestCase
                 RecaudoMensual::class,
                 AsociadosPorMunicipio::class,
                 UltimasTransacciones::class,
-                // Las tres del flujo del sitio (Acta 08, A-03, 9 sep 2026):
-                // los números, la curva y por dónde entra la gente.
+                // Las del flujo del sitio (Acta 08, A-03): los números, la
+                // curva, por dónde entra la gente y qué mira una vez dentro.
                 EntradasAlSitio::class,
                 VisitasDelSitio::class,
                 PorDondeEntranAlSitio::class,
@@ -480,10 +484,10 @@ class TableroTest extends TestCase
                 'xl' => 'full',
             ],
             /*
-             * La banda del flujo del sitio, rehecha el 9 de septiembre de 2026
-             * con el Acta 08 (A-03): tres números a lo ancho, debajo la curva de
-             * treinta días también a lo ancho --dos series no caben legibles en
-             * cuatro columnas-- y al pie las dos listas ordenadas, 3 + 2 = 6.
+             * La banda del flujo del sitio: tres números a lo ancho, debajo la
+             * curva de treinta días también a lo ancho --dos series no caben
+             * legibles en cuatro columnas-- y al pie las dos listas ordenadas,
+             * 3 + 3 = 6.
              *
              * Las dos van juntas a propósito: una dice por dónde ENTRA la gente y
              * la otra qué MIRA una vez dentro, y leerlas al lado es la mitad de
@@ -516,7 +520,7 @@ class TableroTest extends TestCase
      * Un `columnSpan` sin desglosar no se aplica en todos los anchos: Filament
      * lo guarda como `['lg' => …]`, y la regla base de la rejilla solo lee
      * `--col-span-default`. Con el tablero a una columna daba igual; con la
-     * rejilla de 2 en `md` y 6 en `xl` (7 sep) el widget cae a una sola pista
+     * rejilla de 2 en `md` y 6 en `xl` el widget cae a una sola pista
      * y queda a un sexto de fila con el resto vacío.
      * Rotura: devolver `'full'` a secas a cualquiera de los tres.
      */
@@ -541,8 +545,8 @@ class TableroTest extends TestCase
      * sale de una plantilla de Filament. Quien coloca cada widget en la rejilla
      * es `x-filament-widgets::widget`, que llama a `gridColumn()` con el tramo
      * del widget: sin ese envoltorio la vista se salta el tramo y, con la
-     * rejilla de 6 columnas del 7 sep, quedaba a un sexto de fila con el texto
-     * y el botón montados uno sobre otro.
+     * rejilla de 6 columnas, quedaría a un sexto de fila con el texto y el
+     * botón montados uno sobre otro.
      * Rotura: quitar el envoltorio y dejar la tarjeta de vidrio como raíz.
      */
     public function test_la_vista_de_pendientes_conserva_su_sitio_en_la_rejilla(): void

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Publico;
 
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -31,7 +32,7 @@ class ContrasenaAsociadoController
             'password' => 'contraseña',
         ]);
 
-        $estado = Password::reset($datos, function ($usuario, string $password): void {
+        $estado = Password::reset($datos, function (User $usuario, string $password): void {
             $usuario->forceFill([
                 'password' => Hash::make($password),
                 'remember_token' => Str::random(60),

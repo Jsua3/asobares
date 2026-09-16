@@ -8,9 +8,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * G12. La bolsa de empleo ya se depuraba sola, pero los formularios públicos
- * de contacto y PQR guardaban nombre, correo, teléfono y el texto del mensaje
- * sin ninguna fecha de caducidad.
+ * Los formularios públicos de contacto y PQR guardan nombre, correo, teléfono
+ * y el texto del mensaje: sin esta purga no tendrían fecha de caducidad, como
+ * sí la tiene la bolsa de empleo con `bolsas:depurar`.
  */
 class DepuracionDeMensajesTest extends TestCase
 {

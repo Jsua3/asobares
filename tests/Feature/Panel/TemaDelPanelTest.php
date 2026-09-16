@@ -52,13 +52,13 @@ class TemaDelPanelTest extends TestCase
     }
 
     /**
-     * Esta prueba estaba en falso verde: afirmaba sobre una cadena inerte
-     * (`file_get_contents` del CSS fuente), pero medida en navegador
-     * (`document.fonts` + `measureText`) Poppins nunca se renderizaba — el
-     * ancho de "ASOBARES Quindío 2026" a 48px daba 528,07px tanto con
-     * `Poppins` como con una fuente inexistente, la firma de un fallback.
+     * Afirmar sobre el CSS fuente no basta: es una cadena inerte. Medido en
+     * navegador (`document.fonts` + `measureText`), sin lo que sigue Poppins no
+     * se renderiza — el ancho de "ASOBARES Quindío 2026" a 48px da 528,07px
+     * tanto con `Poppins` como con una fuente inexistente, la firma de un
+     * fallback.
      *
-     * Hay dos causas reales, y esta prueba afirma sobre las dos:
+     * Hay dos causas, y esta prueba afirma sobre las dos:
      *
      * 1. Filament pinta su propio `<style>:root{--font-family: ...}` EN
      *    `base.blade.php`, DESPUÉS del `<link>` del tema compilado, con el
@@ -68,7 +68,7 @@ class TemaDelPanelTest extends TestCase
      *
      * 2. `vite.config.js` compila los doce `@font-face` de Poppins vía
      *    `bunny('Poppins', ...)` a `public/build/fonts-manifest.json`, pero
-     *    nada los enlazaba: sin el `<link>`/`<style>` real, el navegador no
+     *    hay que enlazarlos: sin el `<link>`/`<style>` real, el navegador no
      *    tiene de dónde descargar el glifo y Poppins resuelve por fallback
      *    aunque el nombre de la familia sea correcto.
      */
@@ -129,19 +129,17 @@ class TemaDelPanelTest extends TestCase
     {
         $tema = File::get(resource_path('css/filament/admin/theme.css'));
 
-        // Desde el 8 sep el fondo no lo pinta el contenido sino el cuerpo, con el
-        // campo de puntos encima: `.fi-main-ctn` quedó transparente para no
-        // taparlo. Lo que hay que seguir exigiendo es que el fondo exista en los
-        // dos temas, y ahora vive aquí.
+        // El fondo no lo pinta el contenido sino el cuerpo, con el campo de
+        // puntos encima: `.fi-main-ctn` es transparente para no taparlo. Lo que
+        // se exige es que el fondo del cuerpo exista en los dos temas.
         $this->assertStringContainsString('.fi-body {', $tema);
         $this->assertStringContainsString('.dark .fi-body {', $tema);
         $this->assertMatchesRegularExpression('/\.fi-main-ctn \{[^}]*background: transparent;/s', $tema, 'El contenido volvió a pintar fondo propio y taparía el campo de puntos.');
         /*
-         * `.fi-body::before` existe desde el 8 sep y pinta el resplandor de la
-         * zona del panel, que antes vivía en la barra y por eso nacía debajo
-         * del topbar. Lo que sigue prohibido es que esa capa pinte un fondo
-         * OPACO: taparía el campo de puntos, que es justo el defecto que este
-         * caso vigila.
+         * `.fi-body::before` pinta el resplandor de la zona del panel; colgado
+         * de la barra nacería debajo del topbar. Lo prohibido es que esa capa
+         * pinte un fondo OPACO: taparía el campo de puntos, que es justo el
+         * defecto que este caso vigila.
          */
         $this->assertMatchesRegularExpression('/\.fi-body::before \{[^}]*position: fixed;/s', $tema, 'La capa del resplandor dejó de ser fija: volvería a empezar donde empiece su elemento.');
         $this->assertDoesNotMatchRegularExpression('/\.fi-body::before \{[^}]*background-color:/s', $tema, 'La capa del resplandor pinta fondo opaco y taparía el campo de puntos.');

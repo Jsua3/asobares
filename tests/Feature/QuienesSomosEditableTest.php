@@ -9,34 +9,31 @@ use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
- * «Quiénes somos» se edita entero desde el panel (OBS3-11).
+ * «Quiénes somos» se edita entero desde el panel.
  *
- * El directivo dijo del texto institucional «ya eso toca cambiarlo» (R22
- * 06:10) y quedó en pedirle a la directora nacional que corrija los datos del
- * capítulo. **La redacción propia es insumo del gremio y sigue pendiente**:
- * este trabajo no la inventa, porque inventar la historia y la misión de una
- * agremiación es justo lo que no puede hacer un programador.
+ * **La redacción es insumo del gremio**: el código no la inventa, porque
+ * inventar la historia y la misión de una agremiación es justo lo que no
+ * puede hacer un programador.
  *
- * Lo que sí resuelve es que, cuando llegue, entre sin tocar código: quince
- * textos de esta página estaban cableados en la vista --ocho títulos de
- * sección y siete rótulos-- mientras el cuerpo ya salía de `ajustes`. Con
- * ellos dentro, «entregar el texto» habría significado abrir un editor.
+ * Lo que esta guardia asegura es que ese texto entre sin tocar código: los
+ * ocho títulos de sección y los siete rótulos salen de `ajustes`, igual que
+ * el cuerpo. Con uno solo cableado, «entregar el texto» significaría abrir un
+ * editor.
  *
- * Es la misma deuda que el §27.3 punto 2 destapó en la portada, en la segunda
- * página institucional del sitio. La portada tiene su guardia equivalente en
- * `PortadaEditableTest`; esta cubre `quienes-somos`.
+ * La portada tiene su guardia equivalente en `PortadaEditableTest`; esta
+ * cubre `quienes-somos`.
  */
 class QuienesSomosEditableTest extends TestCase
 {
     use RefreshDatabase;
 
     /**
-     * Los quince textos que dejaron de estar cableados, más las cuatro claves
-     * del respaldo nacional que entraron el 9 de septiembre de 2026 (las dos
-     * cifras de la lámina 3 de la presentación institucional y sus dos
-     * rótulos). Los rótulos son ajuste y no texto en la vista justamente por
-     * esta guardia: dicen «en el país», que es lo que impide leerlos como el
-     * tamaño del capítulo, y el gremio tiene que poder cambiarlos.
+     * Los quince textos de la página, más las cuatro claves del respaldo
+     * nacional (las dos cifras de la lámina 3 de la presentación institucional
+     * y sus dos rótulos). Los rótulos son ajuste y no texto en la vista
+     * justamente por esta guardia: dicen «en el país», que es lo que impide
+     * leerlos como el tamaño del capítulo, y el gremio tiene que poder
+     * cambiarlos.
      */
     private const array CLAVES = [
         'quienes_titulo_historia',
@@ -93,7 +90,7 @@ class QuienesSomosEditableTest extends TestCase
 
     /**
      * Guardia estructural: un texto NUEVO cableado mañana pasaría por delante
-     * de la prueba de arriba, que solo vigila las quince claves que existen.
+     * de la prueba de arriba, que solo vigila las claves que existen.
      */
     public function test_ningun_texto_de_la_pagina_esta_cableado(): void
     {
@@ -135,13 +132,12 @@ class QuienesSomosEditableTest extends TestCase
     }
 
     /**
-     * El §27.5 lo fija como regla de contenido: «solo directora ejecutiva y
-     * presidente, como lo hace la página nacional», porque al directivo «no
-     * me gusta como mucha publicidad» personal (R22 05:41-05:47).
+     * Regla de contenido del gremio: «solo directora ejecutiva y presidente,
+     * como lo hace la página nacional», para que la página no se lea como
+     * publicidad personal.
      *
-     * Ya se cumplía antes de OBS3-11 y por eso no hubo que cambiar nada; la
-     * prueba existe para que siga cumpliéndose cuando alguien tenga la buena
-     * idea de añadir el resto de la junta.
+     * La prueba existe para que siga cumpliéndose cuando alguien tenga la
+     * buena idea de añadir el resto de la junta.
      */
     public function test_la_direccion_se_muestra_corta(): void
     {
@@ -195,15 +191,15 @@ class QuienesSomosEditableTest extends TestCase
     /**
      * El caso de producción, que no es el de arriba.
      *
-     * `SettingSeeder` **no corre en el despliegue**: cuando esta rama llegue a
-     * producción, las cuatro claves del respaldo nacional no existirán en la
-     * base hasta que alguien pase `ContenidoOficialSeeder` a mano. Una clave
-     * ausente no es lo mismo que una vacía --`ajuste()` devuelve su valor por
-     * defecto-- y esa diferencia es la que decide si desplegar rompe la página
-     * o simplemente no enseña el bloque todavía.
+     * `SettingSeeder` **no corre en el despliegue**: en la base de producción
+     * las cuatro claves del respaldo nacional no existen hasta que alguien
+     * pasa `ContenidoOficialSeeder` a mano. Una clave ausente no es lo mismo
+     * que una vacía --`ajuste()` devuelve su valor por defecto-- y esa
+     * diferencia es la que decide si desplegar rompe la página o simplemente
+     * no enseña el bloque todavía.
      *
-     * Comprobada borrando las filas, que es literalmente el estado de la base
-     * de producción hoy.
+     * Se comprueba borrando las filas, que es el estado de una base de
+     * producción sin ese paso.
      */
     public function test_la_pagina_aguanta_sin_las_claves_del_respaldo_nacional(): void
     {

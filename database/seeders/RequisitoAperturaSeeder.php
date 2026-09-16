@@ -12,18 +12,13 @@ use Illuminate\Database\Seeder;
  *
  * «Es el punto donde caen siempre los negocios y los cierran.»
  *
- * ⚠️ **Esto se rehízo entero contra la fuente oficial.** Lo que había era una
- * guía de tres municipios --Armenia, Salento y Filandia-- con **costos
- * inventados** (180.000, 45.000, 380.000, 290.000…) y dos formatos PDF que se
- * generaban al vuelo rotulados «Formato de ejemplo». En la demostración del
- * gremio ya se había dicho «todavía no estamos actualizados» (`R21 09:27`), y
- * el §29.4 lo deja escrito: publicar cifras equivocadas de trámites legales
- * en una URL con el nombre del gremio encima es un riesgo del gremio, no del
- * equipo.
+ * ⚠️ **Todo sale de la fuente oficial.** Ni costos inventados ni formatos PDF
+ * rotulados «Formato de ejemplo»: publicar cifras equivocadas de trámites
+ * legales en una URL con el nombre del gremio encima es un riesgo del gremio,
+ * no del equipo.
  *
- * Los siete trámites de Armenia son, **literalmente**, el bloque que ya estaba
- * transcrito y listo para pegar en
- * `docs/ingenieria/guía-normativa-armenia-fuente-oficial.md` (§3). Ese
+ * Los siete trámites de Armenia son, **literalmente**, el bloque transcrito en
+ * `docs/ingenieria/guia-normativa-armenia-fuente-oficial.md` (§3). Ese
  * documento sale de `material/REQUISITOS APERTURA - ARMENIA.docx`, la jornada
  * «BLINDEMOS TU NEGOCIO ARMENIA» hecha con la Alcaldía de Armenia, que el
  * gremio entregó el **20 de agosto de 2026** — de ahí la fecha de
@@ -37,26 +32,26 @@ use Illuminate\Database\Seeder;
  *
  * Tres consecuencias que no son descuido:
  *
- * - **Ningún `costo_aproximado`.** El documento oficial no trae ni una cifra.
- *   Inventarlas otra vez sería repetir el mismo defecto con mejor letra.
+ * - **Ningún `costo_aproximado`.** El documento oficial no trae ni una cifra,
+ *   e inventarlas sería publicar costos sin respaldo.
  * - **Solo Armenia.** Para Salento y Filandia no hay documento. Una guía
  *   incompleta y cierta vale más que una completa e inventada; el §5 de aquel
- *   documento ya cuenta los otros once municipios como pendiente del gremio.
- * - **Sin `adjunto`.** Los PDF que se generaban decían «Formato de ejemplo» y
- *   llevaban el nombre del gremio encima. Los formatos reales de las entidades
- *   hay que pedirlos, y el gremio los sube desde el panel.
+ *   documento cuenta los otros once municipios como pendiente del gremio.
+ * - **Sin `adjunto`.** Un formato de ejemplo con el nombre del gremio encima
+ *   no es un formato de la entidad. Los reales hay que pedirlos, y el gremio
+ *   los sube desde el panel.
  *
- * ⚠️ **Pendiente que este commit NO cierra:** el §5 de ese mismo documento
- * pide que la dirección confirme por escrito que esta es la versión vigente
- * antes de publicar, «porque es información que un empresario va a usar para
- * decidir si abre o no». Aquí salen publicadas --con su fuente y su fecha a la
- * vista, que es la salvaguarda que pedía el §29.4-- pero esa confirmación
- * sigue debiéndose, y desde el panel se pasan a borrador en un clic.
+ * ⚠️ **Pendiente:** el §5 de ese mismo documento pide que la dirección
+ * confirme por escrito que esta es la versión vigente antes de publicar,
+ * «porque es información que un empresario va a usar para decidir si abre o
+ * no». Aquí salen publicadas --con su fuente y su fecha a la vista, que es la
+ * salvaguarda mínima-- pero esa confirmación sigue debiéndose, y desde el
+ * panel se pasan a borrador en un clic.
  *
  * Nota para quien resiembre sobre una base ya poblada: `updateOrCreate` va por
- * `(municipio_id, entidad)` y **no borra nada**, así que las fichas viejas de
- * Salento y Filandia siguen ahí. En desarrollo se limpian con
- * `migrate:fresh --seed`; en producción la tabla nació vacía.
+ * `(municipio_id, entidad)` y **no borra nada**, así que las fichas de
+ * Salento y Filandia de siembras anteriores siguen ahí. En desarrollo se
+ * limpian con `migrate:fresh --seed`; en producción la tabla nació vacía.
  */
 class RequisitoAperturaSeeder extends Seeder
 {

@@ -17,7 +17,7 @@ use UnitEnum;
 
 /**
  * RF-39. Quién hizo qué y cuándo, en español y sin jerga:
- * «Natalia aprobó el asociado X — hace 2 horas».
+ * «<usuario> aprobó el asociado X — hace 2 horas».
  */
 class Bitacora extends Page implements HasTable
 {
@@ -59,25 +59,13 @@ class Bitacora extends Page implements HasTable
         'evento' => 'el evento',
         'noticia' => 'la entrada del boletín',
         'requisito' => 'el requisito',
-        // Faltaba desde que el módulo existe: la guarda de `Panel\BitacoraTest`
-        // lo destapó el 9 de septiembre de 2026. Sin esta línea, publicar
-        // «Vibrarte» se leía como «Natalia actualizó un registro Vibrarte».
         'iniciativa' => 'la iniciativa',
         'vacante' => 'la vacante',
         'artista' => 'el artista',
         'proveedor' => 'el proveedor',
         'aliado' => 'el aliado',
         'beneficio' => 'el beneficio',
-        /*
-         * Los dos módulos nuevos de Ingrid, traducidos aquí el 9 sep 2026 porque
-         * la guarda de `Panel\BitacoraTest` los destapó al correr la regresión:
-         * sin estas líneas la oficina leía «Natalia actualizó **un registro**
-         * Banner del Congreso» y «aprobó **un registro** Bar La Estación».
-         *
-         * Son dos entradas de un array y nada más: no tocan la lógica de
-         * Publicidad ni la de Afiliación. Van aquí y no en sus módulos porque
-         * este mapa es de la Bitácora, que es transversal.
-         */
+        // El mapa vive aquí y no en cada módulo: la bitácora es transversal.
         'publicidad' => 'la publicidad',
         'solicitud_afiliacion' => 'la solicitud de afiliación de',
         'municipio' => 'el municipio',
@@ -150,10 +138,13 @@ class Bitacora extends Page implements HasTable
      * de una persona a todos los afiliados, el otro se los quita--. Con la frase
      * genérica las dos filas se leen idénticas, que es tanto como no registrar
      * nada. Estos modelos escriben su propia descripción y aquí se respeta.
+     * Las incidencias de pago (`pagos`, que escribe RegistroDePagos) también:
+     * su descripción dice qué notificó la pasarela contra lo ya resuelto, y la
+     * frase genérica la dejaba en «El sistema actualizó un registro».
      */
-    private const array DESCRIPCION_PROPIA = ['aspirante'];
+    private const array DESCRIPCION_PROPIA = ['aspirante', 'pagos'];
 
-    /** Arma «Natalia actualizó el asociado La Cava del Yipao». */
+    /** Arma «<usuario> actualizó el asociado <nombre>». */
     private function frase(Activity $registro): string
     {
         $quien = $registro->causer?->name ?? 'El sistema';

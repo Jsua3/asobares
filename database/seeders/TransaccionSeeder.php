@@ -109,15 +109,14 @@ class TransaccionSeeder extends Seeder
      * Dieciocho meses de mensualidades con estacionalidad, más el mes en curso.
      *
      * El tablero grafica recaudo mensual; con las transacciones apretadas en
-     * los últimos 25 días la gráfica era una línea plana, y una gráfica vacía
+     * los últimos 25 días la gráfica sería una línea plana, y una gráfica vacía
      * enseña que el tablero no sirve.
      *
      * La forma es la del sector: diciembre factura, enero y febrero son el
      * valle, y la base de afiliados va creciendo mes a mes. El mes en curso
-     * (mesesAtras = 0) se prorratea por los días ya transcurridos: dejarlo
-     * vacío hasta el cierre de mes hacía que el KPI «recaudado este mes» del
-     * tablero mostrara una caída falsa contra el mes anterior cualquier día
-     * que no fuera fin de mes.
+     * (mesesAtras = 0) se prorratea por los días ya transcurridos: vacío hasta
+     * el cierre de mes, el KPI «recaudado este mes» del tablero mostraría una
+     * caída falsa contra el mes anterior cualquier día que no fuera fin de mes.
      */
     private function sembrarHistorialDeMensualidades(): void
     {
@@ -151,16 +150,16 @@ class TransaccionSeeder extends Seeder
 
         // De 18 (el mes más antiguo) a 0 (el mes en curso, todavía abierto).
         foreach (range(18, 0) as $mesesAtras) {
-            // `startOfMonth()` PRIMERO y la resta después, y el orden es el
-            // arreglo de un defecto que solo se veía los días 29, 30 y 31.
-            // Al revés —`subMonths()->startOfMonth()`— un 30 de agosto la
-            // resta de seis meses construye `2026-02-30`, que PHP deja correr
-            // hasta el 2 de marzo en vez de recortarlo: los cubos de cinco y
-            // seis meses atrás caían en el MISMO mes, febrero se quedaba sin
-            // sembrar, y a quien debía cinco meses se le metía un pago dentro
-            // de su propia ventana de mora. Restarle meses a un día 1 no puede
-            // desbordar, porque el día 1 existe en los doce meses.
-            // `VentanaDeMesesTest` lo vigila con la fecha fijada.
+            // `startOfMonth()` PRIMERO y la resta después. Al revés
+            // —`subMonths()->startOfMonth()`— la resta desborda los días 29,
+            // 30 y 31: desde un 30 de agosto, restar seis meses construye el
+            // 30 de febrero, que PHP deja correr hasta el 2 de marzo en vez de
+            // recortarlo; los cubos de cinco y seis meses atrás caerían en el
+            // MISMO mes, febrero se quedaría sin sembrar, y a quien debe cinco
+            // meses se le metería un pago dentro de su propia ventana de mora.
+            // Restarle meses a un día 1 no puede desbordar, porque el día 1
+            // existe en los doce meses. `VentanaDeMesesTest` lo vigila con la
+            // fecha fijada.
             $mes = now()->startOfMonth()->subMonths($mesesAtras);
             $esMesEnCurso = $mesesAtras === 0;
 

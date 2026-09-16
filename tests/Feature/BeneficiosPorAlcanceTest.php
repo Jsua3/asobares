@@ -58,8 +58,7 @@ class BeneficiosPorAlcanceTest extends TestCase
      * Se mira lo que dice el sello por dentro, y no si el texto aparece en la
      * página: «ASOBARES Quindío» es el membrete del sitio y los municipios
      * salen en el formulario de afiliación, así que un `assertSee` a secas
-     * pasaría aunque el sello dijera cualquier otra cosa. Ya pasó al escribir
-     * estas pruebas.
+     * pasaría aunque el sello dijera cualquier otra cosa.
      */
     private function assertElSelloDice(string $esperado): void
     {
@@ -73,28 +72,14 @@ class BeneficiosPorAlcanceTest extends TestCase
     }
 
     /**
-     * El sello puede cambiar de forma —el 9 de septiembre de 2026 dejó de ser
-     * una píldora con borde y pasó a `antetitulo`, la convención del sitio para
-     * rótulos pequeños— pero no puede salirse del sistema de color por su
-     * cuenta. Esta guarda fija que siga usando `text-apagado`, que es el token
-     * del texto tenue de todo el sitio.
+     * El sello puede cambiar de forma, pero no puede salirse del sistema de
+     * color por su cuenta: tiene que seguir usando `text-apagado`, el token del
+     * texto tenue de todo el sitio.
      *
-     * ⚠️ **Y `text-apagado` no cumple hoy en tema oscuro.** Medido en Chromium
-     * el 9 de septiembre de 2026 sobre la portada, con los fondos que resuelven
-     * a un color sólido: en claro el sello da **7,66:1** y ninguno de los 17
-     * elementos medibles baja de 6,94; en oscuro el sello da **4,32:1** y
-     * **quince de esos diecisiete quedan por debajo del 4,5:1** que exige
-     * RNF-12 para texto normal. El sello no es la causa ni la excepción: da
-     * exactamente lo mismo que el resto del texto tenue.
-     *
-     * Por eso esta prueba afirma sobre el TOKEN y no sobre un número: cambiar el
-     * color aquí escondería el problema en un componente en vez de arreglarlo
-     * donde vive, que es la definición del token en `resources/css/app.css`.
-     * Eso es una decisión de la capa visual y cruza todas las páginas, así que
-     * queda reportado, no parcheado desde aquí.
-     *
-     * (El 4,53:1 que cita el expediente del 8 de septiembre se midió contra el
-     * fondo de una tarjeta, no contra el de la página.)
+     * Se afirma sobre el TOKEN y no sobre un número: el contraste se decide
+     * donde vive el token, en `resources/css/tokens.css`, y lo mide
+     * `ContrasteDelTextoTenueTest`. Cambiar el color aquí escondería en un
+     * componente una decisión que cruza todas las páginas.
      */
     public function test_el_sello_conserva_el_token_de_color_que_se_midio(): void
     {
@@ -105,7 +90,7 @@ class BeneficiosPorAlcanceTest extends TestCase
         $this->assertMatchesRegularExpression(
             '/class="[^"]*'.self::SELLO.'[^"]*text-apagado[^"]*"/u',
             $contenido,
-            'El sello de alcance perdió `text-apagado`, que es el token cuyo contraste (4,53:1) se midió. '
+            'El sello de alcance perdió `text-apagado`, el token cuyo contraste mide ContrasteDelTextoTenueTest. '
             .'Si se cambia el color hay que volver a medirlo, no suponerlo.'
         );
 

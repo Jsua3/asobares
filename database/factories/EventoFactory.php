@@ -10,12 +10,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * El modelo importaba esta clase y la documentaba en su `@use HasFactory<…>`
- * desde el primer día, pero el archivo no existía: `Evento::factory()` lanzaba
- * `Class "Database\Factories\EventoFactory" not found`. Por eso los seis tests
- * que tocan eventos levantan sus datos con `Evento::create([...])` a mano, a
- * diez líneas por evento.
- *
  * @extends Factory<Evento>
  */
 class EventoFactory extends Factory

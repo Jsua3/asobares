@@ -39,12 +39,4 @@ class MensajeFactory extends Factory
             'radicado' => 'PQR-'.now()->year.'-'.fake()->unique()->numerify('####'),
         ]);
     }
-
-    public function respondido(): static
-    {
-        return $this->state(fn (array $atributos): array => [
-            'estado' => EstadoMensaje::Respondido,
-            'respondido_at' => now(),
-        ]);
-    }
 }

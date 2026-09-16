@@ -9,9 +9,10 @@
 {{--
     El sitio de una foto que todavía no existe.
 
-    ASOBARES aún no ha entregado material fotográfico autorizado, y el §9 de
+    ASOBARES aún no ha entregado material fotográfico autorizado, y el §10 de
     `encargo.md` es claro: en producción solo entra contenido de documento
-    oficial del gremio, y ninguna ficha se publica sin autorización del titular.
+    oficial del gremio; el §9 añade que ninguna ficha se publica sin
+    autorización del titular.
     Así que los huecos se abren AHORA, con la marca puesta, y las fotos entran
     el día que lleguen — cambiar un `null` por una ruta, sin rehacer plantillas.
 

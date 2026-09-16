@@ -19,8 +19,8 @@ use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
- * La subida de archivos era el hueco que quedaba: el formulario renderizaba
- * en las pruebas, pero nunca se le había subido una imagen de verdad.
+ * Que el formulario renderice no prueba la subida de archivos: aquí se le
+ * sube una imagen de verdad.
  */
 class SubidaDeImagenesTest extends TestCase
 {
@@ -72,6 +72,8 @@ class SubidaDeImagenesTest extends TestCase
 
     public function test_subir_la_galeria_crea_las_conversiones_webp(): void
     {
+        Storage::fake('public');
+
         $asociado = Asociado::factory()->publicado()->create();
 
         Livewire::test(EditAsociado::class, ['record' => $asociado->getRouteKey()])

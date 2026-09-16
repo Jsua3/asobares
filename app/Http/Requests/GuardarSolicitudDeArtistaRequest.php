@@ -11,9 +11,9 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 /**
- * «Quiero aparecer en la bolsa» dejó de ser un mensaje de texto libre que la
- * secretaría tenía que transcribir a mano: la ficha entra ya armada y solo
- * falta aprobarla.
+ * «Quiero aparecer en la bolsa» entra como una ficha ya armada, no como un
+ * mensaje de texto libre que la secretaría tendría que transcribir a mano:
+ * solo falta aprobarla.
  */
 class GuardarSolicitudDeArtistaRequest extends FormRequest
 {
@@ -62,7 +62,7 @@ class GuardarSolicitudDeArtistaRequest extends FormRequest
                 'video_url', 'whatsapp', 'correo', 'instagram_url', 'municipio_id',
             ]),
             'slug' => $this->slugDisponible($this->string('nombre')->toString()),
-            'foto' => $this->file('foto')?->store('artistas', 'public'),
+            'foto' => $this->file('foto')?->store('artistas', config('almacenamiento.publico')),
             'estado' => EstadoPublicacion::PendienteAprobacion,
             ...$this->selloDeConsentimiento(),
         ];

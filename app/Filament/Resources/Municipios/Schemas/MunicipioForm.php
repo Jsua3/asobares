@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Municipios\Schemas;
 
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
@@ -22,13 +23,27 @@ class MunicipioForm
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (?string $state, callable $set) => $set('slug', Str::slug((string) $state))),
+                            ->afterStateUpdated(function (?string $state, callable $set, string $operation): void {
+                                if ($operation === 'create') {
+                                    $set('slug', Str::slug((string) $state));
+                                }
+                            }),
                         TextInput::make('slug')
                             ->label('Slug (URL)')
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true)
                             ->helperText('Se usa en los filtros: /directorio?municipio=salento'),
+                        TextInput::make('orden')
+                            ->label('Orden')
+                            ->required()
+                            ->numeric()
+                            ->default(0)
+                            ->helperText('Menor número, aparece primero en la guía normativa.'),
+                        Toggle::make('activo')
+                            ->label('Activo en la guía')
+                            ->default(true)
+                            ->helperText('Si está apagado, no aparece en Abre tu negocio aunque tenga requisitos publicados.'),
                     ]),
             ]);
     }

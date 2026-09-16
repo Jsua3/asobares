@@ -1,8 +1,8 @@
 /*
  * Las gráficas del panel siguen el tema.
  *
- * Lo que no seguía el tema eran los ticks, la rejilla y la leyenda, que
- * Chart.js pinta en un gris fijo con poco contraste sobre el fondo oscuro.
+ * Chart.js pinta los ticks, la rejilla y la leyenda en un gris fijo con poco
+ * contraste sobre el fondo oscuro: el plugin los repinta con los tokens.
  *
  * El relleno de una gráfica de una sola serie se queda en Pub Red: como
  * relleno funciona en los dos temas (la restricción AA del token `acento` es
@@ -18,37 +18,47 @@
  * ese global de forma fiable.
  */
 
-const graficas = new Set()
+const graficas = new Set();
 
 const leerToken = (nombre) =>
-    getComputedStyle(document.documentElement).getPropertyValue(nombre).trim()
+    getComputedStyle(document.documentElement).getPropertyValue(nombre).trim();
 
 const plugin = {
     id: 'asobaresTema',
 
     start(grafica) {
-        graficas.add(grafica)
+        graficas.add(grafica);
     },
 
     stop(grafica) {
-        graficas.delete(grafica)
+        graficas.delete(grafica);
     },
 
     beforeUpdate(grafica) {
-        const tinta = leerToken('--asb-tinta')
-        const linea = leerToken('--asb-linea')
+        const tinta = leerToken('--asb-tinta');
+        const linea = leerToken('--asb-linea');
 
-        if (! tinta) return
+        if (! tinta) {
+            return;
+        }
 
-        grafica.options.color = tinta
+        grafica.options.color = tinta;
 
-        const leyenda = grafica.options.plugins?.legend?.labels
-        if (leyenda) leyenda.color = tinta
+        const leyenda = grafica.options.plugins?.legend?.labels;
+        if (leyenda) {
+            leyenda.color = tinta;
+        }
 
         for (const eje of Object.values(grafica.options.scales ?? {})) {
-            if (eje.ticks) eje.ticks.color = tinta
-            if (eje.grid) eje.grid.color = linea
-            if (eje.border) eje.border.color = linea
+            if (eje.ticks) {
+                eje.ticks.color = tinta;
+            }
+            if (eje.grid) {
+                eje.grid.color = linea;
+            }
+            if (eje.border) {
+                eje.border.color = linea;
+            }
         }
 
         /*
@@ -58,22 +68,26 @@ const plugin = {
          * se queda el hexadecimal de reserva en vez de pintar transparente.
          */
         for (const conjunto of grafica.data?.datasets ?? []) {
-            if (! conjunto.asobaresSerie) continue
+            if (! conjunto.asobaresSerie) {
+                continue;
+            }
 
-            const relleno = leerToken(`--asb-serie-${conjunto.asobaresSerie}`)
-            if (relleno) conjunto.backgroundColor = relleno
+            const relleno = leerToken(`--asb-serie-${conjunto.asobaresSerie}`);
+            if (relleno) {
+                conjunto.backgroundColor = relleno;
+            }
         }
     },
-}
+};
 
-window.filamentChartJsPlugins ??= []
-window.filamentChartJsPlugins.push(plugin)
+window.filamentChartJsPlugins ??= [];
+window.filamentChartJsPlugins.push(plugin);
 
 /*
  * Chromium no reinicia una transición cuando lo que cambia es la custom
  * property que hay detrás del valor: la propiedad se queda congelada en el
- * color del tema anterior. Es el mismo bug que ya se cerró en el sitio
- * público (`publico.blade.php`), y el panel lo hereda en cualquier clase con
+ * color del tema anterior. Es el mismo bug que evita el sitio público
+ * (`publico.blade.php`), y el panel lo hereda en cualquier clase con
  * `transition-colors` que dependa de un token (por ejemplo, el enlace
  * «Revisar» de `<x-panel.cola>`, que usa `text-tinta`).
  *
@@ -82,10 +96,10 @@ window.filamentChartJsPlugins.push(plugin)
  * MutationObserver que ya repinta las gráficas en vez de envolver el cambio
  * como hace el sitio público.
  */
-const mordaza = document.createElement('style')
-mordaza.textContent = '*,*::before,*::after{transition:none !important}'
+const mordaza = document.createElement('style');
+mordaza.textContent = '*,*::before,*::after{transition:none !important}';
 
-const quitarMordaza = () => mordaza.remove()
+const quitarMordaza = () => mordaza.remove();
 
 /*
  * Filament conmuta la clase `dark` en <html>. Chart.js no redibuja por eso
@@ -93,8 +107,8 @@ const quitarMordaza = () => mordaza.remove()
  * del tema anterior hasta que algo más la fuerce a repintar.
  */
 new MutationObserver(() => {
-    document.head.appendChild(mordaza)
-    void document.documentElement.offsetHeight
+    document.head.appendChild(mordaza);
+    void document.documentElement.offsetHeight;
 
     /*
      * La retirada se programa ANTES de tocar las gráficas, y no depende de
@@ -112,21 +126,21 @@ new MutationObserver(() => {
      * segundo plano (el caso real es el evento `storage` entre /admin y el
      * sitio) y el navegador no ejecuta requestAnimationFrame.
      */
-    requestAnimationFrame(() => requestAnimationFrame(quitarMordaza))
-    setTimeout(quitarMordaza, 250)
+    requestAnimationFrame(() => requestAnimationFrame(quitarMordaza));
+    setTimeout(quitarMordaza, 250);
 
     /*
      * update() en modo normal, no update('none'): «none» es un modo directo
      * en el que Chart.js NO vuelve a fusionar las opciones compartidas de
      * los elementos, así que los rellenos que beforeUpdate acaba de escribir
      * en el dataset no llegan a las barras y cada serie se queda con la
-     * paleta del tema anterior — Seguridad, que en claro es casi negro,
-     * quedaba invisible al pasar a oscuro. Se vio midiendo los píxeles del
-     * canvas el 14 ago 2026, no leyendo. Tampoco anima: el componente de
+     * paleta del tema anterior — una serie casi negra en claro queda
+     * invisible al pasar a oscuro. Solo se nota midiendo los píxeles del
+     * canvas, no leyendo el código. Tampoco anima: el componente de
      * Filament fija animation.duration en 0 para todas las gráficas.
      */
-    graficas.forEach((grafica) => grafica.update())
+    graficas.forEach((grafica) => grafica.update());
 }).observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['class'],
-})
+});

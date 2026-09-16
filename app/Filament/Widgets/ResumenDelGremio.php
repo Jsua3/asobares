@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Panel\ColaDePendientes;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -22,9 +23,9 @@ use Illuminate\Support\Str;
 /**
  * Banda 2 del tablero: cuatro cifras, no seis, y distintas según el oficio.
  *
- * Antes eran seis tarjetas fijas que mezclaban contenido, plata, bandeja y
- * bolsa: la dirección y la secretaría abrían la misma pantalla con la misma
- * jerarquía y ninguna veía su trabajo. El discriminador es `ver_transaccion`,
+ * Seis tarjetas fijas mezclarían contenido, plata, bandeja y bolsa: la
+ * dirección y la secretaría abrirían la misma pantalla con la misma
+ * jerarquía y ninguna vería su trabajo. El discriminador es `ver_transaccion`,
  * que es justo el permiso que `RolYPermisoSeeder` le niega a la secretaría.
  *
  * Toda tarjeta lleva `url()`: un KPI que no es enlace es un número muerto.
@@ -106,10 +107,10 @@ class ResumenDelGremio extends StatsOverviewWidget
             ->where('fecha_afiliacion', '>=', $inicioDeMes->toDateString())
             ->count();
 
-        $conPresencia = Municipio::whereHas('asociados', fn ($q) => $q->publicado())->count();
+        $conPresencia = Municipio::whereHas('asociados', fn (Builder $asociados): Builder => $asociados->publicado())->count();
 
         return [
-            Stat::make('Recaudado este mes', $this->pesos($recaudado))
+            Stat::make('Recaudado este mes', pesos($recaudado))
                 ->description($this->variacion($recaudado, $recaudadoAntes, $transaccionesRecaudado, $transaccionesAntes))
                 ->descriptionIcon($recaudado >= $recaudadoAntes
                     ? 'heroicon-o-arrow-trending-up'
@@ -118,7 +119,7 @@ class ResumenDelGremio extends StatsOverviewWidget
                 ->url(route('filament.admin.resources.transacciones.index')),
 
             Stat::make('Cartera en mora', $enMora)
-                ->description($this->pesos($saldo).' por recaudar')
+                ->description(pesos($saldo).' por recaudar')
                 ->descriptionIcon('heroicon-o-exclamation-triangle')
                 ->color($enMora > 0 ? 'danger' : 'success')
                 ->url(route('filament.admin.resources.cartera.index')),
@@ -219,11 +220,6 @@ class ResumenDelGremio extends StatsOverviewWidget
 
         return $signo.number_format(abs($porcentaje), 1, ',', '.')
             ." % vs. mismo tramo del mes anterior (n = {$transaccionesAhora} vs. n = {$transaccionesAntes})";
-    }
-
-    private function pesos(float $monto): string
-    {
-        return '$'.number_format($monto, 0, ',', '.');
     }
 
     public static function canView(): bool

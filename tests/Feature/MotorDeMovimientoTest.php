@@ -39,10 +39,10 @@ class MotorDeMovimientoTest extends TestCase
     /**
      * La física, medida sobre el módulo real.
      *
-     * Las cuatro mutaciones que se comprobaron en rojo antes de dar esto por
-     * bueno: quitar el sub-paso (el resorte se va a 8.422.062 px con un
-     * fotograma de 4 s), cambiar la proyección por la fórmula del libro de
-     * física, ignorar el movimiento reducido y volver lineal la goma.
+     * Roturas que la ponen en rojo: quitar el sub-paso (el resorte se va a
+     * 8.422.062 px con un fotograma de 4 s), cambiar la proyección por la
+     * fórmula del libro de física, ignorar el movimiento reducido y volver
+     * lineal la goma.
      */
     public function test_la_fisica_del_motor_se_comporta(): void
     {

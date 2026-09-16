@@ -154,6 +154,33 @@ class SolicitudAfiliacionTest extends TestCase
         $this->assertSame(0, SolicitudAfiliacion::count());
     }
 
+    /**
+     * Una redirección de validación que vuelve a la URL previa sin ancla deja
+     * a la persona en el hero: en un teléfono el formulario empieza tres
+     * pantallas más abajo, no ve ningún error y cree que no ha pasado nada.
+     * Se envía desde la propia página para que la URL previa exista y la
+     * prueba distinga el ancla, no un redirect a la portada.
+     */
+    public function test_un_envio_invalido_vuelve_anclado_al_formulario(): void
+    {
+        $this->get(route('afiliate'))->assertSee('id="formulario"', escape: false);
+
+        $respuesta = $this->from(route('afiliate'))
+            ->post(route('afiliate.store'), $this->datosValidos(['descripcion' => 'corto']));
+
+        // Se compara la cabecera y no con `assertRedirect`: cuando esa aserción
+        // falla, el contexto que le añade Laravel revienta con los errores de
+        // sesión y el motivo real del rojo no se ve.
+        $respuesta->assertSessionHasErrors('descripcion');
+        $this->assertSame(
+            route('afiliate').'#formulario',
+            $respuesta->headers->get('Location'),
+            'Tras un error de validación hay que volver anclado al formulario, no al tope de la página.'
+        );
+
+        $this->assertSame(0, SolicitudAfiliacion::count());
+    }
+
     public function test_honeypot_continua_bloqueando_bots(): void
     {
         $this->post(route('afiliate.store'), $this->datosValidos([
@@ -164,7 +191,7 @@ class SolicitudAfiliacionTest extends TestCase
     }
 
     /** @return array<string, array{0: CargoDelSolicitante}> */
-    public static function cargosEstandarProvider(): array
+    public static function cargosEstandar(): array
     {
         return collect(CargoDelSolicitante::cases())
             ->reject(fn (CargoDelSolicitante $cargo): bool => $cargo->esOtro())
@@ -172,7 +199,7 @@ class SolicitudAfiliacionTest extends TestCase
             ->all();
     }
 
-    #[DataProvider('cargosEstandarProvider')]
+    #[DataProvider('cargosEstandar')]
     public function test_acepta_cada_cargo_estandar(CargoDelSolicitante $cargo): void
     {
         Mail::fake();
@@ -388,6 +415,27 @@ class SolicitudAfiliacionTest extends TestCase
         $this->assertNull($solicitud->aprobado_at);
         $this->assertSame(0, Asociado::count());
         $this->assertSame(1, User::count());
+    }
+
+    /**
+     * La sección de seguimiento es lo que la secretaría lee al gestionar una
+     * solicitud: tiene que remitir a la acción que aprueba, que ya existe, y
+     * no anunciarla como algo por venir.
+     */
+    public function test_el_seguimiento_remite_a_la_accion_de_aprobar(): void
+    {
+        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
+
+        $solicitud = SolicitudAfiliacion::factory()->create([
+            'municipio_id' => $this->municipio->id,
+            'categoria_id' => $this->categoria->id,
+            'estado' => EstadoSolicitudAfiliacion::Pendiente,
+        ]);
+
+        Livewire::test(EditSolicitudAfiliacion::class, ['record' => $solicitud->getRouteKey()])
+            ->assertSuccessful()
+            ->assertDontSee('vendrá después')
+            ->assertSee('Para aprobar y crear el acceso, usa la acción «Aprobar y crear acceso» de la lista de solicitudes.');
     }
 
     public function test_aprobar_dos_veces_no_crea_duplicados(): void

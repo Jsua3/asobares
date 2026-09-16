@@ -2,7 +2,10 @@
     $whatsapp = enlaceWhatsapp(ajuste('contacto_whatsapp'), 'Hola, escribo desde la página de ASOBARES Quindío.');
 @endphp
 
-<footer class="luz-ambiente mt-24 border-t border-linea bg-superficie">
+<footer @class([
+    'luz-ambiente mt-24 border-t border-linea bg-superficie',
+    'dark home-editorial-pie' => request()->routeIs('inicio'),
+])>
     <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
 
@@ -26,8 +29,9 @@
                 <ul class="mt-1 text-sm">
                     <li><a href="{{ route('quienes-somos') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Quiénes somos</a></li>
                     <li><a href="{{ route('afiliate') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Afíliate</a></li>
+                    <li><a href="{{ route('aliados.index') }}" class="enlace-accion flex min-h-11 items-center text-suave hover:text-acento">Aliados y convenios</a></li>
                     {{-- La entrada del afiliado en todos los anchos y sin JavaScript: en el
-                         teléfono la barra la ofrece como fila de la hoja de El gremio (D-M4).
+                         teléfono la barra la ofrece como fila de la hoja de El gremio.
                          Del anónimo, como esa fila: a quien ya tiene sesión el formulario de
                          afiliados le reemplazaría la suya. --}}
                     @guest

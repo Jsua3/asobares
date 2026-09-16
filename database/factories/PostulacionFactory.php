@@ -27,9 +27,4 @@ class PostulacionFactory extends Factory
             'consentimiento_at' => now(),
         ];
     }
-
-    public function contactada(): static
-    {
-        return $this->state(['estado' => EstadoDeGestion::Contactado]);
-    }
 }

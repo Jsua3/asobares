@@ -2,11 +2,16 @@
                    descripcion="Acceso para los establecimientos afiliados: consulta tu estado de cuenta y el detalle de los convenios."
                    :sin-navegacion="true">
 
-    <div class="resplandor-marca flex min-h-[75vh] items-center">
-        <div class="mx-auto w-full max-w-md px-4 py-16 sm:px-6">
+    <div class="acceso-asociado">
+        <a href="{{ route('inicio') }}" class="acceso-asociado__volver">
+            <span aria-hidden="true">← </span>Volver al sitio
+        </a>
 
+        <div class="acceso-asociado__marco">
             <div class="text-center">
-                <x-publico.logo alto="h-10" class="mx-auto" />
+                <a href="{{ route('inicio') }}" class="acceso-asociado__marca" aria-label="Ir al inicio, ASOBARES Capítulo Quindío">
+                    <x-publico.logo alto="h-10" class="mx-auto" />
+                </a>
                 <h1 class="mt-5 font-display text-2xl font-bold">Entra a tu cuenta</h1>
                 <p class="mt-2 text-sm text-tenue">
                     Para los establecimientos afiliados al capítulo.
@@ -17,7 +22,7 @@
                 <x-publico.alerta class="mt-6">{{ session('exito') }}</x-publico.alerta>
             @endif
 
-            <form method="POST" action="{{ route('mi-cuenta.entrar.post') }}" class="tarjeta mt-8 space-y-5 p-7">
+            <form method="POST" action="{{ route('mi-cuenta.entrar.post') }}" class="acceso-asociado__tarjeta mt-8 space-y-5 p-7">
                 @csrf
 
                 <x-publico.campo nombre="email" etiqueta="Correo electrónico" tipo="email" requerido />

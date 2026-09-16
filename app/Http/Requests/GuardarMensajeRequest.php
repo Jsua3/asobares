@@ -16,6 +16,15 @@ class GuardarMensajeRequest extends FormRequest
         return true;
     }
 
+    /**
+     * Mismo ancla que usa el controlador al guardar: un error de validación
+     * vuelve al formulario y no al tope de la página.
+     */
+    protected function getRedirectUrl(): string
+    {
+        return route('contacto').'#formulario';
+    }
+
     /** @return array<string, mixed> */
     public function rules(): array
     {

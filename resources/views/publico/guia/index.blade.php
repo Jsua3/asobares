@@ -1,6 +1,10 @@
 <x-layouts.publico :titulo="ajuste('seo_guia_titulo', ajuste('guia_titulo').' — ASOBARES Quindío')"
                    :descripcion="ajuste('seo_guia_descripcion', 'Requisitos para abrir un bar, gastrobar o café en el Quindío: qué pide cada entidad y ante quién se tramita, municipio por municipio.')">
 
+    @push('cabeza')
+        @vite(['resources/css/guia-editorial.css'])
+    @endpush
+
     @if (! ($seleccionado && $requisitos->isNotEmpty()))
         {{-- Un municipio cuya guía entera caducó (o que nunca la tuvo) deja
              esta URL respondiendo 200 con «Todavía no hay guía publicada»:
@@ -11,31 +15,64 @@
         @endpush
     @endif
 
-    {{-- El hueco de la foto de cabecera. Hoy pinta el marcador de marca; el día
-         que ASOBARES entregue material autorizado basta con guardar la ruta en
-         el ajuste `guia_foto` desde el panel, sin tocar esta plantilla. --}}
+    {{-- Fotografía definitiva: `public/media/abre-tu-negocio/hero-abre-tu-negocio.png`. --}}
+    @php
+        $fotoGuiaEscena = collect([
+            'media/abre-tu-negocio/hero-abre-tu-negocio.png',
+            'img/guia/hero-abre-tu-negocio.png',
+            'img/guia/hero-abre-tu-negocio.webp',
+            'img/guia/hero-abre-tu-negocio.jpg',
+        ])->first(fn (string $ruta): bool => is_file(public_path($ruta)));
+    @endphp
+    <div class="guia-editorial">
     <x-publico.hero :titulo="ajuste('guia_titulo')" :subtitulo="ajuste('guia_intro')" atmosfera>
         <x-slot:medio>
             <x-publico.hueco-foto :foto="ajuste('guia_foto', null)" />
         </x-slot:medio>
+        <x-slot:escena>
+            <div class="guia-editorial-escena" aria-hidden="true">
+                <div class="guia-editorial-escena__campo">
+                    @if ($fotoGuiaEscena)
+                        <img src="{{ asset($fotoGuiaEscena) }}"
+                             alt=""
+                             width="1672"
+                             height="941"
+                             class="guia-editorial-escena__foto">
+                    @else
+                        <div class="guia-editorial-escena__placeholder"
+                             data-guia-placeholder="geometria-04d"></div>
+                    @endif
+                </div>
+                <div class="guia-editorial-escena__velo"></div>
+                @if (file_exists(public_path('media/abre-tu-negocio/animacion-logo.mp4')))
+                    <div class="guia-editorial-logo-vivo" x-data="guiaIdentidad">
+                        <video x-ref="identidad"
+                               muted
+                               playsinline
+                               loop
+                               preload="auto"
+                               width="1080"
+                               height="1080">
+                            <source src="{{ asset('media/abre-tu-negocio/animacion-logo.mp4') }}" type="video/mp4">
+                        </video>
+                    </div>
+                @endif
+            </div>
+        </x-slot:escena>
     </x-publico.hero>
 
-    <div class="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
+    <div class="guia-editorial__cuerpo mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
 
         {{-- Selector de municipio --}}
-        <section class="revelar" data-revelar aria-labelledby="selector">
+        <section class="guia-editorial-selector" aria-labelledby="selector">
             <h2 id="selector" class="font-display text-xs font-semibold uppercase tracking-wider text-apagado">
                 Escoge tu municipio
             </h2>
-            <div class="mt-5 flex flex-wrap gap-2">
+            <div class="guia-editorial-municipios mt-5">
                 @foreach ($municipios as $municipio)
                     <a href="{{ route('guia.index', ['municipio' => $municipio->slug]) }}"
-                       @class([
-                           'pulsable inline-flex min-h-11 items-center rounded-xl border px-4 text-sm',
-                           'border-marca-500 bg-marca-500/10 font-medium text-acento-fuerte' => $seleccionado?->is($municipio),
-                           'border-linea text-suave hover:border-marca-500/40 hover:text-fuerte' => ! $seleccionado?->is($municipio),
-                       ])
-                       @if ($seleccionado?->is($municipio)) aria-current="true" style="view-transition-name: filtro-activo" @endif>
+                       class="guia-editorial-municipio pulsable"
+                       @if ($seleccionado?->is($municipio)) aria-current="true" @endif>
                         {{ $municipio->nombre }}
                     </a>
                 @endforeach
@@ -47,35 +84,32 @@
 
         @if ($seleccionado && $requisitos->isNotEmpty())
             {{-- Resumen --}}
-            <div class="revelar vidrio mt-10 grid gap-6 rounded-[1.5rem] p-6 sm:grid-cols-3" data-revelar>
+            <div class="guia-editorial-resumen">
                 <div>
-                    <p class="text-xs uppercase tracking-wide text-apagado">Municipio</p>
-                    <p class="mt-1 font-display text-lg font-semibold">{{ $seleccionado->nombre }}</p>
+                    <p class="guia-editorial-resumen__etiqueta">Municipio</p>
+                    <p class="guia-editorial-resumen__valor">{{ $seleccionado->nombre }}</p>
                 </div>
                 <div>
-                    <p class="text-xs uppercase tracking-wide text-apagado">Entidades a visitar</p>
-                    <p class="mt-1 font-display text-lg font-semibold">{{ $requisitos->count() }}</p>
+                    <p class="guia-editorial-resumen__etiqueta">Entidades a visitar</p>
+                    <p class="guia-editorial-resumen__valor">{{ $requisitos->count() }}</p>
                 </div>
                 <div>
-                    <p class="text-xs uppercase tracking-wide text-apagado">Costo aproximado</p>
-                    <p class="mt-1 font-display text-lg font-semibold text-acento">
+                    <p class="guia-editorial-resumen__etiqueta">Costo aproximado</p>
+                    <p class="guia-editorial-resumen__valor guia-editorial-resumen__valor--acento">
                         {{ $costoTotal > 0 ? pesos($costoTotal) : 'Por confirmar' }}
                     </p>
                 </div>
             </div>
 
             {{-- Requisitos por entidad --}}
-            <div class="revelar mt-8 space-y-4" data-revelar>
+            <div class="mt-8 space-y-4">
                 @foreach ($requisitos as $indice => $requisito)
-                    <details @class([
-                        'tarjeta tarjeta-hover group overflow-hidden',
-                        'vidrio' => $indice === 0,
-                    ]) @if ($indice === 0) open @endif>
+                    <details class="guia-editorial-requisito group" @if ($indice === 0) open @endif>
                         {{-- `fila-pulsable` y no `pulsable`: encoger el <summary> movería la
                              flecha de `group-open:rotate-180` y se leerían dos movimientos
                              peleados sobre el mismo gesto. --}}
-                        <summary class="fila-pulsable flex cursor-pointer list-none items-start gap-4 p-6">
-                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-marca-500/15 font-display text-sm font-bold text-acento">
+                        <summary class="guia-editorial-requisito__cabecera fila-pulsable">
+                            <span class="guia-editorial-requisito__indice">
                                 {{ $indice + 1 }}
                             </span>
 
@@ -87,15 +121,13 @@
                                             {{ pesos($requisito->costo_aproximado) }}
                                         </span>
                                     @else
-                                        {{-- Decía «Sin costo directo», que es una AFIRMACIÓN: le
-                                             dice al empresario que el trámite es gratis. Un
-                                             `costo_aproximado` nulo no significa eso, significa que
-                                             nadie ha averiguado cuánto vale --que es el estado de
-                                             los ocho trámites, porque el documento oficial del
-                                             gremio no trae ni una cifra--. Decirle «sin costo» a
-                                             quien está haciendo cuentas para abrir un bar es
-                                             exactamente el error que el §29.4 señala. La cabecera
-                                             de la tarjeta ya lo dice bien: «Por confirmar». --}}
+                                        {{-- «Por confirmar» y no una afirmación de gratuidad: un
+                                             `costo_aproximado` nulo no significa que el trámite
+                                             sea gratis, significa que nadie ha averiguado cuánto
+                                             vale, y el documento oficial del gremio no trae
+                                             cifras. Decirle «sin costo» a quien está haciendo
+                                             cuentas para abrir un bar sería darle un dato falso.
+                                             La cabecera de la tarjeta dice lo mismo. --}}
                                         <span class="rounded-full border border-linea px-2.5 py-0.5 text-apagado">Costo por confirmar</span>
                                     @endif
 
@@ -129,7 +161,7 @@
                             </svg>
                         </summary>
 
-                        <div class="border-t border-linea px-6 py-6 sm:pl-19">
+                        <div class="guia-editorial-requisito__cuerpo">
                             @if ($requisito->descripcion)
                                 <p class="text-sm leading-relaxed text-suave">{{ $requisito->descripcion }}</p>
                             @endif
@@ -165,11 +197,11 @@
                                 @endif
 
                                 @if ($requisito->enlace_externo)
-                                    {{-- OBS3-10: la etiqueta no promete mas de lo que el enlace
-                                         cumple. Con enlace puntual invita al tramite; con un
-                                         dominio pelado dice lo que es, una puerta. Asi el dia que
-                                         el gremio entregue las URL exactas la mejora se nota sola,
-                                         sin tocar la vista. --}}
+                                    {{-- La etiqueta no promete más de lo que el enlace cumple.
+                                         Con enlace puntual invita al trámite; con un dominio
+                                         pelado dice lo que es, una puerta. Cuando un requisito
+                                         recibe su URL exacta, la etiqueta cambia sola, sin tocar
+                                         la vista. --}}
                                     <a href="{{ $requisito->enlace_externo }}" target="_blank" rel="noopener"
                                        class="pulsable inline-flex min-h-11 items-center rounded-xl border border-linea px-4 py-2.5 text-sm text-tinta hover:border-marca-500/50">
                                         {{ $requisito->enlaceEsPuntual()
@@ -189,7 +221,7 @@
             </x-publico.alerta>
 
             {{-- CTA --}}
-            <div class="revelar tarjeta-escena vidrio mt-8 rounded-[1.75rem] p-8 text-center" data-revelar>
+            <div class="guia-editorial-cta revelar tarjeta-escena vidrio mt-8 rounded-[1.75rem] p-8 text-center" data-revelar>
                 <h2 class="font-display text-xl font-semibold">{{ ajuste('guia_cta_titulo', '¿Dudas con algún trámite?') }}</h2>
                 <p class="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-tenue">
                     {{ ajuste('guia_cta_texto', 'La orientación jurídica es gratuita para los afiliados, pero si estás empezando y todavía no haces parte del gremio, escríbenos igual: para eso existe esta guía.') }}
@@ -204,10 +236,11 @@
                 </div>
             </div>
         @else
-            <div class="revelar tarjeta mt-10 p-12 text-center" data-revelar>
+            <div class="guia-editorial-vacio">
                 <p class="font-display text-lg font-semibold">Todavía no hay guía publicada</p>
                 <p class="mt-2 text-sm text-tenue">Estamos recopilando la información con las entidades.</p>
             </div>
         @endif
+    </div>
     </div>
 </x-layouts.publico>

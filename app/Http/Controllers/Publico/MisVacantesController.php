@@ -19,9 +19,8 @@ use Illuminate\Validation\Rule;
 /**
  * El establecimiento publica y corrige sus propias vacantes.
  *
- * Antes las escribía la oficina «a nombre de» el asociado, que es justo lo
- * que hacía que la bolsa no se moviera: quien tiene la necesidad no tenía
- * cómo publicarla.
+ * No las escribe la oficina «a nombre de» el asociado: quien tiene la
+ * necesidad es quien la publica, y eso es lo que mueve la bolsa.
  */
 class MisVacantesController
 {
@@ -38,12 +37,11 @@ class MisVacantesController
         ]);
     }
 
-    public function crear(Request $request): View
+    public function crear(): View
     {
         Gate::authorize('create', Vacante::class);
 
         return view('publico.mi-cuenta.vacantes.crear', [
-            'vacante' => null,
             'categorias' => CargoDelSector::cases(),
             'tipos' => TipoVacante::cases(),
         ]);
@@ -53,7 +51,7 @@ class MisVacantesController
     {
         Gate::authorize('create', Vacante::class);
 
-        $request->user()->asociado->vacantes()->create([
+        $this->establecimientoDe($request)->vacantes()->create([
             ...$request->datosDeLaVacante(),
             // El asociado nunca publica directo: su vacante entra a la fila
             // de revisión de la secretaría.

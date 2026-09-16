@@ -82,7 +82,7 @@ No se confunde con la suite automatizada: la suite es el **instrumento**, esta m
 | RF-06, RF-07 | HU-DIR-01 | Listado público con filtros por municipio y categoría; los filtros ofrecen opción vacía | `SitioPublicoTest::test_las_rutas_publicas_responden` · `FormulariosPublicosTest::test_el_directorio_no_necesita_opcion_vacia_porque_sus_filtros_ya_la_traen` | ✅ |
 | RF-08 | HU-DIR-02 | La ficha responde y un asociado sin publicar no es visible | `SitioPublicoTest::test_las_fichas_de_detalle_responden` · `::test_un_asociado_sin_publicar_no_es_visible` | ✅ |
 | RF-09 | HU-DIR-03 | Mapa interactivo que respeta la preferencia de movimiento reducido | `MovimientoTest::test_el_mapa_consulta_la_preferencia_de_movimiento` | ⚠️ Se prueba el comportamiento del mapa ante accesibilidad, no el renderizado de los marcadores (requiere navegador) |
-| RF-10 | HU-DIR-04 | Alta y edición de asociados desde el panel sin tocar código | `AccionesDelPanelTest::test_crear_un_asociado_desde_el_formulario_del_panel` · `PanelCompletoTest` (19 recursos) | ✅ |
+| RF-10 | HU-DIR-04 | Alta y edición de asociados desde el panel sin tocar código | `AccionesDelPanelTest::test_crear_un_asociado_desde_el_formulario_del_panel` · `PanelCompletoTest` (21 recursos) | ✅ |
 | RF-11 | HU-DIR-05 | La ficha pública no filtra los campos marcados como internos | `SitioPublicoTest::test_la_ficha_publica_no_filtra_los_datos_internos_del_asociado` | ✅ |
 
 ### EP-03 · Guía normativa por municipio ★ *producto insignia*
@@ -190,7 +190,7 @@ No se confunde con la suite automatizada: la suite es el **instrumento**, esta m
 |---|---|---|---|---|
 | RF-35, RF-36 | HU-ADM-01 | Súper administrador con acceso total; subadministrador acotado | `PanelAdminTest` (5 casos) · `PermisosDeBolsaTest` (4 casos) | ✅ |
 | RF-37 | HU-ADM-02 | El subadministrador no publica ni siquiera forzando el estado; la cola de pendientes pregunta a las policies | `FlujoDeAprobacionTest` (9 casos) · `AccionesDelPanelTest::test_aunque_la_secretaria_invoque_aprobar_a_la_fuerza_no_publica` · `Panel/ColaDePendientesTest` (9 casos) | ✅ |
-| RF-38 | HU-ADM-03 | Listado, creación y edición de los 19 recursos; ninguna página del panel sin registrar | `PanelCompletoTest::test_no_quedan_paginas_del_panel_sin_registrar` + 3 métodos parametrizados sobre los 19 recursos | ✅ |
+| RF-38 | HU-ADM-03 | Listado, creación y edición de los 21 recursos; ninguna página del panel sin registrar | `PanelCompletoTest::test_no_quedan_paginas_del_panel_sin_registrar` + listado de los 21 recursos, creación de los 13 y edición de los 17 que tienen esa página, sin omisiones | ✅ |
 | RF-39 | HU-ADM-04 | Bitácora de actividad, incluida la de borrado automático de datos personales | `DepuracionDeBolsasTest::test_registra_en_la_bitacora_cuando_borra_datos` · `DepuracionDeInscripcionesTest::test_registra_en_la_bitacora_cuando_borra` | ✅ |
 | RF-40 | HU-ADM-05 | Segundo factor obligatorio en el panel; sin él no se llega al escritorio | `LoginDelPanelTest` (10 casos) | ✅ |
 | RF-61 | *(nuevo ERS v3)* | Certificado automático de afiliación | — | ➖ Fase II |
@@ -209,7 +209,7 @@ Van aparte de los RF a propósito. **Nada de esto es un requisito contratado**: 
 | **A-01** Beneficios por territorio | **Acta 07**, 8 sep | Alcance nacional, departamental o municipal en un solo módulo; el municipal exige municipio y el resto lo suelta; sin clasificar no se anuncia nada | `BeneficiosPorAlcanceTest` (10 casos) | ✅ |
 | **A-02** Analítica del sitio | **Acta 07**, 8 sep, con la contrapropuesta | Conteo anónimo por ruta y día, sin IP, navegador ni sesión; sin visitantes únicos por decisión; dos gráficas tras el permiso de dirección. **Corregido el 9 sep:** contaba descargas, `robots.txt` y `sitemap.xml` contra su propio contrato; ahora mide por tipo de contenido | `AnaliticaDelSitioTest` (18 casos) | ✅ |
 | **A-03** Flujo de entradas | **Acta 08**, 9 sep, con la contrapropuesta | Llegadas al sitio distinguidas de la navegación interna por el `Referer`, que se mira y no se guarda; por dónde entran; comparación con el periodo anterior sin inventar porcentajes contra cero; y cada pieza dice que no son personas distintas | `FlujoDeEntradasAlSitioTest` (15 casos) | ✅ |
-| **A-04** Aviso de mensaje y plazo de PQR | **Acta 08**, 9 sep | El gremio se entera de que entró algo, por el contador del menú y por el buzón que dice el ajuste; el plazo de quince días hábiles de la Ley 1755 se ve en la bandeja, con la palabra «Vencida» y no solo con color (RNF-12) | `AvisoDeMensajeAlGremioTest` (15 casos) | ✅ El correo no sale hasta que haya SMTP (D-07); el contador sí funciona hoy |
+| **A-04** Aviso de mensaje y plazo de PQR | **Acta 08**, 9 sep | El gremio se entera de que entró algo, por el contador del menú y por el buzón que dice el ajuste; el plazo de quince días hábiles de la Ley 1755 se ve en la bandeja, con la palabra «Vencida» y no solo con color (RNF-12) | `AvisoDeMensajeAlGremioTest` (17 casos) | ✅ El correo no sale hasta que haya SMTP (D-07); el contador sí funciona hoy |
 
 ### Los huecos que cerró la auditoría del 9 de septiembre
 
@@ -245,7 +245,7 @@ No son requisitos nuevos: son **piezas contratadas que no hacían su trabajo por
 | RNF-11 | Commits descriptivos semanales | Historial de `Jsua3/asobares` | ✅ Evidencia documental, no automatizable. `origin/main` sincronizado al 18 de agosto |
 | RNF-12 | Accesibilidad básica | `FocoVisibleTest` (6 casos, uno **recalcula el contraste**) · `ObjetivoTactilTest` · `Panel/ComponentesDelPanelTest::test_la_cola_marca_lo_urgente_con_algo_mas_que_color` · `MovimientoTest::test_el_movimiento_reducido_anula_el_desplazamiento_y_no_el_reloj` | ✅ **Cerrado el 19 de agosto de 2026.** El foco visible se restituyó en todo el sitio: el indicador mide **3,49:1 en tema claro y 5,15:1 en oscuro**, por encima del mínimo de 3:1 de WCAG 2.1 §1.4.11. Objetivos táctiles: **594 elementos interactivos verificados en 20 rutas a 320, 390 y 1280 px, ninguno por debajo de 44×44 px**; 26 quedan exceptuados por la propia norma (enlace dentro de una frase, o equivalente mayor al mismo destino). Se comprobó además con `elementFromPoint` que ningún objetivo ampliado le roba la pulsación a su vecino |
 | RNF-13 | Escalabilidad a Fase II sin rehacer | `BancoDeTalentoTest` | ✅ |
-| RNF-14 | Operación autónoma del panel por personal no técnico | `PanelCompletoTest` (19 recursos, listado + creación + edición) | ⚠️ El software responde; **la verificación contractual es la capacitación**: que el personal publique un asociado, un evento y una noticia sin ayuda. Pendiente (S8) |
+| RNF-14 | Operación autónoma del panel por personal no técnico | `PanelCompletoTest` (21 recursos: listado de todos, creación y edición de los que tienen esa página) | ⚠️ El software responde; **la verificación contractual es la capacitación**: que el personal publique un asociado, un evento y una noticia sin ayuda. Pendiente (S8) |
 
 ---
 

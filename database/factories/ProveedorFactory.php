@@ -47,7 +47,7 @@ class ProveedorFactory extends Factory
         return $this->state(['visible_hasta' => now()->subDay()->toDateString()]);
     }
 
-    /** Contacto confirmado hoy (OBS3-12). */
+    /** Contacto confirmado hoy. */
     public function verificado(): static
     {
         return $this->state([

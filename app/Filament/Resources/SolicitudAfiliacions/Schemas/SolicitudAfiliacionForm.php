@@ -55,7 +55,7 @@ class SolicitudAfiliacionForm
                     ]),
 
                 Section::make('Seguimiento')
-                    ->description('En esta fase solo se registra el avance. Aprobar y crear asociado vendrá después.')
+                    ->description('Registra aquí el avance. Para aprobar y crear el acceso, usa la acción «Aprobar y crear acceso» de la lista de solicitudes.')
                     ->columns(2)
                     ->schema([
                         Select::make('estado')

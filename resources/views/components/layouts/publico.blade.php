@@ -18,7 +18,7 @@
     <link rel="canonical" href="{{ url()->current() }}">
 
     {{--
-        Mientras no haya dominio propio, nada de esto se indexa (D-08).
+        Mientras no haya dominio propio, nada de esto se indexa (`SITIO_INDEXABLE`).
 
         Va junto a la canónica a propósito, porque el par es el problema: la
         canónica de arriba resuelve al host temporal de Cloud, así que sin esta
@@ -41,12 +41,10 @@
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:locale" content="es_CO">
     {{--
-        Con imagen SIEMPRE. Hasta el 10 de septiembre `ogImagen` nacía en `null`
-        y solo cuatro vistas la pasaban --artista, noticia, ficha de asociado y
-        evento--, así que la portada, «Quiénes somos», la guía, el directorio y
-        todo lo demás se compartían **sin miniatura**. En un gremio cuyo canal
-        principal es WhatsApp, ese es el primer contacto de mucha gente con el
-        sitio: un enlace pelado.
+        Con imagen SIEMPRE: la página que no pasa `ogImagen` se comparte con la
+        tarjeta del sitio y no **sin miniatura**. En un gremio cuyo canal
+        principal es WhatsApp, esa vista previa es el primer contacto de mucha
+        gente con el sitio, y un enlace pelado no la sustituye.
 
         El respaldo es el logotipo blanco del kit, sin recolorear ni recomponer,
         centrado sobre el fondo del sitio en 1200x630 --la medida que piden
@@ -57,16 +55,16 @@
         Open Graph exige URL absoluta; `asset()` ya la entrega así, y una que
         venga del disco puede llegar relativa.
 
-        ⚠️ **Y esto no se ve todavía en producción, por una razón que no es un
-        defecto.** Mientras `SITIO_INDEXABLE` sea falsa, `robots.txt` sirve
-        `Disallow: /` (D-08, cerrada el 9 sep), y los rastreadores de WhatsApp y
-        Facebook lo respetan: no descargan la página, así que no hay miniatura
-        por mucha etiqueta que haya. La tarjeta empieza a verse **el día del
-        dominio propio**, cuando esa variable se ponga en `true`.
+        ⚠️ **Mientras `SITIO_INDEXABLE` sea falsa, la miniatura no se ve, y no es
+        un defecto.** Con esa variable en falso `robots.txt` sirve `Disallow: /`,
+        y los rastreadores de WhatsApp y Facebook lo respetan: no descargan la
+        página, así que no hay miniatura por mucha etiqueta que haya. La tarjeta
+        se ve cuando esa variable está en `true`.
 
         Dejar pasar solo a los rastreadores de vista previa sin abrir el sitio a
         los buscadores se puede hacer --se les nombra en `robots.txt`--, pero
-        eso toca una decisión ya escrita y no se hace sin Sua e Ingrid.
+        cambia la decisión escrita de no indexar sin dominio propio, así que no
+        se hace sin decidirlo de nuevo por escrito.
     --}}
     @php($ogImagenFinal = $ogImagen ?: asset('img/og-asobares.jpg'))
     <meta property="og:image" content="{{ Str::startsWith($ogImagenFinal, ['http://', 'https://']) ? $ogImagenFinal : url($ogImagenFinal) }}">

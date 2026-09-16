@@ -8,10 +8,7 @@ use App\Models\Aliado;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * El modelo importaba esta clase en su `@use HasFactory<…>` y el archivo no
- * existía: `Aliado::factory()` lanzaba `Class "Database\Factories\AliadoFactory"
- * not found`, y con él se caía todo el conjunto de datos de
- * `AutorizacionDeBorradoTest`, que descubre las políticas por reflexión.
+ * Aliados de prueba: nacen en borrador y comerciales.
  *
  * @extends Factory<Aliado>
  */
@@ -35,7 +32,7 @@ class AliadoFactory extends Factory
     {
         return [
             'nombre' => fake()->unique()->company(),
-            // `Comercial` por defecto porque es el caso comun y el valor por
+            // `Comercial` por defecto porque es el caso común y el valor por
             // defecto de la columna: institucional se declara, no se hereda.
             'tipo' => TipoAliado::Comercial,
             'logo' => null,
@@ -55,8 +52,8 @@ class AliadoFactory extends Factory
 
     /**
      * Las dos compuertas a la vez, que es lo que `Aliado::scopeVisible` exige
-     * para pintar el logo en el carrusel de la portada. Aprobar sin esto deja
-     * el convenio invisible, que es el defecto que documenta PANEL-02.
+     * para pintar el logo en el carrusel de la portada. Aprobar sin `activo`
+     * deja el convenio invisible.
      */
     public function visible(): static
     {

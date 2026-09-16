@@ -9,8 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * "La gente no paga porque no sabe cuánto debe, entonces todo el mundo llama
- * a Natalia." El asociado consulta su estado de cuenta en /mi-cuenta.
+ * El estado de cuenta de cada asociado. Quien no sabe cuánto debe no paga y
+ * termina llamando a la oficina, así que el asociado lo consulta él mismo en
+ * /mi-cuenta.
  */
 class Cartera extends Model
 {
@@ -48,10 +49,8 @@ class Cartera extends Model
 
     /**
      * Aplica un pago sobre el saldo. Un abono parcial reduce la deuda; solo
-     * cuando la cubre entera la cartera queda al día.
-     *
-     * Antes cualquier pago aprobado saldaba la cartera completa, así que un
-     * abono de $50.000 borraba una deuda de $500.000.
+     * cuando la cubre entera la cartera queda al día: un abono de $50.000 no
+     * puede borrar una deuda de $500.000.
      */
     public function abonar(float $monto): void
     {

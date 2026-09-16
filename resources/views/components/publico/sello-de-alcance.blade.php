@@ -10,24 +10,14 @@
     municipio y no con la palabra «Municipal», que no le dice nada al lector.
 --}}
 {{--
-    Simplificado el 9 de septiembre de 2026 (SUA-10), porque Sua leyó las
-    tarjetas y las sintió cargadas. Y lo estaban: en la portada, cada beneficio
-    apilaba un número grande, un icono dentro de una caja redondeada, el título,
-    **una píldora con borde** y la descripción. Cinco objetos visuales para
-    decir cinco cosas, y la píldora competía con el chip del icono por ser el
-    elemento decorado de la tarjeta.
+    Sello en `antetitulo`, sin borde ni píldora: la tarjeta ya tiene su
+    elemento decorado en el icono. `antetitulo` es la convención del sitio para
+    rótulos pequeños en mayúsculas, y mide lo mismo que `--text-2xs` (los dos
+    0,6875rem): el sello pesa menos sin cambiar de tamaño.
 
-    Lo que se va: el borde, la forma de píldora, el relleno y el `inline-flex`.
-    Lo que se queda: exactamente la misma información.
-
-    Y no se inventa un estilo nuevo: pasa a `antetitulo`, que es la convención
-    del sitio para rótulos pequeños en mayúsculas —la usan el hero, la banda de
-    vídeos, el bloque de publicidad y los KPI del panel—. Mide lo mismo que
-    medía (`--text-2xs` y `antetitulo` son los dos 0,6875rem), así que el cambio
-    es de peso visual, no de tamaño.
-
-    `text-apagado` no se toca: es el token cuyo contraste se midió en 4,53:1
-    sobre el fondo de la página, y `BeneficiosPorAlcanceTest` lo vigila.
+    `text-apagado` no se toca: su contraste lo mide `ContrasteDelTextoTenueTest`
+    contra tokens.css, y `BeneficiosPorAlcanceTest` fija que el sello lo siga
+    usando.
     `mt-1` en vez de `mt-2` para que se lea como coletilla del título y no como
     un bloque aparte.
 --}}

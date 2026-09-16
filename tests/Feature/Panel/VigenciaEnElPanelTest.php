@@ -3,6 +3,8 @@
 namespace Tests\Feature\Panel;
 
 use App\Enums\EstadoPublicacion;
+use App\Filament\Resources\Municipios\Pages\CreateMunicipio;
+use App\Filament\Resources\Municipios\Pages\EditMunicipio;
 use App\Filament\Resources\RequisitoAperturas\Pages\EditRequisitoApertura;
 use App\Filament\Resources\RequisitoAperturas\Pages\ListRequisitoAperturas;
 use App\Models\Municipio;
@@ -10,6 +12,7 @@ use App\Models\RequisitoApertura;
 use App\Models\User;
 use Database\Seeders\RolYPermisoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -24,6 +27,13 @@ class VigenciaEnElPanelTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Las pruebas construyen el borde de revisión con `now()` y el filtro
+        // y el modelo lo recalculan con su propio `now()`: si la ejecución
+        // cruza la medianoche entre las dos lecturas, el borde se mueve un día.
+        // Mismo criterio que `VigenciaDeLaGuiaTest`.
+        $this->freezeTime();
+
         $this->seed(RolYPermisoSeeder::class);
     }
 
@@ -80,6 +90,39 @@ class VigenciaEnElPanelTest extends TestCase
             ->assertSee('Circasia');
     }
 
+    public function test_la_direccion_administra_actividad_y_orden_del_municipio(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(CreateMunicipio::class)
+            ->fillForm([
+                'nombre' => 'Córdoba',
+                'slug' => 'cordoba',
+                'activo' => false,
+                'orden' => 40,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $municipio = Municipio::where('slug', 'cordoba')->firstOrFail();
+
+        $this->assertFalse($municipio->activo);
+        $this->assertSame(40, $municipio->orden);
+
+        Livewire::test(EditMunicipio::class, ['record' => $municipio->getRouteKey()])
+            ->fillForm([
+                'activo' => true,
+                'orden' => 5,
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $municipio->refresh();
+
+        $this->assertTrue($municipio->activo);
+        $this->assertSame(5, $municipio->orden);
+    }
+
     public function test_el_filtro_lista_lo_rancio_y_lo_que_nadie_verifico(): void
     {
         $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
@@ -125,9 +168,9 @@ class VigenciaEnElPanelTest extends TestCase
      * Declarar «verifiqué esto contra la Alcaldía» es una afirmación de
      * autoridad sobre información legal. No hace falta un permiso nuevo: el
      * FlujoDeAprobacionObserver ya devuelve a pendiente cualquier edición de
-     * la secretaría sobre algo publicado. Lo que faltaba es que esa protección
-     * dejara de ser incidental — una guarda que nadie comprueba se rompe el
-     * día que alguien añade un atajo.
+     * la secretaría sobre algo publicado. Esta prueba hace que esa protección
+     * deje de ser incidental: una guarda que nadie comprueba se rompe el día
+     * que alguien añade un atajo.
      */
     public function test_la_secretaria_que_feche_un_publicado_lo_devuelve_a_pendiente(): void
     {
@@ -170,12 +213,22 @@ class VigenciaEnElPanelTest extends TestCase
         $municipio = Municipio::factory()->create();
         $meses = RequisitoApertura::MESES_HASTA_REVISION;
 
+        // `NoOverflow` como `necesitaRevision()`: ver `VentanaDeMesesTest`.
+        $borde = now()->subMonthsNoOverflow($meses)->toDateString();
+
         $justoEnElBorde = RequisitoApertura::factory()->publicado()
-            // `NoOverflow` como `necesitaRevision()`: ver `VentanaDeMesesTest`.
-            ->verificado(now()->subMonthsNoOverflow($meses)->toDateString())
+            ->verificado($borde)
             ->create(['municipio_id' => $municipio->id]);
 
-        $this->assertFalse($justoEnElBorde->necesitaRevision());
+        // SQLite guarda el `date` casteado con la hora pegada, y comparada como
+        // cadena contra «Y-m-d» esa forma no distingue `<` de `<=`: el borde
+        // pasaría con los dos. Se deja la fecha como la guarda una columna DATE,
+        // que es la forma en la que un borde corrido sí cambia el resultado.
+        DB::table('requisitos_apertura')
+            ->where('id', $justoEnElBorde->id)
+            ->update(['verificado_el' => $borde]);
+
+        $this->assertFalse($justoEnElBorde->fresh()->necesitaRevision());
 
         Livewire::test(ListRequisitoAperturas::class)
             ->filterTable('necesita_revision')

@@ -36,8 +36,8 @@ class UserForm
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
-                        // Sin regla de fortaleza, el único límite era la
-                        // longitud máxima: se podía dejar una sola letra como
+                        // Sin regla de fortaleza, el único límite sería la
+                        // longitud máxima: cabría una sola letra como
                         // contraseña de la dirección, la cuenta que gobierna
                         // los pagos (RF-40). La condición evita exigirla al
                         // editar sin cambiarla, que es cuando el campo va

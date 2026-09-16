@@ -1,10 +1,8 @@
 @props(['titulo', 'subtitulo' => null, 'compacto' => false, 'atmosfera' => false, 'audiovisual' => false, 'portada' => false])
 
 {{--
-    Ranura `medio` (OBS3-02): imagen o video de fondo para darle vida al hero.
-    El directivo lo pidió en `R21 05:22` --«el banner que va moviéndose o el
-    video, algo que le genere vida»-- y él mismo le puso el límite en
-    `R21 05:35`: «no sea que afecte la visibilidad de las letras».
+    Ranura `medio`: imagen o video de fondo para darle vida al hero, con un
+    límite que pone el gremio: que no afecte la visibilidad de las letras.
 
     Ese límite lo garantiza `.hero-medio::after`, el velo, cuya opacidad es un
     mínimo calculado en `--asb-velo-hero`. No se pinta medio sin velo: van en
@@ -61,7 +59,7 @@
                     'font-display font-bold tracking-tight text-balance',
                     'text-3xl sm:text-5xl lg:text-6xl' => ! $compacto,
                     'text-2xl sm:text-4xl' => $compacto,
-                ])>{{ $titulo }}</h1>
+                ])>@if ($portada)<span class="home-editorial-hero-titulo">{{ $titulo }}</span>@else{{ $titulo }}@endif</h1>
 
                 @if ($subtitulo)
                     <p class="mt-5 text-base leading-relaxed text-suave sm:text-lg text-pretty">{{ $subtitulo }}</p>

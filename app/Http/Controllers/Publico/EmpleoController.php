@@ -44,7 +44,7 @@ class EmpleoController
         }
 
         if (filled($datos['municipio'] ?? null)) {
-            $consulta->whereHas('asociado.municipio', fn ($q) => $q->where('slug', $datos['municipio']));
+            $consulta->whereHas('asociado.municipio', fn (Builder $municipio): Builder => $municipio->where('slug', $datos['municipio']));
         }
 
         return view('publico.empleo.index', [
@@ -59,12 +59,8 @@ class EmpleoController
      * Los municipios que de verdad tienen una vacante viva, más el que el
      * visitante haya elegido.
      *
-     * Antes se ofrecían todos. Medido el 9 de septiembre de 2026: sobre la base
-     * de demostración, **7 de los 8 municipios del selector no llevaban a
-     * ninguna vacante**; en producción, con cero vacantes publicadas, las
-     * **quince opciones del formulario devolvían todas cero**. Un filtro así no
-     * filtra: reparte callejones sin salida en el módulo que el cliente puso de
-     * primero.
+     * Ofrecerlos todos deja un selector donde casi ninguna opción lleva a una
+     * vacante. Un filtro así no filtra: reparte callejones sin salida.
      *
      * Se pregunta por `publicado()->vigente()`, que son **las mismas dos
      * condiciones que deciden qué sale en el muro** unas líneas más arriba. Si
@@ -80,11 +76,11 @@ class EmpleoController
     private function municipiosConVacante(?string $elegido): Collection
     {
         return Municipio::query()
-            ->where(function (Builder $q) use ($elegido): void {
-                $q->whereHas('asociados.vacantes', fn (Builder $v) => $v->publicado()->vigente());
+            ->where(function (Builder $municipios) use ($elegido): void {
+                $municipios->whereHas('asociados.vacantes', fn (Builder $vacantes): Builder => $vacantes->publicado()->vigente());
 
                 if (filled($elegido)) {
-                    $q->orWhere('slug', $elegido);
+                    $municipios->orWhere('slug', $elegido);
                 }
             })
             ->orderBy('nombre')
@@ -140,9 +136,9 @@ class EmpleoController
     }
 
     /**
-     * Antes «postularse» era un enlace de WhatsApp: no quedaba rastro, el
-     * establecimiento no tenía dónde mirar y sin número no había forma de
-     * aplicar. Ahora la postulación se guarda y se avisa por correo.
+     * La postulación se guarda y se avisa por correo: queda rastro, el
+     * establecimiento tiene dónde mirarla y no hace falta un número de
+     * WhatsApp para aplicar.
      */
     public function postular(GuardarPostulacionRequest $request, Vacante $vacante): RedirectResponse
     {
@@ -167,8 +163,8 @@ class EmpleoController
                 // PostgreSQL sobrevivir la violación de unicidad: sin él, el
                 // error aborta la transacción exterior entera y el
                 // firstOrFail() del catch muere con «current transaction is
-                // aborted» (25P02). SQLite y MySQL no abortan, por eso el
-                // patrón parecía portable hasta que se corrió contra pgsql.
+                // aborted» (25P02). SQLite no aborta, así que el patrón parece
+                // portable y solo falla contra PostgreSQL.
                 $postulacion = DB::transaction(
                     fn (): Postulacion => $vacante->postulaciones()->create($datos)
                 );
@@ -203,10 +199,9 @@ class EmpleoController
     /**
      * Ninguno de los dos correos puede tumbar la petición: la postulación ya
      * quedó guardada y el establecimiento la ve en su cuenta aunque el aviso
-     * no llegue. Con el correo saliente caído —como estuvo producción desde
-     * el primer despliegue, D-07— el candidato veía la página de error con su
-     * postulación ya en la base (bitácora §33.4). El fallo se reporta, no se
-     * calla.
+     * no llegue. Sin `rescue()`, con el correo saliente caído el candidato
+     * vería la página de error con su postulación ya en la base. El fallo se
+     * reporta, no se calla.
      */
     private function avisarAlEstablecimiento(Postulacion $postulacion): void
     {
@@ -218,7 +213,9 @@ class EmpleoController
             return;
         }
 
-        rescue(fn () => Mail::to($correos)->send(new NuevaPostulacion($postulacion)));
+        rescue(function () use ($correos, $postulacion): void {
+            Mail::to($correos)->send(new NuevaPostulacion($postulacion));
+        });
     }
 
     /**
@@ -228,7 +225,9 @@ class EmpleoController
      */
     private function confirmarAlPostulante(Postulacion $postulacion): void
     {
-        rescue(fn () => Mail::to($postulacion->correo)->send(new AcuseDePostulacion($postulacion)));
+        rescue(function () use ($postulacion): void {
+            Mail::to($postulacion->correo)->send(new AcuseDePostulacion($postulacion));
+        });
     }
 
     public function registrarAspirante(GuardarAspiranteRequest $request): RedirectResponse
@@ -251,11 +250,11 @@ class EmpleoController
      *
      * La clave natural de este formulario es un correo **que teclea un anónimo**:
      * no hay verificación, ni sesión, ni nada que pruebe que quien lo escribe es
-     * su dueño. Un `updateOrCreate` a secas sobre esa clave --que es lo que había
-     * hasta el 9 de septiembre de 2026-- dejaba que cualquiera reescribiera el
-     * perfil ajeno (desviando a los establecimientos hacia otro teléfono) y, con
-     * `aprobado_el => null` en el mismo movimiento, que lo sacara del banco sin
-     * más trámite que enviar el formulario con el correo de la víctima.
+     * su dueño. Un `updateOrCreate` a secas sobre esa clave dejaría que
+     * cualquiera reescribiera el perfil ajeno (desviando a los establecimientos
+     * hacia otro teléfono) y, con `aprobado_el => null` en el mismo movimiento,
+     * que lo sacara del banco sin más trámite que enviar el formulario con el
+     * correo de la víctima.
      *
      * La regla, entonces, se parte en dos según si alguien ya lo miró:
      *
@@ -268,7 +267,7 @@ class EmpleoController
      * Se resuelve dentro de una transacción con bloqueo de fila porque el
      * «buscar y luego decidir» no es atómico: dos envíos simultáneos con el
      * mismo correo pasarían los dos por el `null` y el segundo chocaría contra
-     * el índice único. Es el mismo cuidado que ya se le puso a `postular()`.
+     * el índice único. Es el mismo cuidado que en `postular()`.
      *
      * @param  array<string, mixed>  $datos
      */

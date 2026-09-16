@@ -13,11 +13,8 @@ use App\Panel\SerieDelObservatorio;
  * leyendo de `MetricasDelObservatorio::composicionDelSector()` en vez de
  * consultar por su cuenta.
  *
- * Con la semilla de hoy hay veinticuatro asociados publicados (n = 24, bajo
- * el umbral de treinta): esta gráfica se clasificó como «sólida» cuando se
- * escribió y nadie volvió a mirarla cuando su muestra bajó. Heredar de
- * `GraficaDelObservatorio` es lo que evita que eso vuelva a pasar: la regla
- * de la muestra ya no depende de que alguien la copie a mano aquí.
+ * Si su serie no alcanza `SerieDelObservatorio::MUESTRA_MINIMA`, no dibuja:
+ * la regla la hereda de `GraficaDelObservatorio` y no depende de copiarla aquí.
  */
 class ComposicionDelSector extends GraficaDelObservatorio
 {
@@ -41,9 +38,9 @@ class ComposicionDelSector extends GraficaDelObservatorio
             'datasets' => [[
                 'label' => 'Asociados',
                 'data' => $serie->series['Asociados'] ?? [],
-                // Pub Red como relleno funciona en los dos temas; lo que no
-                // seguía el tema eran ticks y rejilla, y de eso se encarga el
-                // plugin `panel-graficas.js`.
+                // Pub Red como relleno funciona en los dos temas; los ticks y la
+                // rejilla sí dependen del tema, y de eso se encarga el plugin
+                // `panel-graficas.js`.
                 'backgroundColor' => '#EE4137',
                 'borderRadius' => 6,
             ]],

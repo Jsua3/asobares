@@ -12,6 +12,7 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class BeneficioResource extends Resource
 {
@@ -19,7 +20,7 @@ class BeneficioResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-check-badge';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Gremio';
+    protected static string|UnitEnum|null $navigationGroup = 'Gremio';
 
     protected static ?int $navigationSort = 2;
 
@@ -37,13 +38,6 @@ class BeneficioResource extends Resource
     public static function table(Table $table): Table
     {
         return BeneficiosTable::configure($table);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

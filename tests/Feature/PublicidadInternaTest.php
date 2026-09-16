@@ -137,11 +137,84 @@ class PublicidadInternaTest extends TestCase
         try {
             $publicidad->update(['estado' => EstadoPublicidad::Publicada]);
         } catch (ValidationException) {
-            // La proteccion vive en el modelo, no solo en el boton.
+            // La protección vive en el modelo, no solo en el botón.
         }
 
         $this->assertSame(EstadoPublicidad::Pagada, $publicidad->fresh()->estado);
         $this->assertNull($publicidad->fresh()->aprobado_at);
+    }
+
+    /**
+     * Devolver a pendiente de pago una pauta publicada la saca de Inicio y del
+     * Directorio: es despublicar, y eso solo lo decide la dirección.
+     */
+    public function test_la_secretaria_no_ve_marcar_pendiente_de_pago_sobre_una_pauta_publicada(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
+        $publicada = $this->crearPublicidadPublicada();
+
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        Livewire::test(ListPublicidades::class)
+            ->assertActionHidden(TestAction::make('marcar_pendiente_pago')->table($publicada));
+    }
+
+    public function test_aunque_la_secretaria_invoque_marcar_pendiente_de_pago_a_la_fuerza_la_pauta_sigue_publicada(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
+        $publicada = $this->crearPublicidadPublicada();
+        $aprobador = $publicada->aprobado_por;
+
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $this->invocarAccionDeFilaSinAyudante('marcar_pendiente_pago', $publicada);
+
+        $publicada = $publicada->fresh();
+        $this->assertSame(EstadoPublicidad::Publicada, $publicada->estado, 'La secretaria no puede sacar del sitio una pauta publicada.');
+        $this->assertTrue($publicada->visiblePublicamente());
+        $this->assertSame($aprobador, $publicada->aprobado_por);
+    }
+
+    public function test_la_direccion_devuelve_a_pendiente_de_pago_una_pauta_publicada_y_limpia_la_aprobacion(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
+        $publicada = $this->crearPublicidadPublicada();
+        $this->assertNotNull($publicada->aprobado_por);
+
+        Livewire::test(ListPublicidades::class)
+            ->assertActionVisible(TestAction::make('marcar_pendiente_pago')->table($publicada));
+
+        // La misma vía cruda que usa la prueba de la secretaría: si aquí actúa,
+        // allí no pasa en verde por una llamada que nunca llega a la acción.
+        $this->invocarAccionDeFilaSinAyudante('marcar_pendiente_pago', $publicada);
+
+        $publicada = $publicada->fresh();
+        $this->assertSame(EstadoPublicidad::PendientePago, $publicada->estado);
+        $this->assertFalse($publicada->visiblePublicamente());
+        $this->assertNull($publicada->aprobado_por, 'Una pauta que sale del sitio no conserva la aprobacion anterior.');
+        $this->assertNull($publicada->aprobado_at);
+    }
+
+    public function test_la_secretaria_sigue_marcando_pendiente_de_pago_una_pauta_que_no_esta_publicada(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUBADMIN));
+
+        $borrador = Publicidad::factory()->create(['estado' => EstadoPublicidad::Borrador]);
+
+        Livewire::test(ListPublicidades::class)
+            ->callAction(TestAction::make('marcar_pendiente_pago')->table($borrador));
+
+        $this->assertSame(EstadoPublicidad::PendientePago, $borrador->fresh()->estado);
+    }
+
+    public function test_marcar_pendiente_de_pago_no_se_ofrece_sobre_una_pauta_que_ya_lo_esta(): void
+    {
+        $this->actingAs($this->crearUsuario(User::ROL_SUPER_ADMIN));
+
+        $pendiente = Publicidad::factory()->create(['estado' => EstadoPublicidad::PendientePago]);
+
+        Livewire::test(ListPublicidades::class)
+            ->assertActionHidden(TestAction::make('marcar_pendiente_pago')->table($pendiente));
     }
 
     public function test_la_direccion_crea_y_edita_publicidad_desde_el_panel(): void
@@ -187,8 +260,8 @@ class PublicidadInternaTest extends TestCase
             Livewire::test(ListPublicidades::class)
                 ->callAction(TestAction::make('publicar')->table($publicidad));
         } catch (\Throwable) {
-            // Filament captura la validacion en algunas versiones y en otras
-            // la expone como excepcion. El contrato es que no publique.
+            // Filament captura la validación en algunas versiones y en otras
+            // la expone como excepción. El contrato es que no publique.
         }
 
         $this->assertNotSame(EstadoPublicidad::Publicada, $publicidad->fresh()->estado);
@@ -284,6 +357,17 @@ class PublicidadInternaTest extends TestCase
         $publicidad->update(['estado' => EstadoPublicidad::Publicada]);
 
         return $publicidad->fresh();
+    }
+
+    /**
+     * Invoca una acción de fila por Livewire crudo. callAction() exige antes que
+     * la acción sea visible, así que no ejercita la defensa del servidor.
+     */
+    private function invocarAccionDeFilaSinAyudante(string $accion, Publicidad $publicidad): void
+    {
+        Livewire::test(ListPublicidades::class)
+            ->call('mountAction', $accion, [], ['table' => true, 'recordKey' => (string) $publicidad->getKey()])
+            ->call('callMountedAction');
     }
 
     private function datosFormulario(array $sobrescribir = []): array

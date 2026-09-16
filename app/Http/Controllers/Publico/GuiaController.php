@@ -6,6 +6,7 @@ use App\Models\ConsultaGuia;
 use App\Models\Municipio;
 use App\Models\RequisitoApertura;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -23,8 +24,9 @@ class GuiaController
         // Sólo se ofrecen municipios que ya tienen la guía levantada Y vigente:
         // uno cuyos trámites hayan caducado todos saldría en el selector con la
         // guía vacía.
-        $municipiosConGuia = Municipio::whereHas('requisitos', fn ($q) => $q->publicado()->vigente())
-            ->orderBy('nombre')
+        $municipiosConGuia = Municipio::activos()
+            ->whereHas('requisitos', fn (Builder $requisitos): Builder => $requisitos->publicado()->vigente())
+            ->ordenados()
             ->get();
 
         $seleccionado = filled($request->string('municipio')->toString())
@@ -58,9 +60,9 @@ class GuiaController
      * Sirve el formato oficial con un nombre limpio, nunca la ruta interna.
      *
      * Los adjuntos viven en el disco privado justamente para que esta puerta
-     * sea la única: mientras estuvieron en el disco público, comprobar aquí el
-     * estado de publicación era decorativo, porque el mismo PDF se descargaba
-     * por /storage sin pasar por ningún control.
+     * sea la única: en el disco público, comprobar aquí el estado de
+     * publicación sería decorativo, porque el mismo PDF se descargaría por
+     * /storage sin pasar por ningún control.
      */
     public function descargarFormato(RequisitoApertura $requisito): StreamedResponse
     {

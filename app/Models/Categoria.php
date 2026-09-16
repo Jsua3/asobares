@@ -20,15 +20,17 @@ class Categoria extends Model
 
     protected $fillable = ['nombre', 'slug'];
 
-    public function getRouteKeyName(): string
-    {
-        return 'slug';
-    }
-
-    /** @return HasMany<Asociado, $this> */
+    /**
+     * @return HasMany<Asociado, $this>
+     */
     public function asociados(): HasMany
     {
         return $this->hasMany(Asociado::class);
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
     }
 
     public function getActivitylogOptions(): LogOptions

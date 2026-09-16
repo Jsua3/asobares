@@ -37,16 +37,12 @@ use Tests\TestCase;
  * cuanto el gremio empiece a editar, nadie va a poder decir de dónde salió
  * cada dato — así que la única defensa posible es impedir que entre inventado.
  *
- * Cada aserción se comprobó contra la versión ANTERIOR de estos sembradores,
- * que es donde el defecto existía de verdad:
+ * Las guardias apuntan a las dos formas en que entra lo inventado:
  *
- * - `AliadoSeeder` traía cinco marcas inventadas con URLs a `ejemplo.test` y
- *   descuentos igualmente inventados («12 % sobre lista de precios», «cupo de
- *   crédito a 30 días»), y tres de ellas sin ningún convenio detrás.
- * - `RequisitoAperturaSeeder` traía costos inventados —180.000, 45.000,
- *   380.000, 290.000— y ninguna ficha decía de dónde salía.
- *
- * Las cuatro guardias se pusieron rojas con ese código y verdes con este.
+ * - marcas con URLs a dominios de ejemplo y descuentos sin ningún convenio
+ *   detrás, en `AliadoSeeder`;
+ * - costos de trámites sin ninguna ficha que diga de dónde salen, en
+ *   `RequisitoAperturaSeeder`.
  */
 class SemillaInstitucionalTest extends TestCase
 {
@@ -149,10 +145,8 @@ class SemillaInstitucionalTest extends TestCase
     }
 
     /**
-     * §29.4: «Los costos de la guía normativa son de ejemplo. Publicar cifras
-     * equivocadas de trámites legales en una URL pública es un riesgo del
-     * gremio.» En la propia demostración se dijo «todavía no estamos
-     * actualizados» (`R21 09:27`).
+     * Publicar cifras equivocadas de trámites legales en una URL pública es un
+     * riesgo del gremio.
      *
      * La regla no es «nunca un costo»: es que un costo publicado tenga fecha
      * de verificación detrás. El día que alguien confirme la tarifa de
@@ -195,12 +189,11 @@ class SemillaInstitucionalTest extends TestCase
     /**
      * La portada y la guía no pueden prometer lo que la guía no da.
      *
-     * Es el mismo defecto que el «ya» del WhatsApp (OBS3-14), en otro sitio.
-     * Las dos entradillas decían «con checklist, **costos** y los **formatos
-     * oficiales listos para descargar**», y ninguna de las dos cosas existe:
-     * los costos eran inventados y los formatos eran PDF rotulados «Formato de
-     * ejemplo». Quien llega desde la portada hace clic esperando una tabla de
-     * tarifas y un PDF, y encuentra ni lo uno ni lo otro.
+     * Es el mismo defecto que el «ya» del WhatsApp (`AvisoDelWhatsappTest`), en
+     * otro sitio: una entradilla que promete **costos** y **formatos oficiales
+     * listos para descargar** cuando la guía no tiene ninguna de las dos
+     * cosas. Quien llega desde la portada hace clic esperando una tabla de
+     * tarifas y un PDF, y no encuentra ni lo uno ni lo otro.
      *
      * La guardia no prohíbe la palabra: comprueba que **si el texto la
      * promete, la guía la tenga**. El día que el gremio cargue las tarifas
@@ -239,11 +232,11 @@ class SemillaInstitucionalTest extends TestCase
     /**
      * Un trámite sin costo conocido no se anuncia como gratis.
      *
-     * La guía rotulaba cada trámite sin cifra con «Sin costo directo», que es
-     * una afirmación y no la ausencia de una: le dice al empresario que el
-     * trámite no le va a costar nada. `costo_aproximado` en `null` significa
-     * lo contrario --que nadie ha averiguado cuánto vale-- y es el estado de
-     * los ocho, porque el documento oficial del gremio no trae ni una cifra.
+     * Rotular un trámite sin cifra con «Sin costo directo» es una afirmación y
+     * no la ausencia de una: le dice al empresario que el trámite no le va a
+     * costar nada. `costo_aproximado` en `null` significa lo contrario --que
+     * nadie ha averiguado cuánto vale--, y es el estado de todos mientras el
+     * documento oficial del gremio no traiga cifras.
      *
      * Quien lee esto está haciendo cuentas para decidir si abre un bar.
      */
@@ -274,15 +267,15 @@ class SemillaInstitucionalTest extends TestCase
     }
 
     /**
-     * El presidente firma con sus dos apellidos en un orden, y el sitio los
-     * tenía al revés: decía «Jorge Iván Botero Ángel».
+     * El presidente firma con sus dos apellidos en un orden, y el inverso
+     * («Jorge Iván Botero Ángel») es el error que esta guardia no deja entrar.
      *
      * La invitación a los ponentes del foro nocturno de noviembre de 2025 la
      * firma él mismo como «Jorge Iván Ángel Botero · Presidente Asobares
      * Quindío». Es el nombre de una persona real en una página pública con el
      * nombre del gremio encima, así que la guardia no se conforma con que el
      * bueno esté: comprueba además que el malo no sobreviva en ningún sitio de
-     * la página --que es como estuvo cuatro semanas--.
+     * la página.
      */
     public function test_el_presidente_lleva_los_apellidos_como_el_mismo_los_firma(): void
     {
@@ -295,12 +288,12 @@ class SemillaInstitucionalTest extends TestCase
     }
 
     /**
-     * El lema es el del gremio, no el que redactó este equipo.
+     * El lema es el del gremio, no uno redactado por el equipo.
      *
-     * Cierra la última lámina de la presentación institucional, entre comillas.
-     * Antes decía «La noche construye territorio», de cosecha propia, y se veía
-     * en el pie de todas las páginas, en el título de la portada y sobre el
-     * hero de «Quiénes somos»: era el texto inventado más repetido del sitio.
+     * Cierra la última lámina de la presentación institucional, entre comillas,
+     * y se ve en el pie de todas las páginas, en el título de la portada y
+     * sobre el hero de «Quiénes somos»: un lema inventado sería el texto
+     * inventado más repetido del sitio.
      */
     public function test_el_lema_del_sitio_es_el_del_gremio(): void
     {
@@ -329,12 +322,11 @@ class SemillaInstitucionalTest extends TestCase
      * Las dos cifras del respaldo nacional salen de la lámina 3, y son de la
      * Nacional --no del capítulo--.
      *
-     * La aserción que de verdad protege es la última. `cifra_afiliados` se
-     * jubiló el 9 de septiembre porque el sitio prometía «60», la base tenía 48
-     * y ningún documento lo sostenía (D-18). Estas dos claves entran el mismo
-     * día por la puerta de al lado: si el rótulo no dice de quién son, el
-     * defecto vuelve con otro nombre y esta vez con una cifra cuatro veces
-     * mayor.
+     * La aserción que de verdad protege es la última. `cifra_afiliados` no
+     * tiene valor porque ningún documento sostiene la cifra de afiliados del
+     * capítulo, y estas dos claves están en la puerta de al lado: si el rótulo
+     * no dice de quién son, esa cifra vuelve con otro nombre y se lee como la
+     * del Quindío.
      */
     public function test_el_respaldo_nacional_dice_de_quien_son_sus_cifras(): void
     {

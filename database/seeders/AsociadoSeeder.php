@@ -60,19 +60,19 @@ class AsociadoSeeder extends Seeder
 
             // Galería solo para los destacados: mantiene la semilla ágil.
             // SEED_GALERIA=false la omite (la suite de pruebas la apaga).
-            if (config('app.seed_galeria') && ($datos['destacado'] ?? false) && $asociado->getMedia('galeria')->isEmpty()) {
+            if (config('app.seed_galeria') && ($datos['destacado'] ?? false) && $asociado->getMedia(Asociado::COLECCION_GALERIA)->isEmpty()) {
                 foreach (range(1, 3) as $numero) {
                     $ruta = $imagenes->generar("galeria-{$datos['nombre']}-{$numero}", 'galeria', 1200, 900);
                     $asociado->addMedia(storage_path("app/public/{$ruta}"))
                         ->preservingOriginal()
-                        // OBS3-13: las de la semilla nacen APROBADAS porque
-                        // representan lo que el gremio ya cargó y reviso. Las
-                        // que suba el propietario nacen sin aprobar, que es el
-                        // defecto del modelo. La tercera de cada establecimiento
-                        // se deja pendiente a proposito, para que la demo pueda
-                        // enseñar la cola de moderacion sin inventar datos.
+                        // Las de la semilla nacen APROBADAS porque representan
+                        // lo que el gremio ya cargó y revisó. Las que suba el
+                        // propietario nacen sin aprobar, que es el defecto del
+                        // modelo. La tercera de cada establecimiento se deja
+                        // pendiente a propósito, para que la demo pueda enseñar
+                        // la cola de moderación sin inventar datos.
                         ->withCustomProperties([Asociado::FOTO_APROBADA => $numero < 3])
-                        ->toMediaCollection('galeria');
+                        ->toMediaCollection(Asociado::COLECCION_GALERIA);
                 }
             }
         }
@@ -99,11 +99,11 @@ class AsociadoSeeder extends Seeder
      * Fecha de negocio de la afiliación, no la de inserción de la fila.
      *
      * Los de `RECIEN_AFILIADOS` se afiliaron dentro de los últimos treinta
-     * días: el prompt maestro dice que el gremio «crece mes a mes», y una
-     * semilla donde nadie se afilió nunca en el último mes hace que la
-     * tarjeta «altas este mes» del tablero muestre siempre cero, un
-     * artefacto tan falso como el que corrige (ver `ResumenDelGremio`). El
-     * resto queda repartido entre dos y veintidós meses atrás, como antes.
+     * días: un gremio que crece tiene altas cada mes, y una semilla donde nadie
+     * se afilió en el último mes hace que la tarjeta «altas este mes» del
+     * tablero muestre siempre cero, un artefacto tan falso como el que
+     * `ResumenDelGremio` evita al contar por `fecha_afiliacion`. El resto queda
+     * repartido entre dos y veintidós meses atrás.
      *
      * Para los morosos (`CarteraSeeder::EN_MORA`) el sorteo nunca puede caer
      * por debajo de su propia mora fija: nadie puede deber más meses de

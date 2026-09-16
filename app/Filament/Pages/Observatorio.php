@@ -88,13 +88,13 @@ class Observatorio extends Page
     }
 
     /**
-     * Las seis gráficas del observatorio: las tres que sí tienen datos que
-     * sostienen lo que dibujan (OBS T5), y las tres flacas con su estado
-     * vacío honesto (OBS T6). El mecanismo es `getFooterWidgets()` y no
-     * `<x-filament-widgets::widgets>`: ese componente está `@deprecated` en
-     * `vendor/filament/`, y quien de verdad rinde estos widgets es el
-     * envoltorio `<x-filament-panels::page>` (invoca `{{ $this->footerWidgets }}`
-     * por dentro) — la vista de esta página no vuelve a llamarlos.
+     * Las seis gráficas del observatorio: las que tienen datos que sostienen
+     * lo que dibujan y las flacas con su estado vacío honesto. El mecanismo
+     * es `getFooterWidgets()` y no `<x-filament-widgets::widgets>`: ese
+     * componente está `@deprecated` en `vendor/filament/`, y quien de verdad
+     * rinde estos widgets es el envoltorio `<x-filament-panels::page>`
+     * (invoca `{{ $this->footerWidgets }}` por dentro) — la vista de esta
+     * página no vuelve a llamarlos.
      *
      * @return array<class-string<Widget>>
      */
@@ -135,9 +135,7 @@ class Observatorio extends Page
     /** Recaudo acumulado de los últimos dieciocho meses, en pesos. */
     public function recaudoDelPeriodo(): string
     {
-        $total = array_sum($this->metricas()->saludFinanciera()->series['Recaudo (COP)'] ?? []);
-
-        return '$'.number_format((float) $total, 0, ',', '.');
+        return pesos(array_sum($this->metricas()->saludFinanciera()->series['Recaudo (COP)'] ?? []));
     }
 
     /** Tasa de mora de hoy, formateada como porcentaje. */

@@ -101,20 +101,15 @@ class FlujoDeAprobacionTest extends TestCase
     }
 
     /**
-     * ⚠️ Estas tres pruebas cambiaron de instrumento el 9 de septiembre de 2026,
-     * y no de intención.
+     * Estas tres pruebas afirman sobre la **cola de pendientes** y no sobre
+     * `notifications()`: el panel no activa `databaseNotifications()` --la banda
+     * «Te está esperando» del tablero cuenta mejor lo mismo--, así que una
+     * notificación de base de datos no la vería ningún usuario, y afirmar sobre
+     * ella daría verde sobre algo invisible.
      *
-     * Afirmaban sobre `notifications()`, o sea sobre la campana del panel. Y la
-     * campana **se retiró el 7 de septiembre** (D-L22): `databaseNotifications()`
-     * quedó comentado en `AdminPanelProvider` porque la banda «Te está esperando»
-     * del tablero cuenta mejor lo mismo. Nadie retiró a quien escribía en ella,
-     * así que estas cuatro aserciones llevaban dos días en verde sobre algo que
-     * ningún usuario podía ver. Falso verde número trece.
-     *
-     * La intención --quien puede aprobar se entera, quien lo redactó no-- sigue
-     * intacta y ahora se afirma sobre la **cola de pendientes**, que es lo que de
-     * verdad se pinta. `Panel\AvisosQueSeVenTest` vigila que las dos mitades no
-     * se vuelvan a separar.
+     * La intención --quien puede aprobar se entera, quien lo redactó no-- se
+     * afirma sobre lo que de verdad se pinta. `Panel\AvisosQueSeVenTest` vigila
+     * que las dos mitades no se separen.
      */
     public function test_enviar_a_revision_le_aparece_a_la_direccion_en_su_cola(): void
     {

@@ -37,11 +37,11 @@ class DirectorioController
         }
 
         if (filled($datos['municipio'] ?? null)) {
-            $consulta->whereHas('municipio', fn ($q) => $q->where('slug', $datos['municipio']));
+            $consulta->whereHas('municipio', fn (Builder $municipio): Builder => $municipio->where('slug', $datos['municipio']));
         }
 
         if (filled($datos['categoria'] ?? null)) {
-            $consulta->whereHas('categoria', fn ($q) => $q->where('slug', $datos['categoria']));
+            $consulta->whereHas('categoria', fn (Builder $categoria): Builder => $categoria->where('slug', $datos['categoria']));
         }
 
         $vista = $datos['vista'] ?? 'grid';
@@ -53,10 +53,20 @@ class DirectorioController
             ? $consulta->get()
             : $consulta->paginate(12)->withQueryString();
 
+        $municipios = Municipio::query()
+            ->whereHas('asociados', fn (Builder $asociados): Builder => $asociados->publicado())
+            ->orderBy('nombre')
+            ->get();
+
+        $categorias = Categoria::query()
+            ->whereHas('asociados', fn (Builder $asociados): Builder => $asociados->publicado())
+            ->orderBy('nombre')
+            ->get();
+
         return view('publico.directorio.index', [
             'asociados' => $asociados,
-            'municipios' => Municipio::orderBy('nombre')->get(),
-            'categorias' => Categoria::orderBy('nombre')->get(),
+            'municipios' => $municipios,
+            'categorias' => $categorias,
             'filtros' => $datos,
             'publicidadDirectorio' => Publicidad::publicaEn(UbicacionPublicidad::Directorio)->first(),
             'vista' => $vista,

@@ -22,9 +22,9 @@ use Illuminate\Support\Facades\DB;
  * Las cifras del Observatorio del gremio: seis gráficas más un indicador.
  *
  * Cada método agrega en SQL y devuelve una {@see SerieDelObservatorio}: los
- * datos y el tamaño de muestra que los sostiene. Nada de traer modelos a
- * memoria para contarlos con `groupBy` de Collection — este proyecto ya tuvo
- * que corregirlo una vez (ver `RecaudoMensual`).
+ * datos y el tamaño de muestra que los sostiene. Como hace `RecaudoMensual`,
+ * se agrega en SQL en vez de traer los modelos a memoria para contarlos con
+ * `groupBy` de Collection.
  *
  * Solo cuenta lo publicado donde el modelo tiene estado editorial: un
  * asociado, una vacante o un proveedor en borrador no es presencia del
@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\DB;
  */
 class MetricasDelObservatorio
 {
-    /** Abreviaturas de mes en español: el locale de la app es `en`, así que no basta con Carbon. */
+    /** Abreviaturas de mes fijas en español: no dependen del locale ni de las traducciones de Carbon. */
     private const array MESES = [
         1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr', 5 => 'May', 6 => 'Jun',
         7 => 'Jul', 8 => 'Ago', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic',
@@ -216,7 +216,7 @@ class MetricasDelObservatorio
                     $meses
                 ),
             ],
-            n: (int) $filasRecaudo->sum(fn ($fila): int => (int) $fila->cantidad),
+            n: (int) $filasRecaudo->sum(fn (Transaccion $fila): int => (int) $fila->cantidad),
             unidad: 'transacciones',
         );
     }
@@ -331,7 +331,7 @@ class MetricasDelObservatorio
         return new SerieDelObservatorio(
             etiquetas: array_column($meses, 'etiqueta'),
             series: $series,
-            n: (int) $filas->sum(fn ($fila): int => (int) $fila->total),
+            n: (int) $filas->sum(fn (Vacante $fila): int => (int) $fila->total),
             unidad: 'vacantes',
             // Las siete áreas son rebanadas de una sola población —las
             // vacantes publicadas—, no siete medidas independientes: el

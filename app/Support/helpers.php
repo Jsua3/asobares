@@ -2,6 +2,7 @@
 
 use App\Models\Setting;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 if (! function_exists('ajuste')) {
     /**
@@ -30,9 +31,10 @@ if (! function_exists('ordenarEnEspanol')) {
      *
      * `ORDER BY nombre` en SQLite usa colación BINARIA: 'Z' es 0x5A y 'Á' es
      * 0xC3 0x81, así que «Zorba» sale antes que «Ámbar». En un sitio en
-     * español eso se lee como desorden --que es exactamente la queja que
-     * originó OBS3-06-- y encima cambia entre motores: MySQL con
-     * `utf8mb4_unicode_ci` sí ordena bien, así que el defecto aparecería en
+     * español eso se lee como desorden, y encima depende de la colación del
+     * motor: el PostgreSQL de pruebas en contenedor Alpine (musl) ordena por
+     * bytes igual que SQLite (runbook de despliegue, §14.3), pero uno con
+     * colación de idioma ordena bien, así que el defecto puede verse en
      * desarrollo y no en producción, o al revés.
      *
      * Se usa sobre colecciones ya acotadas (la portada trae seis). Para una
@@ -56,9 +58,9 @@ if (! function_exists('ordenarEnEspanol')) {
         $comparador = new Collator('es_CO');
 
         return $elementos
-            ->sort(fn ($a, $b): int => $comparador->compare(
-                (string) data_get($a, $campo),
-                (string) data_get($b, $campo)
+            ->sort(fn (mixed $primero, mixed $segundo): int => $comparador->compare(
+                (string) data_get($primero, $campo),
+                (string) data_get($segundo, $campo)
             ))
             ->values();
     }
@@ -108,5 +110,49 @@ if (! function_exists('enlaceWhatsapp')) {
         }
 
         return 'https://wa.me/'.$limpio.($mensaje !== '' ? '?text='.rawurlencode($mensaje) : '');
+    }
+}
+
+if (! function_exists('esImagenDeRelleno')) {
+    /**
+     * Las portadas del demo las dibuja `GeneradorImagen` con un PNG
+     * transparente cuyo nombre es el md5 de la semilla. No son fotografía:
+     * si se pintan en la portada tapan el banco editorial y la Home se lee
+     * como maqueta. Una foto subida por Filament nace con ULID, no con md5.
+     */
+    function esImagenDeRelleno(?string $ruta, ?string $disco = null): bool
+    {
+        if (! filled($ruta)) {
+            return true;
+        }
+
+        if (preg_match('/^[a-f0-9]{32}\.png$/i', basename($ruta)) === 1) {
+            return true;
+        }
+
+        $disco ??= config('almacenamiento.publico', 'public');
+
+        return ! Storage::disk($disco)->exists($ruta);
+    }
+}
+
+if (! function_exists('urlDeFotoDeLaHome')) {
+    /**
+     * Cadena visual de la portada: foto real → asset editorial → nada
+     * (el llamador pinta el fallback gráfico).
+     */
+    function urlDeFotoDeLaHome(?string $rutaAlmacenada, ?string $editorial = null, ?string $disco = null): ?string
+    {
+        $disco ??= config('almacenamiento.publico', 'public');
+
+        if (filled($rutaAlmacenada) && ! esImagenDeRelleno($rutaAlmacenada, $disco)) {
+            return Storage::disk($disco)->url($rutaAlmacenada);
+        }
+
+        if (filled($editorial) && is_file(public_path($editorial))) {
+            return asset($editorial);
+        }
+
+        return null;
     }
 }

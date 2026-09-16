@@ -42,8 +42,8 @@ class UsuarioSeeder extends Seeder
             ['email' => 'oficina@asobaresquindio.test'],
             [
                 // Una persona y no el cargo: el chip de la barra móvil muestra
-                // nombre y rango, y «Sec. Secretaría del c…» decía dos veces lo
-                // mismo (D-M15, 6 sep).
+                // nombre y rango, y «Sec. Secretaría del c…» diría dos veces lo
+                // mismo.
                 'name' => 'Mariana Restrepo',
                 'password' => Hash::make(self::CLAVE_DEMO),
                 'email_verified_at' => now(),

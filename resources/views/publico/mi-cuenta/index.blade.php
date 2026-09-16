@@ -4,7 +4,7 @@
     <div class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
 
         {{-- Saludo. Cerrar sesión vive en el desplegable de la navbar: tenerlo
-             también aquí dejaba dos botones idénticos a la vista. --}}
+             también aquí dejaría dos botones idénticos a la vista. --}}
         <header>
             <p class="text-sm text-apagado">Hola, {{ auth()->user()->name }}</p>
             <h1 class="mt-1 font-display text-3xl font-bold tracking-tight">{{ $asociado->nombre }}</h1>
@@ -20,14 +20,14 @@
             <x-publico.boton variante="contorno" :href="route('mi-cuenta.vacantes.index')">
                 Mis vacantes
             </x-publico.boton>
-            {{-- OBS3-13: sin esta puerta la funcionalidad existe y nadie la
-                 encuentra, que es la misma nada con mas codigo. --}}
+            {{-- Sin esta puerta la funcionalidad existe y nadie la encuentra,
+                 que es la misma nada con más código. --}}
             <x-publico.boton variante="contorno" :href="route('mi-cuenta.fotos.index')">
                 Mis fotos
             </x-publico.boton>
-            {{-- Los dos beneficios que dejaron de ser publicos: el directorio de
-                 proveedores y el banco de talento. Si no se entra por aqui, no
-                 se entra por ningun lado. --}}
+            {{-- Los directorios con contacto reservado a los afiliados:
+                 proveedores, artistas y banco de talento. Si no se entra por
+                 aquí, no se entra por ningún lado. --}}
             <x-publico.boton variante="contorno" :href="route('mi-cuenta.proveedores.index')">
                 Proveedores
             </x-publico.boton>
@@ -81,7 +81,7 @@
                             </span>
                             <div>
                                 <p class="font-display text-2xl font-bold text-acento-fuerte">
-                                    Debes {{ $cartera->meses_mora }} {{ Str::plural('mes', $cartera->meses_mora) }}
+                                    Debes {{ $cartera->meses_mora }} {{ (int) $cartera->meses_mora === 1 ? 'mes' : 'meses' }}
                                 </p>
                                 <p class="mt-1.5 font-display text-3xl font-bold">{{ pesos($cartera->saldo_pendiente) }}</p>
                                 @if ($cartera->ultimo_pago_at)

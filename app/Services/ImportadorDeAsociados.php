@@ -276,7 +276,7 @@ class ImportadorDeAsociados
 
         foreach ($lector->getRecords() as $posicion => $fila) {
             $filas[$posicion + 1] = array_map(
-                static fn ($c): string => trim((string) $c),
+                static fn (?string $celda): string => trim((string) $celda),
                 array_values($fila)
             );
         }
@@ -305,7 +305,7 @@ class ImportadorDeAsociados
         foreach ($lector->getSheetIterator() as $hoja) {
             foreach ($hoja->getRowIterator() as $numero => $fila) {
                 $filas[(int) $numero] = array_map(
-                    static fn ($celda): string => $celda instanceof \DateTimeInterface
+                    static fn (mixed $celda): string => $celda instanceof \DateTimeInterface
                         ? $celda->format('Y-m-d')
                         : trim((string) $celda),
                     $fila->toArray()

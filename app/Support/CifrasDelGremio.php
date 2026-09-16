@@ -7,7 +7,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 
 /**
- * La franja «El gremio en cifras» de la portada (D-25, Acta 05).
+ * La franja «El gremio en cifras» de la portada (Acta 05).
  *
  * Cuatro ranuras que la oficina teclea en «Ajustes del sitio» cada quince
  * días con el archivo de la contadora: un número y qué significa. Se pintan

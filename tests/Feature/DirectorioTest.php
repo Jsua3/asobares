@@ -77,6 +77,71 @@ class DirectorioTest extends TestCase
             ->assertSee('name="vista" value="mapa"', escape: false);
     }
 
+    public function test_las_opciones_y_cifras_solo_salen_de_asociados_publicados(): void
+    {
+        Municipio::factory()->create(['nombre' => 'Municipio Sin Fichas', 'slug' => 'municipio-sin-fichas']);
+        $municipioBorrador = Municipio::factory()->create(['nombre' => 'Municipio En Borrador', 'slug' => 'municipio-en-borrador']);
+        $municipioPublicado = Municipio::factory()->create(['nombre' => 'Municipio Visible', 'slug' => 'municipio-visible']);
+
+        Categoria::factory()->create(['nombre' => 'Categoría Sin Fichas', 'slug' => 'categoria-sin-fichas']);
+        $categoriaBorrador = Categoria::factory()->create(['nombre' => 'Categoría En Borrador', 'slug' => 'categoria-en-borrador']);
+        $categoriaPublicada = Categoria::factory()->create(['nombre' => 'Categoría Visible', 'slug' => 'categoria-visible']);
+
+        Asociado::factory()->create([
+            'nombre' => 'Establecimiento Oculto',
+            'municipio_id' => $municipioBorrador->id,
+            'categoria_id' => $categoriaBorrador->id,
+        ]);
+
+        $visible = Asociado::factory()->publicado()->create([
+            'nombre' => 'Establecimiento Visible',
+            'municipio_id' => $municipioPublicado->id,
+            'categoria_id' => $categoriaPublicada->id,
+        ]);
+
+        $respuesta = $this->get(route('directorio.index'));
+
+        $respuesta->assertSuccessful();
+        $respuesta->assertSee($visible->nombre);
+        $this->assertMatchesRegularExpression('/<strong[^>]*data-cifra-final="1"[^>]*>\s*1\s*<\/strong>\s*<span>establecimiento<\/span>/u', $respuesta->getContent());
+        $this->assertMatchesRegularExpression('/<strong[^>]*data-cifra-final="1"[^>]*>\s*1\s*<\/strong>\s*<span>municipio<\/span>/u', $respuesta->getContent());
+        $this->assertMatchesRegularExpression('/<strong[^>]*data-cifra-final="1"[^>]*>\s*1\s*<\/strong>\s*<span>categoría<\/span>/u', $respuesta->getContent());
+        $respuesta->assertSee('Municipio Visible');
+        $respuesta->assertSee('Categoría Visible');
+        $respuesta->assertDontSee('Establecimiento Oculto');
+        $respuesta->assertDontSee('Municipio Sin Fichas');
+        $respuesta->assertDontSee('Municipio En Borrador');
+        $respuesta->assertDontSee('Categoría Sin Fichas');
+        $respuesta->assertDontSee('Categoría En Borrador');
+
+        $this->get(route('directorio.index', [
+            'municipio' => $municipioPublicado->slug,
+            'categoria' => $categoriaPublicada->slug,
+        ]))
+            ->assertSuccessful()
+            ->assertSee($visible->nombre)
+            ->assertSee('Municipio Visible')
+            ->assertSee('Categoría Visible');
+    }
+
+    public function test_el_estado_vacio_no_muestra_opciones_sin_establecimientos_publicados(): void
+    {
+        Municipio::factory()->create(['nombre' => 'Municipio Administrativo', 'slug' => 'municipio-administrativo']);
+        Categoria::factory()->create(['nombre' => 'Categoría Administrativa', 'slug' => 'categoria-administrativa']);
+
+        $html = $this->get(route('directorio.index'))
+            ->assertSuccessful()
+            ->assertSee('Todavía no hay establecimientos publicados')
+            ->assertSee('establecimientos')
+            ->assertSee('municipios')
+            ->assertSee('categorías')
+            ->assertDontSee('Municipio Administrativo')
+            ->assertDontSee('Categoría Administrativa')
+            ->getContent();
+
+        $this->assertMatchesRegularExpression('/<strong[^>]*data-cifra-final="0"[^>]*>\s*0\s*<\/strong>/u', $html);
+    }
+
     public function test_el_directorio_usa_tarjetas_uniformes_y_conserva_distincion_de_destacado(): void
     {
         Asociado::factory()->destacado()->create(['nombre' => 'Bar Amnesia']);

@@ -48,9 +48,8 @@ class Aspirante extends Model
      * RF-39. Aprobar un perfil **entrega el nombre, el teléfono y el correo de
      * una persona a todos los establecimientos afiliados**; retirarlo se los
      * quita. Son las dos decisiones más sensibles del panel en materia de datos
-     * personales y hasta el 9 de septiembre de 2026 no dejaban rastro ninguno:
-     * `aprobado_el` guardaba cuándo, nunca quién, y retirar ponía esa columna en
-     * nulo, borrando la única huella.
+     * personales, así que las dos quedan en la bitácora con quién y cuándo:
+     * `aprobado_el` solo guarda cuándo, y retirar pone esa columna en nulo.
      *
      * Se registra **solo `aprobado_el`** y no el resto de columnas: el nombre, el
      * teléfono, el correo y la experiencia son los datos personales que este

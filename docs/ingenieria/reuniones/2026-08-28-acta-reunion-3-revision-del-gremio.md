@@ -3,7 +3,7 @@
 **Fecha:** viernes 28 de agosto de 2026 (noche) · **Lugar:** establecimiento del directivo, Armenia
 **Asistentes:** el directivo del capítulo (presumiblemente **Jorge Iván Botero Ángel**, presidente — el audio lo respalda: buscó su propio perfil en el sitio de la Nacional y dijo «yo no he enviado fotos»; aun así, **confirmar por escrito** antes de citarlo en documentos formales), **Natalia Gutiérrez** (directora ejecutiva), **Luisa** (contadora del gremio, se integra en `R22 00:32`), **Juan José Sua** e **Ingrid Montoya**.
 **Objeto:** primera demostración completa del sitio público y del panel de administración ante el directivo.
-**Fuente:** 4 audios (66 min) transcritos automáticamente → `transcripcion-reunion-3.md`. Las referencias `Rxx mm:ss` apuntan al audio y minuto exactos. Las citas entre «» son aproximadas: verificar en el audio antes de llevarlas a un documento formal.
+**Fuente:** 4 audios (66 min) transcritos automáticamente; la transcripción no se versiona porque contiene datos personales. Las referencias `Rxx mm:ss` apuntan al audio y minuto exactos. Las citas entre «» son aproximadas: verificar en el audio antes de llevarlas a un documento formal.
 
 ---
 

@@ -11,6 +11,7 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class InscripcionResource extends Resource
 {
@@ -18,7 +19,7 @@ class InscripcionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-ticket';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Bandejas';
+    protected static string|UnitEnum|null $navigationGroup = 'Bandejas';
 
     protected static ?int $navigationSort = 2;
 
@@ -36,13 +37,6 @@ class InscripcionResource extends Resource
     public static function table(Table $table): Table
     {
         return InscripcionsTable::configure($table);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

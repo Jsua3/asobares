@@ -58,8 +58,8 @@ class SubidaSegura extends FileUpload
     /**
      * Los formatos oficiales de la guía normativa. Van al disco privado: se
      * sirven por `GuiaController`, que comprueba que el requisito esté
-     * publicado. En el disco público esa comprobación era decorativa, porque
-     * el mismo PDF quedaba accesible por /storage sin pasar por ninguna parte.
+     * publicado. En el disco público esa comprobación sería decorativa, porque
+     * el mismo PDF quedaría accesible por /storage sin pasar por ninguna parte.
      */
     public function documentoPdf(): static
     {

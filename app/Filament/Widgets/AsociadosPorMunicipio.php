@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Models\Municipio;
 use App\Panel\RanuraDeTema;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Database\Eloquent\Builder;
 
 class AsociadosPorMunicipio extends ChartWidget
 {
@@ -26,7 +27,7 @@ class AsociadosPorMunicipio extends ChartWidget
 
     protected function getData(): array
     {
-        $municipios = Municipio::withCount(['asociados' => fn ($query) => $query->publicado()])
+        $municipios = Municipio::withCount(['asociados' => fn (Builder $query): Builder => $query->publicado()])
             ->orderByDesc('asociados_count')
             ->get();
 
@@ -34,9 +35,9 @@ class AsociadosPorMunicipio extends ChartWidget
             'datasets' => [[
                 'label' => 'Asociados',
                 'data' => $municipios->pluck('asociados_count')->all(),
-                // Pub Red como relleno funciona en los dos temas; lo que no
-                // seguía el tema eran ticks y rejilla, y de eso se encarga el
-                // plugin `panel-graficas.js`.
+                // Pub Red como relleno funciona en los dos temas; los ticks y la
+                // rejilla sí dependen del tema, y de eso se encarga el plugin
+                // `panel-graficas.js`.
                 'backgroundColor' => '#EE4137',
                 'borderRadius' => 6,
             ]],

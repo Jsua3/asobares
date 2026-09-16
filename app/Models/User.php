@@ -48,7 +48,11 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         ];
     }
 
-    /** El establecimiento del que es dueño, para /mi-cuenta. */
+    /**
+     * El establecimiento del que es dueño, para /mi-cuenta.
+     *
+     * @return BelongsTo<Asociado, $this>
+     */
     public function asociado(): BelongsTo
     {
         return $this->belongsTo(Asociado::class);

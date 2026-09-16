@@ -12,6 +12,7 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class RequisitoAperturaResource extends Resource
 {
@@ -19,7 +20,7 @@ class RequisitoAperturaResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-check';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Contenido';
+    protected static string|UnitEnum|null $navigationGroup = 'Contenido';
 
     protected static ?int $navigationSort = 4;
 
@@ -37,13 +38,6 @@ class RequisitoAperturaResource extends Resource
     public static function table(Table $table): Table
     {
         return RequisitoAperturasTable::configure($table);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

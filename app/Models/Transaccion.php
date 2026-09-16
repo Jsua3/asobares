@@ -57,9 +57,10 @@ class Transaccion extends Model
     /**
      * Referencia legible y única: ASO-2026-A1B2C3D4E5F60718.
      *
-     * Con 3 bytes eran 16,7 millones de combinaciones, adivinables por fuerza
-     * bruta en horas. La referencia viaja por correo y por la pasarela, así
-     * que no es un secreto, pero tampoco puede ser enumerable.
+     * Ocho bytes aleatorios y no menos: con tres serían 16,7 millones de
+     * combinaciones, adivinables por fuerza bruta en horas. La referencia
+     * viaja por correo y por la pasarela, así que no es un secreto, pero
+     * tampoco puede ser enumerable.
      */
     public static function generarReferencia(): string
     {

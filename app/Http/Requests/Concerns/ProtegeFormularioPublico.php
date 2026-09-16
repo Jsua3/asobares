@@ -40,8 +40,8 @@ trait ProtegeFormularioPublico
 
     protected function failedValidation(Validator $validator): void
     {
-        // Al bot no se le explica por qué falló: se responde como si todo
-        // hubiera salido bien y no se guarda nada.
+        // Al bot no se le explica qué campo falló: se corta con un 422 sin
+        // errores de validación y no se guarda nada.
         if ($validator->errors()->has(Formulario::CAMPO_TRAMPA)) {
             abort(422);
         }

@@ -9,13 +9,13 @@ use Tests\TestCase;
 /**
  * `text-apagado` es el texto tenue de todo el sitio --pies de tarjeta, rótulos
  * de sección, la fecha de una noticia, el sello territorial de un beneficio--
- * y en tema oscuro no llegaba a AA.
+ * y en tema oscuro puede quedarse por debajo de AA sin que se note.
  *
- * Medido en Chromium el 9 de septiembre de 2026 sobre la portada servida, con
- * los fondos que resuelven a un color sólido: **quince de los diecisiete
- * elementos medibles quedaban por debajo del 4,5:1** que exige RNF-12 para
- * texto normal. El token daba 4,32:1 contra `--asb-superficie`. En claro no
- * pasaba: el mínimo de los diecisiete era 6,94:1.
+ * Medido en Chromium sobre la portada servida, con los fondos que resuelven a
+ * un color sólido: con el token a 4,32:1 contra `--asb-superficie`, **quince de
+ * los diecisiete elementos medibles quedan por debajo del 4,5:1** que exige
+ * RNF-12 para texto normal. En claro no ocurre: el mínimo de los diecisiete es
+ * 6,94:1.
  *
  * Esta guarda vuelve a MEDIR leyendo `tokens.css`, en vez de fiarse de que
  * alguien recuerde por qué el valor es el que es. Si mañana se retoca la rampa
@@ -24,8 +24,8 @@ use Tests\TestCase;
  * Se mide contra las TRES superficies del tema y no solo contra el fondo:
  * `--asb-superficie-alta` es la más clara de las tres y por tanto el peor caso
  * para un texto gris, y es la que llevan las tarjetas del directorio y los
- * módulos de la portada. Medir solo contra `--asb-fondo` es lo que dejaba
- * pasar el valor anterior, que ahí daba 4,53:1 y parecía cumplir.
+ * módulos de la portada. Medir solo contra `--asb-fondo` deja pasar un token
+ * que ahí da 4,53:1 y parece cumplir, y contra `--asb-superficie` da 4,32:1.
  */
 class ContrasteDelTextoTenueTest extends TestCase
 {
@@ -64,9 +64,9 @@ class ContrasteDelTextoTenueTest extends TestCase
     }
 
     /**
-     * El tema claro no se tocó al corregir el oscuro, y esta guarda existe para
-     * que no se toque por descuido: es fácil «arreglar» un token en `:root`
-     * creyendo que se arregla el oscuro, porque `.dark` hereda de ahí.
+     * Esta guarda impide que el tema claro se estropee por descuido: es fácil
+     * «arreglar» un token en `:root` creyendo que se arregla el oscuro, porque
+     * `.dark` hereda de ahí.
      */
     public function test_el_texto_tenue_del_tema_claro_sigue_cumpliendo_aa(): void
     {

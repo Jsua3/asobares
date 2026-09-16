@@ -35,9 +35,4 @@ class CarteraPolicy
     {
         return false;
     }
-
-    public function importar(User $usuario): bool
-    {
-        return $usuario->can('importar_cartera');
-    }
 }

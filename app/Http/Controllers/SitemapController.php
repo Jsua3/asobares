@@ -8,6 +8,7 @@ use App\Models\Evento;
 use App\Models\Municipio;
 use App\Models\Noticia;
 use App\Models\Vacante;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Response;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
@@ -40,6 +41,7 @@ class SitemapController
             ['eventos.index', Url::CHANGE_FREQUENCY_WEEKLY, 0.7],
             ['boletin.index', Url::CHANGE_FREQUENCY_MONTHLY, 0.6],
             ['quienes-somos', Url::CHANGE_FREQUENCY_YEARLY, 0.6],
+            ['aliados.index', Url::CHANGE_FREQUENCY_MONTHLY, 0.6],
             ['afiliate', Url::CHANGE_FREQUENCY_MONTHLY, 0.8],
             ['contacto', Url::CHANGE_FREQUENCY_YEARLY, 0.5],
             ['politica-de-datos', Url::CHANGE_FREQUENCY_YEARLY, 0.3],
@@ -67,9 +69,11 @@ class SitemapController
         // La guía por municipio son URLs distintas y de mucho valor para SEO.
         // Con `vigente()`, porque anunciarle a Google una guía vacía es peor
         // que no anunciarla.
-        Municipio::whereHas('requisitos', fn ($q) => $q->publicado()->vigente())
+        Municipio::activos()
+            ->whereHas('requisitos', fn (Builder $requisitos): Builder => $requisitos->publicado()->vigente())
+            ->ordenados()
             ->get()
-            ->each(fn (Municipio $municipio) => $mapa->add(
+            ->each(fn (Municipio $municipio): Sitemap => $mapa->add(
                 Url::create(route('guia.index', ['municipio' => $municipio->slug]))
                     ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
                     ->setPriority(0.8)
@@ -78,22 +82,22 @@ class SitemapController
 
     private function fichas(Sitemap $mapa): void
     {
-        Asociado::publicado()->get()->each(fn (Asociado $a) => $mapa->add(
-            Url::create(route('directorio.show', $a))
-                ->setLastModificationDate($a->updated_at)
+        Asociado::publicado()->get()->each(fn (Asociado $asociado): Sitemap => $mapa->add(
+            Url::create(route('directorio.show', $asociado))
+                ->setLastModificationDate($asociado->updated_at)
                 ->setPriority(0.7)
         ));
 
-        Evento::publicado()->get()->each(fn (Evento $e) => $mapa->add(
-            Url::create(route('eventos.show', $e))->setLastModificationDate($e->updated_at)->setPriority(0.6)
+        Evento::publicado()->get()->each(fn (Evento $evento): Sitemap => $mapa->add(
+            Url::create(route('eventos.show', $evento))->setLastModificationDate($evento->updated_at)->setPriority(0.6)
         ));
 
-        Noticia::visible()->get()->each(fn (Noticia $n) => $mapa->add(
-            Url::create(route('boletin.show', $n))->setLastModificationDate($n->updated_at)->setPriority(0.5)
+        Noticia::visible()->get()->each(fn (Noticia $noticia): Sitemap => $mapa->add(
+            Url::create(route('boletin.show', $noticia))->setLastModificationDate($noticia->updated_at)->setPriority(0.5)
         ));
 
-        Artista::publicado()->get()->each(fn (Artista $a) => $mapa->add(
-            Url::create(route('artistas.show', $a))->setLastModificationDate($a->updated_at)->setPriority(0.5)
+        Artista::publicado()->get()->each(fn (Artista $artista): Sitemap => $mapa->add(
+            Url::create(route('artistas.show', $artista))->setLastModificationDate($artista->updated_at)->setPriority(0.5)
         ));
 
         /*
@@ -102,14 +106,13 @@ class SitemapController
          * vencida manda al visitante a una vacante muerta.
          *
          * Prioridad alta y frecuencia diaria porque es el módulo que más rota:
-         * una oferta vive semanas, no años. La ficha ya trae JSON-LD `JobPosting`
-         * desde que se construyó el módulo, y ese marcado --el que mete una oferta
-         * en Google Jobs-- apenas servía sin la URL en el mapa. Faltaba desde el
-         * principio y era el único detalle público que no estaba aquí.
+         * una oferta vive semanas, no años. La ficha trae JSON-LD `JobPosting`, y
+         * ese marcado --el que mete una oferta en Google Jobs-- apenas sirve sin
+         * la URL en el mapa.
          */
-        Vacante::publicado()->vigente()->get()->each(fn (Vacante $v) => $mapa->add(
-            Url::create(route('empleo.show', $v))
-                ->setLastModificationDate($v->updated_at)
+        Vacante::publicado()->vigente()->get()->each(fn (Vacante $vacante): Sitemap => $mapa->add(
+            Url::create(route('empleo.show', $vacante))
+                ->setLastModificationDate($vacante->updated_at)
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_DAILY)
                 ->setPriority(0.7)
         ));

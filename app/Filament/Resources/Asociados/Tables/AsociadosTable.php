@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Asociados\Tables;
 
 use App\Enums\EstadoPublicacion;
 use App\Filament\Support\AccionesDeAprobacion;
+use App\Models\Asociado;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -30,7 +31,7 @@ class AsociadosTable
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
-                    ->description(fn ($record): ?string => $record->direccion),
+                    ->description(fn (Asociado $record): ?string => $record->direccion),
                 TextColumn::make('categoria.nombre')
                     ->label('Categoría')
                     ->badge()

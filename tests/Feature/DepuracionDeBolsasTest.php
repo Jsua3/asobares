@@ -86,10 +86,10 @@ class DepuracionDeBolsasTest extends TestCase
     }
 
     /**
-     * Antes la purga se anclaba a `updated_at`: cualquier edición desde el
-     * panel —incluido que la secretaría cambie el estado de gestión— regalaba
-     * doce meses más sin que la persona hubiera renovado nada. Ahora cuelga
-     * de `consentimiento_at`, que una edición cualquiera no toca.
+     * La purga cuelga de `consentimiento_at`, que una edición cualquiera no
+     * toca, y no de `updated_at`: con `updated_at`, cualquier edición desde el
+     * panel —incluido que la secretaría cambie el estado de gestión— regalaría
+     * doce meses más sin que la persona hubiera renovado nada.
      */
     public function test_una_edicion_desde_el_panel_no_salva_a_un_aspirante_con_el_consentimiento_vencido(): void
     {
@@ -260,10 +260,10 @@ class DepuracionDeBolsasTest extends TestCase
     }
 
     /**
-     * El hueco que la v6 dejó anotado: una vacante de tiempo completo sin
-     * fecha límite que nadie cierra nunca conservaba sus postulaciones para
-     * siempre, porque el reloj de la retención solo arrancaba al cerrar o
-     * vencer. La antigüedad absoluta corre aunque la vacante siga abierta.
+     * Una vacante de tiempo completo sin fecha límite que nadie cierra nunca
+     * conservaría sus postulaciones para siempre si el reloj de la retención
+     * solo arrancara al cerrar o vencer. La antigüedad absoluta corre aunque la
+     * vacante siga abierta.
      */
     public function test_una_postulacion_antigua_se_borra_aunque_su_vacante_siga_abierta(): void
     {

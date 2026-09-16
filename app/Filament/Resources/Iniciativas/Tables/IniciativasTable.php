@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Iniciativas\Tables;
 use App\Enums\EstadoIniciativa;
 use App\Enums\EstadoPublicacion;
 use App\Filament\Support\AccionesDeAprobacion;
+use App\Models\Iniciativa;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -26,7 +27,7 @@ class IniciativasTable
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
-                    ->description(fn ($record): ?string => $record->resumen),
+                    ->description(fn (Iniciativa $record): ?string => $record->resumen),
                 TextColumn::make('estado_iniciativa')
                     ->label('¿En qué punto va?')
                     ->badge()
