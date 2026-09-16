@@ -73,9 +73,24 @@ class GremioEditorialVisualTest extends TestCase
         $this->assertStringNotContainsString('lg:grid-cols-3', $html);
         $this->assertStringNotContainsString('imagen-inclinable', $html);
 
-        $this->get(route('boletin.index', ['categoria' => 'observatorio']))
+        // El rótulo «Observatorio económico» está en la página con o sin filtro
+        // (es uno de los botones), así que no prueba nada: se mira qué piezas
+        // quedan y qué botón se marca.
+        Noticia::factory()->visible()->create([
+            'titulo' => 'Cifras del observatorio para la revista',
+            'categoria' => CategoriaNoticia::Observatorio,
+        ]);
+
+        $filtrada = $this->get(route('boletin.index', ['categoria' => CategoriaNoticia::Observatorio->value]))
             ->assertOk()
-            ->assertSee('Observatorio económico', false);
+            ->assertSee('Cifras del observatorio para la revista')
+            ->assertDontSee($protagonista->titulo)
+            ->assertDontSee('Pieza secundaria de la revista')
+            ->getContent();
+
+        $activo = $this->xpathDe($filtrada)->query('//a[@aria-current="page"][contains(@href, "categoria='.CategoriaNoticia::Observatorio->value.'")]');
+        $this->assertSame(1, $activo->length, 'El filtro no marca su propio botón como activo.');
+        $this->assertStringContainsString('view-transition-name: filtro-activo', $activo->item(0)->getAttribute('style'));
     }
 
     public function test_la_ficha_de_noticia_es_lectura_sin_tilt_y_con_retorno_desplazado(): void
@@ -135,5 +150,16 @@ class GremioEditorialVisualTest extends TestCase
         $this->assertStringContainsString('prefers-reduced-motion', $css);
         $this->assertStringNotContainsString('scroll-snap-type: x mandatory', $css);
         $this->assertStringNotContainsString('hueco-foto', $css);
+    }
+
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
     }
 }
