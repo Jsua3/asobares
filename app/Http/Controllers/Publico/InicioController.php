@@ -49,7 +49,7 @@ class InicioController
             'beneficios' => Beneficio::with('municipio')->orderBy('orden')->get(),
             'aliadosInstitucionales' => $aliados->where('tipo', TipoAliado::Institucional)->values(),
             'aliadosComerciales' => $aliados->where('tipo', TipoAliado::Comercial)->values(),
-            'proximosEventos' => Evento::publicado()->proximo()->take(3)->get(),
+            'proximosEventos' => Evento::visibleAlPublico()->delGremio()->proximo()->take(3)->get(),
             'iniciativas' => Iniciativa::publicado()->orderBy('orden')->take(5)->get(),
             'publicidadInicio' => Publicidad::publicaEn(UbicacionPublicidad::Inicio)->first(),
             'totalAsociados' => Asociado::publicado()->count(),

@@ -88,7 +88,7 @@ class SitemapController
                 ->setPriority(0.7)
         ));
 
-        Evento::publicado()->get()->each(fn (Evento $evento): Sitemap => $mapa->add(
+        Evento::visibleAlPublico()->get()->each(fn (Evento $evento): Sitemap => $mapa->add(
             Url::create(route('eventos.show', $evento))->setLastModificationDate($evento->updated_at)->setPriority(0.6)
         ));
 

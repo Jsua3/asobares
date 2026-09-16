@@ -36,8 +36,8 @@
 
     <div class="eventos-editorial">
     <x-publico.hero-eventos
-        titulo="Eventos y capacitaciones"
-        subtitulo="Solo eventos del gremio: ferias, foros y formación para los establecimientos del Quindío." />
+        :titulo="ajuste('eventos_titulo', 'Eventos y capacitaciones')"
+        :subtitulo="ajuste('eventos_intro', 'Eventos, capacitaciones y experiencias del gremio y sus aliados para el sector gastronómico y de entretenimiento del Quindío.')" />
 
     <div class="eventos-editorial-cuerpo mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
@@ -95,7 +95,7 @@
              data-revelar
              style="view-transition-name: calendario-rejilla">
             <table class="w-full table-fixed border-collapse">
-                <caption class="sr-only">Eventos del gremio en {{ $tituloMes }}</caption>
+                <caption class="sr-only">Eventos en {{ $tituloMes }}</caption>
 
                 <thead>
                     <tr>
@@ -187,7 +187,7 @@
                 </li>
             @empty
                 <li class="tarjeta p-8 text-center">
-                    <p class="font-display text-base font-semibold">No hay eventos del gremio en {{ $tituloMes }}</p>
+                    <p class="font-display text-base font-semibold">No hay eventos en {{ $tituloMes }}</p>
                     <a href="{{ route('eventos.index', ['cuando' => 'proximos']) }}"
                        class="eventos-editorial-proximos enlace-accion relative mt-3 inline-flex min-h-11 items-center text-sm font-medium text-acento">
                         Ver los próximos eventos&nbsp;<x-publico.flecha />
@@ -201,7 +201,7 @@
              y esconderlo dejaría la página sin nada donde antes había un mes. --}}
         @if ($agenda->isEmpty())
             <p class="mt-4 hidden text-sm text-tenue sm:block">
-                No hay eventos del gremio en {{ $tituloMes }}.
+                No hay eventos en {{ $tituloMes }}.
                 <a href="{{ route('eventos.index', ['cuando' => 'proximos']) }}"
                    class="eventos-editorial-proximos enlace-accion font-medium text-acento">Ver los próximos eventos&nbsp;<x-publico.flecha /></a>
             </p>

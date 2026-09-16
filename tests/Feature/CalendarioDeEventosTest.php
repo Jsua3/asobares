@@ -351,7 +351,7 @@ class CalendarioDeEventosTest extends TestCase
 
         $this->get('/eventos/calendario/2024/03')
             ->assertSuccessful()
-            ->assertSee('No hay eventos del gremio en Marzo de 2024')
+            ->assertSee('No hay eventos en Marzo de 2024')
             ->assertSee('name="robots" content="noindex, follow"', escape: false);
     }
 

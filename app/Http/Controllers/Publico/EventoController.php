@@ -24,7 +24,7 @@ class EventoController
         $datos = $request->validate(['cuando' => ['nullable', 'in:proximos,pasados']]);
         $cuando = $datos['cuando'] ?? 'proximos';
 
-        $consulta = Evento::publicado()->with('aliado');
+        $consulta = Evento::visibleAlPublico()->with('aliado');
         $cuando === 'pasados' ? $consulta->pasado() : $consulta->proximo();
 
         return view('publico.eventos.index', [
@@ -69,14 +69,14 @@ class EventoController
          * no los pinta y son las dos columnas más pesadas de la tabla. `slug`
          * sí, porque es la clave de ruta (`Evento::getRouteKeyName`).
          */
-        $eventos = Evento::publicado()
+        $eventos = Evento::visibleAlPublico()
             ->enRango($inicioRejilla, $finRejilla)
             ->get(['id', 'titulo', 'slug', 'tipo', 'lugar', 'fecha_inicio', 'fecha_fin', 'precio']);
 
         // Un solo agregado para saber si el mes pedido cae fuera de lo que el
         // gremio tiene publicado. Los meses vacíos se navegan igual, pero se
         // marcan `noindex`: son infinitos en las dos direcciones.
-        $rango = Evento::publicado()
+        $rango = Evento::visibleAlPublico()
             ->selectRaw('MIN(fecha_inicio) as primero, MAX(COALESCE(fecha_fin, fecha_inicio)) as ultimo')
             ->first();
 
@@ -139,14 +139,14 @@ class EventoController
     private function totalesDelConmutador(): array
     {
         return [
-            'totalProximos' => Evento::publicado()->proximo()->count(),
-            'totalPasados' => Evento::publicado()->pasado()->count(),
+            'totalProximos' => Evento::visibleAlPublico()->proximo()->count(),
+            'totalPasados' => Evento::visibleAlPublico()->pasado()->count(),
         ];
     }
 
     public function show(Evento $evento): View
     {
-        abort_unless($evento->estaPublicado(), 404);
+        abort_unless($evento->esVisibleAlPublico(), 404);
 
         return view('publico.eventos.show', [
             'evento' => $evento->loadCount('inscripciones')->loadMissing('aliado'),
@@ -155,7 +155,7 @@ class EventoController
 
     public function inscribir(GuardarInscripcionRequest $request, Evento $evento, RegistroDePagos $pagos): RedirectResponse
     {
-        abort_unless($evento->estaPublicado(), 404);
+        abort_unless($evento->esVisibleAlPublico(), 404);
 
         // Comprobar el cupo y luego insertar en dos pasos sueltos deja que dos
         // peticiones simultáneas lean el mismo conteo, lo den por bueno y las

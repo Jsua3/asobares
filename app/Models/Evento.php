@@ -6,6 +6,7 @@ use App\Enums\EstadoPublicacion;
 use App\Enums\OrigenEvento;
 use App\Enums\TipoEvento;
 use App\Models\Concerns\EsPublicable;
+use App\Support\ReglaDeAlcaldias;
 use Carbon\CarbonInterface;
 use Database\Factories\EventoFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -55,6 +56,12 @@ class Evento extends Model
                 ? $evento->origen
                 : OrigenEvento::from((string) $evento->origen);
 
+            if ($evento->fecha_fin !== null && $evento->fecha_inicio !== null && $evento->fecha_fin->lessThan($evento->fecha_inicio)) {
+                throw ValidationException::withMessages([
+                    'fecha_fin' => 'El evento no puede terminar antes de empezar.',
+                ]);
+            }
+
             if ($origen === OrigenEvento::Asobares) {
                 $evento->aliado_id = null;
 
@@ -66,12 +73,65 @@ class Evento extends Model
                     'aliado_id' => 'Selecciona el aliado que organiza este evento.',
                 ]);
             }
+
+            // El gremio no inscribe ni cobra a nombre de un aliado: el cobro
+            // entraría a la cuenta de Bold del gremio y los datos de quien se
+            // inscribe quedarían bajo su responsabilidad. La inscripción de un
+            // evento de aliado va por su enlace externo.
+            $evento->permite_inscripcion = false;
         });
     }
 
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    /**
+     * Lo que el público puede ver de la agenda: el listado, el calendario, la
+     * ficha, la portada y el sitemap preguntan aquí y en ningún otro sitio.
+     *
+     * Publicado no basta cuando organiza un aliado, porque su nombre y su web
+     * salen en la ficha, en el riel y en el JSON-LD. El aliado tiene que poder
+     * salir al sitio él mismo —aprobado y activo, como en la portada— y
+     * respetar «a todos o nada» de las alcaldías (`ReglaDeAlcaldias`). Un
+     * aliado nace apagado en el panel: sin esta compuerta su evento lo
+     * publicaría antes que él. Y un evento de aliado cuyo aliado se borró
+     * tampoco sale, porque se leería como organizado por ASOBARES.
+     */
+    public function scopeVisibleAlPublico(Builder $query): Builder
+    {
+        $regla = app(ReglaDeAlcaldias::class);
+        $alcaldiasFuera = ! $regla->seCumpleEnElSitio();
+
+        return $query
+            ->publicado()
+            ->where(function (Builder $eventos) use ($regla, $alcaldiasFuera): void {
+                $eventos
+                    ->whereNull('origen')
+                    ->orWhere('origen', '!=', OrigenEvento::Aliado->value)
+                    ->orWhereHas('aliado', function (Builder $aliado) use ($regla, $alcaldiasFuera): void {
+                        $aliado->publicado()->where('activo', true);
+
+                        if ($alcaldiasFuera) {
+                            $regla->sinAlcaldias($aliado);
+                        }
+                    });
+            });
+    }
+
+    /** Los que organiza el gremio. La portada habla con su voz y solo pinta estos. */
+    public function scopeDelGremio(Builder $query): Builder
+    {
+        return $query->where(function (Builder $eventos): void {
+            $eventos->whereNull('origen')->orWhere('origen', OrigenEvento::Asobares->value);
+        });
+    }
+
+    public function esVisibleAlPublico(): bool
+    {
+        return $this->exists
+            && static::query()->visibleAlPublico()->whereKey($this->getKey())->exists();
     }
 
     /** @return HasMany<Inscripcion, $this> */
@@ -221,7 +281,9 @@ class Evento extends Model
 
     public function admiteInscripciones(): bool
     {
-        if (! $this->permite_inscripcion || $this->delegaRegistroExterno() || ! $this->esFuturo()) {
+        // `esDeAliado()` además del guardado: una fila anterior a la regla
+        // puede traer `permite_inscripcion` encendido.
+        if (! $this->permite_inscripcion || $this->esDeAliado() || $this->delegaRegistroExterno() || ! $this->esFuturo()) {
             return false;
         }
 

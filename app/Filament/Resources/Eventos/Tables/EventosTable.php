@@ -43,7 +43,7 @@ class EventosTable
                     ->sortable(),
                 TextColumn::make('aliado.nombre')
                     ->label('Aliado')
-                    ->placeholder('ASOBARES')
+                    ->placeholder(fn (Evento $record): string => $record->esDeAliado() ? 'Sin aliado: no sale en el sitio' : 'ASOBARES')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('fecha_inicio')
                     ->label('Fecha')

@@ -338,7 +338,7 @@ class SettingSeeder extends Seeder
 
             // --- Eventos ---
             $this->texto('eventos_titulo', 'Eventos y capacitaciones', 'eventos', 'Título de eventos'),
-            $this->largo('eventos_intro', 'Solo eventos del gremio: ferias, foros y formación para los establecimientos del Quindío.', 'eventos', 'Introducción de eventos'),
+            $this->largo('eventos_intro', 'Eventos, capacitaciones y experiencias del gremio y sus aliados para el sector gastronómico y de entretenimiento del Quindío.', 'eventos', 'Introducción de eventos'),
             $this->texto('eventos_vacios_proximos', 'No hay eventos programados por ahora', 'eventos', 'Mensaje sin próximos eventos'),
             $this->texto('eventos_vacios_pasados', 'Todavía no hay eventos pasados', 'eventos', 'Mensaje sin eventos pasados'),
             $this->texto('eventos_vacios_texto', 'Publicamos aquí la agenda del gremio.', 'eventos', 'Texto del mensaje sin eventos'),

@@ -111,12 +111,23 @@
                         @endif
                     </dl>
 
-                    @if ($evento->delegaRegistroExterno())
+                    @if ($evento->delegaRegistroExterno() && $evento->esDeAliado())
+                        <x-publico.boton :href="$evento->enlace_externo" target="_blank" rel="noopener" class="mt-6 w-full">
+                            Ir a la inscripción&nbsp;<x-publico.flecha direccion="externa" />
+                        </x-publico.boton>
+                        <p class="mt-2.5 text-xs text-apagado">
+                            La inscripción de este evento la gestiona directamente {{ $evento->organizadorVisible() }}.
+                        </p>
+                    @elseif ($evento->delegaRegistroExterno())
                         <x-publico.boton :href="$evento->enlace_externo" target="_blank" rel="noopener" class="mt-6 w-full">
                             Registrarme en la Nacional&nbsp;<x-publico.flecha direccion="externa" />
                         </x-publico.boton>
                         <p class="mt-2.5 text-xs text-apagado">
                             La inscripción de este evento la gestiona directamente Asobares Colombia.
+                        </p>
+                    @elseif ($evento->esDeAliado())
+                        <p class="mt-6 rounded-xl border border-linea px-4 py-3 text-center text-sm text-apagado">
+                            La inscripción la gestiona directamente {{ $evento->organizadorVisible() }}.
                         </p>
                     @elseif ($evento->admiteInscripciones())
                         <x-publico.boton href="#inscripcion" class="mt-6 w-full">

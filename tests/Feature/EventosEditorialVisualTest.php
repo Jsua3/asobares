@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\OrigenEvento;
 use App\Models\Aliado;
 use App\Models\Evento;
+use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
@@ -45,6 +46,11 @@ class EventosEditorialVisualTest extends TestCase
         $this->assertStringContainsString('ASOBARES Capítulo Quindío', $html);
         $this->assertStringContainsString('eventos-editorial-ficha', $html);
         $this->assertStringContainsString('data-eventos-hero-slot="img/eventos/hero-eventos.webp"', $html);
+        $this->assertSame(
+            1,
+            $this->xpathDe($html)->query('//div[contains(concat(" ", normalize-space(@class), " "), " eventos-editorial-hero__foto ")]/img[@src="'.asset('img/eventos/hero-eventos.webp').'"]')->length,
+            'El hero de /eventos no pinta su fotografía: el hueco declara la ranura pero la imagen no sale.'
+        );
         $this->assertStringContainsString($evento->titulo, $html);
         $this->assertStringContainsString('Centro de Convenciones', $html);
         $this->assertStringContainsString('Ver evento', $html);
@@ -65,18 +71,26 @@ class EventosEditorialVisualTest extends TestCase
         );
     }
 
+    /**
+     * Sin fila en `settings` sale el texto por defecto de la vista; con fila,
+     * manda la fila. Afirmar solo el defecto no prueba que sea administrable:
+     * en producción la fila sembrada lo tapa.
+     */
     public function test_el_hero_obedece_titulo_e_intro_administrables(): void
     {
         $this->get(route('eventos.index'))
             ->assertOk()
-            ->assertSee('Eventos y capacitaciones');
+            ->assertSee('Eventos y capacitaciones')
+            ->assertSee('Eventos, capacitaciones y experiencias del gremio y sus aliados para el sector gastronómico y de entretenimiento del Quindío.');
 
-        $vista = File::get(resource_path('views/publico/eventos/index.blade.php'));
-        $this->assertStringContainsString("ajuste('eventos_titulo', 'Eventos y capacitaciones')", $vista);
-        $this->assertStringContainsString("ajuste('eventos_intro', 'Eventos, capacitaciones y experiencias del gremio y sus aliados para el sector gastronómico y de entretenimiento del Quindío.')", $vista);
+        Setting::query()->create(['clave' => 'eventos_titulo', 'valor' => 'Agenda escrita por la oficina', 'tipo' => 'string', 'grupo' => 'eventos']);
+        Setting::query()->create(['clave' => 'eventos_intro', 'valor' => 'Entradilla escrita por la oficina.', 'tipo' => 'text', 'grupo' => 'eventos']);
+
         $this->get(route('eventos.index'))
             ->assertOk()
-            ->assertSee('Eventos, capacitaciones y experiencias del gremio y sus aliados para el sector gastronómico y de entretenimiento del Quindío.');
+            ->assertSee('Agenda escrita por la oficina')
+            ->assertSee('Entradilla escrita por la oficina.')
+            ->assertDontSee('experiencias del gremio y sus aliados');
     }
 
     public function test_los_pasados_se_senalan_como_realizados_sin_duplicar_el_dom(): void
@@ -253,6 +267,17 @@ class EventosEditorialVisualTest extends TestCase
     /**
      * @return array<string, mixed>
      */
+    private function xpathDe(string $html): \DOMXPath
+    {
+        $dom = new \DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        return new \DOMXPath($dom);
+    }
+
     private function jsonLdDe(string $html): array
     {
         $this->assertMatchesRegularExpression(

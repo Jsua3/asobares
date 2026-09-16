@@ -66,7 +66,7 @@ class EventoForm
                             ->preload()
                             ->required(fn (callable $get): bool => static::esEventoDeAliado($get('origen')))
                             ->visible(fn (callable $get): bool => static::esEventoDeAliado($get('origen')))
-                            ->helperText('Solo para eventos organizados por un aliado.'),
+                            ->helperText('El evento solo sale en el sitio mientras este aliado esté publicado y activo.'),
                         TextInput::make('lugar')
                             ->label('Lugar')
                             ->maxLength(255)
@@ -92,12 +92,15 @@ class EventoForm
                     ->schema([
                         Toggle::make('permite_inscripcion')
                             ->label('Permite inscripción en línea')
+                            ->visible(fn (callable $get): bool => ! static::esEventoDeAliado($get('origen')))
                             ->helperText('Apágalo si la inscripción se hace por fuera del sitio.'),
                         TextInput::make('enlace_externo')
                             ->label('Enlace externo')
                             ->url()
                             ->maxLength(255)
-                            ->helperText('Para eventos cuya inscripción se gestiona por fuera del sitio.'),
+                            ->helperText(fn (callable $get): string => static::esEventoDeAliado($get('origen'))
+                                ? 'La inscripción de un evento de aliado la gestiona el aliado: el gremio no inscribe ni cobra a su nombre.'
+                                : 'Para eventos cuya inscripción se gestiona por fuera del sitio.'),
                         TextInput::make('cupos')
                             ->label('Cupos')
                             ->numeric()
@@ -110,7 +113,9 @@ class EventoForm
                             ->minValue(0)
                             ->default(0)
                             ->prefix('$')
-                            ->helperText('En pesos. 0 = gratuito; con precio, la inscripción se confirma al aprobarse el pago.'),
+                            ->helperText(fn (callable $get): string => static::esEventoDeAliado($get('origen'))
+                                ? 'En pesos, solo informativo: el pago lo recibe el aliado.'
+                                : 'En pesos. 0 = gratuito; con precio, la inscripción se confirma al aprobarse el pago.'),
                     ]),
 
                 Section::make('Imagen')

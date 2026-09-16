@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Enums\TipoAliado;
 use App\Models\Aliado;
 use App\Models\Municipio;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
@@ -49,6 +50,31 @@ class ReglaDeAlcaldias
         $conAlcaldia = $this->municipiosConAlcaldia($visibles);
 
         return $conAlcaldia->isEmpty() || $this->faltantes($visibles)->isEmpty();
+    }
+
+    /**
+     * La regla aplicada a los aliados que hoy salen al sitio. La usa quien
+     * pinta a un aliado fuera de la portada, como el organizador de un evento.
+     */
+    public function seCumpleEnElSitio(): bool
+    {
+        return $this->seCumple(Aliado::visible()->get());
+    }
+
+    /**
+     * `esAlcaldia()` escrita como consulta, para acotar aliados en la base.
+     * Tiene que decir lo mismo que la versión en memoria de abajo.
+     *
+     * @param  Builder<Aliado>  $aliados
+     * @return Builder<Aliado>
+     */
+    public function sinAlcaldias(Builder $aliados): Builder
+    {
+        return $aliados->where(function (Builder $noAlcaldias): void {
+            $noAlcaldias
+                ->whereNull('municipio_id')
+                ->orWhere('tipo', '!=', TipoAliado::Institucional->value);
+        });
     }
 
     /**
