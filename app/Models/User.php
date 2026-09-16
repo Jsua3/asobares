@@ -45,6 +45,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             'app_authentication_secret' => 'encrypted',
             'app_authentication_recovery_codes' => 'encrypted:array',
             'has_email_authentication' => 'boolean',
+            'contrasena_provisional' => 'boolean',
         ];
     }
 
@@ -79,6 +80,29 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     public function esAsociado(): bool
     {
         return $this->hasRole(self::ROL_ASOCIADO);
+    }
+
+    /**
+     * Toda contraseña que pone alguien distinto del titular de una cuenta de
+     * afiliado nace provisional: la genérica de la importación, la que la
+     * oficina escribe en el panel y la del comando de alta. Mientras lo sea,
+     * /mi-cuenta cierra las secciones con datos de terceros
+     * (`ExigirContrasenaPropia`).
+     *
+     * La relación `roles` se descarta antes de mirar el rol: quien llama puede
+     * traerla cargada con el rol que tenía antes de guardar. Y la marca se
+     * asigna suelta porque `#[Fillable]` la descartaría en silencio.
+     */
+    public function marcarContrasenaProvisionalSiEsAfiliado(): void
+    {
+        $this->unsetRelation('roles');
+
+        if (! $this->hasRole(self::ROL_ASOCIADO)) {
+            return;
+        }
+
+        $this->contrasena_provisional = true;
+        $this->save();
     }
 
     // --- MFA del núcleo de Filament (RF-40) ---
