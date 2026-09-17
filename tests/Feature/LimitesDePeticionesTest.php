@@ -148,6 +148,7 @@ class LimitesDePeticionesTest extends TestCase
             'escribir al gremio' => ['POST', 'contacto.store', [], 6, false],
             'entrar a mi cuenta' => ['POST', 'mi-cuenta.entrar.post', [], 5, false],
             'definir la contraseña' => ['POST', 'mi-cuenta.password.update', [], 5, false],
+            'cambiar la contraseña con sesión' => ['PUT', 'mi-cuenta.seguridad.actualizar', [], 5, true],
             'resolver el pago simulado' => ['POST', 'pago.simulado.resolver', ['transaccion' => 'ASO-0000-NOEXISTE'], 10, false],
             'volver de la pasarela' => ['GET', 'pago.retorno', ['transaccion' => 'ASO-0000-NOEXISTE'], 30, false],
             'recibir el webhook de Bold' => ['POST', 'webhooks.bold', [], 120, false],

@@ -19,6 +19,7 @@ use App\Http\Controllers\Publico\MisVacantesController;
 use App\Http\Controllers\Publico\NoticiaController;
 use App\Http\Controllers\Publico\PaginaController;
 use App\Http\Controllers\Publico\ProveedorController;
+use App\Http\Controllers\Publico\SeguridadDeLaCuentaController;
 use App\Http\Controllers\Publico\SesionAsociadoController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\WebhookBoldController;
@@ -181,6 +182,14 @@ Route::middleware(['auth', 'rol.asociado'])->group(function (): void {
     Route::delete('/mi-cuenta/fotos/{media}', [MisFotosController::class, 'destroy'])
         ->middleware('throttle:mi-cuenta-fotos-borrar')
         ->name('mi-cuenta.fotos.destroy');
+
+    // Seguridad de la cuenta: el titular cambia su contraseña. Es la única
+    // puerta que apaga la marca de provisional, así que queda fuera de las
+    // secciones que esa marca cierra.
+    Route::get('/mi-cuenta/seguridad', [SeguridadDeLaCuentaController::class, 'editar'])->name('mi-cuenta.seguridad');
+    Route::put('/mi-cuenta/seguridad', [SeguridadDeLaCuentaController::class, 'actualizar'])
+        ->middleware('throttle:mi-cuenta-seguridad')
+        ->name('mi-cuenta.seguridad.actualizar');
 
     // Beneficios detrás de la sesión: los datos de contacto de proveedores,
     // artistas y aspirantes son la contraprestación de la cuota. La cara

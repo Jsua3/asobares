@@ -74,6 +74,7 @@ class AppServiceProvider extends ServiceProvider
         'contacto' => 6,
         'mi-cuenta-entrar' => 5,
         'mi-cuenta-contrasena' => 5,
+        'mi-cuenta-seguridad' => 5,
         'mi-cuenta-pagar' => 5,
         'mi-cuenta-fotos-subir' => 30,
         'mi-cuenta-fotos-borrar' => 20,
