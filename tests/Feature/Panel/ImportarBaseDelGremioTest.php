@@ -11,10 +11,15 @@ use App\Models\Municipio;
 use App\Models\User;
 use App\Services\ImportacionDeLaBaseDelGremio;
 use Database\Seeders\RolYPermisoSeeder;
+use DOMDocument;
+use DOMElement;
+use DOMXPath;
 use Filament\Notifications\Livewire\Notifications as NotificacionesDelPanel;
+use Filament\Notifications\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Exceptions;
+use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 use Livewire\Livewire;
 use OpenSpout\Common\Entity\Row;
@@ -27,7 +32,7 @@ use Tests\TestCase;
  * La acción del panel con la que la dirección carga la base del gremio en
  * producción. Las reglas de fondo están probadas en los servicios; aquí se
  * prueba la puerta: quién la ve, qué contraseña acepta, que el archivo no se
- * queda en el disco y que un fallo se dice.
+ * queda en el disco, qué dice el aviso y que un fallo se dice.
  */
 class ImportarBaseDelGremioTest extends TestCase
 {
@@ -99,9 +104,65 @@ class ImportarBaseDelGremioTest extends TestCase
     }
 
     /** @return list<string> */
-    private function fila(string $nombre, string $correo): array
+    private function fila(string $nombre, string $correo, string $municipio = 'Armenia'): array
     {
-        return [$nombre, 'Duena del Local', 'Descripción', '900123456', 'Calle 1', 'Armenia', '3001234567', $correo, '', '', '', '', '', ''];
+        return [$nombre, 'Duena del Local', 'Descripción', '900123456', 'Calle 1', $municipio, '3001234567', $correo, '', '', '', '', '', ''];
+    }
+
+    /** La notificación que dejó la acción, reconstruida desde la sesión como lo hace el panel. */
+    private function notificacionEnviada(): Notification
+    {
+        // No se usa ->assertNotified(): hace falta leer la notificación real,
+        // no solo confirmar que hubo una, y ese método vacía la sesión con el
+        // primer vistazo. Este es el mismo mecanismo que usa por dentro.
+        $panelDeNotificaciones = new NotificacionesDelPanel;
+        $panelDeNotificaciones->mount();
+        $enviada = $panelDeNotificaciones->notifications->first();
+
+        $this->assertInstanceOf(Notification::class, $enviada, 'Se esperaba una notificación.');
+
+        return $enviada;
+    }
+
+    /** El cuerpo en el HTML que pinta el panel, después de su saneado. */
+    private function cuerpoPintado(Notification $notificacion): DOMElement
+    {
+        $dom = new DOMDocument;
+        $erroresPrevios = libxml_use_internal_errors(true);
+        $dom->loadHTML('<?xml encoding="utf-8" ?>'.$notificacion->toHtml());
+        libxml_clear_errors();
+        libxml_use_internal_errors($erroresPrevios);
+
+        $cuerpo = (new DOMXPath($dom))
+            ->query('//div[contains(concat(" ", normalize-space(@class), " "), " fi-no-notification-body ")]')
+            ->item(0);
+
+        $this->assertInstanceOf(DOMElement::class, $cuerpo, 'La notificación no pinta cuerpo.');
+
+        return $cuerpo;
+    }
+
+    /**
+     * Las líneas del cuerpo como se leen en pantalla: el texto que queda entre
+     * un `<br>` y el siguiente.
+     *
+     * @return list<string>
+     */
+    private function lineasDelCuerpo(Notification $notificacion): array
+    {
+        $lineas = [''];
+
+        foreach ($this->cuerpoPintado($notificacion)->childNodes as $nodo) {
+            if ($nodo instanceof DOMElement && $nodo->tagName === 'br') {
+                $lineas[] = '';
+
+                continue;
+            }
+
+            $lineas[array_key_last($lineas)] .= $nodo->textContent;
+        }
+
+        return array_map(trim(...), $lineas);
     }
 
     public function test_la_direccion_ve_la_accion(): void
@@ -160,21 +221,161 @@ class ImportarBaseDelGremioTest extends TestCase
         $this->assertSame(2, Asociado::query()->count());
         $this->assertSame(1, User::role(User::ROL_ASOCIADO)->count());
 
-        // No se usa ->assertNotified(): hace falta leer título Y cuerpo de la
-        // notificación real, no solo confirmar que hubo una, y ese método
-        // vacía la sesión con el primer vistazo. Este es el mismo mecanismo
-        // que usa Notification::assertNotified() por dentro.
-        $panelDeNotificaciones = new NotificacionesDelPanel;
-        $panelDeNotificaciones->mount();
-        $enviada = $panelDeNotificaciones->notifications->first();
+        $enviada = $this->notificacionEnviada();
 
-        $this->assertNotNull($enviada, 'Se esperaba una notificación.');
         $this->assertSame('warning', $enviada->getStatus());
         $this->assertSame(
-            'Fichas: 2 creados · 0 actualizados. Cuentas: 1 cuenta creada · 1 ficha sin cuenta.',
+            'Fichas: 2 creadas · 0 actualizadas. Cuentas: 1 cuenta creada · 1 ficha sin cuenta.',
             $enviada->getTitle(),
         );
-        $this->assertStringContainsString('«Bar Dos»: sin correo', (string) $enviada->getBody());
+        $this->assertSame(['«Bar Dos»: sin correo'], $this->lineasDelCuerpo($enviada));
+    }
+
+    /**
+     * El panel pinta el cuerpo como HTML: un salto de línea de texto no separa
+     * nada y todas las fichas se leerían en un mismo párrafo.
+     */
+    public function test_cada_ficha_sin_cuenta_sale_en_su_propia_linea(): void
+    {
+        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(ListAsociados::class)
+            ->callAction('importar', data: [
+                'archivo' => $this->subida([
+                    $this->fila('Bar Uno', 'uno@bar.test'),
+                    $this->fila('Bar Dos', ''),
+                    $this->fila('Bar Tres', 'tres@hotmail'),
+                ]),
+                'categoria' => 'Bar',
+                'crear_cuentas' => true,
+                'contrasena_generica' => self::GENERICA,
+                'contrasena_generica_confirmation' => self::GENERICA,
+            ])
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(
+            ['«Bar Dos»: sin correo', '«Bar Tres»: correo inválido'],
+            $this->lineasDelCuerpo($this->notificacionEnviada()),
+        );
+    }
+
+    /**
+     * Cada línea trae texto de la hoja, y el saneado del panel deja pasar
+     * enlaces y estilos: lo que venga en la hoja se lee, no se pinta.
+     */
+    public function test_el_html_que_trae_la_hoja_sale_como_texto(): void
+    {
+        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
+        $nombre = 'Bar <a href="https://x.test">Uno</a>';
+
+        Livewire::test(ListAsociados::class)
+            ->callAction('importar', data: [
+                'archivo' => $this->subida([$this->fila($nombre, '', 'Pereira')]),
+                'categoria' => 'Bar',
+            ])
+            ->assertHasNoFormErrors();
+
+        $enviada = $this->notificacionEnviada();
+
+        $this->assertSame(0, $this->cuerpoPintado($enviada)->getElementsByTagName('a')->length);
+        $this->assertSame(
+            ["Fila 7: «{$nombre}»: el municipio «Pereira» no está en el catálogo del Quindío."],
+            $this->lineasDelCuerpo($enviada),
+        );
+    }
+
+    /** Hasta 40 líneas: las demás se cuentan al final, para no hacer del aviso un muro. */
+    public function test_el_aviso_muestra_cuarenta_lineas_y_cuenta_las_demas(): void
+    {
+        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
+
+        $filas = [];
+
+        for ($numero = 1; $numero <= 41; $numero++) {
+            $filas[] = $this->fila(sprintf('Bar %02d', $numero), '', 'Pereira');
+        }
+
+        Livewire::test(ListAsociados::class)
+            ->callAction('importar', data: ['archivo' => $this->subida($filas), 'categoria' => 'Bar'])
+            ->assertHasNoFormErrors();
+
+        $lineas = $this->lineasDelCuerpo($this->notificacionEnviada());
+
+        $this->assertCount(41, $lineas);
+        $this->assertStringStartsWith('Fila 7: «Bar 01»', $lineas[0]);
+        $this->assertStringStartsWith('Fila 46: «Bar 40»', $lineas[39]);
+        $this->assertSame('…y 1 más.', $lineas[40]);
+    }
+
+    /**
+     * Volver a subir el archivo corregido: la ficha cuya cuenta ya existe se
+     * cuenta en el título y no sale como una ficha sin cuenta que corregir.
+     */
+    public function test_reimportar_cuenta_aparte_las_fichas_que_ya_tenian_cuenta(): void
+    {
+        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
+
+        $importarConCuentas = function (): void {
+            Livewire::test(ListAsociados::class)
+                ->callAction('importar', data: [
+                    'archivo' => $this->subida([$this->fila('Bar Uno', 'uno@bar.test')]),
+                    'categoria' => 'Bar',
+                    'crear_cuentas' => true,
+                    'contrasena_generica' => self::GENERICA,
+                    'contrasena_generica_confirmation' => self::GENERICA,
+                ])
+                ->assertHasNoFormErrors();
+        };
+
+        $importarConCuentas();
+        $this->assertSame('success', $this->notificacionEnviada()->getStatus());
+
+        $importarConCuentas();
+        $enviada = $this->notificacionEnviada();
+
+        $this->assertSame('success', $enviada->getStatus());
+        $this->assertSame(
+            'Fichas: 0 creadas · 1 actualizada. Cuentas: 0 cuentas creadas · 1 ficha ya tenía cuenta.',
+            $enviada->getTitle(),
+        );
+    }
+
+    /**
+     * Fichas que ya existen, filas del archivo como [nombre, municipio] y el
+     * título que tiene que salir.
+     *
+     * @return array<string, array{list<string>, list<array{string, string}>, string}>
+     */
+    public static function titulosDeLasFichas(): array
+    {
+        return [
+            'una creada' => [[], [['Bar Uno', 'Armenia']], 'Fichas: 1 creada · 0 actualizadas.'],
+            'dos actualizadas' => [['Bar Uno', 'Bar Dos'], [['Bar Uno', 'Armenia'], ['Bar Dos', 'Armenia']], 'Fichas: 0 creadas · 2 actualizadas.'],
+            'una actualizada y una fila con problemas' => [['Bar Uno'], [['Bar Uno', 'Armenia'], ['Bar de Afuera', 'Pereira']], 'Fichas: 0 creadas · 1 actualizada · 1 con problemas.'],
+        ];
+    }
+
+    /**
+     * @param  list<string>  $existentes
+     * @param  list<array{string, string}>  $filas
+     */
+    #[DataProvider('titulosDeLasFichas')]
+    public function test_el_titulo_concuerda_con_las_fichas(array $existentes, array $filas, string $titulo): void
+    {
+        foreach ($existentes as $nombreExistente) {
+            Asociado::factory()->create(['nombre' => $nombreExistente, 'slug' => Str::slug($nombreExistente)]);
+        }
+
+        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(ListAsociados::class)
+            ->callAction('importar', data: [
+                'archivo' => $this->subida(array_map(fn (array $fila): array => $this->fila($fila[0], '', $fila[1]), $filas)),
+                'categoria' => 'Bar',
+            ])
+            ->assertHasNoFormErrors();
+
+        $this->assertSame($titulo, $this->notificacionEnviada()->getTitle());
     }
 
     public function test_sin_marcar_la_casilla_no_crea_cuentas(): void

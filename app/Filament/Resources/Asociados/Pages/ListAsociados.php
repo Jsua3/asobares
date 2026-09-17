@@ -172,7 +172,7 @@ class ListAsociados extends ListRecords
 
     private function notificarResultado(ResultadoDeCargaDeAsociados $carga, ?ResultadoDeAltaDeCuentas $cuentas): void
     {
-        $titulo = 'Fichas: '.$carga->resumen();
+        $titulo = 'Fichas: '.self::resumenDeFichas($carga);
 
         if ($cuentas !== null) {
             $titulo .= ' Cuentas: '.$cuentas->resumen();
@@ -195,6 +195,29 @@ class ListAsociados extends ListRecords
             $visibles[] = "…y {$restantes} más.";
         }
 
-        $notificacion->warning()->body(implode("\n", $visibles))->send();
+        // El panel pinta el cuerpo como HTML saneado, y ese saneado deja pasar
+        // enlaces y estilos: cada línea lleva texto de la hoja, así que se
+        // escapa. Y se separan con `<br>`, porque en HTML un salto de línea de
+        // texto no separa nada.
+        $notificacion->warning()->body(implode('<br>', array_map(e(...), $visibles)))->send();
+    }
+
+    /**
+     * «61 creadas · 1 actualizada»: el aviso habla de fichas. El `resumen()`
+     * del importador cuenta en masculino y lo imprime también el comando
+     * `asociados:importar`, así que no se toca.
+     */
+    private static function resumenDeFichas(ResultadoDeCargaDeAsociados $carga): string
+    {
+        $tramos = [
+            $carga->creados() === 1 ? '1 creada' : "{$carga->creados()} creadas",
+            $carga->actualizados() === 1 ? '1 actualizada' : "{$carga->actualizados()} actualizadas",
+        ];
+
+        if ($carga->tieneErrores()) {
+            $tramos[] = count($carga->errores()).' con problemas';
+        }
+
+        return implode(' · ', $tramos).'.';
     }
 }

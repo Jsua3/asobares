@@ -109,7 +109,12 @@ class AltaDeCuentasDeAfiliadosTest extends TestCase
         ], $resultado->sinCuenta());
     }
 
-    public function test_una_ficha_que_ya_tiene_cuenta_no_recibe_otra(): void
+    /**
+     * Se cuenta aparte y no como ficha sin cuenta: al volver a importar el
+     * archivo corregido casi todas la tienen ya, y esas líneas empujarían fuera
+     * del aviso las que sí piden algo al gremio.
+     */
+    public function test_una_ficha_que_ya_tiene_cuenta_no_recibe_otra_y_se_cuenta_aparte(): void
     {
         $ficha = $this->ficha('Bar Merlin', 'nuevo@merlin.test');
         $dueno = User::factory()->create(['email' => 'anterior@merlin.test', 'asociado_id' => $ficha->id]);
@@ -118,7 +123,8 @@ class AltaDeCuentasDeAfiliadosTest extends TestCase
         $resultado = $this->crear([$ficha]);
 
         $this->assertSame(0, User::query()->where('email', 'nuevo@merlin.test')->count());
-        $this->assertSame(['«Bar Merlin»: '.AltaDeCuentasDeAfiliados::YA_TENIA_CUENTA], $resultado->sinCuenta());
+        $this->assertSame(1, $resultado->yaTenianCuenta());
+        $this->assertSame([], $resultado->sinCuenta());
     }
 
     /** @return array<string, array{string}> */
@@ -184,5 +190,41 @@ class AltaDeCuentasDeAfiliadosTest extends TestCase
         $resultado = $this->crear([$this->ficha('Bar Uno', 'uno@bar.test'), $this->ficha('Bar Dos', null)]);
 
         $this->assertSame('1 cuenta creada · 1 ficha sin cuenta.', $resultado->resumen());
+    }
+
+    /**
+     * Cuentas creadas, fichas que ya tenían cuenta y fichas sin cuenta.
+     *
+     * @return array<string, array{int, int, int, string}>
+     */
+    public static function resumenes(): array
+    {
+        return [
+            'todas creadas' => [2, 0, 0, '2 cuentas creadas.'],
+            'una creada' => [1, 0, 0, '1 cuenta creada.'],
+            'ninguna creada y varias sin cuenta' => [0, 0, 2, '0 cuentas creadas · 2 fichas sin cuenta.'],
+            'una que ya tenía cuenta' => [0, 1, 0, '0 cuentas creadas · 1 ficha ya tenía cuenta.'],
+            'la reimportación del archivo corregido' => [1, 35, 2, '1 cuenta creada · 35 fichas ya tenían cuenta · 2 fichas sin cuenta.'],
+        ];
+    }
+
+    #[DataProvider('resumenes')]
+    public function test_el_resumen_nombra_cada_tramo_con_su_numero(int $creadas, int $yaTenian, int $sinCuenta, string $esperado): void
+    {
+        $resultado = new ResultadoDeAltaDeCuentas;
+
+        for ($i = 1; $i <= $creadas; $i++) {
+            $resultado->contarCreada();
+        }
+
+        for ($i = 1; $i <= $yaTenian; $i++) {
+            $resultado->contarYaTenia();
+        }
+
+        for ($i = 1; $i <= $sinCuenta; $i++) {
+            $resultado->agregarSinCuenta("Bar {$i}", AltaDeCuentasDeAfiliados::SIN_CORREO);
+        }
+
+        $this->assertSame($esperado, $resultado->resumen());
     }
 }

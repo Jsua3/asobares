@@ -34,8 +34,6 @@ class AltaDeCuentasDeAfiliados
 
     public const string CORREO_COMPARTIDO = 'el mismo correo está también en';
 
-    public const string YA_TENIA_CUENTA = 'ya tenía cuenta';
-
     public const string CORREO_DEL_EQUIPO = 'el correo es de una cuenta del equipo del gremio';
 
     public const string CORREO_CON_CUENTA = 'el correo ya tiene una cuenta';
@@ -81,7 +79,7 @@ class AltaDeCuentasDeAfiliados
             }
 
             if ($ficha->usuarios()->exists()) {
-                $resultado->agregarSinCuenta($ficha->nombre, self::YA_TENIA_CUENTA);
+                $resultado->contarYaTenia();
 
                 continue;
             }
