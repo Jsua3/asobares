@@ -48,7 +48,11 @@ class SeguridadDeLaCuentaTest extends TestCase
         return $usuario->fresh();
     }
 
-    /** Por la puerta de verdad: el hash solo queda en la sesión si la petición pasa por el middleware. */
+    /**
+     * Por la puerta de verdad: `actingAs` no guarda en la sesión ni el inicio
+     * de sesión ni el hash de la contraseña, y estas pruebas necesitan que los
+     * dos sobrevivan a `forgetGuards()`.
+     */
     private function entrar(User $usuario): void
     {
         $this->post(route('mi-cuenta.entrar.post'), [
@@ -243,5 +247,74 @@ class SeguridadDeLaCuentaTest extends TestCase
             ->assertRedirect(route('mi-cuenta.entrar'));
 
         $this->assertGuest();
+    }
+
+    /**
+     * Solo el POST de entrada, sin seguir la redirección.
+     *
+     * @return array<string, mixed> la sesión tal como quedó
+     */
+    private function entrarSinSegundaPeticion(User $usuario): array
+    {
+        $this->post(route('mi-cuenta.entrar.post'), [
+            'email' => $usuario->email,
+            'password' => self::ACTUAL,
+        ])->assertRedirect(route('mi-cuenta.index'));
+
+        return session()->all();
+    }
+
+    /** Otro navegador: sesión vacía y un guard que vuelve a leer al usuario, como en producción. */
+    private function otraSesion(): void
+    {
+        $this->flushSession();
+        $this->app['auth']->forgetGuards();
+    }
+
+    /**
+     * Quien conoce la genérica entra con el POST y no sigue la redirección.
+     * `AuthenticateSession` no corre para un invitado, así que esa sesión no
+     * guarda el hash con el que entró si nadie más lo hace: lo guardaría en su
+     * siguiente petición con el hash que haya entonces, sobreviviría al cambio
+     * del dueño y encontraría abiertas las secciones con datos de terceros.
+     */
+    public function test_una_sesion_que_solo_hizo_el_post_de_entrada_cae_cuando_el_dueno_la_cambia(): void
+    {
+        $usuario = $this->afiliado();
+        $sesionSinSegundaPeticion = $this->entrarSinSegundaPeticion($usuario);
+
+        $this->otraSesion();
+        $this->entrar($usuario);
+        $this->put(route('mi-cuenta.seguridad.actualizar'), $this->datosValidos())
+            ->assertRedirect(route('mi-cuenta.index'));
+
+        $this->otraSesion();
+        $this->withSession($sesionSinSegundaPeticion)
+            ->get(route('mi-cuenta.aspirantes.index'))
+            ->assertRedirect(route('mi-cuenta.entrar'));
+
+        $this->assertGuest();
+    }
+
+    /**
+     * La contraprueba, en las mismas condiciones salvo el cambio: esa sesión
+     * sigue dentro —la sección la manda a seguridad, no a la puerta—. Si esta
+     * se pusiera roja, la de arriba estaría midiendo el cambio de sesión de la
+     * prueba y no la contraseña.
+     */
+    public function test_una_sesion_que_solo_hizo_el_post_de_entrada_sigue_dentro_si_nadie_cambia_la_contrasena(): void
+    {
+        $usuario = $this->afiliado();
+        $sesionSinSegundaPeticion = $this->entrarSinSegundaPeticion($usuario);
+
+        $this->otraSesion();
+        $this->entrar($usuario);
+
+        $this->otraSesion();
+        $this->withSession($sesionSinSegundaPeticion)
+            ->get(route('mi-cuenta.aspirantes.index'))
+            ->assertRedirect(route('mi-cuenta.seguridad'));
+
+        $this->assertAuthenticatedAs($usuario->fresh());
     }
 }

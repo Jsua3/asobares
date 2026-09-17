@@ -16,12 +16,14 @@ use App\Observers\ConfirmacionDeInscripcionObserver;
 use App\Observers\FlujoDeAprobacionObserver;
 use App\Observers\LimpiezaDeArchivosObserver;
 use App\Panel\ColaDePendientes;
+use BadMethodCallException;
 use Filament\Resources\Resource;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -119,6 +121,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->registrarReglaDeYoutube();
         $this->registrarBitacoraDeSesiones();
+        $this->registrarHashDeLaContrasenaAlEntrar();
         $this->registrarLimitesDePeticiones();
 
         // Filament capitaliza cada palabra de los títulos, que es convención
@@ -205,6 +208,43 @@ class AppServiceProvider extends ServiceProvider
                 ->causedBy($evento->user)
                 ->event('deleted')
                 ->log('cerró sesión');
+        });
+    }
+
+    /**
+     * Al entrar, la sesión guarda el hash de la contraseña con la que se entró,
+     * en la clave (`password_hash_{guard}`) y el formato que compara
+     * `AuthenticateSession` en cada petición.
+     *
+     * El middleware también lo guarda, pero sale sin hacer nada cuando no hay
+     * usuario, y quien envía el formulario de entrada todavía no lo es: lo
+     * guardaría en la siguiente petición de la sesión, con el hash que haya
+     * entonces. Una sesión que entra y no hace otra petición sobreviviría así
+     * a un cambio de contraseña posterior; con la genérica de la importación
+     * basta con no seguir la redirección y esperar a que el dueño la cambie.
+     * Escuchar `Login` cubre las dos puertas: /mi-cuenta y el panel, cuyo
+     * formulario entra en una petición de Livewire que también lleva sesión.
+     *
+     * Si el guard no firma el hash (`hashPasswordForCookie`), se guarda tal
+     * cual: es el respaldo con el que el middleware lo compara.
+     */
+    private function registrarHashDeLaContrasenaAlEntrar(): void
+    {
+        Event::listen(Login::class, function (Login $evento): void {
+            $peticion = request();
+
+            if (! $peticion->hasSession()) {
+                return;
+            }
+
+            $hash = $evento->user->getAuthPassword();
+
+            try {
+                $hash = Auth::guard($evento->guard)->hashPasswordForCookie($hash);
+            } catch (BadMethodCallException) {
+            }
+
+            $peticion->session()->put('password_hash_'.$evento->guard, $hash);
         });
     }
 

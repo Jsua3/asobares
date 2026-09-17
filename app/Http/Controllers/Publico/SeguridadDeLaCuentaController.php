@@ -24,12 +24,13 @@ use Illuminate\Validation\Rules\Password;
  * - **Cada regla lleva su mensaje escrito.** No hay `lang/`, y la regla
  *   Password falla con `password.symbols` y compañía: sin la clave exacta se
  *   imprime la clave cruda.
- * - **Las demás sesiones se cierran solas.** `AuthenticateSession` (grupo
- *   `web`) guarda en cada sesión el hash con el que se entró y lo compara en
+ * - **Las demás sesiones se cierran solas.** Cada sesión guarda al entrar el
+ *   hash de la contraseña con la que entró (el oyente de `Login` en
+ *   `AppServiceProvider`) y `AuthenticateSession` (grupo `web`) lo compara en
  *   cada petición: al cambiarlo, las sesiones abiertas con la contraseña vieja
  *   caen en su siguiente petición, y la de quien la cambió guarda el hash
  *   nuevo al terminar esta. Quien entró con la genérica antes que el dueño no
- *   sobrevive al cambio.
+ *   sobrevive al cambio, aunque no haya hecho más que el POST de entrada.
  */
 class SeguridadDeLaCuentaController
 {

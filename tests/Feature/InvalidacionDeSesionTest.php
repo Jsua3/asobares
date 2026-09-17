@@ -51,9 +51,9 @@ class InvalidacionDeSesionTest extends TestCase
     }
 
     /**
-     * Entra por la puerta de verdad, no con `actingAs`: el hash sólo queda
-     * guardado en la sesión cuando la petición pasa por el middleware con el
-     * usuario ya autenticado.
+     * Entra por la puerta de verdad, no con `actingAs`: `actingAs` no guarda en
+     * la sesión ni el inicio de sesión ni el hash de la contraseña, y la prueba
+     * necesita que los dos sobrevivan a `forgetGuards()`.
      */
     private function entrar(User $socio): void
     {
