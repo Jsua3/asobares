@@ -3,6 +3,7 @@
 use App\Http\Middleware\AsegurarRolAsociado;
 use App\Http\Middleware\CabecerasDeSeguridad;
 use App\Http\Middleware\ContarVisitaDelSitio;
+use App\Http\Middleware\ExigirContrasenaPropia;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'rol.asociado' => AsegurarRolAsociado::class,
+            'contrasena.propia' => ExigirContrasenaPropia::class,
         ]);
 
         // Global, no sólo en `web`: también cubre las descargas y cualquier

@@ -191,33 +191,41 @@ Route::middleware(['auth', 'rol.asociado'])->group(function (): void {
         ->middleware('throttle:mi-cuenta-seguridad')
         ->name('mi-cuenta.seguridad.actualizar');
 
-    // Beneficios detrás de la sesión: los datos de contacto de proveedores,
-    // artistas y aspirantes son la contraprestación de la cuota. La cara
-    // pública de /proveedores existe, pero sin un solo contacto.
-    //
-    // Los artistas, con una salvedad: su ficha pública NO se vacía. El
-    // escaparate --nombre, foto, género, video-- es lo que el artista busca al
-    // inscribirse; lo que se muda aquí es solo el contacto.
-    Route::get('/mi-cuenta/proveedores', [MisProveedoresController::class, 'index'])->name('mi-cuenta.proveedores.index');
-    Route::get('/mi-cuenta/artistas', [MisArtistasController::class, 'index'])->name('mi-cuenta.artistas.index');
-    Route::get('/mi-cuenta/aspirantes', [MisAspirantesController::class, 'index'])->name('mi-cuenta.aspirantes.index');
+    // Las secciones con datos de otras personas: contactos de proveedores y
+    // artistas, el banco de talento y las postulaciones de cada vacante.
+    // Mientras la contraseña sea provisional, `contrasena.propia` las manda a
+    // /mi-cuenta/seguridad (ver ExigirContrasenaPropia). La bolsa entera va
+    // dentro porque las postulaciones se ven en cada vacante y cerrar una
+    // vacante no pasa por moderación.
+    Route::middleware('contrasena.propia')->group(function (): void {
+        // Beneficios detrás de la sesión: los datos de contacto de proveedores,
+        // artistas y aspirantes son la contraprestación de la cuota. La cara
+        // pública de /proveedores existe, pero sin un solo contacto.
+        //
+        // Los artistas, con una salvedad: su ficha pública NO se vacía. El
+        // escaparate --nombre, foto, género, video-- es lo que el artista busca al
+        // inscribirse; lo que se muda aquí es solo el contacto.
+        Route::get('/mi-cuenta/proveedores', [MisProveedoresController::class, 'index'])->name('mi-cuenta.proveedores.index');
+        Route::get('/mi-cuenta/artistas', [MisArtistasController::class, 'index'])->name('mi-cuenta.artistas.index');
+        Route::get('/mi-cuenta/aspirantes', [MisAspirantesController::class, 'index'])->name('mi-cuenta.aspirantes.index');
 
-    // Bolsa de empleo: el establecimiento publica y corrige lo suyo.
-    Route::get('/mi-cuenta/vacantes', [MisVacantesController::class, 'index'])->name('mi-cuenta.vacantes.index');
-    Route::get('/mi-cuenta/vacantes/crear', [MisVacantesController::class, 'crear'])->name('mi-cuenta.vacantes.crear');
-    Route::post('/mi-cuenta/vacantes', [MisVacantesController::class, 'store'])
-        ->middleware('throttle:mi-cuenta-vacantes-crear')
-        ->name('mi-cuenta.vacantes.store');
-    Route::get('/mi-cuenta/vacantes/{vacante}/editar', [MisVacantesController::class, 'editar'])->name('mi-cuenta.vacantes.editar');
-    Route::put('/mi-cuenta/vacantes/{vacante}', [MisVacantesController::class, 'update'])
-        ->middleware('throttle:mi-cuenta-vacantes-editar')
-        ->name('mi-cuenta.vacantes.update');
-    Route::post('/mi-cuenta/vacantes/{vacante}/cerrar', [MisVacantesController::class, 'cerrar'])->name('mi-cuenta.vacantes.cerrar');
-    Route::post('/mi-cuenta/vacantes/{vacante}/reabrir', [MisVacantesController::class, 'reabrir'])->name('mi-cuenta.vacantes.reabrir');
-    Route::get('/mi-cuenta/vacantes/{vacante}', [MisVacantesController::class, 'show'])->name('mi-cuenta.vacantes.show');
-    Route::patch('/mi-cuenta/postulaciones/{postulacion}', [MisVacantesController::class, 'gestionarPostulacion'])
-        ->middleware('throttle:mi-cuenta-postulaciones')
-        ->name('mi-cuenta.postulaciones.gestionar');
+        // Bolsa de empleo: el establecimiento publica y corrige lo suyo.
+        Route::get('/mi-cuenta/vacantes', [MisVacantesController::class, 'index'])->name('mi-cuenta.vacantes.index');
+        Route::get('/mi-cuenta/vacantes/crear', [MisVacantesController::class, 'crear'])->name('mi-cuenta.vacantes.crear');
+        Route::post('/mi-cuenta/vacantes', [MisVacantesController::class, 'store'])
+            ->middleware('throttle:mi-cuenta-vacantes-crear')
+            ->name('mi-cuenta.vacantes.store');
+        Route::get('/mi-cuenta/vacantes/{vacante}/editar', [MisVacantesController::class, 'editar'])->name('mi-cuenta.vacantes.editar');
+        Route::put('/mi-cuenta/vacantes/{vacante}', [MisVacantesController::class, 'update'])
+            ->middleware('throttle:mi-cuenta-vacantes-editar')
+            ->name('mi-cuenta.vacantes.update');
+        Route::post('/mi-cuenta/vacantes/{vacante}/cerrar', [MisVacantesController::class, 'cerrar'])->name('mi-cuenta.vacantes.cerrar');
+        Route::post('/mi-cuenta/vacantes/{vacante}/reabrir', [MisVacantesController::class, 'reabrir'])->name('mi-cuenta.vacantes.reabrir');
+        Route::get('/mi-cuenta/vacantes/{vacante}', [MisVacantesController::class, 'show'])->name('mi-cuenta.vacantes.show');
+        Route::patch('/mi-cuenta/postulaciones/{postulacion}', [MisVacantesController::class, 'gestionarPostulacion'])
+            ->middleware('throttle:mi-cuenta-postulaciones')
+            ->name('mi-cuenta.postulaciones.gestionar');
+    });
 });
 
 /*
