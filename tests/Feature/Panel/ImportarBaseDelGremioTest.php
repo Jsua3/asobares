@@ -11,8 +11,10 @@ use App\Models\Municipio;
 use App\Models\User;
 use App\Services\ImportacionDeLaBaseDelGremio;
 use Database\Seeders\RolYPermisoSeeder;
+use Filament\Notifications\Livewire\Notifications as NotificacionesDelPanel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Exceptions;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 use Livewire\Livewire;
 use OpenSpout\Common\Entity\Row;
@@ -136,6 +138,45 @@ class ImportarBaseDelGremioTest extends TestCase
         $this->assertSame(2, User::role(User::ROL_ASOCIADO)->where('contrasena_provisional', true)->count());
     }
 
+    /**
+     * «Bar Dos» no trae correo: la ficha entra igual, pero sin cuenta. El
+     * aviso tiene que decir cuál ficha se quedó sin cuenta y por qué
+     * (spec §4.2), no solo cuántas cuentas se crearon.
+     */
+    public function test_el_resumen_dice_cada_ficha_sin_cuenta_con_su_motivo(): void
+    {
+        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(ListAsociados::class)
+            ->callAction('importar', data: [
+                'archivo' => $this->subida([$this->fila('Bar Uno', 'uno@bar.test'), $this->fila('Bar Dos', '')]),
+                'categoria' => 'Bar',
+                'crear_cuentas' => true,
+                'contrasena_generica' => self::GENERICA,
+                'contrasena_generica_confirmation' => self::GENERICA,
+            ])
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(2, Asociado::query()->count());
+        $this->assertSame(1, User::role(User::ROL_ASOCIADO)->count());
+
+        // No se usa ->assertNotified(): hace falta leer título Y cuerpo de la
+        // notificación real, no solo confirmar que hubo una, y ese método
+        // vacía la sesión con el primer vistazo. Este es el mismo mecanismo
+        // que usa Notification::assertNotified() por dentro.
+        $panelDeNotificaciones = new NotificacionesDelPanel;
+        $panelDeNotificaciones->mount();
+        $enviada = $panelDeNotificaciones->notifications->first();
+
+        $this->assertNotNull($enviada, 'Se esperaba una notificación.');
+        $this->assertSame('warning', $enviada->getStatus());
+        $this->assertSame(
+            'Fichas: 2 creados · 0 actualizados. Cuentas: 1 cuenta creada · 1 ficha sin cuenta.',
+            $enviada->getTitle(),
+        );
+        $this->assertStringContainsString('«Bar Dos»: sin correo', (string) $enviada->getBody());
+    }
+
     public function test_sin_marcar_la_casilla_no_crea_cuentas(): void
     {
         $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
@@ -229,6 +270,8 @@ class ImportarBaseDelGremioTest extends TestCase
 
         $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
 
+        Exceptions::fake();
+
         Livewire::test(ListAsociados::class)
             ->callAction('importar', data: [
                 'archivo' => $this->subida([$this->fila('Bar Uno', 'uno@bar.test')]),
@@ -236,6 +279,7 @@ class ImportarBaseDelGremioTest extends TestCase
             ])
             ->assertNotified('La importación no se aplicó');
 
+        Exceptions::assertReported(RuntimeException::class);
         $this->assertSame([], FileUploadConfiguration::storage()->allFiles(FileUploadConfiguration::directory()));
     }
 }
