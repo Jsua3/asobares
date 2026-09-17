@@ -106,7 +106,7 @@ class EventosLenguajeUnicoTest extends TestCase
     // --- A. La superficie ---
 
     #[DataProvider('superficies')]
-    public function test_ninguna_superficie_pulsable_es_recta(string $selector): void
+    public function test_ninguna_superficie_pulsable_es_recta(string $selector, string $encogimiento): void
     {
         $radio = $this->declaracionesDe($selector)['border-radius'] ?? null;
 
@@ -325,7 +325,7 @@ class EventosLenguajeUnicoTest extends TestCase
      * la regla de ese descendiente.
      */
     #[DataProvider('superficies')]
-    public function test_cada_superficie_funde_con_el_reloj_de_la_casa(string $selector): void
+    public function test_cada_superficie_funde_con_el_reloj_de_la_casa(string $selector, string $encogimiento): void
     {
         $reloj = $this->relojDe($selector);
 

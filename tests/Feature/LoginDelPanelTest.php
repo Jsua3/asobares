@@ -10,6 +10,7 @@ use Filament\Auth\MultiFactor\Email\Contracts\HasEmailAuthentication;
 use Filament\Auth\Pages\Login;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -65,6 +66,44 @@ class LoginDelPanelTest extends TestCase
             ->call('authenticate')
             ->assertHasNoFormErrors();
 
+        $this->assertAuthenticatedAs($direccion);
+    }
+
+    public function test_la_sesion_del_panel_sigue_viva_despues_del_login_y_de_navegar(): void
+    {
+        $direccion = $this->crearUsuario(User::ROL_SUPER_ADMIN);
+
+        $pagina = $this->get('/admin/login')->assertOk();
+        $this->assertSame(1, preg_match('/wire:snapshot="([^"]+)"/', $pagina->getContent(), $coincidencias));
+
+        $login = $this->withHeader('X-Livewire', 'true')
+            ->postJson('/livewire/update', [
+                'components' => [[
+                    'snapshot' => html_entity_decode($coincidencias[1], ENT_QUOTES | ENT_HTML5),
+                    'updates' => [
+                        'data' => [
+                            'email' => $direccion->email,
+                            'password' => 'Asobares2026*',
+                            'remember' => false,
+                        ],
+                    ],
+                    'calls' => [['method' => 'authenticate', 'params' => []]],
+                ]],
+            ])
+            ->assertOk();
+
+        $cookie = collect($login->headers->getCookies())
+            ->first(fn ($cookie): bool => $cookie->getName() === config('session.cookie'));
+        $this->assertNotNull($cookie);
+        $this->withUnencryptedCookie($cookie->getName(), $cookie->getValue());
+
+        $this->assertAuthenticatedAs($direccion);
+        $this->assertTrue(session()->has('password_hash_web'));
+        Auth::forgetGuards();
+        $this->get('/admin')->assertRedirect(Filament::getPanel('admin')->getSetUpRequiredMultiFactorAuthenticationUrl());
+        $this->assertAuthenticatedAs($direccion);
+        Auth::forgetGuards();
+        $this->get('/admin/profile')->assertRedirect(Filament::getPanel('admin')->getSetUpRequiredMultiFactorAuthenticationUrl());
         $this->assertAuthenticatedAs($direccion);
     }
 
