@@ -9,16 +9,17 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
- * Que las tres purgas de datos personales sigan teniendo quien las dispare.
+ * Que las purgas de datos personales sigan teniendo quien las dispare.
  *
  * Las purgas están escritas, configuradas y probadas --`DepuracionDeBolsasTest`,
- * `DepuracionDeMensajesTest` y `DepuracionDeInscripcionesTest` verifican que
- * BORRAN bien-- pero esas pruebas no miran si alguien las LLAMA. Borrar las tres
- * líneas de `routes/console.php` dejaría la suite entera en verde y el sitio
- * incumpliendo en silencio la Ley 1581 y lo que promete `/politica-de-datos`:
- * «Pasado cada plazo, el borrado es automático».
+ * `DepuracionDeMensajesTest`, `DepuracionDeInscripcionesTest` y
+ * `DepuracionDeSubidasTest` verifican que BORRAN bien-- pero esas pruebas no
+ * miran si alguien las LLAMA. Borrar sus líneas de `routes/console.php` dejaría
+ * la suite entera en verde y el sitio incumpliendo en silencio la Ley 1581 y lo
+ * que promete `/politica-de-datos`: «Pasado cada plazo, el borrado es
+ * automático».
  *
- * Esta clase es esa guarda. Rotura: comentar las tres tareas del calendario.
+ * Esta clase es esa guarda. Rotura: comentar las tareas del calendario.
  *
  * ⚠️ Lo que esta prueba NO puede comprobar, y hay que verificar a mano: que el
  * entorno de producción ejecute `schedule:run` cada minuto. En Laravel Cloud eso
@@ -28,7 +29,7 @@ use Tests\TestCase;
 class CalendarioDeTareasTest extends TestCase
 {
     /**
-     * Las tres purgas, con el plazo que cada una respeta.
+     * Las purgas de datos personales.
      *
      * @return array<string, array{0: string}>
      */
@@ -38,6 +39,7 @@ class CalendarioDeTareasTest extends TestCase
             'bolsa de empleo (postulaciones y banco de talento)' => ['bolsas:depurar'],
             'mensajes de contacto y PQR' => ['mensajes:depurar'],
             'inscripciones a eventos' => ['inscripciones:depurar'],
+            'subidas temporales del panel' => ['subidas:depurar'],
         ];
     }
 
@@ -70,6 +72,22 @@ class CalendarioDeTareasTest extends TestCase
             "La purga «{$comando}» ya no corre todos los días: «{$tarea->expression}». "
             .'Los plazos de retención se cuentan en meses y se comprueban a diario.'
         );
+    }
+
+    /**
+     * Una subida que nadie procesó lleva la base del gremio o la cartera
+     * entera, y la purga borra lo de más de una hora: una vez al día la dejaría
+     * hasta 25 horas en el disco. Cada hora, nada pasa de dos.
+     */
+    public function test_las_subidas_temporales_se_depuran_cada_hora(): void
+    {
+        $tarea = $this->tareas()->first(fn (Event $t): bool => str_contains((string) $t->command, 'subidas:depurar'));
+
+        $this->assertNotNull($tarea, 'La purga «subidas:depurar» no está programada.');
+
+        [, $hora] = explode(' ', $tarea->expression);
+
+        $this->assertSame('*', $hora, "La purga «subidas:depurar» ya no corre cada hora: «{$tarea->expression}».");
     }
 
     /** @return Collection<int, Event> */

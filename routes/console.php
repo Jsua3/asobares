@@ -11,3 +11,7 @@ Schedule::command('mensajes:depurar')->dailyAt('03:45');
 // Las inscripciones a eventos caducan cuando el evento pasa; el registro
 // contable del pago sobrevive (transacciones.inscripcion_id es nullOnDelete).
 Schedule::command('inscripciones:depurar')->dailyAt('03:50');
+
+// Lo que se subió al panel y ninguna acción procesó —la base del gremio, la
+// cartera— no espera a la purga de 24 horas de Livewire.
+Schedule::command('subidas:depurar')->hourly();

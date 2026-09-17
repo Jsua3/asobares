@@ -282,4 +282,32 @@ class ImportarBaseDelGremioTest extends TestCase
         Exceptions::assertReported(RuntimeException::class);
         $this->assertSame([], FileUploadConfiguration::storage()->allFiles(FileUploadConfiguration::directory()));
     }
+
+    /**
+     * Con un error de validación la acción no corre y su `finally` tampoco: el
+     * archivo y el `.json` que Livewire deja a su lado se quedan en el temporal,
+     * igual que si se cancela el modal. Los recoge la purga de cada hora.
+     */
+    public function test_lo_que_deja_un_error_de_validacion_lo_recoge_la_purga_de_subidas(): void
+    {
+        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(ListAsociados::class)
+            ->callAction('importar', data: [
+                'archivo' => $this->subida([$this->fila('Bar Uno', 'uno@bar.test')]),
+                'categoria' => 'Bar',
+                'crear_cuentas' => true,
+                'contrasena_generica' => 'CordilleraQuindio2026',
+                'contrasena_generica_confirmation' => 'CordilleraQuindio2026',
+            ])
+            ->assertHasFormErrors(['contrasena_generica']);
+
+        $temporal = FileUploadConfiguration::storage();
+        $this->assertNotSame([], $temporal->allFiles(FileUploadConfiguration::directory()));
+
+        $this->travel(61)->minutes();
+        $this->artisan('subidas:depurar')->assertSuccessful();
+
+        $this->assertSame([], $temporal->allFiles(FileUploadConfiguration::directory()));
+    }
 }
