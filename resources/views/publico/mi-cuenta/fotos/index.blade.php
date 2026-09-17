@@ -15,6 +15,8 @@
             </p>
         </header>
 
+        <x-publico.mi-cuenta.aviso-contrasena class="mt-6" />
+
         @if (session('exito'))
             <x-publico.alerta class="mt-8">{{ session('exito') }}</x-publico.alerta>
         @endif

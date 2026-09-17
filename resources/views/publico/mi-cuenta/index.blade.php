@@ -16,6 +16,8 @@
             </p>
         </header>
 
+        <x-publico.mi-cuenta.aviso-contrasena class="mt-6" />
+
         <nav class="mt-6 flex flex-wrap gap-3">
             <x-publico.boton variante="contorno" :href="route('mi-cuenta.vacantes.index')">
                 Mis vacantes
@@ -37,6 +39,9 @@
             <x-publico.boton variante="contorno" :href="route('mi-cuenta.aspirantes.index')">
                 Banco de talento
             </x-publico.boton>
+            <x-publico.boton variante="contorno" :href="route('mi-cuenta.seguridad')">
+                Seguridad
+            </x-publico.boton>
         </nav>
 
         @if (session('exito'))
@@ -45,6 +50,10 @@
 
         @if (session('error'))
             <x-publico.alerta tipo="error" class="mt-8">{{ session('error') }}</x-publico.alerta>
+        @endif
+
+        @if (session('aviso'))
+            <x-publico.alerta tipo="aviso" class="mt-8">{{ session('aviso') }}</x-publico.alerta>
         @endif
 
         {{-- Estado de cartera --}}
