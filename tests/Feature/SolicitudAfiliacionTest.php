@@ -384,6 +384,7 @@ class SolicitudAfiliacionTest extends TestCase
         $this->assertSame('Sandra Ríos', $asociado->representante);
         $this->assertSame($asociado->id, $usuario->asociado_id);
         $this->assertTrue($usuario->hasRole(User::ROL_ASOCIADO));
+        $this->assertTrue($usuario->contrasena_provisional);
         $this->assertSame(0, Cartera::count());
         $this->assertSame(0, Transaccion::count());
 

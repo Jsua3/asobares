@@ -36,6 +36,9 @@ class AprobarSolicitudAfiliacion
                 'email_verified_at' => now(),
             ]);
 
+            $usuario->contrasena_provisional = true;
+            $usuario->save();
+
             $usuario->assignRole(User::ROL_ASOCIADO);
 
             $solicitud->update([
