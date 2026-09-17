@@ -21,6 +21,7 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Livewire\Livewire;
+use Livewire\Mechanisms\ComponentRegistry;
 use Tests\Support\MideContraste;
 use Tests\TestCase;
 
@@ -238,17 +239,20 @@ class ObservatorioTest extends TestCase
      * dos instancias Livewire: el doble de consultas, y un directivo vería
      * cada gráfica repetida.
      *
-     * Se cuenta el atributo `wire:name`, que Livewire escribe **una vez por
-     * instancia montada** y con el nombre de clase completo. El alias con
-     * puntos —`app.filament.widgets.observatorio.…`— no sirve para contar:
-     * no aparece en el marcado. Por eso la lista son clases y no cadenas: si
-     * alguien renombra un widget, la guardia lo sigue.
+     * Livewire (v4) ya no escribe `wire:name` con el FQCN. El nombre del
+     * componente vive una vez por instancia dentro de `wire:snapshot`, en
+     * `memo.name`, como alias con puntos (`app.filament.widgets.observatorio.…`).
+     * Se cuenta esa marca tras decodificar entidades HTML: si alguien
+     * renombra la clase, el registro de Livewire sigue dando el alias correcto.
      */
     public function test_cada_widget_del_observatorio_se_monta_una_sola_vez(): void
     {
         $this->actingAs($this->usuarioCon(User::ROL_SUPER_ADMIN));
 
-        $html = $this->get(Observatorio::getUrl())->getContent();
+        $html = html_entity_decode(
+            $this->get(Observatorio::getUrl())->getContent(),
+            ENT_QUOTES
+        );
 
         foreach ([
             PresenciaPorMunicipio::class,
@@ -258,12 +262,13 @@ class ObservatorioTest extends TestCase
             DemandaLaboralPorArea::class,
             OfertaContraDemanda::class,
         ] as $widget) {
-            $marca = 'wire:name="'.$widget.'"';
+            $marca = '"name":"'.app(ComponentRegistry::class)->getName($widget).'"';
+            $veces = substr_count($html, $marca);
 
             $this->assertSame(
                 1,
-                substr_count($html, $marca),
-                "{$widget} aparece ".substr_count($html, $marca).' veces en el HTML: se está montando más de una instancia.'
+                $veces,
+                "{$widget} aparece {$veces} veces en el HTML: se está montando más de una instancia."
             );
         }
     }
