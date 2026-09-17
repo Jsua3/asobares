@@ -101,6 +101,10 @@ class CrearUsuarioDelPanel extends Command
 
         $usuario->syncRoles([$rol]);
 
+        // La contraseña la escribió quien corre el comando, no el titular: si
+        // la cuenta es de un afiliado, nace provisional.
+        $usuario->marcarContrasenaProvisionalSiEsAfiliado();
+
         $this->info(($existia ? 'Actualizada' : 'Creada')." la cuenta {$email} con el rol {$rol}.");
 
         if ($rol === User::ROL_ASOCIADO) {
@@ -179,10 +183,12 @@ class CrearUsuarioDelPanel extends Command
             [
                 'clave.required' => 'Hace falta una contraseña.',
                 'clave.min' => 'La contraseña necesita al menos 12 caracteres.',
-                'clave.mixed' => 'La contraseña necesita al menos una mayúscula y una minúscula.',
-                'clave.letters' => 'La contraseña necesita al menos una letra.',
-                'clave.numbers' => 'La contraseña necesita al menos un número.',
-                'clave.symbols' => 'La contraseña necesita al menos un símbolo.',
+                // La regla Password falla con `password.mixed` y compañía: la
+                // clave del mensaje es `clave.password.mixed`, no `clave.mixed`.
+                'clave.password.mixed' => 'La contraseña necesita al menos una mayúscula y una minúscula.',
+                'clave.password.letters' => 'La contraseña necesita al menos una letra.',
+                'clave.password.numbers' => 'La contraseña necesita al menos un número.',
+                'clave.password.symbols' => 'La contraseña necesita al menos un símbolo.',
             ],
         )->validate();
     }

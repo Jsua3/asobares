@@ -191,4 +191,48 @@ class CrearUsuarioDelPanelTest extends TestCase
             'La contraseña volvió a la línea de órdenes: ahí la lee el historial del shell.'
         );
     }
+
+    public function test_una_cuenta_de_afiliado_nace_con_la_contrasena_provisional(): void
+    {
+        $this->artisan('asobares:crear-usuario', ['email' => 'socio@asobaresquindio.test', '--rol' => User::ROL_ASOCIADO])
+            ->expectsQuestion('Contraseña para la cuenta', self::CLAVE_BUENA)
+            ->assertSuccessful();
+
+        $this->assertTrue(User::query()->where('email', 'socio@asobaresquindio.test')->firstOrFail()->contrasena_provisional);
+    }
+
+    public function test_una_cuenta_del_equipo_no_queda_provisional(): void
+    {
+        $this->artisan('asobares:crear-usuario', ['email' => 'direccion@asobaresquindio.test'])
+            ->expectsQuestion('Contraseña para la cuenta', self::CLAVE_BUENA)
+            ->assertSuccessful();
+
+        $this->assertFalse(User::query()->where('email', 'direccion@asobaresquindio.test')->firstOrFail()->contrasena_provisional);
+    }
+
+    /** @return array<string, array{string, string}> */
+    public static function reglasConSuMensaje(): array
+    {
+        return [
+            'sin símbolos' => ['CordilleraQuindio2026', 'al menos un símbolo'],
+            'sin mayúsculas' => ['cordillera-quindio-2026!', 'una mayúscula y una minúscula'],
+            'sin números' => ['Cordillera-Quindio!', 'al menos un número'],
+        ];
+    }
+
+    /**
+     * La regla Password falla con `password.symbols` y compañía. Un mensaje
+     * guardado como `clave.symbols` no se usa nunca y el comando imprime la
+     * clave cruda, justo con la contraseña más probable de un apuro: una sin
+     * símbolo.
+     */
+    #[DataProvider('reglasConSuMensaje')]
+    public function test_cada_regla_incumplida_se_explica_en_espanol(string $clave, string $mensaje): void
+    {
+        $this->artisan('asobares:crear-usuario', ['email' => 'debil@asobaresquindio.test'])
+            ->expectsQuestion('Contraseña para la cuenta', $clave)
+            ->expectsOutputToContain($mensaje)
+            ->doesntExpectOutputToContain('validation.')
+            ->assertFailed();
+    }
 }
