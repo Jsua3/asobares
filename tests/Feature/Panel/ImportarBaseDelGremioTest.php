@@ -17,6 +17,7 @@ use DOMXPath;
 use Filament\Notifications\Livewire\Notifications as NotificacionesDelPanel;
 use Filament\Notifications\Notification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Testing\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Str;
@@ -27,6 +28,7 @@ use OpenSpout\Writer\XLSX\Writer;
 use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
 use Tests\TestCase;
+use ZipArchive;
 
 /**
  * La acción del panel con la que la dirección carga la base del gremio en
@@ -40,8 +42,12 @@ class ImportarBaseDelGremioTest extends TestCase
 
     private const string GENERICA = 'Provisional-Quindio-2026!';
 
-    /** Ruta del estado del formulario de la acción montada, en el MessageBag de Livewire. */
+    /** Rutas del estado del formulario de la acción montada, en el MessageBag de Livewire. */
     private const string CAMPO_CONTRASENA = 'mountedActions.0.data.contrasena_generica';
+
+    private const string CAMPO_ARCHIVO = 'mountedActions.0.data.archivo';
+
+    private const string CAMPO_CATEGORIA = 'mountedActions.0.data.categoria';
 
     private string $archivo;
 
@@ -78,7 +84,7 @@ class ImportarBaseDelGremioTest extends TestCase
     }
 
     /** @param  list<list<string>>  $filas */
-    private function subida(array $filas): UploadedFile
+    private function subida(array $filas): File
     {
         $escritor = new Writer;
         $escritor->openToFile($this->archivo);
@@ -457,15 +463,22 @@ class ImportarBaseDelGremioTest extends TestCase
         $this->assertSame([], FileUploadConfiguration::storage()->allFiles(FileUploadConfiguration::directory()));
     }
 
-    public function test_si_la_importacion_revienta_lo_dice_y_borra_el_archivo(): void
+    /**
+     * El mensaje de una excepción de la base lleva los valores del SQL —correos,
+     * nombres, el hash de la genérica— y en producción el registro sale por
+     * stderr: lo que se reporta dice dónde falló, no con qué datos.
+     */
+    public function test_si_la_importacion_revienta_lo_dice_borra_el_archivo_y_reporta_sin_datos_de_la_hoja(): void
     {
-        $this->app->instance(ImportacionDeLaBaseDelGremio::class, new class extends ImportacionDeLaBaseDelGremio
+        $falla = new RuntimeException('SQLSTATE[23505]: Key (email)=(duena@merlin.test) already exists.', 23505);
+
+        $this->app->instance(ImportacionDeLaBaseDelGremio::class, new class($falla) extends ImportacionDeLaBaseDelGremio
         {
-            public function __construct() {}
+            public function __construct(private RuntimeException $falla) {}
 
             public function importar(string $ruta, string $categoriaPorDefecto, ?string $contrasenaGenerica): array
             {
-                throw new RuntimeException('Falla simulada');
+                throw $this->falla;
             }
         });
 
@@ -480,8 +493,103 @@ class ImportarBaseDelGremioTest extends TestCase
             ])
             ->assertNotified('La importación no se aplicó');
 
-        Exceptions::assertReported(RuntimeException::class);
+        Exceptions::assertReportedCount(1);
+        Exceptions::assertReported(fn (RuntimeException $reportada): bool => ! str_contains($reportada->getMessage(), 'duena@merlin.test')
+            && $reportada->getPrevious() === null
+            && str_contains($reportada->getMessage(), RuntimeException::class)
+            && str_contains($reportada->getMessage(), '23505')
+            && str_contains($reportada->getMessage(), $falla->getFile().':'.$falla->getLine()));
         $this->assertSame([], FileUploadConfiguration::storage()->allFiles(FileUploadConfiguration::directory()));
+    }
+
+    /**
+     * Sin `lang/`, una regla sin mensaje propio pinta su clave cruda
+     * (`validation.required`) en el modal.
+     */
+    public function test_sin_archivo_ni_categoria_el_modal_lo_dice_en_espanol(): void
+    {
+        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
+
+        $componente = Livewire::test(ListAsociados::class)
+            ->callAction('importar', data: [])
+            ->assertHasFormErrors(['archivo', 'categoria']);
+
+        $this->assertContains('Sube el archivo de la base del gremio.', $componente->errors()->get(self::CAMPO_ARCHIVO));
+        $this->assertContains('Elige la categoría para las filas que no traen una.', $componente->errors()->get(self::CAMPO_CATEGORIA));
+    }
+
+    /**
+     * Nombre, kilobytes y tipo que se reporta del archivo, y el mensaje.
+     *
+     * @return array<string, array{string, int, string, string}>
+     */
+    public static function archivosQueNoSirven(): array
+    {
+        return [
+            'no es una hoja' => ['base.pdf', 10, 'application/pdf', 'El archivo tiene que ser una hoja de Excel (.xlsx).'],
+            'pesa más de 4 MB' => ['base.xlsx', 4097, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'El archivo pesa más de 4 MB.'],
+        ];
+    }
+
+    #[DataProvider('archivosQueNoSirven')]
+    public function test_un_archivo_que_no_sirve_se_explica_en_espanol(string $nombre, int $kilobytes, string $tipo, string $mensaje): void
+    {
+        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
+
+        $componente = Livewire::test(ListAsociados::class)
+            ->callAction('importar', data: [
+                'archivo' => UploadedFile::fake()->create($nombre, $kilobytes, $tipo),
+                'categoria' => 'Bar',
+            ])
+            ->assertHasFormErrors(['archivo']);
+
+        $this->assertContains($mensaje, $componente->errors()->get(self::CAMPO_ARCHIVO));
+        $this->assertSame(0, Asociado::query()->count());
+    }
+
+    /**
+     * Fuera de las pruebas el tipo se lee del contenido, y un .xlsx es un zip:
+     * una copia guardada con otra herramienta puede leerse como
+     * `application/zip`, y no por eso deja de ser la hoja.
+     */
+    public function test_una_hoja_que_se_lee_como_zip_tambien_entra(): void
+    {
+        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(ListAsociados::class)
+            ->callAction('importar', data: [
+                'archivo' => $this->subida([$this->fila('Bar Uno', 'uno@bar.test')])->mimeType('application/zip'),
+                'categoria' => 'Bar',
+            ])
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(1, Asociado::query()->count());
+    }
+
+    /** Un zip que no es una hoja pasa el tipo, pero el importador lo dice y no crea nada. */
+    public function test_un_zip_que_no_es_una_hoja_lo_reporta_el_importador(): void
+    {
+        $zip = new ZipArchive;
+        $zip->open($this->archivo, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+        $zip->addFromString('notas.txt', 'Esto no es una hoja de cálculo.');
+        $zip->close();
+
+        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
+
+        Livewire::test(ListAsociados::class)
+            ->callAction('importar', data: [
+                'archivo' => UploadedFile::fake()
+                    ->createWithContent('base.xlsx', (string) file_get_contents($this->archivo))
+                    ->mimeType('application/zip'),
+                'categoria' => 'Bar',
+            ])
+            ->assertHasNoFormErrors();
+
+        $enviada = $this->notificacionEnviada();
+
+        $this->assertSame('warning', $enviada->getStatus());
+        $this->assertStringStartsWith('No se pudo leer el archivo', $this->lineasDelCuerpo($enviada)[0]);
+        $this->assertSame(0, Asociado::query()->count());
     }
 
     /**

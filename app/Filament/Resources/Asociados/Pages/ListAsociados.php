@@ -21,6 +21,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use RuntimeException;
 use Throwable;
 
 class ListAsociados extends ListRecords
@@ -75,13 +76,28 @@ class ListAsociados extends ListRecords
                 FileUpload::make('archivo')
                     ->label('Base de datos (.xlsx)')
                     ->required()
-                    ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
+                    // El tipo se lee del contenido, y un .xlsx es un zip: una
+                    // copia guardada con otra herramienta puede leerse como
+                    // `application/zip`. Se acepta; si no es una hoja válida,
+                    // el importador lo reporta como error.
+                    ->acceptedFileTypes([
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'application/zip',
+                    ])
                     ->maxSize(4096)
-                    ->storeFiles(false),
+                    ->storeFiles(false)
+                    // Sin `lang/`, una regla sin mensaje propio pinta su clave
+                    // cruda (`validation.mimetypes`) en el modal.
+                    ->validationMessages([
+                        'required' => 'Sube el archivo de la base del gremio.',
+                        'mimetypes' => 'El archivo tiene que ser una hoja de Excel (.xlsx).',
+                        'max' => 'El archivo pesa más de 4 MB.',
+                    ]),
                 Select::make('categoria')
                     ->label('Categoría para las filas que no traen una')
                     ->options(fn (): array => Categoria::query()->orderBy('nombre')->pluck('nombre', 'nombre')->all())
-                    ->required(),
+                    ->required()
+                    ->validationMessages(['required' => 'Elige la categoría para las filas que no traen una.']),
                 Checkbox::make('crear_cuentas')
                     ->label('Crear cuentas de acceso a Mi Cuenta')
                     ->helperText('Todas con la contraseña genérica de abajo. Cada afiliado queda obligado a cambiarla.')
@@ -132,7 +148,7 @@ class ListAsociados extends ListRecords
                         ($data['crear_cuentas'] ?? false) ? (string) $data['contrasena_generica'] : null,
                     );
                 } catch (Throwable $error) {
-                    report($error);
+                    report(self::sinDatosDeLaHoja($error));
 
                     Notification::make()
                         ->title('La importación no se aplicó')
@@ -159,6 +175,25 @@ class ListAsociados extends ListRecords
 
                 $this->notificarResultado($resultado['carga'], $resultado['cuentas']);
             });
+    }
+
+    /**
+     * Lo que se registra cuando la importación revienta: clase, código, archivo
+     * y línea de la excepción, sin su mensaje. El de una `QueryException` lleva
+     * los valores del SQL —correos, nombres, el hash de la genérica—, y en
+     * producción el registro sale por stderr. Tampoco va como excepción
+     * previa: el registro la imprimiría entera.
+     */
+    private static function sinDatosDeLaHoja(Throwable $error): RuntimeException
+    {
+        return new RuntimeException(sprintf(
+            'La importación de la base del gremio no se aplicó: %s (código %s) en %s:%d. '
+            .'El mensaje original no se registra porque puede traer datos personales de la hoja.',
+            $error::class,
+            $error->getCode(),
+            $error->getFile(),
+            $error->getLine(),
+        ));
     }
 
     private static function puedeImportar(): bool
