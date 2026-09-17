@@ -3409,6 +3409,8 @@ Esperado: `0`.
 
 ### Tarea 12: Cierre — suite, expediente y la puerta de producción
 
+> **Nota de estado, 17 sep 2026 (no tacha los pasos):** el expediente se actualizó en documentación. Pint y `git diff --check` aprobados. Focales y ensayo aislado confirmados (ledger). **Paso 1 (suite completa) no está cerrado:** el proceso PHP terminó prematuramente; no se afirma verde total. **Paso 6 no se ejecuta:** no hay fusión ni push. El acta se registra después del código.
+
 **Files:**
 - Modify: `material/estado.md`, `material/bitacora.md`, `material/encargo.md`
 

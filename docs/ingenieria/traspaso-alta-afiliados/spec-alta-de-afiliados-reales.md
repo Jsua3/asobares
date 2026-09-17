@@ -243,3 +243,15 @@ TDD. Cada aserción **se ve roja rompiendo el cableado a propósito**: regla 3 d
 - `estado.md` reescrito y entrada nueva en `bitacora.md`.
 - `encargo.md`: §5 (`users.contrasena_provisional`), §6 (importación desde el panel, alta de afiliados, límite de una réplica) y §13 (D1, D2, D3, D5 fechadas).
 - **Solo conteos: ni un correo, ni un nombre de afiliado, ni un documento.** El expediente es público.
+
+## 10. Addendum — 17 de septiembre de 2026 (no reescribe lo de arriba)
+
+Las secciones 1–9 son el diseño del 16 sep, **incluido D1 (contraseña genérica)**. No se tachan.
+
+**Qué cambió después, sin borrar D1:** Sua eligió «una por afiliado» y descarga de accesos por la Dirección. Eso está implementado en `ingrid/cierre-alta-real` (`cc72655`, `4b14b40`, `a3bb65d`). El encargo §13 del 17 sep es la regla vigente del producto en esa rama.
+
+**Ensayo aislado confirmado (solo conteos):** 61 fichas creadas, 1 actualizada, 4 errores (filas 57, 70, 71, 72 — municipio fuera del catálogo), 35 cuentas. Rollback validado.
+
+**El acta de la ampliación se registra después del código**, como el Acta 06. Aún no está emitida.
+
+**Producción:** esta rama **no** está en `main`, **no** está desplegada, **no** se importó el Excel real y **no** se generaron accesos reales.

@@ -152,25 +152,31 @@ Por qué cada uno:
 no una consecuencia de desplegar, y ni el comando de construcción ni el de despliegue lo
 encienden.
 
-`routes/console.php` programa tres purgas diarias:
+`routes/console.php` programa **tres purgas diarias de datos personales** (las que promete
+`/politica-de-datos`). En la rama `ingrid/cierre-alta-real` —**no desplegada el 17 sep 2026**—
+hay además **`subidas:depurar` cada hora**, que no es plazo de la política: borra del disco
+temporal de Livewire (`.xlsx`, CSV de cartera, `.json` de metadatos) lo que lleva más de 60
+minutos y nadie procesó.
 
-| Hora | Comando | Qué borra | Plazo |
-|---|---|---|---|
-| 03:30 | `bolsas:depurar` | Postulaciones y perfiles del banco de talento | 6 / 12 meses |
-| 03:45 | `mensajes:depurar` | Mensajes de contacto y PQR | 12 / 24 meses |
-| 03:50 | `inscripciones:depurar` | Inscripciones a eventos | 24 meses |
+| Cuándo | Comando | Qué borra | Plazo | ¿En producción el 17 sep? |
+|---|---|---|---|---|
+| 03:30 | `bolsas:depurar` | Postulaciones y perfiles del banco de talento | 6 / 12 meses | Sí |
+| 03:45 | `mensajes:depurar` | Mensajes de contacto y PQR | 12 / 24 meses | Sí |
+| 03:50 | `inscripciones:depurar` | Inscripciones a eventos | 24 meses | Sí |
+| cada hora | `subidas:depurar` | Subidas temporales del panel que ninguna acción consumió | 60 minutos | **No**: entra con el alta real |
 
-Esas tres son el mecanismo con el que se cumple lo que **`/politica-de-datos` le promete por
+Esas tres diarias son el mecanismo con el que se cumple lo que **`/politica-de-datos` le promete por
 escrito al titular** —«Pasado cada plazo, el borrado es automático»— y lo que el **manual de
 usuario** le dice a la oficina. Un despliegue sin scheduler convierte las dos frases en falsas
 y deja al gremio acumulando datos personales sin caducidad, que es exactamente lo que la Ley
-1581 no permite.
+1581 no permite. `subidas:depurar` no escribe en la Bitácora del panel (no borra registros con
+plazo publicado; borra archivos de paso).
 
 **No es un recurso del entorno: es una propiedad de la INSTANCIA.** Buscarlo como recurso
 aparte —«Environment → Resources»— es perder el rato, porque esa pestaña no existe. Vive en el
 cómputo, o sea la tarjeta **App cluster** del diagrama de Environment; el campo se llama
 `usesScheduler`. Con él encendido, Cloud ejecuta `php artisan schedule:run` cada minuto, que es
-lo que dispara las tres purgas.
+lo que dispara las purgas programadas.
 
 **Cómo se comprueba en qué estado está**, que es lo primero y no cuesta nada:
 
@@ -209,7 +215,8 @@ cloud instance:update App --uses-scheduler=true --force
 cloud command:run -n --cmd "php artisan schedule:list --no-ansi"
 ```
 
-Tienen que salir las tres con su `Next Due`.
+Tienen que salir las tres diarias con su `Next Due`. Cuando se despliegue el alta real, también
+`subidas:depurar` a cada hora. **El 17 sep esa cuarta tarea no está en producción.**
 
 > ✅ **Encendido el 9 de septiembre de 2026, 13:52 UTC.** `usesScheduler` pasó a `true` y
 > `schedule:list` en producción devolvió las tres tareas. Los tres simulacros previos dieron
@@ -223,8 +230,16 @@ leer mal el silencio:* si no había nada que borrar tampoco escriben, así que l
 entradas no prueba que esté roto — pero su presencia sí prueba que funciona.
 
 **Lo que vigila la suite:** `tests/Feature/CalendarioDeTareasTest.php` falla si alguien quita
-una de las tres tareas o le cambia la frecuencia. Lo que **no** puede vigilar —y por eso vive
-aquí— es si el entorno remoto tiene quien las llame.
+una de las tres diarias o le cambia la frecuencia. En la rama del alta real también exige
+`subidas:depurar` cada hora. Lo que **no** puede vigilar —y por eso vive aquí— es si el entorno
+remoto tiene quien las llame.
+
+**Alta de afiliados reales (17 sep 2026).** El código está en `ingrid/cierre-alta-real`. **No
+está en `main`, no está desplegado, no se importó el Excel en producción y no se generaron
+accesos reales.** Fusionar y empujar solo con visto bueno explícito de Sua: el push a `main`
+despliega solo y la migración corre sola. La importación, la descarga de accesos y el reparto
+los hace una persona autorizada en el panel, no una sesión. El acta de esa ampliación se
+registra **después** del código (como el Acta 06).
 
 ---
 

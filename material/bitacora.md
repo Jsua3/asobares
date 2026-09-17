@@ -2790,3 +2790,49 @@ Suite entera sobre la rama terminada, con los activos compilados y sin `npm run 
 
 - **La rama remota de Ingrid no se tocó.** `origin/cierre/visual03-directorio-login` sigue en `a6ebcca`; su contenido está en `main` con otro hash. Rehacerla exigiría un push forzado sobre su rama, y eso lo decide ella: tiene que empezar lo siguiente desde `main`.
 - Los tokens de radio compartidos que pidieron los agentes de la unificación no se crearon: los valores ya son la escala de cada hoja, con guardia, y un cambio de nomenclatura en todas las hojas a seis días de la entrega no compra nada que se vea.
+
+## §58 — Alta de afiliados reales: implementación en rama, expediente al día, producción intacta (17 de septiembre de 2026)
+
+Sesión **solo de expediente**. No se tocó PHP, Blade, tests, base de datos ni el Excel real. No hay commit. La rama de trabajo es `ingrid/cierre-alta-real` (`a3bb65d`), sobre `origin/afiliados/alta-real` (`d9a66aa`). `main` no se fusionó.
+
+### 58.1 Qué ya estaba hecho cuando se abrió la foto
+
+Ingrid añadió, encima de la base `afiliados/alta-real`:
+
+- `cc72655` — `feat(afiliados): unifica primer acceso y contrasena provisional`
+- `4b14b40` — `feat(afiliados): genera accesos provisionales individuales`
+- `a3bb65d` — `test: valida sesiones y corrige proveedor de eventos`
+
+Eso cierra, en código, la decisión de Sua del 16 sep («una contraseña por afiliado» y descarga de accesos por la dirección), que revierte la D1 del spec (contraseña genérica). La D1 histórica del spec no se reescribe; rige la fila nueva del encargo §13.
+
+Antes, las tareas 1–10 del plan, el lote de la revisión final y el informe de arreglos ya estaban en esa línea (`90876b5` … `dfdcd50`, más `d9a66aa` con spec, plan, ledger y reportes).
+
+### 58.2 Completado (conteos; sin PII)
+
+| Qué | Resultado |
+|---|---|
+| Pruebas focales | **151 / 151**, **1.137 aserciones** |
+| Ensayo aislado | **61** fichas creadas, **1** actualizada, **4** filas con error, **35** cuentas creadas |
+| Filas con error | **57, 70, 71 y 72** — municipio fuera del catálogo |
+| Las 35 cuentas | vinculadas a ficha; rol asignado; `contrasena_provisional=true`; hashes individuales y distintos; sin contraseña en texto plano |
+| Rollback de la importación | validado |
+| Descarga de accesos provisionales | **4 / 4**, **63 aserciones** |
+| Pint | aprobado |
+| `git diff --check` | aprobado |
+
+La descarga quedó validada así: solo Dirección; no autorizados reciben 403; solo cuentas provisionales; no toca definitivas; contraseñas individuales de 12 caracteres con la composición exigida y sin `0 O 1 l I`; CSV únicamente establecimiento, nombre, correo y contraseña; protección contra CSV injection; secretos no persistidos; la segunda descarga rota las credenciales anteriores; cabeceras `no-store` / `no-cache`.
+
+### 58.3 Pendiente
+
+- El runner de la **suite completa** terminó con `Premature end of PHP process` en `ArchivosEnElDiscoConfiguradoTest::test_la_foto_del_artista_inscrito_desde_el_sitio_va_al_disco_publico_configurado`. **No hay regresión funcional confirmada.** **No se afirma que la suite completa pasó.**
+- Revisión final conjunta con Sua.
+- Integración a `main`, despliegue, importación en producción y generación de accesos reales: **no hechos**. Siguen siendo operación humana autorizada.
+- El **acta de esta ampliación se registra después del código**, como el Acta 06. Aún no está emitida. D-28 permanece abierta porque producción no tiene el alta.
+
+### 58.4 Qué entra y qué no al estado
+
+Entra la foto del 17 sep: dos líneas (producción en `6197c92` / `bbe9b63`; alta real en `a3bb65d`). Salen de «una sola rama viva» y de cualquier lectura que diera el alta por desplegada. D-28 se actualiza, no se cierra. El encargo §5 / §6 / §9 / §13 y el runbook §5.1 recogen la regla del producto y `subidas:depurar` **como código de la rama**, no como hecho de producción.
+
+### 58.5 Lo aprendido que ya estaba en el plan y se deja dicho otra vez
+
+Las claves de mensaje de la regla `Password` son `….password.symbols` (y hermanas), no `….symbols`. Los campos de contraseña del cambio en Mi Cuenta se llaman como `$dontFlash` (`current_password`, `password`) para que no vuelvan a la sesión ni al HTML. El expediente público no lleva nombres, correos, NIT, documentos, teléfonos ni contraseñas: solo conteos y números de fila de error.

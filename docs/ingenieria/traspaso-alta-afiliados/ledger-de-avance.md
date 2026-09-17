@@ -120,3 +120,35 @@ Sin herramienta de todos en esta sesión: este ledger es el único registro de a
 - Final review: minor (deferred): `ListCarteras` tiene el mismo cuerpo de notificación con saltos perdidos y HTML de un archivo, y no borra su temporal (ya lo cubre `subidas:depurar`).
 - Tarea 12 (expediente): el runbook dice «tres purgas diarias» y `encargo.md` no nombra `subidas:depurar`; hay que ponerlos al día.
 - Ruling (previo al rebase, conservado): rebase de `afiliados/alta-real` sobre `origin/main` (`bbe9b63`) antes de la Tarea 5 — las tareas 6 a 9 editan archivos que la integración cambió y sus pruebas tienen que correr contra lo que de verdad se despliega; la rama es local y sin empujar, así que el rebase es reversible por reflog y no toca historia compartida — si fuera un error, cuesta rehacer los hashes del ledger (queda el mapa abajo) y un conflicto que resolver.
+
+## Continuación — 17 sep 2026 (`ingrid/cierre-alta-real`)
+
+Base remota: `origin/afiliados/alta-real` = `d9a66aa` (docs del traspaso para que Ingrid continúe).
+HEAD: `a3bb65d`.
+
+Commits de Ingrid encima de esa base:
+
+- `cc72655` feat(afiliados): unifica primer acceso y contrasena provisional
+- `4b14b40` feat(afiliados): genera accesos provisionales individuales
+- `a3bb65d` test: valida sesiones y corrige proveedor de eventos
+
+Eso implementa la decisión de Sua del 16 sep («una por afiliado» + descarga). **No se reescribe la D1 histórica del spec.**
+
+### Completado
+
+- Implementación en la rama.
+- Pruebas focales: 151/151, 1.137 aserciones.
+- Ensayo aislado: 61 fichas creadas, 1 actualizada, 4 filas con error (57, 70, 71, 72 — municipio fuera del catálogo), 35 cuentas. Cuentas vinculadas, con rol, `contrasena_provisional=true`, hashes individuales distintos, sin texto plano. Rollback de importación validado. Sin PII en este ledger.
+- Descarga de accesos provisionales: 4/4, 63 aserciones (solo Dirección; 403; solo provisionales; no toca definitivas; 12 caracteres; composición; sin 0 O 1 l I; CSV de cuatro columnas; CSV injection; secretos no persistidos; segunda descarga rota las anteriores; no-store/no-cache).
+- Pint aprobado. `git diff --check` aprobado.
+
+### Pendiente
+
+- Suite completa **no concluyente**: `Premature end of PHP process` en `ArchivosEnElDiscoConfiguradoTest::test_la_foto_del_artista_inscrito_desde_el_sitio_va_al_disco_publico_configurado`. Sin regresión funcional confirmada.
+- Revisión final conjunta con Sua.
+- Integración a `main`, despliegue, importación en producción, accesos reales: no hechos. Operación humana.
+- Acta de la ampliación: **después del código**, como el Acta 06; no emitida.
+
+### Tarea 12 (expediente, 17 sep)
+
+Documentación actualizada, **sin commit**: `material/estado.md`, `material/bitacora.md` §58, `material/encargo.md` §5/§6/§9/§13, `docs/ingenieria/runbook-despliegue.md` §5.1 (`subidas:depurar` como tarea de la rama, no de producción). D-28 no se cierra.
