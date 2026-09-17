@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Console\Commands\CrearUsuarioDelPanel;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Models\User;
@@ -20,6 +21,8 @@ use Tests\TestCase;
 class PoliticaDeContrasenasTest extends TestCase
 {
     use RefreshDatabase;
+
+    private const string MENSAJE_DE_LA_PUBLICADA = 'Esa es la contraseña del demo, publicada en el repositorio. Elige otra.';
 
     protected function setUp(): void
     {
@@ -75,6 +78,37 @@ class PoliticaDeContrasenasTest extends TestCase
             ->assertHasNoFormErrors();
 
         $this->assertDatabaseHas('users', ['email' => 'cuenta.nueva@asobares.test']);
+    }
+
+    /**
+     * La del demo cumple la política y está publicada en el README del
+     * repositorio: se rechaza por sí misma, con su mensaje.
+     */
+    public function test_la_contrasena_publicada_del_demo_no_se_acepta_al_crear(): void
+    {
+        $componente = Livewire::test(CreateUser::class)
+            ->fillForm($this->datos(CrearUsuarioDelPanel::CLAVE_PUBLICADA))
+            ->call('create')
+            ->assertHasFormErrors(['password']);
+
+        $this->assertContains(self::MENSAJE_DE_LA_PUBLICADA, $componente->errors()->get('data.password'));
+        $this->assertDatabaseMissing('users', ['email' => 'cuenta.nueva@asobares.test']);
+    }
+
+    /** Es el camino con el que la oficina le repone la contraseña a un afiliado. */
+    public function test_la_contrasena_publicada_del_demo_no_se_acepta_al_cambiarla(): void
+    {
+        $afiliado = User::factory()->create(['password' => Hash::make('Asobares2026*Quindio')]);
+        $afiliado->syncRoles([User::ROL_ASOCIADO]);
+        $hashAntes = $afiliado->fresh()->password;
+
+        $componente = Livewire::test(EditUser::class, ['record' => $afiliado->getRouteKey()])
+            ->fillForm(['password' => CrearUsuarioDelPanel::CLAVE_PUBLICADA])
+            ->call('save')
+            ->assertHasFormErrors(['password']);
+
+        $this->assertContains(self::MENSAJE_DE_LA_PUBLICADA, $componente->errors()->get('data.password'));
+        $this->assertSame($hashAntes, $afiliado->fresh()->password);
     }
 
     /**

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Publico;
 
+use App\Console\Commands\CrearUsuarioDelPanel;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 /**
@@ -45,13 +47,20 @@ class SeguridadDeLaCuentaController
     {
         $datos = $request->validate([
             'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'confirmed', 'different:current_password', Password::min(12)->mixedCase()->numbers()->symbols()],
+            'password' => [
+                'required',
+                'confirmed',
+                'different:current_password',
+                Rule::notIn([CrearUsuarioDelPanel::CLAVE_PUBLICADA]),
+                Password::min(12)->mixedCase()->numbers()->symbols(),
+            ],
         ], [
             'current_password.required' => 'Escribe tu contraseña actual.',
             'current_password.current_password' => 'Esa no es tu contraseña actual.',
             'password.required' => 'Escribe la contraseña nueva.',
             'password.confirmed' => 'La confirmación no coincide con la contraseña nueva.',
             'password.different' => 'La contraseña nueva tiene que ser distinta de la actual.',
+            'password.not_in' => 'La contraseña nueva no puede ser esa: es pública y cualquiera la conoce.',
             'password.min' => 'La contraseña nueva necesita al menos 12 caracteres.',
             'password.password.mixed' => 'La contraseña nueva necesita al menos una mayúscula y una minúscula.',
             'password.password.numbers' => 'La contraseña nueva necesita al menos un número.',

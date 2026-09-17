@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Console\Commands\CrearUsuarioDelPanel;
 use App\Models\User;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -52,6 +53,11 @@ class UserForm
                                 Password::min(12)->mixedCase()->numbers()->symbols(),
                                 fn (?string $state): bool => filled($state),
                             )
+                            // La del demo cumple la política: se rechaza por sí misma.
+                            ->notIn([CrearUsuarioDelPanel::CLAVE_PUBLICADA])
+                            ->validationMessages([
+                                'not_in' => 'Esa es la contraseña del demo, publicada en el repositorio. Elige otra.',
+                            ])
                             ->maxLength(255)
                             ->helperText(fn (string $operation): string => $operation === 'create'
                                 ? 'Mínimo 12 caracteres, con mayúsculas, minúsculas, números y símbolos. Si la cuenta es de un afiliado queda provisional: Mi Cuenta le pide cambiarla y le cierra las secciones con datos de terceros hasta que lo haga.'

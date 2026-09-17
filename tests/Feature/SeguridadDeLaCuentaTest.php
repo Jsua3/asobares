@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Console\Commands\CrearUsuarioDelPanel;
 use App\Models\Asociado;
 use App\Models\User;
 use Database\Seeders\RolYPermisoSeeder;
@@ -141,6 +142,8 @@ class SeguridadDeLaCuentaTest extends TestCase
             'sin número' => [['current_password' => self::ACTUAL, 'password' => 'Cordillera-Propia-Quindio#', 'password_confirmation' => 'Cordillera-Propia-Quindio#'], 'password', 'La contraseña nueva necesita al menos un número.'],
             'corta' => [['current_password' => self::ACTUAL, 'password' => 'Corta-1#a', 'password_confirmation' => 'Corta-1#a'], 'password', 'La contraseña nueva necesita al menos 12 caracteres.'],
             'igual a la actual' => [['current_password' => self::ACTUAL, 'password' => self::ACTUAL, 'password_confirmation' => self::ACTUAL], 'password', 'La contraseña nueva tiene que ser distinta de la actual.'],
+            // Cumple la política, pero está publicada en el README del repositorio.
+            'la publicada del demo' => [['current_password' => self::ACTUAL, 'password' => CrearUsuarioDelPanel::CLAVE_PUBLICADA, 'password_confirmation' => CrearUsuarioDelPanel::CLAVE_PUBLICADA], 'password', 'La contraseña nueva no puede ser esa: es pública y cualquiera la conoce.'],
         ];
     }
 
