@@ -60,7 +60,15 @@
         <section class="mt-10" aria-labelledby="cartera">
             <h2 id="cartera" class="font-display text-xl font-bold">Estado de cuenta</h2>
 
-            @if ($cartera->estaAlDia())
+            @if ($cartera === null)
+                <div class="tarjeta mt-5 p-8">
+                    <p class="font-display text-xl font-bold">{{ ajuste('mi_cuenta_sin_cartera_titulo', 'Tu estado de cuenta todavía no está cargado') }}</p>
+                    <p class="mt-1.5 text-sm text-tenue">
+                        {{ ajuste('mi_cuenta_sin_cartera_texto', 'La oficina del capítulo aún no ha subido tu estado de cuenta a la plataforma. Si tienes dudas sobre tus pagos, escríbenos a') }}
+                        <a href="mailto:{{ ajuste('contacto_correo') }}" class="enlace-accion text-acento">{{ ajuste('contacto_correo') }}</a>.
+                    </p>
+                </div>
+            @elseif ($cartera->estaAlDia())
                 <div class="mt-5 rounded-2xl border border-exito-linea bg-exito-fondo p-8">
                     <div class="flex items-start gap-4">
                         <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
@@ -117,7 +125,7 @@
                 </div>
             @endif
 
-            @if ($cartera->actualizado_at)
+            @if ($cartera?->actualizado_at)
                 <p class="mt-3 text-xs text-apagado">
                     Información actualizada {{ $cartera->actualizado_at->diffForHumans() }}.
                     {{ ajuste('mi_cuenta_pago_ayuda', 'Si no coincide con tus registros, escríbenos a') }}

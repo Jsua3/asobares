@@ -6,7 +6,6 @@ use App\Enums\ConceptoTransaccion;
 use App\Enums\EstadoTransaccion;
 use App\Models\Aliado;
 use App\Models\Asociado;
-use App\Models\Cartera;
 use App\Models\Transaccion;
 use App\Services\RegistroDePagos;
 use Illuminate\Contracts\View\View;
@@ -27,7 +26,9 @@ class MiCuentaController
 
         abort_if($asociado === null, 403, 'Tu usuario todavía no está vinculado a un establecimiento.');
 
-        $cartera = $asociado->cartera ?? new Cartera(['saldo_pendiente' => 0, 'meses_mora' => 0]);
+        // Sin fila de cartera no hay estado de cuenta que mostrar: nadie la
+        // ha cargado. No es lo mismo que estar al día, y la vista lo dice.
+        $cartera = $asociado->cartera;
 
         return view('publico.mi-cuenta.index', [
             'asociado' => $asociado->load(['municipio', 'categoria']),
@@ -46,7 +47,14 @@ class MiCuentaController
 
         $cartera = $asociado->cartera;
 
-        if ($cartera === null || $cartera->estaAlDia()) {
+        if ($cartera === null) {
+            return redirect()->route('mi-cuenta.index')->with(
+                'aviso',
+                'Tu estado de cuenta todavía no está cargado, así que por ahora no hay nada que pagar desde aquí.'
+            );
+        }
+
+        if ($cartera->estaAlDia()) {
             return redirect()->route('mi-cuenta.index')->with('exito', 'Tu cuenta ya está al día.');
         }
 

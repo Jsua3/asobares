@@ -617,6 +617,14 @@ class FormulariosPublicosTest extends TestCase
         $this->seed(RolYPermisoSeeder::class);
 
         $asociado = Asociado::factory()->publicado()->create(['nombre' => 'Bar Al Día']);
+        // Al día de verdad, con su fila de cartera: sin ella Mi Cuenta dice
+        // que el estado de cuenta no está cargado (MiCuentaSinCarteraTest).
+        Cartera::create([
+            'asociado_id' => $asociado->id,
+            'saldo_pendiente' => 0,
+            'meses_mora' => 0,
+            'actualizado_at' => now(),
+        ]);
         $duenio = User::factory()->create(['asociado_id' => $asociado->id]);
         $duenio->syncRoles([User::ROL_ASOCIADO]);
 

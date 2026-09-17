@@ -371,6 +371,8 @@ class SettingSeeder extends Seeder
             $this->largo('mi_cuenta_seguridad_provisional_texto', 'Entraste con la contraseña provisional que el gremio les entregó a los afiliados. Cámbiala por una que solo conozcas tú: hasta entonces, las secciones con datos de otras personas siguen cerradas.', 'mi_cuenta', 'Seguridad: texto con contraseña provisional'),
             $this->texto('mi_cuenta_aviso_provisional_titulo', 'Estás usando la contraseña provisional que te dio el gremio', 'mi_cuenta', 'Aviso de contraseña provisional: título'),
             $this->largo('mi_cuenta_aviso_provisional_texto', 'Toca aquí para cambiarla por una tuya. Mientras tanto, el banco de talento, los proveedores, los artistas y la bolsa de empleo siguen cerrados.', 'mi_cuenta', 'Aviso de contraseña provisional: texto'),
+            $this->texto('mi_cuenta_sin_cartera_titulo', 'Tu estado de cuenta todavía no está cargado', 'mi_cuenta', 'Estado de cuenta sin cargar: título'),
+            $this->largo('mi_cuenta_sin_cartera_texto', 'La oficina del capítulo aún no ha subido tu estado de cuenta a la plataforma. Si tienes dudas sobre tus pagos, escríbenos a', 'mi_cuenta', 'Estado de cuenta sin cargar: texto'),
             $this->texto('mi_cuenta_convenios_titulo', 'Convenios vigentes', 'mi_cuenta', 'Título de convenios'),
             $this->largo('mi_cuenta_convenios_texto', 'El detalle de cada convenio es información privada de los afiliados. No aparece en el sitio público.', 'mi_cuenta', 'Texto de convenios'),
             $this->texto('mi_cuenta_convenios_vacio_titulo', 'Todavía no hay convenios publicados', 'mi_cuenta', 'Título sin convenios'),
