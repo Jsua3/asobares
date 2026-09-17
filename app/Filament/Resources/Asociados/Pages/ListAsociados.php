@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\Asociados\Pages;
 
-use App\Console\Commands\CrearUsuarioDelPanel;
 use App\Filament\Resources\Asociados\AsociadoResource;
 use App\Models\Asociado;
 use App\Models\Categoria;
 use App\Models\User;
+use App\Services\DescargarAccesosProvisionales;
 use App\Services\ImportacionDeLaBaseDelGremio;
 use App\Services\ResultadoDeAltaDeCuentas;
 use App\Services\ResultadoDeCargaDeAsociados;
@@ -15,13 +15,11 @@ use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Utilities\Get;
-use Illuminate\Validation\Rules\Password;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class ListAsociados extends ListRecords
@@ -45,14 +43,14 @@ class ListAsociados extends ListRecords
     {
         return [
             $this->accionImportarBase(),
+            $this->accionDescargarAccesos(),
             CreateAction::make(),
         ];
     }
 
     /**
      * Carga la base de establecimientos del gremio y, si se pide, crea las
-     * cuentas de /mi-cuenta con una contraseña genérica que escribe quien
-     * importa.
+     * cuentas de /mi-cuenta con contraseñas aleatorias individuales.
      *
      * Solo la ve quien puede crear asociados Y usuarios —hoy, la dirección—,
      * sin permiso nuevo: un permiso nuevo no llega a producción por desplegar
@@ -100,36 +98,7 @@ class ListAsociados extends ListRecords
                     ->validationMessages(['required' => 'Elige la categoría para las filas que no traen una.']),
                 Checkbox::make('crear_cuentas')
                     ->label('Crear cuentas de acceso a Mi Cuenta')
-                    ->helperText('Todas con la contraseña genérica de abajo. Cada afiliado queda obligado a cambiarla.')
-                    ->live(),
-                TextInput::make('contrasena_generica')
-                    ->label('Contraseña genérica')
-                    ->password()
-                    ->revealable()
-                    ->visible(fn (Get $get): bool => (bool) $get('crear_cuentas'))
-                    ->required(fn (Get $get): bool => (bool) $get('crear_cuentas'))
-                    ->confirmed()
-                    ->notIn([CrearUsuarioDelPanel::CLAVE_PUBLICADA])
-                    ->rule(Password::min(12)->mixedCase()->numbers()->symbols())
-                    // La regla Password falla con `password.symbols` y
-                    // compañía, no con `symbols`: sin esas claves exactas, y
-                    // sin `lang/`, el panel pintaría la clave cruda.
-                    ->validationMessages([
-                        'required' => 'Escribe la contraseña genérica.',
-                        'confirmed' => 'La confirmación no coincide.',
-                        'not_in' => 'Esa es la contraseña del demo, publicada en el repositorio. Elige otra.',
-                        'min' => 'La contraseña necesita al menos 12 caracteres.',
-                        'password.mixed' => 'La contraseña necesita al menos una mayúscula y una minúscula.',
-                        'password.numbers' => 'La contraseña necesita al menos un número.',
-                        'password.symbols' => 'La contraseña necesita al menos un símbolo.',
-                    ]),
-                TextInput::make('contrasena_generica_confirmation')
-                    ->label('Confirma la contraseña genérica')
-                    ->password()
-                    ->visible(fn (Get $get): bool => (bool) $get('crear_cuentas'))
-                    ->required(fn (Get $get): bool => (bool) $get('crear_cuentas'))
-                    ->validationMessages(['required' => 'Confirma la contraseña genérica.'])
-                    ->dehydrated(false),
+                    ->helperText('Las contraseñas iniciales son individuales y desconocidas. Dirección podrá descargar accesos provisionales después.'),
             ])
             ->action(function (array $data): void {
                 $archivo = $data['archivo'] ?? null;
@@ -145,7 +114,7 @@ class ListAsociados extends ListRecords
                     $resultado = app(ImportacionDeLaBaseDelGremio::class)->importar(
                         (string) $archivo->getRealPath(),
                         (string) $data['categoria'],
-                        ($data['crear_cuentas'] ?? false) ? (string) $data['contrasena_generica'] : null,
+                        (bool) ($data['crear_cuentas'] ?? false),
                     );
                 } catch (Throwable $error) {
                     report(self::sinDatosDeLaHoja($error));
@@ -175,6 +144,18 @@ class ListAsociados extends ListRecords
 
                 $this->notificarResultado($resultado['carga'], $resultado['cuentas']);
             });
+    }
+
+    private function accionDescargarAccesos(): Action
+    {
+        return Action::make('descargarAccesosProvisionales')
+            ->label('Descargar accesos provisionales')
+            ->icon('heroicon-o-arrow-down-tray')
+            ->color('gray')
+            ->visible(fn (): bool => auth()->user()?->esSuperAdmin() === true)
+            ->requiresConfirmation()
+            ->modalDescription('Cada descarga reemplaza las contraseñas provisionales anteriores. Entrega el archivo únicamente a las personas correspondientes.')
+            ->action(fn (): StreamedResponse => app(DescargarAccesosProvisionales::class)->descargar(auth()->user()));
     }
 
     /**

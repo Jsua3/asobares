@@ -25,8 +25,6 @@ class ImportacionDeLaBaseDelGremioTest extends TestCase
 {
     use RefreshDatabase;
 
-    private const string GENERICA = 'Provisional-Quindio-2026!';
-
     private string $archivo;
 
     protected function setUp(): void
@@ -89,18 +87,18 @@ class ImportacionDeLaBaseDelGremioTest extends TestCase
             $this->fila('Bar Dos', 'dos@bar.test'),
         ]);
 
-        $resultado = app(ImportacionDeLaBaseDelGremio::class)->importar($ruta, 'Bar', self::GENERICA);
+        $resultado = app(ImportacionDeLaBaseDelGremio::class)->importar($ruta, 'Bar', true);
 
         $this->assertSame(2, $resultado['carga']->creados());
         $this->assertSame(2, $resultado['cuentas']?->creadas());
         $this->assertSame(2, User::role(User::ROL_ASOCIADO)->where('contrasena_provisional', true)->count());
     }
 
-    public function test_sin_contrasena_no_crea_cuentas(): void
+    public function test_sin_pedir_cuentas_no_las_crea(): void
     {
         $ruta = $this->archivoComoElDelGremio([$this->fila('Bar Uno', 'uno@bar.test')]);
 
-        $resultado = app(ImportacionDeLaBaseDelGremio::class)->importar($ruta, 'Bar', null);
+        $resultado = app(ImportacionDeLaBaseDelGremio::class)->importar($ruta, 'Bar', false);
 
         $this->assertNull($resultado['cuentas']);
         $this->assertSame(1, Asociado::query()->count());
@@ -112,7 +110,7 @@ class ImportacionDeLaBaseDelGremioTest extends TestCase
         Asociado::factory()->create(['correo_interno' => 'ajena@bar.test']);
         $ruta = $this->archivoComoElDelGremio([$this->fila('Bar Uno', 'uno@bar.test')]);
 
-        app(ImportacionDeLaBaseDelGremio::class)->importar($ruta, 'Bar', self::GENERICA);
+        app(ImportacionDeLaBaseDelGremio::class)->importar($ruta, 'Bar', true);
 
         $this->assertSame(0, User::query()->where('email', 'ajena@bar.test')->count());
         $this->assertSame(1, User::query()->where('email', 'uno@bar.test')->count());
@@ -122,7 +120,7 @@ class ImportacionDeLaBaseDelGremioTest extends TestCase
     {
         $ruta = $this->archivoComoElDelGremio([$this->fila('Bar de Afuera', 'afuera@bar.test', 'Pereira')]);
 
-        $resultado = app(ImportacionDeLaBaseDelGremio::class)->importar($ruta, 'Bar', self::GENERICA);
+        $resultado = app(ImportacionDeLaBaseDelGremio::class)->importar($ruta, 'Bar', true);
 
         $this->assertTrue($resultado['carga']->tieneErrores());
         $this->assertSame(0, User::query()->count());
@@ -132,7 +130,7 @@ class ImportacionDeLaBaseDelGremioTest extends TestCase
     {
         $this->app->instance(AltaDeCuentasDeAfiliados::class, new class extends AltaDeCuentasDeAfiliados
         {
-            public function crear(Collection $fichas, string $contrasenaGenerica): ResultadoDeAltaDeCuentas
+            public function crear(Collection $fichas): ResultadoDeAltaDeCuentas
             {
                 throw new RuntimeException('Falla simulada a mitad de las cuentas');
             }
@@ -141,7 +139,7 @@ class ImportacionDeLaBaseDelGremioTest extends TestCase
         $ruta = $this->archivoComoElDelGremio([$this->fila('Bar Uno', 'uno@bar.test')]);
 
         try {
-            app(ImportacionDeLaBaseDelGremio::class)->importar($ruta, 'Bar', self::GENERICA);
+            app(ImportacionDeLaBaseDelGremio::class)->importar($ruta, 'Bar', true);
             $this->fail('La falla de las cuentas tenía que subir.');
         } catch (RuntimeException) {
             // Esperado.

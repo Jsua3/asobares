@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Asociado;
 use Illuminate\Support\Facades\DB;
-use SensitiveParameter;
 
 /**
  * La importación de la base del gremio desde el panel: fichas y, si la
@@ -24,12 +23,12 @@ class ImportacionDeLaBaseDelGremio
     /**
      * @return array{carga: ResultadoDeCargaDeAsociados, cuentas: ResultadoDeAltaDeCuentas|null}
      */
-    public function importar(string $ruta, string $categoriaPorDefecto, #[SensitiveParameter] ?string $contrasenaGenerica): array
+    public function importar(string $ruta, string $categoriaPorDefecto, bool $crearCuentas): array
     {
-        return DB::transaction(function () use ($ruta, $categoriaPorDefecto, $contrasenaGenerica): array {
+        return DB::transaction(function () use ($ruta, $categoriaPorDefecto, $crearCuentas): array {
             $carga = $this->importador->importar($ruta, $categoriaPorDefecto);
 
-            if ($contrasenaGenerica === null) {
+            if (! $crearCuentas) {
                 return ['carga' => $carga, 'cuentas' => null];
             }
 
@@ -38,7 +37,7 @@ class ImportacionDeLaBaseDelGremio
                 ->orderBy('nombre')
                 ->get();
 
-            return ['carga' => $carga, 'cuentas' => $this->altaDeCuentas->crear($fichas, $contrasenaGenerica)];
+            return ['carga' => $carga, 'cuentas' => $this->altaDeCuentas->crear($fichas)];
         });
     }
 }

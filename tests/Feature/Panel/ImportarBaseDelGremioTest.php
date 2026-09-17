@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Panel;
 
-use App\Console\Commands\CrearUsuarioDelPanel;
 use App\Enums\EstadoPublicacion;
 use App\Filament\Resources\Asociados\Pages\ListAsociados;
 use App\Models\Asociado;
@@ -20,6 +19,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Testing\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Exceptions;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 use Livewire\Livewire;
@@ -40,11 +40,7 @@ class ImportarBaseDelGremioTest extends TestCase
 {
     use RefreshDatabase;
 
-    private const string GENERICA = 'Provisional-Quindio-2026!';
-
     /** Rutas del estado del formulario de la acción montada, en el MessageBag de Livewire. */
-    private const string CAMPO_CONTRASENA = 'mountedActions.0.data.contrasena_generica';
-
     private const string CAMPO_ARCHIVO = 'mountedActions.0.data.archivo';
 
     private const string CAMPO_CATEGORIA = 'mountedActions.0.data.categoria';
@@ -55,6 +51,15 @@ class ImportarBaseDelGremioTest extends TestCase
     {
         parent::setUp();
         $this->seed(RolYPermisoSeeder::class);
+
+        // En Windows, la ruta de Storage::fake bajo el proyecto más el nombre
+        // largo de Livewire supera MAX_PATH y OpenSpout no puede abrir el XLSX.
+        config()->set('filesystems.disks.tmp-for-tests', [
+            'driver' => 'local',
+            'root' => sys_get_temp_dir().DIRECTORY_SEPARATOR.'asb-lw-test',
+            'throw' => false,
+        ]);
+        Storage::purge('tmp-for-tests');
 
         Categoria::query()->create(['nombre' => 'Bar', 'slug' => 'bar']);
         Municipio::query()->create(['nombre' => 'Armenia', 'slug' => 'armenia']);
@@ -195,8 +200,6 @@ class ImportarBaseDelGremioTest extends TestCase
                 'archivo' => $this->subida([$this->fila('Bar Uno', 'uno@bar.test'), $this->fila('Bar Dos', 'dos@bar.test')]),
                 'categoria' => 'Bar',
                 'crear_cuentas' => true,
-                'contrasena_generica' => self::GENERICA,
-                'contrasena_generica_confirmation' => self::GENERICA,
             ])
             ->assertHasNoFormErrors()
             ->assertNotified();
@@ -219,8 +222,6 @@ class ImportarBaseDelGremioTest extends TestCase
                 'archivo' => $this->subida([$this->fila('Bar Uno', 'uno@bar.test'), $this->fila('Bar Dos', '')]),
                 'categoria' => 'Bar',
                 'crear_cuentas' => true,
-                'contrasena_generica' => self::GENERICA,
-                'contrasena_generica_confirmation' => self::GENERICA,
             ])
             ->assertHasNoFormErrors();
 
@@ -254,8 +255,6 @@ class ImportarBaseDelGremioTest extends TestCase
                 ]),
                 'categoria' => 'Bar',
                 'crear_cuentas' => true,
-                'contrasena_generica' => self::GENERICA,
-                'contrasena_generica_confirmation' => self::GENERICA,
             ])
             ->assertHasNoFormErrors();
 
@@ -327,8 +326,6 @@ class ImportarBaseDelGremioTest extends TestCase
                     'archivo' => $this->subida([$this->fila('Bar Uno', 'uno@bar.test')]),
                     'categoria' => 'Bar',
                     'crear_cuentas' => true,
-                    'contrasena_generica' => self::GENERICA,
-                    'contrasena_generica_confirmation' => self::GENERICA,
                 ])
                 ->assertHasNoFormErrors();
         };
@@ -399,54 +396,13 @@ class ImportarBaseDelGremioTest extends TestCase
         $this->assertSame(0, User::role(User::ROL_ASOCIADO)->count());
     }
 
-    /** @return array<string, array{string, string}> */
-    public static function contrasenasQueNoSirven(): array
-    {
-        return [
-            'la del demo' => [CrearUsuarioDelPanel::CLAVE_PUBLICADA, 'Esa es la contraseña del demo, publicada en el repositorio. Elige otra.'],
-            'sin símbolo' => ['CordilleraQuindio2026', 'La contraseña necesita al menos un símbolo.'],
-            'sin número' => ['Cordillera-Quindio!', 'La contraseña necesita al menos un número.'],
-            'sin mayúscula' => ['cordillera-quindio-2026!', 'La contraseña necesita al menos una mayúscula y una minúscula.'],
-            'corta' => ['Corta-1!a', 'La contraseña necesita al menos 12 caracteres.'],
-        ];
-    }
-
-    #[DataProvider('contrasenasQueNoSirven')]
-    public function test_la_contrasena_generica_tiene_que_cumplir_la_politica(string $clave, string $mensaje): void
+    public function test_el_modal_no_pide_contrasena_generica(): void
     {
         $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
 
-        $componente = Livewire::test(ListAsociados::class)
-            ->callAction('importar', data: [
-                'archivo' => $this->subida([$this->fila('Bar Uno', 'uno@bar.test')]),
-                'categoria' => 'Bar',
-                'crear_cuentas' => true,
-                'contrasena_generica' => $clave,
-                'contrasena_generica_confirmation' => $clave,
-            ])
-            ->assertHasFormErrors(['contrasena_generica']);
-
-        // Si esta aserción no encuentra la clave, imprime
-        // array_keys($componente->errors()->toArray()) para ver la ruta real.
-        $this->assertContains($mensaje, $componente->errors()->get(self::CAMPO_CONTRASENA));
-        $this->assertSame(0, Asociado::query()->count());
-    }
-
-    public function test_la_confirmacion_tiene_que_coincidir(): void
-    {
-        $this->actingAs($this->usuario(User::ROL_SUPER_ADMIN));
-
-        $componente = Livewire::test(ListAsociados::class)
-            ->callAction('importar', data: [
-                'archivo' => $this->subida([$this->fila('Bar Uno', 'uno@bar.test')]),
-                'categoria' => 'Bar',
-                'crear_cuentas' => true,
-                'contrasena_generica' => self::GENERICA,
-                'contrasena_generica_confirmation' => 'Otra-Distinta-2026!',
-            ])
-            ->assertHasFormErrors(['contrasena_generica']);
-
-        $this->assertContains('La confirmación no coincide.', $componente->errors()->get(self::CAMPO_CONTRASENA));
+        Livewire::test(ListAsociados::class)
+            ->mountAction('importar')
+            ->assertDontSee('contrasena_generica');
     }
 
     public function test_el_archivo_subido_no_se_queda_en_el_disco(): void
@@ -465,7 +421,7 @@ class ImportarBaseDelGremioTest extends TestCase
 
     /**
      * El mensaje de una excepción de la base lleva los valores del SQL —correos,
-     * nombres, el hash de la genérica— y en producción el registro sale por
+     * nombres y correos— y en producción el registro sale por
      * stderr: lo que se reporta dice dónde falló, no con qué datos.
      */
     public function test_si_la_importacion_revienta_lo_dice_borra_el_archivo_y_reporta_sin_datos_de_la_hoja(): void
@@ -476,7 +432,7 @@ class ImportarBaseDelGremioTest extends TestCase
         {
             public function __construct(private RuntimeException $falla) {}
 
-            public function importar(string $ruta, string $categoriaPorDefecto, ?string $contrasenaGenerica): array
+            public function importar(string $ruta, string $categoriaPorDefecto, bool $crearCuentas): array
             {
                 throw $this->falla;
             }
@@ -604,12 +560,10 @@ class ImportarBaseDelGremioTest extends TestCase
         Livewire::test(ListAsociados::class)
             ->callAction('importar', data: [
                 'archivo' => $this->subida([$this->fila('Bar Uno', 'uno@bar.test')]),
-                'categoria' => 'Bar',
+                'categoria' => '',
                 'crear_cuentas' => true,
-                'contrasena_generica' => 'CordilleraQuindio2026',
-                'contrasena_generica_confirmation' => 'CordilleraQuindio2026',
             ])
-            ->assertHasFormErrors(['contrasena_generica']);
+            ->assertHasFormErrors(['categoria']);
 
         $temporal = FileUploadConfiguration::storage();
         $this->assertNotSame([], $temporal->allFiles(FileUploadConfiguration::directory()));

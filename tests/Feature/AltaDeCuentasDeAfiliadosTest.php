@@ -22,8 +22,6 @@ class AltaDeCuentasDeAfiliadosTest extends TestCase
 {
     use RefreshDatabase;
 
-    private const string GENERICA = 'Provisional-Quindio-2026!';
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -42,7 +40,7 @@ class AltaDeCuentasDeAfiliadosTest extends TestCase
     /** @param  list<Asociado>  $fichas */
     private function crear(array $fichas): ResultadoDeAltaDeCuentas
     {
-        return app(AltaDeCuentasDeAfiliados::class)->crear(collect($fichas), self::GENERICA);
+        return app(AltaDeCuentasDeAfiliados::class)->crear(collect($fichas));
     }
 
     public function test_crea_la_cuenta_vinculada_con_su_rol_y_la_marca(): void
@@ -59,7 +57,7 @@ class AltaDeCuentasDeAfiliadosTest extends TestCase
         $this->assertTrue($usuario->contrasena_provisional);
         $this->assertNotNull($usuario->email_verified_at);
         $this->assertSame('Duena del Local', $usuario->name);
-        $this->assertTrue(Hash::check(self::GENERICA, $usuario->password));
+        $this->assertTrue(Hash::isHashed($usuario->password));
     }
 
     public function test_el_correo_se_guarda_en_minusculas_y_sin_espacios(): void
@@ -175,14 +173,14 @@ class AltaDeCuentasDeAfiliadosTest extends TestCase
         $this->assertSame(['«Bar Merlin»: '.AltaDeCuentasDeAfiliados::CORREO_CON_CUENTA], $resultado->sinCuenta());
     }
 
-    public function test_las_cuentas_nuevas_comparten_un_solo_hash(): void
+    public function test_las_cuentas_nuevas_tienen_secretos_individuales_desconocidos(): void
     {
         $this->crear([$this->ficha('Bar Uno', 'uno@bar.test'), $this->ficha('Bar Dos', 'dos@bar.test')]);
 
         $hashes = User::query()->pluck('password')->unique();
 
-        $this->assertCount(1, $hashes);
-        $this->assertTrue(Hash::check(self::GENERICA, $hashes->first()));
+        $this->assertCount(2, $hashes);
+        $this->assertTrue(Hash::isHashed($hashes->first()));
     }
 
     public function test_el_resumen_cuenta_las_creadas_y_las_que_no(): void

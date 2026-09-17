@@ -5,14 +5,11 @@ namespace App\Services;
 use App\Models\Asociado;
 use App\Models\User;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use SensitiveParameter;
 
 /**
  * Crea las cuentas de /mi-cuenta de los afiliados que trae la base del
- * gremio, con la contraseña genérica que escribe la dirección y marcadas
- * como provisionales.
+ * gremio, con una contraseña aleatoria desconocida y marcadas como provisionales.
  *
  * Tres reglas que no son de estilo:
  *
@@ -22,9 +19,8 @@ use SensitiveParameter;
  * 2. **Ante la duda, no se crea.** Un correo repetido en dos fichas del mismo
  *    archivo no dice de cuál local es el dueño, y una cuenta se vincula a un
  *    solo establecimiento: se reporta y decide el gremio.
- * 3. **El hash se calcula una vez.** Es la misma contraseña para todos, así
- *    que repetir el hash no protege nada y multiplica el tiempo de la
- *    petición del panel. Deja de ser la misma en cuanto cada dueño la cambia.
+ * 3. **Cada cuenta tiene un secreto distinto.** La contraseña inicial no se
+ *    muestra ni se entrega; Dirección la rota al descargar los accesos.
  */
 class AltaDeCuentasDeAfiliados
 {
@@ -39,10 +35,9 @@ class AltaDeCuentasDeAfiliados
     public const string CORREO_CON_CUENTA = 'el correo ya tiene una cuenta';
 
     /** @param  Collection<int, Asociado>  $fichas */
-    public function crear(Collection $fichas, #[SensitiveParameter] string $contrasenaGenerica): ResultadoDeAltaDeCuentas
+    public function crear(Collection $fichas): ResultadoDeAltaDeCuentas
     {
         $resultado = new ResultadoDeAltaDeCuentas;
-        $hash = Hash::make($contrasenaGenerica);
 
         $correos = $fichas->mapWithKeys(fn (Asociado $ficha): array => [$ficha->id => $this->normalizar($ficha->correo_interno)]);
 
@@ -97,13 +92,12 @@ class AltaDeCuentasDeAfiliados
             }
 
             // `forceFill` y no `create`: `#[Fillable]` descartaría en silencio
-            // la marca y la verificación. El cast `hashed` reconoce el hash
-            // ya calculado y no lo vuelve a calcular.
+            // la marca y la verificación. El secreto no sale de este método.
             $usuario = new User;
             $usuario->forceFill([
                 'name' => filled($ficha->representante) ? $ficha->representante : $ficha->nombre,
                 'email' => $correo,
-                'password' => $hash,
+                'password' => Str::password(64, symbols: true),
                 'asociado_id' => $ficha->id,
                 'email_verified_at' => now(),
                 'contrasena_provisional' => true,
