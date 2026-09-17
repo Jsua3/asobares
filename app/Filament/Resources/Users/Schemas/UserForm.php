@@ -61,7 +61,7 @@ class UserForm
                             ->maxLength(255)
                             ->helperText(fn (string $operation): string => $operation === 'create'
                                 ? 'Mínimo 12 caracteres, con mayúsculas, minúsculas, números y símbolos. Si la cuenta es de un afiliado queda provisional: Mi Cuenta le pide cambiarla y le cierra las secciones con datos de terceros hasta que lo haga.'
-                                : 'Déjala en blanco para no cambiarla.')
+                                : 'Déjala en blanco para no cambiarla. Si escribes una para un afiliado, queda provisional: Mi Cuenta le pide cambiarla y le cierra las secciones con datos de terceros hasta que lo haga.')
                             ->columnSpanFull(),
                     ]),
 

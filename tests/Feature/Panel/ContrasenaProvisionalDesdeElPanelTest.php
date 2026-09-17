@@ -8,8 +8,13 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Asociado;
 use App\Models\User;
 use Database\Seeders\RolYPermisoSeeder;
+use Filament\Forms\Components\Field;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Text;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -110,6 +115,40 @@ class ContrasenaProvisionalDesdeElPanelTest extends TestCase
             ->assertHasNoFormErrors();
 
         $this->assertTrue($usuario->fresh()->contrasena_provisional);
+    }
+
+    /**
+     * Página del formulario, si edita a alguien, y lo que la ayuda del campo
+     * contraseña tiene que decir en ella.
+     *
+     * @return array<string, array{class-string, bool, string}>
+     */
+    public static function ayudasDeLaContrasena(): array
+    {
+        return [
+            'al crear' => [CreateUser::class, false, 'Si la cuenta es de un afiliado queda provisional'],
+            'al editar' => [EditUser::class, true, 'Déjala en blanco para no cambiarla. Si escribes una para un afiliado, queda provisional'],
+        ];
+    }
+
+    /** Quien le repone la contraseña a un afiliado tiene que saber qué le pasa a su cuenta. */
+    #[DataProvider('ayudasDeLaContrasena')]
+    public function test_la_ayuda_de_la_contrasena_avisa_que_la_de_un_afiliado_queda_provisional(string $pagina, bool $editando, string $ayudaEsperada): void
+    {
+        $parametros = $editando ? ['record' => User::factory()->create()->getRouteKey()] : [];
+        $ayuda = null;
+
+        // En Filament 5 la ayuda es un componente `Text` debajo del campo.
+        Livewire::test($pagina, $parametros)
+            ->assertFormFieldExists('password', function (TextInput $campo) use (&$ayuda): bool {
+                $ayuda = collect($campo->getChildSchema(Field::BELOW_CONTENT_SCHEMA_KEY)?->getComponents() ?? [])
+                    ->map(fn (Component $componente): string => $componente instanceof Text ? (string) $componente->getContent() : '')
+                    ->implode(' ');
+
+                return true;
+            });
+
+        $this->assertStringContainsString($ayudaEsperada, (string) $ayuda);
     }
 
     public function test_la_tabla_filtra_a_quien_le_falta_cambiarla(): void

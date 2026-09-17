@@ -86,6 +86,11 @@ class SeccionesCerradasConContrasenaProvisionalTest extends TestCase
             ->assertSessionHas('aviso');
     }
 
+    /**
+     * Que no mande a seguridad no basta: una sección que revienta tampoco
+     * manda. Sin la marca tiene que responder, sea con la página, con una
+     * redirección propia o con sus errores de validación.
+     */
     #[DataProvider('seccionesCerradas')]
     public function test_sin_la_marca_la_seccion_no_manda_a_seguridad(string $metodo, string $ruta, string $parametro): void
     {
@@ -94,6 +99,7 @@ class SeccionesCerradasConContrasenaProvisionalTest extends TestCase
         $respuesta = $this->actingAs($usuario)->call($metodo, $this->url($ruta, $parametro, $vacante, $postulacion));
 
         $this->assertNotSame(route('mi-cuenta.seguridad'), $respuesta->headers->get('Location'));
+        $this->assertLessThan(500, $respuesta->getStatusCode(), "«{$ruta}» respondió {$respuesta->getStatusCode()}.");
     }
 
     /** @return array<string, array{string}> */
