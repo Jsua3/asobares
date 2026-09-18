@@ -6,6 +6,7 @@ use App\Enums\EstadoTransaccion;
 use App\Enums\MetodoPago;
 use App\Models\Transaccion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -42,6 +43,28 @@ class PasarelaBold implements PasarelaDePago
             );
         }
 
+        $existente = $transaccion->fresh();
+
+        if ($existente->estado !== EstadoTransaccion::Pendiente) {
+            throw new RuntimeException('Solo se pueden generar enlaces para pagos pendientes.');
+        }
+
+        if ($existente->bold_payment_link !== null) {
+            $url = data_get($existente->payload, 'bold_checkout_url');
+
+            if (! is_string($url) || $url === '') {
+                throw new RuntimeException('El enlace Bold registrado no tiene URL; requiere conciliación manual.');
+            }
+
+            return $url;
+        }
+
+        $monto = (float) $existente->monto;
+
+        if ($existente->moneda !== 'COP' || $monto <= 0 || $monto !== round($monto)) {
+            throw new RuntimeException('Bold API Link requiere un monto positivo en pesos enteros (COP).');
+        }
+
         $respuesta = Http::withHeaders([
             'Authorization' => "x-api-key {$this->apiKey}",
             'Content-Type' => 'application/json',
@@ -50,13 +73,13 @@ class PasarelaBold implements PasarelaDePago
             ->post("{$this->urlBase}/online/link/v1", [
                 'amount_type' => 'CLOSE',
                 'amount' => [
-                    'currency' => $transaccion->moneda,
+                    'currency' => $existente->moneda,
                     'tip_amount' => 0,
-                    'total_amount' => (int) round((float) $transaccion->monto),
+                    'total_amount' => (int) $monto,
                 ],
-                'description' => $transaccion->concepto->getLabel(),
-                'reference' => $transaccion->referencia,
-                'callback_url' => route('pago.retorno', ['transaccion' => $transaccion->referencia]),
+                'description' => $existente->concepto->getLabel(),
+                'reference' => $existente->referencia,
+                'callback_url' => route('pago.retorno', ['transaccion' => $existente->referencia]),
                 'payment_methods' => ['PSE', 'CREDIT_CARD'],
                 'expiration_date' => now()->addDay()->getTimestampMs() * 1_000_000,
             ]);
@@ -66,19 +89,40 @@ class PasarelaBold implements PasarelaDePago
         $payload = $respuesta->json('payload');
         $url = data_get($payload, 'url');
 
-        if (! is_string($url) || $url === '') {
-            throw new RuntimeException('Bold no devolvió una URL de pago utilizable.');
-        }
-
         $paymentLink = data_get($payload, 'payment_link');
 
-        $transaccion->update(['payload' => array_merge($transaccion->payload ?? [], [
-            'bold_checkout_url' => $url,
-            'bold_link' => $payload,
-            'bold_payment_link' => is_string($paymentLink) && $paymentLink !== '' ? $paymentLink : null,
-        ])]);
+        if (! is_string($url) || $url === '' || ! is_string($paymentLink) || ! str_starts_with($paymentLink, 'LNK_')) {
+            throw new RuntimeException('Bold no devolvió un enlace de pago identificable.');
+        }
 
-        return $url;
+        return DB::transaction(function () use ($transaccion, $url, $payload, $paymentLink): string {
+            $actual = Transaccion::whereKey($transaccion->id)->lockForUpdate()->firstOrFail();
+
+            if ($actual->bold_payment_link !== null) {
+                $urlExistente = data_get($actual->payload, 'bold_checkout_url');
+
+                if (! is_string($urlExistente) || $urlExistente === '') {
+                    throw new RuntimeException('El enlace Bold registrado no tiene URL; requiere conciliación manual.');
+                }
+
+                return $urlExistente;
+            }
+
+            if ($actual->estado !== EstadoTransaccion::Pendiente) {
+                throw new RuntimeException('El pago dejó de estar pendiente antes de guardar el enlace Bold.');
+            }
+
+            $actual->update([
+                'bold_payment_link' => $paymentLink,
+                'payload' => array_merge($actual->payload ?? [], [
+                    'bold_checkout_url' => $url,
+                    'bold_link' => $payload,
+                    'bold_payment_link' => $paymentLink,
+                ]),
+            ]);
+
+            return $url;
+        });
     }
 
     /**
@@ -123,7 +167,7 @@ class PasarelaBold implements PasarelaDePago
 
         $estado = match (data_get($datos, 'type')) {
             'SALE_APPROVED' => EstadoTransaccion::Aprobada,
-            'SALE_REJECTED', 'VOID_APPROVED' => EstadoTransaccion::Rechazada,
+            'VOID_APPROVED' => EstadoTransaccion::Rechazada,
             default => EstadoTransaccion::Pendiente,
         };
 
@@ -147,10 +191,17 @@ class PasarelaBold implements PasarelaDePago
             payload: [
                 'pasarela' => 'bold',
                 'sandbox' => $this->sandbox,
+                'tipo_bold' => data_get($datos, 'type'),
                 'evento_id' => data_get($datos, 'id'),
                 'payment_id' => data_get($datos, 'data.payment_id'),
                 'bold_code' => data_get($datos, 'data.bold_code'),
                 'evento' => $datos,
+                ...(data_get($datos, 'type') === 'SALE_REJECTED' ? [
+                    'ultimo_intento_rechazado' => [
+                        'evento_id' => data_get($datos, 'id'),
+                        'payment_id' => data_get($datos, 'data.payment_id'),
+                    ],
+                ] : []),
             ],
             monto: is_numeric($montoNotificado) ? (float) $montoNotificado : null,
             moneda: is_string($moneda = data_get($datos, 'data.amount.currency')) ? $moneda : null,

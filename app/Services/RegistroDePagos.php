@@ -68,9 +68,9 @@ class RegistroDePagos
     public function aplicarConfirmacion(ResultadoDePago $resultado): ?Transaccion
     {
         return DB::transaction(function () use ($resultado): ?Transaccion {
-            $transaccion = Transaccion::where('referencia', $resultado->referencia)
-                ->lockForUpdate()
-                ->first();
+            $transaccion = str_starts_with($resultado->referencia, 'LNK_')
+                ? Transaccion::where('bold_payment_link', $resultado->referencia)->lockForUpdate()->first()
+                : Transaccion::where('referencia', $resultado->referencia)->lockForUpdate()->first();
 
             if ($transaccion === null) {
                 return null;
@@ -122,7 +122,8 @@ class RegistroDePagos
      * nada del cobro: los dos se ignoran en silencio. Lo que no puede pasar
      * en silencio es lo contrario de lo resuelto, como una anulación
      * (VOID_APPROVED) sobre un cobro aprobado o una aprobación sobre uno
-     * rechazado.
+     * rechazado. Un intento SALE_REJECTED de API Link no cierra el enlace:
+     * Bold permite volver a intentar el pago sobre el mismo LNK.
      */
     private function contradiceLoResuelto(Transaccion $transaccion, ResultadoDePago $resultado): bool
     {
@@ -142,8 +143,17 @@ class RegistroDePagos
      */
     private function registrarIncidencia(Transaccion $transaccion, ResultadoDePago $resultado): void
     {
+        $payload = $transaccion->payload ?? [];
+        $eventoId = data_get($resultado->payload, 'evento_id');
+
+        if ($eventoId !== null && collect($payload['incidencias'] ?? [])
+            ->contains(fn (array $incidencia): bool => ($incidencia['evento_id'] ?? null) === $eventoId)) {
+            return;
+        }
+
         $incidencia = [
             'tipo' => 'notificacion_contradictoria',
+            'evento_id' => $eventoId,
             'estado_registrado' => $transaccion->estado->value,
             'estado_notificado' => $resultado->estado->value,
             'evento' => data_get($resultado->payload, 'evento.type'),
@@ -155,7 +165,6 @@ class RegistroDePagos
             ...$incidencia,
         ]);
 
-        $payload = $transaccion->payload ?? [];
         $payload['incidencias'] = [...($payload['incidencias'] ?? []), $incidencia];
 
         $transaccion->update(['payload' => $payload]);
@@ -200,8 +209,12 @@ class RegistroDePagos
             return false;
         }
 
-        return $resultado->moneda === null
-            || strtoupper($resultado->moneda) === strtoupper((string) $transaccion->moneda);
+        if (data_get($resultado->payload, 'pasarela') === 'bold' && $resultado->monto !== floor($resultado->monto)) {
+            return false;
+        }
+
+        return $resultado->moneda !== null
+            && strtoupper($resultado->moneda) === strtoupper((string) $transaccion->moneda);
     }
 
     /** Lo que un pago aprobado desencadena, según su concepto. */

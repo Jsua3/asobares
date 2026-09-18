@@ -493,9 +493,56 @@ class FlujoDePagoTest extends TestCase
         $payload = $transaccion->fresh()->payload;
 
         $this->assertSame('LNK_H7S4xxx', $payload['bold_payment_link']);
+        $this->assertSame('LNK_H7S4xxx', $transaccion->fresh()->bold_payment_link);
         $this->assertSame('https://checkout.bold.co/LNK_H7S4xxx', $payload['bold_checkout_url']);
         $this->assertSame('LNK_H7S4xxx', $payload['bold_link']['payment_link']);
         $this->assertSame($transaccion->referencia, $transaccion->fresh()->referencia);
+    }
+
+    public function test_bold_reutiliza_el_link_pendiente_sin_crear_otro(): void
+    {
+        $transaccion = Transaccion::create([
+            'referencia' => Transaccion::generarReferencia(),
+            'concepto' => ConceptoTransaccion::Mensualidad,
+            'monto' => 150000,
+            'moneda' => 'COP',
+            'estado' => EstadoTransaccion::Pendiente,
+            'metodo' => MetodoPago::Otro,
+        ]);
+
+        Http::fake(['https://integrations.api.bold.co/online/link/v1' => Http::response([
+            'payload' => ['payment_link' => 'LNK_REUSO', 'url' => 'https://checkout.bold.co/LNK_REUSO'],
+        ])]);
+
+        $pasarela = new PasarelaBold('llave', 'secreto', 'https://integrations.api.bold.co', true);
+
+        $this->assertSame('https://checkout.bold.co/LNK_REUSO', $pasarela->crearEnlaceDePago($transaccion));
+        $this->assertSame('https://checkout.bold.co/LNK_REUSO', $pasarela->crearEnlaceDePago($transaccion));
+        Http::assertSentCount(1);
+    }
+
+    public function test_bold_no_redondea_centavos_al_crear_un_link_de_pesos_enteros(): void
+    {
+        $transaccion = Transaccion::create([
+            'referencia' => Transaccion::generarReferencia(),
+            'concepto' => ConceptoTransaccion::Mensualidad,
+            'monto' => 150000.50,
+            'moneda' => 'COP',
+            'estado' => EstadoTransaccion::Pendiente,
+            'metodo' => MetodoPago::Otro,
+        ]);
+
+        Http::fake();
+
+        $this->expectException(RuntimeException::class);
+
+        try {
+            (new PasarelaBold('llave', 'secreto', 'https://integrations.api.bold.co', true))
+                ->crearEnlaceDePago($transaccion);
+        } finally {
+            Http::assertNothingSent();
+            $this->assertNull($transaccion->fresh()->bold_payment_link);
+        }
     }
 
     public function test_bold_en_sandbox_local_permite_crear_link_sin_secret_de_webhook(): void
@@ -898,13 +945,30 @@ class FlujoDePagoTest extends TestCase
         return Transaccion::firstOrFail();
     }
 
+    private function asociarLinkBold(Transaccion $transaccion, string $link): void
+    {
+        $transaccion->update([
+            'bold_payment_link' => $link,
+            'payload' => array_merge($transaccion->payload ?? [], [
+                'bold_payment_link' => $link,
+                'bold_checkout_url' => "https://checkout.bold.co/{$link}",
+            ]),
+        ]);
+    }
+
     /**
      * Manda por HTTP una notificación de Bold firmada con la llave de pruebas,
      * igual que `test_el_webhook_con_firma_valida_actualiza_la_transaccion_y_la_inscripcion`:
      * pasa por la verificación de firma real, no la esquiva.
      */
-    private function notificarDesdeBold(string $tipo, Transaccion $transaccion): TestResponse
-    {
+    private function notificarDesdeBold(
+        string $tipo,
+        Transaccion $transaccion,
+        ?string $referencia = null,
+        ?float $monto = null,
+        ?string $moneda = 'COP',
+        ?string $referenciaAlterna = null,
+    ): TestResponse {
         config()->set('pagos.driver', 'bold');
         config()->set('pagos.bold.secret', self::LLAVE_DE_IDENTIDAD);
         app()->forgetInstance(PasarelaDePago::class);
@@ -913,9 +977,10 @@ class FlujoDePagoTest extends TestCase
             'id' => 'EVT_'.$tipo,
             'type' => $tipo,
             'data' => [
-                'metadata' => ['reference' => $transaccion->referencia],
+                'metadata' => ['reference' => $referencia ?? $transaccion->referencia],
+                ...($referenciaAlterna !== null ? ['reference' => $referenciaAlterna] : []),
                 'payment_method' => 'PSE',
-                'amount' => ['total' => (float) $transaccion->monto, 'currency' => 'COP'],
+                'amount' => ['total' => $monto ?? (float) $transaccion->monto, 'currency' => $moneda],
             ],
         ]);
 
@@ -928,6 +993,124 @@ class FlujoDePagoTest extends TestCase
             ],
             content: $cuerpo
         );
+    }
+
+    public function test_webhook_api_link_aprueba_por_lnk_y_no_pierde_la_referencia_interna(): void
+    {
+        $transaccion = $this->transaccionDeInscripcionPendiente();
+        $this->asociarLinkBold($transaccion, 'LNK_EVENTO_1');
+
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion, 'LNK_EVENTO_1')->assertOk();
+
+        $this->assertSame(EstadoTransaccion::Aprobada, $transaccion->fresh()->estado);
+        $this->assertSame(EstadoInscripcion::Confirmada, Inscripcion::firstOrFail()->estado);
+        $this->assertSame('LNK_EVENTO_1', $transaccion->fresh()->bold_payment_link);
+        $this->assertStringStartsWith('ASO-', $transaccion->fresh()->referencia);
+
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion, 'LNK_EVENTO_1')->assertOk();
+        $this->assertSame(EstadoInscripcion::Confirmada, Inscripcion::firstOrFail()->estado);
+        $this->assertArrayNotHasKey('incidencias', $transaccion->fresh()->payload);
+    }
+
+    public function test_webhook_api_link_rechazado_puede_aprobarse_despues_una_sola_vez(): void
+    {
+        $transaccion = $this->transaccionDeInscripcionPendiente();
+        $this->asociarLinkBold($transaccion, 'LNK_REINTENTO_1');
+
+        $this->notificarDesdeBold('SALE_REJECTED', $transaccion, 'LNK_REINTENTO_1')->assertOk();
+        $this->assertSame(EstadoTransaccion::Pendiente, $transaccion->fresh()->estado);
+        $this->assertSame(EstadoInscripcion::Registrada, Inscripcion::firstOrFail()->estado);
+
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion, 'LNK_REINTENTO_1')->assertOk();
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion, 'LNK_REINTENTO_1')->assertOk();
+
+        $this->assertSame(EstadoTransaccion::Aprobada, $transaccion->fresh()->estado);
+        $this->assertSame(EstadoInscripcion::Confirmada, Inscripcion::firstOrFail()->estado);
+        $this->assertSame('EVT_SALE_REJECTED', $transaccion->fresh()->payload['ultimo_intento_rechazado']['evento_id']);
+        $this->assertArrayNotHasKey('incidencias', $transaccion->fresh()->payload);
+    }
+
+    public function test_webhook_api_link_rechaza_monto_moneda_y_firma_incorrectos(): void
+    {
+        $transaccion = $this->transaccionDeInscripcionPendiente();
+        $this->asociarLinkBold($transaccion, 'LNK_VALIDACIONES_1');
+
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion, 'LNK_VALIDACIONES_1', 1000.0)->assertOk();
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion, 'LNK_VALIDACIONES_1', 30000.001)->assertOk();
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion, 'LNK_VALIDACIONES_1', moneda: 'USD')->assertOk();
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion, 'LNK_VALIDACIONES_1', moneda: null)->assertOk();
+
+        $this->postJson(route('webhooks.bold'), [
+            'type' => 'SALE_APPROVED',
+            'data' => ['metadata' => ['reference' => 'LNK_VALIDACIONES_1']],
+        ], ['x-bold-signature' => 'firma-falsa'])->assertUnauthorized();
+
+        $this->assertSame(EstadoTransaccion::Pendiente, $transaccion->fresh()->estado);
+        $this->assertSame(EstadoInscripcion::Registrada, Inscripcion::firstOrFail()->estado);
+    }
+
+    public function test_webhook_lnk_desconocido_no_puede_aprobar_otra_transaccion(): void
+    {
+        $transaccion = $this->transaccionDeInscripcionPendiente();
+        $this->asociarLinkBold($transaccion, 'LNK_CONOCIDO_1');
+
+        $this->notificarDesdeBold(
+            'SALE_APPROVED',
+            $transaccion,
+            'LNK_DESCONOCIDO_1',
+            referenciaAlterna: $transaccion->referencia,
+        )->assertNotFound();
+
+        $this->assertSame(EstadoTransaccion::Pendiente, $transaccion->fresh()->estado);
+        $this->assertSame(EstadoInscripcion::Registrada, Inscripcion::firstOrFail()->estado);
+    }
+
+    public function test_webhook_lnk_solo_abona_la_cartera_de_su_transaccion(): void
+    {
+        $primero = Asociado::factory()->publicado()->create();
+        $segundo = Asociado::factory()->publicado()->create();
+
+        foreach ([$primero, $segundo] as $asociado) {
+            Cartera::create([
+                'asociado_id' => $asociado->id,
+                'saldo_pendiente' => 100000,
+                'meses_mora' => 2,
+                'actualizado_at' => now(),
+            ]);
+        }
+
+        $primerCobro = app(RegistroDePagos::class)->cobrarMensualidad($primero, 100000);
+        $segundoCobro = app(RegistroDePagos::class)->cobrarMensualidad($segundo, 100000);
+        $this->asociarLinkBold($primerCobro, 'LNK_CARTERA_1');
+        $this->asociarLinkBold($segundoCobro, 'LNK_CARTERA_2');
+
+        $this->notificarDesdeBold('SALE_APPROVED', $segundoCobro, 'LNK_CARTERA_1')->assertOk();
+
+        $this->assertSame(EstadoTransaccion::Aprobada, $primerCobro->fresh()->estado);
+        $this->assertSame(EstadoTransaccion::Pendiente, $segundoCobro->fresh()->estado);
+        $this->assertSame('0.00', $primero->cartera->fresh()->saldo_pendiente);
+        $this->assertSame('100000.00', $segundo->cartera->fresh()->saldo_pendiente);
+    }
+
+    public function test_webhook_lnk_no_abona_dos_veces_tras_rechazo_y_aprobacion_repetida(): void
+    {
+        $asociado = Asociado::factory()->publicado()->create();
+        Cartera::create([
+            'asociado_id' => $asociado->id,
+            'saldo_pendiente' => 100000,
+            'meses_mora' => 2,
+            'actualizado_at' => now(),
+        ]);
+
+        $transaccion = app(RegistroDePagos::class)->cobrarMensualidad($asociado, 30000);
+        $this->asociarLinkBold($transaccion, 'LNK_ABONO_PARCIAL_1');
+
+        $this->notificarDesdeBold('SALE_REJECTED', $transaccion, 'LNK_ABONO_PARCIAL_1')->assertOk();
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion, 'LNK_ABONO_PARCIAL_1')->assertOk();
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion, 'LNK_ABONO_PARCIAL_1')->assertOk();
+
+        $this->assertSame(EstadoTransaccion::Aprobada, $transaccion->fresh()->estado);
+        $this->assertSame('70000.00', $asociado->cartera->fresh()->saldo_pendiente);
     }
 
     /**
@@ -977,7 +1160,22 @@ class FlujoDePagoTest extends TestCase
         $this->assertSame(EstadoInscripcion::Confirmada, Inscripcion::firstOrFail()->estado, 'Ni la inscripción.');
     }
 
-    public function test_un_rechazo_de_bold_sobre_un_cobro_pendiente_lo_rechaza_sin_confirmar_la_inscripcion(): void
+    public function test_una_anulacion_repetida_de_api_link_no_duplica_la_incidencia(): void
+    {
+        $transaccion = $this->transaccionDeInscripcionPendiente();
+        $this->asociarLinkBold($transaccion, 'LNK_VOID_1');
+
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion, 'LNK_VOID_1')->assertOk();
+        $this->notificarDesdeBold('VOID_APPROVED', $transaccion, 'LNK_VOID_1')->assertOk();
+        $this->notificarDesdeBold('VOID_APPROVED', $transaccion, 'LNK_VOID_1')->assertOk();
+
+        $this->assertSame(EstadoTransaccion::Aprobada, $transaccion->fresh()->estado);
+        $this->assertSame(EstadoInscripcion::Confirmada, Inscripcion::firstOrFail()->estado);
+        $this->assertCount(1, $transaccion->fresh()->payload['incidencias']);
+        $this->assertSame(1, Activity::query()->where('log_name', 'pagos')->count());
+    }
+
+    public function test_un_intento_rechazado_de_bold_conserva_el_link_pendiente_sin_confirmar_la_inscripcion(): void
     {
         $transaccion = $this->transaccionDeInscripcionPendiente();
 
@@ -987,11 +1185,12 @@ class FlujoDePagoTest extends TestCase
             ->assertOk()
             ->assertExactJson([
                 'referencia' => $transaccion->referencia,
-                'estado' => EstadoTransaccion::Rechazada->value,
+                'estado' => EstadoTransaccion::Pendiente->value,
             ]);
 
-        $this->assertSame(EstadoTransaccion::Rechazada, $transaccion->fresh()->estado);
+        $this->assertSame(EstadoTransaccion::Pendiente, $transaccion->fresh()->estado);
         $this->assertSame(EstadoInscripcion::Registrada, Inscripcion::firstOrFail()->estado);
+        $this->assertSame('EVT_SALE_REJECTED', $transaccion->fresh()->payload['ultimo_intento_rechazado']['evento_id']);
 
         // Un rechazo de un cobro pendiente es el camino normal, no una incidencia.
         Log::shouldNotHaveReceived('error');
@@ -1031,31 +1230,19 @@ class FlujoDePagoTest extends TestCase
         $this->assertSame(0, Activity::query()->where('log_name', 'pagos')->count());
     }
 
-    /**
-     * El caso simétrico, con el mismo remedio: Bold aprueba un cobro que aquí
-     * ya estaba rechazado —por ejemplo, alguien reintenta en el mismo enlace—.
-     * Hay dinero cobrado y ningún efecto aplicado, y eso tampoco puede pasar
-     * en silencio.
-     */
-    public function test_una_aprobacion_de_bold_sobre_un_cobro_rechazado_deja_rastro_sin_aplicarla(): void
+    public function test_bold_puede_aprobar_tras_un_intento_rechazado_sin_duplicar_el_efecto(): void
     {
         $transaccion = $this->transaccionDeInscripcionPendiente();
 
         $this->notificarDesdeBold('SALE_REJECTED', $transaccion)->assertOk();
 
-        Log::spy();
-
+        $this->notificarDesdeBold('SALE_APPROVED', $transaccion)->assertOk();
         $this->notificarDesdeBold('SALE_APPROVED', $transaccion)->assertOk();
 
-        Log::shouldHaveReceived('error')
-            ->withArgs(fn (string $mensaje, array $contexto = []): bool => ($contexto['referencia'] ?? null) === $transaccion->referencia
-                && ($contexto['estado_registrado'] ?? null) === EstadoTransaccion::Rechazada->value
-                && ($contexto['estado_notificado'] ?? null) === EstadoTransaccion::Aprobada->value)
-            ->once();
-
-        $this->assertCount(1, $transaccion->fresh()->payload['incidencias'] ?? []);
-        $this->assertSame(1, Activity::query()->where('log_name', 'pagos')->count());
-        $this->assertSame(EstadoTransaccion::Rechazada, $transaccion->fresh()->estado);
-        $this->assertSame(EstadoInscripcion::Registrada, Inscripcion::firstOrFail()->estado);
+        $this->assertSame(EstadoTransaccion::Aprobada, $transaccion->fresh()->estado);
+        $this->assertSame(EstadoInscripcion::Confirmada, Inscripcion::firstOrFail()->estado);
+        $this->assertSame('EVT_SALE_REJECTED', $transaccion->fresh()->payload['ultimo_intento_rechazado']['evento_id']);
+        $this->assertArrayNotHasKey('incidencias', $transaccion->fresh()->payload);
+        $this->assertSame(0, Activity::query()->where('log_name', 'pagos')->count());
     }
 }
