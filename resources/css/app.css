@@ -651,35 +651,15 @@
         }
 
         /*
-         * En scroll y atención las tres píldoras dejan huecos, y el texto que
-         * pasaba por debajo se leía entre ellas. Este velo lo desenfoca sin
-         * cambiar geometría, enlaces ni módulos.
-         *
-         * No es una banda: se DESVANECE hacia abajo con una máscara. Con
-         * fondo opaco y corte seco volvía a ser la franja de lado a lado con
-         * una raya recta cruzando la página, que es lo que las píldoras
-         * flotantes vinieron a quitar. Y es translúcido para que el
-         * desenfoque componga algo: debajo de un fondo sólido se pagaba en
-         * cada fotograma de scroll sin pintar nada.
-         *
-         * Va por debajo de `.bandeja` (z-index 1): sin eso tapa el logo, los
-         * enlaces y la cuenta.
+         * En scroll y atención las tres píldoras dejan huecos, y por ahí se
+         * leía el texto que pasaba por debajo. Hubo un pseudoelemento sobre
+         * el cromo que lo desenfocaba, pero pintaba de canto a canto de la
+         * pantalla y no solo esos huecos: a 70-99% de opacidad eso se veía
+         * como una barra clara cruzando toda la cabecera sobre cualquier
+         * foto del hero (Sua, 17 sep, con captura). Se retira sin
+         * reemplazo; el texto entre píldoras vuelve a leerse levemente, que
+         * es preferible a la barra.
          */
-        .cromo[data-estado="scroll"]::after,
-        .cromo[data-estado="atencion"]::after {
-            content: '';
-            pointer-events: none;
-            position: absolute;
-            inset: 0 0 auto;
-            height: calc(100% + 1.5rem);
-            z-index: 0;
-            background-color: var(--asb-cromo-fila);
-            -webkit-backdrop-filter: var(--asb-cromo-desenfoque);
-            backdrop-filter: var(--asb-cromo-desenfoque);
-            -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5rem), transparent);
-            mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5rem), transparent);
-        }
-
         .bandeja {
             z-index: 1;
             width: min(calc(100% - 2rem), 80rem);

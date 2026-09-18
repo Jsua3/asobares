@@ -529,56 +529,27 @@ class NavbarTresEstadosTest extends TestCase
     }
 
     /**
-     * En scroll las tres píldoras dejan huecos, y el texto que pasa por debajo
-     * se leía entre ellas. El velo de fila lo desenfoca sin tocar la geometría.
+     * En scroll las tres píldoras dejan huecos y el texto que pasa por
+     * debajo se lee levemente entre ellas — a propósito. Hubo un velo de
+     * fila (`.cromo[data-estado="scroll"]::after`) que los tapaba, pero
+     * pintaba de canto a canto de la pantalla entera y no solo esos huecos:
+     * a 70-99% de opacidad se veía como una barra clara cruzando la
+     * cabecera sobre cualquier foto del hero (Sua, 17 sep, con captura de
+     * la barra en producción). Se retiró sin reemplazo.
      *
-     * La guardia anterior buscaba tres cadenas y seguía verde con el defecto
-     * entero de vuelta (`--asb-cromo-fila: transparent`) y con la banda
-     * tapando logo, enlaces y cuenta (sin el `z-index` de `.bandeja`). Esta
-     * mide lo que el velo HACE:
-     *
-     * - existe en los dos estados y pinta el token de fila con desenfoque;
-     * - se desvanece por máscara hacia `transparent`: sin ella vuelve la
-     *   franja de lado a lado con un corte recto cruzando la página;
-     * - el token es translúcido en los dos temas (un fondo sólido no deja
-     *   nada que desenfocar a las píldoras) y sólido bajo transparencia
-     *   reducida;
-     * - queda por DEBAJO de `.bandeja` en el apilamiento.
-     *
-     * Roturas: token a `transparent`, token opaco, sin máscara, sin
-     * `z-index` en `.bandeja`, sin los `::after`.
+     * Rotura: reintroducir `.cromo[data-estado="scroll"]::after` (o su
+     * gemelo de "atencion") o el token `--asb-cromo-fila`.
      */
-    public function test_el_velo_de_fila_cubre_los_huecos_en_scroll(): void
+    public function test_no_hay_velo_de_fila_tapando_los_huecos_en_scroll(): void
     {
         $css = File::get(resource_path('css/app.css'));
         $escritorio = $this->bloqueCss($css, '@media (min-width: 64rem) {');
 
-        $selector = ".cromo[data-estado=\"scroll\"]::after,\n        .cromo[data-estado=\"atencion\"]::after";
-        $velo = $this->regla($escritorio, $selector);
-
-        $this->assertStringContainsString("content: '';", $velo, 'el velo de fila no se pinta');
-        $this->assertStringContainsString('background-color: var(--asb-cromo-fila);', $velo);
-        $this->assertStringContainsString('backdrop-filter: var(--asb-cromo-desenfoque);', $velo);
-        $this->assertMatchesRegularExpression('/(?<!-webkit-)mask-image: linear-gradient\(to bottom, #000 [^;]+, transparent\);/', $velo, 'sin máscara el velo es una banda con corte recto');
-
-        $this->assertSame(1, preg_match('/z-index: (\d+);/', $velo, $zVelo), 'el velo de fila no declara su z-index');
-        $this->assertSame(1, preg_match('/z-index: (\d+);/', $this->regla($escritorio, '.bandeja'), $zBandeja), '.bandeja de escritorio no declara z-index: el velo la tapa');
-        $this->assertGreaterThan((int) $zVelo[1], (int) $zBandeja[1], 'el velo de fila queda por encima de logo, enlaces y cuenta');
+        $this->assertStringNotContainsString('data-estado="scroll"]::after', $escritorio, 'volvió la barra clara de canto a canto en scroll');
+        $this->assertStringNotContainsString('data-estado="atencion"]::after', $escritorio, 'volvió la barra clara de canto a canto en atención');
 
         $tokens = File::get(resource_path('css/tokens.css'));
-        $patron = '/--asb-cromo-fila: color-mix\(in oklab, var\(--asb-fondo\) (\d+)%, transparent\);/';
-
-        foreach (['claro' => ':root {', 'oscuro' => '.dark {'] as $tema => $marca) {
-            $this->assertSame(1, preg_match($patron, $this->bloqueCss($tokens, $marca), $alfa), "el velo de fila {$tema} no es un color-mix translúcido del fondo");
-            $this->assertGreaterThanOrEqual(70, (int) $alfa[1], "el velo de fila {$tema} deja pasar demasiado");
-            $this->assertLessThan(100, (int) $alfa[1], "el velo de fila {$tema} es opaco: el desenfoque no compone nada");
-        }
-
-        $this->assertStringContainsString(
-            '--asb-cromo-fila: var(--asb-fondo);',
-            $this->bloqueCss($tokens, '@media (prefers-reduced-transparency: reduce) {'),
-            'bajo transparencia reducida el velo de fila tiene que ser sólido'
-        );
+        $this->assertStringNotContainsString('--asb-cromo-fila', $tokens, 'el token del velo de fila debía retirarse junto con la regla que lo usaba');
     }
 
     /**
