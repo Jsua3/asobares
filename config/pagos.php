@@ -53,6 +53,7 @@ return [
         | cualquiera. Hay que pedirlo a propósito.
         */
         'sandbox' => filter_var(env('BOLD_SANDBOX', false), FILTER_VALIDATE_BOOLEAN),
+        'sandbox_webhook_link' => env('BOLD_SANDBOX_WEBHOOK_LINK', ''),
     ],
 
 ];

@@ -24,6 +24,7 @@ use App\Http\Controllers\Publico\SeguridadDeLaCuentaController;
 use App\Http\Controllers\Publico\SesionAsociadoController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\WebhookBoldController;
+use App\Http\Controllers\WebhookBoldPruebasController;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
@@ -277,3 +278,8 @@ Route::post('/webhooks/bold', WebhookBoldController::class)
     ->withoutMiddleware([PreventRequestForgery::class])
     ->middleware('throttle:webhook-bold')
     ->name('webhooks.bold');
+
+Route::post('/webhooks/bold/pruebas', WebhookBoldPruebasController::class)
+    ->withoutMiddleware([PreventRequestForgery::class])
+    ->middleware('throttle:webhook-bold')
+    ->name('webhooks.bold.pruebas');
