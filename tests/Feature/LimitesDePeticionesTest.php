@@ -138,6 +138,7 @@ class LimitesDePeticionesTest extends TestCase
             'editar una vacante' => ['PUT', 'mi-cuenta.vacantes.update', ['vacante' => 999999], 20, true],
             'gestionar una postulación' => ['PATCH', 'mi-cuenta.postulaciones.gestionar', ['postulacion' => 999999], 60, true],
             'consultar la guía' => ['GET', 'guia.index', [], 30, false],
+            'consultar la guía de un municipio' => ['GET', 'guia.municipio', ['municipio' => 'no-existe'], 30, false],
             'descargar un formato' => ['GET', 'guia.formato', ['requisito' => 999999], 10, false],
             'registrar un perfil de empleo' => ['POST', 'empleo.aspirante', [], 6, false],
             'postularse a una vacante' => ['POST', 'empleo.postular', ['vacante' => 999999], 6, false],

@@ -67,6 +67,12 @@ Route::get('/politica-de-datos', [PaginaController::class, 'politicaDeDatos'])->
 
 // Directorio de establecimientos.
 Route::get('/directorio', [DirectorioController::class, 'index'])->name('directorio.index');
+// URL propia por municipio: la canónica de /directorio?municipio= siempre
+// colapsa en /directorio (url()->current() descarta la query), así que esa
+// forma nunca puede posicionar "bares en Salento" aparte de "bares en
+// Armenia". Va antes de /{asociado:slug} solo por orden de lectura: al tener
+// un segmento más, Laravel no los confunde en ningún orden.
+Route::get('/directorio/municipio/{municipio:slug}', [DirectorioController::class, 'porMunicipio'])->name('directorio.municipio');
 Route::get('/directorio/{asociado:slug}', [DirectorioController::class, 'show'])->name('directorio.show');
 
 // Guía normativa: el producto insignia.
@@ -80,6 +86,12 @@ Route::get('/directorio/{asociado:slug}', [DirectorioController::class, 'show'])
 Route::get('/abre-tu-negocio', [GuiaController::class, 'index'])
     ->middleware('throttle:guia')
     ->name('guia.index');
+// Misma URL propia por municipio, mismo motivo y mismo límite que arriba:
+// llegar aquí en bucle sobre los doce municipios es el mismo abuso que la
+// nota de arriba explica, solo que por ruta en vez de por query string.
+Route::get('/abre-tu-negocio/{municipio:slug}', [GuiaController::class, 'porMunicipio'])
+    ->middleware('throttle:guia')
+    ->name('guia.municipio');
 // Descargar un formato también escribe en consultas_guia (ver el
 // controlador), pero es una acción más deliberada y menos repetitiva que
 // elegir municipio: nadie baja 30 formatos por minuto de verdad, y cada guía

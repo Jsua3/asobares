@@ -1,5 +1,17 @@
-<x-layouts.publico :titulo="ajuste('seo_guia_titulo', ajuste('guia_titulo').' — ASOBARES Quindío')"
-                   :descripcion="ajuste('seo_guia_descripcion', 'Requisitos para abrir un bar, gastrobar o café en el Quindío: qué pide cada entidad y ante quién se tramita, municipio por municipio.')">
+@php
+    // Título y descripción propios cuando el municipio es explícito (por su
+    // URL o por `?municipio=`), no el que cargó por defecto: así "cómo abrir
+    // un bar en Salento" no compite con el mismo título genérico de la guía
+    // entera para los doce municipios.
+    $tituloPagina = $municipioPagina
+        ? "Requisitos para abrir un bar en {$municipioPagina->nombre}, Quindío — ASOBARES Quindío"
+        : ajuste('seo_guia_titulo', ajuste('guia_titulo').' — ASOBARES Quindío');
+    $descripcionPagina = $municipioPagina
+        ? "Trámites, entidades y costo aproximado para abrir un bar, gastrobar o café en {$municipioPagina->nombre}, Quindío, según la guía oficial del gremio."
+        : ajuste('seo_guia_descripcion', 'Requisitos para abrir un bar, gastrobar o café en el Quindío: qué pide cada entidad y ante quién se tramita, municipio por municipio.');
+@endphp
+
+<x-layouts.publico :titulo="$tituloPagina" :descripcion="$descripcionPagina">
 
     @push('cabeza')
         @vite(['resources/css/guia-editorial.css'])
@@ -71,7 +83,7 @@
             </h2>
             <div class="guia-editorial-municipios mt-5">
                 @foreach ($municipios as $municipio)
-                    <a href="{{ route('guia.index', ['municipio' => $municipio->slug]) }}"
+                    <a href="{{ route('guia.municipio', $municipio) }}"
                        class="guia-editorial-municipio pulsable"
                        @if ($seleccionado?->is($municipio)) aria-current="true" @endif>
                         {{ $municipio->nombre }}

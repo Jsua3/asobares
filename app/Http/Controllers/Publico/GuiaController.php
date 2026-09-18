@@ -21,6 +21,30 @@ class GuiaController
     {
         $request->validate(['municipio' => ['nullable', 'string', 'exists:municipios,slug']]);
 
+        return $this->vistaDeGuia(
+            $request->string('municipio')->toString() ?: null,
+            explicito: $request->filled('municipio'),
+        );
+    }
+
+    /**
+     * URL propia por municipio: /abre-tu-negocio/salento.
+     *
+     * Mismo motivo que `DirectorioController::porMunicipio()`: la canónica de
+     * `index()` colapsa todas las variantes de `?municipio=` en la página
+     * base, así que ninguna puede posicionar "cómo abrir un bar en Salento"
+     * aparte de "en Armenia". Llegar aquí cuenta para el observatorio igual
+     * que elegirlo del desplegable: es la misma intención deliberada.
+     */
+    public function porMunicipio(Municipio $municipio): View
+    {
+        abort_unless($municipio->activo, 404);
+
+        return $this->vistaDeGuia($municipio->slug, explicito: true);
+    }
+
+    private function vistaDeGuia(?string $slug, bool $explicito): View
+    {
         // Sólo se ofrecen municipios que ya tienen la guía levantada Y vigente:
         // uno cuyos trámites hayan caducado todos saldría en el selector con la
         // guía vacía.
@@ -29,8 +53,8 @@ class GuiaController
             ->ordenados()
             ->get();
 
-        $seleccionado = filled($request->string('municipio')->toString())
-            ? $municipiosConGuia->firstWhere('slug', $request->string('municipio')->toString())
+        $seleccionado = filled($slug)
+            ? $municipiosConGuia->firstWhere('slug', $slug)
             : $municipiosConGuia->first();
 
         $requisitos = $seleccionado
@@ -43,14 +67,16 @@ class GuiaController
 
         // Conteo anónimo para el observatorio: en qué municipios la gente
         // quiere abrir un negocio. Solo se registra cuando se elige explícitamente
-        // para evitar inflar al municipio por defecto con clics accidentales en el menú.
-        if ($seleccionado !== null && $request->filled('municipio')) {
+        // -- desde el desplegable o desde su URL propia -- para evitar inflar
+        // al municipio por defecto con visitas accidentales a la página base.
+        if ($seleccionado !== null && $explicito) {
             ConsultaGuia::registrar($seleccionado->id);
         }
 
         return view('publico.guia.index', [
             'municipios' => $municipiosConGuia,
             'seleccionado' => $seleccionado,
+            'municipioPagina' => $explicito ? $seleccionado : null,
             'requisitos' => $requisitos,
             'costoTotal' => $requisitos->sum(fn (RequisitoApertura $r): float => (float) $r->costo_aproximado),
         ]);
