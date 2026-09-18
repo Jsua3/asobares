@@ -6,13 +6,25 @@ use App\Enums\EstadoMensaje;
 use App\Enums\TipoMensaje;
 use App\Filament\Resources\Aliados\Pages\ListAliados;
 use App\Filament\Resources\Artistas\Pages\ListArtistas;
+use App\Filament\Resources\Asociados\Pages\ListAsociados;
+use App\Filament\Resources\Aspirantes\Pages\ListAspirantes;
+use App\Filament\Resources\Eventos\Pages\ListEventos;
+use App\Filament\Resources\Iniciativas\Pages\ListIniciativas;
 use App\Filament\Resources\Mensajes\Pages\ListMensajes;
+use App\Filament\Resources\Noticias\Pages\ListNoticias;
 use App\Filament\Resources\Proveedors\Pages\ListProveedors;
+use App\Filament\Resources\RequisitoAperturas\Pages\ListRequisitoAperturas;
 use App\Models\Aliado;
 use App\Models\Artista;
+use App\Models\Asociado;
+use App\Models\Aspirante;
+use App\Models\Evento;
+use App\Models\Iniciativa;
 use App\Models\Mensaje;
 use App\Models\Municipio;
+use App\Models\Noticia;
 use App\Models\Proveedor;
+use App\Models\RequisitoApertura;
 use App\Models\User;
 use Database\Seeders\RolYPermisoSeeder;
 use Filament\Actions\ActionGroup;
@@ -164,6 +176,90 @@ class PresentacionDeTablasOperativasTest extends TestCase
         ])->assertHasNoErrors();
 
         $this->assertSame(EstadoMensaje::Respondido, $mensaje->fresh()->estado);
+    }
+
+    /**
+     * Cierre de la regresión de ancho horizontal (Eventos, Boletín, Guía
+     * normativa, Iniciativas, Aspirantes y Asociados): las seis bandejas
+     * quedaban con columnas sueltas y acciones sin agrupar. Solo se verifica
+     * el contrato que ya exige este archivo —`asb-operativo` + un único
+     * `ActionGroup`—, igual que las cuatro bandejas de arriba.
+     */
+    public function test_eventos_agrupa_sus_acciones_y_usa_el_patron_operativo(): void
+    {
+        $evento = Evento::factory()->create();
+
+        $lista = Livewire::test(ListEventos::class);
+
+        $this->assertPatronOperativo($lista);
+        $this->assertSame(['aprobar', 'devolver', 'edit'], $this->nombresDeAcciones($lista));
+
+        $lista->assertCanSeeTableRecords([$evento]);
+    }
+
+    public function test_boletin_agrupa_sus_acciones_y_usa_el_patron_operativo(): void
+    {
+        $noticia = Noticia::factory()->create();
+
+        $lista = Livewire::test(ListNoticias::class);
+
+        $this->assertPatronOperativo($lista);
+        $this->assertSame(['aprobar', 'devolver', 'edit'], $this->nombresDeAcciones($lista));
+
+        $lista->assertCanSeeTableRecords([$noticia]);
+    }
+
+    public function test_guia_normativa_agrupa_sus_acciones_y_usa_el_patron_operativo(): void
+    {
+        $requisito = RequisitoApertura::factory()->create();
+
+        $lista = Livewire::test(ListRequisitoAperturas::class);
+
+        $this->assertPatronOperativo($lista);
+        $this->assertSame(['aprobar', 'devolver', 'edit'], $this->nombresDeAcciones($lista));
+
+        $lista->assertCanSeeTableRecords([$requisito]);
+    }
+
+    public function test_iniciativas_agrupa_sus_acciones_y_usa_el_patron_operativo(): void
+    {
+        $iniciativa = Iniciativa::factory()->create();
+
+        $lista = Livewire::test(ListIniciativas::class);
+
+        $this->assertPatronOperativo($lista);
+        $this->assertSame(['aprobar', 'devolver', 'edit'], $this->nombresDeAcciones($lista));
+
+        $lista->assertCanSeeTableRecords([$iniciativa]);
+    }
+
+    public function test_aspirantes_agrupa_sus_acciones_y_usa_el_patron_operativo(): void
+    {
+        $aspirante = Aspirante::factory()->create();
+
+        $lista = Livewire::test(ListAspirantes::class);
+
+        $this->assertPatronOperativo($lista);
+        $this->assertSame(['edit', 'aprobar', 'retirar'], $this->nombresDeAcciones($lista));
+
+        $lista->assertCanSeeTableRecords([$aspirante]);
+    }
+
+    /**
+     * Asociados ya tenía `asb-operativo` desde `bff282c` (solo en la página de
+     * listado); lo que faltaba era agrupar las acciones de la tabla, que es
+     * lo que esta prueba cierra.
+     */
+    public function test_asociados_agrupa_sus_acciones_y_usa_el_patron_operativo(): void
+    {
+        $asociado = Asociado::factory()->create();
+
+        $lista = Livewire::test(ListAsociados::class);
+
+        $this->assertPatronOperativo($lista);
+        $this->assertSame(['aprobar', 'devolver', 'edit'], $this->nombresDeAcciones($lista));
+
+        $lista->assertCanSeeTableRecords([$asociado]);
     }
 
     public function test_aliados_resumen_el_convenio_sin_mostrar_url_ni_archivo_de_logo(): void

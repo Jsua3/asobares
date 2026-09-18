@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Aspirantes\Tables;
 use App\Enums\EstadoDeGestion;
 use App\Models\Aspirante;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -36,11 +37,13 @@ class AspirantesTable
                     ->sortable(),
                 TextColumn::make('telefono')
                     ->label('Teléfono')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('categoria_cargo')
                     ->label('Área')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('estado')
                     ->label('Gestión')
                     ->badge()
@@ -49,11 +52,13 @@ class AspirantesTable
                     ->label('En el banco')
                     ->boolean()
                     ->tooltip('Visible para los establecimientos afiliados')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('acepta_datos')
                     ->label('Datos')
                     ->boolean()
-                    ->tooltip('Consentimiento de tratamiento de datos'),
+                    ->tooltip('Consentimiento de tratamiento de datos')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Registrado')
                     ->since()
@@ -72,44 +77,50 @@ class AspirantesTable
                     ->options(EstadoDeGestion::class),
             ])
             ->recordActions([
-                EditAction::make()->label('Ver perfil'),
-                Action::make('aprobar')
-                    ->label('Aprobar')
-                    ->icon('heroicon-o-check-circle')
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->modalHeading('Dejar este perfil en el banco de talento')
-                    ->modalDescription('Los establecimientos afiliados verán su nombre, su teléfono y su correo.')
-                    ->modalSubmitActionLabel('Sí, aprobar')
-                    ->visible(fn (Aspirante $registro): bool => ! $registro->estaAprobado()
-                        && auth()->user()?->can('update', $registro) === true)
-                    ->action(function (Aspirante $registro): void {
-                        $registro->update(['aprobado_el' => now()]);
+                ActionGroup::make([
+                    EditAction::make()->label('Ver perfil'),
+                    Action::make('aprobar')
+                        ->label('Aprobar')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->modalHeading('Dejar este perfil en el banco de talento')
+                        ->modalDescription('Los establecimientos afiliados verán su nombre, su teléfono y su correo.')
+                        ->modalSubmitActionLabel('Sí, aprobar')
+                        ->visible(fn (Aspirante $registro): bool => ! $registro->estaAprobado()
+                            && auth()->user()?->can('update', $registro) === true)
+                        ->action(function (Aspirante $registro): void {
+                            $registro->update(['aprobado_el' => now()]);
 
-                        Notification::make()
-                            ->title('Perfil aprobado')
-                            ->body('Ya aparece en el banco de talento de los afiliados.')
-                            ->success()
-                            ->send();
-                    }),
-                Action::make('retirar')
-                    ->label('Retirar del banco')
-                    ->icon('heroicon-o-eye-slash')
-                    ->color('warning')
-                    ->requiresConfirmation()
-                    ->modalHeading('Retirar este perfil del banco')
-                    ->modalDescription('Deja de verse para los afiliados. El perfil no se borra.')
-                    ->visible(fn (Aspirante $registro): bool => $registro->estaAprobado()
-                        && auth()->user()?->can('update', $registro) === true)
-                    ->action(function (Aspirante $registro): void {
-                        $registro->update(['aprobado_el' => null]);
+                            Notification::make()
+                                ->title('Perfil aprobado')
+                                ->body('Ya aparece en el banco de talento de los afiliados.')
+                                ->success()
+                                ->send();
+                        }),
+                    Action::make('retirar')
+                        ->label('Retirar del banco')
+                        ->icon('heroicon-o-eye-slash')
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->modalHeading('Retirar este perfil del banco')
+                        ->modalDescription('Deja de verse para los afiliados. El perfil no se borra.')
+                        ->visible(fn (Aspirante $registro): bool => $registro->estaAprobado()
+                            && auth()->user()?->can('update', $registro) === true)
+                        ->action(function (Aspirante $registro): void {
+                            $registro->update(['aprobado_el' => null]);
 
-                        Notification::make()
-                            ->title('Perfil retirado del banco')
-                            ->success()
-                            ->send();
-                    }),
+                            Notification::make()
+                                ->title('Perfil retirado del banco')
+                                ->success()
+                                ->send();
+                        }),
+                ])
+                    ->label('Acciones')
+                    ->icon('heroicon-m-ellipsis-horizontal')
+                    ->tooltip('Acciones del aspirante'),
             ])
+            ->recordActionsColumnLabel('Acciones')
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()->label('Eliminar'),

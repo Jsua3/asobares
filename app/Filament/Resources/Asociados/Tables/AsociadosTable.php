@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Asociados\Tables;
 use App\Enums\EstadoPublicacion;
 use App\Filament\Support\AccionesDeAprobacion;
 use App\Models\Asociado;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -25,7 +26,8 @@ class AsociadosTable
                     ->label('Portada')
                     ->disk(config('almacenamiento.publico'))
                     ->height(40)
-                    ->width(60),
+                    ->width(60)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('nombre')
                     ->label('Establecimiento')
                     ->searchable()
@@ -39,7 +41,8 @@ class AsociadosTable
                     ->sortable(),
                 TextColumn::make('municipio.nombre')
                     ->label('Municipio')
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('md'),
                 TextColumn::make('estado')
                     ->label('Estado')
                     ->badge()
@@ -47,7 +50,8 @@ class AsociadosTable
                 IconColumn::make('destacado')
                     ->label('Destacado')
                     ->boolean()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('representante')
                     ->label('Representante')
                     ->searchable()
@@ -75,9 +79,15 @@ class AsociadosTable
                     ->label('Destacado'),
             ])
             ->recordActions([
-                ...AccionesDeAprobacion::paraFila(),
-                EditAction::make()->label('Editar'),
+                ActionGroup::make([
+                    ...AccionesDeAprobacion::paraFila(),
+                    EditAction::make()->label('Editar'),
+                ])
+                    ->label('Acciones')
+                    ->icon('heroicon-m-ellipsis-horizontal')
+                    ->tooltip('Acciones del asociado'),
             ])
+            ->recordActionsColumnLabel('Acciones')
             ->toolbarActions([
                 AccionesDeAprobacion::aprobarEnLote('publicar_asociado'),
                 BulkActionGroup::make([

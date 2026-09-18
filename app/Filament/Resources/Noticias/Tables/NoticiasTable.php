@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Noticias\Tables;
 
 use App\Enums\EstadoPublicacion;
 use App\Filament\Support\AccionesDeAprobacion;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -22,10 +23,12 @@ class NoticiasTable
                     ->searchable(),
                 TextColumn::make('slug')
                     ->label('Slug (URL)')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('imagen')
                     ->label('Imagen')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('categoria')
                     ->label('Categoría')
                     ->badge()
@@ -55,9 +58,15 @@ class NoticiasTable
                     ->options(EstadoPublicacion::class),
             ])
             ->recordActions([
-                ...AccionesDeAprobacion::paraFila(),
-                EditAction::make()->label('Editar'),
+                ActionGroup::make([
+                    ...AccionesDeAprobacion::paraFila(),
+                    EditAction::make()->label('Editar'),
+                ])
+                    ->label('Acciones')
+                    ->icon('heroicon-m-ellipsis-horizontal')
+                    ->tooltip('Acciones de la noticia'),
             ])
+            ->recordActionsColumnLabel('Acciones')
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

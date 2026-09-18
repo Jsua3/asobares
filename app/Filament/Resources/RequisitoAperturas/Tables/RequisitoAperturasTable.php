@@ -5,6 +5,7 @@ namespace App\Filament\Resources\RequisitoAperturas\Tables;
 use App\Enums\EstadoPublicacion;
 use App\Filament\Support\AccionesDeAprobacion;
 use App\Models\RequisitoApertura;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -29,7 +30,8 @@ class RequisitoAperturasTable
                     ->searchable(),
                 TextColumn::make('enlace_externo')
                     ->label('Enlace externo')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 // La columna de arriba enseña la URL; esta dice si lleva al
                 // trámite y no solo a la portada. Sin una señal a la vista,
                 // los enlaces a portada se quedan años: no fallan, solo no
@@ -49,21 +51,26 @@ class RequisitoAperturasTable
                     })
                     ->tooltip(fn (RequisitoApertura $requisito): ?string => $requisito->enlaceEsPuntual()
                         ? null
-                        : 'El enlace abre la portada de la entidad; debería abrir el trámite exacto.'),
+                        : 'El enlace abre la portada de la entidad; debería abrir el trámite exacto.')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('adjunto')
                     ->label('Formato oficial (PDF)')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('adjunto_nombre')
                     ->label('Nombre del formato')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('costo_aproximado')
                     ->label('Costo aproximado')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('orden')
                     ->label('Orden')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('estado')
                     ->label('Estado')
                     ->badge()
@@ -84,7 +91,8 @@ class RequisitoAperturasTable
                     ->date('d/m/Y')
                     ->placeholder('Permanente')
                     ->color(fn (RequisitoApertura $record): string => $record->haCaducado() ? 'danger' : 'gray')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Creado')
                     ->dateTime()
@@ -123,9 +131,15 @@ class RequisitoAperturasTable
                         ->where('vigente_hasta', '<', now()->toDateString())),
             ])
             ->recordActions([
-                ...AccionesDeAprobacion::paraFila(),
-                EditAction::make()->label('Editar'),
+                ActionGroup::make([
+                    ...AccionesDeAprobacion::paraFila(),
+                    EditAction::make()->label('Editar'),
+                ])
+                    ->label('Acciones')
+                    ->icon('heroicon-m-ellipsis-horizontal')
+                    ->tooltip('Acciones del requisito'),
             ])
+            ->recordActionsColumnLabel('Acciones')
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),

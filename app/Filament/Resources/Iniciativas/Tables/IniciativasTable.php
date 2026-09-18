@@ -6,6 +6,7 @@ use App\Enums\EstadoIniciativa;
 use App\Enums\EstadoPublicacion;
 use App\Filament\Support\AccionesDeAprobacion;
 use App\Models\Iniciativa;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -37,11 +38,12 @@ class IniciativasTable
                     ->badge()
                     ->color('gray')
                     ->placeholder('—')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('lugar')
                     ->label('Dónde')
                     ->placeholder('—')
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('estado')
                     ->label('Publicación')
                     ->badge()
@@ -58,9 +60,15 @@ class IniciativasTable
                     ->options(EstadoPublicacion::class),
             ])
             ->recordActions([
-                ...AccionesDeAprobacion::paraFila(),
-                EditAction::make()->label('Editar'),
+                ActionGroup::make([
+                    ...AccionesDeAprobacion::paraFila(),
+                    EditAction::make()->label('Editar'),
+                ])
+                    ->label('Acciones')
+                    ->icon('heroicon-m-ellipsis-horizontal')
+                    ->tooltip('Acciones de la iniciativa'),
             ])
+            ->recordActionsColumnLabel('Acciones')
             ->toolbarActions([
                 AccionesDeAprobacion::aprobarEnLote('publicar_iniciativa'),
                 BulkActionGroup::make([
