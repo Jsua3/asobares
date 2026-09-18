@@ -21,14 +21,30 @@
     $totalEstablecimientos = $vista === 'mapa'
         ? $asociados->count()
         : $asociados->total();
+
+    // Título y descripción propios cuando la URL es de un municipio (no un
+    // filtro de paso): así "bares en Salento" y "bares en Armenia" no
+    // compiten con el mismo título genérico del directorio entero.
+    $tituloPagina = $municipioPagina
+        ? "Bares y establecimientos afiliados en {$municipioPagina->nombre}, Quindío — ASOBARES Quindío"
+        : ajuste('seo_directorio_titulo', 'Directorio de establecimientos — ASOBARES Quindío');
+    $descripcionPagina = $municipioPagina
+        ? "Bares, gastrobares, cafés y discotecas afiliados a ASOBARES en {$municipioPagina->nombre}, Quindío."
+        : ajuste('seo_directorio_descripcion', 'Bares, gastrobares, cafés y discotecas afiliados al gremio en Armenia, Salento, Filandia y todo el Quindío.');
 @endphp
 
 @push('cabeza')
     @vite(['resources/css/directorio-editorial.css'])
+    @if ($municipioPagina && $asociados->isEmpty())
+        {{-- Un municipio real sin ningún negocio publicado todavía es
+             contenido honesto, pero anunciárselo a Google como si tuviera
+             algo que enseñar sería peor que no anunciarlo: mismo patrón que
+             ya usa la guía normativa para un municipio sin trámites. --}}
+        <meta name="robots" content="noindex, follow">
+    @endif
 @endpush
 
-<x-layouts.publico :titulo="ajuste('seo_directorio_titulo', 'Directorio de establecimientos — ASOBARES Quindío')"
-                   :descripcion="ajuste('seo_directorio_descripcion', 'Bares, gastrobares, cafés y discotecas afiliados al gremio en Armenia, Salento, Filandia y todo el Quindío.')">
+<x-layouts.publico :titulo="$tituloPagina" :descripcion="$descripcionPagina">
 
     <div class="directorio-editorial">
         <section class="directorio-editorial-hero directorio-editorial-hero--con-foto" aria-labelledby="directorio-editorial-titulo">
@@ -283,18 +299,23 @@
                         {{-- Resultados --}}
                         @if ($asociados->isEmpty())
                             <div class="tarjeta mt-6 p-12 text-center">
-                                @if ($hayFiltros)
+                                @if ($municipioPagina)
+                                    <p class="font-display text-lg font-semibold">Todavía no hay establecimientos afiliados publicados en {{ $municipioPagina->nombre }}</p>
+                                    <p class="mt-2 text-sm text-tenue">Si tienes un bar, gastrobar, café o discoteca aquí, puedes afiliarte al gremio.</p>
+                                    <a href="{{ route('afiliate') }}"
+                                       class="pulsable mt-5 inline-block min-h-11 rounded-xl border border-linea-fuerte px-5 py-2.5 text-sm hover:border-marca-500/50">
+                                        Conoce la afiliación
+                                    </a>
+                                @elseif ($hayFiltros)
                                     <p class="font-display text-lg font-semibold">No encontramos establecimientos con ese filtro</p>
                                     <p class="mt-2 text-sm text-tenue">Prueba con otro municipio o limpia la búsqueda.</p>
-                                @else
-                                    <p class="font-display text-lg font-semibold">Todavía no hay establecimientos publicados</p>
-                                    <p class="mt-2 text-sm text-tenue">Cuando el gremio publique fichas, aparecen aquí.</p>
-                                @endif
-                                @if ($hayFiltros)
                                     <a href="{{ $listado }}"
                                        class="pulsable mt-5 inline-block min-h-11 rounded-xl border border-linea-fuerte px-5 py-2.5 text-sm hover:border-marca-500/50">
                                         Ver todos
                                     </a>
+                                @else
+                                    <p class="font-display text-lg font-semibold">Todavía no hay establecimientos publicados</p>
+                                    <p class="mt-2 text-sm text-tenue">Cuando el gremio publique fichas, aparecen aquí.</p>
                                 @endif
                             </div>
                         @elseif ($vista === 'mapa')

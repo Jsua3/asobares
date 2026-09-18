@@ -479,8 +479,8 @@ class VigenciaDeLaGuiaTest extends TestCase
 
         $respuesta = $this->get('/sitemap.xml')->assertSuccessful();
 
-        $respuesta->assertSee(route('guia.index', ['municipio' => $vivo->slug]), escape: false);
-        $respuesta->assertDontSee(route('guia.index', ['municipio' => $apagado->slug]), escape: false);
+        $respuesta->assertSee(route('guia.municipio', $vivo), escape: false);
+        $respuesta->assertDontSee(route('guia.municipio', $apagado), escape: false);
     }
 
     public function test_un_tramite_verificado_ensena_su_fecha_y_su_fuente(): void

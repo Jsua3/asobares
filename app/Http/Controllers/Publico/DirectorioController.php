@@ -26,6 +26,37 @@ class DirectorioController
             'vista' => ['nullable', 'in:grid,mapa'],
         ]);
 
+        return $this->vistaDelDirectorio($datos, municipioPagina: null);
+    }
+
+    /**
+     * URL propia por municipio: /directorio/municipio/salento.
+     *
+     * La canónica de `index()` es `url()->current()`, que descarta la query
+     * string: las doce variantes de `?municipio=` colapsan siempre en
+     * `/directorio` y le quitan al directorio cualquier oportunidad de
+     * posicionar un municipio aparte de otro. Esta ruta, al ser una URL de
+     * verdad, se auto-referencia sola con la misma etiqueta canónica.
+     */
+    public function porMunicipio(Municipio $municipio, Request $request): View
+    {
+        abort_unless($municipio->activo, 404);
+
+        $datos = $request->validate([
+            'q' => ['nullable', 'string', 'max:80'],
+            'categoria' => ['nullable', 'string', 'exists:categorias,slug'],
+            'vista' => ['nullable', 'in:grid,mapa'],
+        ]);
+        $datos['municipio'] = $municipio->slug;
+
+        return $this->vistaDelDirectorio($datos, municipioPagina: $municipio);
+    }
+
+    /**
+     * @param  array<string, mixed>  $datos
+     */
+    private function vistaDelDirectorio(array $datos, ?Municipio $municipioPagina): View
+    {
         $consulta = Asociado::publicado()->with(['categoria', 'municipio']);
 
         if (filled($datos['q'] ?? null)) {
@@ -68,6 +99,7 @@ class DirectorioController
             'municipios' => $municipios,
             'categorias' => $categorias,
             'filtros' => $datos,
+            'municipioPagina' => $municipioPagina,
             'publicidadDirectorio' => Publicidad::publicaEn(UbicacionPublicidad::Directorio)->first(),
             'vista' => $vista,
         ]);

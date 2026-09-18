@@ -68,15 +68,37 @@ class SitemapController
 
         // La guía por municipio son URLs distintas y de mucho valor para SEO.
         // Con `vigente()`, porque anunciarle a Google una guía vacía es peor
-        // que no anunciarla.
-        Municipio::activos()
+        // que no anunciarla. Es la ruta propia (`guia.municipio`), no
+        // `guia.index` con query string: la canónica de esa segunda forma
+        // siempre colapsa en la página base, así que listarla en el mapa le
+        // pediría a Google que indexe una URL que la propia página desmiente.
+        $municipiosConGuia = Municipio::activos()
             ->whereHas('requisitos', fn (Builder $requisitos): Builder => $requisitos->publicado()->vigente())
+            ->ordenados()
+            ->get();
+
+        $municipiosConGuia->each(fn (Municipio $municipio): Sitemap => $mapa->add(
+            Url::create(route('guia.municipio', $municipio))
+                ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
+                ->setPriority(0.8)
+        ));
+
+        // El directorio por municipio, con la misma lógica canónica y el
+        // mismo criterio que la guía: solo entran los que ya tienen algo real
+        // que enseñar. Un municipio sin ningún negocio publicado responde
+        // igual (200, con el estado honesto y el enlace de afiliación) y se
+        // marca `noindex` a sí mismo, pero anunciarlo en el mapa sería
+        // pedirle a Google que indexe justo lo que la página le está
+        // pidiendo que no indexe. Al generarse al vuelo, entra solo el día
+        // que el gremio publique la primera ficha de ese municipio.
+        Municipio::activos()
+            ->whereHas('asociados', fn (Builder $asociados): Builder => $asociados->publicado())
             ->ordenados()
             ->get()
             ->each(fn (Municipio $municipio): Sitemap => $mapa->add(
-                Url::create(route('guia.index', ['municipio' => $municipio->slug]))
-                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
-                    ->setPriority(0.8)
+                Url::create(route('directorio.municipio', $municipio))
+                    ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
+                    ->setPriority(0.7)
             ));
     }
 
