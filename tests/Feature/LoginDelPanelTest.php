@@ -77,7 +77,7 @@ class LoginDelPanelTest extends TestCase
         $this->assertSame(1, preg_match('/wire:snapshot="([^"]+)"/', $pagina->getContent(), $coincidencias));
 
         $login = $this->withHeader('X-Livewire', 'true')
-            ->postJson('/livewire/update', [
+            ->postJson(Livewire::getUpdateUri(), [
                 'components' => [[
                     'snapshot' => html_entity_decode($coincidencias[1], ENT_QUOTES | ENT_HTML5),
                     'updates' => [
