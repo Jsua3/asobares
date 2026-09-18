@@ -7,6 +7,7 @@ use App\Models\Artista;
 use App\Models\Asociado;
 use App\Models\Evento;
 use App\Models\Noticia;
+use App\Models\Setting;
 use App\Models\Vacante;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -110,6 +111,72 @@ class SitioPublicoTest extends TestCase
         $this->assertNotFalse($posicionScript, 'El bloque JSON-LD debe estar presente.');
         $this->assertNotFalse($posicionCierreHead);
         $this->assertLessThan($posicionCierreHead, $posicionScript);
+    }
+
+    /**
+     * La portada le dice a Google quién es el gremio: la organización, con sus
+     * datos de contacto de los ajustes, y el sitio que publica.
+     */
+    public function test_la_portada_declara_la_organizacion_y_el_sitio(): void
+    {
+        $grafo = $this->jsonLdDe(route('inicio'))['@graph'];
+        $organizacion = collect($grafo)->firstWhere('@type', 'Organization');
+        $sitio = collect($grafo)->firstWhere('@type', 'WebSite');
+
+        $this->assertNotNull($organizacion, 'Falta la organización.');
+        $this->assertNotNull($sitio, 'Falta el sitio.');
+
+        $this->assertSame(ajuste('sitio_nombre'), $organizacion['name']);
+        $this->assertSame(route('inicio'), $organizacion['url']);
+        $this->assertSame(asset('img/favicon.png'), $organizacion['logo']);
+        $this->assertSame(ajuste('contacto_correo'), $organizacion['email']);
+        $this->assertSame(ajuste('contacto_whatsapp_visible'), $organizacion['telephone']);
+        $this->assertSame(['https://instagram.com/'.ajuste('contacto_instagram')], $organizacion['sameAs']);
+        $this->assertSame(ajuste('contacto_direccion'), $organizacion['address']['streetAddress']);
+
+        $this->assertSame(ajuste('sitio_nombre'), $sitio['name']);
+        $this->assertSame(['@id' => $organizacion['@id']], $sitio['publisher']);
+    }
+
+    /**
+     * Lo que la oficina deja vacío en el panel desaparece del bloque en vez de
+     * salir como texto en blanco o como un Instagram sin usuario.
+     */
+    public function test_los_datos_vacios_de_la_organizacion_se_caen(): void
+    {
+        Setting::query()->whereIn('clave', ['contacto_instagram', 'contacto_direccion', 'contacto_correo'])
+            ->get()
+            ->each->update(['valor' => '']);
+
+        $organizacion = collect($this->jsonLdDe(route('inicio'))['@graph'])->firstWhere('@type', 'Organization');
+
+        $this->assertArrayNotHasKey('sameAs', $organizacion);
+        $this->assertArrayNotHasKey('address', $organizacion);
+        $this->assertArrayNotHasKey('email', $organizacion);
+        $this->assertSame(ajuste('sitio_nombre'), $organizacion['name']);
+    }
+
+    public function test_el_json_ld_de_la_portada_no_se_puede_romper_desde_los_ajustes(): void
+    {
+        Setting::query()->where('clave', 'contacto_direccion')->first()
+            ->update(['valor' => 'Piso 3</script><script>alert(1)</script>']);
+
+        $this->get(route('inicio'))
+            ->assertSuccessful()
+            ->assertDontSee('<script>alert(1)', escape: false);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function jsonLdDe(string $url): array
+    {
+        $contenido = $this->get($url)->assertSuccessful()->getContent();
+
+        $this->assertSame(1, preg_match('#<script type="application/ld\+json">(.*?)</script>#s', $contenido, $bloque), 'Falta el bloque JSON-LD.');
+        $this->assertLessThan(strpos($contenido, '</head>'), strpos($contenido, 'application/ld+json'));
+
+        return json_decode($bloque[1], true, flags: JSON_THROW_ON_ERROR);
     }
 
     /** @return list<array{0: string}> */
