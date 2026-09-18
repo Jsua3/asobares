@@ -7,6 +7,7 @@ use App\Enums\OrigenEvento;
 use App\Enums\TipoEvento;
 use App\Filament\Support\AccionesDeAprobacion;
 use App\Models\Evento;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -26,7 +27,8 @@ class EventosTable
                     ->label('Imagen')
                     ->disk(config('almacenamiento.publico'))
                     ->height(40)
-                    ->width(60),
+                    ->width(60)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('titulo')
                     ->label('Evento')
                     ->searchable()
@@ -36,14 +38,17 @@ class EventosTable
                 TextColumn::make('tipo')
                     ->label('Tipo')
                     ->badge()
-                    ->sortable(),
+                    ->sortable()
+                    ->visibleFrom('lg'),
                 TextColumn::make('origen')
                     ->label('Origen')
                     ->badge()
                     ->sortable(),
                 TextColumn::make('aliado.nombre')
                     ->label('Aliado')
-                    ->placeholder(fn (Evento $record): string => $record->esDeAliado() ? 'Sin aliado: no sale en el sitio' : 'ASOBARES')
+                    ->placeholder(fn (Evento $record): string => $record->esDeAliado()
+                        ? 'Sin aliado: no sale en el sitio'
+                        : ($record->esDeLaComunidad() ? 'Comunidad' : 'ASOBARES'))
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('fecha_inicio')
                     ->label('Fecha')
@@ -51,9 +56,9 @@ class EventosTable
                     ->sortable(),
                 TextColumn::make('precio')
                     ->label('Precio')
-                    ->formatStateUsing(fn (mixed $state): string => (float) $state === 0.0
-                        ? 'Gratuito'
-                        : pesos($state))
+                    ->formatStateUsing(fn (mixed $state, Evento $record): string => $record->esDeLaComunidad()
+                        ? 'Sin precio informado'
+                        : ((float) $state === 0.0 ? 'Gratuito' : pesos($state)))
                     ->sortable(),
                 TextColumn::make('cupos')
                     ->label('Cupos')
@@ -63,7 +68,8 @@ class EventosTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('permite_inscripcion')
                     ->label('Inscripción')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('estado')
                     ->label('Estado')
                     ->badge()
@@ -82,9 +88,15 @@ class EventosTable
                     ->options(OrigenEvento::class),
             ])
             ->recordActions([
-                ...AccionesDeAprobacion::paraFila(),
-                EditAction::make()->label('Editar'),
+                ActionGroup::make([
+                    ...AccionesDeAprobacion::paraFila(),
+                    EditAction::make()->label('Editar'),
+                ])
+                    ->label('Acciones')
+                    ->icon('heroicon-m-ellipsis-horizontal')
+                    ->tooltip('Acciones del evento'),
             ])
+            ->recordActionsColumnLabel('Acciones')
             ->toolbarActions([
                 AccionesDeAprobacion::aprobarEnLote('publicar_evento'),
                 BulkActionGroup::make([

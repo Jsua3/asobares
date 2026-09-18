@@ -838,6 +838,37 @@ Alpine.data('bandaEstablecimientos', () => ({
 }));
 
 window.Alpine = Alpine;
+Alpine.data('calendarioComunitario', (fechaInicial, reabrirPorErrores) => ({
+    fecha: fechaInicial,
+    disparador: null,
+    scrollAnterior: '',
+
+    init() {
+        if (reabrirPorErrores) {
+            this.$nextTick(() => this.abrir(fechaInicial));
+        }
+    },
+
+    abrir(fecha = null) {
+        // Sin fecha --el CTA general, no un día concreto-- se deja vacía: la
+        // persona la elige en el campo Fecha del formulario.
+        this.fecha = fecha ?? '';
+        this.disparador = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        this.scrollAnterior = document.body.style.overflow;
+        this.$refs.formulario.showModal();
+        document.body.style.overflow = 'hidden';
+        this.$nextTick(() => this.$refs.formulario.querySelector('#campo-titulo')?.focus());
+    },
+
+    cerrar() {
+        this.$refs.formulario.close();
+    },
+
+    alCerrar() {
+        document.body.style.overflow = this.scrollAnterior;
+        this.disparador?.focus();
+    },
+}));
 Alpine.start();
 
 const prepararRevelado = () => {

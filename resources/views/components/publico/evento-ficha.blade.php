@@ -35,11 +35,13 @@
             <div class="eventos-editorial-ficha__meta">
                 <span class="eventos-editorial-ficha__tipo">{{ $evento->tipo->getLabel() }}</span>
                 <span class="eventos-editorial-ficha__precio eventos-editorial-ficha__origen">{{ $evento->origenPublico()->getLabel() }}</span>
-                @if ($evento->esGratuito())
-                    <span class="eventos-editorial-ficha__precio">Gratuito</span>
-                @else
-                    <span class="eventos-editorial-ficha__precio">{{ pesos($evento->precio) }}</span>
-                @endif
+                @unless ($evento->esDeLaComunidad())
+                    @if ($evento->esGratuito())
+                        <span class="eventos-editorial-ficha__precio">Gratuito</span>
+                    @else
+                        <span class="eventos-editorial-ficha__precio">{{ pesos($evento->precio) }}</span>
+                    @endif
+                @endunless
                 @if ($realizado)
                     <span class="eventos-editorial-ficha__realizado">Realizado</span>
                 @endif
@@ -51,10 +53,12 @@
                 <p class="eventos-editorial-ficha__lugar">{{ $evento->lugar }}</p>
             @endif
 
-            <p class="eventos-editorial-ficha__organiza">
-                <span>Organiza</span>
-                {{ $evento->organizadorVisible() }}
-            </p>
+            @unless ($evento->esDeLaComunidad())
+                <p class="eventos-editorial-ficha__organiza">
+                    <span>Organiza</span>
+                    {{ $evento->organizadorVisible() }}
+                </p>
+            @endunless
 
             <span class="eventos-editorial-ficha__cta">Ver evento&nbsp;<x-publico.flecha /></span>
         </div>

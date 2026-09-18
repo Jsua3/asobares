@@ -82,6 +82,10 @@ class EventosLenguajeUnicoTest extends TestCase
             'segmentos del conmutador' => ['.eventos-editorial-conmutador a', '--asb-encogimiento-control'],
             'píldora del calendario' => ['.eventos-editorial-calendario a', '--asb-encogimiento-tarjeta'],
             'evento de la agenda de móvil' => ['.eventos-editorial-agenda__evento', '--asb-encogimiento-tarjeta'],
+            'agregar evento de una celda' => ['.eventos-editorial-agregar', '--asb-encogimiento-control'],
+            'día del selector de móvil' => ['.eventos-editorial-dias-movil__dia', '--asb-encogimiento-control'],
+            'cerrar el formulario' => ['.eventos-editorial-modal__cerrar', '--asb-encogimiento-control'],
+            'enviar el formulario' => ['.eventos-editorial-modal__enviar', '--asb-encogimiento-control'],
         ];
     }
 

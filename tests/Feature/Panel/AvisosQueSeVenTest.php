@@ -3,24 +3,17 @@
 namespace Tests\Feature\Panel;
 
 use App\Providers\Filament\AdminPanelProvider;
+use Filament\Enums\DatabaseNotificationsPosition;
 use Filament\Panel;
 use Tests\TestCase;
 
 /**
- * Un aviso que nadie puede ver no es un aviso.
- *
- * El panel no activa `databaseNotifications()`: lo pendiente lo cuentan la banda
- * «Te está esperando» del tablero y los contadores del menú. Una notificación de
- * base escrita sin campana es trabajo en cada guardado y filas que ninguna
- * pantalla lee, y una prueba que afirme sobre ellas queda en verde sobre algo
- * que el usuario no ve.
- *
- * Esta clase es la guarda de la pareja. Las dos mitades tienen que moverse
- * juntas: o hay campana y hay quien escriba en ella, o no hay ninguna de las dos.
+ * Una notificación persistente necesita una campana visible en el panel.
+ * La banda de pendientes del tablero permanece independiente de esta campana.
  */
 class AvisosQueSeVenTest extends TestCase
 {
-    /** Los archivos que escriben notificaciones de base. */
+    /** Archivos que envían notificaciones persistentes mediante Filament. */
     private function quienesEscribenNotificaciones(): array
     {
         $escritores = [];
@@ -32,41 +25,24 @@ class AvisosQueSeVenTest extends TestCase
                 continue;
             }
 
-            // `->sendToDatabase(` y no `sendToDatabase` a secas: una explicación
-            // en un comentario --como la que lleva `AvisoDeMensajeAlGremio` para
-            // contar por qué NO la usa-- no escribe ninguna fila.
-            if (str_contains((string) file_get_contents($archivo->getPathname()), '->sendToDatabase(')) {
-                $escritores[] = str_replace(app_path().DIRECTORY_SEPARATOR, '', $archivo->getPathname());
+            $contenido = (string) file_get_contents($archivo->getPathname());
+
+            if (str_contains($contenido, '->sendToDatabase(') || str_contains($contenido, '->toDatabase(')) {
+                $escritores[] = str_replace('\\', '/', str_replace(app_path().DIRECTORY_SEPARATOR, '', $archivo->getPathname()));
             }
         }
 
         return $escritores;
     }
 
-    private function hayCampana(): bool
+    public function test_los_avisos_persistentes_tienen_campana_visible_en_el_topbar(): void
     {
-        return (new AdminPanelProvider($this->app))
-            ->panel(Panel::make())
-            ->hasDatabaseNotifications();
-    }
-
-    public function test_nadie_escribe_notificaciones_si_no_hay_campana_que_las_enseñe(): void
-    {
-        if ($this->hayCampana()) {
-            $this->assertTrue(true, 'Hay campana: escribir notificaciones tiene sentido.');
-
-            return;
-        }
-
         $escritores = $this->quienesEscribenNotificaciones();
+        $panel = (new AdminPanelProvider($this->app))->panel(Panel::make());
 
-        $this->assertSame(
-            [],
-            $escritores,
-            'La campana del panel está apagada y estos archivos siguen escribiendo notificaciones '
-            .'que nadie puede leer: '.implode(', ', $escritores)
-            .'. O se enciende `databaseNotifications()` en AdminPanelProvider, o se quita el envío. '
-            .'Las dos mitades se mueven juntas.'
-        );
+        $this->assertContains('Support/AvisoDeEventoComunitario.php', $escritores);
+        $this->assertTrue($panel->hasDatabaseNotifications(), 'Hay avisos persistentes pero la campana está apagada.');
+        $this->assertTrue($panel->hasTopbar());
+        $this->assertSame(DatabaseNotificationsPosition::Topbar, $panel->getDatabaseNotificationsPosition());
     }
 }

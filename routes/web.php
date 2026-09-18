@@ -7,6 +7,7 @@ use App\Http\Controllers\Publico\ContactoController;
 use App\Http\Controllers\Publico\ContrasenaAsociadoController;
 use App\Http\Controllers\Publico\DirectorioController;
 use App\Http\Controllers\Publico\EmpleoController;
+use App\Http\Controllers\Publico\EventoComunitarioController;
 use App\Http\Controllers\Publico\EventoController;
 use App\Http\Controllers\Publico\GuiaController;
 use App\Http\Controllers\Publico\InicioController;
@@ -116,6 +117,9 @@ Route::post('/proveedores/inscripcion', [ProveedorController::class, 'guardarIns
 
 // Eventos del gremio.
 Route::get('/eventos', [EventoController::class, 'index'])->name('eventos.index');
+Route::post('/eventos/calendario/comunidad', [EventoComunitarioController::class, 'store'])
+    ->middleware('throttle:eventos-comunidad')
+    ->name('eventos.comunidad.store');
 // Antes que la ruta con slug, por el mismo motivo y con el mismo remedio que
 // `artistas.inscripcion` unas líneas más arriba: `/eventos/calendario` tiene
 // dos segmentos igual que `/eventos/{evento:slug}`, así que registrada después

@@ -72,6 +72,7 @@ class AppServiceProvider extends ServiceProvider
         'artistas-inscripcion' => 6,
         'proveedores-inscripcion' => 6,
         'eventos-inscripcion' => 6,
+        'eventos-comunidad' => 3,
         'afiliate' => 6,
         'contacto' => 6,
         'mi-cuenta-entrar' => 5,

@@ -14,7 +14,7 @@
             'eventStatus' => 'https://schema.org/EventScheduled',
             'location' => $evento->lugar ? ['@type' => 'Place', 'name' => $evento->lugar] : null,
             'organizer' => $evento->organizadorJsonLd(),
-            'offers' => [
+            'offers' => $evento->esDeLaComunidad() ? null : [
                 '@type' => 'Offer',
                 'price' => (string) $evento->precio,
                 'priceCurrency' => 'COP',
@@ -38,9 +38,11 @@
         <div class="mt-5 flex flex-wrap items-center gap-2 text-xs">
             <span class="rounded-full bg-marca-500/15 px-3 py-1 font-medium text-acento-fuerte">{{ $evento->tipo->getLabel() }}</span>
             <span class="rounded-full border border-linea px-3 py-1 text-tenue">{{ $evento->origenPublico()->getLabel() }}</span>
-            <span class="rounded-full border border-linea px-3 py-1 text-tenue">
-                {{ $evento->esGratuito() ? 'Entrada libre' : pesos($evento->precio) }}
-            </span>
+            @unless ($evento->esDeLaComunidad())
+                <span class="rounded-full border border-linea px-3 py-1 text-tenue">
+                    {{ $evento->esGratuito() ? 'Entrada libre' : pesos($evento->precio) }}
+                </span>
+            @endunless
             @unless ($evento->esFuturo())
                 <span class="rounded-full border border-linea px-3 py-1 text-apagado">Evento realizado</span>
             @endunless
@@ -97,10 +99,12 @@
                                 <dd class="mt-0.5 text-tinta">{{ $evento->lugar }}</dd>
                             </div>
                         @endif
-                        <div>
-                            <dt class="text-xs uppercase tracking-wide text-apagado">Organiza</dt>
-                            <dd class="mt-0.5 text-tinta">{{ $evento->organizadorVisible() }}</dd>
-                        </div>
+                        @unless ($evento->esDeLaComunidad())
+                            <div>
+                                <dt class="text-xs uppercase tracking-wide text-apagado">Organiza</dt>
+                                <dd class="mt-0.5 text-tinta">{{ $evento->organizadorVisible() }}</dd>
+                            </div>
+                        @endunless
                         @if ($evento->cupos)
                             <div>
                                 <dt class="text-xs uppercase tracking-wide text-apagado">Cupos</dt>
@@ -111,7 +115,13 @@
                         @endif
                     </dl>
 
-                    @if ($evento->delegaRegistroExterno() && $evento->esDeAliado())
+                    @if ($evento->esDeLaComunidad() && $evento->delegaRegistroExterno())
+                        <x-publico.boton :href="$evento->enlace_externo" target="_blank" rel="noopener noreferrer" class="mt-6 w-full">
+                            Ver enlace del evento&nbsp;<x-publico.flecha direccion="externa" />
+                        </x-publico.boton>
+                    @elseif ($evento->esDeLaComunidad())
+                        <p class="mt-6 text-sm text-apagado">Evento compartido por la comunidad.</p>
+                    @elseif ($evento->delegaRegistroExterno() && $evento->esDeAliado())
                         <x-publico.boton :href="$evento->enlace_externo" target="_blank" rel="noopener" class="mt-6 w-full">
                             Ir a la inscripción&nbsp;<x-publico.flecha direccion="externa" />
                         </x-publico.boton>

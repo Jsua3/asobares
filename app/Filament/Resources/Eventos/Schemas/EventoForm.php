@@ -22,7 +22,7 @@ class EventoForm
         return $schema
             ->components([
                 Section::make('El evento')
-                    ->description('Eventos propios del gremio o publicados por un aliado.')
+                    ->description('Eventos del gremio, aliados y comunidad.')
                     ->columns(2)
                     ->schema([
                         TextInput::make('titulo')
@@ -55,7 +55,7 @@ class EventoForm
                             ->native(false)
                             ->live()
                             ->afterStateUpdated(function (mixed $state, callable $set): void {
-                                if ($state === OrigenEvento::Asobares->value || $state === OrigenEvento::Asobares) {
+                                if ($state !== OrigenEvento::Aliado->value && $state !== OrigenEvento::Aliado) {
                                     $set('aliado_id', null);
                                 }
                             }),
@@ -92,7 +92,7 @@ class EventoForm
                     ->schema([
                         Toggle::make('permite_inscripcion')
                             ->label('Permite inscripción en línea')
-                            ->visible(fn (callable $get): bool => ! static::esEventoDeAliado($get('origen')))
+                            ->visible(fn (callable $get): bool => $get('origen') === OrigenEvento::Asobares->value || $get('origen') === OrigenEvento::Asobares)
                             ->helperText('Apágalo si la inscripción se hace por fuera del sitio.'),
                         TextInput::make('enlace_externo')
                             ->label('Enlace externo')
@@ -100,14 +100,18 @@ class EventoForm
                             ->maxLength(255)
                             ->helperText(fn (callable $get): string => static::esEventoDeAliado($get('origen'))
                                 ? 'La inscripción de un evento de aliado la gestiona el aliado: el gremio no inscribe ni cobra a su nombre.'
-                                : 'Para eventos cuya inscripción se gestiona por fuera del sitio.'),
+                                : (($get('origen') === OrigenEvento::Comunidad->value || $get('origen') === OrigenEvento::Comunidad)
+                                    ? 'Enlace externo del evento. ASOBARES no gestiona inscripciones de la comunidad.'
+                                    : 'Para eventos cuya inscripción se gestiona por fuera del sitio.')),
                         TextInput::make('cupos')
                             ->label('Cupos')
+                            ->visible(fn (callable $get): bool => $get('origen') !== OrigenEvento::Comunidad->value && $get('origen') !== OrigenEvento::Comunidad)
                             ->numeric()
                             ->minValue(0)
                             ->helperText('Déjalo vacío si no hay límite.'),
                         TextInput::make('precio')
                             ->label('Precio')
+                            ->visible(fn (callable $get): bool => $get('origen') !== OrigenEvento::Comunidad->value && $get('origen') !== OrigenEvento::Comunidad)
                             ->required()
                             ->numeric()
                             ->minValue(0)

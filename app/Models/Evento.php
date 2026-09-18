@@ -34,6 +34,8 @@ class Evento extends Model
 
     protected $guarded = ['id'];
 
+    private bool $altaComunitariaValidada = false;
+
     protected function casts(): array
     {
         return [
@@ -64,6 +66,15 @@ class Evento extends Model
 
             if ($origen === OrigenEvento::Asobares) {
                 $evento->aliado_id = null;
+
+                return;
+            }
+
+            if ($origen === OrigenEvento::Comunidad) {
+                $evento->aliado_id = null;
+                $evento->permite_inscripcion = false;
+                $evento->cupos = null;
+                $evento->precio = 0;
 
                 return;
             }
@@ -219,6 +230,21 @@ class Evento extends Model
         return $this->origenPublico() === OrigenEvento::Aliado;
     }
 
+    public function esDeLaComunidad(): bool
+    {
+        return $this->origenPublico() === OrigenEvento::Comunidad;
+    }
+
+    public function marcarAltaComunitariaValidada(): void
+    {
+        $this->altaComunitariaValidada = true;
+    }
+
+    public function esAltaComunitariaValidada(): bool
+    {
+        return ! $this->exists && $this->esDeLaComunidad() && $this->altaComunitariaValidada;
+    }
+
     /**
      * Los eventos anteriores a la columna `origen` pueden llegar en null.
      * En lectura se interpretan como ASOBARES; no como aliado.
@@ -228,8 +254,12 @@ class Evento extends Model
         return $this->origen ?? OrigenEvento::Asobares;
     }
 
-    public function organizadorVisible(): string
+    public function organizadorVisible(): ?string
     {
+        if ($this->esDeLaComunidad()) {
+            return null;
+        }
+
         if ($this->esDeAliado() && $this->aliado !== null) {
             return $this->aliado->nombre;
         }
@@ -238,10 +268,14 @@ class Evento extends Model
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, string>|null
      */
-    public function organizadorJsonLd(): array
+    public function organizadorJsonLd(): ?array
     {
+        if ($this->esDeLaComunidad()) {
+            return null;
+        }
+
         $organizador = [
             '@type' => 'Organization',
             'name' => $this->organizadorVisible(),
@@ -283,7 +317,7 @@ class Evento extends Model
     {
         // `esDeAliado()` además del guardado: una fila anterior a la regla
         // puede traer `permite_inscripcion` encendido.
-        if (! $this->permite_inscripcion || $this->esDeAliado() || $this->delegaRegistroExterno() || ! $this->esFuturo()) {
+        if (! $this->permite_inscripcion || $this->esDeAliado() || $this->esDeLaComunidad() || $this->delegaRegistroExterno() || ! $this->esFuturo()) {
             return false;
         }
 

@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Enums\EstadoPublicacion;
+use App\Models\Evento;
 use App\Models\User;
 use App\Models\Vacante;
 use Illuminate\Database\Eloquent\Model;
@@ -32,6 +33,10 @@ class FlujoDeAprobacionObserver
         // una propiedad de PHP, dejando la puerta abierta a que una futura
         // columna o accessor con ese nombre apague RF-37 en silencio.
         if ($modelo instanceof Vacante && $modelo->saltaFlujoDeAprobacion) {
+            return;
+        }
+
+        if ($modelo instanceof Evento && $modelo->esAltaComunitariaValidada()) {
             return;
         }
 

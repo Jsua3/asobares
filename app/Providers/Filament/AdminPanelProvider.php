@@ -129,10 +129,10 @@ class AdminPanelProvider extends PanelProvider
                 ],
                 isRequired: true,
             )
-            // Sin campana de notificaciones: lo pendiente lo cuentan la banda
-            // «Te está esperando» del tablero y los contadores del menú.
-            // `Panel\AvisosQueSeVenTest` impide escribir avisos que nadie lee.
-            //
+            // La banda del tablero sigue contando aprobaciones; la campana
+            // nativa muestra avisos persistentes que requieren revisión.
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
             // Sin icono de grupo a propósito: Filament no admite iconos en el
             // grupo y en sus items a la vez, y el icono por recurso orienta más.
             ->navigationGroups([

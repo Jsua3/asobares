@@ -34,12 +34,17 @@
         @endpush
     @endif
 
-    <div class="eventos-editorial">
+    <div class="eventos-editorial"
+         x-data="calendarioComunitario(@js(old('fecha', $mes->toDateString())), @js($errors->any()))">
     <x-publico.hero-eventos
         :titulo="ajuste('eventos_titulo', 'Eventos y capacitaciones')"
         :subtitulo="ajuste('eventos_intro', 'Eventos, capacitaciones y experiencias del gremio y sus aliados para el sector gastronómico y de entretenimiento del Quindío.')" />
 
     <div class="eventos-editorial-cuerpo mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+        @if (session('exito'))
+            <x-publico.alerta class="mt-6">{{ session('exito') }}</x-publico.alerta>
+        @endif
 
         <div class="revelar" data-revelar>
             <x-publico.conmutador-eventos activo="calendario" :mes="$mes"
@@ -48,8 +53,7 @@
         </div>
 
         {{--
-            El mando del mes: dos `<a href>` y nada más. Sin JavaScript, no por
-            austeridad sino porque es la única mecánica coherente con un sitio
+            El mando del mes usa dos enlaces, porque es la mecánica coherente con un sitio
             de recarga completa —aquí filtrar, paginar y abrir un detalle son
             SIEMPRE navegación—, y porque así cada mes tiene una URL que se
             comparte, se marca y se indexa.
@@ -77,6 +81,22 @@
                 <x-publico.flecha />
             </x-publico.boton>
         </nav>
+
+        {{--
+            Aviso general, no un banner: el mismo botón de la casa
+            (`x-publico.boton`), que ya trae `.pulsable` --su acuse y su foco
+            los vigila `MovimientoTest`, no esta hoja--. Sin fecha en el
+            dataset: `abrir()` la deja vacía y la persona la elige en el
+            campo Fecha del formulario, igual que si hubiera entrado sin
+            pulsar ningún día.
+        --}}
+        <div class="eventos-editorial-cta revelar mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-linea bg-superficie-alta px-4 py-3"
+             data-revelar>
+            <p class="m-0 text-sm font-semibold text-suave">¿Tienes un evento para compartir?</p>
+            <x-publico.boton variante="contorno" tipo="button" x-on:click="abrir()">
+                <span aria-hidden="true">+</span> Agregar evento
+            </x-publico.boton>
+        </div>
 
         {{--
             ESCRITORIO: la rejilla de siete columnas.
@@ -118,12 +138,21 @@
                                     ])
                                     @if ($dia->month !== $mes->month) data-fuera="true" @endif
                                     @if ($dia->isToday()) aria-current="date" @endif>
-                                    <span @class([
-                                        'inline-flex h-6 w-6 items-center justify-center rounded-full text-xs',
-                                        'bg-accion font-semibold text-white' => $dia->isToday(),
-                                        'text-tinta' => ! $dia->isToday() && $dia->month === $mes->month,
-                                        'text-apagado' => ! $dia->isToday() && $dia->month !== $mes->month,
-                                    ])>{{ $dia->day }}</span>
+                                    <div class="eventos-editorial-celda-cabecera">
+                                        <span @class([
+                                            'inline-flex h-6 w-6 items-center justify-center rounded-full text-xs',
+                                            'bg-accion font-semibold text-white' => $dia->isToday(),
+                                            'text-tinta' => ! $dia->isToday() && $dia->month === $mes->month,
+                                            'text-apagado' => ! $dia->isToday() && $dia->month !== $mes->month,
+                                        ])>{{ $dia->day }}</span>
+
+                                        <button type="button" data-fecha="{{ $dia->toDateString() }}"
+                                                x-on:click="abrir($el.dataset.fecha)"
+                                                class="eventos-editorial-agregar"
+                                                aria-label="Agregar evento el {{ $dia->translatedFormat('d \d\e F \d\e Y') }}">
+                                            <span aria-hidden="true">+</span>
+                                        </button>
+                                    </div>
 
                                     @foreach ($porDia[$dia->toDateString()] ?? [] as $evento)
                                         {{--
@@ -149,9 +178,36 @@
             </table>
         </div>
 
+        <div class="eventos-editorial-dias-movil mt-5 sm:hidden" aria-label="Seleccionar fecha para agregar evento">
+            <p class="mb-2 text-sm font-medium text-tinta">Selecciona un día para agregar un evento</p>
+            <div class="eventos-editorial-dias-movil__rejilla">
+                @foreach ($diasDeLaSemana as $dia)
+                    <span aria-hidden="true" class="eventos-editorial-dias-movil__semana">{{ Str::ucfirst($dia->translatedFormat('D')) }}</span>
+                @endforeach
+                @foreach ($semanas as $semana)
+                    @foreach ($semana as $dia)
+                        @if ($dia->month === $mes->month)
+                            <button type="button" data-fecha="{{ $dia->toDateString() }}"
+                                    x-on:click="abrir($el.dataset.fecha)"
+                                    @if ($dia->isToday()) aria-current="date" @endif
+                                    class="eventos-editorial-dias-movil__dia"
+                                    aria-label="Agregar evento el {{ $dia->translatedFormat('d \d\e F \d\e Y') }}">
+                                {{ $dia->day }}
+                                @if (! empty($porDia[$dia->toDateString()]))
+                                    <span class="eventos-editorial-dias-movil__marca" aria-hidden="true"></span>
+                                @endif
+                            </button>
+                        @else
+                            <span aria-hidden="true"></span>
+                        @endif
+                    @endforeach
+                @endforeach
+            </div>
+        </div>
+
         {{--
-            MÓVIL: la misma información como agenda vertical. Cero JavaScript,
-            cero scroll horizontal y cada enlace con su objetivo de 44 px.
+            MÓVIL: la misma información como agenda vertical. Sin scroll horizontal
+            y cada enlace con su objetivo de 44 px.
 
             Sin `hover:` en ninguna lista de aquí abajo: Tailwind 4 compila esa
             variante detrás de `(hover: hover)` y no de la puerta de puntero
@@ -207,5 +263,6 @@
             </p>
         @endif
     </div>
+    <x-publico.formulario-evento-comunitario />
     </div>
 </x-layouts.publico>

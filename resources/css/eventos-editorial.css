@@ -929,6 +929,191 @@
     background: var(--evt-bg-alta);
 }
 
+.eventos-editorial-celda-cabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.35rem;
+}
+
+/*
+ * El «+» de una celda: discreto a propósito, cerca del número del día y sin
+ * pisarlo. Encoge como un control --no como una tarjeta-- porque es del
+ * mismo tamaño que un mando del riel. El `::after` amplía el área táctil sin
+ * agrandar la caja visible: no pinta nada, así que esta guardia no lo ve.
+ */
+.eventos-editorial-agregar {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 1px solid var(--evt-linea);
+    border-radius: 999px;
+    background: var(--evt-surface-alta);
+    color: var(--evt-acento);
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+        transform var(--duracion-instante) var(--ease-out),
+        border-color var(--duracion-boton) var(--ease-color);
+}
+
+.eventos-editorial-agregar::after {
+    content: "";
+    position: absolute;
+    inset: -0.4rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .eventos-editorial-agregar:hover {
+        border-color: var(--evt-acento);
+    }
+}
+
+.eventos-editorial-agregar:active {
+    transform: scale(var(--asb-encogimiento-control));
+    transition-duration: 0ms;
+}
+
+.eventos-editorial-dias-movil__rejilla {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.25rem;
+}
+
+.eventos-editorial-dias-movil__semana {
+    padding: 0.35rem 0;
+    color: var(--evt-tenue);
+    font-size: 0.68rem;
+    text-align: center;
+}
+
+.eventos-editorial-dias-movil__dia {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 2.75rem;
+    border: 1px solid var(--evt-linea);
+    border-radius: 0.75rem;
+    background: var(--evt-surface);
+    color: var(--evt-tinta);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition:
+        transform var(--duracion-instante) var(--ease-out),
+        border-color var(--duracion-boton) var(--ease-color);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .eventos-editorial-dias-movil__dia:hover {
+        border-color: var(--evt-acento);
+    }
+}
+
+.eventos-editorial-dias-movil__dia:active {
+    transform: scale(var(--asb-encogimiento-control));
+    transition-duration: 0ms;
+}
+
+.eventos-editorial-dias-movil__dia[aria-current="date"] {
+    border-color: var(--evt-acento);
+    color: var(--evt-acento);
+    font-weight: 700;
+}
+
+.eventos-editorial-dias-movil__marca {
+    position: absolute;
+    bottom: 0.2rem;
+    width: 0.25rem;
+    height: 0.25rem;
+    border-radius: 50%;
+    background: var(--evt-acento);
+}
+
+.eventos-editorial-agregar:focus-visible,
+.eventos-editorial-dias-movil__dia:focus-visible,
+.eventos-editorial-modal__cerrar:focus-visible,
+.eventos-editorial-modal__enviar:focus-visible {
+    outline: 2px solid var(--color-marca-500);
+    outline-offset: 2px;
+}
+
+.eventos-editorial-modal {
+    width: min(calc(100% - 1.5rem), 42rem);
+    max-height: calc(100dvh - 2rem);
+    margin: auto;
+    padding: 1.5rem;
+    overflow-y: auto;
+    border: 1px solid var(--evt-linea);
+    border-radius: 0.75rem;
+    background: var(--evt-surface);
+    color: var(--evt-tinta);
+    box-shadow: var(--evt-sombra);
+}
+
+.eventos-editorial-modal::backdrop {
+    background: rgb(12 10 11 / 0.72);
+}
+
+.eventos-editorial-modal__cabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.eventos-editorial-modal__cerrar {
+    flex: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--evt-linea);
+    border-radius: 0.75rem;
+    color: var(--evt-tinta);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition:
+        transform var(--duracion-instante) var(--ease-out),
+        border-color var(--duracion-boton) var(--ease-color);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .eventos-editorial-modal__cerrar:hover {
+        border-color: var(--evt-acento);
+    }
+}
+
+.eventos-editorial-modal__cerrar:active {
+    transform: scale(var(--asb-encogimiento-control));
+    transition-duration: 0ms;
+}
+
+.eventos-editorial-modal__enviar {
+    border-radius: 0.75rem;
+    background: var(--asb-accion-fuerte);
+    color: white;
+    cursor: pointer;
+    transition:
+        transform var(--duracion-instante) var(--ease-out),
+        filter var(--duracion-boton) var(--ease-color);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .eventos-editorial-modal__enviar:hover {
+        filter: brightness(0.92);
+    }
+}
+
+.eventos-editorial-modal__enviar:active {
+    transform: scale(var(--asb-encogimiento-control));
+    transition-duration: 0ms;
+}
+
 @media (min-width: 768px) and (max-width: 1023.98px) {
     .eventos-editorial-calendario td {
         min-height: 5.35rem;
@@ -960,19 +1145,19 @@
     padding: 0.28rem 0.4rem;
     border-radius: 0.75rem;
     background: var(--evt-acento-suave);
-    color: var(--asb-acento-fuerte);
+    color: var(--evt-tinta);
     font-size: 0.72rem;
     font-weight: 600;
     text-overflow: ellipsis;
     transition:
         transform var(--duracion-instante) var(--ease-out),
-        color var(--duracion-boton) var(--ease-color),
+        filter var(--duracion-boton) var(--ease-color),
         opacity var(--duracion-instante) var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
     .eventos-editorial-calendario a:hover {
-        color: var(--evt-tinta);
+        filter: brightness(0.92);
     }
 }
 
