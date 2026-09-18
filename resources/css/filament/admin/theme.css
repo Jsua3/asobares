@@ -665,15 +665,34 @@
          * riel se queda sin nombre accesible y la barra pasa a ser una lista de
          * enlaces sin texto. Con recorte visual, el lector de pantalla y el
          * foco lo siguen encontrando.
+         *
+         * Solo el del ÍTEM: es una fila horizontal (icono + rótulo) y su alto
+         * no depende del rótulo, así que sacarlo del flujo no mueve nada.
          */
-        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-item-label,
-        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group-label {
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-item-label {
             position: absolute;
             width: 1px;
             height: 1px;
             overflow: hidden;
             clip-path: inset(50%);
             white-space: nowrap;
+        }
+
+        /*
+         * El del GRUPO («Contenido», «Bolsas»…) sí reserva su alto en el
+         * riel, aunque no se vea. Esa fila no tiene icono ni chevron —los
+         * dos se apagan aparte— así que el rótulo era lo único que le daba
+         * alto: sacarlo del flujo la dejaba en 16 px, contra 48 px en el
+         * cajón abierto (medido con `maqueta:barra`). Cinco grupos de 32 px
+         * de diferencia cada uno son 160 px de deriva acumulada: el icono
+         * que se acaba de tocar en el riel aparecía en otro sitio al
+         * desplegar. `visibility` conserva el alto sin pintar nada;
+         * `overflow: hidden` evita que el texto invisible desborde los
+         * 4 rem del riel.
+         */
+        .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group-label {
+            visibility: hidden;
+            overflow: hidden;
         }
 
         /* Sin rótulo, el chevron no plega nada legible; y el logotipo no cabe
