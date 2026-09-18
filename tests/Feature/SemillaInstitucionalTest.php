@@ -301,19 +301,19 @@ class SemillaInstitucionalTest extends TestCase
     }
 
     /**
-     * Y lo mismo con la propuesta de valor, que es el subtítulo del hero de
-     * «Quiénes somos»: lo primero que lee quien entra a saber qué es esto.
-     *
-     * Entra tal cual la escribe la lámina 2, sin resumir: la regla del §17.2
-     * del encargo es que un texto del gremio no se «mejora», y si está mal
-     * escrito se le pregunta a la dirección ejecutiva.
+     * El subtítulo del hero de «Quiénes somos» —lo primero que lee quien
+     * entra a saber qué es esto— estuvo un tiempo sustituido por la
+     * propuesta de valor de la lámina 2 (§17.2 del encargo, 10 sep). Es
+     * excepción explícita a esa regla, registrada en encargo.md §13 (17
+     * sep): la tutora empresarial del corte 2 aprobó esta redacción del
+     * equipo y rechazó la de la lámina al verla en la interfaz nueva.
      */
-    public function test_la_propuesta_de_valor_la_escribe_el_gremio(): void
+    public function test_la_mision_institucional_es_la_que_aprobo_la_tutora(): void
     {
         $this->assertSame(
-            'En Asobares Capítulo Quindío nos comprometemos a ser un aliado estratégico de los empresarios y '
-            .'establecimientos de la vida nocturna, brindando oportunidades de crecimiento, innovación y conexión '
-            .'para impulsar el desarrollo del sector turístico como un producto nocturno.',
+            'Representar al sector de la vida nocturna del Quindío ante las instituciones públicas y privadas, '
+            .'para proponer como gremio: participar en las decisiones sobre horarios, ruido, orden público y '
+            .'formalización antes de que se tomen, y no reclamar después.',
             ajuste('quienes_mision')
         );
     }

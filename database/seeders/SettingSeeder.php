@@ -211,11 +211,15 @@ class SettingSeeder extends Seeder
             $this->texto('quienes_cargo_directora', 'Directora ejecutiva', 'institucional', 'Quiénes somos · cargo de la directora'),
             $this->largo('quienes_historia', 'Somos una organización gremial que nace en Bogotá y llega al Quindío con la necesidad de afianzar la relación TURISMO – NOCHE. El capítulo se fundó el 14 de agosto de 2024 en Armenia y reúne a bares, gastrobares, cafés y discotecas del departamento alrededor de una idea simple: la vida nocturna es una industria que genera empleo, paga impuestos y merece ser tratada como tal.', 'institucional', 'Historia'),
             // Subtítulo del hero de «Quiénes somos», lo primero que se lee en la
-            // página que explica el gremio. Es la propuesta de valor del propio
-            // gremio, de la lámina 2 de la presentación institucional: entra tal
-            // cual, sin resumir y sin «mejorar» (§17.2 del encargo), y por eso
-            // la etiqueta que ve la oficina es «Propuesta de valor».
-            $this->largo('quienes_mision', 'En Asobares Capítulo Quindío nos comprometemos a ser un aliado estratégico de los empresarios y establecimientos de la vida nocturna, brindando oportunidades de crecimiento, innovación y conexión para impulsar el desarrollo del sector turístico como un producto nocturno.', 'institucional', 'Propuesta de valor'),
+            // página que explica el gremio. Estuvo un tiempo sustituido por la
+            // propuesta de valor de la lámina 2 de la presentación institucional
+            // (§17.2 del encargo, 10 sep), pero es exactamente el texto que la
+            // tutora empresarial aprobó en el corte 2 (Sua, 17 sep): la tutora
+            // vio después la propuesta de valor de la lámina y no le gustó, y sí
+            // le gustó la interfaz nueva de Ingrid. Excepción explícita a §17.2
+            // registrada en encargo.md §13 (17 sep): este campo lo redacta el
+            // equipo y no el gremio.
+            $this->largo('quienes_mision', 'Representar al sector de la vida nocturna del Quindío ante las instituciones públicas y privadas, para proponer como gremio: participar en las decisiones sobre horarios, ruido, orden público y formalización antes de que se tomen, y no reclamar después.', 'institucional', 'Misión'),
             $this->largo('quienes_que_hacemos', 'Trabajamos por una vida nocturna más diversa y por la dignificación del sector, para consolidarnos como el corazón nocturno del Eje Cafetero. Gestionamos con las Secretarías de Salud, Gobierno y Planeación; negociamos tarifas de derechos de autor; formamos a los equipos de nuestros afiliados; y construimos la guía normativa por municipio que hoy no tiene ningún otro gremio del país.', 'institucional', 'Qué hacemos'),
             $this->texto('quienes_vision', 'Hacia la transformación del Quindío en un paraíso nocturno seguro', 'institucional', 'Visión'),
             // Nombre como lo firma el propio presidente en la invitación a los

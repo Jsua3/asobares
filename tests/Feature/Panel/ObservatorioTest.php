@@ -21,7 +21,6 @@ use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Livewire\Livewire;
-use Livewire\Mechanisms\ComponentRegistry;
 use Tests\Support\MideContraste;
 use Tests\TestCase;
 
@@ -262,7 +261,13 @@ class ObservatorioTest extends TestCase
             DemandaLaboralPorArea::class,
             OfertaContraDemanda::class,
         ] as $widget) {
-            $marca = '"name":"'.app(ComponentRegistry::class)->getName($widget).'"';
+            // `Livewire\Mechanisms\ComponentRegistry` no existe en esta versión:
+            // el alias clase→nombre lo resuelve el `Finder` que el manager
+            // registra en el contenedor como `livewire.finder`. Estos widgets
+            // no tienen alias corto registrado, así que el nombre es el FQCN
+            // tal cual, y el HTML lo lleva con las contrabarras escapadas por
+            // el JSON de `wire:snapshot`: `json_encode` reproduce ese escape.
+            $marca = '"name":'.json_encode(app('livewire.finder')->normalizeName($widget));
             $veces = substr_count($html, $marca);
 
             $this->assertSame(

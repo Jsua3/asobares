@@ -76,6 +76,8 @@ class LoginDelPanelTest extends TestCase
         $pagina = $this->get('/admin/login')->assertOk();
         $this->assertSame(1, preg_match('/wire:snapshot="([^"]+)"/', $pagina->getContent(), $coincidencias));
 
+        // Livewire 4 usa una ruta de actualización con prefijo dinámico.
+        // La API de Livewire devuelve su URI vigente sin fijar ese prefijo.
         $login = $this->withHeader('X-Livewire', 'true')
             ->postJson(Livewire::getUpdateUri(), [
                 'components' => [[
@@ -179,6 +181,24 @@ class LoginDelPanelTest extends TestCase
         $this->assertInstanceOf(HasAppAuthentication::class, $usuario);
         $this->assertInstanceOf(HasAppAuthenticationRecovery::class, $usuario);
         $this->assertInstanceOf(HasEmailAuthentication::class, $usuario);
+    }
+
+    /**
+     * No reproduce el 22P02 de producción: `Schema::getColumnType()` en
+     * SQLite da `text` tanto para `json()` como para `text()` (el grammar de
+     * SQLite compila `json()` a `text` salvo `use_native_json`), así que esta
+     * suite no puede distinguir las dos declaraciones. Sólo Postgres valida
+     * el blob del cast `encrypted:array` como JSON y lo rechaza; la migración
+     * de la columna se comprueba de verdad corriéndola contra Postgres.
+     */
+    public function test_los_codigos_de_recuperacion_se_guardan_y_leen_cifrados(): void
+    {
+        $usuario = $this->crearUsuario(User::ROL_SUPER_ADMIN);
+        $codigos = ['ABCD-1234', 'EFGH-5678'];
+
+        $usuario->saveAppAuthenticationRecoveryCodes($codigos);
+
+        $this->assertSame($codigos, $usuario->fresh()->getAppAuthenticationRecoveryCodes());
     }
 
     public function test_el_segundo_factor_por_correo_arranca_apagado_y_se_puede_activar(): void
