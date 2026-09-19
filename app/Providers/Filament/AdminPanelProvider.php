@@ -15,6 +15,9 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Assets\Js;
 use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
@@ -52,6 +55,11 @@ class AdminPanelProvider extends PanelProvider
             // el sitio público, no un `.svg` que solo envuelva esa imagen.
             ->brandLogo(asset('img/logo-asobares.png'))
             ->brandLogoHeight('2rem')
+            // El logo lleva a la portada pública, con una carga normal: la
+            // navegación SPA del panel no sirve para una página que no es suya.
+            ->homeUrl(fn (): string => route('inicio'))
+            ->spaUrlExceptions(fn (): array => [route('inicio')])
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->darkMode()
             ->defaultThemeMode(ThemeMode::Light)
             ->themeSwitcher()
@@ -92,6 +100,13 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::SIDEBAR_FOOTER,
                 fn (): HtmlString => new HtmlString(view('filament.components.cuenta-en-la-barra', ['donde' => 'pie'])->render()),
+            )
+            // Volver al listado desde crear, editar o ver un registro. Las migas
+            // de pan de Filament se ocultan en el teléfono, y un gancho en el
+            // encabezado lo pone en todos los recursos sin tocar cada página.
+            ->renderHook(
+                PanelsRenderHook::PAGE_HEADER_ACTIONS_BEFORE,
+                fn (array $scopes): ?HtmlString => $this->volverAlListado($scopes),
             )
             // El campo de puntos del fondo de TODA la interfaz. Va lo primero
             // del cuerpo, fijo y por debajo de todo.
@@ -187,6 +202,30 @@ class AdminPanelProvider extends PanelProvider
      *
      * @return array<int, Js>
      */
+    /**
+     * El botón de volver para las páginas de crear, editar o ver un registro;
+     * nulo en cualquier otra página. Quien llega a una de esas páginas ya pasó
+     * el acceso al recurso, que es el mismo que pide su listado.
+     *
+     * @param  array<int, mixed>  $scopes
+     */
+    private function volverAlListado(array $scopes): ?HtmlString
+    {
+        $pagina = collect($scopes)->first(fn (mixed $scope): bool => is_string($scope)
+            && (is_subclass_of($scope, CreateRecord::class) || is_subclass_of($scope, EditRecord::class) || is_subclass_of($scope, ViewRecord::class)));
+
+        if ($pagina === null) {
+            return null;
+        }
+
+        $recurso = $pagina::getResource();
+
+        return new HtmlString(view('filament.components.volver-al-listado', [
+            'url' => $recurso::getUrl('index'),
+            'etiqueta' => 'Volver a '.$recurso::getPluralModelLabel(),
+        ])->render());
+    }
+
     private function assetsDelPanel(): array
     {
         try {
@@ -195,6 +234,7 @@ class AdminPanelProvider extends PanelProvider
                 Js::make('panel-barra-lateral', Vite::asset('resources/js/panel-barra-lateral.js'))->module(),
                 Js::make('panel-barra-puntos', Vite::asset('resources/js/panel-barra-puntos.js'))->module(),
                 Js::make('panel-barra-resorte', Vite::asset('resources/js/panel-barra-resorte.js'))->module(),
+                Js::make('panel-campana', Vite::asset('resources/js/panel-campana.js'))->module(),
             ];
         } catch (ViteException) {
             return [];

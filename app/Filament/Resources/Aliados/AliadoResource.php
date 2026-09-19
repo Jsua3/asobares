@@ -18,6 +18,9 @@ class AliadoResource extends Resource
 {
     protected static ?string $model = Aliado::class;
 
+    /** Lo que muestra y busca el buscador general del panel. */
+    protected static ?string $recordTitleAttribute = 'nombre';
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-sparkles';
 
     protected static string|UnitEnum|null $navigationGroup = 'Gremio';

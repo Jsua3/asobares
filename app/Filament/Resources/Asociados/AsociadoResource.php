@@ -18,6 +18,9 @@ class AsociadoResource extends Resource
 {
     protected static ?string $model = Asociado::class;
 
+    /** Lo que muestra y busca el buscador general del panel. */
+    protected static ?string $recordTitleAttribute = 'nombre';
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-building-storefront';
 
     protected static string|UnitEnum|null $navigationGroup = 'Contenido';

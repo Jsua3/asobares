@@ -18,6 +18,9 @@ class EventoResource extends Resource
 {
     protected static ?string $model = Evento::class;
 
+    /** Lo que muestra y busca el buscador general del panel. */
+    protected static ?string $recordTitleAttribute = 'titulo';
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
 
     protected static string|UnitEnum|null $navigationGroup = 'Contenido';

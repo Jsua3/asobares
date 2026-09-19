@@ -17,6 +17,9 @@ class SolicitudAfiliacionResource extends Resource
 {
     protected static ?string $model = SolicitudAfiliacion::class;
 
+    /** Lo que muestra y busca el buscador general del panel. */
+    protected static ?string $recordTitleAttribute = 'establecimiento_nombre';
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-check';
 
     protected static string|UnitEnum|null $navigationGroup = 'Bandejas';

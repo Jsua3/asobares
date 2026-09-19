@@ -18,6 +18,9 @@ class ProveedorResource extends Resource
 {
     protected static ?string $model = Proveedor::class;
 
+    /** Lo que muestra y busca el buscador general del panel. */
+    protected static ?string $recordTitleAttribute = 'nombre';
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-truck';
 
     protected static string|UnitEnum|null $navigationGroup = 'Bolsas';

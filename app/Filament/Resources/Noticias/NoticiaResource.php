@@ -18,6 +18,9 @@ class NoticiaResource extends Resource
 {
     protected static ?string $model = Noticia::class;
 
+    /** Lo que muestra y busca el buscador general del panel. */
+    protected static ?string $recordTitleAttribute = 'titulo';
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-newspaper';
 
     protected static string|UnitEnum|null $navigationGroup = 'Contenido';

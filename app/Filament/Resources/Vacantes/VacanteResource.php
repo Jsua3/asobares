@@ -8,6 +8,7 @@ use App\Models\Vacante;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 /**
@@ -19,6 +20,9 @@ use UnitEnum;
 class VacanteResource extends Resource
 {
     protected static ?string $model = Vacante::class;
+
+    /** Lo que muestra y busca el buscador general del panel. */
+    protected static ?string $recordTitleAttribute = 'cargo';
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-briefcase';
 
@@ -35,6 +39,17 @@ class VacanteResource extends Resource
     public static function table(Table $table): Table
     {
         return VacantesTable::configure($table);
+    }
+
+    /**
+     * La bandeja no tiene página por vacante: el resultado del buscador lleva
+     * al listado filtrado por su cargo. El buscador solo recorre este recurso
+     * para quien tiene `ver_vacante`, que es el mismo permiso que pide el
+     * listado.
+     */
+    public static function getGlobalSearchResultUrl(Model $record): string
+    {
+        return static::getUrl('index', ['search' => $record->getAttribute('cargo')]);
     }
 
     public static function getPages(): array
