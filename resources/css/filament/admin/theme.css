@@ -401,6 +401,19 @@
         transform: scale(0.9);
     }
 
+    /* Filament pone en mayúscula cada palabra del grupo del buscador; en
+       español queda «Eventos Y Capacitaciones». Los nombres de los
+       listados ya vienen escritos como se leen. */
+    .fi-global-search-result-group-header {
+        text-transform: none;
+    }
+
+    /* Un aviso con destino se abre con un clic en cualquier parte de la
+       tarjeta (`panel-campana.js`), y el cursor lo dice. */
+    .fi-no-database .fi-no-notification:has(a[href]) {
+        cursor: pointer;
+    }
+
     /*
      * El cristal de la barra.
      *
@@ -694,13 +707,13 @@
         }
 
         /*
-         * EL CROMO DEL TELÉFONO. Hamburguesa a la izquierda, logotipo al
-         * centro, control de tema a la derecha.
+         * EL CROMO DEL TELÉFONO. Hamburguesa y lupa a la izquierda, logotipo
+         * al centro, campana y tema a la derecha.
          *
          * El centrado saca al logotipo del reparto de espacio en vez de repartir
          * huecos: así no depende de cuántos hijos tenga el cromo, que Filament
          * cambia entre versiones. Y centra de verdad, porque los dos costados
-         * miden lo mismo: 44 px de botón a cada lado.
+         * miden casi lo mismo: dos botones a cada lado.
          */
         .fi-topbar {
             position: relative;
@@ -722,6 +735,74 @@
 
         .asb-panel-tema {
             margin-inline-start: auto;
+        }
+
+        /*
+         * La lupa y la campana, a los costados del logotipo. Filament empuja
+         * su zona con `margin-inline-start: auto`, igual que el tema empujaba
+         * el suyo: se repartían el hueco y la campana caía detrás del
+         * logotipo. La zona ocupa el ancho que queda y reparte: la lupa junto
+         * a la hamburguesa, la campana junto al tema.
+         */
+        .fi-topbar-end {
+            flex: 1;
+            justify-content: space-between;
+            /* El botón de la campana sobresale 6 px de su caja por su margen
+               negativo; este aire evita que su toque pise el del tema. */
+            margin-inline: 0.25rem 0.375rem;
+        }
+
+        /*
+         * El buscador, plegado en una lupa del tamaño de un botón. El campo
+         * ocupa toda la lupa para que el toque lo enfoque, y el icono va
+         * encima sin robarle el toque. Enfocado, se despliega sobre el cromo
+         * de lado a lado, con fondo opaco para tapar el logotipo.
+         */
+        .fi-topbar .fi-global-search-ctn {
+            flex: none;
+        }
+
+        .fi-topbar .fi-global-search-field {
+            width: 2.25rem;
+        }
+
+        .fi-topbar .fi-global-search-field .fi-input-wrp {
+            position: relative;
+        }
+
+        .fi-topbar .fi-global-search-field .fi-input-wrp-prefix {
+            position: absolute;
+            inset-block: 0;
+            inset-inline-start: 0;
+            pointer-events: none;
+        }
+
+        .fi-topbar .fi-global-search-field .fi-input {
+            width: 100%;
+            padding-inline-start: 2.25rem;
+        }
+
+        .fi-topbar .fi-global-search:not(:focus-within) .fi-input,
+        .fi-topbar .fi-global-search:not(:focus-within) .fi-input::placeholder {
+            color: transparent;
+        }
+
+        .fi-topbar .fi-global-search:focus-within {
+            position: absolute;
+            inset-inline: 0.75rem;
+            z-index: 30;
+        }
+
+        .fi-topbar .fi-global-search:focus-within .fi-global-search-field {
+            width: 100%;
+        }
+
+        .fi-topbar .fi-global-search:focus-within .fi-input-wrp {
+            background-color: var(--color-white);
+        }
+
+        .dark .fi-topbar .fi-global-search:focus-within .fi-input-wrp {
+            background-color: var(--gray-900);
         }
 
         /* La cuenta cambia de sitio: se va del cromo y aparece al pie. */
@@ -1581,8 +1662,9 @@
             margin-inline: 0.25rem 0.4rem;
         }
 
-        /* Más grande: a 6,5rem se leía pequeño, y en el centro del cromo hay
-           sitio de sobra —a 375 px, 44 de hamburguesa y 44 de tema dejan 287. */
+        /* Más grande: a 6,5rem se leía pequeño, y en el centro del cromo cabe
+           —a 375 px, los dos botones de cada costado dejan 184 y el logotipo
+           mide 160. */
         .fi-topbar .fi-logo {
             width: auto;
             max-width: 10rem;

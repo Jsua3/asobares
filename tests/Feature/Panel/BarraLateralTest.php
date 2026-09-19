@@ -1011,7 +1011,7 @@ class BarraLateralTest extends TestCase
      * derecha. La hamburguesa se queda donde estaba, a la izquierda.
      *
      * El centrado es absoluto contra el ancho del cromo y no por reparto de
-     * espacio: los dos costados miden lo mismo —44 px de botón a cada lado—
+     * espacio: los dos costados miden casi lo mismo —dos botones a cada lado—
      * así que centrar contra el ancho es centrar entre ellos, y deja de
      * depender de cuántos hijos tenga la barra, que Filament cambia entre
      * versiones.
