@@ -2836,3 +2836,56 @@ Entra la foto del 17 sep: dos líneas (producción en `6197c92` / `bbe9b63`; alt
 ### 58.5 Lo aprendido que ya estaba en el plan y se deja dicho otra vez
 
 Las claves de mensaje de la regla `Password` son `….password.symbols` (y hermanas), no `….symbols`. Los campos de contraseña del cambio en Mi Cuenta se llaman como `$dontFlash` (`current_password`, `password`) para que no vuelvan a la sesión ni al HTML. El expediente público no lleva nombres, correos, NIT, documentos, teléfonos ni contraseñas: solo conteos y números de fila de error.
+
+## §59 — Todo en `main`, el dominio en producción y los accesos listos para repartir (17 y 18 de septiembre de 2026)
+
+Dos días sin foto: entre `446901e` (17 sep, 09:54) y `659fc61` (18 sep, 17:41) entraron **14 commits**, ocho de Ingrid y seis de Sua, y el estado seguía diciendo que el alta real no estaba en `main`. Esta entrada los cuenta y deja el expediente al día.
+
+### 59.1 Qué entró
+
+| Commit | Quién | Qué |
+|---|---|---|
+| `97be48c`, `c8a7929` | Ingrid | Dos pruebas adaptadas al marcado y a la sesión de Livewire 4 |
+| `781d6c4` | Sua | `app_authentication_recovery_codes` de `json` a texto: Postgres rechazaba el blob cifrado (`encrypted:array`) al registrar la app de autenticación; SQLite no lo ve. Dos pruebas rotas por Livewire 4 |
+| `46483fe` | Ingrid | Correlación de los webhooks del API Link de Bold: la transacción guarda su link (migración `2026_09_17_000000`) |
+| `66eca79` | Sua | Fuera el velo de la barra en scroll: se pintaba de canto a canto y se veía como franja clara sobre el hero. Cierra D-50 |
+| `0aea90b` → `4f1d34b` | Sua | La Misión del equipo vuelve a «Quiénes somos» (encargo §13, 17 sep). El ajuste del riel comprimido del panel se revirtió: en producción dejaba el último módulo vacío |
+| `49b6d88` | Ingrid | **Calendario comunitario**: formulario público que publica al instante, con imagen opcional, y moderación posterior desde el panel. Abre D-51 |
+| `f04fc59` | Ingrid | Presentación de las tablas operativas del panel |
+| `7656af6` | Sua | Páginas propias por municipio en el directorio y en la guía, con canónica propia; `noindex` en los municipios sin negocios publicados |
+| `735e1d8`, `341fa1f` | Ingrid | Fusiones con `origin/main` |
+| `3884a5b` | Ingrid | Webhook de pruebas de Bold aislado (`/webhooks/bold/pruebas`) |
+| `659fc61` | Sua | Un solo host para Google y la organización en la portada (59.3) |
+
+### 59.2 El alta real ya está en producción
+
+La base de producción tiene **61 fichas y 39 usuarios** (`db:show --counts`, 18 sep; sin PII) y el sitemap lista **10 fichas publicadas**. El 17 sep a las 15:41 se descargó el CSV de **35 accesos provisionales**. El 18 sep se armó para Natalia un documento de entrega (Word y PDF, **fuera del repositorio**): lista de control, un mensaje para copiar y pegar por afiliado y tarjetas para recortar. Se comprobó con Word que el texto que se copia de cada recuadro es idéntico al esperado en las 35 cuentas, y que ninguna contraseña quedó en la tarjeta de otro correo. Queda sin registrar si el CSV salió del panel de producción o del local, y si las 10 fichas publicadas tienen autorización escrita del titular.
+
+### 59.3 El dominio
+
+Sua verificó `asobaresquindio.com` en Search Console y envió el sitemap. Al medir se encontraron dos defectos:
+
+- **El host de Cloud servía 200 con canónica propia**: dos copias del sitio compitiendo en Google. `RedirigirAlDominioPropio` (middleware global, detrás de `CabecerasDeSeguridad` para que el 301 también las lleve) manda a `APP_URL` con 301, conservando ruta y consulta. Solo GET y HEAD: quien envía un POST —el webhook de Bold, un formulario— no lo repite detrás de un 301. `/up` no se toca.
+- **`APP_URL` de producción seguía siendo el host de Cloud.** Se cambió a `https://asobaresquindio.com` **antes** del push, para que el mismo despliegue trajera las dos cosas. El middleware se apaga solo si `APP_URL` es `*.laravel.cloud`: con el orden al revés habría mandado el dominio a la copia.
+
+La portada declara en JSON-LD la organización —nombre, logo, correo, WhatsApp, Instagram y dirección, todo de los ajustes— y el sitio. El logo es el favicon de 128 px porque Google pide al menos 112 de lado y el logotipo horizontal mide 108 de alto. Entra en RNF-06; no amplía alcance.
+
+Comprobado en producción tras el despliegue (17:42:45 → 17:44:12): el host viejo da 301 en `/`, `/directorio?municipio=armenia` y `/mi-cuenta/entrar` hacia el mismo camino en el dominio, con `nosniff`; `/up` en 200; un POST al webhook de pruebas por el host viejo lo contesta el propio webhook (401 por firma), sin redirección; el dominio sirve 200 y el JSON-LD.
+
+### 59.4 Bold en sandbox
+
+Ingrid pidió revisar la llegada del webhook de pruebas. Solo lectura de registros: un `POST /webhooks/bold/pruebas` a las **13:34:42** (Bogotá) con `bold-webhook/1.0`, **200** en 144 ms, sin excepciones entre 12:40 y 13:45. Ese controlador solo responde 200 con firma, referencia y tipo de evento válidos. `cloud environment:logs` devuelve **como máximo 100 líneas**: la ventana se leyó en tramos de 5 minutos, ninguno saturado.
+
+### 59.5 Qué se midió
+
+- **Suite completa sobre `659fc61`: 1.972 casos, 1.971 pasan, 13.662 aserciones, 1.150 s.** El único fallo es la guardia que encuentra el Excel del gremio en `material/sep15material/`, carpeta ignorada: es del disco de la máquina, no del código. El `Premature end of PHP process` del 17 sep no se repitió.
+- Las pruebas nuevas (`DominioPropioTest`, 11 casos; tres en `SitioPublicoTest`) se rompieron a propósito, una condición cada vez: todas se pusieron rojas. La primera versión de la prueba de mayúsculas **pasaba por el motivo equivocado**: Symfony ya entrega el host de la petición en minúsculas, así que la rama no se alcanzaba. Ahora las mayúsculas vienen de `APP_URL`, que es donde pueden aparecer.
+- Cifras del árbol remedidas (estado §5).
+
+### 59.6 Qué entró y salió del estado
+
+Sale la foto de dos líneas (rama del alta frente a producción) y el bloque del SMTP con `asobares.org`: el correo es Gmail y está configurado, sin comprobar la entrega. Salen D-09 y D-50 hacia el encargo §13. Entra D-51 (calendario comunitario sin revisión previa y sin acta). D-28 sigue abierta hasta el reparto de los accesos.
+
+### 59.7 D-51 respondida el mismo día
+
+Natalia aprobó el calendario comunitario tal como funciona: se publica al instante y se modera después. Sale del estado y entra en el encargo §13. Siguen pendientes el acta escrita de esta ampliación y que la moderación retire cualquier foto con personas identificables, porque no tiene autorización de imagen.
