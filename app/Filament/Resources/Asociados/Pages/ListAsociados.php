@@ -146,6 +146,23 @@ class ListAsociados extends ListRecords
             });
     }
 
+    /**
+     * Cada descarga cambia las contraseñas, así que el archivo anterior deja
+     * de servir; y cifrar cada una lleva su tiempo, de modo que con treinta
+     * cuentas la descarga tarda más de diez segundos.
+     */
+    private static function avisoDeDescarga(int $cuentas): string
+    {
+        if ($cuentas === 0) {
+            return 'Ninguna cuenta de afiliado tiene contraseña provisional: el archivo saldrá vacío.';
+        }
+
+        $cuales = $cuentas === 1 ? 'la cuenta que todavía tiene' : "las {$cuentas} cuentas que todavía tienen";
+
+        return "Se generan contraseñas nuevas para {$cuales} la contraseña provisional, y las de cualquier archivo descargado antes dejan de funcionar. "
+            .'Tarda unos segundos: no cierres ni recargues la página hasta que baje el archivo. Entrega cada acceso solo a su titular.';
+    }
+
     private function accionDescargarAccesos(): Action
     {
         return Action::make('descargarAccesosProvisionales')
@@ -154,7 +171,11 @@ class ListAsociados extends ListRecords
             ->color('gray')
             ->visible(fn (): bool => auth()->user()?->esSuperAdmin() === true)
             ->requiresConfirmation()
-            ->modalDescription('Cada descarga reemplaza las contraseñas provisionales anteriores. Entrega el archivo únicamente a las personas correspondientes.')
+            ->modalHeading('¿Generar contraseñas nuevas?')
+            ->modalIcon('heroicon-o-exclamation-triangle')
+            ->modalIconColor('warning')
+            ->modalDescription(fn (): string => self::avisoDeDescarga(DescargarAccesosProvisionales::cuentasQueSeRotan()->count()))
+            ->modalSubmitActionLabel('Generar y descargar')
             ->action(fn (): StreamedResponse => app(DescargarAccesosProvisionales::class)->descargar(auth()->user()));
     }
 

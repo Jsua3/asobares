@@ -95,6 +95,27 @@ class DescargarAccesosProvisionalesTest extends TestCase
             ->assertFileDownloaded('accesos-provisionales.csv');
     }
 
+    /**
+     * En producción se descargó dos veces seguidas sin que nadie supiera que
+     * cada descarga invalida el archivo anterior, y cada una tardó más de
+     * diez segundos sin que la pantalla dijera por qué. El aviso nombra
+     * cuántas cuentas cambian y que hay que esperar.
+     */
+    public function test_el_aviso_dice_cuantas_cuentas_cambian_y_que_hay_que_esperar(): void
+    {
+        $direccion = $this->usuario(User::ROL_SUPER_ADMIN);
+        $this->actingAs($direccion);
+        $this->usuario(User::ROL_ASOCIADO, Asociado::factory()->create(), provisional: true);
+        $this->usuario(User::ROL_ASOCIADO, Asociado::factory()->create(), provisional: true);
+        $this->usuario(User::ROL_ASOCIADO, Asociado::factory()->create(), provisional: false);
+
+        Livewire::test(ListAsociados::class)
+            ->mountAction('descargarAccesosProvisionales')
+            ->assertMountedActionModalSee('las 2 cuentas')
+            ->assertMountedActionModalSee('dejan de funcionar')
+            ->assertMountedActionModalSee('no cierres ni recargues');
+    }
+
     public function test_csv_solo_incluye_cuentas_provisionales_y_rota_las_claves(): void
     {
         $direccion = $this->usuario(User::ROL_SUPER_ADMIN);

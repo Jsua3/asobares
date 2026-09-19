@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -10,6 +11,23 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DescargarAccesosProvisionales
 {
+    /**
+     * Las cuentas a las que una descarga les cambia la contraseña: afiliados
+     * con ficha que todavía no pusieron una suya. El aviso del panel las
+     * cuenta con esta misma consulta.
+     *
+     * @return Builder<User>
+     */
+    public static function cuentasQueSeRotan(): Builder
+    {
+        return User::query()
+            ->where('contrasena_provisional', true)
+            ->whereNotNull('asociado_id')
+            ->whereHas('asociado')
+            ->whereHas('roles', fn ($query) => $query->where('name', User::ROL_ASOCIADO))
+            ->whereDoesntHave('roles', fn ($query) => $query->whereIn('name', [User::ROL_SUPER_ADMIN, User::ROL_SUBADMIN]));
+    }
+
     public function descargar(?User $direccion): StreamedResponse
     {
         abort_unless($direccion?->esSuperAdmin() && auth()->id() === $direccion->id, 403);
@@ -17,13 +35,8 @@ class DescargarAccesosProvisionales
         $filas = DB::transaction(function (): array {
             $filas = [];
 
-            User::query()
+            self::cuentasQueSeRotan()
                 ->with('asociado')
-                ->where('contrasena_provisional', true)
-                ->whereNotNull('asociado_id')
-                ->whereHas('asociado')
-                ->whereHas('roles', fn ($query) => $query->where('name', User::ROL_ASOCIADO))
-                ->whereDoesntHave('roles', fn ($query) => $query->whereIn('name', [User::ROL_SUPER_ADMIN, User::ROL_SUBADMIN]))
                 ->orderBy('id')
                 ->lockForUpdate()
                 ->get()
