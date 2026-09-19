@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Http\Requests\Concerns\ProtegeFormularioPublico;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class GuardarEventoComunitarioRequest extends FormRequest
 {
@@ -24,6 +25,11 @@ class GuardarEventoComunitarioRequest extends FormRequest
             'hora_inicio' => ['required', 'date_format:H:i'],
             'hora_fin' => ['nullable', 'date_format:H:i'],
             'lugar' => ['required', 'string', 'max:180', $sinHtml],
+            // Dónde queda, para el mapa. Las coordenadas no se aceptan del
+            // público: las pone el panel.
+            'municipio_id' => ['nullable', 'integer', Rule::exists('municipios', 'id')->where('activo', true)],
+            'direccion' => ['nullable', 'string', 'max:180', $sinHtml],
+            'mapa_url' => ['nullable', 'url:http,https', 'max:255'],
             'descripcion' => ['required', 'string', 'max:800', $sinHtml],
             'imagen' => ['nullable', 'file', 'image', 'mimetypes:image/jpeg,image/png,image/webp', 'max:5120', 'dimensions:max_width=6000,max_height=6000'],
             'enlace_externo' => [

@@ -20,6 +20,7 @@ class EventoComunitarioController
     {
         $datos = $request->safe()->only([
             'titulo', 'fecha', 'hora_inicio', 'hora_fin', 'lugar', 'descripcion', 'enlace_externo',
+            'municipio_id', 'direccion', 'mapa_url',
         ]);
 
         $inicio = Carbon::createFromFormat('!Y-m-d H:i', $datos['fecha'].' '.$datos['hora_inicio']);
@@ -50,6 +51,9 @@ class EventoComunitarioController
             'fecha_inicio' => $inicio,
             'fecha_fin' => $fin,
             'lugar' => $datos['lugar'],
+            'municipio_id' => $datos['municipio_id'] ?? null,
+            'direccion' => $datos['direccion'] ?? null,
+            'mapa_url' => $datos['mapa_url'] ?? null,
             'descripcion' => $datos['descripcion'],
             'enlace_externo' => $datos['enlace_externo'] ?? null,
             'permite_inscripcion' => false,

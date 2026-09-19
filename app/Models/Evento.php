@@ -46,6 +46,8 @@ class Evento extends Model
             'fecha_fin' => 'datetime',
             'precio' => 'decimal:2',
             'permite_inscripcion' => 'boolean',
+            'lat' => 'float',
+            'lng' => 'float',
         ];
     }
 
@@ -157,6 +159,37 @@ class Evento extends Model
     public function aliado(): BelongsTo
     {
         return $this->belongsTo(Aliado::class);
+    }
+
+    /**
+     * @return BelongsTo<Municipio, $this>
+     */
+    public function municipio(): BelongsTo
+    {
+        return $this->belongsTo(Municipio::class);
+    }
+
+    /** Con coordenadas se puede pintar el punto en el mapa. */
+    public function tieneUbicacion(): bool
+    {
+        return $this->lat !== null && $this->lng !== null;
+    }
+
+    /**
+     * El enlace para abrir el lugar en un mapa: el que se escribió a mano o,
+     * sin él, OpenStreetMap con las coordenadas. Nulo si no hay ninguno.
+     */
+    public function urlDelMapa(): ?string
+    {
+        if (filled($this->mapa_url)) {
+            return $this->mapa_url;
+        }
+
+        if (! $this->tieneUbicacion()) {
+            return null;
+        }
+
+        return "https://www.openstreetmap.org/?mlat={$this->lat}&mlon={$this->lng}#map=17/{$this->lat}/{$this->lng}";
     }
 
     /**

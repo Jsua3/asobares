@@ -87,6 +87,40 @@ class EventoForm
                             ->columnSpanFull(),
                     ]),
 
+                // El mismo contrato que la ficha de un asociado: con
+                // coordenadas, el sitio puede pintar el punto en el mapa.
+                Section::make('Ubicación')
+                    ->description('Para mostrar el evento en un mapa. Todo es opcional.')
+                    ->columns(2)
+                    ->collapsible()
+                    ->schema([
+                        Select::make('municipio_id')
+                            ->label('Municipio')
+                            ->relationship('municipio', 'nombre', fn ($query) => $query->where('activo', true)->orderBy('orden'))
+                            ->searchable()
+                            ->preload(),
+                        TextInput::make('direccion')
+                            ->label('Dirección')
+                            ->maxLength(180)
+                            ->placeholder('Carrera 14 # 23-15, piso 3'),
+                        TextInput::make('lat')
+                            ->label('Latitud')
+                            ->numeric()
+                            ->minValue(-90)
+                            ->maxValue(90),
+                        TextInput::make('lng')
+                            ->label('Longitud')
+                            ->numeric()
+                            ->minValue(-180)
+                            ->maxValue(180),
+                        TextInput::make('mapa_url')
+                            ->label('Enlace de mapa')
+                            ->rule('url:http,https')
+                            ->maxLength(255)
+                            ->helperText('Google Maps u OpenStreetMap. Si lo dejas vacío y hay coordenadas, se usa OpenStreetMap.')
+                            ->columnSpanFull(),
+                    ]),
+
                 Section::make('Inscripción y aforo')
                     ->columns(2)
                     ->schema([
