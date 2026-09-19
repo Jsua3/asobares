@@ -22,6 +22,13 @@ final readonly class SerieDelObservatorio
      */
     public const int MUESTRA_MINIMA = 30;
 
+    /**
+     * Lo que dice una cifra calculada —una tasa, una suma de dinero— cuando
+     * su serie está vacía: un «0,0 %» de mora sin una sola cartera se lee
+     * como «nadie debe». Los conteos no lo usan: cero proveedores es un dato.
+     */
+    public const string SIN_DATOS = 'Sin datos';
+
     public function __construct(
         public array $etiquetas,
         public array $series,

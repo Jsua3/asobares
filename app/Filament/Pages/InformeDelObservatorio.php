@@ -88,12 +88,16 @@ class InformeDelObservatorio extends Page
             ],
             [
                 'etiqueta' => 'Recaudo (18 meses)',
-                'valor' => pesos(array_sum($salud->series['Recaudo (COP)'] ?? [])),
+                'valor' => $salud->estaVacia()
+                    ? SerieDelObservatorio::SIN_DATOS
+                    : pesos(array_sum($salud->series['Recaudo (COP)'] ?? [])),
                 'serie' => $salud,
             ],
             [
                 'etiqueta' => 'Tasa de mora actual',
-                'valor' => number_format((float) ($mora->series['Tasa de mora (%)'][0] ?? 0), 1, ',', '.').' %',
+                'valor' => $mora->estaVacia()
+                    ? SerieDelObservatorio::SIN_DATOS
+                    : number_format((float) ($mora->series['Tasa de mora (%)'][0] ?? 0), 1, ',', '.').' %',
                 'serie' => $mora,
             ],
         ];

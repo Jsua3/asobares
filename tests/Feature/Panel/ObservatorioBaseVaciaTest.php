@@ -4,6 +4,8 @@ namespace Tests\Feature\Panel;
 
 use App\Filament\Pages\InformeDelObservatorio;
 use App\Filament\Pages\Observatorio;
+use App\Models\Asociado;
+use App\Models\Cartera;
 use App\Models\User;
 use Database\Seeders\RolYPermisoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -82,6 +84,43 @@ class ObservatorioBaseVaciaTest extends TestCase
                 ->assertSee('Todavía no hay datos que mostrar')
                 ->assertDontSee('Aún sin muestra suficiente');
         }
+    }
+
+    /**
+     * Sin una sola cartera ni un solo pago, la banda de cifras decía «Tasa de
+     * mora actual: 0,0 %» y «Recaudo: $0»: la primera se lee como «nadie
+     * debe» y la segunda como «el gremio no recaudó nada», cuando lo que no
+     * hay es información. Es lo que pasa hoy en producción. Los conteos sí
+     * son hechos —cero proveedores es verdad— y se quedan en cero.
+     */
+    public function test_la_banda_de_cifras_no_inventa_una_mora_ni_un_recaudo_sin_datos(): void
+    {
+        $this->actingAs($this->direccion());
+
+        $this->get(Observatorio::getUrl())
+            ->assertOk()
+            ->assertDontSee('0,0 %')
+            ->assertDontSee('$0')
+            ->assertSee('Sin datos');
+
+        $this->get(InformeDelObservatorio::getUrl())
+            ->assertOk()
+            ->assertDontSee('0,0 %')
+            ->assertDontSee('$0')
+            ->assertSee('Sin datos');
+    }
+
+    /** El control: con carteras cargadas, la tasa se calcula y se muestra. */
+    public function test_con_carteras_cargadas_la_mora_si_se_muestra(): void
+    {
+        $this->actingAs($this->direccion());
+        $alDia = Asociado::factory()->create();
+        $enMora = Asociado::factory()->create();
+        Cartera::query()->create(['asociado_id' => $alDia->id, 'meses_mora' => 0, 'saldo_pendiente' => 0]);
+        Cartera::query()->create(['asociado_id' => $enMora->id, 'meses_mora' => 2, 'saldo_pendiente' => 140000]);
+
+        $this->get(Observatorio::getUrl())->assertOk()->assertSee('50,0 %');
+        $this->get(InformeDelObservatorio::getUrl())->assertOk()->assertSee('50,0 %');
     }
 
     /**

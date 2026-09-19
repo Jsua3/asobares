@@ -9,6 +9,7 @@ use App\Filament\Widgets\Observatorio\OfertaContraDemanda;
 use App\Filament\Widgets\Observatorio\PresenciaPorMunicipio;
 use App\Filament\Widgets\Observatorio\SaludFinanciera;
 use App\Panel\MetricasDelObservatorio;
+use App\Panel\SerieDelObservatorio;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Pages\Page;
@@ -132,17 +133,27 @@ class Observatorio extends Page
         return (int) array_sum($this->metricas()->coberturaDeProveedores()->series['Proveedores'] ?? []);
     }
 
-    /** Recaudo acumulado de los últimos dieciocho meses, en pesos. */
+    /** Recaudo acumulado de los últimos dieciocho meses, en pesos; sin pagos, «Sin datos». */
     public function recaudoDelPeriodo(): string
     {
-        return pesos(array_sum($this->metricas()->saludFinanciera()->series['Recaudo (COP)'] ?? []));
+        $salud = $this->metricas()->saludFinanciera();
+
+        if ($salud->estaVacia()) {
+            return SerieDelObservatorio::SIN_DATOS;
+        }
+
+        return pesos(array_sum($salud->series['Recaudo (COP)'] ?? []));
     }
 
-    /** Tasa de mora de hoy, formateada como porcentaje. */
+    /** Tasa de mora de hoy, formateada como porcentaje; sin carteras, «Sin datos». */
     public function tasaDeMora(): string
     {
-        $tasa = $this->metricas()->tasaDeMoraActual()->series['Tasa de mora (%)'][0] ?? 0;
+        $mora = $this->metricas()->tasaDeMoraActual();
 
-        return number_format((float) $tasa, 1, ',', '.').' %';
+        if ($mora->estaVacia()) {
+            return SerieDelObservatorio::SIN_DATOS;
+        }
+
+        return number_format((float) ($mora->series['Tasa de mora (%)'][0] ?? 0), 1, ',', '.').' %';
     }
 }
