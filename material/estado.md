@@ -71,6 +71,18 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 > | Eventos comunitarios: el flujo de Ingrid ya cubría publicación, aviso, edición, despublicación, borrado y seguridad (18 pruebas); faltaba la idempotencia: el mismo evento en diez minutos no se publica dos veces | `1ceb152` |
 > | Ubicación de eventos: `direccion`, `municipio_id`, `lat`, `lng`, `mapa_url` (migración aditiva `2026_09_19_080245`), sección en el panel, formulario comunitario listo del lado del servidor. **Contrato para Ingrid:** `tieneUbicacion()` y `urlDelMapa()` | `de27db6` |
 >
+> **Fase D (datos institucionales) — inventario medido en producción el 19 sep, solo lectura y sin PII; misma rama:**
+>
+> | Módulo | Qué hay en producción | Origen | Qué falta confirmar |
+> |---|---|---|---|
+> | **Observatorio** | 10 asociados publicados (51 en borrador), 0 proveedores, 0 transacciones, 0 carteras, 0 vacantes y aspirantes, 90 consultas de la guía | Todo sale de la base: nada es demo, pero casi todo está vacío o por debajo de 30 | `632ef2f`: mora y recaudo decían «0,0 %» y «$0» sin datos; ahora «Sin datos». Lo demás ya se rotulaba «muestra pequeña» o «Todavía no hay datos» |
+> | **Iniciativas** | 5 publicadas: Vibrarte y Bares Verdes (en ejecución), Blindando tu Negocio (escalando), Noche Segura y Competitiva, Diplomado en Gerencia de Bares (en formulación) | TED gremial del capítulo, lámina «Las 5 iniciativas»; Blindando, además, el documento de la jornada con la Alcaldía | Que los estados sigan vigentes, descripciones más completas, imágenes y enlaces (Natalia) |
+> | **Beneficios** | 5, sin alcance por municipio | Catálogo oficial «BENEFICIOS AFILIADOS» | Clasificarlos por alcance (D-39) |
+> | **Aliados y convenios** | 4 institucionales (Asobares Colombia, Cámara de Comercio, Comité Intergremial, Gobernación) y 19 comerciales con convenio | Comerciales: «BENEFICIOS AFILIADOS», alcance nacional; el detalle con porcentaje y contacto solo se ve en Mi Cuenta | Vigencia de cada convenio y cuáles aplican en el Quindío (D-18) |
+> | **Boletín** | 0 entradas | — | El módulo funciona de punta a punta (`d43c8cb`); faltan artículos reales con fecha, categoría e imagen autorizada |
+> | **Guía normativa** | 151 fichas en 12 municipios: 106 verificadas (99 generales del 15 sep y 7 de la Alcaldía de Armenia), 45 sin verificar (4 municipales por municipio, más 1 general de Armenia); 0 costos; 5 enlaces | Guía «Abre tu negocio» del capítulo y documento de la Alcaldía de Armenia | Que la dirección confirme las filas «sin verificar» (D-21) y las URL de trámite (D-04). El sitio ya las rotula «Sin verificar» y «Costo por confirmar» |
+> | **Proveedores** | 0 | — | Proveedores reales; el módulo está cubierto (moderación, vigencia, formularios) |
+>
 > ⚠️ **Pantalla negra, pista nueva (19 sep):** en modo oscuro el fondo del cuerpo es casi negro (`#0B090A`), y un fotograma sin contenido pintado —un salto largo, una carga lenta, el cambio de página SPA— se ve como pantalla negra. Se vio una vez en el panel al desplazarse 899 px en el teléfono. Sin confirmar que sea lo que vio Ingrid.
 
 ---

@@ -2944,3 +2944,15 @@ El primer control para probar que `panel-campana.js` hacía falta —bloquear su
 ### 61.4 Lo medido
 
 Pruebas nuevas rotas a propósito, cambio por cambio. Tres mutaciones sobrevivieron en la primera ronda y se corrigieron las pruebas, no el código: el cast de `lat` que SQLite no deja ver (se hidrata el modelo con texto, como lo entrega Postgres); `url` contra `url:http,https`, indistinguibles con `javascript:` (se prueba con `ftp://`); y una prueba que usaba `fresh()` y nunca alcanzaba la guarda `! $this->exists`. En las corridas por zona: 445 del panel, 611 de artistas y 893 de eventos, migraciones y panel completo, en verde.
+
+## §62 — Fase D: los datos institucionales, medidos en producción (19 de septiembre de 2026)
+
+Inventario de solo lectura con `cloud tinker` sobre producción, sin datos personales. Con espacios en el código, PowerShell envuelve el argumento en comillas y `cmd` ya no toma el `>` de `->` como redirección.
+
+- **Observatorio**: nada es demo; casi todo está vacío (0 proveedores, transacciones, carteras y vacantes) o por debajo de 30 (10 asociados publicados). La banda de cifras y el informe impreso decían «Tasa de mora actual: 0,0 %» y «Recaudo: $0» sin una sola cartera ni un solo pago: `632ef2f` dice «Sin datos», con la misma `estaVacia()` que ya usaban las gráficas.
+- **Iniciativas, beneficios y convenios**: todo tiene fuente escrita en su sembrador (TED gremial, «BENEFICIOS AFILIADOS»). Lo que falta es confirmación del gremio, no reemplazo de demo.
+- **Boletín**: vacío en producción; el módulo funciona de punta a punta (`d43c8cb`, pruebas que pasaron a la primera y que se rompieron a propósito para ver que muerden).
+- **Guía**: 106 de 151 fichas verificadas; las 45 restantes ya salen rotuladas «Sin verificar» y «Costo por confirmar».
+- **Proveedores**: cero en producción.
+
+Lo aprendido: una prueba que pasa a la primera no dice nada hasta que se rompe el código que dice cubrir.
