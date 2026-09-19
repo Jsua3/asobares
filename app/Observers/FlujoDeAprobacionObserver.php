@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Enums\EstadoPublicacion;
+use App\Models\Artista;
 use App\Models\Evento;
 use App\Models\User;
 use App\Models\Vacante;
@@ -16,10 +17,10 @@ use Illuminate\Support\Facades\Auth;
  * usuario no tiene permiso de publicar ese recurso, el registro se guarda
  * como `pendiente_aprobacion` (RF-37).
  *
- * No avisa a nadie: el panel no activa `databaseNotifications()`. Quien puede
- * aprobar se entera por la banda «Te está esperando» del tablero
- * (`ColaDePendientes`), que pregunta a las mismas policies.
- * `Panel\AvisosQueSeVenTest` impide escribir avisos que nadie lee.
+ * No avisa a nadie: quien puede aprobar se entera por la banda «Te está
+ * esperando» del tablero (`ColaDePendientes`), que pregunta a las mismas
+ * policies. Los avisos de la campana los escriben las dos altas que publican
+ * sin revisión previa: `AvisoDeEventoComunitario` y `AvisoDeArtistaPublicado`.
  */
 class FlujoDeAprobacionObserver
 {
@@ -37,6 +38,10 @@ class FlujoDeAprobacionObserver
         }
 
         if ($modelo instanceof Evento && $modelo->esAltaComunitariaValidada()) {
+            return;
+        }
+
+        if ($modelo instanceof Artista && $modelo->esInscripcionPublicaValidada()) {
             return;
         }
 

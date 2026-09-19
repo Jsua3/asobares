@@ -12,8 +12,9 @@ use Illuminate\Validation\Rule;
 
 /**
  * «Quiero aparecer en la bolsa» entra como una ficha ya armada, no como un
- * mensaje de texto libre que la secretaría tendría que transcribir a mano:
- * solo falta aprobarla.
+ * mensaje de texto libre que la secretaría tendría que transcribir a mano, y
+ * sale publicada al instante: la bolsa se modera después (encargo §13,
+ * 18 sep). El estado lo fija el servidor, nunca el formulario.
  */
 class GuardarSolicitudDeArtistaRequest extends FormRequest
 {
@@ -63,9 +64,27 @@ class GuardarSolicitudDeArtistaRequest extends FormRequest
             ]),
             'slug' => $this->slugDisponible($this->string('nombre')->toString()),
             'foto' => $this->file('foto')?->store('artistas', config('almacenamiento.publico')),
-            'estado' => EstadoPublicacion::PendienteAprobacion,
+            'estado' => EstadoPublicacion::Publicado,
             ...$this->selloDeConsentimiento(),
         ];
+    }
+
+    /**
+     * La misma inscripción otra vez: un doble clic o un reenvío del navegador.
+     * Mismo nombre, mismo contacto y mismo municipio en los últimos diez
+     * minutos. Se mira antes de armar los datos porque armarlos guarda la foto.
+     */
+    public function yaSeRecibio(): bool
+    {
+        $datos = $this->safe();
+
+        return Artista::query()
+            ->where('nombre', $datos['nombre'])
+            ->where('municipio_id', $datos['municipio_id'])
+            ->where('correo', $datos['correo'] ?? null)
+            ->where('whatsapp', $datos['whatsapp'] ?? null)
+            ->where('created_at', '>=', now()->subMinutes(10))
+            ->exists();
     }
 
     /** Dos artistas pueden llamarse igual; la URL no puede repetirse. */

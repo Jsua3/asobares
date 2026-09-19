@@ -6,6 +6,7 @@ use App\Enums\TipoArtista;
 use App\Http\Requests\GuardarSolicitudDeArtistaRequest;
 use App\Models\Artista;
 use App\Models\Municipio;
+use App\Support\AvisoDeArtistaPublicado;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -91,12 +92,24 @@ class ArtistaController
         ]);
     }
 
+    /**
+     * La ficha sale publicada al instante y la bolsa se modera después
+     * (encargo §13, 18 sep): quien la modera recibe un aviso en el panel.
+     * Reenviar la misma inscripción no publica otra ficha.
+     */
     public function guardarInscripcion(GuardarSolicitudDeArtistaRequest $request): RedirectResponse
     {
-        Artista::create($request->datosDelArtista());
+        if (! $request->yaSeRecibio()) {
+            $artista = new Artista($request->datosDelArtista());
+            $artista->marcarInscripcionPublicaValidada();
+            $artista->save();
+
+            // El aviso es posterior al guardado y no puede deshacer la publicación.
+            rescue(fn () => AvisoDeArtistaPublicado::enviar($artista));
+        }
 
         return redirect()
             ->route('artistas.inscripcion')
-            ->with('exito', 'Recibimos tu inscripción. La secretaría la revisa y te avisamos cuando tu ficha esté publicada.');
+            ->with('exito', 'Listo: tu ficha ya está publicada en la bolsa de artistas. Si necesitas corregir algo, escríbenos.');
     }
 }

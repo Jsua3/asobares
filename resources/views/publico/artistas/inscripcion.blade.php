@@ -7,8 +7,8 @@
 
             <h1 class="mt-4 font-display text-3xl font-bold tracking-tight">Inscríbete en la bolsa de artistas</h1>
             <p class="mt-2 text-sm text-tenue">
-                Cuando un bar necesite música a las doce de la noche, va a buscar aquí. La secretaría revisa cada
-                inscripción antes de publicarla.
+                Cuando un bar necesite música a las doce de la noche, va a buscar aquí.
+                Tu ficha sale publicada en cuanto la envías, y el gremio la puede revisar después.
             </p>
         </div>
     </div>

@@ -62,7 +62,7 @@
                 @else
                     <p class="font-display text-lg font-semibold">Todavía no hay artistas publicados</p>
                     <p class="mt-2 text-sm text-tenue">
-                        Si eres músico, DJ o artista del Quindío, inscríbete y la secretaría revisa tu ficha.
+                        Si eres músico, DJ o artista del Quindío, inscríbete: tu ficha sale publicada al instante.
                     </p>
                 @endif
             </div>

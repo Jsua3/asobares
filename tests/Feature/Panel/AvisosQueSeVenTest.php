@@ -41,6 +41,7 @@ class AvisosQueSeVenTest extends TestCase
         $panel = (new AdminPanelProvider($this->app))->panel(Panel::make());
 
         $this->assertContains('Support/AvisoDeEventoComunitario.php', $escritores);
+        $this->assertContains('Support/AvisoDeArtistaPublicado.php', $escritores);
         $this->assertTrue($panel->hasDatabaseNotifications(), 'Hay avisos persistentes pero la campana está apagada.');
         $this->assertTrue($panel->hasTopbar());
         $this->assertSame(DatabaseNotificationsPosition::Topbar, $panel->getDatabaseNotificationsPosition());

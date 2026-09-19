@@ -38,7 +38,11 @@ class SolicitudesDeBolsaTest extends TestCase
         return $usuario->fresh();
     }
 
-    public function test_la_inscripcion_de_artista_crea_una_ficha_pendiente(): void
+    /**
+     * Desde el 18 sep la bolsa de artistas publica al instante y se modera
+     * después (encargo §13, aprobado por Natalia).
+     */
+    public function test_la_inscripcion_de_artista_crea_una_ficha_publicada(): void
     {
         $municipio = Municipio::factory()->create();
 
@@ -57,26 +61,26 @@ class SolicitudesDeBolsaTest extends TestCase
         $artista = Artista::firstOrFail();
 
         $this->assertSame('DJ Tornamesa', $artista->nombre);
-        $this->assertSame(EstadoPublicacion::PendienteAprobacion, $artista->estado);
+        $this->assertSame(EstadoPublicacion::Publicado, $artista->estado);
         $this->assertNotNull($artista->slug);
         $this->assertTrue($artista->acepta_datos);
         $this->assertNotNull($artista->consentimiento_at);
     }
 
-    public function test_la_ficha_recien_inscrita_no_sale_en_el_directorio_publico(): void
+    public function test_la_ficha_recien_inscrita_sale_en_la_bolsa_al_instante(): void
     {
         $municipio = Municipio::factory()->create();
 
         $this->post(route('artistas.inscripcion.store'), [
-            'nombre' => 'DJ Sin Aprobar',
+            'nombre' => 'DJ Recien Inscrito',
             'tipo' => TipoArtista::Dj->value,
             'municipio_id' => $municipio->id,
             'whatsapp' => '3151189203',
             'acepta_datos' => '1',
         ]);
 
-        $this->get(route('artistas.index'))->assertDontSee('DJ Sin Aprobar');
-        $this->get(route('artistas.show', Artista::firstOrFail()))->assertNotFound();
+        $this->get(route('artistas.index'))->assertSee('DJ Recien Inscrito');
+        $this->get(route('artistas.show', Artista::firstOrFail()))->assertOk();
     }
 
     public function test_la_inscripcion_de_artista_exige_autorizacion_de_datos(): void
@@ -113,8 +117,10 @@ class SolicitudesDeBolsaTest extends TestCase
             'acepta_datos' => '1',
         ];
 
-        $this->post(route('artistas.inscripcion.store'), $datos);
-        $this->post(route('artistas.inscripcion.store'), $datos)->assertSessionHas('exito');
+        // Dos artistas distintos: el mismo nombre con otro contacto. Con el
+        // mismo contacto sería la misma inscripción reenviada, y no se repite.
+        $this->post(route('artistas.inscripcion.store'), [...$datos, 'whatsapp' => '3151189203']);
+        $this->post(route('artistas.inscripcion.store'), [...$datos, 'whatsapp' => '3009876543'])->assertSessionHas('exito');
 
         $this->assertSame(2, Artista::count());
         $this->assertSame(2, Artista::distinct()->count('slug'));

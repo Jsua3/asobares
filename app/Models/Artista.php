@@ -27,6 +27,13 @@ class Artista extends Model
 
     protected $guarded = ['id'];
 
+    /**
+     * Bandera transitoria, nunca persistida: la lee `FlujoDeAprobacionObserver`
+     * para dejar publicada la inscripción que llega del formulario público,
+     * aunque quien la envía tenga sesión de afiliado y no pueda publicar.
+     */
+    private bool $inscripcionPublicaValidada = false;
+
     protected function casts(): array
     {
         return [
@@ -36,6 +43,17 @@ class Artista extends Model
             'acepta_datos' => 'boolean',
             'consentimiento_at' => 'datetime',
         ];
+    }
+
+    public function marcarInscripcionPublicaValidada(): void
+    {
+        $this->inscripcionPublicaValidada = true;
+    }
+
+    /** Solo el alta: editar la ficha después vuelve a pasar por el flujo. */
+    public function esInscripcionPublicaValidada(): bool
+    {
+        return ! $this->exists && $this->inscripcionPublicaValidada;
     }
 
     public function getRouteKeyName(): string
