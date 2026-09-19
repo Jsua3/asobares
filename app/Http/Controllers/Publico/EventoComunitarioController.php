@@ -32,6 +32,14 @@ class EventoComunitarioController
             $fin->addDay();
         }
 
+        // Un doble clic o un reenvío del navegador: el mismo título, fecha,
+        // hora y lugar en diez minutos es el mismo envío, y no se publica ni
+        // se avisa otra vez. Antes de guardar la imagen, para no dejarla
+        // huérfana.
+        if ($this->yaSePublico($datos['titulo'], $inicio, $datos['lugar'])) {
+            return $this->alCalendario($inicio);
+        }
+
         $evento = new Evento;
         $evento->fill([
             'titulo' => $datos['titulo'],
@@ -75,6 +83,22 @@ class EventoComunitarioController
         // El aviso es posterior al guardado y no puede deshacer la publicación.
         rescue(fn () => AvisoDeEventoComunitario::enviar($evento));
 
+        return $this->alCalendario($inicio);
+    }
+
+    private function yaSePublico(string $titulo, Carbon $inicio, string $lugar): bool
+    {
+        return Evento::query()
+            ->where('origen', OrigenEvento::Comunidad)
+            ->where('titulo', $titulo)
+            ->where('fecha_inicio', $inicio)
+            ->where('lugar', $lugar)
+            ->where('created_at', '>=', now()->subMinutes(10))
+            ->exists();
+    }
+
+    private function alCalendario(Carbon $inicio): RedirectResponse
+    {
         return redirect()
             ->route('eventos.calendario', [$inicio->year, $inicio->format('m')])
             ->with('exito', 'Tu evento ya aparece en el calendario.');
