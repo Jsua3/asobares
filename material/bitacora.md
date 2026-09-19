@@ -2889,3 +2889,35 @@ Sale la foto de dos líneas (rama del alta frente a producción) y el bloque del
 ### 59.7 D-51 respondida el mismo día
 
 Natalia aprobó el calendario comunitario tal como funciona: se publica al instante y se modera después. Sale del estado y entra en el encargo §13. Siguen pendientes el acta escrita de esta ampliación y que la moderación retire cualquier foto con personas identificables, porque no tiene autorización de imagen.
+
+## §60 — Reparto de cierre con Ingrid y Fase A: rendimiento medido antes de optimizar (18 de septiembre de 2026, noche)
+
+Ingrid repartió el cierre en dos bloques (estado, «Reparto de cierre»): a Sua, rendimiento, panel, flujos, datos institucionales y datos definitivos; a ella, todo el frente público y Mi Cuenta. La navbar pública queda congelada para los dos. Pidió diagnóstico antes que cambios: problema, causa, archivo, solución, riesgo.
+
+### 60.1 Cómo se midió
+
+Registros de acceso de Cloud de 23 horas (2.641 peticiones con duración; 2.418 de personas), leídos en tramos que se parten cuando llegan al tope de 100 líneas; configuración real del entorno por `cloud environment:get`, `instance:list` y `config:show`; y consultas SQL contadas en local con `DB::listen`. Solo ruta, código y duración: sin IP ni agente.
+
+Producción es **una instancia `flex-512mb` sin autoescalado, con hibernación**, el scheduler en la misma máquina y **Postgres serverless**; cola `sync`, caché y sesiones en la base de datos.
+
+### 60.2 Lo que resultó
+
+- **Los dos «bloqueos» fueron descargas de accesos provisionales** (11,3 y 10,1 s). El registro lento de PHP-FPM las atrapó con `password_hash()` dentro de `DescargarAccesosProvisionales`: 35 contraseñas con bcrypt de costo 12. De paso se supo que el documento de entrega del 17 sep ya no vale; se rehace el domingo 20 con una descarga nueva.
+- **Cada `ajuste()` era una consulta**: con la caché en base de datos, `Cache::rememberForever` no recuerda nada dentro de la petición. La portada hacía 96 consultas, 81 de ellas la misma lectura de `cache`.
+- **Los widgets de Filament consultan cada 5 s por defecto** (`CanPoll::$pollingInterval`), y ninguno de los nuestros lo cambiaba: 1.254 de las 2.418 peticiones de personas (52 %).
+- Descartado: consultas pesadas en los widgets (1 a 4 cada uno), N+1 en el tablero, errores 500 (ninguno) y excepciones de la aplicación.
+- **No reproducido:** la pantalla negra.
+
+### 60.3 Qué se cambió (rama `sua/fase-a-rendimiento`)
+
+`faea52e` memoriza los ajustes por petición con `Cache::memo()`, en la lectura y en el olvido: portada 96 → 15 consultas, directorio 32 → 10, eventos 35 → 10. `d079048` quita el sondeo a los 7 widgets del tablero y a la base de las 6 gráficas del Observatorio. `5ba8bb1` hace que el aviso de la descarga diga cuántas cuentas cambian, que los archivos anteriores dejan de funcionar y que hay que esperar; el costo del hash no se toca.
+
+### 60.4 Lo aprendido
+
+- **`Cache::memo()` no memoriza la primera lectura con la caché vacía**: `rememberForever` escribe con `forever()`, que olvida la clave en la memoria. La prueba que leía una sola vez antes de guardar pasaba por el motivo equivocado —la memoria nunca llegó a tener el valor—; la corregida lee dos veces y la mutación de `olvidarCache()` sin `memo()` la pone roja.
+- En Filament 5 el contenido de un modal no está en el HTML de la página: se prueba con `assertMountedActionModalSee()`.
+- `cloud.bat` pasa `--cmd` y `--code` por `cmd.exe`: el `>` de `->` es una redirección que deja archivos `count()` en la raíz del repositorio y manda un código vacío.
+
+### 60.5 Qué entró y salió del estado
+
+Entra el reparto con Ingrid, la tabla de la Fase A y el plan del domingo para los accesos. En el encargo §13 entra el bloque C aprobado por Natalia: artistas que publican al instante con aviso a la dirección y eventos con ubicación; sin acta todavía.

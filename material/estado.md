@@ -20,15 +20,38 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 
 ---
 
-## ⚠️ ACCESOS DE LOS AFILIADOS: GENERADOS, SIN REPARTIR
+## ⚠️ ACCESOS DE LOS AFILIADOS: EL DOCUMENTO DEL 17 SEP YA NO SIRVE
 
-> **El alta real está en producción.** La base tiene **61 fichas** y **39 usuarios** (conteo de filas del 18 sep, `db:show --counts`; sin PII). El 17 sep, 15:41, se descargó un CSV con **35 accesos provisionales**, y el 18 sep se preparó para Natalia un documento de entrega con la marca del gremio (Word y PDF, fuera del repositorio, en la carpeta de descargas de Sua): lista de control, **un mensaje para copiar y pegar por afiliado** y tarjetas para recortar, con el portal en `asobaresquindio.com/mi-cuenta/entrar`.
+> **El alta real está en producción.** La base tiene **61 fichas** y **39 usuarios** (conteo de filas del 18 sep, `db:show --counts`; sin PII). El documento de entrega para Natalia (Word y PDF, fuera del repositorio: lista de control, un mensaje para copiar y pegar por afiliado y tarjetas para recortar) salió del CSV del **17 sep, 15:41**.
 >
-> - ⚠️ **No volver a descargar los accesos desde el panel**: cada descarga rota las contraseñas de todas las cuentas que sigan en provisional, y el documento deja de servir.
-> - ⚠️ **Confirmar que el CSV salió del panel de producción** y no de local: el expediente no lo registra. Si fue de local, esas contraseñas no entran al sitio.
+> - ⚠️ **Ese documento no se envía.** Los registros de Cloud muestran **dos descargas más el 18 sep, a las 11:53 y a las 17:51** (Bogotá): `password_hash()` dentro de `DescargarAccesosProvisionales`. Cada descarga cambia las contraseñas de todas las cuentas que siguen en provisional.
+> - **Plan (Sua, 18 sep):** el **domingo 20 sep** se hace una sola descarga nueva y con ese CSV se rehace el documento. Hasta entonces, nadie descarga.
+> - Desde `5ba8bb1` (rama `sua/fase-a-rendimiento`) el aviso de la descarga dice cuántas cuentas cambian, que los archivos anteriores dejan de funcionar y que hay que esperar.
 > - Antes de enviar, Natalia confirma tres casos del archivo: un responsable con dos establecimientos y dos correos; cuatro cuentas con el nombre del negocio en vez de una persona; correos universitarios o que no coinciden con el titular.
 > - **10 fichas publicadas** en el directorio (las que lista el sitemap). La regla es que ninguna se publica sin autorización del titular: **que esa autorización exista por escrito no está registrado aquí**.
 > - El **acta del alta** (se registra después del código, como el Acta 06) **sigue sin emitir**.
+
+---
+
+## 🔀 REPARTO DE CIERRE CON INGRID (18 sep)
+
+> Ingrid repartió el cierre en dos bloques para no tocar los mismos archivos. **La navbar pública no la toca nadie.** Todo cambio se revisa en escritorio, tablet y móvil, claro y oscuro. Cada bloque se entrega con commit, archivos, pruebas y pendientes.
+>
+> - **Sua:** rendimiento y estabilidad → panel (logo al sitio, volver al listado, buscador general, campana que se cierra) → flujos (artistas, eventos por dentro, ubicación de eventos en datos) → datos institucionales (Observatorio, iniciativas, boletín, convenios, guía, proveedores) → datos definitivos (asociados, bolsa de empleo, SEO). Bold queda **congelado** hasta la ronda conjunta.
+> - **Ingrid:** sistema visual público, Directorio, Aliados, Abre tu negocio, Quiénes somos, Eventos por fuera (calendario, mapa), Mi Cuenta y la presentación de convenios.
+> - Se coordina antes de tocar: Eventos, Mi Cuenta, Aliados/Convenios, CSS público global, layouts y componentes compartidos.
+>
+> **Fase A (rendimiento) — en la rama `sua/fase-a-rendimiento`, sin integrar a `main`:**
+>
+> | Problema | Causa medida | Commit |
+> |---|---|---|
+> | «Se bloqueó dos veces» | Las dos descargas de accesos: 11,3 y 10,1 s cifrando 35 contraseñas (bcrypt 12), sin explicación en pantalla | `5ba8bb1` (aviso; el hash no se toca) |
+> | Páginas públicas lentas (p95 1,3 s en el servidor) | Cada `ajuste()` era una consulta a la tabla `cache`: la portada hacía 96, 81 de ellas la misma | `faea52e`: `Cache::memo()`; portada **96 → 15** consultas |
+> | Panel cargado | Los widgets de Filament consultaban cada 5 s por defecto: **1.254 de 2.418** peticiones de personas en 23 h (52 %) | `d079048`: sin sondeo en 7 widgets y 6 gráficas |
+> | Primera visita tras inactividad | Hibernación de la app y de Postgres *serverless*; instancia única `flex-512mb` | Sin cambio: medir de nuevo tras integrar; subir de instancia es costo del gremio (D-12) |
+> | **Pantalla negra** | **No reproducida.** Candidatos: `@view-transition` del sitio público (`resources/css/app.css`, zona de Ingrid) o la navegación SPA del panel | Falta saber dónde se vio: sitio o panel, navegador, dispositivo, modo |
+>
+> La cola es `sync`: cada correo sale dentro de la petición que lo dispara. En 23 h ninguna petición fue lenta por eso; el aviso de artista nuevo del bloque C suma uno más.
 
 ---
 
@@ -139,11 +162,11 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 
 ## 3. Registro único de decisiones pendientes
 
-Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen» de `encargo.md`. **El 18 sep entraron tres:** el dominio propio en producción (**cierra D-09**), la barra de escritorio en scroll sin velo ni banda (**cierra D-50**) y el calendario comunitario que publica primero y se modera después, aprobado por Natalia (**cierra D-51**). Contadas en la bitácora §59. **D-28 no sale:** las cuentas existen en producción, pero los accesos no se han repartido.
+Cuando una se responde, sale de aquí y entra fechada en «Decisiones que rigen» de `encargo.md`. **El 18 sep entraron cuatro:** el dominio propio en producción (**cierra D-09**), la barra de escritorio en scroll sin velo ni banda (**cierra D-50**), el calendario comunitario que publica primero y se modera después (**cierra D-51**) y el bloque C del reparto —artistas que publican al instante y eventos con ubicación—, los dos últimos aprobados por Natalia. Contadas en la bitácora §59. **D-28 no sale:** las cuentas existen en producción, pero los accesos no se han repartido.
 
 | ID | Decisión | Dueño | Pedida | Respondida |
 |---|---|---|---|---|
-| **D-28** | **Alta de credenciales de afiliado.** Código, importación y cuentas **en producción** (61 fichas, 39 usuarios). Faltan: confirmar que el CSV del 17 sep es de producción, **repartir los 35 accesos** con el documento de Natalia, y el acta de la ampliación | Natalia + Sua + Ingrid | 3 sep | Cuentas en producción; reparto: — |
+| **D-28** | **Alta de credenciales de afiliado.** Código, importación y cuentas **en producción** (61 fichas, 39 usuarios). Faltan: la descarga única del **domingo 20 sep** (el documento del 17 sep quedó sin validez por las dos descargas del 18 sep), **repartir los accesos** y el acta de la ampliación | Natalia + Sua + Ingrid | 3 sep | Cuentas en producción; reparto: — |
 | **D-47** | **Acta 09**: capa visual, salto de versión y eventos de aliados | Sua | 9 sep | — |
 | **D-21** | **Municipios 2 a 12 de la guía**: la dirección confirma por escrito que es la versión vigente | Natalia | 1 sep | Materia prima el 15 sep; confirmación: — |
 | **D-46** | **Los dos tokens compartidos de la capa visual** (`--asb-apagado`, `--asb-accion`) | Ingrid | 9 sep | — |
@@ -224,15 +247,16 @@ Medidas el **18 de septiembre de 2026 sobre `659fc61`**, que es lo desplegado. V
 
 ## 6. Lo siguiente, en orden
 
-1. **Repartir los 35 accesos** con el documento de Natalia, después de confirmar que el CSV es de producción y los tres casos dudosos del archivo. **No volver a descargar** desde el panel.
-2. **Search Console:** pedir indexación de la portada y de 4 o 5 páginas clave; revisar **Indexing → Pages** en una semana.
-3. **Perfil de Empresa en Google** con la cuenta del gremio, Sua como administrador; enlace a `asobaresquindio.com` desde Instagram y pedirlo a la Nacional (`asobares.org`).
-4. **Comprobar el correo**: una PQR de prueba y su acuse; registros sin `TransportException`.
-5. **Emitir por escrito las tres ampliaciones que ya se aprobaron o se construyeron:** el Acta 09 (D-47), el acta del alta real y la del calendario comunitario (aprobado por Natalia el 18 sep).
-6. **Confirmar las autorizaciones** de las 10 fichas publicadas.
-7. **Reflejar la Misión del equipo en producción** (`quienes_mision`).
-8. **Confirmar los envíos a la universidad** (4 y 11 sep) y qué pide hoy, viernes 18.
-9. **Fijar la demo 2** (D-20) sobre el dominio.
-10. **Una sola reunión con Natalia** con la tabla del §3 impresa: cuota (D-44), pasarela (D-10), cifra de afiliados (D-18), titularidad de las cuentas de Google (D-12).
-11. **Entrega del 22 sep:** capacitación y Acta 02, manual en PDF, traspaso de cuentas (D-12), acuerdo de soporte (DPV-13).
-12. **Rehacer la matriz de trazabilidad** y el documento de práctica con lo de esta semana.
+1. **Domingo 20 sep: una sola descarga nueva de los accesos** y, con ese CSV, rehacer el documento de Natalia; después, repartir con los tres casos dudosos del archivo confirmados. **Nadie descarga antes.**
+2. **Integrar la Fase A** (`sua/fase-a-rendimiento`: `faea52e`, `d079048`, `5ba8bb1`) cuando Ingrid la revise, medir de nuevo en producción y seguir con la **Fase B** (panel). Averiguar dónde se vio la pantalla negra.
+3. **Search Console:** pedir indexación de la portada y de 4 o 5 páginas clave; revisar **Indexing → Pages** en una semana.
+4. **Perfil de Empresa en Google** con Natalia, con la guía paso a paso del 18 sep (fuera del repositorio) y la cuenta del gremio; Sua como administrador.
+5. **Comprobar el correo**: una PQR de prueba y su acuse; registros sin `TransportException`.
+6. **Emitir por escrito las ampliaciones aprobadas o construidas:** el Acta 09 (D-47), el acta del alta real, la del calendario comunitario y la del bloque C (artistas al instante y ubicación de eventos).
+7. **Confirmar las autorizaciones** de las 10 fichas publicadas.
+8. **Reflejar la Misión del equipo en producción** (`quienes_mision`).
+9. **Confirmar los envíos a la universidad** (4 y 11 sep) y qué pedía el viernes 18.
+10. **Fijar la demo 2** (D-20) sobre el dominio.
+11. **Una sola reunión con Natalia** con la tabla del §3 impresa: cuota (D-44), pasarela (D-10), cifra de afiliados (D-18), titularidad de las cuentas de Google (D-12).
+12. **Entrega del 22 sep:** capacitación y Acta 02, manual en PDF, traspaso de cuentas (D-12), acuerdo de soporte (DPV-13).
+13. **Rehacer la matriz de trazabilidad** y el documento de práctica con lo de esta semana.
