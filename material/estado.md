@@ -51,7 +51,27 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 > | Primera visita tras inactividad | Hibernación de la app y de Postgres *serverless*; instancia única `flex-512mb` | Sin cambio: medir de nuevo tras integrar; subir de instancia es costo del gremio (D-12) |
 > | **Pantalla negra** | **No reproducida.** Candidatos: `@view-transition` del sitio público (`resources/css/app.css`, zona de Ingrid) o la navegación SPA del panel | Falta saber dónde se vio: sitio o panel, navegador, dispositivo, modo |
 >
-> La cola es `sync`: cada correo sale dentro de la petición que lo dispara. En 23 h ninguna petición fue lenta por eso; el aviso de artista nuevo del bloque C suma uno más.
+> La cola es `sync`: cada correo sale dentro de la petición que lo dispara. En 23 h ninguna petición fue lenta por eso; los avisos del bloque C van solo a la campana, sin correo.
+>
+> **Fase B (panel) — misma rama, verificada en el navegador a 1902, 768 y 375 px, claro y oscuro:**
+>
+> | Punto | Causa | Commit |
+> |---|---|---|
+> | Logo → sitio | Llevaba al tablero | `07945c8`: `homeUrl()` a la portada, fuera de la navegación SPA |
+> | Volver al listado | Filament oculta las migas de pan en el teléfono (`hidden sm:block`) | `07945c8`: un gancho del encabezado pone «Volver a {listado}» en 13 páginas de crear y 17 de editar |
+> | Buscador general | Apagado: ningún recurso tenía título | `07945c8`: Filament nativo en 9 recursos, Ctrl+K; respeta permisos; la vacante lleva al listado filtrado |
+> | Campana | La zona es `x-persist`: al abrir un aviso el panel quedaba encima; el título del aviso no abría nada | `07945c8`: `panel-campana.js` la cierra al navegar y delega el clic de la tarjeta |
+> | Barra del teléfono | **La campana ya caía detrás del logo en producción**; el buscador también se montaba | `e8b636a`: ☰ 🔍 · logo · 🔔 ◐, lupa que se despliega; grupos del buscador sin mayúscula en cada palabra |
+>
+> **Fase C (flujos) — misma rama:**
+>
+> | Punto | Commit |
+> |---|---|
+> | Artistas publican al instante; aviso «Nuevo artista publicado: {nombre}» a quien tiene `publicar_artista`; textos públicos sin promesa de revisión; reenvío de la misma inscripción no duplica | `0826061` |
+> | Eventos comunitarios: el flujo de Ingrid ya cubría publicación, aviso, edición, despublicación, borrado y seguridad (18 pruebas); faltaba la idempotencia: el mismo evento en diez minutos no se publica dos veces | `1ceb152` |
+> | Ubicación de eventos: `direccion`, `municipio_id`, `lat`, `lng`, `mapa_url` (migración aditiva `2026_09_19_080245`), sección en el panel, formulario comunitario listo del lado del servidor. **Contrato para Ingrid:** `tieneUbicacion()` y `urlDelMapa()` | `de27db6` |
+>
+> ⚠️ **Pantalla negra, pista nueva (19 sep):** en modo oscuro el fondo del cuerpo es casi negro (`#0B090A`), y un fotograma sin contenido pintado —un salto largo, una carga lenta, el cambio de página SPA— se ve como pantalla negra. Se vio una vez en el panel al desplazarse 899 px en el teléfono. Sin confirmar que sea lo que vio Ingrid.
 
 ---
 
@@ -248,7 +268,7 @@ Medidas el **18 de septiembre de 2026 sobre `659fc61`**, que es lo desplegado. V
 ## 6. Lo siguiente, en orden
 
 1. **Domingo 20 sep: una sola descarga nueva de los accesos** y, con ese CSV, rehacer el documento de Natalia; después, repartir con los tres casos dudosos del archivo confirmados. **Nadie descarga antes.**
-2. **Integrar la Fase A** (`sua/fase-a-rendimiento`: `faea52e`, `d079048`, `5ba8bb1`) cuando Ingrid la revise, medir de nuevo en producción y seguir con la **Fase B** (panel). Averiguar dónde se vio la pantalla negra.
+2. **Integrar las Fases A, B y C** (rama `sua/fase-a-rendimiento`) cuando Ingrid las revise; al desplegar corre la migración aditiva de eventos. Medir de nuevo el rendimiento en producción. Ingrid decide cómo pinta la ubicación del evento y si agrega municipio, dirección y enlace de mapa al formulario comunitario. Averiguar dónde se vio la pantalla negra. Siguiente de Sua: **Fase D** (datos institucionales).
 3. **Search Console:** pedir indexación de la portada y de 4 o 5 páginas clave; revisar **Indexing → Pages** en una semana.
 4. **Perfil de Empresa en Google** con Natalia, con la guía paso a paso del 18 sep (fuera del repositorio) y la cuenta del gremio; Sua como administrador.
 5. **Comprobar el correo**: una PQR de prueba y su acuse; registros sin `TransportException`.

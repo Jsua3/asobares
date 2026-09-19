@@ -2921,3 +2921,26 @@ Producción es **una instancia `flex-512mb` sin autoescalado, con hibernación**
 ### 60.5 Qué entró y salió del estado
 
 Entra el reparto con Ingrid, la tabla de la Fase A y el plan del domingo para los accesos. En el encargo §13 entra el bloque C aprobado por Natalia: artistas que publican al instante con aviso a la dirección y eventos con ubicación; sin acta todavía.
+
+## §61 — Fases B y C del reparto: el panel se recorre sin la flecha del navegador y los flujos públicos publican al instante (19 de septiembre de 2026)
+
+Todo en la rama `sua/fase-a-rendimiento`, sin integrar a `main`. Se revisó en el navegador con la sesión de Sua en local, a 1902, 768 y 375 px, en claro y oscuro.
+
+### 61.1 Fase B, panel
+
+- `07945c8`: logo a la portada (fuera de la navegación SPA, que no sirve para una página ajena al panel); «Volver a {listado}» con un solo gancho del encabezado; buscador general nativo de Filament en nueve recursos, que solo recorre lo que el rol puede abrir; `panel-campana.js`.
+- `e8b636a`: la barra del teléfono. **La campana caía detrás del logo desde que se encendió**: Filament empuja su zona con `margin-inline-start: auto`, igual que el tema, y se repartían el hueco. Ahora ☰ 🔍 · logo · 🔔 ◐, con la lupa desplegable. Los grupos del buscador llevaban `text-transform: capitalize` («Eventos Y Capacitaciones»).
+
+### 61.2 La campana, y un control que no controlaba nada
+
+El primer control para probar que `panel-campana.js` hacía falta —bloquear su evento `close-modal` con un oyente de captura— dejó el panel cerrándose igual, y pareció que Filament ya lo cerraba solo. La traza mostró que lo cerraba el propio script: el bloqueo no alcanzaba al oyente de Alpine. Quitando el código de verdad, un clic real en «Revisar» abría la ficha **con el panel de avisos encima**: el defecto que reportó Ingrid. Apareció además el segundo: el título del aviso no abría nada. El control válido es retirar el código y repetir el clic real.
+
+### 61.3 Fase C, flujos
+
+- `0826061`: artistas publicados al instante. El observador del flujo de aprobación deja pasar solo el alta, con una bandera transitoria como la del evento comunitario, porque con sesión de afiliado la ficha habría quedado pendiente. Aviso a `publicar_artista`, textos públicos y control de reenvío antes de guardar la foto.
+- `1ceb152`: el evento comunitario reenviado en diez minutos no se publica dos veces.
+- `de27db6`: ubicación de eventos con el contrato del asociado, `tieneUbicacion()` y `urlDelMapa()`.
+
+### 61.4 Lo medido
+
+Pruebas nuevas rotas a propósito, cambio por cambio. Tres mutaciones sobrevivieron en la primera ronda y se corrigieron las pruebas, no el código: el cast de `lat` que SQLite no deja ver (se hidrata el modelo con texto, como lo entrega Postgres); `url` contra `url:http,https`, indistinguibles con `javascript:` (se prueba con `ftp://`); y una prueba que usaba `fresh()` y nunca alcanzaba la guarda `! $this->exists`. En las corridas por zona: 445 del panel, 611 de artistas y 893 de eventos, migraciones y panel completo, en verde.
