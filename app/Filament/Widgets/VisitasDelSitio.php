@@ -27,6 +27,9 @@ class VisitasDelSitio extends ChartWidget
 
     protected static ?int $sort = 5;
 
+    /** Se actualiza al entrar o recargar, no cada 5 s (`SondeoDelPanelTest`). */
+    protected ?string $pollingInterval = null;
+
     /**
      * A todo lo ancho: con dos series --entradas y páginas servidas-- y treinta
      * puntos, cuatro de las seis columnas dejan las líneas demasiado juntas para

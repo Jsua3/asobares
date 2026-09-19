@@ -28,6 +28,9 @@ class EntradasAlSitio extends StatsOverviewWidget
 {
     protected static ?int $sort = 4;
 
+    /** Se actualiza al entrar o recargar, no cada 5 s (`SondeoDelPanelTest`). */
+    protected ?string $pollingInterval = null;
+
     protected ?string $heading = 'Flujo del sitio';
 
     /**

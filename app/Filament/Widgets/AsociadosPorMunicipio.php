@@ -13,6 +13,9 @@ class AsociadosPorMunicipio extends ChartWidget
 
     protected static ?int $sort = 3;
 
+    /** Se actualiza al entrar o recargar, no cada 5 s (`SondeoDelPanelTest`). */
+    protected ?string $pollingInterval = null;
+
     /**
      * En escritorio (`xl`, 6 columnas) comparte fila con el recaudo: este
      * widget ocupa 2. En `md` y móvil va a todo el ancho para que los doce

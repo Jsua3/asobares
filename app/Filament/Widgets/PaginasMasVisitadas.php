@@ -25,6 +25,9 @@ class PaginasMasVisitadas extends ChartWidget
 
     protected static ?int $sort = 6;
 
+    /** Se actualiza al entrar o recargar, no cada 5 s (`SondeoDelPanelTest`). */
+    protected ?string $pollingInterval = null;
+
     protected int|string|array $columnSpan = [
         'default' => 'full',
         'md' => 'full',

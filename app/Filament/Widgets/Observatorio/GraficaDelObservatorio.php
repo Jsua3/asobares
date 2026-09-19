@@ -44,6 +44,9 @@ abstract class GraficaDelObservatorio extends ChartWidget
 
     protected int|string|array $columnSpan = 'full';
 
+    /** Se actualiza al entrar o recargar, no cada 5 s (`SondeoDelPanelTest`). */
+    protected ?string $pollingInterval = null;
+
     /**
      * Color de reserva de cada ranura de la paleta categórica, para el
      * instante anterior a que `panel-graficas.js` pinte y para un cliente sin

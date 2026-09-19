@@ -43,6 +43,9 @@ class ResumenDelGremio extends StatsOverviewWidget
 
     protected static ?int $sort = 1;
 
+    /** Se actualiza al entrar o recargar, no cada 5 s (`SondeoDelPanelTest`). */
+    protected ?string $pollingInterval = null;
+
     /** El alcance firmado del proyecto son los 12 municipios del Quindío. */
     private const int MUNICIPIOS_DEL_ALCANCE = 12;
 
