@@ -83,6 +83,8 @@ _La foto del proyecto hoy. **Se reescribe entero** al cerrar toda sesión que ca
 > | **Guía normativa** | 151 fichas en 12 municipios: 106 verificadas (99 generales del 15 sep y 7 de la Alcaldía de Armenia), 45 sin verificar (4 municipales por municipio, más 1 general de Armenia); 0 costos; 5 enlaces | Guía «Abre tu negocio» del capítulo y documento de la Alcaldía de Armenia | Que la dirección confirme las filas «sin verificar» (D-21) y las URL de trámite (D-04). El sitio ya las rotula «Sin verificar» y «Costo por confirmar» |
 > | **Proveedores** | 0 | — | Proveedores reales; el módulo está cubierto (moderación, vigencia, formularios) |
 >
+> **Suite completa sobre la rama (19 sep, `16a8227`): 2.051 casos · 2.050 pasan · 13.920 aserciones · 939 s.** El único fallo es `DatosInternosDelAsociadoTest`, que ve el Excel del gremio en `material/sep15material/` (carpeta ignorada del disco de Sua), igual que el 18 sep.
+>
 > ⚠️ **Pantalla negra, pista nueva (19 sep):** en modo oscuro el fondo del cuerpo es casi negro (`#0B090A`), y un fotograma sin contenido pintado —un salto largo, una carga lenta, el cambio de página SPA— se ve como pantalla negra. Se vio una vez en el panel al desplazarse 899 px en el teléfono. Sin confirmar que sea lo que vio Ingrid.
 
 ---
