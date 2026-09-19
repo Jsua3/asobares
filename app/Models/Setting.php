@@ -35,20 +35,28 @@ class Setting extends Model
     /**
      * Las actualizaciones masivas no disparan eventos de modelo, así que la
      * página de ajustes tiene que invalidar la caché explícitamente.
+     *
+     * Por `memo()`, igual que la lectura: olvidar solo en la caché de fondo
+     * dejaría el valor viejo en la memoria de la petición en curso.
      */
     public static function olvidarCache(): void
     {
-        Cache::forget(self::CLAVE_CACHE);
+        Cache::memo()->forget(self::CLAVE_CACHE);
     }
 
     /**
      * Todos los ajustes indexados por clave, ya convertidos a su tipo.
      *
+     * `memo()` los guarda en memoria durante la petición: con la caché en la
+     * base de datos, cada `ajuste()` de una vista era una consulta y una
+     * deserialización de todos los ajustes, y la portada llama a `ajuste()`
+     * unas ochenta veces.
+     *
      * @return array<string, mixed>
      */
     public static function todos(): array
     {
-        return Cache::rememberForever(self::CLAVE_CACHE, fn (): array => static::query()
+        return Cache::memo()->rememberForever(self::CLAVE_CACHE, fn (): array => static::query()
             ->get()
             ->mapWithKeys(fn (Setting $ajuste): array => [$ajuste->clave => $ajuste->valorConvertido()])
             ->all());
